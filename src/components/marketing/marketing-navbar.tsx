@@ -9,36 +9,55 @@ const NAV_ITEMS = [
     label: "Especialidades",
     children: [
       {
-        label: "Clinica (Disponible)",
+        label: "Psicología Clínica",
         href: "/especialidades/psicologia-clinica",
-        description: "Membresia activa con software y eventos especializados",
+        description: "Ciencia aplicada al cuidado de la salud mental",
       },
       {
-        label: "Forense (Proximamente)",
-        href: "/precios",
-        description: "Unete a la lista de espera",
+        label: "Neuropsicología",
+        href: "/especialidades/neuropsicologia",
+        description: "Donde la neurociencia y la clínica convergen",
       },
       {
-        label: "Educacion (Proximamente)",
-        href: "/precios",
-        description: "Especializacion en construccion segun demanda",
+        label: "Psicología Forense",
+        href: "/especialidades/psicologia-forense",
+        description: "Rigor científico al servicio de la justicia",
       },
       {
-        label: "Organizacional (Proximamente)",
-        href: "/precios",
-        description: "Especializacion en construccion segun demanda",
+        label: "Psicología Organizacional",
+        href: "/especialidades/psicologia-organizacional",
+        description: "Potencia el capital humano con ciencia",
       },
+      {
+        label: "Psicología Infantojuvenil",
+        href: "/especialidades/psicologia-infantojuvenil",
+        description: "Desarrollo saludable desde la infancia",
+      },
+      {
+        label: "Ver las 12 especialidades",
+        href: "/especialidades",
+        description: "Explora todas las ramas disponibles en SAPIHUM",
+      },
+    ],
+  },
+  {
+    label: "Academia",
+    children: [
+      { label: "Cursos y Diplomados", href: "/precios", description: "Programas de formación continua" },
+      { label: "Certificaciones", href: "/precios", description: "Acreditación profesional avalada" },
+      { label: "Eventos y Webinars", href: "/precios", description: "Conferencias y networking de alto nivel" },
+      { label: "Supervisión Clínica", href: "/precios", description: "Supervisión grupal con especialistas" },
     ],
   },
   {
     label: "Recursos",
     children: [
-      { label: "Blog", href: "/blog", description: "Articulos sobre psicologia empresarial y salud mental" },
-      { label: "Recursos Gratuitos", href: "/recursos", description: "Herramientas, guias y plantillas descargables" },
-      { label: "Casos de Exito", href: "/casos-de-exito", description: "Historias de psicologos que transformaron su practica" },
+      { label: "Blog", href: "/blog", description: "Artículos sobre psicología profesional" },
+      { label: "Recursos Gratuitos", href: "/recursos", description: "Herramientas, guías y plantillas descargables" },
+      { label: "Casos de Estudio", href: "/casos-de-exito", description: "Profesionales que transformaron su práctica" },
     ],
   },
-  { label: "Comunidad", href: "/comunidad" },
+  { label: "Investigación", href: "/nosotros" },
   { label: "Precios", href: "/precios" },
 ]
 
@@ -53,11 +72,11 @@ export function MarketingNavbar({ isLoggedIn }: MarketingNavbarProps) {
     <header className="sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur-lg supports-[backdrop-filter]:bg-background/60">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         <Link href="/" className="flex items-center gap-2.5 shrink-0">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-blue-600 to-indigo-600 text-white font-bold text-sm">
-            CP
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-teal-500 to-emerald-600 text-white font-bold text-[10px] tracking-tighter">
+            SH
           </div>
           <span className="font-bold text-lg tracking-tight hidden sm:inline-block">
-            Comunidad de Psicologia
+            SAPIHUM
           </span>
         </Link>
 
@@ -109,24 +128,24 @@ export function MarketingNavbar({ isLoggedIn }: MarketingNavbarProps) {
         <div className="flex items-center gap-2 sm:gap-3">
           {isLoggedIn ? (
             <Link href="/dashboard">
-              <Button size="sm" className="font-medium bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-md shadow-blue-500/25" data-analytics-cta data-analytics-label="Ir al Dashboard" data-analytics-surface="marketing_nav" data-analytics-funnel="dashboard">
+              <Button size="sm" className="font-medium bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-400 hover:to-emerald-400 text-white shadow-md shadow-teal-500/25" data-analytics-cta data-analytics-label="Ir al Dashboard" data-analytics-surface="marketing_nav" data-analytics-funnel="dashboard">
                 Ir al Dashboard
               </Button>
             </Link>
           ) : (
             <>
               <Link href="/auth/login" className="hidden sm:inline-flex">
-                <Button variant="ghost" size="sm" className="font-medium" data-analytics-cta data-analytics-label="Iniciar Sesion" data-analytics-surface="marketing_nav" data-analytics-funnel="registration">
-                  Iniciar Sesion
+                <Button variant="ghost" size="sm" className="font-medium" data-analytics-cta data-analytics-label="Iniciar Sesión" data-analytics-surface="marketing_nav" data-analytics-funnel="registration">
+                  Iniciar Sesión
                 </Button>
               </Link>
               <Link href="/auth/register" className="hidden sm:inline-flex">
-                <Button size="sm" className="font-medium bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-md shadow-blue-500/25" data-analytics-cta data-analytics-label="Comenzar" data-analytics-surface="marketing_nav" data-analytics-funnel="registration">
+                <Button size="sm" className="font-medium bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-400 hover:to-emerald-400 text-white shadow-md shadow-teal-500/25" data-analytics-cta data-analytics-label="Comenzar" data-analytics-surface="marketing_nav" data-analytics-funnel="registration">
                   Comenzar
                 </Button>
               </Link>
               <Link href="/auth/register" className="sm:hidden">
-                <Button size="sm" className="font-medium bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-md shadow-blue-500/25" data-analytics-cta data-analytics-label="Unirme" data-analytics-surface="marketing_nav" data-analytics-funnel="registration">
+                <Button size="sm" className="font-medium bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-400 hover:to-emerald-400 text-white shadow-md shadow-teal-500/25" data-analytics-cta data-analytics-label="Unirme" data-analytics-surface="marketing_nav" data-analytics-funnel="registration">
                   Unirme
                 </Button>
               </Link>
@@ -136,7 +155,7 @@ export function MarketingNavbar({ isLoggedIn }: MarketingNavbarProps) {
           <button
             onClick={() => setMobileOpen(!mobileOpen)}
             className="lg:hidden flex flex-col gap-1.5 p-2 rounded-md hover:bg-accent transition-colors"
-            aria-label="Abrir menu"
+            aria-label="Abrir menú"
           >
             <span className={`block h-0.5 w-5 bg-foreground transition-all duration-300 ${mobileOpen ? "translate-y-2 rotate-45" : ""}`} />
             <span className={`block h-0.5 w-5 bg-foreground transition-all duration-300 ${mobileOpen ? "opacity-0" : ""}`} />
@@ -187,10 +206,10 @@ export function MarketingNavbar({ isLoggedIn }: MarketingNavbarProps) {
           {!isLoggedIn && (
             <div className="pt-3 border-t mt-3">
               <Link href="/auth/login" onClick={() => setMobileOpen(false)}>
-                <Button variant="outline" className="w-full mb-2" data-analytics-cta data-analytics-label="Iniciar Sesion" data-analytics-surface="marketing_nav_mobile" data-analytics-funnel="registration">Iniciar Sesion</Button>
+                <Button variant="outline" className="w-full mb-2" data-analytics-cta data-analytics-label="Iniciar Sesión" data-analytics-surface="marketing_nav_mobile" data-analytics-funnel="registration">Iniciar Sesión</Button>
               </Link>
               <Link href="/auth/register" onClick={() => setMobileOpen(false)}>
-                <Button className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white" data-analytics-cta data-analytics-label="Comenzar" data-analytics-surface="marketing_nav_mobile" data-analytics-funnel="registration">Comenzar</Button>
+                <Button className="w-full bg-gradient-to-r from-teal-500 to-emerald-500 text-white" data-analytics-cta data-analytics-label="Comenzar" data-analytics-surface="marketing_nav_mobile" data-analytics-funnel="registration">Comenzar</Button>
               </Link>
             </div>
           )}

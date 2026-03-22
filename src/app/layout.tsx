@@ -22,12 +22,12 @@ export const viewport: Viewport = {
 }
 
 export const metadata: Metadata = {
-    title: 'Comunidad Psicología App',
-    description: 'Plataforma exclusiva para miembros de la comunidad de psicología',
+    title: 'SAPIHUM | Psicología Avanzada e Investigación Humana',
+    description: 'Plataforma integral para profesionales de la psicología. Formación especializada, herramientas clínicas digitales e investigación aplicada.',
     appleWebApp: {
         capable: true,
         statusBarStyle: 'default',
-        title: 'Comunidad Psicología App',
+        title: 'SAPIHUM',
     },
     formatDetection: {
         telephone: false,
