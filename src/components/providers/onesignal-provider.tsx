@@ -37,6 +37,7 @@ export function OneSignalSetup() {
             return
         }
 
+        const appId = oneSignalAppId
         let isActive = true
         const supabase = createClient()
 
@@ -67,7 +68,7 @@ export function OneSignalSetup() {
             try {
                 if (!isInitialized.current) {
                     await OneSignal.init({
-                        appId: oneSignalAppId,
+                        appId,
                         // allowLocalhostAsSecureOrigin: process.env.NODE_ENV === 'development',
                     })
                     isInitialized.current = true

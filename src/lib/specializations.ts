@@ -401,3 +401,7 @@ export function canUserSeeLevel3Offer(options: {
     const specialization = getSpecializationByCode(options.specializationCode ?? null)
     return !!specialization && specialization.level3Available
 }
+
+export function getSpecializationBySlug(slug: string): SpecializationConfig | null {
+    return Object.values(SPECIALIZATION_CATALOG).find(spec => spec.slug === slug) ?? null
+}

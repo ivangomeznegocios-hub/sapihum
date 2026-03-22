@@ -76,8 +76,8 @@ export async function getActivePatientsForPsychologist(
     }
 
     const patientIds = Array.from(
-        new Set(relationships.map((relationship: any) => relationship.patient_id))
-    )
+        new Set((relationships as any[]).map((relationship: any) => String(relationship.patient_id)))
+    ) as string[]
     const { data: patients, error: patientError } = await (supabase
         .from('profiles') as any)
         .select('*')
