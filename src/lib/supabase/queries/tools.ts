@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import type {
     TherapeuticTool,
+    TherapeuticToolInsert,
     ToolAssignment,
     ToolAssignmentInsert,
     ToolAssignmentWithDetails,
@@ -24,6 +25,8 @@ export async function getToolsCatalog(): Promise<TherapeuticTool[]> {
     const { data, error } = await (supabase
         .from('therapeutic_tools') as any)
         .select('*')
+        .order('is_template', { ascending: false })
+        .order('updated_at', { ascending: false })
         .order('title', { ascending: true })
 
     if (error) {
@@ -32,6 +35,28 @@ export async function getToolsCatalog(): Promise<TherapeuticTool[]> {
     }
 
     return (data ?? []) as TherapeuticTool[]
+}
+
+/**
+ * Create a therapeutic tool template or custom tool
+ */
+export async function createTherapeuticTool(
+    data: TherapeuticToolInsert
+): Promise<TherapeuticTool | null> {
+    const supabase = await createClient()
+
+    const { data: tool, error } = await (supabase
+        .from('therapeutic_tools') as any)
+        .insert(data as any)
+        .select()
+        .single()
+
+    if (error) {
+        console.error('Error creating therapeutic tool:', error)
+        return null
+    }
+
+    return tool as TherapeuticTool
 }
 
 /**

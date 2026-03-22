@@ -2,6 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
+import { sendPushNotification } from '@/lib/onesignal'
 
 export async function sendMessage(receiverId: string, content: string) {
     const supabase = await createClient()
@@ -24,6 +25,19 @@ export async function sendMessage(receiverId: string, content: string) {
         return { error: error.message }
     }
 
+    const { data: senderProfile } = await (supabase
+        .from('profiles') as any)
+        .select('full_name, role')
+        .eq('id', user.id)
+        .maybeSingle()
+
+    await sendPushNotification({
+        title: 'Nuevo mensaje',
+        message: `${senderProfile?.full_name || 'Tu contacto'} te envió un mensaje.`,
+        targetExternalId: receiverId,
+        url: '/dashboard/messages',
+    })
+
     revalidatePath('/dashboard/messages')
     return { success: true }
 }
@@ -44,6 +58,7 @@ export async function markAsRead(messageIds: string[]) {
         return { error: error.message }
     }
 
+    revalidatePath('/dashboard/messages')
     return { success: true }
 }
 

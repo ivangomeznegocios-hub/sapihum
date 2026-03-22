@@ -42,6 +42,7 @@ export async function updateUserRole(userId: string, newRole: string) {
 
 export async function assignPatientToPsychologist(patientId: string, psychologistId: string) {
     const supabase = await createClient()
+    const adminSupabase = await createAdminClient()
 
     const { data: { user } } = await supabase.auth.getUser()
 
@@ -60,19 +61,51 @@ export async function assignPatientToPsychologist(patientId: string, psychologis
         return { error: 'No tienes permisos de administrador' }
     }
 
-    // Check if relationship already exists
-    const { data: existing } = await ((supabase
+    // Check if the patient is already assigned to this psychologist
+    const { data: existing } = await ((adminSupabase
         .from('patient_psychologist_relationships') as any) as any)
-        .select('id')
+        .select('id, status')
         .eq('patient_id', patientId)
         .eq('psychologist_id', psychologistId)
-        .single()
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle()
 
-    if (existing) {
-        return { error: 'Esta relación ya existe' }
+    // Deactivate any other active psychologist assignment for the patient.
+    const deactivateQuery = (adminSupabase
+        .from('patient_psychologist_relationships') as any)
+        .update({ status: 'inactive' })
+        .eq('patient_id', patientId)
+        .eq('status', 'active')
+
+    const { error: deactivateError } = existing?.id
+        ? await deactivateQuery.neq('id', existing.id)
+        : await deactivateQuery
+
+    if (deactivateError) {
+        return { error: deactivateError.message }
     }
 
-    const { error } = await ((supabase
+    if (existing) {
+        const { error: reactivateError } = await ((adminSupabase
+            .from('patient_psychologist_relationships') as any) as any)
+            .update({ status: 'active' })
+            .eq('id', existing.id)
+
+        if (reactivateError) {
+            return { error: reactivateError.message }
+        }
+
+        revalidatePath('/dashboard/admin/users')
+        revalidatePath('/dashboard/messages')
+        revalidatePath('/dashboard/my-psychologist')
+        revalidatePath('/dashboard')
+        revalidatePath('/dashboard/booking')
+        revalidatePath('/dashboard/patients')
+        return { success: true }
+    }
+
+    const { error } = await ((adminSupabase
         .from('patient_psychologist_relationships') as any) as any)
         .insert({
             patient_id: patientId,
@@ -85,11 +118,17 @@ export async function assignPatientToPsychologist(patientId: string, psychologis
     }
 
     revalidatePath('/dashboard/admin/users')
+    revalidatePath('/dashboard/messages')
+    revalidatePath('/dashboard/my-psychologist')
+    revalidatePath('/dashboard')
+    revalidatePath('/dashboard/booking')
+    revalidatePath('/dashboard/patients')
     return { success: true }
 }
 
 export async function removePatientAssignment(patientId: string, psychologistId: string) {
     const supabase = await createClient()
+    const adminSupabase = await createAdminClient()
 
     const { data: { user } } = await supabase.auth.getUser()
 
@@ -108,7 +147,7 @@ export async function removePatientAssignment(patientId: string, psychologistId:
         return { error: 'No tienes permisos de administrador' }
     }
 
-    const { error } = await ((supabase
+    const { error } = await ((adminSupabase
         .from('patient_psychologist_relationships') as any) as any)
         .update({ status: 'inactive' })
         .eq('patient_id', patientId)
@@ -119,6 +158,11 @@ export async function removePatientAssignment(patientId: string, psychologistId:
     }
 
     revalidatePath('/dashboard/admin/users')
+    revalidatePath('/dashboard/messages')
+    revalidatePath('/dashboard/my-psychologist')
+    revalidatePath('/dashboard')
+    revalidatePath('/dashboard/booking')
+    revalidatePath('/dashboard/patients')
     return { success: true }
 }
 

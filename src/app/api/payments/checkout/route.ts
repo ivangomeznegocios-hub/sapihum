@@ -7,6 +7,11 @@ import { recordAnalyticsServerEvent, resolveAttributionSnapshot } from '@/lib/an
 import { getAppUrl } from '@/lib/config/app-url'
 import { getPaymentProvider } from '@/lib/payments'
 import { AI_CREDIT_PACKAGES, type AICreditPackageKey } from '@/lib/payments/config'
+import {
+    getEffectiveEventPriceForProfile,
+    isPurchasableRecordingEvent,
+    normalizeMemberAccessType,
+} from '@/lib/events/pricing'
 
 async function userCanAccessEventCheckout(
     supabase: any,
@@ -15,9 +20,11 @@ async function userCanAccessEventCheckout(
     event: any
 ) {
     const audience = Array.isArray(event.target_audience) ? event.target_audience : ['public']
+    const isRecordedProduct = isPurchasableRecordingEvent(event)
 
     if (audience.includes('public')) return true
     if (profile.role === 'admin') return true
+    if (isRecordedProduct) return true
     if (audience.includes('members') && (profile.membership_level ?? 0) >= 1) return true
     if (audience.includes('psychologists') && profile.role === 'psychologist') return true
     if (audience.includes('patients') && profile.role === 'patient') return true
@@ -41,7 +48,7 @@ async function resolveEventPurchaseDetails(supabase: any, userId: string, eventI
     const [{ data: event }, { data: profile }] = await Promise.all([
         (supabase
             .from('events') as any)
-            .select('id, title, price, member_price, member_access_type, target_audience, status, created_by')
+            .select('id, title, price, member_price, member_access_type, target_audience, status, created_by, recording_url, recording_expires_at, event_type')
             .eq('id', eventId)
             .single(),
         (supabase
@@ -84,27 +91,24 @@ async function resolveEventPurchaseDetails(supabase: any, userId: string, eventI
         return { error: 'Ya estas registrado en este evento' as const }
     }
 
-    let amount = Number(event.price || 0)
+    const amount = getEffectiveEventPriceForProfile(
+        {
+            price: event.price,
+            member_price: event.member_price,
+            member_access_type: normalizeMemberAccessType(event.member_access_type),
+        },
+        profile.role,
+        profile.membership_level ?? 0
+    )
 
-    if (profile.role === 'patient') {
-        amount = Number(event.price || 0)
-    } else if (profile.role === 'psychologist' && (profile.membership_level ?? 0) > 0) {
-        if (event.member_access_type === 'free') {
-            amount = 0
-        } else {
-            amount = Number(event.member_price ?? event.price ?? 0)
-        }
-    } else if (profile.role === 'ponente') {
-        amount = Number(event.price || 0)
-    }
-
-    if (amount <= 0) {
+    const canBuyRecordedAccess = isPurchasableRecordingEvent(event)
+    if (amount <= 0 && !canBuyRecordedAccess) {
         return { error: 'Este evento no requiere pago. Usa el registro gratuito.' as const }
     }
 
     return {
         amount,
-        description: `Registro a: ${event.title}`,
+        description: `${canBuyRecordedAccess ? 'Acceso a' : 'Registro a'}: ${event.title}`,
         referenceId: event.id,
     }
 }

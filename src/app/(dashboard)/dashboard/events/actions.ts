@@ -4,6 +4,10 @@ import { createClient } from '@/lib/supabase/server'
 import { recordAnalyticsServerEvent } from '@/lib/analytics/server'
 import { revalidatePath } from 'next/cache'
 import type { TargetAudience } from '@/types/database'
+import {
+    getEffectiveEventPriceForProfile,
+    normalizeMemberAccessType,
+} from '@/lib/events/pricing'
 
 export async function registerForEvent(eventId: string, registrationData: Record<string, string> = {}) {
     const supabase = await createClient()
@@ -69,22 +73,17 @@ export async function registerForEvent(eventId: string, registrationData: Record
     let needsToPay = false
 
     if (profileData) {
-        if (profileData.role === 'patient') {
-            if (currentPrice > 0) needsToPay = true
-        } else if (profileData.role === 'psychologist' && (profileData.membership_level || 0) > 0) {
-            if (eventData.member_access_type === 'paid') {
-                currentPrice = eventData.member_price !== null ? eventData.member_price : currentPrice
-                if (currentPrice > 0) needsToPay = true
-            } else if (eventData.member_access_type === 'discount') {
-                currentPrice = eventData.member_price !== null ? eventData.member_price : currentPrice
-                if (currentPrice > 0) needsToPay = true
-            } else {
-                // member_access_type === 'free'
-                currentPrice = 0
-            }
-        } else if (profileData.role === 'ponente' && currentPrice > 0) {
-            needsToPay = true
-        } else if (profileData.role !== 'admin' && currentPrice > 0) {
+        currentPrice = getEffectiveEventPriceForProfile(
+            {
+                price: eventData.price,
+                member_price: eventData.member_price,
+                member_access_type: normalizeMemberAccessType(eventData.member_access_type),
+            },
+            profileData.role,
+            profileData.membership_level ?? 0
+        )
+
+        if (profileData.role !== 'admin' && currentPrice > 0) {
             needsToPay = true
         }
     } else if (currentPrice > 0) {

@@ -5,6 +5,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Calendar, AlertCircle, ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
+import { getLatestActiveRelationshipForPatient } from '@/lib/supabase/queries/relationships'
 
 export default async function BookingPage() {
     const supabase = await createClient()
@@ -18,13 +19,7 @@ export default async function BookingPage() {
         redirect('/dashboard/calendar')
     }
 
-    // Get assigned psychologist
-    const { data: relationship } = await (supabase
-        .from('patient_psychologist_relationships') as any)
-        .select('psychologist_id')
-        .eq('patient_id', profile.id)
-        .eq('status', 'active')
-        .single()
+    const relationship = await getLatestActiveRelationshipForPatient(profile.id)
 
     if (!relationship) {
         return (

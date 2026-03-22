@@ -13,6 +13,12 @@ import { CheckoutButton } from '@/components/payments/CheckoutButton'
 import { AddToCalendarButton } from '@/components/add-to-calendar'
 import { InteractiveToolViewer } from '@/components/interactive-tool-viewer'
 import {
+    getEffectiveEventPriceForProfile,
+    getEventMemberAccessMessage,
+    isPurchasableRecordingEvent,
+    normalizeMemberAccessType,
+} from '@/lib/events/pricing'
+import {
     Calendar,
     Clock,
     Users,
@@ -98,25 +104,21 @@ export default async function EventDetailPage({ params }: PageProps) {
     // Calculate effective price for user
     let currentPrice = event.price || 0
     let needsToPay = false
+    const recordingProductAvailable = isPurchasableRecordingEvent(event)
 
     if (!isRegistered && !canManageEvent) {
-        if (profile.role === 'patient') {
-            if (currentPrice > 0) needsToPay = true
-        } else if (profile.role === 'psychologist' && (profile.membership_level || 0) > 0) {
-            if (event.member_access_type === 'paid') {
-                currentPrice = event.member_price !== null ? event.member_price : currentPrice
-                if (currentPrice > 0) needsToPay = true
-            } else if (event.member_access_type === 'discount') {
-                currentPrice = event.member_price !== null ? event.member_price : currentPrice
-                if (currentPrice > 0) needsToPay = true
-            } else {
-                // member_access_type === 'free'
-                currentPrice = 0
-            }
-        } else if (profile.role === 'ponente' && currentPrice > 0) {
-             needsToPay = true
-        } else if (currentPrice > 0) {
-             needsToPay = true
+        currentPrice = getEffectiveEventPriceForProfile(
+            {
+                price: event.price,
+                member_price: event.member_price,
+                member_access_type: normalizeMemberAccessType(event.member_access_type),
+            },
+            profile.role,
+            profile.membership_level ?? 0
+        )
+
+        if (profile.role !== 'admin' && currentPrice > 0) {
+            needsToPay = true
         }
     }
 
@@ -509,14 +511,34 @@ export default async function EventDetailPage({ params }: PageProps) {
                                             ¡Grabación disponible arriba!
                                         </p>
                                     )}
+                                    {!canSeeRecording && recordingProductAvailable && event.price > 0 && (
+                                        <div className="mt-3">
+                                            <CheckoutButton
+                                                purchaseType="event_purchase"
+                                                eventId={event.id}
+                                                className="w-full"
+                                                label="Comprar grabacion"
+                                            />
+                                        </div>
+                                    )}
                                 </div>
                             ) : isReadOnly ? (
                                 <>
                                     <div className="text-center mb-4">
                                         <span className="text-2xl font-bold text-green-600">
-                                            Hazte Miembro Activo
+                                            Acceso individual disponible
                                         </span>
                                     </div>
+                                    {event.price > 0 && (
+                                        <div className="mb-3">
+                                            <CheckoutButton
+                                                purchaseType="event_purchase"
+                                                eventId={event.id}
+                                                className="w-full"
+                                                label={recordingProductAvailable ? 'Comprar grabacion' : 'Comprar acceso'}
+                                            />
+                                        </div>
+                                    )}
                                     <Button asChild variant="outline" className="w-full bg-primary/5 hover:bg-primary/10 border-primary/20">
                                         <Link href="/dashboard/subscription">
                                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2 text-primary">
@@ -571,20 +593,23 @@ export default async function EventDetailPage({ params }: PageProps) {
                         </CardHeader>
                         <CardContent className="space-y-4">
                             {/* Dual pricing display */}
-                            {event.member_access_type === 'free' && event.price > 0 && (
+                            {normalizeMemberAccessType(event.member_access_type) === 'free' && event.price > 0 && (
                                 <div className="p-2 bg-green-50 dark:bg-green-950 rounded-lg border border-green-200 dark:border-green-800 text-center">
                                     <p className="text-sm font-medium text-green-700 dark:text-green-300">
                                         ✨ Gratis para miembros
                                     </p>
                                 </div>
                             )}
-                            {event.member_access_type === 'discounted' && (
+                            {normalizeMemberAccessType(event.member_access_type) === 'discounted' && (
                                 <div className="p-2 bg-amber-50 dark:bg-amber-950 rounded-lg border border-amber-200 dark:border-amber-800 text-center">
                                     <p className="text-sm font-medium text-amber-700 dark:text-amber-300">
                                         ✨ Miembros: ${event.member_price?.toFixed(2)} MXN
                                     </p>
                                 </div>
                             )}
+                            <div className="rounded-lg border bg-muted/30 p-3 text-sm text-muted-foreground">
+                                {getEventMemberAccessMessage(event).note || 'Compra individual disponible cuando el evento tiene precio.'}
+                            </div>
                             <ShareEventButton
                                 eventId={event.id}
                                 eventTitle={event.title}

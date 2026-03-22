@@ -9,7 +9,7 @@ import {
     UploadDocumentButton, DeleteDocumentButton, DownloadDocumentButton,
     AddSessionSummaryButton
 } from '../patient-forms'
-import { ToolsTabContent } from './tool-components'
+import { ToolsTabContent } from './tool-components-enhanced'
 import {
     FileText, Paperclip, Calendar, LayoutDashboard, Search,
     Pin, Tag, Clock, File, AlertCircle, Star, BookOpen,

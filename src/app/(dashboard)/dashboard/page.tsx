@@ -3,6 +3,7 @@ import { PsychologistDashboard, PatientDashboard, AdminDashboard, PonenteDashboa
 import { redirect } from 'next/navigation'
 import type { ActivityItem } from '@/components/dashboard/ui/ActivityFeed'
 import type { ContentItem } from '@/components/dashboard/ui/ContentCarousel'
+import { getAssignedPsychologistForPatient } from '@/lib/supabase/queries/relationships'
 
 // Helper to calculate profile completeness for psychologists
 function calculatePsychologistCompleteness(profile: any): number {
@@ -337,23 +338,8 @@ export default async function DashboardPage() {
 
     // ===== PATIENT DASHBOARD =====
     if (userRole === 'patient') {
-        // Psychologist info
-        const { data: relationship } = await (supabase
-            .from('patient_psychologist_relationships') as any)
-            .select('psychologist_id')
-            .eq('patient_id', profile.id)
-            .eq('status', 'active')
-            .single()
-
-        let psychologistName = null
-        if (relationship?.psychologist_id) {
-            const { data: psychologist } = await (supabase
-                .from('profiles') as any)
-                .select('full_name')
-                .eq('id', relationship.psychologist_id)
-                .single()
-            psychologistName = psychologist?.full_name
-        }
+        const assignedPsychologist = await getAssignedPsychologistForPatient(profile.id)
+        const psychologistName = assignedPsychologist?.full_name || null
 
         // Upcoming appointments count
         const { count: appointmentCount } = await (supabase

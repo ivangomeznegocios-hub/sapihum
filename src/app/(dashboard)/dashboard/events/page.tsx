@@ -4,11 +4,17 @@ import { createClient, getUserProfile } from '@/lib/supabase/server'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { CheckoutButton } from '@/components/payments/CheckoutButton'
 import { AddToCalendarButton } from '@/components/add-to-calendar'
 import { RecordingCountdown } from './recordings/recording-countdown'
 import { EventsCategoryNav } from './events-filter'
 import type { EventWithRegistration } from '@/types/database'
 import { isEventPast } from '@/lib/timezone'
+import {
+    getEffectiveEventPriceForProfile,
+    getEventTypePurchaseLabel,
+    isPurchasableRecordingEvent,
+} from '@/lib/events/pricing'
 
 // Helper to format date in Spanish
 function formatEventDate(dateStr: string) {
@@ -56,19 +62,31 @@ function EventStatusBadge({ status }: { status: string }) {
 // Event card component
 function EventCard({
     event,
-    isActiveMember,
     userId,
+    role,
+    membershipLevel,
     isReadOnly = false,
 }: {
     event: EventWithRegistration
-    isActiveMember: boolean
     userId?: string
+    role?: string
+    membershipLevel?: number
     isReadOnly?: boolean
 }) {
     const isRegistered = event.registration?.status === 'registered'
     const hasRecording = event.status === 'completed' && event.recording_url
     const isFull = event.max_attendees && (event.attendee_count || 0) >= event.max_attendees
     const isCreator = userId && event.created_by === userId
+    const recordingProductAvailable = isPurchasableRecordingEvent(event)
+    const effectivePrice = getEffectiveEventPriceForProfile(
+        {
+            price: event.price,
+            member_price: event.member_price,
+            member_access_type: event.member_access_type,
+        },
+        role,
+        membershipLevel ?? 0
+    )
 
     // ──── READ-ONLY MODE (level 0 psychologists) ────
     if (isReadOnly) {
@@ -109,12 +127,21 @@ function EventCard({
                         {event.price > 0 ? <span className="font-semibold text-primary">${event.price.toFixed(2)} MXN</span> : <span className="text-green-600 font-medium">Gratis</span>}
                     </div>
                     <div className="pt-3">
-                        <Button asChild variant="outline" className="w-full justify-center whitespace-normal text-center leading-snug">
-                            <Link href="/dashboard/subscription">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2"><rect width="18" height="11" x="3" y="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>
-                                Hazte Miembro para Participar
-                            </Link>
-                        </Button>
+                        {recordingProductAvailable && effectivePrice > 0 ? (
+                            <CheckoutButton
+                                purchaseType="event_purchase"
+                                eventId={event.id}
+                                className="w-full"
+                                label={`Comprar ${getEventTypePurchaseLabel(event.event_type)}` }
+                            />
+                        ) : (
+                            <Button asChild variant="outline" className="w-full justify-center whitespace-normal text-center leading-snug">
+                                <Link href="/dashboard/subscription">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2"><rect width="18" height="11" x="3" y="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>
+                                    Hazte Miembro para Participar
+                                </Link>
+                            </Button>
+                        )}
                     </div>
                 </CardContent>
             </Card>
@@ -289,7 +316,7 @@ function EventCard({
                                 Gestionar Evento
                             </Link>
                         </Button>
-                    ) : hasRecording && isActiveMember ? (
+                    ) : hasRecording && isRegistered ? (
                         <div className="space-y-2">
                             {/* Recording countdown if expires */}
                             {event.recording_expires_at && (
@@ -318,25 +345,17 @@ function EventCard({
                                 </Link>
                             </Button>
                         </div>
-                    ) : hasRecording && !isActiveMember ? (
+                    ) : hasRecording && recordingProductAvailable && effectivePrice > 0 ? (
+                        <CheckoutButton
+                            purchaseType="event_purchase"
+                            eventId={event.id}
+                            className="w-full"
+                            label={`Comprar ${getEventTypePurchaseLabel(event.event_type)}`}
+                        />
+                    ) : hasRecording ? (
                         <Button asChild variant="outline" className="w-full justify-center whitespace-normal text-center leading-snug">
-                            <Link href="/precios">
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    width="16"
-                                    height="16"
-                                    viewBox="0 0 24 24"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    strokeWidth="2"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    className="mr-2"
-                                >
-                                    <rect width="18" height="11" x="3" y="11" rx="2" ry="2" />
-                                    <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-                                </svg>
-                                Hazte Miembro para Ver
+                            <Link href={`/dashboard/events/${event.id}`}>
+                                Ver detalles
                             </Link>
                         </Button>
                     ) : isRegistered ? (
@@ -572,8 +591,9 @@ export default async function EventsPage() {
                             <EventCard
                                 key={event.id}
                                 event={event}
-                                isActiveMember={isActiveMember}
                                 userId={profile?.id}
+                                role={profile?.role}
+                                membershipLevel={profile?.membership_level ?? 0}
                                 isReadOnly={isReadOnly}
                             />
                         ))}
@@ -609,8 +629,9 @@ export default async function EventsPage() {
                             <EventCard
                                 key={event.id}
                                 event={event}
-                                isActiveMember={isActiveMember}
                                 userId={profile?.id}
+                                role={profile?.role}
+                                membershipLevel={profile?.membership_level ?? 0}
                                 isReadOnly={isReadOnly}
                             />
                         ))}
@@ -643,8 +664,9 @@ export default async function EventsPage() {
                             <EventCard
                                 key={event.id}
                                 event={event}
-                                isActiveMember={isActiveMember}
                                 userId={profile?.id}
+                                role={profile?.role}
+                                membershipLevel={profile?.membership_level ?? 0}
                                 isReadOnly={isReadOnly}
                             />
                         ))}

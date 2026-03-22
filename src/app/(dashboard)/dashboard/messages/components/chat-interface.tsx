@@ -7,7 +7,6 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Card } from '@/components/ui/card'
 import { Send, User, Loader2, ArrowLeft } from 'lucide-react'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
@@ -27,7 +26,7 @@ interface Message {
 }
 
 export function ChatInterface({ currentUser, initialContacts }: ChatInterfaceProps) {
-    const [contacts, setContacts] = useState(initialContacts)
+    const contacts = initialContacts
     const [selectedContact, setSelectedContact] = useState<any>(initialContacts.length === 1 ? initialContacts[0] : null)
     const [messages, setMessages] = useState<Message[]>([])
     const [newMessage, setNewMessage] = useState('')
