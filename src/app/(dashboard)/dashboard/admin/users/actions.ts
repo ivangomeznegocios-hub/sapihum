@@ -1,0 +1,227 @@
+'use server'
+import { createClient, createAdminClient } from '@/lib/supabase/server'
+import { revalidatePath } from 'next/cache'
+
+export async function updateUserRole(userId: string, newRole: string) {
+    const supabase = await createClient()
+
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) {
+        return { error: 'No autenticado' }
+    }
+
+    // Verify current user is admin
+    const { data: adminProfile } = await ((supabase
+        .from('profiles') as any) as any)
+        .select('role')
+        .eq('id', user.id)
+        .single()
+
+    if ((adminProfile as any)?.role !== 'admin') {
+        return { error: 'No tienes permisos de administrador' }
+    }
+
+    // Validate role
+    if (!['admin', 'psychologist', 'patient', 'ponente'].includes(newRole)) {
+        return { error: 'Rol inválido' }
+    }
+
+    const { error } = await ((supabase
+        .from('profiles') as any) as any)
+        .update({ role: newRole, updated_at: new Date().toISOString() })
+        .eq('id', userId)
+
+    if (error) {
+        return { error: error.message }
+    }
+
+    revalidatePath('/dashboard/admin/users')
+    return { success: true }
+}
+
+export async function assignPatientToPsychologist(patientId: string, psychologistId: string) {
+    const supabase = await createClient()
+
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) {
+        return { error: 'No autenticado' }
+    }
+
+    // Verify current user is admin
+    const { data: adminProfile } = await ((supabase
+        .from('profiles') as any) as any)
+        .select('role')
+        .eq('id', user.id)
+        .single()
+
+    if ((adminProfile as any)?.role !== 'admin') {
+        return { error: 'No tienes permisos de administrador' }
+    }
+
+    // Check if relationship already exists
+    const { data: existing } = await ((supabase
+        .from('patient_psychologist_relationships') as any) as any)
+        .select('id')
+        .eq('patient_id', patientId)
+        .eq('psychologist_id', psychologistId)
+        .single()
+
+    if (existing) {
+        return { error: 'Esta relación ya existe' }
+    }
+
+    const { error } = await ((supabase
+        .from('patient_psychologist_relationships') as any) as any)
+        .insert({
+            patient_id: patientId,
+            psychologist_id: psychologistId,
+            status: 'active'
+        })
+
+    if (error) {
+        return { error: error.message }
+    }
+
+    revalidatePath('/dashboard/admin/users')
+    return { success: true }
+}
+
+export async function removePatientAssignment(patientId: string, psychologistId: string) {
+    const supabase = await createClient()
+
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) {
+        return { error: 'No autenticado' }
+    }
+
+    // Verify current user is admin
+    const { data: adminProfile } = await ((supabase
+        .from('profiles') as any) as any)
+        .select('role')
+        .eq('id', user.id)
+        .single()
+
+    if ((adminProfile as any)?.role !== 'admin') {
+        return { error: 'No tienes permisos de administrador' }
+    }
+
+    const { error } = await ((supabase
+        .from('patient_psychologist_relationships') as any) as any)
+        .update({ status: 'inactive' })
+        .eq('patient_id', patientId)
+        .eq('psychologist_id', psychologistId)
+
+    if (error) {
+        return { error: error.message }
+    }
+
+    revalidatePath('/dashboard/admin/users')
+    return { success: true }
+}
+
+export async function adminUpdateProfile(
+    userId: string,
+    data: {
+        full_name?: string | null,
+        bio?: string | null,
+        specialty?: string | null,
+        hourly_rate?: number | null,
+        subscription_status?: string | null,
+        membership_level?: number | null,
+        is_test?: boolean
+    }
+) {
+    const supabase = await createClient()
+
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return { error: 'No autenticado' }
+
+    // Verify current user is admin
+    const { data: adminProfile } = await ((supabase
+        .from('profiles') as any) as any)
+        .select('role')
+        .eq('id', user.id)
+        .single()
+
+    if ((adminProfile as any)?.role !== 'admin') {
+        return { error: 'No tienes permisos de administrador' }
+    }
+
+    const { error } = await ((supabase
+        .from('profiles') as any) as any)
+        .update({
+            full_name: data.full_name,
+            bio: data.bio,
+            specialty: data.specialty,
+            hourly_rate: data.hourly_rate,
+            subscription_status: data.subscription_status,
+            membership_level: data.membership_level,
+            is_test: data.is_test,
+            updated_at: new Date().toISOString()
+        })
+        .eq('id', userId)
+
+    if (error) {
+        return { error: `Error al actualizar perfil: ${error.message}` }
+    }
+
+    revalidatePath('/dashboard/admin/users')
+    return { success: true }
+}
+
+export async function adminCreateUser(data: { email: string, password?: string, fullName: string, role: string }) {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return { error: 'No autenticado' }
+
+    // Verify current user is admin
+    const { data: adminProfile } = await ((supabase
+        .from('profiles') as any) as any)
+        .select('role')
+        .eq('id', user.id)
+        .single()
+
+    if ((adminProfile as any)?.role !== 'admin') {
+        return { error: 'No tienes permisos de administrador' }
+    }
+
+    const adminSupabase = await createAdminClient()
+    
+    // Create auth user
+    const { data: newAuthUser, error: createError } = await adminSupabase.auth.admin.createUser({
+        email: data.email,
+        password: data.password || undefined,
+        email_confirm: true,
+        user_metadata: {
+            full_name: data.fullName
+        }
+    })
+
+    if (createError) {
+        return { error: `Error al crear usuario: ${createError.message}` }
+    }
+    
+    if (!newAuthUser.user) {
+        return { error: 'Error desconocido al crear usuario' }
+    }
+
+    // Update the auto-created profile with the selected role
+    const { error: updateError } = await ((adminSupabase
+        .from('profiles') as any) as any)
+        .update({
+            role: data.role,
+            updated_at: new Date().toISOString()
+        })
+        .eq('id', newAuthUser.user.id)
+        
+    if (updateError) {
+        // We created the user but failed to update their role
+        return { error: `Usuario creado, pero hubo un error al asignar el rol: ${updateError.message}` }
+    }
+
+    revalidatePath('/dashboard/admin/users')
+    return { success: true }
+}

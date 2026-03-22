@@ -1,0 +1,321 @@
+import { createClient } from '@/lib/supabase/server'
+import type {
+    Event,
+    EventInsert,
+    EventWithRegistration,
+    EventRegistration,
+    EventRegistrationInsert
+} from '@/types/database'
+
+
+
+/**
+ * Get events with user's registration status
+ */
+export async function getEventsWithRegistration(): Promise<EventWithRegistration[]> {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+
+    // Get upcoming events
+    const { data: events, error: eventsError } = await (supabase
+        .from('events') as any)
+        .select('*')
+        .in('status', ['draft', 'upcoming', 'live', 'completed', 'cancelled'])
+        .order('start_time', { ascending: true })
+
+    if (eventsError || !events) {
+        console.error('Error fetching events:', eventsError?.message || eventsError)
+        return []
+    }
+
+    if (!user) {
+        return events as EventWithRegistration[]
+    }
+
+    // Get user's registrations
+    const eventIds = events.map((e: any) => e.id)
+    const { data: registrations } = await (supabase
+        .from('event_registrations') as any)
+        .select('*')
+        .eq('user_id', user.id)
+        .in('event_id', eventIds)
+
+    // Get attendee counts
+    const { data: counts } = await (supabase
+        .from('event_registrations') as any)
+        .select('event_id')
+        .in('event_id', eventIds)
+        .eq('status', 'registered')
+
+    // Count attendees per event
+    const attendeeCounts: Record<string, number> = {}
+    counts?.forEach((c: any) => {
+        attendeeCounts[c.event_id] = (attendeeCounts[c.event_id] || 0) + 1
+    })
+
+    // Merge data
+    const allEvents = events.map((event: any) => ({
+        ...event,
+        registration: registrations?.find((r: any) => r.event_id === event.id),
+        attendee_count: attendeeCounts[event.id] || 0
+    })) as EventWithRegistration[]
+
+    // Filter by audience
+    // If no user (public), only show public events
+    if (!user) {
+        return allEvents.filter(e => {
+            const audience = e.target_audience as string[] || ['public']
+            return audience.includes('public')
+        })
+    }
+
+    // Get profile to check role/sub
+    const { data: profileData } = await (supabase
+        .from('profiles') as any)
+        .select('*')
+        .eq('id', user.id)
+        .single()
+
+    const profile = profileData as any
+
+    if (!profile) return []
+
+    // Check if patient has any active relationship (for 'active_patients' audience)
+    let hasActiveRelationship = false
+    if (profile.role === 'patient') {
+        const { count } = await (supabase
+            .from('patient_psychologist_relationships') as any)
+            .select('*', { count: 'exact', head: true })
+            .eq('patient_id', user.id)
+            .eq('status', 'active')
+        hasActiveRelationship = (count || 0) > 0
+    }
+
+    return allEvents.filter(e => {
+        // Admin sees everything
+        if (profile.role === 'admin') return true
+
+        // Creator sees their events (even if draft)
+        if (e.created_by === user.id) return true
+
+        // Hide drafts from everyone else
+        if (e.status === 'draft') return false
+
+        const audience = e.target_audience as string[] || ['public']
+        if (audience.includes('public')) return true
+
+        if (audience.includes('members') && (profile.membership_level ?? 0) >= 1) return true
+
+        if (audience.includes('psychologists') && profile.role === 'psychologist') return true
+
+        if (audience.includes('patients') && profile.role === 'patient') return true
+
+        if (audience.includes('active_patients') && hasActiveRelationship) return true
+
+        return false
+    })
+}
+
+/**
+ * Get a single event by ID
+ */
+export async function getEventById(eventId: string): Promise<Event | null> {
+    const supabase = await createClient()
+
+    const { data: event, error } = await (supabase
+        .from('events') as any)
+        .select('*')
+        .eq('id', eventId)
+        .single()
+
+    if (error) {
+        console.error('Error fetching event:', error)
+        return null
+    }
+
+    // Increment views (fire and forget)
+    if (event) {
+        (supabase as any).rpc('increment_event_views', { event_id: eventId }).then(({ error }: any) => {
+            if (error) console.error('Error incrementing views:', error)
+        })
+    }
+
+    return event as Event
+}
+
+/**
+ * Create a new event
+ */
+export async function createEvent(event: EventInsert): Promise<Event | null> {
+    const supabase = await createClient()
+
+    const { data, error } = await (supabase as any)
+        .from('events')
+        .insert(event)
+        .select()
+        .single()
+
+    if (error) {
+
+        console.error('Error creating event:', error)
+        return null
+    }
+
+    return data as Event
+}
+
+/**
+ * Update an event
+ */
+export async function updateEvent(
+    eventId: string,
+    updates: Partial<EventInsert>
+): Promise<Event | null> {
+    const supabase = await createClient()
+
+    const { data, error } = await (supabase as any)
+        .from('events')
+        .update(updates)
+        .eq('id', eventId)
+        .select()
+        .single()
+
+    if (error) {
+
+        console.error('Error updating event:', error)
+        return null
+    }
+
+    return data as Event
+}
+
+/**
+ * Register for an event
+ */
+export async function registerForEvent(eventId: string, registrationData: any = {}): Promise<EventRegistration | null> {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) return null
+
+    const { data, error } = await (supabase as any)
+        .from('event_registrations')
+        .insert({
+            event_id: eventId,
+            user_id: user.id,
+            status: 'registered',
+            registration_data: registrationData
+        })
+        .select()
+        .single()
+
+    if (error) {
+
+        console.error('Error registering for event:', error)
+        return null
+    }
+
+    return data as EventRegistration
+}
+
+/**
+ * Cancel event registration
+ */
+export async function cancelEventRegistration(eventId: string): Promise<boolean> {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) return false
+
+    const { error } = await (supabase as any)
+        .from('event_registrations')
+        .update({ status: 'cancelled' })
+        .eq('event_id', eventId)
+        .eq('user_id', user.id)
+
+    if (error) {
+
+        console.error('Error cancelling registration:', error)
+        return false
+    }
+
+    return true
+}
+
+/**
+ * Get registrations for an event (admin)
+ */
+export async function getEventRegistrations(eventId: string): Promise<EventRegistration[]> {
+    const supabase = await createClient()
+
+    const { data, error } = await (supabase
+        .from('event_registrations') as any)
+        .select(`
+            *,
+            user:profiles (
+                id,
+                full_name,
+                avatar_url
+            )
+        `)
+        .eq('event_id', eventId)
+        .eq('status', 'registered')
+
+    if (error) {
+        console.error('Error fetching registrations:', error)
+        return []
+    }
+
+    return (data ?? []) as EventRegistration[]
+}
+
+/**
+ * Get public event by ID (no auth required - for embeds and sharing)
+ * Filters out Draft and Cancelled events.
+ */
+export async function getPublicEventById(eventId: string): Promise<any | null> {
+    const supabase = await createClient()
+
+    const { data: event, error } = await (supabase
+        .from('events') as any)
+        .select('*')
+        .eq('id', eventId)
+        .not('status', 'eq', 'draft')
+        .not('status', 'eq', 'cancelled')
+        .single()
+
+    if (error || !event) {
+        console.error('Error fetching public event:', error)
+        return null
+    }
+
+    // Get speakers
+    const { data: speakers } = await (supabase
+        .from('event_speakers') as any)
+        .select(`
+            *,
+            speaker:speakers (
+                *,
+                profile:profiles (
+                    id,
+                    full_name,
+                    avatar_url
+                )
+            )
+        `)
+        .eq('event_id', eventId)
+        .order('display_order', { ascending: true })
+
+    // Get attendee count
+    const { count } = await (supabase
+        .from('event_registrations') as any)
+        .select('*', { count: 'exact', head: true })
+        .eq('event_id', eventId)
+        .eq('status', 'registered')
+
+    return {
+        ...event,
+        speakers: speakers ?? [],
+        attendee_count: count ?? 0,
+    }
+}

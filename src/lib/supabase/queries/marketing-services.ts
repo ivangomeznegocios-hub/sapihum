@@ -1,0 +1,220 @@
+import { createClient, createAdminClient } from '@/lib/supabase/server'
+
+// ============================================
+// SERVICE KEY CONFIG
+// ============================================
+export const MARKETING_SERVICE_KEYS = [
+    'community_manager',
+    'content_creation',
+    'assistant',
+    'seo',
+    'ads',
+    'google_business',
+] as const
+
+export type MarketingServiceKey = typeof MARKETING_SERVICE_KEYS[number]
+
+export interface MarketingService {
+    id: string
+    user_id: string
+    service_key: MarketingServiceKey
+    status: 'pending_brief' | 'in_progress' | 'active' | 'paused'
+    notes: string | null
+    admin_notes: string | null
+    assigned_to: string | null
+    contact_link: string | null
+    created_at: string
+    updated_at: string
+}
+
+export interface MarketingBrief {
+    id: string
+    user_id: string
+    brand_name: string | null
+    tone_of_voice: string | null
+    target_audience: string | null
+    colors_and_style: string | null
+    social_links: string | null
+    goals: string | null
+    additional_notes: string | null
+    status: 'submitted' | 'reviewed' | 'approved'
+    created_at: string
+    updated_at: string
+}
+
+export const SERVICE_LABELS: Record<MarketingServiceKey, { title: string; description: string }> = {
+    community_manager: {
+        title: 'Community Manager',
+        description: 'Gestión y estrategia de tus redes sociales (Instagram, Facebook).',
+    },
+    content_creation: {
+        title: 'Creación de Contenido',
+        description: 'Diseños, reels y copys mensuales para tu marca personal.',
+    },
+    assistant: {
+        title: 'Asistente Personal',
+        description: 'Gestión de citas, atención a pacientes y tareas administrativas.',
+    },
+    seo: {
+        title: 'SEO y Posicionamiento',
+        description: 'Optimización para que aparezcas primero en las búsquedas de Google.',
+    },
+    ads: {
+        title: 'Campañas de Ads',
+        description: 'Publicidad pagada en Meta y Google para atraer más pacientes.',
+    },
+    google_business: {
+        title: 'Google My Business',
+        description: 'Optimización de tu ficha local para búsquedas cerca de tu consultorio.',
+    },
+}
+
+export const STATUS_CONFIG: Record<string, { label: string; color: string }> = {
+    pending_brief: {
+        label: 'Esperando Brief',
+        color: 'text-amber-600 dark:text-amber-500 bg-amber-100 dark:bg-amber-900/30 border-amber-200 dark:border-amber-800',
+    },
+    in_progress: {
+        label: 'En Progreso',
+        color: 'text-blue-700 dark:text-blue-400 bg-blue-100 dark:bg-blue-900/30 border-blue-200 dark:border-blue-800',
+    },
+    active: {
+        label: 'Activo',
+        color: 'text-emerald-700 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-900/30 border-emerald-200 dark:border-emerald-800',
+    },
+    paused: {
+        label: 'Pausado',
+        color: 'text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700',
+    },
+}
+
+// ============================================
+// USER QUERIES
+// ============================================
+
+/**
+ * Get all marketing services for a user.
+ * Returns an empty array if no services exist yet.
+ */
+export async function getUserMarketingServices(userId: string): Promise<MarketingService[]> {
+    const supabase = await createClient()
+    const { data, error } = await (supabase as any)
+        .from('marketing_services')
+        .select('*')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: true })
+
+    if (error) {
+        console.error('Error fetching marketing services:', error)
+        return []
+    }
+
+    return (data ?? []) as MarketingService[]
+}
+
+/**
+ * Get the user's brand brief (if submitted).
+ */
+export async function getUserMarketingBrief(userId: string): Promise<MarketingBrief | null> {
+    const supabase = await createClient()
+    const { data, error } = await (supabase as any)
+        .from('marketing_briefs')
+        .select('*')
+        .eq('user_id', userId)
+        .single()
+
+    if (error && error.code !== 'PGRST116') {
+        console.error('Error fetching marketing brief:', error)
+    }
+
+    return (data as MarketingBrief) ?? null
+}
+
+/**
+ * Initialize all 6 marketing service records for a user if they don't exist yet.
+ */
+export async function initializeMarketingServices(userId: string): Promise<MarketingService[]> {
+    const supabase = await createClient()
+
+    // Check if already initialized
+    const { data: existing } = await (supabase as any)
+        .from('marketing_services')
+        .select('id')
+        .eq('user_id', userId)
+        .limit(1)
+
+    if (existing && existing.length > 0) {
+        return getUserMarketingServices(userId)
+    }
+
+    // Create all 6 service rows
+    const rows = MARKETING_SERVICE_KEYS.map(key => ({
+        user_id: userId,
+        service_key: key,
+        status: 'pending_brief',
+    }))
+
+    const { error } = await (supabase as any)
+        .from('marketing_services')
+        .insert(rows)
+
+    if (error) {
+        console.error('Error initializing marketing services:', error)
+        return []
+    }
+
+    return getUserMarketingServices(userId)
+}
+
+// ============================================
+// ADMIN QUERIES
+// ============================================
+
+/**
+ * Get all level-3 users with their marketing services and brief status.
+ * Admin-only.
+ */
+export async function getMarketingOverview(): Promise<{
+    users: Array<{
+        id: string
+        full_name: string | null
+        avatar_url: string | null
+        email: string | null
+        services: MarketingService[]
+        brief: MarketingBrief | null
+    }>
+}> {
+    const supabase = await createClient()
+
+    // Get all level-3 psychologists
+    const { data: profiles, error: profileError } = await supabase
+        .from('profiles')
+        .select('id, full_name, avatar_url, email')
+        .eq('membership_level', 3)
+        .order('full_name', { ascending: true })
+
+    if (profileError || !profiles) {
+        console.error('Error fetching level-3 profiles:', profileError)
+        return { users: [] }
+    }
+
+    // For each user, get services and briefs
+    const users = await Promise.all(
+        (profiles as any[]).map(async (profile) => {
+            const [services, brief] = await Promise.all([
+                getUserMarketingServices(profile.id),
+                getUserMarketingBrief(profile.id),
+            ])
+            return {
+                id: profile.id,
+                full_name: profile.full_name,
+                avatar_url: profile.avatar_url,
+                email: profile.email,
+                services,
+                brief,
+            }
+        })
+    )
+
+    return { users }
+}

@@ -1,0 +1,86 @@
+'use server'
+
+import { revalidatePath } from 'next/cache'
+import { createToolAssignment, toggleResultsVisibility, deleteToolAssignment } from '@/lib/supabase/queries/tools'
+import { createClient } from '@/lib/supabase/server'
+
+/**
+ * Server action: Assign a tool to a patient
+ */
+export async function assignToolAction(formData: FormData) {
+    const toolId = formData.get('toolId') as string
+    const patientId = formData.get('patientId') as string
+    const instructions = formData.get('instructions') as string
+    const dueDate = formData.get('dueDate') as string
+
+    if (!toolId || !patientId) {
+        return { error: 'Herramienta y paciente son requeridos' }
+    }
+
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) return { error: 'No autenticado' }
+
+    const result = await createToolAssignment({
+        tool_id: toolId,
+        patient_id: patientId,
+        psychologist_id: user.id,
+        instructions: instructions || null,
+        due_date: dueDate || null
+    })
+
+    if (!result) {
+        return { error: 'Error al asignar la herramienta' }
+    }
+
+    revalidatePath(`/dashboard/patients/${patientId}`)
+    return { success: true, assignment: result }
+}
+
+/**
+ * Server action: Toggle results visibility for patient
+ */
+export async function toggleVisibilityAction(formData: FormData) {
+    const assignmentId = formData.get('assignmentId') as string
+    const visible = formData.get('visible') === 'true'
+    const patientId = formData.get('patientId') as string
+
+    if (!assignmentId) {
+        return { error: 'Assignment ID requerido' }
+    }
+
+    const result = await toggleResultsVisibility(assignmentId, visible)
+
+    if (!result) {
+        return { error: 'Error al cambiar la visibilidad' }
+    }
+
+    if (patientId) {
+        revalidatePath(`/dashboard/patients/${patientId}`)
+    }
+    return { success: true }
+}
+
+/**
+ * Server action: Delete a tool assignment
+ */
+export async function deleteAssignmentAction(formData: FormData) {
+    const assignmentId = formData.get('assignmentId') as string
+    const patientId = formData.get('patientId') as string
+
+    if (!assignmentId) {
+        return { error: 'Assignment ID requerido' }
+    }
+
+    const result = await deleteToolAssignment(assignmentId)
+
+    if (!result) {
+        return { error: 'Error al eliminar la asignación' }
+    }
+
+    if (patientId) {
+        revalidatePath(`/dashboard/patients/${patientId}`)
+    }
+    return { success: true }
+}
