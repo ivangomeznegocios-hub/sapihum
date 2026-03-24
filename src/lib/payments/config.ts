@@ -25,6 +25,10 @@ export interface SubscriptionPlanConfig {
     }
 }
 
+function isPlaceholderPriceId(value: string | null | undefined): boolean {
+    return !value || value.includes('placeholder')
+}
+
 function resolveLevel2StripePriceId(code: SpecializationCode, interval: BillingInterval): string {
     const uppercaseCode = code.toUpperCase()
     const scopedEnvKey = interval === 'annual'
@@ -180,6 +184,10 @@ export function getStripePriceId(
     return interval === 'annual' ? plan.annual.stripePriceId : plan.monthly.stripePriceId
 }
 
+export function isStripePriceIdConfigured(priceId: string | null | undefined): priceId is string {
+    return !isPlaceholderPriceId(priceId)
+}
+
 export function getPlanByPriceId(priceId: string): (SubscriptionPlanConfig & { interval: BillingInterval }) | null {
     const staticPlans = [LEVEL_1_PLAN, LEVEL_3_PLAN]
     for (const plan of staticPlans) {
@@ -212,4 +220,3 @@ export const AI_CREDIT_PACKAGES = {
 } as const
 
 export type AICreditPackageKey = keyof typeof AI_CREDIT_PACKAGES
-

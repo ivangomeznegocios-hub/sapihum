@@ -1,9 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { z } from 'zod'
 import { createAdminClient, createClient } from '@/lib/supabase/server'
 import { getSpecializationByCode } from '@/lib/specializations'
 import { recordAnalyticsServerEvent, resolveAttributionSnapshot } from '@/lib/analytics/server'
 
 type WaitlistSource = 'landing' | 'app'
+
+const WaitlistEmailSchema = z.string().trim().toLowerCase().email()
 
 function normalizeSource(input: unknown): WaitlistSource {
     return input === 'app' ? 'app' : 'landing'
@@ -47,6 +50,16 @@ export async function POST(request: NextRequest) {
                 { error: 'Necesitamos un correo para avisarte cuando se abra esta especializacion' },
                 { status: 400 }
             )
+        }
+
+        if (!user?.id) {
+            const emailValidation = WaitlistEmailSchema.safeParse(email)
+            if (!emailValidation.success) {
+                return NextResponse.json(
+                    { error: 'Correo invalido para lista de espera' },
+                    { status: 400 }
+                )
+            }
         }
 
         const admin = await createAdminClient()

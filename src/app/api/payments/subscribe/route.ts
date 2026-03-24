@@ -6,7 +6,12 @@ import { createClient } from '@/lib/supabase/server'
 import { recordAnalyticsServerEvent, resolveAttributionSnapshot } from '@/lib/analytics/server'
 import { getAppUrl } from '@/lib/config/app-url'
 import { getPaymentProvider } from '@/lib/payments'
-import { getSubscriptionPlan, getStripePriceId, type BillingInterval } from '@/lib/payments/config'
+import {
+    getSubscriptionPlan,
+    getStripePriceId,
+    isStripePriceIdConfigured,
+    type BillingInterval,
+} from '@/lib/payments/config'
 import { canUserSeeLevel3Offer, getSpecializationByCode } from '@/lib/specializations'
 
 export async function POST(request: NextRequest) {
@@ -53,6 +58,13 @@ export async function POST(request: NextRequest) {
         const priceId = getStripePriceId(membershipLevel, billingInterval, resolvedSpecializationCode)
         if (!priceId) {
             return NextResponse.json({ error: 'Precio no encontrado' }, { status: 400 })
+        }
+
+        if (!isStripePriceIdConfigured(priceId)) {
+            return NextResponse.json(
+                { error: 'Stripe no esta configurado completamente para este plan' },
+                { status: 503 }
+            )
         }
 
         // Get profile for Stripe customer ID

@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { getSpecializationBySlug, getVisibleSpecializations } from '@/lib/specializations'
 import { Metadata } from 'next'
+import { getSubscriptionPlan } from '@/lib/payments/config'
 
 interface Props {
   params: Promise<{ slug: string }>
@@ -34,6 +35,9 @@ export default async function SpecializationPage(props: Props) {
     notFound()
   }
 
+  const level2Plan = getSubscriptionPlan(2, spec.code)
+  const isLevel2Active = !!level2Plan
+
   return (
     <div className="flex flex-col items-center flex-1 w-full bg-background relative">
       {/* Hero Section */}
@@ -57,9 +61,9 @@ export default async function SpecializationPage(props: Props) {
           </p>
           
           <div className="sapihum-fade-up" style={{ animationDelay: '0.3s' }}>
-            <Link href={`/auth/register?plan=level2&specialization=${spec.code}`}>
+            <Link href={`/auth/register?plan=${isLevel2Active ? 'level2' : 'level1'}&specialization=${spec.code}`}>
               <Button size="lg" className="h-14 px-8 text-base shadow-lg bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-400 hover:to-emerald-400 text-white border-0 font-bold sapihum-glow-cta">
-                Comenzar Especialización
+                {isLevel2Active ? 'Comenzar Especialización' : 'Comenzar con Nivel 1'}
               </Button>
             </Link>
           </div>
@@ -107,7 +111,7 @@ export default async function SpecializationPage(props: Props) {
                 Al unirte a la especialidad de {spec.name}, obtienes acceso no solo a software, sino a una red de apoyo clínico y formación continua focalizada.
               </p>
               
-              <Link href={`/auth/register?plan=level2&specialization=${spec.code}`}>
+              <Link href={`/auth/register?plan=${isLevel2Active ? 'level2' : 'level1'}&specialization=${spec.code}`}>
                 <Button size="lg" className="h-12 px-8 text-base bg-gradient-to-r from-teal-500 to-emerald-500 text-white">
                   Crear Cuenta Gratis
                 </Button>
@@ -143,9 +147,9 @@ export default async function SpecializationPage(props: Props) {
             Únete a cientos de colegas que ya gestionan su práctica y se capacitan en nuestra plataforma.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href={`/auth/register?plan=level2&specialization=${spec.code}`}>
+            <Link href={`/auth/register?plan=${isLevel2Active ? 'level2' : 'level1'}&specialization=${spec.code}`}>
               <Button size="lg" className="h-14 px-10 text-base shadow-xl bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-400 hover:to-emerald-400 text-white border-0 font-bold sapihum-glow-cta">
-                Activar Membresía {spec.name}
+                {isLevel2Active ? `Activar Membresía ${spec.name}` : 'Unirme al Nivel 1'}
               </Button>
             </Link>
           </div>

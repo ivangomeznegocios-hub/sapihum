@@ -1,7 +1,12 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { createToolAssignment, createTherapeuticTool, toggleResultsVisibility, deleteToolAssignment } from '@/lib/supabase/queries/tools'
+import {
+    createToolAssignment,
+    createTherapeuticTool,
+    toggleResultsVisibilityForPsychologist,
+    deleteToolAssignmentForPsychologist,
+} from '@/lib/supabase/queries/tools'
 import { createClient } from '@/lib/supabase/server'
 
 /**
@@ -50,10 +55,15 @@ export async function toggleVisibilityAction(formData: FormData) {
         return { error: 'Assignment ID requerido' }
     }
 
-    const result = await toggleResultsVisibility(assignmentId, visible)
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) return { error: 'No autenticado' }
+
+    const result = await toggleResultsVisibilityForPsychologist(user.id, assignmentId, visible)
 
     if (!result) {
-        return { error: 'Error al cambiar la visibilidad' }
+        return { error: 'No tienes permisos para cambiar la visibilidad de esta herramienta' }
     }
 
     if (patientId) {
@@ -73,10 +83,15 @@ export async function deleteAssignmentAction(formData: FormData) {
         return { error: 'Assignment ID requerido' }
     }
 
-    const result = await deleteToolAssignment(assignmentId)
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) return { error: 'No autenticado' }
+
+    const result = await deleteToolAssignmentForPsychologist(user.id, assignmentId)
 
     if (!result) {
-        return { error: 'Error al eliminar la asignación' }
+        return { error: 'No tienes permisos para eliminar esta asignacion' }
     }
 
     if (patientId) {
@@ -144,7 +159,7 @@ export async function createToolAction(input: {
                             text: 'Escribe tu respuesta o desarrolla la actividad solicitada.',
                             type: 'text',
                             required: true,
-                            placeholder: 'Escribe aqui...',
+                            placeholder: 'Escribe aqui tu respuesta...',
                         },
                     ],
                 },

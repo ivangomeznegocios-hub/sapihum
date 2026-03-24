@@ -29,6 +29,8 @@ import {
 } from '@/lib/supabase/queries/marketing-services'
 import { BriefButton, ServiceInitializer } from './marketing-client'
 
+const supportWhatsAppUrl = process.env.NEXT_PUBLIC_SUPPORT_WHATSAPP_URL?.trim() || null
+
 export const metadata = {
     title: 'Marketing Premium Hub | Comunidad Psicología',
     description: 'Gestiona tus servicios de Marketing Premium',
@@ -124,12 +126,19 @@ export default async function MarketingHubPage() {
 
                     <div className="pt-4 flex flex-wrap gap-4">
                         <BriefButton existingBrief={brief} variant="hero" />
-                        <Button variant="outline" className="border-indigo-500/50 text-white hover:bg-indigo-500/20 bg-transparent" asChild>
-                            <a href="https://wa.me/521XXXXXXXXXX" target="_blank" rel="noopener noreferrer">
+                        {supportWhatsAppUrl ? (
+                            <Button variant="outline" className="border-indigo-500/50 text-white hover:bg-indigo-500/20 bg-transparent" asChild>
+                                <a href={supportWhatsAppUrl} target="_blank" rel="noopener noreferrer">
+                                    <MessageCircle className="w-4 h-4 mr-2" />
+                                    Contactar a Soporte VIP
+                                </a>
+                            </Button>
+                        ) : (
+                            <Button variant="outline" className="border-indigo-500/50 text-white bg-transparent opacity-60" disabled>
                                 <MessageCircle className="w-4 h-4 mr-2" />
-                                Contactar a Soporte VIP
-                            </a>
-                        </Button>
+                                Soporte VIP pendiente de configurar
+                            </Button>
+                        )}
                     </div>
                 </div>
             </div>
@@ -342,12 +351,18 @@ export default async function MarketingHubPage() {
                                     Facturación y Pagos
                                 </Link>
                             </Button>
-                            <Button variant="ghost" className="w-full justify-start text-sm h-9" asChild>
-                                <a href="https://wa.me/521XXXXXXXXXX" target="_blank" rel="noopener noreferrer">
-                                    Contactar Soporte VIP
-                                    <ExternalLink className="w-3 h-3 ml-auto" />
-                                </a>
-                            </Button>
+                            {supportWhatsAppUrl ? (
+                                <Button variant="ghost" className="w-full justify-start text-sm h-9" asChild>
+                                    <a href={supportWhatsAppUrl} target="_blank" rel="noopener noreferrer">
+                                        Contactar Soporte VIP
+                                        <ExternalLink className="w-3 h-3 ml-auto" />
+                                    </a>
+                                </Button>
+                            ) : (
+                                <Button variant="ghost" className="w-full justify-start text-sm h-9 opacity-60" disabled>
+                                    Soporte VIP pendiente de configurar
+                                </Button>
+                            )}
                         </CardContent>
                     </Card>
                 </div>

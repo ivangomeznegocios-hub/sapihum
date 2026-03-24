@@ -1,6 +1,9 @@
 import { MetadataRoute } from 'next'
+import { getAppUrl } from '@/lib/config/app-url'
 
 export default function robots(): MetadataRoute.Robots {
+  const appUrl = getAppUrl()
+
   return {
     rules: {
       userAgent: '*',
@@ -18,6 +21,6 @@ export default function robots(): MetadataRoute.Robots {
         '/api/' // Added to prevent indexing of internal APIs
       ],
     },
-    sitemap: 'https://puntoempresarios.club/sitemap.xml',
+    sitemap: `${appUrl}/sitemap.xml`,
   }
 }

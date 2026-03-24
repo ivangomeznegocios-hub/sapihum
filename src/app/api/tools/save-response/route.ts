@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { saveToolResponse, updateAssignmentStatus } from '@/lib/supabase/queries/tools'
+import {
+    saveToolResponseForPatientUser,
+    updateAssignmentStatusForPatientUser,
+} from '@/lib/supabase/queries/tools'
 
 export async function POST(request: NextRequest) {
     try {
@@ -19,7 +22,7 @@ export async function POST(request: NextRequest) {
         }
 
         // Save response
-        const result = await saveToolResponse({
+        const result = await saveToolResponseForPatientUser(user.id, {
             assignment_id: assignmentId,
             responses: responses || {},
             scores: scores || {},
@@ -27,18 +30,28 @@ export async function POST(request: NextRequest) {
         })
 
         if (!result) {
-            return NextResponse.json({ error: 'Error al guardar respuesta' }, { status: 500 })
+            return NextResponse.json(
+                { error: 'No tienes acceso a esta herramienta o no se pudo guardar la respuesta' },
+                { status: 403 }
+            )
         }
 
         // If completed, update assignment status
         if (completed) {
-            await updateAssignmentStatus(
+            const updated = await updateAssignmentStatusForPatientUser(
+                user.id,
                 assignmentId,
                 'completed',
                 new Date().toISOString()
             )
+            if (!updated) {
+                return NextResponse.json({ error: 'No fue posible actualizar el estado de la herramienta' }, { status: 403 })
+            }
         } else if (progress > 0) {
-            await updateAssignmentStatus(assignmentId, 'in_progress')
+            const updated = await updateAssignmentStatusForPatientUser(user.id, assignmentId, 'in_progress')
+            if (!updated) {
+                return NextResponse.json({ error: 'No fue posible actualizar el estado de la herramienta' }, { status: 403 })
+            }
         }
 
         return NextResponse.json({ success: true, response: result })

@@ -253,6 +253,32 @@ export async function createToolAssignment(
     return assignment as ToolAssignment
 }
 
+async function getAssignmentAccessContext(assignmentId: string): Promise<
+    Pick<ToolAssignment, 'id' | 'patient_id' | 'psychologist_id'> | null
+> {
+    const supabase = await createClient()
+    const {
+        data: { user },
+    } = await supabase.auth.getUser()
+
+    if (!user) {
+        return null
+    }
+
+    const { data: assignment, error } = await (supabase
+        .from('tool_assignments') as any)
+        .select('id, patient_id, psychologist_id')
+        .eq('id', assignmentId)
+        .maybeSingle()
+
+    if (error) {
+        console.error('Error fetching assignment access context:', error)
+        return null
+    }
+
+    return (assignment ?? null) as Pick<ToolAssignment, 'id' | 'patient_id' | 'psychologist_id'> | null
+}
+
 /**
  * Toggle results visibility for a tool assignment
  */
@@ -292,6 +318,78 @@ export async function deleteToolAssignment(assignmentId: string): Promise<boolea
     }
 
     return true
+}
+
+export async function saveToolResponseForPatientUser(
+    patientUserId: string,
+    data: ToolResponseInsert
+): Promise<ToolResponse | null> {
+    const assignment = await getAssignmentAccessContext(data.assignment_id)
+
+    if (!assignment || assignment.patient_id !== patientUserId) {
+        console.error('Unauthorized tool response save attempt', {
+            assignmentId: data.assignment_id,
+            patientUserId,
+        })
+        return null
+    }
+
+    return saveToolResponse(data)
+}
+
+export async function updateAssignmentStatusForPatientUser(
+    patientUserId: string,
+    assignmentId: string,
+    status: 'pending' | 'in_progress' | 'completed' | 'expired',
+    completedAt?: string
+): Promise<boolean> {
+    const assignment = await getAssignmentAccessContext(assignmentId)
+
+    if (!assignment || assignment.patient_id !== patientUserId) {
+        console.error('Unauthorized assignment status update attempt', {
+            assignmentId,
+            patientUserId,
+            status,
+        })
+        return false
+    }
+
+    return updateAssignmentStatus(assignmentId, status, completedAt)
+}
+
+export async function toggleResultsVisibilityForPsychologist(
+    psychologistUserId: string,
+    assignmentId: string,
+    visible: boolean
+): Promise<boolean> {
+    const assignment = await getAssignmentAccessContext(assignmentId)
+
+    if (!assignment || assignment.psychologist_id !== psychologistUserId) {
+        console.error('Unauthorized tool visibility update attempt', {
+            assignmentId,
+            psychologistUserId,
+        })
+        return false
+    }
+
+    return toggleResultsVisibility(assignmentId, visible)
+}
+
+export async function deleteToolAssignmentForPsychologist(
+    psychologistUserId: string,
+    assignmentId: string
+): Promise<boolean> {
+    const assignment = await getAssignmentAccessContext(assignmentId)
+
+    if (!assignment || assignment.psychologist_id !== psychologistUserId) {
+        console.error('Unauthorized tool assignment delete attempt', {
+            assignmentId,
+            psychologistUserId,
+        })
+        return false
+    }
+
+    return deleteToolAssignment(assignmentId)
 }
 
 // ============================================
