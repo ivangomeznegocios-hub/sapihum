@@ -10,6 +10,20 @@ const withSerwist = withSerwistInit({
 const nextConfig: NextConfig = {
     reactStrictMode: false,
     turbopack: {}, // Workaround for serwist + turbopack build blocking
+    async redirects() {
+        return [
+            {
+                source: '/especialidades/psicologia-infantil',
+                destination: '/especialidades/psicologia-infantojuvenil',
+                permanent: true,
+            },
+            {
+                source: '/especialidades/adulto-mayor',
+                destination: '/especialidades/psicogerontologia',
+                permanent: true,
+            },
+        ]
+    },
     async headers() {
         const securityHeaders = [
             {

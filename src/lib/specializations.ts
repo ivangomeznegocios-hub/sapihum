@@ -402,6 +402,20 @@ export function canUserSeeLevel3Offer(options: {
     return !!specialization && specialization.level3Available
 }
 
+const SPECIALIZATION_SLUG_ALIASES: Record<string, SpecializationCode> = {
+    'psicologia-infantil': 'infanto_juvenil',
+    'adulto-mayor': 'psicogerontologia',
+}
+
+export function getCanonicalSpecializationSlug(slug: string): string {
+    const specialization =
+        Object.values(SPECIALIZATION_CATALOG).find((spec) => spec.slug === slug) ??
+        getSpecializationByCode(SPECIALIZATION_SLUG_ALIASES[slug])
+
+    return specialization?.slug ?? slug
+}
+
 export function getSpecializationBySlug(slug: string): SpecializationConfig | null {
-    return Object.values(SPECIALIZATION_CATALOG).find(spec => spec.slug === slug) ?? null
+    const canonicalSlug = getCanonicalSpecializationSlug(slug)
+    return Object.values(SPECIALIZATION_CATALOG).find(spec => spec.slug === canonicalSlug) ?? null
 }

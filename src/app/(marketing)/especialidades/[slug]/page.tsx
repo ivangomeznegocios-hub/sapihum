@@ -1,7 +1,11 @@
-import { notFound } from 'next/navigation'
+import { notFound, redirect } from 'next/navigation'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-import { getSpecializationBySlug, getVisibleSpecializations } from '@/lib/specializations'
+import {
+  getCanonicalSpecializationSlug,
+  getSpecializationBySlug,
+  getVisibleSpecializations,
+} from '@/lib/specializations'
 import { Metadata } from 'next'
 import { getSubscriptionPlan } from '@/lib/payments/config'
 
@@ -11,7 +15,8 @@ interface Props {
 
 export async function generateMetadata(props: Props): Promise<Metadata> {
   const params = await props.params
-  const spec = getSpecializationBySlug(params.slug)
+  const canonicalSlug = getCanonicalSpecializationSlug(params.slug)
+  const spec = getSpecializationBySlug(canonicalSlug)
   if (!spec) return {}
 
   return {
@@ -29,25 +34,30 @@ export async function generateStaticParams() {
 
 export default async function SpecializationPage(props: Props) {
   const params = await props.params
-  const spec = getSpecializationBySlug(params.slug)
+  const canonicalSlug = getCanonicalSpecializationSlug(params.slug)
+  const spec = getSpecializationBySlug(canonicalSlug)
 
   if (!spec) {
     notFound()
+  }
+
+  if (canonicalSlug !== params.slug) {
+    redirect(`/especialidades/${canonicalSlug}`)
   }
 
   const level2Plan = getSubscriptionPlan(2, spec.code)
   const isLevel2Active = !!level2Plan
 
   return (
-    <div className="flex flex-col items-center flex-1 w-full bg-background relative">
+    <div className="relative flex flex-1 w-full flex-col items-center overflow-x-hidden bg-background">
       {/* Hero Section */}
-      <section className="w-full py-20 md:py-32 flex flex-col items-center text-center px-4 bg-gradient-to-b from-[#0A1628] to-background">
+      <section className="relative flex w-full flex-col items-center overflow-hidden bg-gradient-to-b from-[#0A1628] to-background px-4 py-20 text-center md:py-32">
         {/* Background effects */}
         <div className="absolute inset-0 top-0 h-[600px] sapihum-grid-bg opacity-30" />
         <div className="absolute left-1/2 top-0 -translate-x-1/2 h-[500px] w-[500px] rounded-full bg-teal-500/10 blur-[120px] pointer-events-none" />
 
         <div className="relative z-10 max-w-4xl flex flex-col items-center">
-          <div className="sapihum-fade-up mb-6 inline-flex items-center gap-2 rounded-full border border-teal-500/30 bg-teal-950/40 px-4 py-1.5 text-sm font-semibold text-teal-300">
+          <div className="sapihum-fade-up mb-6 inline-flex max-w-full flex-wrap items-center justify-center gap-2 rounded-full border border-teal-500/30 bg-teal-950/40 px-4 py-1.5 text-center text-sm font-semibold text-teal-300">
             <span className="text-xl leading-none">{spec.icon}</span>
             Especialidad: {spec.name}
           </div>
@@ -62,7 +72,7 @@ export default async function SpecializationPage(props: Props) {
           
           <div className="sapihum-fade-up" style={{ animationDelay: '0.3s' }}>
             <Link href={`/auth/register?plan=${isLevel2Active ? 'level2' : 'level1'}&specialization=${spec.code}`}>
-              <Button size="lg" className="h-14 px-8 text-base shadow-lg bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-400 hover:to-emerald-400 text-white border-0 font-bold sapihum-glow-cta">
+              <Button size="lg" className="h-auto max-w-full whitespace-normal px-8 py-4 text-center text-base font-bold text-white shadow-lg border-0 bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-400 hover:to-emerald-400 sapihum-glow-cta">
                 {isLevel2Active ? 'Comenzar Especialización' : 'Comenzar con Nivel 1'}
               </Button>
             </Link>
@@ -112,7 +122,7 @@ export default async function SpecializationPage(props: Props) {
               </p>
               
               <Link href={`/auth/register?plan=${isLevel2Active ? 'level2' : 'level1'}&specialization=${spec.code}`}>
-                <Button size="lg" className="h-12 px-8 text-base bg-gradient-to-r from-teal-500 to-emerald-500 text-white">
+                <Button size="lg" className="h-auto max-w-full whitespace-normal px-8 py-3 text-center text-base text-white bg-gradient-to-r from-teal-500 to-emerald-500">
                   Crear Cuenta Gratis
                 </Button>
               </Link>
@@ -148,7 +158,7 @@ export default async function SpecializationPage(props: Props) {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href={`/auth/register?plan=${isLevel2Active ? 'level2' : 'level1'}&specialization=${spec.code}`}>
-              <Button size="lg" className="h-14 px-10 text-base shadow-xl bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-400 hover:to-emerald-400 text-white border-0 font-bold sapihum-glow-cta">
+              <Button size="lg" className="h-auto max-w-full whitespace-normal px-10 py-4 text-center text-base font-bold text-white shadow-xl border-0 bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-400 hover:to-emerald-400 sapihum-glow-cta">
                 {isLevel2Active ? `Activar Membresía ${spec.name}` : 'Unirme al Nivel 1'}
               </Button>
             </Link>
