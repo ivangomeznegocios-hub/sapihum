@@ -5,6 +5,7 @@
 import { createClient as createServiceClient } from '@supabase/supabase-js'
 import { recordAnalyticsServerEvent } from '@/lib/analytics/server'
 import type { AttributionSnapshot } from '@/lib/analytics/types'
+import { grantEventEntitlements } from '@/lib/events/entitlements'
 import { getPlanByPriceId } from './config'
 import { stripeAdapter } from './stripe'
 import type {
@@ -60,6 +61,197 @@ function parseAttributionSnapshot(value: unknown): AttributionSnapshot {
 
 function getPrimaryTouch(snapshot: AttributionSnapshot) {
     return snapshot.lastNonDirectTouch ?? snapshot.lastTouch ?? snapshot.firstTouch
+}
+
+function normalizeWebhookValue(value: string | null | undefined) {
+    const normalized = value?.trim()
+    return normalized ? normalized : null
+}
+
+async function fulfillEventPurchase(params: {
+    supabase: any
+    data: PaymentWebhookData
+    eventId: string
+    userId: string | null
+    profileId: string | null
+}) {
+    const customerEmail = normalizeWebhookValue(params.data.customerEmail)?.toLowerCase()
+    if (!customerEmail) {
+        console.error('[Payment] Event purchase missing customer email:', params.data)
+        return { resolvedUserId: params.userId || params.profileId || null }
+    }
+
+    const { data: event } = await params.supabase
+        .from('events')
+        .select('id, title, event_type, recording_expires_at')
+        .eq('id', params.eventId)
+        .maybeSingle()
+
+    if (!event) {
+        console.error('[Payment] Event not found for purchase fulfillment:', params.eventId)
+        return { resolvedUserId: params.userId || params.profileId || null }
+    }
+
+    const purchaseIdFromMetadata = normalizeWebhookValue(params.data.metadata?.event_purchase_id)
+    let purchaseRow: any = null
+
+    if (purchaseIdFromMetadata) {
+        const { data: existingById } = await (params.supabase
+            .from('event_purchases') as any)
+            .select('id, user_id, email, full_name, status, metadata')
+            .eq('id', purchaseIdFromMetadata)
+            .maybeSingle()
+
+        purchaseRow = existingById ?? null
+    }
+
+    if (!purchaseRow) {
+        const lookupFilters = [
+            params.data.paymentIntentId ? `provider_payment_id.eq.${params.data.paymentIntentId}` : null,
+            params.data.sessionId ? `provider_session_id.eq.${params.data.sessionId}` : null,
+        ].filter(Boolean) as string[]
+
+        if (lookupFilters.length > 0) {
+            const { data: existingByProviderRefs } = await (params.supabase
+                .from('event_purchases') as any)
+                .select('id, user_id, email, full_name, status, metadata')
+                .or(lookupFilters.join(','))
+                .maybeSingle()
+
+            purchaseRow = existingByProviderRefs ?? null
+        }
+    }
+
+    if (!purchaseRow) {
+        const { data: fallbackPurchase } = await (params.supabase
+            .from('event_purchases') as any)
+            .select('id, user_id, email, full_name, status, metadata')
+            .eq('event_id', params.eventId)
+            .eq('email', customerEmail)
+            .order('purchased_at', { ascending: false })
+            .limit(1)
+            .maybeSingle()
+
+        purchaseRow = fallbackPurchase ?? null
+    }
+
+    const { data: matchedProfile } = await (params.supabase
+        .from('profiles') as any)
+        .select('id')
+        .eq('email', customerEmail)
+        .maybeSingle()
+
+    const resolvedUserId = purchaseRow?.user_id || params.userId || params.profileId || matchedProfile?.id || null
+    const paymentReference = params.data.paymentIntentId || params.data.sessionId
+    const mergedMetadata = {
+        ...(purchaseRow?.metadata ?? {}),
+        ...(params.data.metadata ?? {}),
+        webhook: {
+            session_id: params.data.sessionId,
+            payment_intent_id: params.data.paymentIntentId || null,
+            fulfilled_at: new Date().toISOString(),
+        },
+    }
+
+    let purchaseId = purchaseRow?.id as string | null
+
+    if (purchaseId) {
+        await (params.supabase
+            .from('event_purchases') as any)
+            .update({
+                user_id: resolvedUserId,
+                email: customerEmail,
+                full_name: purchaseRow?.full_name || normalizeWebhookValue(params.data.metadata?.buyer_full_name),
+                payment_reference: paymentReference,
+                provider_session_id: params.data.sessionId,
+                provider_payment_id: params.data.paymentIntentId || null,
+                metadata: mergedMetadata,
+                status: 'confirmed',
+                confirmed_at: new Date().toISOString(),
+            })
+            .eq('id', purchaseId)
+    } else {
+        const { data: createdPurchase, error: purchaseInsertError } = await (params.supabase
+            .from('event_purchases') as any)
+            .insert({
+                event_id: params.eventId,
+                user_id: resolvedUserId,
+                email: customerEmail,
+                full_name: normalizeWebhookValue(params.data.metadata?.buyer_full_name),
+                amount_paid: params.data.amount,
+                currency: (params.data.currency || 'mxn').toUpperCase(),
+                payment_method: 'card',
+                payment_reference: paymentReference,
+                provider_session_id: params.data.sessionId,
+                provider_payment_id: params.data.paymentIntentId || null,
+                metadata: mergedMetadata,
+                status: 'confirmed',
+                confirmed_at: new Date().toISOString(),
+            })
+            .select('id')
+            .single()
+
+        if (purchaseInsertError) {
+            throw purchaseInsertError
+        }
+
+        purchaseId = createdPurchase.id as string
+    }
+
+    if (resolvedUserId && event.event_type !== 'on_demand') {
+        const { data: existingRegistration } = await (params.supabase
+            .from('event_registrations') as any)
+            .select('id, registration_data')
+            .eq('event_id', params.eventId)
+            .eq('user_id', resolvedUserId)
+            .maybeSingle()
+
+        const registrationPayload = {
+            payment_reference: paymentReference,
+            amount_paid: params.data.amount,
+            currency: (params.data.currency || 'mxn').toUpperCase(),
+            source: 'payment_webhook',
+        }
+
+        if (existingRegistration) {
+            await (params.supabase
+                .from('event_registrations') as any)
+                .update({
+                    status: 'registered',
+                    registration_data: {
+                        ...(existingRegistration.registration_data ?? {}),
+                        ...registrationPayload,
+                    },
+                })
+                .eq('id', existingRegistration.id)
+        } else {
+            await (params.supabase.from('event_registrations') as any).insert({
+                event_id: params.eventId,
+                user_id: resolvedUserId,
+                status: 'registered',
+                registration_data: registrationPayload,
+            })
+        }
+    }
+
+    await grantEventEntitlements({
+        event,
+        email: customerEmail,
+        userId: resolvedUserId,
+        sourceType: 'purchase',
+        sourceReference: purchaseId,
+        metadata: {
+            payment_reference: paymentReference,
+            provider_session_id: params.data.sessionId,
+            provider_payment_id: params.data.paymentIntentId || null,
+            amount_paid: params.data.amount,
+            currency: (params.data.currency || 'mxn').toUpperCase(),
+        },
+    })
+
+    console.log(`[Payment] Event purchase confirmed, access granted for event: ${params.eventId}`)
+
+    return { resolvedUserId }
 }
 
 export async function fulfillSubscriptionCreated(data: SubscriptionWebhookData): Promise<void> {
@@ -332,14 +524,15 @@ export async function fulfillSubscriptionUpdated(data: SubscriptionWebhookData):
 export async function fulfillOneTimePayment(data: PaymentWebhookData): Promise<void> {
     const supabase = getServiceSupabase()
 
-    const userId = data.metadata?.user_id
-    const profileId = data.metadata?.profile_id
+    const userId = normalizeWebhookValue(data.metadata?.user_id)
+    const profileId = normalizeWebhookValue(data.metadata?.profile_id)
     const purchaseType = (data.purchaseType || data.metadata?.purchase_type) as any
     const referenceId = data.referenceId || data.metadata?.reference_id
     const analyticsVisitorId = data.metadata?.analytics_visitor_id || null
     const analyticsSessionId = data.metadata?.analytics_session_id || null
     const attributionSnapshot = parseAttributionSnapshot(data.metadata?.attribution_snapshot)
     const sourceRef = data.paymentIntentId || data.sessionId
+    let resolvedFulfillmentUserId = profileId || userId || null
 
     const lookupFilters = [
         data.paymentIntentId ? `provider_payment_id.eq.${data.paymentIntentId}` : null,
@@ -407,31 +600,14 @@ export async function fulfillOneTimePayment(data: PaymentWebhookData): Promise<v
             }
         }
     } else if (purchaseType === 'event_purchase' && referenceId) {
-        if (profileId || userId) {
-            const uid = userId || profileId
-
-            const { data: existingReg } = await supabase
-                .from('event_registrations')
-                .select('id')
-                .eq('event_id', referenceId)
-                .eq('user_id', uid)
-                .single()
-
-            if (!existingReg) {
-                await supabase.from('event_registrations').insert({
-                    event_id: referenceId,
-                    user_id: uid,
-                    status: 'registered',
-                    registration_data: {
-                        payment_reference: data.paymentIntentId || data.sessionId,
-                        amount_paid: data.amount,
-                        currency: data.currency,
-                    },
-                })
-            }
-        }
-
-        console.log(`[Payment] Event purchase confirmed, user registered for event: ${referenceId}`)
+        const result = await fulfillEventPurchase({
+            supabase,
+            data,
+            eventId: referenceId,
+            userId,
+            profileId,
+        })
+        resolvedFulfillmentUserId = result.resolvedUserId
     }
 
     await recordAnalyticsServerEvent({
@@ -439,7 +615,7 @@ export async function fulfillOneTimePayment(data: PaymentWebhookData): Promise<v
         eventSource: 'webhook',
         visitorId: analyticsVisitorId,
         sessionId: analyticsSessionId,
-        userId: profileId || userId || null,
+        userId: resolvedFulfillmentUserId,
         touch: getPrimaryTouch(attributionSnapshot),
         properties: {
             purchaseType,
@@ -455,7 +631,7 @@ export async function fulfillOneTimePayment(data: PaymentWebhookData): Promise<v
             eventSource: 'webhook',
             visitorId: analyticsVisitorId,
             sessionId: analyticsSessionId,
-            userId: profileId || userId || null,
+            userId: resolvedFulfillmentUserId,
             touch: getPrimaryTouch(attributionSnapshot),
             properties: {
                 eventId: referenceId || null,
@@ -470,7 +646,7 @@ export async function fulfillOneTimePayment(data: PaymentWebhookData): Promise<v
             eventSource: 'webhook',
             visitorId: analyticsVisitorId,
             sessionId: analyticsSessionId,
-            userId: profileId || userId || null,
+            userId: resolvedFulfillmentUserId,
             touch: getPrimaryTouch(attributionSnapshot),
             properties: {
                 packageKey: referenceId || null,

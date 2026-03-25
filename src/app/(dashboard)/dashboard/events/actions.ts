@@ -8,6 +8,35 @@ import {
     getEffectiveEventPriceForProfile,
     normalizeMemberAccessType,
 } from '@/lib/events/pricing'
+import { getUniqueEventAccessCount } from '@/lib/events/attendance'
+import { grantEventEntitlements } from '@/lib/events/entitlements'
+import { slugifyCatalogText } from '@/lib/events/public'
+
+async function resolveUniqueEventSlug(supabase: any, baseValue: string, eventId?: string) {
+    const fallbackBase = slugifyCatalogText(baseValue) || `evento-${crypto.randomUUID().slice(0, 8)}`
+    let candidate = fallbackBase
+    let suffix = 2
+
+    while (true) {
+        let query = (supabase
+            .from('events') as any)
+            .select('id')
+            .eq('slug', candidate)
+            .limit(1)
+
+        if (eventId) {
+            query = query.neq('id', eventId)
+        }
+
+        const { data: existing } = await query.maybeSingle()
+        if (!existing) {
+            return candidate
+        }
+
+        candidate = `${fallbackBase}-${suffix}`
+        suffix += 1
+    }
+}
 
 export async function registerForEvent(eventId: string, registrationData: Record<string, string> = {}) {
     const supabase = await createClient()
@@ -21,7 +50,7 @@ export async function registerForEvent(eventId: string, registrationData: Record
     // Get event to check audience requirements and pricing
     const { data: event } = await (supabase
         .from('events') as any)
-        .select('target_audience, required_subscription, max_attendees, price, member_access_type, member_price')
+        .select('target_audience, required_subscription, max_attendees, price, member_access_type, member_price, event_type, recording_expires_at')
         .eq('id', eventId)
         .single()
 
@@ -32,7 +61,7 @@ export async function registerForEvent(eventId: string, registrationData: Record
     // Get user profile
     const { data: profile } = await (supabase
         .from('profiles') as any)
-        .select('role, membership_level')
+        .select('role, membership_level, email')
         .eq('id', user.id)
         .single()
 
@@ -108,13 +137,9 @@ export async function registerForEvent(eventId: string, registrationData: Record
 
     // Check max attendees
     if (eventData.max_attendees) {
-        const { count } = await (supabase
-            .from('event_registrations') as any)
-            .select('*', { count: 'exact', head: true })
-            .eq('event_id', eventId)
-            .eq('status', 'registered')
+        const attendeeCount = await getUniqueEventAccessCount(supabase, eventId)
 
-        if (count && count >= eventData.max_attendees) {
+        if (attendeeCount >= eventData.max_attendees) {
             return { error: 'El evento está lleno' }
         }
     }
@@ -130,6 +155,22 @@ export async function registerForEvent(eventId: string, registrationData: Record
 
     if (error) {
         return { error: error.message }
+    }
+
+    if (profileData?.email) {
+        await grantEventEntitlements({
+            event: {
+                id: eventId,
+                event_type: eventData.event_type || 'live',
+                recording_expires_at: eventData.recording_expires_at || null,
+            } as any,
+            email: profileData.email,
+            userId: user.id,
+            sourceType: currentPrice === 0 && Number(eventData.price || 0) > 0 ? 'membership' : 'registration',
+            metadata: {
+                registration_data: registrationData,
+            },
+        })
     }
 
     await recordAnalyticsServerEvent({
@@ -169,6 +210,13 @@ export async function cancelEventRegistration(eventId: string) {
         return { error: error.message }
     }
 
+    await (supabase
+        .from('event_entitlements') as any)
+        .update({ status: 'revoked' })
+        .eq('event_id', eventId)
+        .eq('user_id', user.id)
+        .eq('source_type', 'registration')
+
     revalidatePath('/dashboard/events')
     revalidatePath(`/dashboard/events/${eventId}`)
     return { success: true }
@@ -195,6 +243,8 @@ export async function createEvent(formData: FormData) {
     }
 
     const title = formData.get('title') as string
+    const customSlug = (formData.get('slug') as string | null)?.trim() || null
+    const subtitle = (formData.get('subtitle') as string | null)?.trim() || null
     const description = formData.get('description') as string
     const date = formData.get('date') as string
     const time = formData.get('time') as string
@@ -238,11 +288,19 @@ export async function createEvent(formData: FormData) {
     const memberAccessType = (formData.get('memberAccessType') as string) || 'free'
     const isEmbeddable = formData.get('isEmbeddable') === 'on'
     const ogDescription = formData.get('ogDescription') as string || null
+    const seoTitle = formData.get('seoTitle') as string || null
+    const seoDescription = formData.get('seoDescription') as string || null
+    const heroBadge = formData.get('heroBadge') as string || null
+    const publicCtaLabel = formData.get('publicCtaLabel') as string || null
+
+    const slug = await resolveUniqueEventSlug(supabase, customSlug || title)
 
     const { data: newEvent, error } = await (supabase
         .from('events') as any)
         .insert({
+            slug,
             title,
+            subtitle,
             description: description || null,
             image_url: imageUrl,
             start_time: startTime.toISOString(),
@@ -256,6 +314,10 @@ export async function createEvent(formData: FormData) {
             member_access_type: memberAccessType,
             is_embeddable: isEmbeddable,
             og_description: ogDescription,
+            seo_title: seoTitle,
+            seo_description: seoDescription,
+            hero_badge: heroBadge,
+            public_cta_label: publicCtaLabel,
             target_audience: targetAudience,
             registration_fields: registrationFields,
             recording_available_days: recordingDays,
@@ -320,6 +382,8 @@ export async function updateEvent(eventId: string, formData: FormData) {
     }
 
     const title = formData.get('title') as string
+    const customSlug = (formData.get('slug') as string | null)?.trim() || null
+    const subtitle = (formData.get('subtitle') as string | null)?.trim() || null
     const description = formData.get('description') as string
     const date = formData.get('date') as string
     const time = formData.get('time') as string
@@ -400,11 +464,26 @@ export async function updateEvent(eventId: string, formData: FormData) {
     const memberAccessType = formData.get('memberAccessType') as string
     const isEmbeddable = formData.get('isEmbeddable')
     const ogDescription = formData.get('ogDescription') as string
+    const seoTitle = formData.get('seoTitle') as string
+    const seoDescription = formData.get('seoDescription') as string
+    const heroBadge = formData.get('heroBadge') as string
+    const publicCtaLabel = formData.get('publicCtaLabel') as string
 
     if (memberPrice !== null) updates.member_price = parseFloat(memberPrice) || 0
     if (memberAccessType) updates.member_access_type = memberAccessType
     if (isEmbeddable !== null) updates.is_embeddable = isEmbeddable === 'on'
     if (ogDescription !== undefined) updates.og_description = ogDescription || null
+    if (seoTitle !== undefined) updates.seo_title = seoTitle || null
+    if (seoDescription !== undefined) updates.seo_description = seoDescription || null
+    if (heroBadge !== undefined) updates.hero_badge = heroBadge || null
+    if (publicCtaLabel !== undefined) updates.public_cta_label = publicCtaLabel || null
+    if (subtitle !== undefined) updates.subtitle = subtitle || null
+    if (customSlug !== null) {
+        const normalizedSlug = slugifyCatalogText(customSlug)
+        if (normalizedSlug) {
+            updates.slug = await resolveUniqueEventSlug(supabase, normalizedSlug, eventId)
+        }
+    }
 
     const { error } = await (supabase
         .from('events') as any)

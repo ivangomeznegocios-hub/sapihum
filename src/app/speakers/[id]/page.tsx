@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
+import { getPublicEventPath } from '@/lib/events/public'
 import { getSpeakerById, getSpeakerEvents } from '@/lib/supabase/queries/speakers'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -152,7 +153,7 @@ export default async function PublicSpeakerDetailPage({ params }: PageProps) {
                             </h2>
                             <div className="grid gap-4 sm:grid-cols-2">
                                 {upcomingEvents.map((event: any) => (
-                                    <Link key={event.id} href={`/events/${event.id}`}>
+                                    <Link key={event.id} href={getPublicEventPath(event)}>
                                         <Card className="flex h-full cursor-pointer flex-col transition-colors hover:border-primary/50">
                                             {event.image_url ? (
                                                 <div className="aspect-video w-full overflow-hidden rounded-t-xl border-b">
@@ -189,7 +190,7 @@ export default async function PublicSpeakerDetailPage({ params }: PageProps) {
                             <h2 className="text-xl font-bold text-muted-foreground">Eventos Anteriores (Archivados)</h2>
                             <div className="grid gap-4 sm:grid-cols-2 opacity-80">
                                 {pastEvents.map((event: any) => (
-                                    <Link key={event.id} href={`/events/${event.id}`}>
+                                    <Link key={event.id} href={getPublicEventPath(event)}>
                                         <Card className="flex h-full cursor-pointer flex-col transition-colors hover:border-primary/50">
                                             <CardContent className="flex flex-1 flex-col p-4">
                                                 <div className="mb-2">

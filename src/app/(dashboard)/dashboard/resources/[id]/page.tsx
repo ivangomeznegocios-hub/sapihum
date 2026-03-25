@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { InteractiveToolViewer } from '@/components/interactive-tool-viewer'
+import { getActiveEntitlementForEvent } from '@/lib/events/access'
 import { ArrowLeft, ExternalLink } from 'lucide-react'
 
 interface PageProps {
@@ -48,16 +49,37 @@ export default async function ResourceDetailPage({ params }: PageProps) {
             .from('event_resources') as any)
             .select(`
                 event_id,
-                events:event_id (
-                    event_registrations!inner (user_id)
-                )
+                events:event_id (id)
             `)
             .eq('resource_id', id)
             .limit(1)
 
-        const hasEventAccess = eventLink?.some((el: any) =>
-            el.events?.event_registrations?.some((er: any) => er.user_id === profile.id)
+        const eventAccessChecks = await Promise.all(
+            (eventLink || []).map(async (link: any) => {
+                const entitlement = await getActiveEntitlementForEvent({
+                    supabase,
+                    eventId: link.event_id,
+                    userId: profile.id,
+                    email: profile.email,
+                })
+
+                if (entitlement) {
+                    return true
+                }
+
+                const { data: registration } = await (supabase
+                    .from('event_registrations') as any)
+                    .select('id')
+                    .eq('event_id', link.event_id)
+                    .eq('user_id', profile.id)
+                    .eq('status', 'registered')
+                    .maybeSingle()
+
+                return Boolean(registration)
+            })
         )
+
+        const hasEventAccess = eventAccessChecks.some(Boolean)
 
         if (!assignment && !hasEventAccess) {
             return (

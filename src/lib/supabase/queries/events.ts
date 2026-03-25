@@ -3,9 +3,10 @@ import type {
     Event,
     EventInsert,
     EventWithRegistration,
-    EventRegistration,
-    EventRegistrationInsert
+    EventRegistration
 } from '@/types/database'
+import { getPublicCatalogKindForEvent } from '@/lib/events/public'
+import { getUniqueEventAccessCount, getUniqueEventAccessCounts } from '@/lib/events/attendance'
 
 
 
@@ -306,16 +307,101 @@ export async function getPublicEventById(eventId: string): Promise<any | null> {
         .eq('event_id', eventId)
         .order('display_order', { ascending: true })
 
-    // Get attendee count
-    const { count } = await (supabase
-        .from('event_registrations') as any)
-        .select('*', { count: 'exact', head: true })
-        .eq('event_id', eventId)
-        .eq('status', 'registered')
+    const attendeeCount = await getPublicEventAttendeeCount(supabase, eventId)
 
     return {
         ...event,
         speakers: speakers ?? [],
-        attendee_count: count ?? 0,
+        attendee_count: attendeeCount,
     }
+}
+
+async function getPublicEventAttendeeCount(supabase: any, eventId: string) {
+    return getUniqueEventAccessCount(supabase, eventId)
+}
+
+export async function getPublicEventBySlug(slug: string): Promise<any | null> {
+    const supabase = await createClient()
+
+    const { data: event, error } = await (supabase
+        .from('events') as any)
+        .select('*')
+        .eq('slug', slug)
+        .not('status', 'eq', 'draft')
+        .not('status', 'eq', 'cancelled')
+        .single()
+
+    if (error || !event) {
+        console.error('Error fetching public event by slug:', error)
+        return null
+    }
+
+    const hydrated = await getPublicEventById(event.id)
+    if (!hydrated) return null
+
+    return {
+        ...hydrated,
+        public_kind: getPublicCatalogKindForEvent(hydrated),
+    }
+}
+
+export async function getPublicCatalogEvents(kind: 'eventos' | 'cursos' | 'grabaciones') {
+    const supabase = await createClient()
+
+    let query = (supabase
+        .from('events') as any)
+        .select('*')
+        .not('status', 'eq', 'draft')
+        .not('status', 'eq', 'cancelled')
+
+    if (kind === 'cursos') {
+        query = query.eq('event_type', 'course')
+    } else if (kind === 'grabaciones') {
+        query = query.or('event_type.eq.on_demand,and(status.eq.completed,recording_url.not.is.null)')
+    } else {
+        query = query.not('event_type', 'eq', 'course').not('event_type', 'eq', 'on_demand')
+    }
+
+    const { data, error } = await query.order('start_time', { ascending: true })
+
+    if (error || !data) {
+        console.error('Error fetching public catalog events:', error)
+        return []
+    }
+
+    const ids = data.map((event: any) => event.id)
+    if (ids.length === 0) return []
+
+    const [{ data: speakers }, attendeeCounts] = await Promise.all([
+        (supabase
+            .from('event_speakers') as any)
+            .select(`
+                *,
+                speaker:speakers (
+                    *,
+                    profile:profiles (
+                        id,
+                        full_name,
+                        avatar_url
+                    )
+                )
+            `)
+            .in('event_id', ids)
+            .order('display_order', { ascending: true }),
+        getUniqueEventAccessCounts(supabase, ids),
+    ])
+
+    const speakerMap = new Map<string, any[]>()
+    for (const row of speakers ?? []) {
+        const collection = speakerMap.get(row.event_id) ?? []
+        collection.push(row)
+        speakerMap.set(row.event_id, collection)
+    }
+
+    return data.map((event: any) => ({
+        ...event,
+        speakers: speakerMap.get(event.id) ?? [],
+        attendee_count: attendeeCounts[event.id] || 0,
+        public_kind: getPublicCatalogKindForEvent(event),
+    }))
 }

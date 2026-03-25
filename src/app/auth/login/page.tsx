@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
@@ -15,7 +15,10 @@ export default function LoginPage() {
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
     const router = useRouter()
+    const searchParams = useSearchParams()
     const supabase = createClient()
+    const next = searchParams.get('next')
+    const nextPath = next?.startsWith('/') ? next : '/dashboard'
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault()
@@ -33,7 +36,7 @@ export default function LoginPage() {
             return
         }
 
-        router.push('/dashboard')
+        router.push(nextPath)
         router.refresh()
     }
 
@@ -101,7 +104,7 @@ export default function LoginPage() {
                     </Link>
                     <p className="text-sm text-muted-foreground text-center">
                         ¿No tienes cuenta?{' '}
-                        <Link href="/auth/register" className="text-primary hover:underline font-medium">
+                        <Link href={`/auth/register?next=${encodeURIComponent(nextPath)}`} className="text-primary hover:underline font-medium">
                             Regístrate
                         </Link>
                     </p>

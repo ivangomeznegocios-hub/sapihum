@@ -4,6 +4,7 @@ import { applyInviteCode, completeInviteAttribution } from '@/actions/invite-ref
 import { recordRegistrationConsents } from '@/actions/consent'
 import { hasRegistrationConsentMetadata } from '@/lib/consent'
 import { recordAnalyticsServerEvent } from '@/lib/analytics/server'
+import { claimCurrentUserEventEntitlements } from '@/lib/supabase/queries/event-entitlements'
 
 export async function GET(request: Request) {
     const { searchParams, origin } = new URL(request.url)
@@ -32,6 +33,7 @@ export async function GET(request: Request) {
                 if (hasRegistrationConsentMetadata(userMetadata)) {
                     await recordRegistrationConsents(userMetadata)
                 }
+                await claimCurrentUserEventEntitlements()
                 if (user) {
                     await recordAnalyticsServerEvent({
                         eventName: 'registration_verified',

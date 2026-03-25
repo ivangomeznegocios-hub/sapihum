@@ -53,6 +53,7 @@ export interface Profile {
     role: UserRole
     full_name: string | null
     avatar_url: string | null
+    email: string | null
     subscription_status: SubscriptionStatus | null
     membership_level: number
     ai_minutes_available: number
@@ -88,6 +89,7 @@ export interface ProfileInsert {
     role?: UserRole
     full_name?: string | null
     avatar_url?: string | null
+    email?: string | null
     subscription_status?: SubscriptionStatus | null
     membership_level?: number
     ai_minutes_available?: number
@@ -100,6 +102,7 @@ export interface ProfileUpdate {
     role?: UserRole
     full_name?: string | null
     avatar_url?: string | null
+    email?: string | null
     subscription_status?: SubscriptionStatus | null
     membership_level?: number
     phone?: string | null
@@ -615,7 +618,9 @@ export type EventSpeakerRole = 'speaker' | 'moderator' | 'host'
 
 export interface Event {
     id: string
+    slug: string
     title: string
+    subtitle: string | null
     description: string | null
     image_url: string | null
     start_time: string
@@ -646,12 +651,18 @@ export interface Event {
     // Embed & sharing
     is_embeddable: boolean
     og_description: string | null
+    seo_title: string | null
+    seo_description: string | null
+    hero_badge: string | null
+    public_cta_label: string | null
     // Session configuration
     session_config: SessionConfig | null
 }
 
 export interface EventInsert {
+    slug?: string
     title: string
+    subtitle?: string | null
     description?: string | null
     image_url?: string | null
     start_time: string
@@ -676,11 +687,17 @@ export interface EventInsert {
     member_access_type?: MemberAccessType
     is_embeddable?: boolean
     og_description?: string | null
+    seo_title?: string | null
+    seo_description?: string | null
+    hero_badge?: string | null
+    public_cta_label?: string | null
     session_config?: SessionConfig | null
 }
 
 export interface EventUpdate {
+    slug?: string
     title?: string
+    subtitle?: string | null
     description?: string | null
     image_url?: string | null
     start_time?: string
@@ -702,6 +719,10 @@ export interface EventUpdate {
     member_access_type?: MemberAccessType
     is_embeddable?: boolean
     og_description?: string | null
+    seo_title?: string | null
+    seo_description?: string | null
+    hero_badge?: string | null
+    public_cta_label?: string | null
     session_config?: SessionConfig | null
 }
 
@@ -806,12 +827,16 @@ export type EventPurchaseStatus = 'pending' | 'confirmed' | 'cancelled' | 'refun
 export interface EventPurchase {
     id: string
     event_id: string
+    user_id: string | null
     email: string
     full_name: string | null
     amount_paid: number
     currency: string
     payment_method: string | null
     payment_reference: string | null
+    provider_session_id: string | null
+    provider_payment_id: string | null
+    metadata: Record<string, any>
     access_token: string
     status: EventPurchaseStatus
     purchased_at: string
@@ -820,18 +845,79 @@ export interface EventPurchase {
 
 export interface EventPurchaseInsert {
     event_id: string
+    user_id?: string | null
     email: string
     full_name?: string | null
     amount_paid: number
     currency?: string
     payment_method?: string | null
     payment_reference?: string | null
+    provider_session_id?: string | null
+    provider_payment_id?: string | null
+    metadata?: Record<string, any>
 }
 
 export interface EventPurchaseUpdate {
     status?: EventPurchaseStatus
     payment_reference?: string | null
+    provider_session_id?: string | null
+    provider_payment_id?: string | null
+    metadata?: Record<string, any>
     confirmed_at?: string | null
+}
+
+// ============================================
+// TABLE: event_entitlements
+// ============================================
+export type EventEntitlementAccessKind =
+    | 'live_access'
+    | 'replay_access'
+    | 'course_access'
+    | 'membership_benefit'
+    | 'bundle_child_access'
+    | 'certificate_eligibility'
+    | 'manual_support_grant'
+
+export type EventEntitlementSourceType = 'registration' | 'purchase' | 'membership' | 'manual'
+
+export type EventEntitlementStatus = 'active' | 'expired' | 'revoked'
+
+export interface EventEntitlement {
+    id: string
+    event_id: string
+    user_id: string | null
+    email: string
+    identity_key: string
+    access_kind: EventEntitlementAccessKind
+    source_type: EventEntitlementSourceType
+    source_reference: string | null
+    status: EventEntitlementStatus
+    starts_at: string
+    ends_at: string | null
+    metadata: Record<string, any>
+    created_at: string
+    updated_at: string
+}
+
+export interface EventEntitlementInsert {
+    event_id: string
+    user_id?: string | null
+    email: string
+    access_kind: EventEntitlementAccessKind
+    source_type: EventEntitlementSourceType
+    source_reference?: string | null
+    status?: EventEntitlementStatus
+    starts_at?: string
+    ends_at?: string | null
+    metadata?: Record<string, any>
+}
+
+export interface EventEntitlementUpdate {
+    user_id?: string | null
+    status?: EventEntitlementStatus
+    starts_at?: string
+    ends_at?: string | null
+    metadata?: Record<string, any>
 }
 
 // ============================================
@@ -1259,6 +1345,16 @@ export interface Database {
                 Row: Newsletter
                 Insert: NewsletterInsert
                 Update: NewsletterUpdate
+            }
+            event_purchases: {
+                Row: EventPurchase
+                Insert: EventPurchaseInsert
+                Update: EventPurchaseUpdate
+            }
+            event_entitlements: {
+                Row: EventEntitlement
+                Insert: EventEntitlementInsert
+                Update: EventEntitlementUpdate
             }
             exclusive_agreements: {
                 Row: ExclusiveAgreement

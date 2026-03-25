@@ -66,6 +66,8 @@ function RegisterForm() {
     const [success, setSuccess] = useState(false)
     const searchParams = useSearchParams()
     const supabase = createClient()
+    const requestedNext = searchParams.get('next')
+    const nextPath = requestedNext?.startsWith('/') ? requestedNext : '/dashboard'
 
     const [referralCode, setReferralCode] = useState<string | null>(null)
     const [preselectedPlan, setPreselectedPlan] = useState<string | null>(null)
@@ -193,7 +195,7 @@ function RegisterForm() {
             email,
             password,
             options: {
-                emailRedirectTo: `${window.location.origin}/auth/callback`,
+                emailRedirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(nextPath)}`,
                 data: {
                     ...signUpMetadata,
                 },
@@ -241,7 +243,7 @@ function RegisterForm() {
                     </CardDescription>
                 </CardHeader>
                 <CardFooter>
-                    <Link href="/auth/login" className="w-full">
+                    <Link href={`/auth/login?next=${encodeURIComponent(nextPath)}`} className="w-full">
                         <Button variant="outline" className="w-full">
                             Volver al inicio de sesion
                         </Button>
@@ -421,7 +423,7 @@ function RegisterForm() {
                     </Button>
                     <p className="text-sm text-muted-foreground text-center">
                         Ya tienes cuenta?{' '}
-                        <Link href="/auth/login" className="text-primary hover:underline font-medium">
+                        <Link href={`/auth/login?next=${encodeURIComponent(nextPath)}`} className="text-primary hover:underline font-medium">
                             Iniciar sesion
                         </Link>
                     </p>

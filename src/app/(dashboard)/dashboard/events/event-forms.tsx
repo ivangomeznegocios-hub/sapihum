@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { registerForEvent, cancelEventRegistration, createEvent, updateEvent, deleteEvent } from './actions'
 import { createClient } from '@/lib/supabase/client'
+import { getPublicEventPath } from '@/lib/events/public'
 import { Plus, X, Loader2, Check, UserPlus, UserMinus, Users, Lock, Globe, Stethoscope, Heart, Pencil, Trash2, AlertTriangle, HelpCircle, GripVertical, MapPin, Copy, Code2, Link2, Calendar, Clock, Repeat, GraduationCap, Award, Mic2, Video } from 'lucide-react'
 
 interface Event {
@@ -287,6 +288,16 @@ export function CreateEventForm({ onClose, isEmbedded = false, initialData, even
         (initialData?.registration_fields || []).map((f: any) => ({ ...f, id: questionIdCounter.current++ }))
     )
 
+    const publicPath = initialData?.slug
+        ? getPublicEventPath({
+            slug: initialData.slug,
+            event_type: initialData.event_type || 'live',
+            status: initialData.status || 'upcoming',
+            recording_url: initialData.recording_url || null,
+        })
+        : null
+    const publicUrl = typeof window !== 'undefined' && publicPath ? `${window.location.origin}${publicPath}` : publicPath
+
     // Fetch available speakers
     useState(() => {
         async function fetchSpeakers() {
@@ -416,6 +427,37 @@ export function CreateEventForm({ onClose, isEmbedded = false, initialData, even
                         className="mt-1 w-full px-3 py-2 border rounded-lg bg-background"
                         placeholder="Nombre del evento"
                     />
+                </div>
+
+                <div>
+                    <label className="text-sm font-medium" htmlFor="subtitle">
+                        Subtitulo comercial
+                    </label>
+                    <input
+                        id="subtitle"
+                        name="subtitle"
+                        type="text"
+                        defaultValue={initialData?.subtitle || ''}
+                        className="mt-1 w-full px-3 py-2 border rounded-lg bg-background"
+                        placeholder="Promesa corta para la landing publica"
+                    />
+                </div>
+
+                <div>
+                    <label className="text-sm font-medium" htmlFor="slug">
+                        Slug publico
+                    </label>
+                    <input
+                        id="slug"
+                        name="slug"
+                        type="text"
+                        defaultValue={initialData?.slug || ''}
+                        className="mt-1 w-full px-3 py-2 border rounded-lg bg-background font-mono"
+                        placeholder="terapia-de-pareja-2026"
+                    />
+                    <p className="text-xs text-muted-foreground mt-1">
+                        Define la URL canonica del activo.
+                    </p>
                 </div>
 
                 <div>
@@ -925,13 +967,13 @@ export function CreateEventForm({ onClose, isEmbedded = false, initialData, even
                                 <div className="flex items-center gap-2">
                                     <input
                                         readOnly
-                                        value={typeof window !== 'undefined' ? `${window.location.origin}/events/${eventId}` : `/events/${eventId}`}
+                                        value={publicUrl || 'Guarda el evento para generar la URL canonica'}
                                         className="flex-1 px-3 py-2 border rounded-lg bg-background text-sm font-mono"
                                     />
                                     <button
                                         type="button"
                                         onClick={() => {
-                                            const url = typeof window !== 'undefined' ? `${window.location.origin}/events/${eventId}` : ''
+                                            const url = publicUrl || ''
                                             navigator.clipboard.writeText(url)
                                         }}
                                         className="px-3 py-2 border rounded-lg hover:bg-muted transition-colors text-sm flex items-center gap-1.5"
@@ -953,12 +995,12 @@ export function CreateEventForm({ onClose, isEmbedded = false, initialData, even
                                 </label>
                                 <div className="flex items-center gap-2">
                                     <pre className="flex-1 px-3 py-2 border rounded-lg bg-background text-xs font-mono overflow-x-auto whitespace-pre-wrap break-all">
-                                        {`<iframe src="${typeof window !== 'undefined' ? window.location.origin : ''}/events/${eventId}/embed" width="400" height="420" frameborder="0" style="border-radius:16px;overflow:hidden;" loading="lazy"></iframe>`}
+                                        {`<iframe src="${publicUrl ? `${publicUrl}/embed` : ''}" width="400" height="420" frameborder="0" style="border-radius:16px;overflow:hidden;" loading="lazy"></iframe>`}
                                     </pre>
                                     <button
                                         type="button"
                                         onClick={() => {
-                                            const code = `<iframe src="${typeof window !== 'undefined' ? window.location.origin : ''}/events/${eventId}/embed" width="400" height="420" frameborder="0" style="border-radius:16px;overflow:hidden;" loading="lazy"></iframe>`
+                                            const code = `<iframe src="${publicUrl ? `${publicUrl}/embed` : ''}" width="400" height="420" frameborder="0" style="border-radius:16px;overflow:hidden;" loading="lazy"></iframe>`
                                             navigator.clipboard.writeText(code)
                                         }}
                                         className="px-3 py-2 border rounded-lg hover:bg-muted transition-colors text-sm flex items-center gap-1.5 flex-shrink-0"
@@ -990,6 +1032,63 @@ export function CreateEventForm({ onClose, isEmbedded = false, initialData, even
                         <p className="text-xs text-muted-foreground mt-1">
                             Max 160 caracteres. Se muestra en WhatsApp, Facebook, Twitter, etc.
                         </p>
+                    </div>
+
+                    <div className="grid gap-4 md:grid-cols-2">
+                        <div>
+                            <label className="text-sm font-medium" htmlFor="seoTitle">
+                                SEO title
+                            </label>
+                            <input
+                                id="seoTitle"
+                                name="seoTitle"
+                                type="text"
+                                defaultValue={initialData?.seo_title || ''}
+                                className="mt-1 w-full px-3 py-2 border rounded-lg bg-background"
+                                placeholder="Titulo SEO opcional"
+                            />
+                        </div>
+                        <div>
+                            <label className="text-sm font-medium" htmlFor="heroBadge">
+                                Badge publico
+                            </label>
+                            <input
+                                id="heroBadge"
+                                name="heroBadge"
+                                type="text"
+                                defaultValue={initialData?.hero_badge || ''}
+                                className="mt-1 w-full px-3 py-2 border rounded-lg bg-background"
+                                placeholder="Ej. Preventa, Cohorte, Masterclass"
+                            />
+                        </div>
+                    </div>
+
+                    <div>
+                        <label className="text-sm font-medium" htmlFor="seoDescription">
+                            SEO description
+                        </label>
+                        <textarea
+                            id="seoDescription"
+                            name="seoDescription"
+                            rows={3}
+                            defaultValue={initialData?.seo_description || ''}
+                            className="mt-1 w-full px-3 py-2 border rounded-lg bg-background resize-none"
+                            placeholder="Descripcion canonica para buscadores"
+                        />
+                    </div>
+
+                    <div>
+                        <label className="text-sm font-medium" htmlFor="publicCtaLabel">
+                            CTA publico principal
+                        </label>
+                        <input
+                            id="publicCtaLabel"
+                            name="publicCtaLabel"
+                            type="text"
+                            defaultValue={initialData?.public_cta_label || ''}
+                            className="mt-1 w-full px-3 py-2 border rounded-lg bg-background"
+                            placeholder="Ej. Comprar acceso, Registrarme gratis"
+                        />
                     </div>
                 </div>
             </div>

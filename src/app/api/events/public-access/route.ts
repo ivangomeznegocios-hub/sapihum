@@ -1,0 +1,172 @@
+import { NextRequest, NextResponse } from 'next/server'
+import { grantEventEntitlements } from '@/lib/events/entitlements'
+import { getPublicEventPath } from '@/lib/events/public'
+import {
+    getEffectiveEventPriceForProfile,
+    normalizeMemberAccessType,
+} from '@/lib/events/pricing'
+import { getUniqueEventAccessCount } from '@/lib/events/attendance'
+import { createClient } from '@/lib/supabase/server'
+
+async function canAuthenticatedUserAccessFreeEvent(supabase: any, userId: string, profile: any, event: any) {
+    const audience = Array.isArray(event.target_audience) ? event.target_audience : ['public']
+
+    if (profile.role === 'admin') return true
+    if (event.created_by === userId) return true
+    if (audience.includes('public')) return true
+    if (audience.includes('members') && (profile.membership_level ?? 0) >= 1) return true
+    if (audience.includes('psychologists') && profile.role === 'psychologist') return true
+    if (audience.includes('patients') && profile.role === 'patient') return true
+
+    if (audience.includes('active_patients') && profile.role === 'patient') {
+        const { data: relationship } = await (supabase
+            .from('patient_psychologist_relationships') as any)
+            .select('id')
+            .eq('patient_id', userId)
+            .eq('status', 'active')
+            .limit(1)
+            .maybeSingle()
+
+        return Boolean(relationship)
+    }
+
+    return false
+}
+
+export async function POST(request: NextRequest) {
+    try {
+        const supabase = await createClient()
+        const { data: { user } } = await supabase.auth.getUser()
+        const body = await request.json()
+        const { eventId, email, fullName } = body as {
+            eventId?: string
+            email?: string
+            fullName?: string
+        }
+
+        if (!eventId) {
+            return NextResponse.json({ error: 'Evento requerido' }, { status: 400 })
+        }
+
+        const { data: event } = await (supabase
+            .from('events') as any)
+            .select('id, slug, title, price, member_price, member_access_type, target_audience, status, event_type, created_by, recording_expires_at, max_attendees')
+            .eq('id', eventId)
+            .single()
+
+        if (!event || ['draft', 'cancelled'].includes(event.status)) {
+            return NextResponse.json({ error: 'Activo no disponible' }, { status: 404 })
+        }
+
+        if (event.max_attendees) {
+            const attendeeCount = await getUniqueEventAccessCount(supabase, eventId)
+            if (attendeeCount >= event.max_attendees) {
+                return NextResponse.json({ error: 'Este evento ya alcanzó su cupo' }, { status: 409 })
+            }
+        }
+
+        if (user) {
+            const { data: profile } = await (supabase
+                .from('profiles') as any)
+                .select('id, email, full_name, role, membership_level')
+                .eq('id', user.id)
+                .single()
+
+            if (!profile) {
+                return NextResponse.json({ error: 'Perfil no encontrado' }, { status: 404 })
+            }
+
+            const hasAudienceAccess = await canAuthenticatedUserAccessFreeEvent(supabase, user.id, profile, event)
+            if (!hasAudienceAccess) {
+                return NextResponse.json({ error: 'No tienes acceso a este activo' }, { status: 403 })
+            }
+
+            const effectivePrice = getEffectiveEventPriceForProfile(
+                {
+                    price: event.price,
+                    member_price: event.member_price,
+                    member_access_type: normalizeMemberAccessType(event.member_access_type),
+                },
+                profile.role,
+                profile.membership_level ?? 0
+            )
+
+            if (effectivePrice > 0) {
+                return NextResponse.json({ error: 'Este activo requiere pago' }, { status: 400 })
+            }
+
+            const { data: existingRegistration } = await (supabase
+                .from('event_registrations') as any)
+                .select('id')
+                .eq('event_id', eventId)
+                .eq('user_id', user.id)
+                .eq('status', 'registered')
+                .maybeSingle()
+
+            if (!existingRegistration) {
+                await (supabase.from('event_registrations') as any).insert({
+                    event_id: eventId,
+                    user_id: user.id,
+                    status: 'registered',
+                    registration_data: {
+                        source: 'public-access',
+                    },
+                })
+            }
+
+            await grantEventEntitlements({
+                event,
+                email: profile.email || user.email || '',
+                userId: user.id,
+                sourceType: effectivePrice === 0 && Number(event.price || 0) > 0 ? 'membership' : 'registration',
+                sourceReference: existingRegistration?.id ?? null,
+                metadata: {
+                    via: 'public_access_route',
+                    full_name: profile.full_name || fullName || null,
+                },
+            })
+
+            return NextResponse.json({
+                redirectTo: `/hub/${event.slug}?granted=1`,
+            })
+        }
+
+        const audience = Array.isArray(event.target_audience) ? event.target_audience : ['public']
+        if (!audience.includes('public')) {
+            return NextResponse.json({ error: 'Este activo requiere una cuenta autorizada' }, { status: 403 })
+        }
+
+        if (Number(event.price || 0) > 0) {
+            return NextResponse.json({ error: 'Este activo requiere pago' }, { status: 400 })
+        }
+
+        if (!email || !fullName) {
+            return NextResponse.json(
+                {
+                    error: 'Correo requerido',
+                    requiresGuestDetails: true,
+                },
+                { status: 401 }
+            )
+        }
+
+        await grantEventEntitlements({
+            event,
+            email,
+            sourceType: 'registration',
+            metadata: {
+                via: 'public_guest_access',
+                full_name: fullName,
+            },
+        })
+
+        return NextResponse.json({
+            message: 'Tu acceso se reservo correctamente. Te llevaremos a recuperar tu acceso por correo para abrir el hub privado.',
+            publicPath: getPublicEventPath(event),
+            recoveryUrl: `/compras/recuperar?email=${encodeURIComponent(email)}&next=${encodeURIComponent(`/hub/${event.slug}`)}`,
+        })
+    } catch (error) {
+        console.error('[API] Public event access error:', error)
+        return NextResponse.json({ error: 'No fue posible reservar el acceso' }, { status: 500 })
+    }
+}

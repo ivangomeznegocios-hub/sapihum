@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
+import { getPublicEventPath } from '@/lib/events/public'
 import {
     Share2,
     Copy,
@@ -13,18 +14,34 @@ import {
 } from 'lucide-react'
 
 interface ShareEventButtonProps {
-    eventId: string
+    eventSlug: string
+    eventType?: 'live' | 'on_demand' | 'course' | 'presencial' | null
+    eventStatus?: string | null
+    recordingUrl?: string | null
     eventTitle: string
     isEmbeddable?: boolean
 }
 
-export function ShareEventButton({ eventId, eventTitle, isEmbeddable = true }: ShareEventButtonProps) {
+export function ShareEventButton({
+    eventSlug,
+    eventType,
+    eventStatus,
+    recordingUrl,
+    eventTitle,
+    isEmbeddable = true,
+}: ShareEventButtonProps) {
     const [showPanel, setShowPanel] = useState(false)
     const [copiedLink, setCopiedLink] = useState(false)
     const [copiedEmbed, setCopiedEmbed] = useState(false)
 
     const baseUrl = typeof window !== 'undefined' ? window.location.origin : ''
-    const publicUrl = `${baseUrl}/events/${eventId}`
+    const publicPath = getPublicEventPath({
+        slug: eventSlug,
+        event_type: eventType || 'live',
+        status: (eventStatus as any) || 'upcoming',
+        recording_url: recordingUrl || null,
+    })
+    const publicUrl = `${baseUrl}${publicPath}`
     const embedCode = `<iframe src="${publicUrl}/embed" width="400" height="420" frameborder="0" style="border-radius:16px;overflow:hidden;" loading="lazy"></iframe>`
 
     const shareLinks = {

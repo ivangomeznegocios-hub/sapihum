@@ -1,60 +1,36 @@
-import { createClient, getUserProfile } from '@/lib/supabase/server'
+import { getUserProfile } from '@/lib/supabase/server'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { VideoPlayer } from '@/components/ui/video-player'
 import { RecordingCountdown, RecordingCardWrapper } from './recording-countdown'
+import { getMyAccessibleEvents } from '@/lib/supabase/queries/event-entitlements'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import {
     Play,
     Calendar,
     Clock,
-    ArrowRight,
     Video,
-    Lock,
     Infinity as InfinityIcon
 } from 'lucide-react'
 
 export default async function RecordingsPage() {
-    const supabase = await createClient()
     const profile = await getUserProfile()
 
     if (!profile) {
-        redirect('/auth/login')
+        redirect('/compras/recuperar?next=/dashboard/events/recordings')
     }
 
     const now = new Date()
-
-    // Get completed events with recordings
-    // User can see recordings if:
-    // 1. They registered for the event
-    // 2. They are a member (trial/active subscription)
-    // 3. Recording hasn't expired
-
-    const { data: userRegistrations } = await (supabase
-        .from('event_registrations') as any)
-        .select('event_id')
-        .eq('user_id', profile.id)
-        .eq('status', 'registered')
-
-    const registeredEventIds = userRegistrations?.map((r: any) => r.event_id) || []
-
-    // Get recordings the user can access
-    const { data: recordings } = await (supabase
-        .from('events') as any)
-        .select('*')
-        .eq('status', 'completed')
-        .not('recording_url', 'is', null)
-        .or(`recording_expires_at.is.null,recording_expires_at.gt.${now.toISOString()}`)
-        .order('start_time', { ascending: false })
-
-    // Filter recordings: only show to users who registered for that event
-    const accessibleRecordings = recordings?.filter((event: any) => {
-        // Admin can see all recordings
-        if (profile.role === 'admin') return true
-        // Must have registered for the event
-        return registeredEventIds.includes(event.id)
-    }) || []
+    const accessibleEvents = await getMyAccessibleEvents()
+    const accessibleRecordings = accessibleEvents
+        .map((row: any) => row.event)
+        .filter((event: any) => {
+            if (!event?.recording_url) return false
+            if (event.status !== 'completed') return false
+            if (event.recording_expires_at && new Date(event.recording_expires_at) <= now) return false
+            return true
+        })
+        .sort((a: any, b: any) => new Date(b.start_time).getTime() - new Date(a.start_time).getTime())
 
     const formatDate = (dateStr: string) => {
         const date = new Date(dateStr)
@@ -140,7 +116,7 @@ export default async function RecordingsPage() {
                                         )}
 
                                         {/* Play overlay */}
-                                        <Link href={`/dashboard/events/${event.id}`} className="absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <Link href={`/hub/${event.slug}`} className="absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity">
                                             <div className="h-16 w-16 rounded-full bg-white/90 flex items-center justify-center">
                                                 <Play className="h-8 w-8 text-primary ml-1" />
                                             </div>
@@ -182,7 +158,7 @@ export default async function RecordingsPage() {
                                                 </span>
                                             )}
 
-                                            <Link href={`/dashboard/events/${event.id}`}>
+                                            <Link href={`/hub/${event.slug}`}>
                                                 <Button size="sm">
                                                     <Play className="h-4 w-4 mr-1" />
                                                     Ver

@@ -12,6 +12,8 @@ import { EventRegistrationButton, EditEventButton, DeleteEventButton } from '../
 import { CheckoutButton } from '@/components/payments/CheckoutButton'
 import { AddToCalendarButton } from '@/components/add-to-calendar'
 import { InteractiveToolViewer } from '@/components/interactive-tool-viewer'
+import { getActiveEntitlementForEvent } from '@/lib/events/access'
+import { getUniqueEventAccessCount } from '@/lib/events/attendance'
 import {
     getEffectiveEventPriceForProfile,
     getEventMemberAccessMessage,
@@ -72,15 +74,20 @@ export default async function EventDetailPage({ params }: PageProps) {
 
     const isRegistered = registration?.status === 'registered'
 
-    // Get registration count
-    const { count: registrationCount } = await supabase
-        .from('event_registrations' as any)
-        .select('*', { count: 'exact', head: true })
-        .eq('event_id', id)
-        .eq('status', 'registered')
-
     // Check if user can manage this event (admin or creator)
     const canManageEvent = profile.role === 'admin' || profile.id === event.created_by
+
+    const accessEntitlement = canManageEvent
+        ? null
+        : await getActiveEntitlementForEvent({
+            supabase,
+            eventId: id,
+            userId: profile.id,
+            email: profile.email,
+        })
+
+    const attendeeCount = await getUniqueEventAccessCount(supabase, id)
+    const hasEventAccess = canManageEvent || isRegistered || Boolean(accessEntitlement)
 
     // Get all registrations with user info (for admins/creators only)
     let allRegistrations: any[] = []
@@ -106,7 +113,7 @@ export default async function EventDetailPage({ params }: PageProps) {
     let needsToPay = false
     const recordingProductAvailable = isPurchasableRecordingEvent(event)
 
-    if (!isRegistered && !canManageEvent) {
+    if (!hasEventAccess && !canManageEvent) {
         currentPrice = getEffectiveEventPriceForProfile(
             {
                 price: event.price,
@@ -132,18 +139,17 @@ export default async function EventDetailPage({ params }: PageProps) {
     const now = new Date()
     const eventDate = new Date(event.start_time)
     const eventEndDate = event.end_time ? new Date(event.end_time) : new Date(eventDate.getTime() + 2 * 60 * 60000) // 2 hours after start
+    const hubPath = `/hub/${event.slug}`
 
-    // Meeting link visible: same day, registered, event not completed
+    // Meeting link visible: same day, user has access, event not completed
     const isSameDay = now.toDateString() === eventDate.toDateString()
     const isEventTime = now >= new Date(eventDate.getTime() - 30 * 60000) && now <= eventEndDate // 30 min before to end
-    const canSeeMeetingLink = event.meeting_link && isRegistered && (isSameDay || isEventTime) && event.status !== 'completed'
+    const canSeeMeetingLink = event.meeting_link && hasEventAccess && (isSameDay || isEventTime) && event.status !== 'completed'
 
-    // Check if user can see recording — must be registered
+    // Check if user can see recording while access is still active
     const canSeeRecording = event.recording_url && event.status === 'completed' && (
-        // Within recording availability period
         (!event.recording_expires_at || new Date(event.recording_expires_at) > now) &&
-        // User must have registered for this event (or be admin)
-        (isRegistered || profile.role === 'admin')
+        hasEventAccess
     )
 
     const formatDate = (dateStr: string) => {
@@ -286,7 +292,7 @@ export default async function EventDetailPage({ params }: PageProps) {
                                     <div>
                                         <p className="text-sm text-muted-foreground">Asistentes</p>
                                         <p className="font-medium">
-                                            {registrationCount || 0}
+                                            {attendeeCount || 0}
                                             {event.max_attendees && ` / ${event.max_attendees}`}
                                         </p>
                                     </div>
@@ -338,7 +344,7 @@ export default async function EventDetailPage({ params }: PageProps) {
                             )}
 
                             {/* Recording pending message */}
-                            {event.status === 'completed' && !event.recording_url && isRegistered && (
+                            {event.status === 'completed' && !event.recording_url && hasEventAccess && (
                                 <div className="p-4 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-lg">
                                     <div className="flex items-start gap-3">
                                         <Video className="h-5 w-5 text-amber-600 flex-shrink-0 mt-0.5" />
@@ -455,7 +461,7 @@ export default async function EventDetailPage({ params }: PageProps) {
                                                                 <Lock className="h-3 w-3" />
                                                                 Disponible al iniciar
                                                             </Badge>
-                                                        ) : isRegistered || canManageEvent ? (
+                                                        ) : hasEventAccess ? (
                                                             !isInteractiveTool && (
                                                                 <Button asChild size="sm" variant="secondary">
                                                                     <a href={resource.url} target="_blank" rel="noopener noreferrer">
@@ -466,13 +472,13 @@ export default async function EventDetailPage({ params }: PageProps) {
                                                             )
                                                         ) : (
                                                             <Badge variant="outline" className="text-[10px]">
-                                                                Regístrate para acceder
+                                                                Obtén acceso para abrirlo
                                                             </Badge>
                                                         )}
                                                     </div>
 
-                                                    {/* Render interactive tool inline for registered users */}
-                                                    {isInteractiveTool && !isLocked && (isRegistered || canManageEvent) && (
+                                                    {/* Render interactive tool inline for users with access */}
+                                                    {isInteractiveTool && !isLocked && hasEventAccess && (
                                                         <InteractiveToolViewer
                                                             htmlContent={(resource as any).html_content}
                                                             title={resource.title}
@@ -511,6 +517,13 @@ export default async function EventDetailPage({ params }: PageProps) {
                                             ¡Grabación disponible arriba!
                                         </p>
                                     )}
+                                    {hasEventAccess && (
+                                        <div className="mt-3">
+                                            <Button asChild className="w-full">
+                                                <Link href={hubPath}>Abrir hub privado</Link>
+                                            </Button>
+                                        </div>
+                                    )}
                                     {!canSeeRecording && recordingProductAvailable && event.price > 0 && (
                                         <div className="mt-3">
                                             <CheckoutButton
@@ -522,6 +535,20 @@ export default async function EventDetailPage({ params }: PageProps) {
                                         </div>
                                     )}
                                 </div>
+                            ) : hasEventAccess ? (
+                                <>
+                                    <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-center text-sm text-emerald-700">
+                                        Ya tienes acceso activo a este contenido.
+                                    </div>
+                                    <Button asChild className="w-full">
+                                        <Link href={hubPath}>Abrir hub privado</Link>
+                                    </Button>
+                                    {event.status === 'upcoming' && (
+                                        <div className="mt-3">
+                                            <AddToCalendarButton event={event} className="w-full" />
+                                        </div>
+                                    )}
+                                </>
                             ) : isReadOnly ? (
                                 <>
                                     <div className="text-center mb-4">
@@ -568,12 +595,12 @@ export default async function EventDetailPage({ params }: PageProps) {
                                             isRegistered={isRegistered}
                                         />
                                     )}
-                                    {isRegistered && event.status === 'upcoming' && (
+                                    {hasEventAccess && event.status === 'upcoming' && (
                                         <div className="mt-3">
                                             <AddToCalendarButton event={event} className="w-full" />
                                         </div>
                                     )}
-                                    {!isRegistered && event.meeting_link && (
+                                    {!hasEventAccess && event.meeting_link && (
                                         <p className="text-xs text-muted-foreground text-center">
                                             El enlace de la reunión estará disponible el día del evento
                                         </p>
@@ -611,7 +638,10 @@ export default async function EventDetailPage({ params }: PageProps) {
                                 {getEventMemberAccessMessage(event).note || 'Compra individual disponible cuando el evento tiene precio.'}
                             </div>
                             <ShareEventButton
-                                eventId={event.id}
+                                eventSlug={event.slug}
+                                eventType={event.event_type}
+                                eventStatus={event.status}
+                                recordingUrl={event.recording_url}
                                 eventTitle={event.title}
                                 isEmbeddable={event.is_embeddable !== false}
                             />
