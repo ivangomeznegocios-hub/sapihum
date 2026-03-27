@@ -67,14 +67,14 @@ export async function getSpeakerFinancialSummary(): Promise<{ data: SpeakerFinan
         .select('student_id')
         .eq('speaker_id', user.id)
 
-    const uniqueStudents = new Set((studentCount || []).map((e: any) => e.student_id)).size
+    const uniqueStudents = new Set((studentCount || []).map((e: any) => e.student_id).filter(Boolean)).size
 
     const { data: eventCount } = await (supabase
         .from('speaker_earnings') as any)
         .select('event_id')
         .eq('speaker_id', user.id)
 
-    const uniqueEvents = new Set((eventCount || []).map((e: any) => e.event_id)).size
+    const uniqueEvents = new Set((eventCount || []).map((e: any) => e.event_id).filter(Boolean)).size
 
     // Next payment date: last day of current month
     const now = new Date()
@@ -473,7 +473,7 @@ export async function getEarningsReportData(month: string) {
     const csvRows = (earnings || []).map((e: any) => ({
         alumno: e.student?.full_name || 'N/A',
         evento: e.event?.title || 'N/A',
-        tipo: e.earning_type === 'membership_proration' ? 'Membresía (Prorrateo)' : 'Programa Premium',
+        tipo: e.earning_type === 'membership_proration' ? 'Membresía (Prorrateo)' : e.earning_type === 'premium_commission' ? 'Programa Premium' : 'Manual / Bono',
         monto_bruto: e.gross_amount,
         tasa_comision: `${(e.commission_rate * 100).toFixed(1)}%`,
         monto_neto: e.net_amount,

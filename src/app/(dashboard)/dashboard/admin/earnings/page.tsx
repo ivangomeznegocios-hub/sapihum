@@ -1,6 +1,6 @@
 import { getUserProfile } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import { adminGetAllSpeakerEarnings, adminReleaseEarnings, adminCloseMonth } from './actions'
+import { adminGetAllSpeakerEarnings, adminReleaseEarnings, adminCloseMonth, adminGetAllSpeakers } from './actions'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { DollarSign, Users, Clock, CheckCircle2, TrendingUp, Ban, Shield } from 'lucide-react'
@@ -18,6 +18,7 @@ export default async function AdminEarningsPage() {
 
     const currentMonth = new Date().toISOString().slice(0, 7)
     const { data, error } = await adminGetAllSpeakerEarnings(currentMonth)
+    const { data: speakerList } = await adminGetAllSpeakers()
 
     if (error || !data) {
         return (
@@ -40,7 +41,7 @@ export default async function AdminEarningsPage() {
                         Vista global de montos por ponente · Mes: {data.month}
                     </p>
                 </div>
-                <AdminEarningsActions currentMonth={currentMonth} />
+                <AdminEarningsActions currentMonth={currentMonth} speakers={speakerList || []} />
             </div>
 
             {/* Global Totals */}

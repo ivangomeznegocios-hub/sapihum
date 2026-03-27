@@ -287,3 +287,82 @@ export async function voidEarningByTransaction(transactionId: string) {
 
     return { success: true, voidedCount: earnings?.length || 0 }
 }
+
+// ============================================
+// 6. ADMIN: ADD MANUAL EARNING / BONUS
+// ============================================
+export async function adminAddManualEarning(
+    speakerId: string,
+    amount: number,
+    notes: string,
+    monthKey: string
+) {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) return { error: 'No autenticado' }
+
+    const { data: profile } = await (supabase.from('profiles') as any)
+        .select('role')
+        .eq('id', user.id)
+        .single()
+
+    if (profile?.role !== 'admin') {
+        return { error: 'Acceso denegado' }
+    }
+
+    if (!speakerId || !amount || amount <= 0) {
+        return { error: 'Datos de ingreso inválidos' }
+    }
+
+    const { error } = await (supabase.from('speaker_earnings') as any)
+        .insert({
+            speaker_id: speakerId,
+            earning_type: 'manual_bonus',
+            gross_amount: amount,
+            net_amount: amount,
+            status: 'pending',
+            month_key: monthKey,
+            description: notes || 'Bono manual admin',
+            attendance_date: new Date().toISOString().split('T')[0],
+            release_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+        })
+
+    if (error) {
+        console.error("Error adding manual earning:", error);
+        return { error: `Error DB: ${error.message}` }
+    }
+
+    revalidatePath('/dashboard/admin/earnings')
+    revalidatePath('/dashboard/earnings')
+
+    return { success: true }
+}
+
+// ============================================
+// 7. ADMIN: GET ALL SPEAKERS (for dropdown)
+// ============================================
+export async function adminGetAllSpeakers() {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) return { data: null, error: 'No autenticado' }
+
+    const { data: profile } = await (supabase.from('profiles') as any)
+        .select('role')
+        .eq('id', user.id)
+        .single()
+
+    if (profile?.role !== 'admin') {
+        return { data: null, error: 'Acceso denegado' }
+    }
+
+    const { data, error } = await (supabase.from('profiles') as any)
+        .select('id, full_name, avatar_url')
+        .eq('role', 'ponente')
+        .order('full_name')
+
+    if (error) return { data: null, error: error.message }
+
+    return { data, error: null }
+}

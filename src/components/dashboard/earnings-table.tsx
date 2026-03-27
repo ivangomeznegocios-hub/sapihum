@@ -43,6 +43,7 @@ const statusConfig: Record<string, { label: string; variant: 'default' | 'second
 const typeLabels: Record<string, string> = {
     membership_proration: 'Membresía',
     premium_commission: 'Programa Premium',
+    manual_bonus: 'Manual / Bono',
 }
 
 export function EarningsTable({ earnings, csvData, showStudentPaymentStatus = true }: EarningsTableProps) {

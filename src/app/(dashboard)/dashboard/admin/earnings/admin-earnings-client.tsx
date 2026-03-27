@@ -5,12 +5,14 @@ import { CheckCircle2, Lock, Loader2 } from 'lucide-react'
 import { useState } from 'react'
 import { adminReleaseEarnings, adminCloseMonth } from './actions'
 import { useRouter } from 'next/navigation'
+import { ManualEarningModal } from './manual-earning-modal'
 
 interface AdminEarningsActionsProps {
     currentMonth: string
+    speakers: { id: string; full_name: string; avatar_url: string | null }[]
 }
 
-export function AdminEarningsActions({ currentMonth }: AdminEarningsActionsProps) {
+export function AdminEarningsActions({ currentMonth, speakers }: AdminEarningsActionsProps) {
     const [releasing, setReleasing] = useState(false)
     const [closing, setClosing] = useState(false)
     const [message, setMessage] = useState<string | null>(null)
@@ -70,6 +72,7 @@ export function AdminEarningsActions({ currentMonth }: AdminEarningsActionsProps
                     )}
                     Liberar Pendientes (+30 días)
                 </Button>
+                <ManualEarningModal speakers={speakers} currentMonth={currentMonth} />
                 <Button
                     variant="default"
                     size="sm"
