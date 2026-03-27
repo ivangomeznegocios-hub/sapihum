@@ -1,20 +1,18 @@
-import { createClient, getUserProfile } from '@/lib/supabase/server'
+import { getCurrentInternalAccessContext } from '@/lib/access/internal-server'
+import { canAccessTasksModule } from '@/lib/access/internal-modules'
 import { redirect } from 'next/navigation'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { CheckSquare, Clock, ListTodo } from 'lucide-react'
 import { TaskList } from './components/task-list'
 import { AssignTaskButton } from './components/assign-task-form'
 
 export default async function TasksPage() {
-    const supabase = await createClient()
-    const profile = await getUserProfile()
+    const { supabase, profile, viewer } = await getCurrentInternalAccessContext()
 
-    if (!profile) {
+    if (!profile || !viewer) {
         redirect('/auth/login')
     }
-
-
 
     if (profile.role === 'patient') {
         // --- PATIENT VIEW ---
@@ -79,9 +77,12 @@ export default async function TasksPage() {
         )
     }
 
-    // --- PSYCHOLOGIST VIEW ---
-    if ((profile.membership_level ?? 0) < 2) {
-        redirect('/dashboard/subscription')
+    if (!canAccessTasksModule(viewer)) {
+        if (profile.role === 'psychologist') {
+            redirect('/dashboard/subscription')
+        }
+
+        redirect('/dashboard')
     }
 
     // Get assigned patients for the dropdown

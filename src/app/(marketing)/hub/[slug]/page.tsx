@@ -9,6 +9,8 @@ import { InteractiveToolViewer } from '@/components/interactive-tool-viewer'
 import { getPublicEventBySlug } from '@/lib/supabase/queries/events'
 import { userHasEventHubAccess } from '@/lib/supabase/queries/event-entitlements'
 import { getResourcesByEvent } from '@/lib/supabase/queries/resources'
+import { createClient } from '@/lib/supabase/server'
+import { getActiveEntitlementForEvent } from '@/lib/events/access'
 import {
     ArrowLeft,
     Calendar,
@@ -90,13 +92,27 @@ export default async function EventHubPage({ params }: PageProps) {
     }
 
     const eventResources = await getResourcesByEvent(event.id)
+    const supabase = await createClient()
     const now = new Date()
     const eventDate = new Date(event.start_time)
     const eventEndDate = event.end_time ? new Date(event.end_time) : new Date(eventDate.getTime() + 2 * 60 * 60000)
     const isSameDay = now.toDateString() === eventDate.toDateString()
     const isEventTime = now >= new Date(eventDate.getTime() - 30 * 60000) && now <= eventEndDate
     const canSeeMeetingLink = Boolean(event.meeting_link) && event.status !== 'completed' && (isSameDay || isEventTime)
-    const canSeeRecording = Boolean(event.recording_url) && event.status === 'completed' && (!event.recording_expires_at || new Date(event.recording_expires_at) > now)
+    const replayEntitlement = access.profile
+        ? await getActiveEntitlementForEvent({
+            supabase,
+            eventId: event.id,
+            userId: access.profile.id,
+            email: access.profile.email,
+            allowedAccessKinds: ['replay_access'],
+        })
+        : null
+    const canSeeRecording = Boolean(event.recording_url) && event.status === 'completed' && (
+        !event.recording_expires_at || new Date(event.recording_expires_at) > now
+    ) && (
+        Boolean(replayEntitlement) || event.event_type === 'on_demand'
+    )
 
     return (
         <section className="mx-auto w-full max-w-5xl px-4 py-12 sm:px-6 lg:px-8">

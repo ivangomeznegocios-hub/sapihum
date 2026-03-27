@@ -7,6 +7,8 @@ import type {
 } from '@/types/database'
 import { getPublicCatalogKindForEvent } from '@/lib/events/public'
 import { getUniqueEventAccessCount, getUniqueEventAccessCounts } from '@/lib/events/attendance'
+import { audienceAllowsAccess, getCommercialAccessContext } from '@/lib/access/commercial'
+import { canViewerSeeCatalogEvent } from '@/lib/access/catalog'
 
 
 
@@ -29,17 +31,15 @@ export async function getEventsWithRegistration(): Promise<EventWithRegistration
         return []
     }
 
-    if (!user) {
-        return events as EventWithRegistration[]
-    }
-
     // Get user's registrations
     const eventIds = events.map((e: any) => e.id)
-    const { data: registrations } = await (supabase
-        .from('event_registrations') as any)
-        .select('*')
-        .eq('user_id', user.id)
-        .in('event_id', eventIds)
+    const { data: registrations } = user
+        ? await (supabase
+            .from('event_registrations') as any)
+            .select('*')
+            .eq('user_id', user.id)
+            .in('event_id', eventIds)
+        : { data: [] }
 
     // Get attendee counts
     const { data: counts } = await (supabase
@@ -61,19 +61,13 @@ export async function getEventsWithRegistration(): Promise<EventWithRegistration
         attendee_count: attendeeCounts[event.id] || 0
     })) as EventWithRegistration[]
 
-    // Filter by audience
-    // If no user (public), only show public events
     if (!user) {
-        return allEvents.filter(e => {
-            const audience = e.target_audience as string[] || ['public']
-            return audience.includes('public')
-        })
+        return allEvents.filter((event) => canViewerSeeCatalogEvent(event as any, null))
     }
 
-    // Get profile to check role/sub
     const { data: profileData } = await (supabase
         .from('profiles') as any)
-        .select('*')
+        .select('role, email, membership_level, subscription_status')
         .eq('id', user.id)
         .single()
 
@@ -81,39 +75,22 @@ export async function getEventsWithRegistration(): Promise<EventWithRegistration
 
     if (!profile) return []
 
-    // Check if patient has any active relationship (for 'active_patients' audience)
-    let hasActiveRelationship = false
-    if (profile.role === 'patient') {
-        const { count } = await (supabase
-            .from('patient_psychologist_relationships') as any)
-            .select('*', { count: 'exact', head: true })
-            .eq('patient_id', user.id)
-            .eq('status', 'active')
-        hasActiveRelationship = (count || 0) > 0
-    }
+    const commercialAccess = await getCommercialAccessContext({
+        supabase,
+        userId: user.id,
+        profile,
+    })
 
-    return allEvents.filter(e => {
-        // Admin sees everything
-        if (profile.role === 'admin') return true
+    if (!commercialAccess) return []
 
-        // Creator sees their events (even if draft)
-        if (e.created_by === user.id) return true
+    return allEvents.filter((event) => {
+        if (!canViewerSeeCatalogEvent(event as any, commercialAccess.viewer)) {
+            return false
+        }
 
-        // Hide drafts from everyone else
-        if (e.status === 'draft') return false
-
-        const audience = e.target_audience as string[] || ['public']
-        if (audience.includes('public')) return true
-
-        if (audience.includes('members') && (profile.membership_level ?? 0) >= 1) return true
-
-        if (audience.includes('psychologists') && profile.role === 'psychologist') return true
-
-        if (audience.includes('patients') && profile.role === 'patient') return true
-
-        if (audience.includes('active_patients') && hasActiveRelationship) return true
-
-        return false
+        return audienceAllowsAccess(event.target_audience as string[] | null | undefined, commercialAccess, {
+            creatorId: event.created_by,
+        })
     })
 }
 

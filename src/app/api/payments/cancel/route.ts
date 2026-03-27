@@ -4,6 +4,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { getPaymentProvider } from '@/lib/payments'
+import { syncMembershipEntitlementsForUser } from '@/lib/membership-entitlements'
 
 export async function POST(request: NextRequest) {
     try {
@@ -79,6 +80,8 @@ export async function POST(request: NextRequest) {
                     { status: 502 }
                 )
             }
+
+            await syncMembershipEntitlementsForUser(user.id)
         }
 
         return NextResponse.json({

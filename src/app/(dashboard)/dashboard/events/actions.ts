@@ -11,6 +11,7 @@ import {
 import { getUniqueEventAccessCount } from '@/lib/events/attendance'
 import { grantEventEntitlements } from '@/lib/events/entitlements'
 import { slugifyCatalogText } from '@/lib/events/public'
+import { audienceAllowsAccess, getCommercialAccessContext } from '@/lib/access/commercial'
 
 async function resolveUniqueEventSlug(supabase: any, baseValue: string, eventId?: string) {
     const fallbackBase = slugifyCatalogText(baseValue) || `evento-${crypto.randomUUID().slice(0, 8)}`
@@ -61,37 +62,22 @@ export async function registerForEvent(eventId: string, registrationData: Record
     // Get user profile
     const { data: profile } = await (supabase
         .from('profiles') as any)
-        .select('role, membership_level, email')
+        .select('role, membership_level, subscription_status, email')
         .eq('id', user.id)
         .single()
 
-    // Validate audience access
-    const audience = (event as any).target_audience as TargetAudience[] || ['public']
-    let hasAccess = audience.includes('public')
-
     const profileData = profile ? (profile as any) : null
-
-    if (!hasAccess && profileData) {
-        if (audience.includes('members') && (profileData.membership_level ?? 0) >= 1) {
-            hasAccess = true
-        }
-        if (audience.includes('psychologists') && profileData.role === 'psychologist') {
-            hasAccess = true
-        }
-        if (audience.includes('patients') && profileData.role === 'patient') {
-            hasAccess = true
-        }
-        if (audience.includes('active_patients')) {
-            const { data: relationship } = await (supabase
-                .from('patient_psychologist_relationships') as any)
-                .select('id')
-                .eq('patient_id', user.id)
-                .eq('status', 'active')
-                .limit(1)
-                .single()
-            if (relationship) hasAccess = true
-        }
-    }
+    const commercialAccess = profileData
+        ? await getCommercialAccessContext({
+            supabase,
+            userId: user.id,
+            profile: profileData,
+        })
+        : null
+    const audience = (event as any).target_audience as TargetAudience[] || ['public']
+    const hasAccess = commercialAccess
+        ? audienceAllowsAccess(audience, commercialAccess)
+        : audience.includes('public')
 
     if (!hasAccess) {
         return { error: 'No tienes acceso a este evento' }
@@ -108,8 +94,11 @@ export async function registerForEvent(eventId: string, registrationData: Record
                 member_price: eventData.member_price,
                 member_access_type: normalizeMemberAccessType(eventData.member_access_type),
             },
-            profileData.role,
-            profileData.membership_level ?? 0
+            {
+                role: profileData.role,
+                membershipLevel: commercialAccess?.membershipLevel ?? profileData.membership_level ?? 0,
+                hasActiveMembership: commercialAccess?.hasActiveMembership ?? false,
+            }
         )
 
         if (profileData.role !== 'admin' && currentPrice > 0) {
@@ -566,6 +555,15 @@ export async function addSpeakerToEvent(eventId: string, speakerId: string, role
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return { error: 'No autenticado' }
 
+    const [{ data: event }, { data: profile }] = await Promise.all([
+        (supabase.from('events') as any).select('created_by').eq('id', eventId).single(),
+        (supabase.from('profiles') as any).select('role').eq('id', user.id).single()
+    ])
+
+    if (!event || (event.created_by !== user.id && profile?.role !== 'admin')) {
+        return { error: 'No tienes permisos para modificar este evento' }
+    }
+
     const { error } = await (supabase.from('event_speakers') as any)
         .insert({ event_id: eventId, speaker_id: speakerId, role })
 
@@ -579,6 +577,15 @@ export async function removeSpeakerFromEvent(eventId: string, speakerId: string)
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return { error: 'No autenticado' }
+
+    const [{ data: event }, { data: profile }] = await Promise.all([
+        (supabase.from('events') as any).select('created_by').eq('id', eventId).single(),
+        (supabase.from('profiles') as any).select('role').eq('id', user.id).single()
+    ])
+
+    if (!event || (event.created_by !== user.id && profile?.role !== 'admin')) {
+        return { error: 'No tienes permisos para modificar este evento' }
+    }
 
     const { error } = await (supabase.from('event_speakers') as any)
         .delete()

@@ -1,4 +1,6 @@
 import type { Event, EventEntitlementAccessKind, EventEntitlementSourceType } from '@/types/database'
+import { createServiceClient } from '@/lib/supabase/service'
+import { getEventAccessKinds } from './entitlements'
 
 export function getPrimaryAccessKindForEvent(event: Pick<Event, 'event_type'>): EventEntitlementAccessKind {
     if (event.event_type === 'course') return 'course_access'
@@ -48,14 +50,15 @@ export async function upsertEventEntitlement(params: {
 }
 
 export async function claimEventEntitlementsByEmail(params: {
-    supabase: any
     userId: string
     email: string | null | undefined
 }) {
     const normalizedEmail = params.email?.trim().toLowerCase()
     if (!normalizedEmail) return
 
-    await (params.supabase as any)
+    const admin = createServiceClient()
+
+    await (admin as any)
         .from('event_entitlements')
         .update({ user_id: params.userId })
         .is('user_id', null)
@@ -67,6 +70,8 @@ export async function getActiveEntitlementForEvent(params: {
     eventId: string
     userId?: string | null
     email?: string | null
+    eventType?: Event['event_type'] | null
+    allowedAccessKinds?: EventEntitlementAccessKind[]
 }) {
     const normalizedEmail = params.email?.trim().toLowerCase()
     const filters = [
@@ -76,7 +81,9 @@ export async function getActiveEntitlementForEvent(params: {
 
     if (filters.length === 0) return null
 
-    const query = (params.supabase as any)
+    const allowedAccessKinds = params.allowedAccessKinds ?? (params.eventType ? getEventAccessKinds({ event_type: params.eventType } as Pick<Event, 'event_type'>) : null)
+
+    let query = (params.supabase as any)
         .from('event_entitlements')
         .select('*')
         .eq('event_id', params.eventId)
@@ -84,9 +91,12 @@ export async function getActiveEntitlementForEvent(params: {
         .or(filters.join(','))
         .order('created_at', { ascending: false })
         .limit(1)
-        .maybeSingle()
 
-    const { data } = await query
+    if (allowedAccessKinds?.length) {
+        query = query.in('access_kind', allowedAccessKinds)
+    }
+
+    const { data } = await query.maybeSingle()
     if (!data) return null
 
     if (data.ends_at && new Date(data.ends_at) <= new Date()) {

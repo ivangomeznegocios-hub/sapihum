@@ -4,6 +4,7 @@ import { TelehealthSession } from '@/components/telehealth'
 import { Badge } from '@/components/ui/badge'
 import { getAppointmentById } from '@/lib/supabase/queries/appointments'
 import { createClient, getUserProfile } from '@/lib/supabase/server'
+import { getCommercialAccessContext } from '@/lib/access/commercial'
 
 interface SessionPageProps {
     params: Promise<{ appointmentId: string }>
@@ -39,6 +40,11 @@ export default async function SessionPage({ params }: SessionPageProps) {
     }
 
     const isPatientView = profile.role === 'patient'
+    const commercialAccess = await getCommercialAccessContext({
+        supabase,
+        userId: profile.id,
+        profile,
+    })
 
     return (
         <div className="space-y-6">
@@ -90,7 +96,7 @@ export default async function SessionPage({ params }: SessionPageProps) {
                 patientName={patient.full_name ?? 'Paciente'}
                 meetingLink={appointment.meeting_link}
                 aiMinutes={profile.ai_minutes_available || 0}
-                membershipLevel={profile.membership_level || 0}
+                membershipLevel={commercialAccess?.membershipLevel ?? 0}
                 userRole={profile.role}
             />
         </div>

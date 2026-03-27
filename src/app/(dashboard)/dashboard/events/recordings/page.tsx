@@ -2,7 +2,7 @@ import { getUserProfile } from '@/lib/supabase/server'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { RecordingCountdown, RecordingCardWrapper } from './recording-countdown'
-import { getMyAccessibleEvents } from '@/lib/supabase/queries/event-entitlements'
+import { getMyReplayAccessibleEvents } from '@/lib/supabase/queries/event-entitlements'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import {
@@ -21,7 +21,7 @@ export default async function RecordingsPage() {
     }
 
     const now = new Date()
-    const accessibleEvents = await getMyAccessibleEvents()
+    const accessibleEvents = await getMyReplayAccessibleEvents()
     const accessibleRecordings = accessibleEvents
         .map((row: any) => row.event)
         .filter((event: any) => {

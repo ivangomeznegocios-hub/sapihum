@@ -1,13 +1,25 @@
 import { getEventsWithRegistration } from '@/lib/supabase/queries/events'
-import { getUserProfile } from '@/lib/supabase/server'
+import { createClient, getUserProfile } from '@/lib/supabase/server'
 import { EventsCategoryNav } from '../events-filter'
 import { FilteredEventsList } from '../filtered-events-list'
+import { getCommercialAccessContext, isCommunityReadOnlyViewer } from '@/lib/access/commercial'
 
 export default async function NetworkingEventsPage() {
     const events = await getEventsWithRegistration()
     const profile = await getUserProfile()
-
-    const isActiveMember = profile?.role === 'patient' || profile?.role === 'admin' || (profile?.membership_level ?? 0) >= 1
+    const supabase = profile ? await createClient() : null
+    const commercialAccess = profile && supabase
+        ? await getCommercialAccessContext({
+            supabase,
+            userId: profile.id,
+            profile,
+        })
+        : null
+    const isActiveMember = Boolean(
+        commercialAccess?.hasActiveMembership ||
+        profile?.role === 'patient' ||
+        profile?.role === 'admin'
+    )
 
     // Filter by networking category
     const networkingEvents = events.filter((e: any) => e.category === 'networking')
@@ -27,6 +39,7 @@ export default async function NetworkingEventsPage() {
                 events={networkingEvents}
                 isActiveMember={isActiveMember}
                 userId={profile?.id}
+                isReadOnly={commercialAccess ? isCommunityReadOnlyViewer(commercialAccess) : false}
             />
         </div>
     )

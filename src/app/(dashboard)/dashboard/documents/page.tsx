@@ -1,20 +1,24 @@
-import { createClient, getUserProfile } from '@/lib/supabase/server'
+import { getCurrentInternalAccessContext } from '@/lib/access/internal-server'
+import { canAccessDocumentsModule } from '@/lib/access/internal-modules'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { redirect } from 'next/navigation'
-import { FileText, FolderOpen } from 'lucide-react'
+import { FileText } from 'lucide-react'
 import { DocumentLinkForm } from './document-link-form'
 import { DocumentsList } from './documents-list'
 
 export default async function DocumentsPage() {
-    const supabase = await createClient()
-    const profile = await getUserProfile()
+    const { supabase, profile, viewer } = await getCurrentInternalAccessContext()
 
-    if (!profile) {
+    if (!profile || !viewer) {
         redirect('/auth/login')
     }
 
-    if (profile.role === 'psychologist' && (profile.membership_level ?? 0) < 2) {
-        redirect('/dashboard/subscription')
+    if (!canAccessDocumentsModule(viewer)) {
+        if (profile.role === 'psychologist') {
+            redirect('/dashboard/subscription')
+        }
+
+        redirect('/dashboard')
     }
 
     // Get patients if psychologist

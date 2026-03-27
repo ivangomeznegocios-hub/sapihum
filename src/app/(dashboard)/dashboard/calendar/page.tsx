@@ -1,7 +1,7 @@
-import { createClient, getUserProfile } from '@/lib/supabase/server'
+import { getCurrentInternalAccessContext } from '@/lib/access/internal-server'
+import { canAccessCalendarModule } from '@/lib/access/internal-modules'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { NewAppointmentButton, AppointmentActions } from './calendar-forms'
@@ -10,11 +10,8 @@ import {
     Clock,
     Video,
     MapPin,
-    Users,
     CalendarDays,
-    ChevronRight,
     CheckCircle2,
-    AlertCircle,
     XCircle,
     Timer
 } from 'lucide-react'
@@ -33,18 +30,21 @@ interface AppointmentWithDetails {
 }
 
 export default async function CalendarPage() {
-    const supabase = await createClient()
-    const profile = await getUserProfile()
+    const { supabase, profile, viewer } = await getCurrentInternalAccessContext()
 
-    if (!profile) {
+    if (!profile || !viewer) {
         redirect('/auth/login')
     }
 
     const userRole = profile.role
     const today = new Date()
 
-    if (userRole === 'psychologist' && (profile.membership_level ?? 0) < 2) {
-        redirect('/dashboard/subscription')
+    if (!canAccessCalendarModule(viewer)) {
+        if (userRole === 'psychologist') {
+            redirect('/dashboard/subscription')
+        }
+
+        redirect('/dashboard')
     }
 
     // Fetch appointments based on role

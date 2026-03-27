@@ -1,20 +1,20 @@
-import { createClient } from '@/lib/supabase/server'
+import { getCurrentInternalAccessContext } from '@/lib/access/internal-server'
+import { canAccessPatientsModule } from '@/lib/access/internal-modules'
 import type { Profile } from '@/types/database'
 
 /**
  * Get all patients assigned to the current psychologist
  */
 export async function getAssignedPatients(): Promise<Profile[]> {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { supabase, profile, viewer } = await getCurrentInternalAccessContext()
 
-    if (!user) return []
+    if (!profile || !viewer || !canAccessPatientsModule(viewer)) return []
 
     // Get patient IDs from relationships
     const { data: relationships, error: relError } = await (supabase
         .from('patient_psychologist_relationships') as any)
         .select('patient_id')
-        .eq('psychologist_id', user.id)
+        .eq('psychologist_id', profile.id)
         .eq('status', 'active')
 
     if (relError || !relationships?.length) return []
@@ -41,16 +41,15 @@ export async function getAssignedPatients(): Promise<Profile[]> {
  * Only returns if the patient is assigned to the current psychologist
  */
 export async function getPatientById(patientId: string): Promise<Profile | null> {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { supabase, profile, viewer } = await getCurrentInternalAccessContext()
 
-    if (!user) return null
+    if (!profile || !viewer || !canAccessPatientsModule(viewer)) return null
 
     // Verify relationship exists
     const { data: relationship, error: relError } = await (supabase
         .from('patient_psychologist_relationships') as any)
         .select('id')
-        .eq('psychologist_id', user.id)
+        .eq('psychologist_id', profile.id)
         .eq('patient_id', patientId)
         .eq('status', 'active')
         .single()
@@ -76,15 +75,14 @@ export async function getPatientById(patientId: string): Promise<Profile | null>
  * Get patient count for current psychologist
  */
 export async function getPatientCount(): Promise<number> {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { supabase, profile, viewer } = await getCurrentInternalAccessContext()
 
-    if (!user) return 0
+    if (!profile || !viewer || !canAccessPatientsModule(viewer)) return 0
 
     const { count, error } = await (supabase
         .from('patient_psychologist_relationships') as any)
         .select('*', { count: 'exact', head: true })
-        .eq('psychologist_id', user.id)
+        .eq('psychologist_id', profile.id)
         .eq('status', 'active')
 
     if (error) {

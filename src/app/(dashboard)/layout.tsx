@@ -1,6 +1,7 @@
 import { createClient, getUserRole, getUserProfile } from '@/lib/supabase/server'
 import { DashboardShell } from '@/components/layout/dashboard-shell'
 import { SessionTimeout } from '@/components/auth/session-timeout'
+import { getCommercialAccessContext } from '@/lib/access/commercial'
 
 export default async function DashboardLayout({
     children,
@@ -11,7 +12,14 @@ export default async function DashboardLayout({
     const { data: { user } } = await supabase.auth.getUser()
     const userRole = await getUserRole()
     const profile = await getUserProfile()
-    const membershipLevel = profile?.membership_level ?? 0
+    const commercialAccess = user && profile
+        ? await getCommercialAccessContext({
+            supabase,
+            userId: user.id,
+            profile,
+        })
+        : null
+    const membershipLevel = commercialAccess?.membershipLevel ?? 0
     const membershipSpecializationCode = (profile as any)?.membership_specialization_code ?? null
 
     return (

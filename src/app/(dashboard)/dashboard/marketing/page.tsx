@@ -1,4 +1,5 @@
-import { createClient, getUserProfile } from '@/lib/supabase/server'
+import { getCurrentInternalAccessContext } from '@/lib/access/internal-server'
+import { canAccessMarketingHub } from '@/lib/access/internal-modules'
 import { redirect } from 'next/navigation'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -9,7 +10,6 @@ import {
     Headphones,
     MapPin,
     Search as SearchIcon,
-    ArrowRight,
     CheckCircle2,
     Sparkles,
     MessageCircle,
@@ -46,18 +46,18 @@ const SERVICE_ICONS: Record<MarketingServiceKey, React.ElementType> = {
 }
 
 export default async function MarketingHubPage() {
-    const profile = await getUserProfile()
+    const { profile, viewer } = await getCurrentInternalAccessContext()
 
-    if (!profile) {
+    if (!profile || !viewer) {
         redirect('/auth/login')
     }
 
-    const currentLevel = profile.membership_level ?? 0
-    const isAdmin = profile.role === 'admin'
+    if (!canAccessMarketingHub(viewer)) {
+        if (profile.role === 'psychologist') {
+            redirect('/dashboard/subscription')
+        }
 
-    // Only allow level 3 (Marketing Premium) or admins
-    if (!isAdmin && currentLevel < 3) {
-        redirect('/dashboard/subscription')
+        redirect('/dashboard')
     }
 
     // Initialize services if this is a first visit

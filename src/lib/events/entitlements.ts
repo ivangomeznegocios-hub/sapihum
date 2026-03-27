@@ -7,6 +7,12 @@ export function getEventAccessKinds(event: Pick<Event, 'event_type'>): EventEnti
     return ['live_access', 'replay_access']
 }
 
+export function getEventGrantAccessKinds(event: Pick<Event, 'event_type'>): EventEntitlementAccessKind[] {
+    if (event.event_type === 'course') return ['course_access']
+    if (event.event_type === 'on_demand') return ['replay_access']
+    return ['live_access']
+}
+
 function normalizeEmail(email: string) {
     return email.trim().toLowerCase()
 }
@@ -25,11 +31,13 @@ export async function grantEventEntitlements(params: {
     userId?: string | null
     sourceType: EventEntitlementSourceType
     sourceReference?: string | null
+    startsAt?: string | null
+    endsAt?: string | null
     metadata?: Record<string, unknown>
 }) {
     const admin = createServiceClient()
     const email = normalizeEmail(params.email)
-    const accessKinds = getEventAccessKinds(params.event)
+    const accessKinds = getEventGrantAccessKinds(params.event)
 
     for (const accessKind of accessKinds) {
         const payload = {
@@ -40,8 +48,8 @@ export async function grantEventEntitlements(params: {
             source_type: params.sourceType,
             source_reference: params.sourceReference ?? null,
             status: 'active',
-            starts_at: new Date().toISOString(),
-            ends_at: getEntitlementEndAt(params.event, accessKind),
+            starts_at: params.startsAt ?? new Date().toISOString(),
+            ends_at: params.endsAt ?? getEntitlementEndAt(params.event, accessKind),
             metadata: params.metadata ?? {},
         }
 

@@ -2,7 +2,7 @@ import { createClient, createAdminClient, getUserProfile } from '@/lib/supabase/
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { redirect } from 'next/navigation'
-import { UserRowActions, AssignButton, AddUserButton } from './user-forms'
+import { AssignButton, AddUserButton } from './user-forms'
 import { UsersTable } from './users-table'
 import {
     Users,
@@ -16,8 +16,6 @@ interface Profile {
     id: string
     full_name: string | null
     role: string
-    subscription_status: string | null
-    membership_level: number
     created_at: string
     bio: string | null
     specialty: string | null
@@ -75,10 +73,13 @@ export default async function AdminUsersPage() {
                         Gestión de Usuarios
                     </h1>
                     <p className="text-muted-foreground mt-1">
-                        Administra todos los usuarios de la plataforma
+                        Administra identidades y perfiles. Membresias, compras y accesos se operan en Operaciones.
                     </p>
                 </div>
                 <div className="flex w-full flex-wrap items-stretch gap-3 md:w-auto md:justify-end">
+                    <Button asChild variant="outline">
+                        <a href="/dashboard/admin/operations">Ir a Operaciones</a>
+                    </Button>
                     <AssignButton
                         patients={patients.map(p => ({ id: p.id, full_name: p.full_name, role: p.role }))}
                         psychologists={psychologists.map(p => ({ id: p.id, full_name: p.full_name, role: p.role }))}

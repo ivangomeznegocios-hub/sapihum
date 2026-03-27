@@ -2,7 +2,7 @@
 // DATABASE TYPES - Auto-generated from Supabase schema
 // ============================================
 
-export type UserRole = 'admin' | 'psychologist' | 'patient' | 'ponente'
+export type UserRole = 'admin' | 'support' | 'psychologist' | 'patient' | 'ponente'
 
 export type SubscriptionStatus = 'trial' | 'active' | 'past_due' | 'cancelled' | 'inactive'
 
@@ -841,6 +841,9 @@ export interface EventPurchase {
     status: EventPurchaseStatus
     purchased_at: string
     confirmed_at: string | null
+    analytics_visitor_id?: string | null
+    analytics_session_id?: string | null
+    attribution_snapshot?: Record<string, any>
 }
 
 export interface EventPurchaseInsert {
@@ -878,7 +881,15 @@ export type EventEntitlementAccessKind =
     | 'certificate_eligibility'
     | 'manual_support_grant'
 
-export type EventEntitlementSourceType = 'registration' | 'purchase' | 'membership' | 'manual'
+export type EventEntitlementSourceType =
+    | 'registration'
+    | 'purchase'
+    | 'membership'
+    | 'manual'
+    | 'support'
+    | 'gift'
+    | 'alliance'
+    | 'migration'
 
 export type EventEntitlementStatus = 'active' | 'expired' | 'revoked'
 
@@ -894,6 +905,7 @@ export interface EventEntitlement {
     status: EventEntitlementStatus
     starts_at: string
     ends_at: string | null
+    revoked_at?: string | null
     metadata: Record<string, any>
     created_at: string
     updated_at: string
@@ -917,6 +929,7 @@ export interface EventEntitlementUpdate {
     status?: EventEntitlementStatus
     starts_at?: string
     ends_at?: string | null
+    revoked_at?: string | null
     metadata?: Record<string, any>
 }
 
@@ -1878,4 +1891,87 @@ export interface SpeakerFinancialSummary {
     currentMonthEarnings: number
     totalStudents: number
     totalEvents: number
+}
+
+// ============================================
+// OPERATIONS / BACKOFFICE
+// ============================================
+export interface AdminOperationLog {
+    id: string
+    actor_user_id: string | null
+    action_type: string
+    entity_type: string
+    entity_id: string | null
+    target_user_id: string | null
+    target_email: string | null
+    reason: string | null
+    details: Record<string, any>
+    created_at: string
+}
+
+export interface AdminOperationNote {
+    id: string
+    entity_type: string
+    entity_id: string | null
+    target_user_id: string | null
+    target_email: string | null
+    note: string
+    created_by: string | null
+    updated_by: string | null
+    created_at: string
+    updated_at: string
+}
+
+export type MembershipRuleScopeType = 'event_audience' | 'event_category' | 'event' | 'discount'
+export type MembershipRuleBenefitType = 'access' | 'discount'
+
+export interface MembershipEntitlementRule {
+    id: string
+    membership_level: number
+    specialization_code: SpecializationCode | null
+    scope_type: MembershipRuleScopeType
+    benefit_type: MembershipRuleBenefitType
+    event_id: string | null
+    event_category: string | null
+    required_audience: string | null
+    discount_percent: number | null
+    is_active: boolean
+    metadata: Record<string, any>
+    created_by: string | null
+    created_at: string
+    updated_at: string
+}
+
+export interface CertificateRule {
+    id: string
+    event_id: string
+    is_active: boolean
+    requires_purchase: boolean
+    requires_attendance: boolean
+    min_attendance_percent: number | null
+    requires_progress: boolean
+    min_progress_percent: number | null
+    requires_evaluation: boolean
+    min_evaluation_score: number | null
+    requires_active_membership: boolean
+    metadata: Record<string, any>
+    created_by: string | null
+    created_at: string
+    updated_at: string
+}
+
+export type CertificateEligibilityStatus = 'pending' | 'eligible' | 'ineligible' | 'issued' | 'revoked'
+
+export interface CertificateEligibilitySnapshot {
+    id: string
+    event_id: string
+    user_id: string | null
+    email: string
+    identity_key: string
+    status: CertificateEligibilityStatus
+    evaluated_at: string
+    reasons: any[]
+    source_snapshot: Record<string, any>
+    created_at: string
+    updated_at: string
 }

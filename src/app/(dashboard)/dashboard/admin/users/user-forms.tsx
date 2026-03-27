@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -13,8 +14,6 @@ export interface User {
     bio?: string | null
     specialty?: string | null
     hourly_rate?: number | null
-    subscription_status?: string | null
-    membership_level?: number | null
     is_test?: boolean
 }
 
@@ -75,6 +74,7 @@ export function RoleChangeForm({ user, onClose }: RoleChangeFormProps) {
                             <option value="patient">Paciente</option>
                             <option value="psychologist">Psicólogo</option>
                             <option value="ponente">Ponente</option>
+                            <option value="support">Soporte</option>
                             <option value="admin">Administrador</option>
                         </select>
                     </div>
@@ -112,8 +112,6 @@ export function UserEditForm({ user, onClose }: UserEditFormProps) {
     const [bio, setBio] = useState(user.bio || '')
     const [specialty, setSpecialty] = useState(user.specialty || '')
     const [hourlyRate, setHourlyRate] = useState(user.hourly_rate?.toString() || '')
-    const [subscriptionStatus, setSubscriptionStatus] = useState(user.subscription_status || '')
-    const [membershipLevel, setMembershipLevel] = useState(user.membership_level?.toString() || '0')
     const [isTest, setIsTest] = useState(user.is_test || false)
 
     async function handleSubmit() {
@@ -125,8 +123,6 @@ export function UserEditForm({ user, onClose }: UserEditFormProps) {
             bio: bio,
             specialty: specialty,
             hourly_rate: hourlyRate ? parseFloat(hourlyRate) : null,
-            subscription_status: subscriptionStatus || null,
-            membership_level: membershipLevel ? parseInt(membershipLevel, 10) : 0,
             is_test: isTest
         })
 
@@ -171,31 +167,12 @@ export function UserEditForm({ user, onClose }: UserEditFormProps) {
                         />
                     </div>
 
-                    <div>
-                        <label className="text-sm font-medium">Estado de Suscripción</label>
-                        <select
-                            value={subscriptionStatus}
-                            onChange={(e) => setSubscriptionStatus(e.target.value)}
-                            className="mt-1 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-                        >
-                            <option value="">Sin Suscripción (Null)</option>
-                            <option value="trial">Prueba (Trial)</option>
-                            <option value="active">Activa</option>
-                            <option value="past_due">Atrasada (Past Due)</option>
-                            <option value="cancelled">Cancelada</option>
-                            <option value="inactive">Inactiva</option>
-                        </select>
-                    </div>
-
-                    <div>
-                        <label className="text-sm font-medium">Nivel de Membresía</label>
-                        <input
-                            type="number"
-                            min="0"
-                            value={membershipLevel}
-                            onChange={(e) => setMembershipLevel(e.target.value)}
-                            className="mt-1 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-                        />
+                    <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-3 text-sm text-amber-900">
+                        Membresias y accesos se operan en{' '}
+                        <Link href="/dashboard/admin/operations" className="font-medium underline underline-offset-4">
+                            Operaciones
+                        </Link>
+                        , no desde esta pantalla.
                     </div>
 
                     <div className="flex items-center gap-2 mt-4 p-3 bg-red-50 dark:bg-red-900/10 rounded-lg border border-red-100 dark:border-red-900/30">
@@ -365,12 +342,12 @@ export function UserRowActions({ user }: UserRowActionsProps) {
     const [showEditForm, setShowEditForm] = useState(false)
 
     return (
-        <div className="flex flex-wrap justify-start gap-2 sm:justify-end">
-            <Button variant="ghost" size="sm" onClick={() => setShowEditForm(true)} title="Editar Perfil">
-                <UserCog className="h-4 w-4" />
-            </Button>
+        <div className="flex items-center gap-2">
             <Button variant="ghost" size="sm" onClick={() => setShowRoleForm(true)} title="Cambiar Rol">
                 <Shield className="h-4 w-4" />
+            </Button>
+            <Button variant="ghost" size="sm" onClick={() => setShowEditForm(true)} title="Editar Perfil">
+                <UserPlus className="h-4 w-4" />
             </Button>
 
             {showRoleForm && (
@@ -393,10 +370,11 @@ export function AssignButton({ patients, psychologists }: AssignButtonProps) {
 
     return (
         <>
-            <Button variant="outline" onClick={() => setShowForm(true)} className="w-full sm:w-auto">
-                <Link2 className="mr-2 h-4 w-4" />
+            <Button variant="outline" onClick={() => setShowForm(true)}>
+                <Link2 className="h-4 w-4 mr-2" />
                 Asignar Paciente
             </Button>
+
             {showForm && (
                 <AssignPatientForm
                     patients={patients}
@@ -411,7 +389,7 @@ export function AssignButton({ patients, psychologists }: AssignButtonProps) {
 export function AddUserForm({ onClose }: { onClose: () => void }) {
     const [isLoading, setIsLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
-    
+
     const [fullName, setFullName] = useState('')
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
@@ -494,6 +472,7 @@ export function AddUserForm({ onClose }: { onClose: () => void }) {
                             <option value="patient">Paciente</option>
                             <option value="psychologist">Psicólogo</option>
                             <option value="ponente">Ponente</option>
+                            <option value="support">Soporte</option>
                             <option value="admin">Administrador</option>
                         </select>
                     </div>
@@ -531,4 +510,3 @@ export function AddUserButton() {
         </>
     )
 }
-

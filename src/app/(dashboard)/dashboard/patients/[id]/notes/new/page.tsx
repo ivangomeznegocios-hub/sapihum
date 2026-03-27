@@ -1,7 +1,8 @@
 import Link from 'next/link'
-import { notFound } from 'next/navigation'
+import { notFound, redirect } from 'next/navigation'
+import { getCurrentInternalAccessContext } from '@/lib/access/internal-server'
+import { canAccessPatientsModule } from '@/lib/access/internal-modules'
 import { getPatientById } from '@/lib/supabase/queries/patients'
-import { getUserProfile } from '@/lib/supabase/server'
 import { NewNoteForm } from '@/components/clinical/new-note-form'
 
 interface NewNotesPageProps {
@@ -10,10 +11,23 @@ interface NewNotesPageProps {
 
 export default async function NewNotesPage({ params }: NewNotesPageProps) {
     const resolvedParams = await params
-    const patient = await getPatientById(resolvedParams.id)
-    const profile = await getUserProfile()
+    const { profile, viewer } = await getCurrentInternalAccessContext()
 
-    if (!patient || !profile) {
+    if (!profile || !viewer) {
+        redirect('/auth/login')
+    }
+
+    if (!canAccessPatientsModule(viewer)) {
+        if (profile.role === 'psychologist') {
+            redirect('/dashboard/subscription')
+        }
+
+        redirect('/dashboard')
+    }
+
+    const patient = await getPatientById(resolvedParams.id)
+
+    if (!patient) {
         notFound()
     }
 

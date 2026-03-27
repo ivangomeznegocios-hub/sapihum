@@ -1,13 +1,40 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
+import { getCurrentInternalAccessContext } from '@/lib/access/internal-server'
+import { canAccessPatientsModule } from '@/lib/access/internal-modules'
 import {
     createToolAssignment,
     createTherapeuticTool,
     toggleResultsVisibilityForPsychologist,
     deleteToolAssignmentForPsychologist,
 } from '@/lib/supabase/queries/tools'
-import { createClient } from '@/lib/supabase/server'
+
+async function requirePatientsWorkspace() {
+    const { supabase, profile, viewer } = await getCurrentInternalAccessContext()
+
+    if (!profile || !viewer) {
+        return { supabase, profile: null, error: 'No autenticado' }
+    }
+
+    if (!canAccessPatientsModule(viewer)) {
+        return { supabase, profile: null, error: 'No autorizado' }
+    }
+
+    return { supabase, profile, error: null }
+}
+
+async function hasActivePatientRelationship(supabase: any, psychologistId: string, patientId: string) {
+    const { data: relationship } = await (supabase
+        .from('patient_psychologist_relationships') as any)
+        .select('id')
+        .eq('patient_id', patientId)
+        .eq('psychologist_id', psychologistId)
+        .eq('status', 'active')
+        .maybeSingle()
+
+    return relationship
+}
 
 /**
  * Server action: Assign a tool to a patient
@@ -22,15 +49,18 @@ export async function assignToolAction(formData: FormData) {
         return { error: 'Herramienta y paciente son requeridos' }
     }
 
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { supabase, profile, error: accessError } = await requirePatientsWorkspace()
+    if (accessError || !profile) return { error: accessError }
 
-    if (!user) return { error: 'No autenticado' }
+    const relationship = await hasActivePatientRelationship(supabase, profile.id, patientId)
+    if (!relationship) {
+        return { error: 'No tienes acceso a este paciente' }
+    }
 
     const result = await createToolAssignment({
         tool_id: toolId,
         patient_id: patientId,
-        psychologist_id: user.id,
+        psychologist_id: profile.id,
         instructions: instructions || null,
         due_date: dueDate || null
     })
@@ -55,12 +85,10 @@ export async function toggleVisibilityAction(formData: FormData) {
         return { error: 'Assignment ID requerido' }
     }
 
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { profile, error: accessError } = await requirePatientsWorkspace()
+    if (accessError || !profile) return { error: accessError }
 
-    if (!user) return { error: 'No autenticado' }
-
-    const result = await toggleResultsVisibilityForPsychologist(user.id, assignmentId, visible)
+    const result = await toggleResultsVisibilityForPsychologist(profile.id, assignmentId, visible)
 
     if (!result) {
         return { error: 'No tienes permisos para cambiar la visibilidad de esta herramienta' }
@@ -83,12 +111,10 @@ export async function deleteAssignmentAction(formData: FormData) {
         return { error: 'Assignment ID requerido' }
     }
 
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { profile, error: accessError } = await requirePatientsWorkspace()
+    if (accessError || !profile) return { error: accessError }
 
-    if (!user) return { error: 'No autenticado' }
-
-    const result = await deleteToolAssignmentForPsychologist(user.id, assignmentId)
+    const result = await deleteToolAssignmentForPsychologist(profile.id, assignmentId)
 
     if (!result) {
         return { error: 'No tienes permisos para eliminar esta asignacion' }
@@ -101,7 +127,7 @@ export async function deleteAssignmentAction(formData: FormData) {
 }
 
 /**
- * Server action: Create a quick therapeutic tool draft for psychologists/admins
+ * Server action: Create a quick therapeutic tool draft for psychologists with clinical access
  */
 export async function createToolAction(input: {
     title: string
@@ -110,20 +136,8 @@ export async function createToolAction(input: {
     estimatedMinutes?: number
     instructions?: string
 }) {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-
-    if (!user) return { error: 'No autenticado' }
-
-    const { data: profile } = await (supabase
-        .from('profiles') as any)
-        .select('role')
-        .eq('id', user.id)
-        .maybeSingle()
-
-    if (!profile || !['psychologist', 'admin'].includes(profile.role)) {
-        return { error: 'No tienes permisos para crear herramientas' }
-    }
+    const { profile, error: accessError } = await requirePatientsWorkspace()
+    if (accessError || !profile) return { error: accessError }
 
     const title = input.title?.trim()
     if (!title) {
@@ -138,7 +152,7 @@ export async function createToolAction(input: {
         category: (input.category as any) || 'exercise',
         estimated_minutes: estimatedMinutes,
         is_template: false,
-        created_by: user.id,
+        created_by: profile.id,
         tags: ['borrador', 'creado-por-psicologo'],
         schema: {
             version: '1.0',

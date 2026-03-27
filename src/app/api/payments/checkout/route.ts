@@ -14,37 +14,8 @@ import {
 } from '@/lib/events/pricing'
 import { getActiveEntitlementForEvent } from '@/lib/events/access'
 import { getUniqueEventAccessCount } from '@/lib/events/attendance'
-
-async function userCanAccessEventCheckout(
-    supabase: any,
-    userId: string,
-    profile: { role: string; membership_level: number | null },
-    event: any
-) {
-    const audience = Array.isArray(event.target_audience) ? event.target_audience : ['public']
-    const isRecordedProduct = isPurchasableRecordingEvent(event)
-
-    if (audience.includes('public')) return true
-    if (profile.role === 'admin') return true
-    if (isRecordedProduct) return true
-    if (audience.includes('members') && (profile.membership_level ?? 0) >= 1) return true
-    if (audience.includes('psychologists') && profile.role === 'psychologist') return true
-    if (audience.includes('patients') && profile.role === 'patient') return true
-
-    if (audience.includes('active_patients') && profile.role === 'patient') {
-        const { data: relationship } = await (supabase
-            .from('patient_psychologist_relationships') as any)
-            .select('id')
-            .eq('patient_id', userId)
-            .eq('status', 'active')
-            .limit(1)
-            .maybeSingle()
-
-        return Boolean(relationship)
-    }
-
-    return false
-}
+import { getEventGrantAccessKinds } from '@/lib/events/entitlements'
+import { audienceAllowsAccess, getCommercialAccessContext } from '@/lib/access/commercial'
 
 function guestCanAccessEventCheckout(event: any) {
     const audience = Array.isArray(event.target_audience) ? event.target_audience : ['public']
@@ -86,7 +57,7 @@ async function resolveEventPurchaseDetails(
     if (params.userId) {
         const { data: profile } = await (supabase
             .from('profiles') as any)
-            .select('role, membership_level, email')
+            .select('role, membership_level, subscription_status, email')
             .eq('id', params.userId)
             .single()
 
@@ -98,7 +69,18 @@ async function resolveEventPurchaseDetails(
             return { error: 'No necesitas checkout para este evento' as const }
         }
 
-        const hasAccess = await userCanAccessEventCheckout(supabase, params.userId, profile, event)
+        const commercialAccess = await getCommercialAccessContext({
+            supabase,
+            userId: params.userId,
+            profile,
+        })
+        if (!commercialAccess) {
+            return { error: 'No fue posible resolver el acceso comercial de esta cuenta' as const }
+        }
+        const hasAccess =
+            isPurchasableRecordingEvent(event) ||
+            audienceAllowsAccess(event.target_audience, commercialAccess, { creatorId: event.created_by })
+
         if (!hasAccess) {
             return { error: 'No tienes acceso a este evento' as const }
         }
@@ -109,6 +91,7 @@ async function resolveEventPurchaseDetails(
                 eventId: params.eventId,
                 userId: params.userId,
                 email: profile.email,
+                allowedAccessKinds: getEventGrantAccessKinds(event),
             })
             : null
 
@@ -130,8 +113,11 @@ async function resolveEventPurchaseDetails(
                 member_price: event.member_price,
                 member_access_type: normalizeMemberAccessType(event.member_access_type),
             },
-            profile.role,
-            profile.membership_level ?? 0
+            {
+                role: profile.role,
+                membershipLevel: commercialAccess.membershipLevel,
+                hasActiveMembership: commercialAccess.hasActiveMembership,
+            }
         )
 
         if (amount <= 0 && !canBuyRecordedAccess) {
@@ -175,6 +161,7 @@ async function createPendingEventPurchase(params: {
     fullName?: string | null
     amount: number
     analyticsContext?: any
+    attributionSnapshot?: any
 }) {
     const { data, error } = await (params.supabase
         .from('event_purchases') as any)
@@ -187,8 +174,12 @@ async function createPendingEventPurchase(params: {
             currency: 'MXN',
             payment_method: 'card',
             status: 'pending',
+            analytics_visitor_id: params.analyticsContext?.visitorId ?? null,
+            analytics_session_id: params.analyticsContext?.sessionId ?? null,
+            attribution_snapshot: params.attributionSnapshot ?? {},
             metadata: {
                 analytics: params.analyticsContext ?? null,
+                attribution_snapshot: params.attributionSnapshot ?? null,
             },
         })
         .select('id')
@@ -300,6 +291,7 @@ export async function POST(request: NextRequest) {
                 fullName: fullName || profile.data?.full_name || null,
                 amount: checkoutAmount,
                 analyticsContext,
+                attributionSnapshot,
             })
 
             metadata = {

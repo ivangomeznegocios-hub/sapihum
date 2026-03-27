@@ -15,6 +15,7 @@ import {
     getEventTypePurchaseLabel,
     isPurchasableRecordingEvent,
 } from '@/lib/events/pricing'
+import { getCommercialAccessContext, isCommunityReadOnlyViewer } from '@/lib/access/commercial'
 
 // Helper to format date in Spanish
 function formatEventDate(dateStr: string) {
@@ -63,14 +64,16 @@ function EventStatusBadge({ status }: { status: string }) {
 function EventCard({
     event,
     userId,
-    role,
-    membershipLevel,
+    commercialAccess,
     isReadOnly = false,
 }: {
     event: EventWithRegistration
     userId?: string
-    role?: string
-    membershipLevel?: number
+    commercialAccess?: {
+        role: string
+        membershipLevel: number
+        hasActiveMembership: boolean
+    }
     isReadOnly?: boolean
 }) {
     const isRegistered = event.registration?.status === 'registered'
@@ -84,8 +87,7 @@ function EventCard({
             member_price: event.member_price,
             member_access_type: event.member_access_type,
         },
-        role,
-        membershipLevel ?? 0
+        commercialAccess
     )
 
     // ──── READ-ONLY MODE (level 0 psychologists) ────
@@ -427,25 +429,24 @@ function EventCard({
 export default async function EventsPage() {
     const events = await getEventsWithRegistration()
     const profile = await getUserProfile()
-
-    let hasActiveRelationship = false
-    if (profile?.role === 'patient') {
-        const supabase = await createClient()
-        const { count } = await (supabase
-            .from('patient_psychologist_relationships') as any)
-            .select('*', { count: 'exact', head: true })
-            .eq('patient_id', profile.id)
-            .eq('status', 'active')
-        hasActiveRelationship = (count || 0) > 0
-    }
+    const supabase = profile ? await createClient() : null
+    const commercialAccess = profile && supabase
+        ? await getCommercialAccessContext({
+            supabase,
+            userId: profile.id,
+            profile,
+        })
+        : null
 
     const isPsychologist = profile?.role === 'psychologist'
-    const isActiveMember = profile?.role === 'admin' ||
-        profile?.role === 'ponente' ||
-        (profile?.membership_level ?? 0) >= 1
-
-    // Level 0 psychologists see events read-only
-    const isReadOnly = isPsychologist && (profile?.membership_level ?? 0) < 1
+    const isActiveMember = Boolean(
+        commercialAccess?.hasActiveMembership ||
+        profile?.role === 'admin' ||
+        profile?.role === 'ponente'
+    )
+    const isReadOnly = commercialAccess
+        ? isCommunityReadOnlyViewer(commercialAccess)
+        : Boolean(isPsychologist)
 
     // Separate events by status AND date
     // Events with status 'upcoming' but start_time in the past should go to past section
@@ -592,8 +593,11 @@ export default async function EventsPage() {
                                 key={event.id}
                                 event={event}
                                 userId={profile?.id}
-                                role={profile?.role}
-                                membershipLevel={profile?.membership_level ?? 0}
+                                commercialAccess={commercialAccess ? {
+                                    role: commercialAccess.role,
+                                    membershipLevel: commercialAccess.membershipLevel,
+                                    hasActiveMembership: commercialAccess.hasActiveMembership,
+                                } : undefined}
                                 isReadOnly={isReadOnly}
                             />
                         ))}
@@ -630,8 +634,11 @@ export default async function EventsPage() {
                                 key={event.id}
                                 event={event}
                                 userId={profile?.id}
-                                role={profile?.role}
-                                membershipLevel={profile?.membership_level ?? 0}
+                                commercialAccess={commercialAccess ? {
+                                    role: commercialAccess.role,
+                                    membershipLevel: commercialAccess.membershipLevel,
+                                    hasActiveMembership: commercialAccess.hasActiveMembership,
+                                } : undefined}
                                 isReadOnly={isReadOnly}
                             />
                         ))}
@@ -665,8 +672,11 @@ export default async function EventsPage() {
                                 key={event.id}
                                 event={event}
                                 userId={profile?.id}
-                                role={profile?.role}
-                                membershipLevel={profile?.membership_level ?? 0}
+                                commercialAccess={commercialAccess ? {
+                                    role: commercialAccess.role,
+                                    membershipLevel: commercialAccess.membershipLevel,
+                                    hasActiveMembership: commercialAccess.hasActiveMembership,
+                                } : undefined}
                                 isReadOnly={isReadOnly}
                             />
                         ))}

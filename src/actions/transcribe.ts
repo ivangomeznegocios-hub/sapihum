@@ -1,6 +1,8 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { getViewerCommercialAccessContext } from '@/lib/access/commercial'
+import { canUseClinicalAi } from '@/lib/access/internal-modules'
 import type { SOAPContent, ClinicalRecord } from '@/types/database'
 
 const GROQ_API_URL = 'https://api.groq.com/openai/v1'
@@ -179,10 +181,10 @@ async function validateClinicalAiAccess(
         return { success: false, error: 'Duracion de audio invalida' }
     }
 
-    const [{ data: profile }, { data: appointment }] = await Promise.all([
+    const [{ data: profile }, { data: appointment }, commercialAccess] = await Promise.all([
         (supabase
             .from('profiles') as any)
-            .select('id, role, membership_level, ai_minutes_available')
+            .select('id, role, ai_minutes_available')
             .eq('id', user.id)
             .single(),
         (supabase
@@ -190,13 +192,17 @@ async function validateClinicalAiAccess(
             .select('id, patient_id, psychologist_id')
             .eq('id', appointmentId)
             .single(),
+        getViewerCommercialAccessContext(supabase, user.id),
     ])
 
     if (!profile || profile.role !== 'psychologist') {
         return { success: false, error: 'Solo psicologos pueden usar IA clinica.' }
     }
 
-    if ((profile.membership_level ?? 0) < 2) {
+    if (!commercialAccess || !canUseClinicalAi({
+        role: commercialAccess.profile.role,
+        membershipLevel: commercialAccess.membershipLevel,
+    })) {
         return { success: false, error: 'Tu membresia actual no incluye IA clinica.' }
     }
 

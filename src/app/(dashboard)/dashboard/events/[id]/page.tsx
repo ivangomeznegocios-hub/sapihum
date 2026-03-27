@@ -20,6 +20,7 @@ import {
     isPurchasableRecordingEvent,
     normalizeMemberAccessType,
 } from '@/lib/events/pricing'
+import { audienceAllowsAccess, getCommercialAccessContext, isCommunityReadOnlyViewer } from '@/lib/access/commercial'
 import {
     Calendar,
     Clock,
@@ -46,8 +47,12 @@ export default async function EventDetailPage({ params }: PageProps) {
         redirect('/auth/login')
     }
 
-    const isPsychologist = profile?.role === 'psychologist'
-    const isReadOnly = isPsychologist && (profile?.membership_level ?? 0) < 1
+    const commercialAccess = await getCommercialAccessContext({
+        supabase,
+        userId: profile.id,
+        profile,
+    })
+    const isReadOnly = isCommunityReadOnlyViewer(commercialAccess)
 
     // Get event details
     const { data: eventData, error } = await supabase
@@ -84,7 +89,51 @@ export default async function EventDetailPage({ params }: PageProps) {
             eventId: id,
             userId: profile.id,
             email: profile.email,
+            eventType: event.event_type,
         })
+
+    const replayEntitlement = canManageEvent
+        ? null
+        : await getActiveEntitlementForEvent({
+            supabase,
+            eventId: id,
+            userId: profile.id,
+            email: profile.email,
+            allowedAccessKinds: ['replay_access'],
+        })
+
+    const canReachOffer = commercialAccess
+        ? audienceAllowsAccess(event.target_audience, commercialAccess, { creatorId: event.created_by })
+        : false
+
+    if (!canManageEvent && !canReachOffer && !isRegistered && !accessEntitlement) {
+        return (
+            <div className="space-y-8">
+                <Link
+                    href="/dashboard/events"
+                    className="inline-flex items-center text-muted-foreground hover:text-primary transition-colors"
+                >
+                    <ArrowLeft className="h-4 w-4 mr-2" />
+                    Volver a eventos
+                </Link>
+                <Card>
+                    <CardContent className="flex flex-col items-center justify-center py-12 text-center">
+                        <h3 className="text-lg font-medium mb-2">Acceso restringido</h3>
+                        <p className="text-muted-foreground text-sm max-w-md">
+                            Este evento no esta disponible para tu perfil actual.
+                        </p>
+                        {profile.role === 'psychologist' ? (
+                            <div className="mt-4">
+                                <Button asChild>
+                                    <Link href="/precios">Ver membresia</Link>
+                                </Button>
+                            </div>
+                        ) : null}
+                    </CardContent>
+                </Card>
+            </div>
+        )
+    }
 
     const attendeeCount = await getUniqueEventAccessCount(supabase, id)
     const hasEventAccess = canManageEvent || isRegistered || Boolean(accessEntitlement)
@@ -120,8 +169,11 @@ export default async function EventDetailPage({ params }: PageProps) {
                 member_price: event.member_price,
                 member_access_type: normalizeMemberAccessType(event.member_access_type),
             },
-            profile.role,
-            profile.membership_level ?? 0
+            {
+                role: commercialAccess?.role ?? profile.role,
+                membershipLevel: commercialAccess?.membershipLevel ?? 0,
+                hasActiveMembership: commercialAccess?.hasActiveMembership ?? false,
+            }
         )
 
         if (profile.role !== 'admin' && currentPrice > 0) {
@@ -147,9 +199,9 @@ export default async function EventDetailPage({ params }: PageProps) {
     const canSeeMeetingLink = event.meeting_link && hasEventAccess && (isSameDay || isEventTime) && event.status !== 'completed'
 
     // Check if user can see recording while access is still active
-    const canSeeRecording = event.recording_url && event.status === 'completed' && (
+    const canSeeRecording = Boolean(event.recording_url) && event.status === 'completed' && (
         (!event.recording_expires_at || new Date(event.recording_expires_at) > now) &&
-        hasEventAccess
+        (canManageEvent || Boolean(replayEntitlement) || (event.event_type === 'on_demand' && Boolean(accessEntitlement)))
     )
 
     const formatDate = (dateStr: string) => {

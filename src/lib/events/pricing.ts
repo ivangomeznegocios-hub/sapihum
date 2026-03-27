@@ -50,10 +50,9 @@ export function getEventMemberAccessMessage(event: Pick<Event, 'price' | 'member
     }
 }
 
-export function getEffectiveEventPriceForProfile(
+export function getEffectiveEventPriceForMembership(
     event: Pick<Event, 'price' | 'member_price' | 'member_access_type'>,
-    role?: string,
-    membershipLevel = 0
+    hasActiveMembership: boolean
 ) {
     const publicPrice = Number(event.price || 0)
     const memberPrice = event.member_price !== null && event.member_price !== undefined
@@ -61,7 +60,7 @@ export function getEffectiveEventPriceForProfile(
         : publicPrice
     const accessType = normalizeMemberAccessType(event.member_access_type)
 
-    if (role === 'psychologist' && membershipLevel > 0) {
+    if (hasActiveMembership) {
         switch (accessType) {
             case 'free':
                 return 0
@@ -74,6 +73,19 @@ export function getEffectiveEventPriceForProfile(
     }
 
     return publicPrice
+}
+
+export function getEffectiveEventPriceForProfile(
+    event: Pick<Event, 'price' | 'member_price' | 'member_access_type'>,
+    roleOrContext?: string | { role?: string; membershipLevel?: number; hasActiveMembership?: boolean },
+    membershipLevel = 0
+) {
+    const hasActiveMembership =
+        typeof roleOrContext === 'object' && roleOrContext !== null
+            ? (roleOrContext.hasActiveMembership ?? (roleOrContext.membershipLevel ?? 0) > 0)
+            : membershipLevel > 0
+
+    return getEffectiveEventPriceForMembership(event, hasActiveMembership)
 }
 
 export function isPurchasableRecordingEvent(event: Pick<Event, 'status' | 'recording_url' | 'recording_expires_at' | 'event_type'>, now = new Date()) {

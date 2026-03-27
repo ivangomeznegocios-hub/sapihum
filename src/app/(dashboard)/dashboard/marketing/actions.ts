@@ -1,22 +1,33 @@
 'use server'
 
-import { createClient } from '@/lib/supabase/server'
+import { getCurrentInternalAccessContext } from '@/lib/access/internal-server'
+import { canAccessMarketingHub } from '@/lib/access/internal-modules'
 import { revalidatePath } from 'next/cache'
 import { initializeMarketingServices } from '@/lib/supabase/queries/marketing-services'
 
-// ============================================
-// INITIALIZE SERVICES (called on first page visit)
-// ============================================
+async function requireMarketingHubAccess() {
+    const { supabase, profile, viewer } = await getCurrentInternalAccessContext()
+
+    if (!profile || !viewer) {
+        return { supabase, profile: null, error: 'No autenticado' }
+    }
+
+    if (!canAccessMarketingHub(viewer)) {
+        return { supabase, profile: null, error: 'No autorizado' }
+    }
+
+    return { supabase, profile, error: null }
+}
+
 export async function initializeServicesIfNeeded(): Promise<{
     success: boolean
     error?: string
 }> {
     try {
-        const supabase = await createClient()
-        const { data: { user } } = await supabase.auth.getUser()
-        if (!user) return { success: false, error: 'No autenticado' }
+        const { profile, error } = await requireMarketingHubAccess()
+        if (!profile) return { success: false, error: error || 'No autenticado' }
 
-        await initializeMarketingServices(user.id)
+        await initializeMarketingServices(profile.id)
         revalidatePath('/dashboard/marketing')
         return { success: true }
     } catch (err) {
@@ -25,9 +36,6 @@ export async function initializeServicesIfNeeded(): Promise<{
     }
 }
 
-// ============================================
-// SUBMIT / UPDATE BRAND BRIEF
-// ============================================
 export async function submitBrandBrief(formData: {
     brand_name: string
     tone_of_voice: string
@@ -38,30 +46,14 @@ export async function submitBrandBrief(formData: {
     additional_notes: string
 }): Promise<{ success: boolean; error?: string }> {
     try {
-        const supabase = await createClient()
-        const { data: { user } } = await supabase.auth.getUser()
-        if (!user) return { success: false, error: 'No autenticado' }
+        const { supabase, profile, error: accessError } = await requireMarketingHubAccess()
+        if (!profile) return { success: false, error: accessError || 'No autenticado' }
 
-        // Check if user has level 3
-        const { data: profile } = await supabase
-            .from('profiles')
-            .select('membership_level, role')
-            .eq('id', user.id)
-            .single()
-
-        if (!profile) return { success: false, error: 'Perfil no encontrado' }
-
-        const p = profile as any
-        if (p.role !== 'admin' && (p.membership_level ?? 0) < 3) {
-            return { success: false, error: 'Se requiere membresía nivel 3' }
-        }
-
-        // Upsert brief (one per user)
         const { error } = await (supabase as any)
             .from('marketing_briefs')
             .upsert(
                 {
-                    user_id: user.id,
+                    user_id: profile.id,
                     ...formData,
                     status: 'submitted',
                 },
@@ -73,19 +65,17 @@ export async function submitBrandBrief(formData: {
             return { success: false, error: 'Error al guardar el brief' }
         }
 
-        // Update community_manager service to in_progress if it was pending
         await (supabase as any)
             .from('marketing_services')
             .update({ status: 'in_progress' })
-            .eq('user_id', user.id)
+            .eq('user_id', profile.id)
             .eq('service_key', 'community_manager')
             .eq('status', 'pending_brief')
 
-        // Update content_creation to in_progress too
         await (supabase as any)
             .from('marketing_services')
             .update({ status: 'in_progress' })
-            .eq('user_id', user.id)
+            .eq('user_id', profile.id)
             .eq('service_key', 'content_creation')
             .eq('status', 'pending_brief')
 

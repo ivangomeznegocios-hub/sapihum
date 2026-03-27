@@ -6,6 +6,8 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { InteractiveToolViewer } from '@/components/interactive-tool-viewer'
 import { getActiveEntitlementForEvent } from '@/lib/events/access'
+import { getCommercialAccessContext } from '@/lib/access/commercial'
+import { canViewerSeeListedResource } from '@/lib/access/catalog'
 import { ArrowLeft, ExternalLink } from 'lucide-react'
 
 interface PageProps {
@@ -32,11 +34,42 @@ export default async function ResourceDetailPage({ params }: PageProps) {
         notFound()
     }
 
+    const commercialAccess = await getCommercialAccessContext({
+        supabase,
+        userId: profile.id,
+        profile,
+    })
+    if (!commercialAccess) {
+        redirect('/dashboard/resources')
+    }
     const isAdmin = profile.role === 'admin'
     const isCreator = resource.created_by === profile.id
+    const hasStandardAccess = canViewerSeeListedResource(resource as any, commercialAccess.viewer)
 
     // Check if user has access
-    if (resource.visibility === 'private' && !isAdmin && !isCreator) {
+    if (!hasStandardAccess) {
+        if (resource.visibility !== 'private' || isAdmin || isCreator) {
+            return (
+                <div className="space-y-8">
+                    <Link
+                        href="/dashboard/resources"
+                        className="inline-flex items-center text-muted-foreground hover:text-primary transition-colors"
+                    >
+                        <ArrowLeft className="h-4 w-4 mr-2" />
+                        Volver a recursos
+                    </Link>
+                    <Card>
+                        <CardContent className="flex flex-col items-center justify-center py-12 text-center">
+                            <h3 className="text-lg font-medium mb-2">Acceso restringido</h3>
+                            <p className="text-muted-foreground text-sm max-w-md">
+                                No tienes permisos para acceder a este recurso.
+                            </p>
+                        </CardContent>
+                    </Card>
+                </div>
+            )
+        }
+
         // Check if assigned to this user or if registered to linked event
         const { data: assignment } = await (supabase
             .from('patient_resources') as any)
@@ -49,7 +82,7 @@ export default async function ResourceDetailPage({ params }: PageProps) {
             .from('event_resources') as any)
             .select(`
                 event_id,
-                events:event_id (id)
+                events:event_id (id, event_type)
             `)
             .eq('resource_id', id)
             .limit(1)
@@ -61,6 +94,7 @@ export default async function ResourceDetailPage({ params }: PageProps) {
                     eventId: link.event_id,
                     userId: profile.id,
                     email: profile.email,
+                    eventType: link.events?.event_type,
                 })
 
                 if (entitlement) {

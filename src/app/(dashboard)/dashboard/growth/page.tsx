@@ -20,6 +20,8 @@ import { getInviteRewardEvents } from '@/lib/supabase/queries/invite-referrals'
 import { getActiveCampaigns, getTopReferrers } from '@/lib/supabase/queries/growth-campaigns'
 import { cn } from '@/lib/utils'
 import type { GrowthCampaign } from '@/types/database'
+import { getCommercialAccessContext } from '@/lib/access/commercial'
+import { canAccessGrowthHub } from '@/lib/access/internal-modules'
 import {
     CampaignCard,
     CopyCodeButton,
@@ -66,19 +68,26 @@ export default async function GrowthHubPage() {
 
     if (!user) redirect('/auth/login')
 
-    const { data: profile } = await supabase
-        .from('profiles')
-        .select('role, membership_level')
-        .eq('id', user.id)
-        .single()
+    const commercialAccess = await getCommercialAccessContext({
+        supabase,
+        userId: user.id,
+    })
 
-    if (!profile) redirect('/auth/login')
+    if (!commercialAccess) redirect('/auth/login')
 
-    const role = (profile as any).role as string
-    const membershipLevel = (profile as any).membership_level || 0
+    const role = commercialAccess.role
+    const viewer = {
+        role,
+        membershipLevel: commercialAccess.membershipLevel,
+    }
 
-    if (role === 'patient') redirect('/dashboard')
-    if (role === 'psychologist' && membershipLevel < 1) redirect('/dashboard/subscription')
+    if (!canAccessGrowthHub(viewer)) {
+        if (role === 'psychologist') {
+            redirect('/dashboard/subscription')
+        }
+
+        redirect('/dashboard')
+    }
 
     const headersList = await headers()
     const host = headersList.get('host') || 'localhost:3000'

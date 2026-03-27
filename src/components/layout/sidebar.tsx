@@ -23,9 +23,7 @@ import {
     GitBranch,
     BookUser,
     ChevronDown,
-    Lock,
     Sparkles,
-    Check,
     Newspaper,
     Handshake,
     GraduationCap,
@@ -35,21 +33,18 @@ import {
     DollarSign,
     Gift,
     TrendingUp,
+    ShieldCheck,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { getMembershipTier } from '@/lib/membership'
 import type { UserRole } from '@/types/database'
-import { canUserSeeLevel3Offer } from '@/lib/specializations'
+import { canSeeSidebarItem } from '@/lib/access/internal-modules'
 
-// ────────────────────────────────────────
-// Navigation item types
-// ────────────────────────────────────────
 interface NavItem {
     name: string
     href: string
     icon: React.ElementType
     roles: UserRole[]
-    minLevel?: number // Minimum membership level required
 }
 
 interface NavGroup {
@@ -58,40 +53,37 @@ interface NavGroup {
     items: NavItem[]
 }
 
-// ────────────────────────────────────────
-// Grouped navigation definitions
-// ────────────────────────────────────────
 const navGroups: NavGroup[] = [
     {
         label: 'Principal',
         roles: ['admin', 'psychologist', 'patient', 'ponente'],
         items: [
             { name: 'Inicio', href: '/dashboard', icon: Home, roles: ['admin', 'psychologist', 'patient', 'ponente'] },
-            { name: 'Calendario', href: '/dashboard/calendar', icon: Calendar, roles: ['admin', 'patient'], minLevel: 2 },
-            { name: 'Mensajes', href: '/dashboard/messages', icon: MessageSquare, roles: ['admin', 'psychologist', 'patient'], minLevel: 2 },
-            { name: 'Invitacion Pro', href: '/dashboard/growth', icon: Gift, roles: ['admin', 'psychologist', 'ponente'], minLevel: 1 },
+            { name: 'Calendario', href: '/dashboard/calendar', icon: Calendar, roles: ['admin', 'patient'] },
+            { name: 'Mensajes', href: '/dashboard/messages', icon: MessageSquare, roles: ['admin', 'psychologist', 'patient'] },
+            { name: 'Invitacion Pro', href: '/dashboard/growth', icon: Gift, roles: ['admin', 'psychologist', 'ponente'] },
         ],
     },
     {
         label: 'Comunidad',
         roles: ['admin', 'psychologist', 'patient', 'ponente'],
         items: [
-            { name: 'Eventos', href: '/dashboard/events', icon: CalendarDays, roles: ['admin', 'psychologist', 'patient', 'ponente'], minLevel: 1 },
-            { name: 'Networking', href: '/dashboard/events/networking', icon: Users2, roles: ['admin', 'psychologist', 'ponente'], minLevel: 1 },
-            { name: 'Escuela Clínica', href: '/dashboard/events/clinical', icon: GraduationCap, roles: ['admin', 'psychologist', 'ponente'], minLevel: 1 },
-            { name: 'Negocios', href: '/dashboard/events/business', icon: Briefcase, roles: ['admin', 'psychologist', 'ponente'], minLevel: 1 },
-            { name: 'Grabaciones', href: '/dashboard/events/recordings', icon: Video, roles: ['admin', 'psychologist', 'ponente'], minLevel: 1 },
+            { name: 'Eventos', href: '/dashboard/events', icon: CalendarDays, roles: ['admin', 'psychologist', 'patient', 'ponente'] },
+            { name: 'Networking', href: '/dashboard/events/networking', icon: Users2, roles: ['admin', 'psychologist', 'ponente'] },
+            { name: 'Escuela Clinica', href: '/dashboard/events/clinical', icon: GraduationCap, roles: ['admin', 'psychologist', 'ponente'] },
+            { name: 'Negocios', href: '/dashboard/events/business', icon: Briefcase, roles: ['admin', 'psychologist', 'ponente'] },
+            { name: 'Grabaciones', href: '/dashboard/events/recordings', icon: Video, roles: ['admin', 'psychologist', 'ponente'] },
             { name: 'Ponentes', href: '/dashboard/speakers', icon: Mic2, roles: ['admin', 'psychologist', 'ponente'] },
-            { name: 'Recursos', href: '/dashboard/resources', icon: BookOpen, roles: ['admin', 'psychologist', 'ponente'], minLevel: 1 },
-            { name: 'Newsletter', href: '/dashboard/newsletter', icon: Newspaper, roles: ['admin', 'psychologist', 'ponente'], minLevel: 1 },
-            { name: 'Convenios', href: '/dashboard/agreements', icon: Handshake, roles: ['admin', 'psychologist', 'ponente'], minLevel: 1 },
+            { name: 'Recursos', href: '/dashboard/resources', icon: BookOpen, roles: ['admin', 'psychologist', 'ponente'] },
+            { name: 'Newsletter', href: '/dashboard/newsletter', icon: Newspaper, roles: ['admin', 'psychologist', 'ponente'] },
+            { name: 'Convenios', href: '/dashboard/agreements', icon: Handshake, roles: ['admin', 'psychologist', 'ponente'] },
         ],
     },
     {
         label: 'Mi Proceso',
         roles: ['admin', 'patient'],
         items: [
-            { name: 'Mi Psicólogo', href: '/dashboard/my-psychologist', icon: UserCog, roles: ['admin', 'patient'] },
+            { name: 'Mi Psicologo', href: '/dashboard/my-psychologist', icon: UserCog, roles: ['admin', 'patient'] },
             { name: 'Agendar Cita', href: '/dashboard/booking', icon: CalendarPlus, roles: ['admin', 'patient'] },
             { name: 'Tareas', href: '/dashboard/tasks', icon: CheckSquare, roles: ['admin', 'patient'] },
             { name: 'Herramientas', href: '/dashboard/tools', icon: Brain, roles: ['admin', 'patient'] },
@@ -102,23 +94,23 @@ const navGroups: NavGroup[] = [
         label: 'Nivel 2 - Especializacion',
         roles: ['admin', 'psychologist'],
         items: [
-            { name: 'Calendario', href: '/dashboard/calendar', icon: Calendar, roles: ['admin', 'psychologist'], minLevel: 2 },
-            { name: 'Mis Pacientes', href: '/dashboard/patients', icon: Users, roles: ['admin', 'psychologist'], minLevel: 2 },
-            { name: 'Tareas', href: '/dashboard/tasks', icon: CheckSquare, roles: ['admin', 'psychologist'], minLevel: 2 },
-            { name: 'Documentos', href: '/dashboard/documents', icon: FileText, roles: ['admin', 'psychologist'], minLevel: 2 },
-            { name: 'Canalizacion', href: '/dashboard/referrals', icon: GitBranch, roles: ['admin', 'psychologist'], minLevel: 2 },
-            { name: 'Estadísticas', href: '/dashboard/analytics', icon: BarChart3, roles: ['admin', 'psychologist'], minLevel: 2 },
+            { name: 'Calendario', href: '/dashboard/calendar', icon: Calendar, roles: ['admin', 'psychologist'] },
+            { name: 'Mis Pacientes', href: '/dashboard/patients', icon: Users, roles: ['admin', 'psychologist'] },
+            { name: 'Tareas', href: '/dashboard/tasks', icon: CheckSquare, roles: ['admin', 'psychologist'] },
+            { name: 'Documentos', href: '/dashboard/documents', icon: FileText, roles: ['admin', 'psychologist'] },
+            { name: 'Canalizacion', href: '/dashboard/referrals', icon: GitBranch, roles: ['admin', 'psychologist'] },
+            { name: 'Estadisticas', href: '/dashboard/analytics', icon: BarChart3, roles: ['admin', 'psychologist'] },
         ],
     },
     {
         label: 'Nivel 3 - Avanzado',
         roles: ['admin', 'psychologist'],
         items: [
-            { name: 'Hub Avanzado', href: '/dashboard/marketing', icon: Sparkles, roles: ['admin', 'psychologist'], minLevel: 3 },
+            { name: 'Hub Avanzado', href: '/dashboard/marketing', icon: Sparkles, roles: ['admin', 'psychologist'] },
         ],
     },
     {
-        label: 'Gestión de Eventos',
+        label: 'Gestion de Eventos',
         roles: ['admin', 'ponente'],
         items: [
             { name: 'Mis Eventos', href: '/dashboard/events', icon: CalendarDays, roles: ['admin', 'ponente'] },
@@ -130,10 +122,11 @@ const navGroups: NavGroup[] = [
 ]
 
 const adminGroup: NavGroup = {
-    label: 'Administración',
-    roles: ['admin'],
+    label: 'Administracion',
+    roles: ['admin', 'support'],
     items: [
         { name: 'Panel Admin', href: '/dashboard/admin', icon: Shield, roles: ['admin'] },
+        { name: 'Operaciones', href: '/dashboard/admin/operations', icon: ShieldCheck, roles: ['admin', 'support'] },
         { name: 'Usuarios', href: '/dashboard/admin/users', icon: UserCog, roles: ['admin'] },
         { name: 'Directorio', href: '/dashboard/admin/directory', icon: BookUser, roles: ['admin'] },
         { name: 'Ganancias Ponentes', href: '/dashboard/admin/earnings', icon: DollarSign, roles: ['admin'] },
@@ -147,30 +140,31 @@ const adminGroup: NavGroup = {
 }
 
 const bottomNav: NavItem[] = [
-    { name: 'Suscripción', href: '/dashboard/subscription', icon: CreditCard, roles: ['admin', 'psychologist'] },
-    { name: 'Configuración', href: '/dashboard/settings', icon: Settings, roles: ['admin', 'psychologist', 'patient', 'ponente'] },
+    { name: 'Suscripcion', href: '/dashboard/subscription', icon: CreditCard, roles: ['admin', 'psychologist'] },
+    { name: 'Configuracion', href: '/dashboard/settings', icon: Settings, roles: ['admin', 'support', 'psychologist', 'patient', 'ponente'] },
 ]
 
-// ────────────────────────────────────────
-// Collapsible Group Component
-// ────────────────────────────────────────
 function NavGroupSection({
     group,
     userRole,
     membershipLevel,
+    membershipSpecializationCode,
     pathname,
     onNavigate,
 }: {
     group: NavGroup
     userRole: UserRole
     membershipLevel: number
+    membershipSpecializationCode?: string | null
     pathname: string
     onNavigate?: () => void
 }) {
-    // Check if any item in the group is active (so we start expanded)
-    const hasActiveItem = group.items.some(
-        item => item.roles.includes(userRole) && pathname === item.href
-    )
+    const visibleItems = group.items.filter((item) => item.roles.includes(userRole) && canSeeSidebarItem(item.href, {
+        role: userRole,
+        membershipLevel,
+        membershipSpecializationCode,
+    }))
+    const hasActiveItem = visibleItems.some((item) => pathname === item.href)
     const [isOpen, setIsOpen] = useState(true)
     const groupId = group.label.toLowerCase().replace(/[^a-z0-9]+/g, '-')
 
@@ -180,7 +174,6 @@ function NavGroupSection({
         }
     }, [hasActiveItem])
 
-    const visibleItems = group.items.filter(item => item.roles.includes(userRole))
     if (visibleItems.length === 0) return null
 
     return (
@@ -190,7 +183,7 @@ function NavGroupSection({
                 aria-expanded={isOpen}
                 aria-controls={`nav-group-${groupId}`}
                 onClick={() => setIsOpen(!isOpen)}
-                className="flex w-full items-center justify-between px-2 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-sidebar-foreground/50 hover:text-sidebar-foreground/70 transition-colors"
+                className="flex w-full items-center justify-between px-2 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-sidebar-foreground/50 transition-colors hover:text-sidebar-foreground/70"
             >
                 {group.label}
                 <ChevronDown
@@ -205,66 +198,29 @@ function NavGroupSection({
                 <ul id={`nav-group-${groupId}`} className="mt-0.5 space-y-0.5">
                     {visibleItems.map((item) => {
                         const isActive = pathname === item.href
-                        const isLocked = userRole === 'psychologist' && item.minLevel !== undefined && membershipLevel < item.minLevel
-                        // Marketing Premium items are managed services — link to Hub
-                        const isManagedService = item.minLevel === 3 && item.href === '/dashboard/marketing'
 
                         return (
                             <li key={item.name}>
-                                {isLocked ? (
-                                    <Link
-                                        href="/dashboard/subscription"
-                                        onClick={onNavigate}
-                                        className="group flex items-center gap-x-3 rounded-md px-2 py-1.5 text-sm font-medium text-sidebar-foreground/35 hover:text-sidebar-foreground/50 hover:bg-sidebar-accent/30 transition-colors"
-                                        title={item.minLevel === 3 ? 'Nivel 3 - Avanzado' : item.minLevel === 2 ? 'Nivel 2 - Especializacion' : 'Nivel 1 - Comunidad'}
-                                    >
-                                        <item.icon className="h-4 w-4 shrink-0" />
-                                        <span className="flex-1 truncate">{item.name}</span>
-                                        {item.minLevel === 3 ? (
-                                            <Sparkles className="h-3 w-3 opacity-50 text-amber-400" />
-                                        ) : (
-                                            <Lock className="h-3 w-3 opacity-50" />
-                                        )}
-                                    </Link>
-                                ) : isManagedService ? (
-                                    /* Managed services: show as active with check, navigate to hub */
-                                    <Link
-                                        href={item.href}
-                                        onClick={onNavigate}
+                                <Link
+                                    href={item.href}
+                                    onClick={onNavigate}
+                                    className={cn(
+                                        'group flex items-center gap-x-3 rounded-md px-2 py-1.5 text-sm font-medium transition-colors',
+                                        isActive
+                                            ? 'bg-sidebar-accent text-sidebar-accent-foreground'
+                                            : 'text-sidebar-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground'
+                                    )}
+                                >
+                                    <item.icon
                                         className={cn(
-                                            'group flex items-center gap-x-3 rounded-md px-2 py-1.5 text-sm font-medium transition-colors',
+                                            'h-4 w-4 shrink-0',
                                             isActive
-                                                ? 'bg-sidebar-accent text-sidebar-accent-foreground'
-                                                : 'text-sidebar-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground'
+                                                ? 'text-sidebar-primary'
+                                                : 'text-sidebar-foreground/60 group-hover:text-sidebar-primary'
                                         )}
-                                        title="Gestionar en tu Hub de Marketing Premium"
-                                    >
-                                        <item.icon className="h-4 w-4 shrink-0 text-amber-500" />
-                                        <span className="flex-1 truncate">{item.name}</span>
-                                        <Check className="h-3.5 w-3.5 text-emerald-500" />
-                                    </Link>
-                                ) : (
-                                    <Link
-                                        href={item.href}
-                                        onClick={onNavigate}
-                                        className={cn(
-                                            'group flex items-center gap-x-3 rounded-md px-2 py-1.5 text-sm font-medium transition-colors',
-                                            isActive
-                                                ? 'bg-sidebar-accent text-sidebar-accent-foreground'
-                                                : 'text-sidebar-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground'
-                                        )}
-                                    >
-                                        <item.icon
-                                            className={cn(
-                                                'h-4 w-4 shrink-0',
-                                                isActive
-                                                    ? 'text-sidebar-primary'
-                                                    : 'text-sidebar-foreground/60 group-hover:text-sidebar-primary'
-                                            )}
-                                        />
-                                        <span className="truncate">{item.name}</span>
-                                    </Link>
-                                )}
+                                    />
+                                    <span className="truncate">{item.name}</span>
+                                </Link>
                             </li>
                         )
                     })}
@@ -274,9 +230,6 @@ function NavGroupSection({
     )
 }
 
-// ────────────────────────────────────────
-// Membership Badge Component
-// ────────────────────────────────────────
 function MembershipBadge({
     level,
     onNavigate,
@@ -311,7 +264,7 @@ function MembershipBadge({
         >
             <div className="flex items-center gap-2">
                 <div className={cn('h-2 w-2 rounded-full', dotStyles[level] ?? dotStyles[0])} />
-                <span className="text-xs font-bold text-sidebar-foreground truncate">
+                <span className="truncate text-xs font-bold text-sidebar-foreground">
                     {tier.label}
                 </span>
             </div>
@@ -319,9 +272,6 @@ function MembershipBadge({
     )
 }
 
-// ────────────────────────────────────────
-// Main Sidebar Component
-// ────────────────────────────────────────
 interface SidebarProps {
     userRole?: UserRole | null
     membershipLevel?: number
@@ -341,51 +291,35 @@ export function Sidebar({
 
     if (!userRole) return null
 
-    const canSeeLevel3Group = canUserSeeLevel3Offer({
-        membershipLevel,
-        specializationCode: membershipSpecializationCode,
-        isAdmin: userRole === 'admin',
-    })
-
-    // Filter groups visible to this role
-    const visibleGroups = navGroups.filter((g) => {
-        if (!g.roles.includes(userRole)) return false
-        if (g.label === 'Nivel 3 - Avanzado') return canSeeLevel3Group
-        return true
-    })
+    const visibleGroups = navGroups.filter((group) => group.roles.includes(userRole))
     const showAdmin = adminGroup.roles.includes(userRole)
-
-    const filteredBottomNav = bottomNav.filter(item => item.roles.includes(userRole))
+    const filteredBottomNav = bottomNav.filter((item) => item.roles.includes(userRole))
 
     return (
         <aside className={cn(
-            "overflow-hidden bg-sidebar border-r border-sidebar-border",
+            'overflow-hidden border-r border-sidebar-border bg-sidebar',
             isMobile
-                ? "flex h-full w-full flex-col border-0 bg-transparent"
-                : "hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-64"
+                ? 'flex h-full w-full flex-col border-0 bg-transparent'
+                : 'hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-64'
         )}>
             <div className="flex h-full min-h-0 grow flex-col overflow-y-auto overscroll-contain bg-sidebar px-4 pb-4">
-                {/* Logo */}
                 <div className="flex h-14 shrink-0 items-center gap-2 px-1">
-                    <div className="h-7 w-7 rounded-lg bg-primary flex items-center justify-center">
+                    <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary">
                         <Brain className="h-4 w-4 text-primary-foreground" />
                     </div>
-                    <span className="text-sm font-bold text-sidebar-foreground tracking-tight">
-                        Comunidad Psicología
+                    <span className="text-sm font-bold tracking-tight text-sidebar-foreground">
+                        Comunidad Psicologia
                     </span>
                 </div>
 
-                {/* Membership Badge (only for psychologists) */}
                 {userRole === 'psychologist' && (
                     <div className="mb-4">
                         <MembershipBadge level={membershipLevel} onNavigate={onNavigate} />
                     </div>
                 )}
 
-                {/* Navigation Groups */}
                 <nav className="flex flex-1 flex-col">
                     <div className="flex flex-1 flex-col gap-y-4">
-                        {/* Main Groups */}
                         <div className="space-y-3">
                             {visibleGroups.map((group) => (
                                 <NavGroupSection
@@ -393,30 +327,31 @@ export function Sidebar({
                                     group={group}
                                     userRole={userRole}
                                     membershipLevel={membershipLevel}
+                                    membershipSpecializationCode={membershipSpecializationCode}
                                     pathname={pathname}
                                     onNavigate={onNavigate}
                                 />
                             ))}
                         </div>
 
-                        {/* Admin Group */}
                         {showAdmin && (
-                            <div className="pt-2 border-t border-sidebar-border">
+                            <div className="border-t border-sidebar-border pt-2">
                                 <NavGroupSection
                                     group={adminGroup}
                                     userRole={userRole}
                                     membershipLevel={membershipLevel}
+                                    membershipSpecializationCode={membershipSpecializationCode}
                                     pathname={pathname}
                                     onNavigate={onNavigate}
                                 />
                             </div>
                         )}
 
-                        {/* Bottom Navigation */}
-                        <div className="mt-auto pt-2 border-t border-sidebar-border">
+                        <div className="mt-auto border-t border-sidebar-border pt-2">
                             <ul className="space-y-0.5">
                                 {filteredBottomNav.map((item) => {
                                     const isActive = pathname === item.href
+
                                     return (
                                         <li key={item.href}>
                                             <Link

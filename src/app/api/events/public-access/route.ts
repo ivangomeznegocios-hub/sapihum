@@ -7,31 +7,7 @@ import {
 } from '@/lib/events/pricing'
 import { getUniqueEventAccessCount } from '@/lib/events/attendance'
 import { createClient } from '@/lib/supabase/server'
-
-async function canAuthenticatedUserAccessFreeEvent(supabase: any, userId: string, profile: any, event: any) {
-    const audience = Array.isArray(event.target_audience) ? event.target_audience : ['public']
-
-    if (profile.role === 'admin') return true
-    if (event.created_by === userId) return true
-    if (audience.includes('public')) return true
-    if (audience.includes('members') && (profile.membership_level ?? 0) >= 1) return true
-    if (audience.includes('psychologists') && profile.role === 'psychologist') return true
-    if (audience.includes('patients') && profile.role === 'patient') return true
-
-    if (audience.includes('active_patients') && profile.role === 'patient') {
-        const { data: relationship } = await (supabase
-            .from('patient_psychologist_relationships') as any)
-            .select('id')
-            .eq('patient_id', userId)
-            .eq('status', 'active')
-            .limit(1)
-            .maybeSingle()
-
-        return Boolean(relationship)
-    }
-
-    return false
-}
+import { audienceAllowsAccess, getCommercialAccessContext } from '@/lib/access/commercial'
 
 export async function POST(request: NextRequest) {
     try {
@@ -68,7 +44,7 @@ export async function POST(request: NextRequest) {
         if (user) {
             const { data: profile } = await (supabase
                 .from('profiles') as any)
-                .select('id, email, full_name, role, membership_level')
+                .select('id, email, full_name, role, membership_level, subscription_status')
                 .eq('id', user.id)
                 .single()
 
@@ -76,7 +52,17 @@ export async function POST(request: NextRequest) {
                 return NextResponse.json({ error: 'Perfil no encontrado' }, { status: 404 })
             }
 
-            const hasAudienceAccess = await canAuthenticatedUserAccessFreeEvent(supabase, user.id, profile, event)
+            const commercialAccess = await getCommercialAccessContext({
+                supabase,
+                userId: user.id,
+                profile,
+            })
+            if (!commercialAccess) {
+                return NextResponse.json({ error: 'No fue posible resolver el acceso comercial de esta cuenta' }, { status: 500 })
+            }
+            const hasAudienceAccess = audienceAllowsAccess(event.target_audience, commercialAccess, {
+                creatorId: event.created_by,
+            })
             if (!hasAudienceAccess) {
                 return NextResponse.json({ error: 'No tienes acceso a este activo' }, { status: 403 })
             }
@@ -87,8 +73,11 @@ export async function POST(request: NextRequest) {
                     member_price: event.member_price,
                     member_access_type: normalizeMemberAccessType(event.member_access_type),
                 },
-                profile.role,
-                profile.membership_level ?? 0
+                {
+                    role: profile.role,
+                    membershipLevel: commercialAccess.membershipLevel,
+                    hasActiveMembership: commercialAccess.hasActiveMembership,
+                }
             )
 
             if (effectivePrice > 0) {

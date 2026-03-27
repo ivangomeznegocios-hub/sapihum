@@ -4,6 +4,10 @@ import { redirect } from 'next/navigation'
 import type { ActivityItem } from '@/components/dashboard/ui/ActivityFeed'
 import type { ContentItem } from '@/components/dashboard/ui/ContentCarousel'
 import { getAssignedPsychologistForPatient } from '@/lib/supabase/queries/relationships'
+import { getCommercialAccessContext } from '@/lib/access/commercial'
+import { canAccessClinicalWorkspace, getPsychologistDashboardLevel } from '@/lib/access/internal-modules'
+import { getEventsWithRegistration } from '@/lib/supabase/queries/events'
+import { getVisibleResources } from '@/lib/supabase/queries/resources'
 
 // Helper to calculate profile completeness for psychologists
 function calculatePsychologistCompleteness(profile: any): number {
@@ -56,6 +60,16 @@ export default async function DashboardPage() {
 
     const userName = profile.full_name?.split(' ')[0] || 'Usuario'
     const userRole = profile.role
+    const commercialAccess = await getCommercialAccessContext({
+        supabase,
+        userId: profile.id,
+        profile,
+    })
+    const effectiveMembershipLevel = commercialAccess?.membershipLevel ?? 0
+
+    if (userRole === 'support') {
+        redirect('/dashboard/admin/operations')
+    }
 
     // ===== ADMIN DASHBOARD =====
     if (userRole === 'admin') {
@@ -137,32 +151,30 @@ export default async function DashboardPage() {
 
     // ===== PSYCHOLOGIST DASHBOARD =====
     if (userRole === 'psychologist') {
-        const membershipLevel = profile.membership_level ?? 0
+        const psychologistViewer = {
+            role: userRole,
+            membershipLevel: effectiveMembershipLevel,
+            membershipSpecializationCode: (profile as any)?.membership_specialization_code ?? null,
+        }
+        const dashboardMembershipLevel = getPsychologistDashboardLevel(psychologistViewer)
+        const hasClinicalWorkspace = canAccessClinicalWorkspace(psychologistViewer)
         const profileCompleteness = calculatePsychologistCompleteness(profile)
+        const visibleEvents = await getEventsWithRegistration()
+        const visibleResources = await getVisibleResources()
+        const upcomingVisibleEvents = visibleEvents
+            .filter((event) => event.status === 'upcoming')
+            .slice(0, 4)
+        const recentVisibleResources = visibleResources.slice(0, 3)
 
         let patientCount = 0
         let appointmentsToday = 0
         let hoursThisMonth = 0
         let upcomingAppointments: any[] = []
-        let activeEvents = 0
-        let availableResources = 0
+        const activeEvents = upcomingVisibleEvents.length
+        const availableResources = visibleResources.length
         let eventsAttended = 0
         let completedSessions = 0
         let pendingReferrals = 0
-
-        // Events count
-        const { count: eventsCount } = await (supabase
-            .from('events') as any)
-            .select('*', { count: 'exact', head: true })
-            .eq('status', 'upcoming')
-        activeEvents = eventsCount || 0
-
-        // Resources count
-        const { count: resourcesCount } = await (supabase
-            .from('resources') as any)
-            .select('*', { count: 'exact', head: true })
-            .eq('status', 'published')
-        availableResources = resourcesCount || 0
 
         // Events attended (registrations)
         const { count: regCount } = await (supabase
@@ -171,8 +183,8 @@ export default async function DashboardPage() {
             .eq('user_id', profile.id)
         eventsAttended = regCount || 0
 
-        // Level 2+ data
-        if (membershipLevel >= 2) {
+        // Clinical suite data
+        if (hasClinicalWorkspace) {
             const { count: pCount } = await (supabase
                 .from('patient_psychologist_relationships') as any)
                 .select('*', { count: 'exact', head: true })
@@ -238,7 +250,7 @@ export default async function DashboardPage() {
         // Build activity feed
         const recentActivity: ActivityItem[] = []
 
-        if (membershipLevel >= 2) {
+        if (hasClinicalWorkspace) {
             // Recent completed appointments
             const { data: recentApts } = await (supabase
                 .from('appointments') as any)
@@ -279,15 +291,7 @@ export default async function DashboardPage() {
         // Build content items
         const contentItems: ContentItem[] = []
 
-        // Upcoming events as content
-        const { data: upcomingEvts } = await (supabase
-            .from('events') as any)
-            .select('id, title, image_url, start_time')
-            .eq('status', 'upcoming')
-            .order('start_time', { ascending: true })
-            .limit(4)
-
-        for (const evt of upcomingEvts || []) {
+        for (const evt of upcomingVisibleEvents) {
             contentItems.push({
                 id: evt.id,
                 type: 'event',
@@ -298,15 +302,7 @@ export default async function DashboardPage() {
             })
         }
 
-        // Recent resources as content
-        const { data: recentRes } = await (supabase
-            .from('resources') as any)
-            .select('id, title, thumbnail_url')
-            .eq('status', 'published')
-            .order('created_at', { ascending: false })
-            .limit(3)
-
-        for (const res of recentRes || []) {
+        for (const res of recentVisibleResources) {
             contentItems.push({
                 id: res.id,
                 type: 'resource',
@@ -318,7 +314,7 @@ export default async function DashboardPage() {
 
         return (
             <PsychologistDashboard
-                membershipLevel={membershipLevel}
+                membershipLevel={dashboardMembershipLevel}
                 patientCount={patientCount}
                 appointmentsToday={appointmentsToday}
                 hoursMonth={Math.round(hoursThisMonth * 10) / 10}
@@ -340,6 +336,7 @@ export default async function DashboardPage() {
     if (userRole === 'patient') {
         const assignedPsychologist = await getAssignedPsychologistForPatient(profile.id)
         const psychologistName = assignedPsychologist?.full_name || null
+        const visibleEvents = await getEventsWithRegistration()
 
         // Upcoming appointments count
         const { count: appointmentCount } = await (supabase
@@ -391,15 +388,7 @@ export default async function DashboardPage() {
         // Content items for patient
         const contentItems: ContentItem[] = []
 
-        // Events
-        const { data: patientEvents } = await (supabase
-            .from('events') as any)
-            .select('id, title, image_url, start_time')
-            .eq('status', 'upcoming')
-            .order('start_time', { ascending: true })
-            .limit(3)
-
-        for (const evt of patientEvents || []) {
+        for (const evt of visibleEvents.filter((event) => event.status === 'upcoming').slice(0, 3)) {
             contentItems.push({
                 id: evt.id,
                 type: 'event',

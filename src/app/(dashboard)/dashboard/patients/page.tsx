@@ -1,4 +1,5 @@
-import { createClient, getUserProfile } from '@/lib/supabase/server'
+import { getCurrentInternalAccessContext } from '@/lib/access/internal-server'
+import { canAccessPatientsModule } from '@/lib/access/internal-modules'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
@@ -26,20 +27,18 @@ interface Relationship {
 }
 
 export default async function PatientsPage() {
-    const supabase = await createClient()
-    const profile = await getUserProfile()
+    const { supabase, profile, viewer } = await getCurrentInternalAccessContext()
 
-    if (!profile) {
+    if (!profile || !viewer) {
         redirect('/auth/login')
     }
 
-    // Only psychologists can access this page
-    if (profile.role !== 'psychologist') {
-        redirect('/dashboard')
-    }
+    if (!canAccessPatientsModule(viewer)) {
+        if (profile.role === 'psychologist') {
+            redirect('/dashboard/subscription')
+        }
 
-    if ((profile.membership_level ?? 0) < 2) {
-        redirect('/dashboard/subscription')
+        redirect('/dashboard')
     }
 
     // Get psychologist's patient relationships

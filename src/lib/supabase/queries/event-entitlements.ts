@@ -1,15 +1,14 @@
 import { getActiveEntitlementForEvent, claimEventEntitlementsByEmail } from '@/lib/events/access'
+import { getEventAccessKinds } from '@/lib/events/entitlements'
 import { getPublicEventPath } from '@/lib/events/public'
 import { createClient, getUserProfile } from '@/lib/supabase/server'
 
 export async function claimCurrentUserEventEntitlements() {
-    const supabase = await createClient()
     const profile = await getUserProfile()
 
     if (!profile?.id || !profile.email) return
 
     await claimEventEntitlementsByEmail({
-        supabase,
         userId: profile.id,
         email: profile.email,
     })
@@ -42,6 +41,7 @@ export async function userHasEventHubAccess(event: any) {
         eventId: event.id,
         userId: profile.id,
         email: profile.email,
+        eventType: event.event_type,
     })
 
     return {
@@ -84,6 +84,10 @@ export async function getMyAccessibleEvents() {
             continue
         }
 
+        if (!getEventAccessKinds({ event_type: row.event.event_type }).includes(row.access_kind)) {
+            continue
+        }
+
         const existing = dedupedByEvent.get(row.event.id)
         if (!existing) {
             dedupedByEvent.set(row.event.id, row)
@@ -102,4 +106,40 @@ export async function getMyAccessibleEvents() {
         ...row,
         public_path: getPublicEventPath(row.event),
     }))
+}
+
+export async function getMyReplayAccessibleEvents() {
+    const supabase = await createClient()
+    const profile = await getUserProfile()
+
+    if (!profile?.id || !profile.email) return []
+
+    await claimCurrentUserEventEntitlements()
+
+    const { data: entitlements, error } = await (supabase
+        .from('event_entitlements') as any)
+        .select(`
+            *,
+            event:events (*)
+        `)
+        .eq('status', 'active')
+        .eq('access_kind', 'replay_access')
+        .order('starts_at', { ascending: false })
+
+    if (error || !entitlements) {
+        console.error('Error loading replay entitlements:', error)
+        return []
+    }
+
+    return entitlements
+        .filter((row: any) => {
+            if (row.ends_at && new Date(row.ends_at) <= new Date()) {
+                return false
+            }
+            return Boolean(row.event)
+        })
+        .map((row: any) => ({
+            ...row,
+            public_path: getPublicEventPath(row.event),
+        }))
 }

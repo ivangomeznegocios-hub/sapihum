@@ -1,4 +1,6 @@
-import { createClient, createAdminClient } from '@/lib/supabase/server'
+import { getCommercialAccessContext } from '@/lib/access/commercial'
+import { canAccessMarketingHub } from '@/lib/access/internal-modules'
+import { createClient } from '@/lib/supabase/server'
 
 // ============================================
 // SERVICE KEY CONFIG
@@ -171,7 +173,8 @@ export async function initializeMarketingServices(userId: string): Promise<Marke
 // ============================================
 
 /**
- * Get all level-3 users with their marketing services and brief status.
+ * Get all psychologists with effective access to the marketing hub
+ * and include their services and brief status.
  * Admin-only.
  */
 export async function getMarketingOverview(): Promise<{
@@ -186,21 +189,37 @@ export async function getMarketingOverview(): Promise<{
 }> {
     const supabase = await createClient()
 
-    // Get all level-3 psychologists
+    // Start from psychologists and then resolve effective access using
+    // the same commercial + internal gating logic as the user-facing hub.
     const { data: profiles, error: profileError } = await supabase
         .from('profiles')
-        .select('id, full_name, avatar_url, email')
-        .eq('membership_level', 3)
+        .select('id, full_name, avatar_url, email, role, membership_level, subscription_status, membership_specialization_code')
+        .eq('role', 'psychologist')
         .order('full_name', { ascending: true })
 
     if (profileError || !profiles) {
-        console.error('Error fetching level-3 profiles:', profileError)
+        console.error('Error fetching marketing candidate profiles:', profileError)
         return { users: [] }
     }
 
-    // For each user, get services and briefs
-    const users = await Promise.all(
+    const users = (await Promise.all(
         (profiles as any[]).map(async (profile) => {
+            const commercialAccess = await getCommercialAccessContext({
+                supabase,
+                userId: profile.id,
+                profile,
+            })
+
+            const canAccess = canAccessMarketingHub({
+                role: profile.role,
+                membershipLevel: commercialAccess?.membershipLevel ?? 0,
+                membershipSpecializationCode: profile.membership_specialization_code ?? null,
+            })
+
+            if (!canAccess) {
+                return null
+            }
+
             const [services, brief] = await Promise.all([
                 getUserMarketingServices(profile.id),
                 getUserMarketingBrief(profile.id),
@@ -214,7 +233,14 @@ export async function getMarketingOverview(): Promise<{
                 brief,
             }
         })
-    )
+    )).filter(Boolean) as Array<{
+        id: string
+        full_name: string | null
+        avatar_url: string | null
+        email: string | null
+        services: MarketingService[]
+        brief: MarketingBrief | null
+    }>
 
     return { users }
 }

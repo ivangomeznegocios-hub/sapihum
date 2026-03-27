@@ -1,17 +1,61 @@
 'use server'
 
-import { createClient, createAdminClient, getUserProfile } from '@/lib/supabase/server'
+import { createClient, createAdminClient } from '@/lib/supabase/server'
+import { getCurrentInternalAccessContext } from '@/lib/access/internal-server'
+import { canAccessClinicalWorkspace } from '@/lib/access/internal-modules'
 import { revalidatePath } from 'next/cache'
 import { sendAppointmentConfirmationEmail, sendWelcomeEmail } from '@/lib/email'
 import { sendPushNotification } from '@/lib/onesignal'
 
-export async function createAppointment(formData: FormData) {
-    const supabase = await createClient()
-    const profile = await getUserProfile()
+async function requireClinicalPsychologist() {
+    const { supabase, profile, viewer } = await getCurrentInternalAccessContext()
 
-    if (!profile || profile.role !== 'psychologist') {
-        return { error: 'No autorizado' }
+    if (!profile || !viewer) {
+        return { supabase, profile: null, error: 'No autenticado' }
     }
+
+    if (profile.role !== 'psychologist' || !canAccessClinicalWorkspace(viewer)) {
+        return { supabase, profile: null, error: 'No autorizado' }
+    }
+
+    return { supabase, profile, error: null }
+}
+
+async function getAuthorizedAppointment(appointmentId: string) {
+    const { supabase, profile, viewer } = await getCurrentInternalAccessContext()
+
+    if (!profile || !viewer) {
+        return { supabase, profile: null, appointment: null, error: 'No autenticado' }
+    }
+
+    const { data: appointment } = await (supabase
+        .from('appointments') as any)
+        .select('id, patient_id, psychologist_id, status')
+        .eq('id', appointmentId)
+        .maybeSingle()
+
+    if (!appointment) {
+        return { supabase, profile, appointment: null, error: 'Cita no encontrada' }
+    }
+
+    if (profile.role === 'admin') {
+        return { supabase, profile, appointment, error: null }
+    }
+
+    if (profile.role === 'patient' && appointment.patient_id === profile.id) {
+        return { supabase, profile, appointment, error: null }
+    }
+
+    if (profile.role === 'psychologist' && canAccessClinicalWorkspace(viewer) && appointment.psychologist_id === profile.id) {
+        return { supabase, profile, appointment, error: null }
+    }
+
+    return { supabase, profile, appointment: null, error: 'No autorizado' }
+}
+
+export async function createAppointment(formData: FormData) {
+    const { supabase, profile, error: accessError } = await requireClinicalPsychologist()
+    if (accessError || !profile) return { error: accessError }
 
     const patientId = formData.get('patientId') as string
     const date = formData.get('date') as string
@@ -30,6 +74,18 @@ export async function createAppointment(formData: FormData) {
     // Validate the date is in the future
     if (startTime < new Date()) {
         return { error: 'No puedes crear citas en el pasado' }
+    }
+
+    const { data: relationship } = await (supabase
+        .from('patient_psychologist_relationships') as any)
+        .select('id')
+        .eq('patient_id', patientId)
+        .eq('psychologist_id', profile.id)
+        .eq('status', 'active')
+        .maybeSingle()
+
+    if (!relationship) {
+        return { error: 'No tienes una relacion activa con este paciente' }
     }
 
     // Generate meeting link for video appointments
@@ -98,9 +154,8 @@ export async function createAppointment(formData: FormData) {
 }
 
 export async function cancelAppointment(appointmentId: string) {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return { error: 'No autenticado' }
+    const { supabase, appointment, error: accessError } = await getAuthorizedAppointment(appointmentId)
+    if (accessError || !appointment) return { error: accessError }
 
     const { error } = await (supabase
         .from('appointments') as any)
@@ -115,9 +170,12 @@ export async function cancelAppointment(appointmentId: string) {
 }
 
 export async function confirmAppointment(appointmentId: string) {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return { error: 'No autenticado' }
+    const { supabase, profile, appointment, error: accessError } = await getAuthorizedAppointment(appointmentId)
+    if (accessError || !profile || !appointment) return { error: accessError }
+
+    if (profile.role === 'patient') {
+        return { error: 'Solo psicologos o administradores pueden confirmar citas' }
+    }
 
     const { error } = await (supabase
         .from('appointments') as any)
@@ -131,9 +189,12 @@ export async function confirmAppointment(appointmentId: string) {
 }
 
 export async function completeAppointment(appointmentId: string) {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return { error: 'No autenticado' }
+    const { supabase, profile, appointment, error: accessError } = await getAuthorizedAppointment(appointmentId)
+    if (accessError || !profile || !appointment) return { error: accessError }
+
+    if (profile.role === 'patient') {
+        return { error: 'Solo psicologos o administradores pueden completar citas' }
+    }
 
     const { error } = await (supabase
         .from('appointments') as any)
@@ -151,13 +212,9 @@ export async function completeAppointment(appointmentId: string) {
  * Supports name-only (no email required) or with email.
  */
 export async function quickCreatePatient(formData: FormData) {
-    const supabase = await createClient()
+    const { supabase, profile, error: accessError } = await requireClinicalPsychologist()
     const adminSupabase = await createAdminClient()
-    const profile = await getUserProfile()
-
-    if (!profile || profile.role !== 'psychologist') {
-        return { error: 'No autorizado' }
-    }
+    if (accessError || !profile) return { error: accessError }
 
     const fullName = (formData.get('fullName') as string || '').trim()
     const email = (formData.get('email') as string || '').trim().toLowerCase()

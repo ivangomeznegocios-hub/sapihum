@@ -9,6 +9,8 @@ import type {
     EventResourceInsert,
     ResourceWithEvent
 } from '@/types/database'
+import { audienceAllowsAccess, getCommercialAccessContext } from '@/lib/access/commercial'
+import { canViewerSeeListedResource } from '@/lib/access/catalog'
 
 // ============================================
 // Filter types
@@ -59,61 +61,38 @@ export async function getVisibleResources(filters?: ResourceFilters): Promise<Re
         return []
     }
 
-    if (!user || !resources) return (resources ?? []) as Resource[]
+    if (!resources) return []
 
-    // Get profile for role/level filtering
-    const { data: profileData } = await (supabase
-        .from('profiles') as any)
-        .select('role, membership_level')
-        .eq('id', user.id)
-        .single()
+    if (!user) {
+        return (resources as any[]).filter((resource: any) => {
+            const audience: string[] = resource.target_audience || ['public']
 
-    const profile = profileData as any
-    if (!profile) return []
+            if (filters?.audience && filters.audience !== 'all' && !audience.includes(filters.audience)) {
+                return false
+            }
 
-    const now = new Date().toISOString()
-
-    // Admin sees everything (including expired, unless filter says hide)
-    if (profile.role === 'admin') {
-        if (!filters?.showExpired) {
-            return (resources as any[]).filter((r: any) =>
-                !r.expires_at || r.expires_at > now
-            ) as Resource[]
-        }
-        return resources as Resource[]
+            return canViewerSeeListedResource(resource, null, Boolean(filters?.showExpired))
+        }) as Resource[]
     }
 
-    const membershipLevel = profile.membership_level ?? 0
+    const commercialAccess = await getCommercialAccessContext({
+        supabase,
+        userId: user.id,
+    })
+
+    if (!commercialAccess) return []
 
     // Filter resources by target_audience, min_membership_level, and expiration
     return (resources as any[]).filter((resource: any) => {
-        // Filter expired resources
-        if (!filters?.showExpired && resource.expires_at && resource.expires_at <= now) {
-            return false
-        }
-
-        // Creator always sees their own resources
-        if (resource.created_by === user.id) return true
-
         const audience: string[] = resource.target_audience || ['public']
-        const minLevel: number = resource.min_membership_level ?? 0
-
-        // Check audience match
-        let audienceMatch = false
-        if (audience.includes('public')) audienceMatch = true
-        if (audience.includes('psychologists') && profile.role === 'psychologist') audienceMatch = true
-        if (audience.includes('patients') && profile.role === 'patient') audienceMatch = true
-        if (audience.includes('members') && membershipLevel >= 1) audienceMatch = true
 
         // Apply audience filter from URL params
         if (filters?.audience && filters.audience !== 'all') {
             if (!audience.includes(filters.audience)) return false
         }
 
-        if (!audienceMatch) return false
-
-        // Check membership level (only applies to psychologists)
-        if (profile.role === 'psychologist' && membershipLevel < minLevel) return false
+        if (!audienceAllowsAccess(audience, commercialAccess, { creatorId: resource.created_by })) return false
+        if (!canViewerSeeListedResource(resource, commercialAccess.viewer, Boolean(filters?.showExpired))) return false
 
         return true
     }) as Resource[]

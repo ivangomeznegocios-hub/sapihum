@@ -1,31 +1,40 @@
 'use server'
 
-import { createClient } from '@/lib/supabase/server'
+import { getCurrentInternalAccessContext } from '@/lib/access/internal-server'
+import { canAccessTasksModule } from '@/lib/access/internal-modules'
 import { revalidatePath } from 'next/cache'
 
-export async function completeTask(taskId: string, response: any, notes: string) {
-    const supabase = await createClient()
+async function requireTasksWorkspace() {
+    const { supabase, profile, viewer } = await getCurrentInternalAccessContext()
 
-    const { data: { user } } = await supabase.auth.getUser()
-
-    if (!user) {
-        return { error: 'No autenticado' }
+    if (!profile || !viewer) {
+        return { supabase, profile: null, viewer: null, error: 'No autenticado' }
     }
 
-    const { error } = await ((supabase
+    return { supabase, profile, viewer, error: null }
+}
+
+export async function completeTask(taskId: string, response: any, notes: string) {
+    const { supabase, profile, error } = await requireTasksWorkspace()
+
+    if (error || !profile) {
+        return { error: error || 'No autenticado' }
+    }
+
+    const { error: updateError } = await ((supabase
         .from('tasks') as any) as any)
         .update({
             status: 'completed',
             response: response || {},
             completion_notes: notes || null,
-            updated_at: new Date().toISOString()
+            updated_at: new Date().toISOString(),
         })
         .eq('id', taskId)
-        .eq('patient_id', user.id)
+        .eq('patient_id', profile.id)
 
-    if (error) {
-        console.error('Error completing task:', error)
-        return { error: error.message }
+    if (updateError) {
+        console.error('Error completing task:', updateError)
+        return { error: updateError.message }
     }
 
     revalidatePath('/dashboard/tasks')
@@ -40,35 +49,25 @@ export async function createTask(data: {
     dueDate?: string
     content?: any
 }) {
-    const supabase = await createClient()
+    const { supabase, profile, viewer, error } = await requireTasksWorkspace()
 
-    const { data: { user } } = await supabase.auth.getUser()
-
-    if (!user) {
-        return { error: 'No autenticado' }
+    if (error || !profile || !viewer) {
+        return { error: error || 'No autenticado' }
     }
 
-    // Verify user is a psychologist
-    const { data: profile } = await ((supabase
-        .from('profiles') as any) as any)
-        .select('role, membership_level')
-        .eq('id', user.id)
-        .single()
-
-    if (profile?.role !== 'psychologist') {
+    if (profile.role !== 'psychologist') {
         return { error: 'Solo psicólogos pueden asignar tareas' }
     }
 
-    if ((profile?.membership_level ?? 0) < 2) {
+    if (!canAccessTasksModule(viewer)) {
         return { error: 'Tu plan actual no incluye esta función. Por favor mejora tu plan para asignar tareas.' }
     }
 
-    // Verify relationship with patient
     const { data: relationship } = await ((supabase
         .from('patient_psychologist_relationships') as any) as any)
         .select('id')
         .eq('patient_id', data.patientId)
-        .eq('psychologist_id', user.id)
+        .eq('psychologist_id', profile.id)
         .eq('status', 'active')
         .single()
 
@@ -76,22 +75,22 @@ export async function createTask(data: {
         return { error: 'No tienes una relación activa con este paciente' }
     }
 
-    const { error } = await ((supabase
+    const { error: insertError } = await ((supabase
         .from('tasks') as any) as any)
         .insert({
             patient_id: data.patientId,
-            psychologist_id: user.id,
+            psychologist_id: profile.id,
             title: data.title,
             description: data.description || null,
             type: data.type || 'general',
             status: 'pending',
             due_date: data.dueDate || null,
-            content: data.content || {}
+            content: data.content || {},
         })
 
-    if (error) {
-        console.error('Error creating task:', error)
-        return { error: error.message }
+    if (insertError) {
+        console.error('Error creating task:', insertError)
+        return { error: insertError.message }
     }
 
     revalidatePath('/dashboard/tasks')
@@ -100,23 +99,25 @@ export async function createTask(data: {
 }
 
 export async function deleteTask(taskId: string) {
-    const supabase = await createClient()
+    const { supabase, profile, viewer, error } = await requireTasksWorkspace()
 
-    const { data: { user } } = await supabase.auth.getUser()
-
-    if (!user) {
-        return { error: 'No autenticado' }
+    if (error || !profile || !viewer) {
+        return { error: error || 'No autenticado' }
     }
 
-    const { error } = await ((supabase
+    if (profile.role !== 'psychologist' || !canAccessTasksModule(viewer)) {
+        return { error: 'No autorizado' }
+    }
+
+    const { error: deleteError } = await ((supabase
         .from('tasks') as any) as any)
         .delete()
         .eq('id', taskId)
-        .eq('psychologist_id', user.id)
+        .eq('psychologist_id', profile.id)
 
-    if (error) {
-        console.error('Error deleting task:', error)
-        return { error: error.message }
+    if (deleteError) {
+        console.error('Error deleting task:', deleteError)
+        return { error: deleteError.message }
     }
 
     revalidatePath('/dashboard/tasks')

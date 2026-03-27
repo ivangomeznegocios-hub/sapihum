@@ -6,6 +6,7 @@ import { createClient as createServiceClient } from '@supabase/supabase-js'
 import { recordAnalyticsServerEvent } from '@/lib/analytics/server'
 import type { AttributionSnapshot } from '@/lib/analytics/types'
 import { grantEventEntitlements } from '@/lib/events/entitlements'
+import { syncMembershipEntitlementsForUser } from '@/lib/membership-entitlements'
 import { getPlanByPriceId } from './config'
 import { stripeAdapter } from './stripe'
 import type {
@@ -143,6 +144,7 @@ async function fulfillEventPurchase(params: {
 
     const resolvedUserId = purchaseRow?.user_id || params.userId || params.profileId || matchedProfile?.id || null
     const paymentReference = params.data.paymentIntentId || params.data.sessionId
+    const attributionSnapshot = parseAttributionSnapshot(params.data.metadata?.attribution_snapshot)
     const mergedMetadata = {
         ...(purchaseRow?.metadata ?? {}),
         ...(params.data.metadata ?? {}),
@@ -165,6 +167,9 @@ async function fulfillEventPurchase(params: {
                 payment_reference: paymentReference,
                 provider_session_id: params.data.sessionId,
                 provider_payment_id: params.data.paymentIntentId || null,
+                analytics_visitor_id: params.data.metadata?.analytics_visitor_id || null,
+                analytics_session_id: params.data.metadata?.analytics_session_id || null,
+                attribution_snapshot: attributionSnapshot,
                 metadata: mergedMetadata,
                 status: 'confirmed',
                 confirmed_at: new Date().toISOString(),
@@ -184,6 +189,9 @@ async function fulfillEventPurchase(params: {
                 payment_reference: paymentReference,
                 provider_session_id: params.data.sessionId,
                 provider_payment_id: params.data.paymentIntentId || null,
+                analytics_visitor_id: params.data.metadata?.analytics_visitor_id || null,
+                analytics_session_id: params.data.metadata?.analytics_session_id || null,
+                attribution_snapshot: attributionSnapshot,
                 metadata: mergedMetadata,
                 status: 'confirmed',
                 confirmed_at: new Date().toISOString(),
@@ -336,6 +344,7 @@ export async function fulfillSubscriptionCreated(data: SubscriptionWebhookData):
     }
 
     await supabase.from('profiles').update(profileUpdate).eq('id', profileId)
+    await syncMembershipEntitlementsForUser(profileId)
 
     console.log(`[Payment] Subscription activated: user=${profileId}, level=${membershipLevel}`)
 
@@ -379,6 +388,7 @@ export async function fulfillSubscriptionRenewed(data: SubscriptionWebhookData):
         .eq('id', sub.id)
 
     await supabase.from('profiles').update({ subscription_status: 'active' }).eq('id', sub.profile_id)
+    await syncMembershipEntitlementsForUser(sub.profile_id)
 
     let existingTransactionId: string | null = null
     if (data.invoiceId) {
@@ -476,6 +486,7 @@ export async function fulfillSubscriptionUpdated(data: SubscriptionWebhookData):
                     membership_specialization_code: null,
                 })
                 .eq('id', sub.profile_id)
+            await syncMembershipEntitlementsForUser(sub.profile_id)
         }
     } else if (data.status === 'past_due') {
         const { data: sub } = await supabase
@@ -484,8 +495,19 @@ export async function fulfillSubscriptionUpdated(data: SubscriptionWebhookData):
             .eq('provider_subscription_id', data.providerSubscriptionId)
             .single()
 
-        if (sub) {
-            await supabase.from('profiles').update({ subscription_status: 'past_due' }).eq('id', sub.profile_id)
+            if (sub) {
+                await supabase.from('profiles').update({ subscription_status: 'past_due' }).eq('id', sub.profile_id)
+                await syncMembershipEntitlementsForUser(sub.profile_id)
+            }
+    } else {
+        const { data: sub } = await supabase
+            .from('subscriptions')
+            .select('profile_id')
+            .eq('provider_subscription_id', data.providerSubscriptionId)
+            .single()
+
+        if (sub?.profile_id) {
+            await syncMembershipEntitlementsForUser(sub.profile_id)
         }
     }
 

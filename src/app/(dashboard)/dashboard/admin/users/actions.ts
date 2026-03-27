@@ -23,7 +23,7 @@ export async function updateUserRole(userId: string, newRole: string) {
     }
 
     // Validate role
-    if (!['admin', 'psychologist', 'patient', 'ponente'].includes(newRole)) {
+    if (!['admin', 'support', 'psychologist', 'patient', 'ponente'].includes(newRole)) {
         return { error: 'Rol inválido' }
     }
 
@@ -173,8 +173,6 @@ export async function adminUpdateProfile(
         bio?: string | null,
         specialty?: string | null,
         hourly_rate?: number | null,
-        subscription_status?: string | null,
-        membership_level?: number | null,
         is_test?: boolean
     }
 ) {
@@ -201,8 +199,6 @@ export async function adminUpdateProfile(
             bio: data.bio,
             specialty: data.specialty,
             hourly_rate: data.hourly_rate,
-            subscription_status: data.subscription_status,
-            membership_level: data.membership_level,
             is_test: data.is_test,
             updated_at: new Date().toISOString()
         })

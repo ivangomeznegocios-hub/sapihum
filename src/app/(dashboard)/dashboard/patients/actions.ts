@@ -1,11 +1,10 @@
 'use server'
 
-import { createClient, createAdminClient, getUserProfile } from '@/lib/supabase/server'
+import { createClient, createAdminClient } from '@/lib/supabase/server'
+import { getCurrentInternalAccessContext } from '@/lib/access/internal-server'
+import { canAccessPatientsModule } from '@/lib/access/internal-modules'
 import { revalidatePath } from 'next/cache'
 
-// ============================================
-// HELPERS
-// ============================================
 async function logAudit(
     supabase: any,
     userId: string,
@@ -22,70 +21,61 @@ async function logAudit(
             action,
             record_type: recordType,
             record_id: recordId,
-            details: details || {}
+            details: details || {},
         })
-    } catch (e) {
-        console.error('[AuditLog] Failed to log:', e)
+    } catch (error) {
+        console.error('[AuditLog] Failed to log:', error)
     }
 }
 
-// ============================================
-// ACCESS VERIFICATION
-// ============================================
-async function verifyAccess(minLevel: number) {
-    const profile = await getUserProfile()
+async function requirePatientsWorkspace() {
+    const { profile, viewer } = await getCurrentInternalAccessContext()
 
-    if (!profile) {
-        return { error: 'No autenticado', profile: null }
+    if (!profile || !viewer) {
+        return { profile: null, error: 'No autenticado' }
     }
 
-    if (profile.role !== 'psychologist' && profile.role !== 'admin') {
-        return { error: 'No autorizado', profile: null }
+    if (!canAccessPatientsModule(viewer)) {
+        return { profile: null, error: 'No autorizado' }
     }
 
-    if (profile.role === 'psychologist' && (profile.membership_level ?? 0) < minLevel) {
-        return { error: `Requiere membresía nivel ${minLevel} o superior`, profile: null }
-    }
-
-    return { error: null, profile }
+    return { profile, error: null }
 }
 
-// ============================================
-// PATIENT MANAGEMENT
-// ============================================
+async function verifyActiveRelationship(supabase: any, psychologistId: string, patientId: string) {
+    const { data: relationship } = await (supabase
+        .from('patient_psychologist_relationships') as any)
+        .select('id')
+        .eq('patient_id', patientId)
+        .eq('psychologist_id', psychologistId)
+        .eq('status', 'active')
+        .maybeSingle()
 
-/**
- * Add a patient — supports two modes:
- *  1. WITH email: looks up existing user or sends invite
- *  2. WITHOUT email (name-only): creates a local patient profile
- */
+    return relationship
+}
+
 export async function addPatient(formData: FormData) {
     const supabase = await createClient()
     const adminSupabase = await createAdminClient()
-
-    const { error: accessError, profile } = await verifyAccess(2)
+    const { error: accessError, profile } = await requirePatientsWorkspace()
     if (accessError || !profile) return { error: accessError }
 
     const patientEmail = (formData.get('email') as string || '').trim().toLowerCase()
     const patientName = (formData.get('fullName') as string || '').trim()
     const patientPhone = (formData.get('phone') as string || '').trim()
 
-    const hasEmail = patientEmail.length > 0
-    const hasName = patientName.length > 0
-
-    if (!hasEmail && !hasName) {
+    if (!patientEmail && !patientName) {
         return { error: 'Proporciona al menos el nombre o email del paciente' }
     }
 
     let patientId: string | undefined
 
-    if (hasEmail) {
-        // ─── MODE 1: Email-based ───
+    if (patientEmail) {
         const { data: existingPatient } = await (supabase
             .from('profiles') as any)
             .select('id, full_name, role')
             .eq('email', patientEmail)
-            .single()
+            .maybeSingle()
 
         patientId = existingPatient?.id
 
@@ -96,7 +86,7 @@ export async function addPatient(formData: FormData) {
                     data: {
                         full_name: patientName || 'Paciente Invitado',
                         role: 'patient',
-                    }
+                    },
                 }
             )
 
@@ -110,13 +100,13 @@ export async function addPatient(formData: FormData) {
                 const updates: any = {}
                 if (patientName) updates.full_name = patientName
                 if (patientPhone) updates.phone = patientPhone
+
                 await (adminSupabase.from('profiles') as any)
                     .update(updates)
                     .eq('id', patientId)
             }
         }
     } else {
-        // ─── MODE 2: Name-only (local patient) ───
         const internalEmail = `local-patient-${Date.now()}-${Math.random().toString(36).slice(2, 8)}@internal.comunidadpsicologia.app`
         const tempPassword = `CP-${crypto.randomUUID()}`
 
@@ -128,7 +118,7 @@ export async function addPatient(formData: FormData) {
                 full_name: patientName,
                 role: 'patient',
                 is_local_patient: true,
-            }
+            },
         })
 
         if (createError) {
@@ -139,6 +129,7 @@ export async function addPatient(formData: FormData) {
 
         const updates: any = { full_name: patientName, role: 'patient' }
         if (patientPhone) updates.phone = patientPhone
+
         await (adminSupabase.from('profiles') as any)
             .update(updates)
             .eq('id', patientId)
@@ -148,75 +139,59 @@ export async function addPatient(formData: FormData) {
         return { error: 'Error: no se pudo obtener el ID del paciente' }
     }
 
-    // Check if relationship already exists (active)
     const { data: existingRelation } = await (supabase
         .from('patient_psychologist_relationships') as any)
-        .select('*')
+        .select('id, status')
         .eq('patient_id', patientId)
         .eq('psychologist_id', profile.id)
-        .eq('status', 'active')
-        .single()
+        .maybeSingle()
+
+    if (existingRelation?.status === 'active') {
+        return { success: 'Este paciente ya esta en tu lista.', patientId, patientName }
+    }
 
     if (existingRelation) {
-        return { success: 'Este paciente ya está en tu lista.', patientId, patientName }
-    }
-
-    // Check for inactive relationship to reactivate
-    const { data: inactiveRelation } = await (supabase
-        .from('patient_psychologist_relationships') as any)
-        .select('*')
-        .eq('patient_id', patientId)
-        .eq('psychologist_id', profile.id)
-        .single()
-
-    if (inactiveRelation) {
-        const { error: updateError } = await (supabase
+        const { error } = await (supabase
             .from('patient_psychologist_relationships') as any)
             .update({ status: 'active' })
-            .eq('id', inactiveRelation.id)
+            .eq('id', existingRelation.id)
 
-        if (updateError) {
+        if (error) {
             return { error: 'Error al reactivar paciente' }
         }
-        revalidatePath('/dashboard/patients')
-        revalidatePath('/dashboard/calendar')
-        return { success: 'Paciente reactivado exitosamente', patientId, patientName }
-    }
+    } else {
+        const { error } = await (supabase
+            .from('patient_psychologist_relationships') as any)
+            .insert({
+                patient_id: patientId,
+                psychologist_id: profile.id,
+                status: 'active',
+            })
 
-    // Create new relationship
-    const { error: createRelError } = await (supabase
-        .from('patient_psychologist_relationships') as any)
-        .insert({
-            patient_id: patientId,
-            psychologist_id: profile.id,
-            status: 'active'
-        })
-
-    if (createRelError) {
-        return { error: 'Error al vincular paciente' }
+        if (error) {
+            return { error: 'Error al vincular paciente' }
+        }
     }
 
     revalidatePath('/dashboard/patients')
     revalidatePath('/dashboard/calendar')
     return {
-        success: hasEmail
-            ? 'Paciente agregado exitosamente'
-            : '¡Paciente creado y vinculado exitosamente!',
+        success: patientEmail ? 'Paciente agregado exitosamente' : 'Paciente creado y vinculado exitosamente',
         patientId,
-        patientName
+        patientName,
     }
 }
 
 export async function removePatient(patientId: string) {
     const supabase = await createClient()
-    const { error: accessError, profile: user } = await verifyAccess(2)
-    if (accessError || !user) return { error: accessError }
+    const { error: accessError, profile } = await requirePatientsWorkspace()
+    if (accessError || !profile) return { error: accessError }
 
     const { error } = await (supabase
         .from('patient_psychologist_relationships') as any)
         .update({ status: 'inactive' })
         .eq('patient_id', patientId)
-        .eq('psychologist_id', user.id)
+        .eq('psychologist_id', profile.id)
 
     if (error) {
         return { error: error.message }
@@ -226,76 +201,55 @@ export async function removePatient(patientId: string) {
     return { success: true }
 }
 
-// ============================================
-// CLINICAL NOTES
-// ============================================
 export async function addClinicalNote(formData: FormData) {
     const supabase = await createClient()
-    const { error: accessError, profile: user } = await verifyAccess(2)
-    if (accessError || !user) return { error: accessError }
+    const { error: accessError, profile } = await requirePatientsWorkspace()
+    if (accessError || !profile) return { error: accessError }
 
     const patientId = formData.get('patientId') as string
-    const type = formData.get('type') as string || 'session_note'
-    const format = formData.get('format') as string || 'simple'
-    const tagsRaw = formData.get('tags') as string || ''
-    const appointmentId = formData.get('appointmentId') as string || null
+    const type = (formData.get('type') as string) || 'session_note'
+    const format = (formData.get('format') as string) || 'simple'
+    const tagsRaw = (formData.get('tags') as string) || ''
+    const appointmentId = (formData.get('appointmentId') as string) || null
     const isPinned = formData.get('isPinned') === 'true'
 
-    // Verify relationship exists
-    const { data: relationship } = await (supabase
-        .from('patient_psychologist_relationships') as any)
-        .select('id')
-        .eq('patient_id', patientId)
-        .eq('psychologist_id', user.id)
-        .eq('status', 'active')
-        .single()
-
+    const relationship = await verifyActiveRelationship(supabase, profile.id, patientId)
     if (!relationship) {
         return { error: 'No tienes acceso a este paciente' }
     }
 
-    // Get next session number
     const { count } = await (supabase
         .from('clinical_records') as any)
         .select('*', { count: 'exact', head: true })
         .eq('patient_id', patientId)
-        .eq('psychologist_id', user.id)
+        .eq('psychologist_id', profile.id)
         .is('deleted_at', null)
 
     const sessionNumber = (count || 0) + 1
+    const tags = tagsRaw.split(',').map((tag) => tag.trim().toLowerCase()).filter(Boolean)
 
-    let content: any = {}
-
-    if (format === 'soap') {
-        content = {
+    const content = format === 'soap'
+        ? {
             subjective: formData.get('subjective') as string,
             objective: formData.get('objective') as string,
             assessment: formData.get('assessment') as string,
-            plan: formData.get('plan') as string
+            plan: formData.get('plan') as string,
         }
-    } else {
-        content = {
-            subjective: formData.get('content') as string
+        : {
+            subjective: formData.get('content') as string,
         }
-    }
-
-    // Parse tags
-    const tags = tagsRaw
-        .split(',')
-        .map(t => t.trim().toLowerCase())
-        .filter(t => t.length > 0)
 
     const { data: record, error } = await (supabase
         .from('clinical_records') as any)
         .insert({
             patient_id: patientId,
-            psychologist_id: user.id,
-            type: type,
-            content: content,
+            psychologist_id: profile.id,
+            type,
+            content,
             tags,
-            appointment_id: appointmentId || null,
+            appointment_id: appointmentId,
             is_pinned: isPinned,
-            session_number: sessionNumber
+            session_number: sessionNumber,
         })
         .select('id')
         .single()
@@ -304,11 +258,10 @@ export async function addClinicalNote(formData: FormData) {
         return { error: error.message }
     }
 
-    // Audit log
-    await logAudit(supabase, user.id, patientId, 'create', 'clinical_record', record?.id, {
+    await logAudit(supabase, profile.id, patientId, 'create', 'clinical_record', record?.id, {
         record_type: type,
         format,
-        tags
+        tags,
     })
 
     revalidatePath(`/dashboard/patients/${patientId}`)
@@ -317,56 +270,52 @@ export async function addClinicalNote(formData: FormData) {
 
 export async function updateClinicalNote(formData: FormData) {
     const supabase = await createClient()
-    const { error: accessError, profile: user } = await verifyAccess(2)
-    if (accessError || !user) return { error: accessError }
+    const { error: accessError, profile } = await requirePatientsWorkspace()
+    if (accessError || !profile) return { error: accessError }
 
     const noteId = formData.get('noteId') as string
     const patientId = formData.get('patientId') as string
     const type = formData.get('type') as string
-    const format = formData.get('format') as string || 'simple'
-    const tagsRaw = formData.get('tags') as string || ''
+    const format = (formData.get('format') as string) || 'simple'
+    const tagsRaw = (formData.get('tags') as string) || ''
 
-    let content: any = {}
+    const relationship = await verifyActiveRelationship(supabase, profile.id, patientId)
+    if (!relationship) {
+        return { error: 'No tienes acceso a este paciente' }
+    }
 
-    if (format === 'soap') {
-        content = {
+    const tags = tagsRaw.split(',').map((tag) => tag.trim().toLowerCase()).filter(Boolean)
+    const content = format === 'soap'
+        ? {
             subjective: formData.get('subjective') as string,
             objective: formData.get('objective') as string,
             assessment: formData.get('assessment') as string,
-            plan: formData.get('plan') as string
+            plan: formData.get('plan') as string,
         }
-    } else {
-        content = {
-            subjective: formData.get('content') as string
+        : {
+            subjective: formData.get('content') as string,
         }
-    }
-
-    const tags = tagsRaw
-        .split(',')
-        .map(t => t.trim().toLowerCase())
-        .filter(t => t.length > 0)
 
     const { error } = await (supabase
         .from('clinical_records') as any)
         .update({
-            type: type,
-            content: content,
+            type,
+            content,
             tags,
-            updated_at: new Date().toISOString()
+            updated_at: new Date().toISOString(),
         })
         .eq('id', noteId)
-        .eq('psychologist_id', user.id)
+        .eq('psychologist_id', profile.id)
         .is('deleted_at', null)
 
     if (error) {
         return { error: error.message }
     }
 
-    // Audit log
-    await logAudit(supabase, user.id, patientId, 'update', 'clinical_record', noteId, {
+    await logAudit(supabase, profile.id, patientId, 'update', 'clinical_record', noteId, {
         record_type: type,
         format,
-        tags
+        tags,
     })
 
     revalidatePath(`/dashboard/patients/${patientId}`)
@@ -375,15 +324,14 @@ export async function updateClinicalNote(formData: FormData) {
 
 export async function deleteClinicalNote(noteId: string) {
     const supabase = await createClient()
-    const { error: accessError, profile: user } = await verifyAccess(2)
-    if (accessError || !user) return { error: accessError }
+    const { error: accessError, profile } = await requirePatientsWorkspace()
+    if (accessError || !profile) return { error: accessError }
 
-    // Get note details before deleting for audit
     const { data: note } = await (supabase
         .from('clinical_records') as any)
-        .select('patient_id, type, deleted_at')
+        .select('patient_id, type')
         .eq('id', noteId)
-        .eq('psychologist_id', user.id)
+        .eq('psychologist_id', profile.id)
         .is('deleted_at', null)
         .single()
 
@@ -391,21 +339,20 @@ export async function deleteClinicalNote(noteId: string) {
         .from('clinical_records') as any)
         .update({
             deleted_at: new Date().toISOString(),
-            deleted_by: user.id,
+            deleted_by: profile.id,
             updated_at: new Date().toISOString(),
         })
         .eq('id', noteId)
-        .eq('psychologist_id', user.id)
+        .eq('psychologist_id', profile.id)
         .is('deleted_at', null)
 
     if (error) {
         return { error: error.message }
     }
 
-    // Audit log
     if (note) {
-        await logAudit(supabase, user.id, note.patient_id, 'delete', 'clinical_record', noteId, {
-            record_type: note.type
+        await logAudit(supabase, profile.id, note.patient_id, 'delete', 'clinical_record', noteId, {
+            record_type: note.type,
         })
     }
 
@@ -415,14 +362,14 @@ export async function deleteClinicalNote(noteId: string) {
 
 export async function togglePinNote(noteId: string, isPinned: boolean) {
     const supabase = await createClient()
-    const { error: accessError, profile: user } = await verifyAccess(2)
-    if (accessError || !user) return { error: accessError }
+    const { error: accessError, profile } = await requirePatientsWorkspace()
+    if (accessError || !profile) return { error: accessError }
 
     const { error } = await (supabase
         .from('clinical_records') as any)
         .update({ is_pinned: isPinned })
         .eq('id', noteId)
-        .eq('psychologist_id', user.id)
+        .eq('psychologist_id', profile.id)
 
     if (error) {
         return { error: error.message }
@@ -432,80 +379,65 @@ export async function togglePinNote(noteId: string, isPinned: boolean) {
     return { success: true }
 }
 
-// ============================================
-// DOCUMENT MANAGEMENT
-// ============================================
 export async function uploadDocument(formData: FormData) {
     const supabase = await createClient()
-    const { error: accessError, profile: user } = await verifyAccess(2)
-    if (accessError || !user) return { error: accessError }
+    const { error: accessError, profile } = await requirePatientsWorkspace()
+    if (accessError || !profile) return { error: accessError }
 
     const patientId = formData.get('patientId') as string
-    const category = formData.get('category') as string || 'other'
-    const notes = formData.get('notes') as string || null
+    const category = (formData.get('category') as string) || 'other'
+    const notes = (formData.get('notes') as string) || null
     const file = formData.get('file') as File
 
     if (!file) {
-        return { error: 'No se seleccionó ningún archivo' }
+        return { error: 'No se selecciono ningun archivo' }
     }
 
-    // Verify relationship
-    const { data: relationship } = await (supabase
-        .from('patient_psychologist_relationships') as any)
-        .select('id')
-        .eq('patient_id', patientId)
-        .eq('psychologist_id', user.id)
-        .eq('status', 'active')
-        .single()
-
+    const relationship = await verifyActiveRelationship(supabase, profile.id, patientId)
     if (!relationship) {
         return { error: 'No tienes acceso a este paciente' }
     }
 
-    // Upload to Supabase Storage
     const timestamp = Date.now()
     const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_')
-    const filePath = `${user.id}/${patientId}/${timestamp}_${safeName}`
+    const filePath = `${profile.id}/${patientId}/${timestamp}_${safeName}`
 
     const { error: uploadError } = await supabase.storage
         .from('clinical-documents')
         .upload(filePath, file, {
             cacheControl: '3600',
-            upsert: false
+            upsert: false,
         })
 
     if (uploadError) {
         return { error: `Error al subir archivo: ${uploadError.message}` }
     }
 
-    // Create DB record
     const { data: doc, error: dbError } = await (supabase
         .from('clinical_documents') as any)
         .insert({
             patient_id: patientId,
-            psychologist_id: user.id,
+            psychologist_id: profile.id,
             file_name: file.name,
             file_path: filePath,
             file_type: file.type,
             file_size: file.size,
             category,
-            notes
+            notes,
         })
         .select('id')
         .single()
 
     if (dbError) {
-        // Clean up uploaded file if DB insert fails
         await supabase.storage.from('clinical-documents').remove([filePath])
         return { error: `Error al registrar documento: ${dbError.message}` }
     }
 
-    // Audit log
-    await logAudit(supabase, user.id, patientId, 'create', 'clinical_document', doc?.id, {
+    await logAudit(supabase, profile.id, patientId, 'create', 'clinical_document', doc?.id, {
         file_name: file.name,
         file_type: file.type,
         file_size: file.size,
-        category
+        category,
     })
 
     revalidatePath(`/dashboard/patients/${patientId}`)
@@ -514,15 +446,14 @@ export async function uploadDocument(formData: FormData) {
 
 export async function deleteDocument(documentId: string) {
     const supabase = await createClient()
-    const { error: accessError, profile: user } = await verifyAccess(2)
-    if (accessError || !user) return { error: accessError }
+    const { error: accessError, profile } = await requirePatientsWorkspace()
+    if (accessError || !profile) return { error: accessError }
 
-    // Get document details
     const { data: doc } = await (supabase
         .from('clinical_documents') as any)
-        .select('file_path, patient_id, file_name, deleted_at')
+        .select('patient_id, file_name')
         .eq('id', documentId)
-        .eq('psychologist_id', user.id)
+        .eq('psychologist_id', profile.id)
         .is('deleted_at', null)
         .single()
 
@@ -530,25 +461,23 @@ export async function deleteDocument(documentId: string) {
         return { error: 'Documento no encontrado' }
     }
 
-    // Soft delete in DB, keep storage object for retention
     const { error } = await (supabase
         .from('clinical_documents') as any)
         .update({
             deleted_at: new Date().toISOString(),
-            deleted_by: user.id,
+            deleted_by: profile.id,
             updated_at: new Date().toISOString(),
         })
         .eq('id', documentId)
-        .eq('psychologist_id', user.id)
+        .eq('psychologist_id', profile.id)
         .is('deleted_at', null)
 
     if (error) {
         return { error: error.message }
     }
 
-    // Audit log
-    await logAudit(supabase, user.id, doc.patient_id, 'delete', 'clinical_document', documentId, {
-        file_name: doc.file_name
+    await logAudit(supabase, profile.id, doc.patient_id, 'delete', 'clinical_document', documentId, {
+        file_name: doc.file_name,
     })
 
     revalidatePath(`/dashboard/patients/${doc.patient_id}`)
@@ -557,25 +486,21 @@ export async function deleteDocument(documentId: string) {
 
 export async function getDocumentUrl(filePath: string) {
     const supabase = await createClient()
-    const { error: accessError, profile: user } = await verifyAccess(2)
-    if (accessError || !user) return { error: accessError }
+    const { error: accessError, profile } = await requirePatientsWorkspace()
+    if (accessError || !profile) return { error: accessError }
 
     const normalizedPath = filePath.trim()
     if (!normalizedPath) {
         return { error: 'Ruta de archivo invalida' }
     }
 
-    let query = (supabase
+    const { data: document, error: documentError } = await (supabase
         .from('clinical_documents') as any)
         .select('id, patient_id, psychologist_id, file_path')
         .eq('file_path', normalizedPath)
+        .eq('psychologist_id', profile.id)
         .is('deleted_at', null)
-
-    if (user.role !== 'admin') {
-        query = query.eq('psychologist_id', user.id)
-    }
-
-    const { data: document, error: documentError } = await query.single()
+        .single()
 
     if (documentError || !document) {
         return { error: 'Documento no encontrado o sin acceso' }
@@ -583,7 +508,7 @@ export async function getDocumentUrl(filePath: string) {
 
     const { data, error } = await supabase.storage
         .from('clinical-documents')
-        .createSignedUrl(normalizedPath, 3600) // 1 hour expiry
+        .createSignedUrl(normalizedPath, 3600)
 
     if (error) {
         return { error: error.message }
@@ -592,65 +517,64 @@ export async function getDocumentUrl(filePath: string) {
     return { url: data.signedUrl }
 }
 
-// ============================================
-// SESSION SUMMARIES
-// ============================================
 export async function saveSessionSummary(formData: FormData) {
     const supabase = await createClient()
-    const { error: accessError, profile: user } = await verifyAccess(2)
-    if (accessError || !user) return { error: accessError }
+    const { error: accessError, profile } = await requirePatientsWorkspace()
+    if (accessError || !profile) return { error: accessError }
 
     const patientId = formData.get('patientId') as string
-    const appointmentId = formData.get('appointmentId') as string || null
+    const appointmentId = (formData.get('appointmentId') as string) || null
     const summary = formData.get('summary') as string
-    const moodRating = formData.get('moodRating') ? parseInt(formData.get('moodRating') as string) : null
-    const progressRating = formData.get('progressRating') ? parseInt(formData.get('progressRating') as string) : null
-    const keyTopicsRaw = formData.get('keyTopics') as string || ''
-    const homework = formData.get('homework') as string || null
-    const nextSessionFocus = formData.get('nextSessionFocus') as string || null
-    const summaryId = formData.get('summaryId') as string || null
+    const moodRating = formData.get('moodRating') ? parseInt(formData.get('moodRating') as string, 10) : null
+    const progressRating = formData.get('progressRating') ? parseInt(formData.get('progressRating') as string, 10) : null
+    const keyTopicsRaw = (formData.get('keyTopics') as string) || ''
+    const homework = (formData.get('homework') as string) || null
+    const nextSessionFocus = (formData.get('nextSessionFocus') as string) || null
+    const summaryId = (formData.get('summaryId') as string) || null
 
-    const keyTopics = keyTopicsRaw
-        .split(',')
-        .map(t => t.trim())
-        .filter(t => t.length > 0)
+    const relationship = await verifyActiveRelationship(supabase, profile.id, patientId)
+    if (!relationship) {
+        return { error: 'No tienes acceso a este paciente' }
+    }
+
+    const keyTopics = keyTopicsRaw.split(',').map((topic) => topic.trim()).filter(Boolean)
 
     if (summaryId) {
-        // Update existing
-    const { error } = await (supabase
-        .from('session_summaries') as any)
-        .update({
-            summary,
-            mood_rating: moodRating,
-            progress_rating: progressRating,
-            key_topics: keyTopics,
-            homework,
-            next_session_focus: nextSessionFocus,
-            updated_at: new Date().toISOString()
-        })
-        .eq('id', summaryId)
-        .eq('psychologist_id', user.id)
-        .is('deleted_at', null)
+        const { error } = await (supabase
+            .from('session_summaries') as any)
+            .update({
+                summary,
+                mood_rating: moodRating,
+                progress_rating: progressRating,
+                key_topics: keyTopics,
+                homework,
+                next_session_focus: nextSessionFocus,
+                updated_at: new Date().toISOString(),
+            })
+            .eq('id', summaryId)
+            .eq('psychologist_id', profile.id)
+            .is('deleted_at', null)
 
         if (error) {
             return { error: error.message }
         }
 
-        await logAudit(supabase, user.id, patientId, 'update', 'session_summary', summaryId, { summary: summary.substring(0, 50) })
+        await logAudit(supabase, profile.id, patientId, 'update', 'session_summary', summaryId, {
+            summary: summary.substring(0, 50),
+        })
     } else {
-        // Create new
         const { data: record, error } = await (supabase
             .from('session_summaries') as any)
             .insert({
                 appointment_id: appointmentId,
-                psychologist_id: user.id,
+                psychologist_id: profile.id,
                 patient_id: patientId,
                 summary,
                 mood_rating: moodRating,
                 progress_rating: progressRating,
                 key_topics: keyTopics,
                 homework,
-                next_session_focus: nextSessionFocus
+                next_session_focus: nextSessionFocus,
             })
             .select('id')
             .single()
@@ -659,7 +583,9 @@ export async function saveSessionSummary(formData: FormData) {
             return { error: error.message }
         }
 
-        await logAudit(supabase, user.id, patientId, 'create', 'session_summary', record?.id, { summary: summary.substring(0, 50) })
+        await logAudit(supabase, profile.id, patientId, 'create', 'session_summary', record?.id, {
+            summary: summary.substring(0, 50),
+        })
     }
 
     revalidatePath(`/dashboard/patients/${patientId}`)
@@ -668,14 +594,14 @@ export async function saveSessionSummary(formData: FormData) {
 
 export async function deleteSessionSummary(summaryId: string) {
     const supabase = await createClient()
-    const { error: accessError, profile: user } = await verifyAccess(2)
-    if (accessError || !user) return { error: accessError }
+    const { error: accessError, profile } = await requirePatientsWorkspace()
+    if (accessError || !profile) return { error: accessError }
 
     const { data: summary } = await (supabase
         .from('session_summaries') as any)
-        .select('patient_id, deleted_at')
+        .select('patient_id')
         .eq('id', summaryId)
-        .eq('psychologist_id', user.id)
+        .eq('psychologist_id', profile.id)
         .is('deleted_at', null)
         .single()
 
@@ -683,11 +609,11 @@ export async function deleteSessionSummary(summaryId: string) {
         .from('session_summaries') as any)
         .update({
             deleted_at: new Date().toISOString(),
-            deleted_by: user.id,
+            deleted_by: profile.id,
             updated_at: new Date().toISOString(),
         })
         .eq('id', summaryId)
-        .eq('psychologist_id', user.id)
+        .eq('psychologist_id', profile.id)
         .is('deleted_at', null)
 
     if (error) {
@@ -695,7 +621,7 @@ export async function deleteSessionSummary(summaryId: string) {
     }
 
     if (summary) {
-        await logAudit(supabase, user.id, summary.patient_id, 'delete', 'session_summary', summaryId, {})
+        await logAudit(supabase, profile.id, summary.patient_id, 'delete', 'session_summary', summaryId, {})
         revalidatePath(`/dashboard/patients/${summary.patient_id}`)
     }
 

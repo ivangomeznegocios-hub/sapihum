@@ -1,14 +1,26 @@
 import { getEventsWithRegistration } from '@/lib/supabase/queries/events'
-import { getUserProfile } from '@/lib/supabase/server'
+import { createClient, getUserProfile } from '@/lib/supabase/server'
 import { Suspense } from 'react'
 import { EventsCategoryNav } from '../events-filter'
 import { FilteredEventsList } from '../filtered-events-list'
+import { getCommercialAccessContext, isCommunityReadOnlyViewer } from '@/lib/access/commercial'
 
 export default async function ClinicalEventsPage() {
     const events = await getEventsWithRegistration()
     const profile = await getUserProfile()
-
-    const isActiveMember = profile?.role === 'patient' || profile?.role === 'admin' || (profile?.membership_level ?? 0) >= 1
+    const supabase = profile ? await createClient() : null
+    const commercialAccess = profile && supabase
+        ? await getCommercialAccessContext({
+            supabase,
+            userId: profile.id,
+            profile,
+        })
+        : null
+    const isActiveMember = Boolean(
+        commercialAccess?.hasActiveMembership ||
+        profile?.role === 'patient' ||
+        profile?.role === 'admin'
+    )
 
     // Filter by clinical category
     const clinicalEvents = events.filter((e: any) => e.category === 'clinical')
@@ -31,6 +43,7 @@ export default async function ClinicalEventsPage() {
                     events={clinicalEvents}
                     isActiveMember={isActiveMember}
                     userId={profile?.id}
+                    isReadOnly={commercialAccess ? isCommunityReadOnlyViewer(commercialAccess) : false}
                 />
             </Suspense>
         </div>
