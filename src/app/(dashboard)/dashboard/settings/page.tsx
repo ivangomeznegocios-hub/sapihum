@@ -44,7 +44,7 @@ export default async function SettingsPage() {
             <div>
                 <h1 className="text-3xl font-bold tracking-tight flex items-center gap-3">
                     <Settings className="h-8 w-8" />
-                    ConfiguraciÃ³n
+                    Configuración
                 </h1>
                 <p className="text-muted-foreground mt-1">
                     Administra tu cuenta y preferencias
@@ -80,7 +80,7 @@ export default async function SettingsPage() {
                                 Privacidad y Datos Sensibles
                             </CardTitle>
                             <CardDescription className="text-orange-700/80 dark:text-orange-300/80">
-                                Controles avanzados para la gestiÃ³n de tus datos personales, exportaciÃ³n y derechos ARCO.
+                                Controles avanzados para la gestión de tus datos personales, exportación y derechos ARCO.
                             </CardDescription>
                         </CardHeader>
                         <CardContent>
@@ -99,7 +99,7 @@ export default async function SettingsPage() {
                     {/* Membership Info */}
                     <Card>
                         <CardHeader>
-                            <CardTitle className="text-lg">MembresÃ­a</CardTitle>
+                            <CardTitle className="text-lg">Membresía</CardTitle>
                         </CardHeader>
                         <CardContent>
                             <div className="text-center">
@@ -113,7 +113,7 @@ export default async function SettingsPage() {
                                     {profile.role === 'patient'
                                         ? 'Acceso a recursos y citas'
                                         : membershipLevel === 0
-                                            ? 'Perfil bÃ¡sico sin membresÃ­a activa'
+                                            ? 'Perfil básico sin membresía activa'
                                             : membershipLevel === 1
                                                 ? 'Acceso a eventos, grabaciones, formaciones y toda la comunidad'
                                                 : getMembershipTier(membershipLevel).description}
@@ -150,7 +150,7 @@ export default async function SettingsPage() {
                                     type="submit"
                                 >
                                     <LogOut className="mr-2 h-4 w-4" />
-                                    Cerrar sesiÃ³n
+                                    Cerrar sesión
                                 </Button>
                             </form>
                         </CardContent>
