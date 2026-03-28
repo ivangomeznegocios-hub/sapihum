@@ -47,7 +47,7 @@ export const stripeAdapter: PaymentProviderAdapter = {
             ],
             success_url: params.successUrl,
             cancel_url: params.cancelUrl,
-            customer_email: params.customerId ? undefined : params.customerEmail,
+            customer_email: params.customerId ? undefined : (params.customerEmail || undefined),
             customer: params.customerId || undefined,
             metadata: {
                 user_id: params.userId,
@@ -115,7 +115,7 @@ export const stripeAdapter: PaymentProviderAdapter = {
             ],
             success_url: params.successUrl,
             cancel_url: params.cancelUrl,
-            customer_email: params.customerId ? undefined : params.customerEmail,
+            customer_email: params.customerId ? undefined : (params.customerEmail || undefined),
             customer: params.customerId || undefined,
             metadata: {
                 user_id: params.userId || '',

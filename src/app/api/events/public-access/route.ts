@@ -8,6 +8,8 @@ import {
 import { getUniqueEventAccessCount } from '@/lib/events/attendance'
 import { createClient } from '@/lib/supabase/server'
 import { audienceAllowsAccess, getCommercialAccessContext } from '@/lib/access/commercial'
+import { sendEmail } from '@/lib/email/index'
+import { buildGuestAccessEmail } from '@/lib/email/templates'
 
 export async function POST(request: NextRequest) {
     try {
@@ -148,6 +150,30 @@ export async function POST(request: NextRequest) {
                 full_name: fullName,
             },
         })
+
+        // Send guest access email (non-blocking)
+        try {
+            const { getAppUrl } = await import('@/lib/config/app-url')
+            const appUrl = getAppUrl()
+            const eventDate = event.start_time
+                ? new Intl.DateTimeFormat('es-MX', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', hour: 'numeric', minute: '2-digit' }).format(new Date(event.start_time))
+                : 'Por confirmar'
+
+            const emailContent = buildGuestAccessEmail({
+                userName: fullName,
+                eventTitle: event.title,
+                eventDate,
+                recoveryUrl: `${appUrl}/compras/recuperar?email=${encodeURIComponent(email)}`,
+            })
+
+            await sendEmail({
+                to: email,
+                subject: emailContent.subject,
+                html: emailContent.html,
+            })
+        } catch (emailError) {
+            console.error('[API] Failed to send guest access email:', emailError)
+        }
 
         return NextResponse.json({
             message: 'Tu acceso se reservo correctamente. Te llevaremos a recuperar tu acceso por correo para abrir el hub privado.',

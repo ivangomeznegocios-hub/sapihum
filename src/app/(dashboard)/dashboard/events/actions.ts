@@ -12,6 +12,8 @@ import { getUniqueEventAccessCount } from '@/lib/events/attendance'
 import { grantEventEntitlements } from '@/lib/events/entitlements'
 import { slugifyCatalogText } from '@/lib/events/public'
 import { audienceAllowsAccess, getCommercialAccessContext } from '@/lib/access/commercial'
+import { sendEmail } from '@/lib/email/index'
+import { buildEventRegistrationEmail } from '@/lib/email/templates'
 
 async function resolveUniqueEventSlug(supabase: any, baseValue: string, eventId?: string) {
     const fallbackBase = slugifyCatalogText(baseValue) || `evento-${crypto.randomUUID().slice(0, 8)}`
@@ -177,6 +179,33 @@ export async function registerForEvent(eventId: string, registrationData: Record
 
     revalidatePath('/dashboard/events')
     revalidatePath(`/dashboard/events/${eventId}`)
+
+    // Send registration confirmation email (non-blocking)
+    try {
+        if (profileData?.email) {
+            const { getAppUrl } = await import('@/lib/config/app-url')
+            const appUrl = getAppUrl()
+            const eventDate = eventData.start_time
+                ? new Intl.DateTimeFormat('es-MX', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', hour: 'numeric', minute: '2-digit' }).format(new Date(eventData.start_time))
+                : 'Por confirmar'
+
+            const emailContent = buildEventRegistrationEmail({
+                userName: profileData.full_name || profileData.email.split('@')[0],
+                eventTitle: eventData.title,
+                eventDate,
+                eventUrl: `${appUrl}/dashboard/events/${eventId}`,
+            })
+
+            await sendEmail({
+                to: profileData.email,
+                subject: emailContent.subject,
+                html: emailContent.html,
+            })
+        }
+    } catch (emailError) {
+        console.error('[Events] Failed to send registration email:', emailError)
+    }
+
     return { success: true }
 }
 
@@ -596,31 +625,4 @@ export async function removeSpeakerFromEvent(eventId: string, speakerId: string)
 
     revalidatePath(`/dashboard/events/${eventId}`)
     return { success: true }
-}
-
-export async function createEventPurchase(eventId: string, email: string, fullName: string) {
-    const supabase = await createClient()
-
-    // Get event price
-    const { data: event } = await (supabase.from('events') as any)
-        .select('price, title')
-        .eq('id', eventId)
-        .single()
-
-    if (!event) return { error: 'Evento no encontrado' }
-
-    const { data: purchase, error } = await (supabase.from('event_purchases') as any)
-        .insert({
-            event_id: eventId,
-            email,
-            full_name: fullName,
-            amount_paid: event.price,
-            status: 'pending'
-        })
-        .select('id, access_token')
-        .single()
-
-    if (error) return { error: error.message }
-
-    return { success: true, purchase }
 }

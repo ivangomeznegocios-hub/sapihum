@@ -12,7 +12,7 @@ const FOOTER_LINKS = {
   Academia: [
     { label: "Cursos y Diplomados", href: "/precios" },
     { label: "Certificaciones", href: "/precios" },
-    { label: "Eventos y Webinars", href: "/precios" },
+    { label: "Eventos y Webinars", href: "/eventos" },
     { label: "Supervisión Clínica", href: "/precios" },
   ],
   Recursos: [

@@ -283,16 +283,24 @@ export async function POST(request: NextRequest) {
                 )
             }
 
-            pendingEventPurchaseId = await createPendingEventPurchase({
-                supabase,
-                eventId,
-                userId: user?.id ?? null,
-                email: customerEmail,
-                fullName: fullName || profile.data?.full_name || null,
-                amount: checkoutAmount,
-                analyticsContext,
-                attributionSnapshot,
-            })
+            try {
+                pendingEventPurchaseId = await createPendingEventPurchase({
+                    supabase,
+                    eventId,
+                    userId: user?.id ?? null,
+                    email: customerEmail,
+                    fullName: fullName || profile.data?.full_name || null,
+                    amount: checkoutAmount,
+                    analyticsContext,
+                    attributionSnapshot,
+                })
+            } catch (purchaseError) {
+                console.error('[API] Failed to create pending event purchase:', purchaseError)
+                return NextResponse.json(
+                    { error: 'No fue posible iniciar la compra. Intenta de nuevo.' },
+                    { status: 500 }
+                )
+            }
 
             metadata = {
                 event_purchase_id: pendingEventPurchaseId,
@@ -306,6 +314,13 @@ export async function POST(request: NextRequest) {
             }
         } else {
             return NextResponse.json({ error: 'Tipo de compra no valido' }, { status: 400 })
+        }
+
+        if (checkoutAmount <= 0) {
+            return NextResponse.json(
+                { error: 'Este evento no requiere pago. Usa el registro gratuito.' },
+                { status: 400 }
+            )
         }
 
         await recordAnalyticsServerEvent({
@@ -326,26 +341,65 @@ export async function POST(request: NextRequest) {
             },
         })
 
-        const result = await provider.createOneTimeCheckout({
-            purchaseType: purchaseType as 'ai_credits' | 'event_purchase',
-            amount: checkoutAmount,
-            customerEmail,
-            customerId,
-            userId: user?.id,
-            profileId: profile.data?.id,
-            description: checkoutDescription,
-            referenceId,
-            metadata: {
-                ...metadata,
-                analytics_visitor_id: analyticsContext?.visitorId ?? '',
-                analytics_session_id: analyticsContext?.sessionId ?? '',
-                attribution_snapshot: JSON.stringify(attributionSnapshot),
-                guest_checkout: user ? 'false' : 'true',
-                guest_email: user ? '' : customerEmail,
-            },
-            successUrl,
-            cancelUrl,
-        })
+        // Attempt Stripe checkout, retry without customerId if customer is invalid
+        let result
+        try {
+            result = await provider.createOneTimeCheckout({
+                purchaseType: purchaseType as 'ai_credits' | 'event_purchase',
+                amount: checkoutAmount,
+                customerEmail,
+                customerId,
+                userId: user?.id,
+                profileId: profile.data?.id,
+                description: checkoutDescription,
+                referenceId,
+                metadata: {
+                    ...metadata,
+                    analytics_visitor_id: analyticsContext?.visitorId ?? '',
+                    analytics_session_id: analyticsContext?.sessionId ?? '',
+                    attribution_snapshot: JSON.stringify(attributionSnapshot),
+                    guest_checkout: user ? 'false' : 'true',
+                    guest_email: user ? '' : customerEmail,
+                },
+                successUrl,
+                cancelUrl,
+            })
+        } catch (stripeError: any) {
+            // If the error is about an invalid customer, clear it and retry
+            const msg = stripeError?.message || ''
+            if (customerId && (msg.includes('No such customer') || msg.includes('customer'))) {
+                console.warn('[API] Invalid stripe_customer_id, clearing and retrying:', customerId)
+                // Clear the invalid customer ID from profile
+                if (profile.data?.id) {
+                    await (supabase as any)
+                        .from('profiles')
+                        .update({ stripe_customer_id: null })
+                        .eq('id', profile.data.id)
+                }
+                result = await provider.createOneTimeCheckout({
+                    purchaseType: purchaseType as 'ai_credits' | 'event_purchase',
+                    amount: checkoutAmount,
+                    customerEmail,
+                    customerId: undefined,
+                    userId: user?.id,
+                    profileId: profile.data?.id,
+                    description: checkoutDescription,
+                    referenceId,
+                    metadata: {
+                        ...metadata,
+                        analytics_visitor_id: analyticsContext?.visitorId ?? '',
+                        analytics_session_id: analyticsContext?.sessionId ?? '',
+                        attribution_snapshot: JSON.stringify(attributionSnapshot),
+                        guest_checkout: user ? 'false' : 'true',
+                        guest_email: user ? '' : customerEmail,
+                    },
+                    successUrl,
+                    cancelUrl,
+                })
+            } else {
+                throw stripeError
+            }
+        }
 
         return NextResponse.json({
             checkoutUrl: result.checkoutUrl,

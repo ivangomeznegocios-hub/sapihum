@@ -6,6 +6,8 @@ import { createClient as createServiceClient } from '@supabase/supabase-js'
 import { recordAnalyticsServerEvent } from '@/lib/analytics/server'
 import type { AttributionSnapshot } from '@/lib/analytics/types'
 import { grantEventEntitlements } from '@/lib/events/entitlements'
+import { sendEmail } from '@/lib/email/index'
+import { buildEventPurchaseEmail } from '@/lib/email/templates'
 import { syncMembershipEntitlementsForUser } from '@/lib/membership-entitlements'
 import { getPlanByPriceId } from './config'
 import { stripeAdapter } from './stripe'
@@ -258,6 +260,40 @@ async function fulfillEventPurchase(params: {
     })
 
     console.log(`[Payment] Event purchase confirmed, access granted for event: ${params.eventId}`)
+
+    // Send purchase confirmation email
+    try {
+        const { getAppUrl } = await import('@/lib/config/app-url')
+        const appUrl = getAppUrl()
+        const isGuest = !params.userId && params.data.metadata?.guest_checkout === 'true'
+        const buyerName = purchaseRow?.full_name
+            || normalizeWebhookValue(params.data.metadata?.buyer_full_name)
+            || customerEmail.split('@')[0]
+        const eventDate = event.start_time
+            ? new Intl.DateTimeFormat('es-MX', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', hour: 'numeric', minute: '2-digit' }).format(new Date(event.start_time))
+            : 'Por confirmar'
+
+        const emailContent = buildEventPurchaseEmail({
+            userName: buyerName,
+            eventTitle: event.title,
+            eventDate,
+            amount: params.data.amount / 100, // Stripe sends in cents
+            eventUrl: resolvedUserId
+                ? `${appUrl}/dashboard/events/${params.eventId}`
+                : `${appUrl}/mi-acceso`,
+            isGuest,
+            recoveryUrl: `${appUrl}/compras/recuperar`,
+        })
+
+        await sendEmail({
+            to: customerEmail,
+            subject: emailContent.subject,
+            html: emailContent.html,
+        })
+    } catch (emailError) {
+        // Non-blocking — purchase is already confirmed
+        console.error('[Payment] Failed to send purchase confirmation email:', emailError)
+    }
 
     return { resolvedUserId }
 }

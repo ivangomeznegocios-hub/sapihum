@@ -1,7 +1,9 @@
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { SPECIALIZATION_CATALOG } from "@/lib/specializations"
-import { CheckCircle2, ChevronDown, Shield, Users, BookOpen, Scaling, Beaker, FileText, Smartphone } from "lucide-react"
+import { getPublicCatalogEvents } from "@/lib/supabase/queries/events"
+import { getPublicEventPath } from "@/lib/events/public"
+import { CheckCircle2, ChevronDown, Shield, Users, BookOpen, Scaling, Beaker, FileText, Smartphone, CalendarDays, ArrowRight } from "lucide-react"
 
 export const metadata = {
   title: "SAPIHUM | Comunidad Profesional de Psicología Avanzada",
@@ -143,7 +145,9 @@ const FAQS = [
   }
 ]
 
-export default function LandingPage() {
+export default async function LandingPage() {
+  const upcomingEvents = (await getPublicCatalogEvents('eventos')).slice(0, 3)
+
   return (
     <div className="flex flex-col items-center flex-1 w-full">
 
@@ -424,6 +428,86 @@ export default function LandingPage() {
           </div>
         </div>
       </section>
+
+      {/* ══════════════════════════════════════════════════
+          8.5. PRÓXIMOS EVENTOS
+      ══════════════════════════════════════════════════ */}
+      {upcomingEvents.length > 0 && (
+        <section className="w-full py-20 md:py-28 bg-background border-b">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between mb-12">
+              <div>
+                <p className="text-sm font-semibold text-teal-600 dark:text-teal-400 uppercase tracking-wider mb-3">
+                  Formación en Vivo
+                </p>
+                <h2 className="text-3xl md:text-4xl font-bold tracking-tight">
+                  Próximos Eventos
+                </h2>
+                <p className="mt-2 text-muted-foreground">
+                  Talleres, conferencias y experiencias de formación para la comunidad.
+                </p>
+              </div>
+              <Link href="/eventos" className="shrink-0">
+                <Button variant="outline" className="gap-2">
+                  Ver todos los eventos
+                  <ArrowRight className="h-4 w-4" />
+                </Button>
+              </Link>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {upcomingEvents.map((event: any) => {
+                const publicPath = getPublicEventPath(event)
+                const price = Number(event.price || 0)
+                const dateStr = new Date(event.start_time).toLocaleDateString('es-MX', { day: 'numeric', month: 'short' })
+                const timeStr = new Date(event.start_time).toLocaleTimeString('es-MX', { hour: 'numeric', minute: '2-digit' })
+                const speakerName = event.speakers?.[0]?.speaker?.profile?.full_name
+
+                return (
+                  <Link
+                    key={event.id}
+                    href={publicPath}
+                    className="group flex flex-col overflow-hidden rounded-2xl border bg-card transition-all duration-300 hover:shadow-xl hover:-translate-y-1 hover:border-teal-500/30"
+                  >
+                    <div className="relative aspect-[16/9] overflow-hidden bg-gradient-to-br from-slate-900 via-slate-800 to-teal-900/40">
+                      {event.image_url ? (
+                        <img src={event.image_url} alt={event.title} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                      ) : (
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <CalendarDays className="h-12 w-12 text-white/20" />
+                        </div>
+                      )}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
+                      <div className="absolute bottom-3 left-3 flex items-center gap-1.5 rounded-lg bg-white/95 px-2.5 py-1.5 shadow-sm">
+                        <CalendarDays className="h-3.5 w-3.5 text-teal-600" />
+                        <span className="text-xs font-semibold text-slate-800">{dateStr}</span>
+                        <span className="text-[10px] text-slate-500">{timeStr}</span>
+                      </div>
+                    </div>
+                    <div className="flex flex-1 flex-col p-5">
+                      {speakerName && (
+                        <p className="mb-1.5 text-xs font-medium text-muted-foreground">{speakerName}</p>
+                      )}
+                      <h3 className="line-clamp-2 text-lg font-semibold leading-snug group-hover:text-teal-600 transition-colors">
+                        {event.title}
+                      </h3>
+                      <div className="flex-1" />
+                      <div className="mt-4 flex items-center justify-between border-t pt-3">
+                        {price > 0 ? (
+                          <span className="text-base font-bold">${price.toFixed(0)} MXN</span>
+                        ) : (
+                          <span className="text-sm font-bold text-emerald-600">Gratis</span>
+                        )}
+                        <span className="text-xs font-semibold text-teal-600 group-hover:underline">Ver detalles →</span>
+                      </div>
+                    </div>
+                  </Link>
+                )
+              })}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* ══════════════════════════════════════════════════
           9. TESTIMONIOS / RESPALDO
