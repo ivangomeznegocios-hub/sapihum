@@ -7,15 +7,10 @@ const canonicalAssetLinks = {
     href: '/eventos',
     kind: 'eventos' as const,
   },
-  cursos: {
-    label: 'Ver cursos',
-    href: '/cursos',
-    kind: 'cursos' as const,
-  },
-  grabaciones: {
-    label: 'Ver grabaciones',
-    href: '/grabaciones',
-    kind: 'grabaciones' as const,
+  academia: {
+    label: 'Ver catálogo',
+    href: '/academia',
+    kind: 'academia' as const,
   },
 }
 
@@ -33,11 +28,10 @@ const blogPosts: BlogPost[] = [
     category: 'Arquitectura de producto',
     featured: true,
     tags: ['eventos', 'landing', 'SEO', 'membresias'],
-    canonicalFocus: ['eventos', 'cursos', 'grabaciones'],
+    canonicalFocus: ['eventos', 'academia'],
     assetLinks: [
       canonicalAssetLinks.eventos,
-      canonicalAssetLinks.cursos,
-      canonicalAssetLinks.grabaciones,
+      canonicalAssetLinks.academia,
     ],
     intro:
       'La mejor manera de pensar un evento no es como un calendario, sino como una pieza de negocio con vida propia: capta tráfico, convierte intención y abre la puerta a una relación más larga.',
@@ -59,7 +53,7 @@ const blogPosts: BlogPost[] = [
         heading: 'El blog no compite con la landing',
         paragraphs: [
           'El blog cumple otra función: captar demanda, explicar el problema y posicionar la idea antes de la conversión.',
-          'Cada artículo puede empujar a un evento, curso o grabación, pero no debe intentar hacer todo en una sola página.',
+          'Cada artículo puede empujar a un evento o formación, pero no debe intentar hacer todo en una sola página.',
         ],
       },
       {
@@ -76,7 +70,7 @@ const blogPosts: BlogPost[] = [
     slug: 'cuando-cobrar-un-evento-y-cuando-regalarlo',
     title: 'Cuándo conviene cobrar un evento y cuándo usarlo como captación',
     description:
-      'Una regla práctica para decidir entre evento gratuito, evento pagado y contenido on-demand según el objetivo comercial.',
+      'Una regla práctica para decidir entre evento gratuito y evento pagado según el objetivo comercial.',
     excerpt:
       'No todo evento debe monetizarse igual. Algunos están hechos para atraer audiencia; otros para filtrar intención y recuperar inversión.',
     publishedAt: '2026-03-24',
@@ -84,8 +78,8 @@ const blogPosts: BlogPost[] = [
     readTime: '5 min',
     category: 'Estrategia comercial',
     tags: ['pricing', 'captacion', 'conversión', 'campañas'],
-    canonicalFocus: ['eventos', 'grabaciones'],
-    assetLinks: [canonicalAssetLinks.eventos, canonicalAssetLinks.grabaciones],
+    canonicalFocus: ['eventos', 'academia'],
+    assetLinks: [canonicalAssetLinks.eventos, canonicalAssetLinks.academia],
     intro:
       'El criterio no debería ser solamente cuánto tiempo te toma organizar el evento. La pregunta correcta es qué papel cumple dentro de la escalera de valor.',
     sections: [
@@ -109,20 +103,20 @@ const blogPosts: BlogPost[] = [
         ],
       },
       {
-        heading: 'La grabación extiende el valor',
+        heading: 'La grabación como beneficio, no como producto aparte',
         paragraphs: [
-          'Si el evento ya demostró demanda, la grabación puede vivir como producto independiente o como beneficio de membresía.',
-          'Eso convierte una sola producción en varias oportunidades de venta.',
+          'Si el evento ya demostró demanda, la grabación es un beneficio para quienes asistieron o compraron acceso.',
+          'Eso aumenta el valor percibido del evento original sin fragmentar el catálogo.',
         ],
       },
     ],
-    ctaLabel: 'Ver grabaciones',
+    ctaLabel: 'Ver eventos',
   },
   {
     slug: 'membresia-que-retiene-y-no-cannibaliza',
     title: 'La membresía correcta no compite con tu catálogo: lo vuelve más rentable',
     description:
-      'Cómo diseñar beneficios, descuentos y accesos para que la membresía retenga sin reemplazar eventos, cursos o grabaciones.',
+      'Cómo diseñar beneficios, descuentos y accesos para que la membresía retenga sin reemplazar eventos o formaciones.',
     excerpt:
       'La membresía funciona mejor cuando es continuidad, no atajo: acceso preferencial, ahorro y comunidad sin borrar el valor del catálogo individual.',
     publishedAt: '2026-03-24',
@@ -131,14 +125,13 @@ const blogPosts: BlogPost[] = [
     category: 'Membresías',
     featured: true,
     tags: ['membresia', 'retencion', 'LTV', 'beneficios'],
-    canonicalFocus: ['cursos', 'grabaciones', 'eventos'],
+    canonicalFocus: ['academia', 'eventos'],
     assetLinks: [
-      canonicalAssetLinks.cursos,
-      canonicalAssetLinks.grabaciones,
+      canonicalAssetLinks.academia,
       canonicalAssetLinks.eventos,
     ],
     intro:
-      'La membresía debe resolver una pregunta simple: ¿por qué quedarse aquí cuando el usuario ya recibió valor de un evento o curso?',
+      'La membresía debe resolver una pregunta simple: ¿por qué quedarse aquí cuando el usuario ya recibió valor de un evento o formación?',
     sections: [
       {
         heading: 'No la uses como sustituto',
@@ -150,8 +143,8 @@ const blogPosts: BlogPost[] = [
       {
         heading: 'Sí debe crear hábitos de consumo',
         paragraphs: [
-          'Los mejores programas de membresía invitan a volver: nuevos eventos, nuevas grabaciones, nuevos cursos o ventajas prácticas.',
-          'El usuario paga por seguir avanzando, no solo por “tener acceso”.',
+          'Los mejores programas de membresía invitan a volver: nuevos eventos, nuevas formaciones y ventajas prácticas.',
+          'El usuario paga por seguir avanzando, no solo por "tener acceso".',
         ],
         points: [
           'Replays extendidos.',
@@ -167,7 +160,7 @@ const blogPosts: BlogPost[] = [
         ],
       },
     ],
-    ctaLabel: 'Explorar cursos',
+    ctaLabel: 'Explorar catálogo',
   },
 ]
 

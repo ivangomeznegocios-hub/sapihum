@@ -24,7 +24,7 @@ export async function POST(request: NextRequest) {
         }
 
         const body = await request.json()
-        const { membershipLevel, billingInterval = 'monthly', specializationCode, analyticsContext } = body as {
+        const { membershipLevel, billingInterval = 'monthly', specializationCode, analyticsContext, successPath } = body as {
             membershipLevel: number
             billingInterval?: BillingInterval
             specializationCode?: string
@@ -33,6 +33,7 @@ export async function POST(request: NextRequest) {
                 sessionId?: string | null
                 touch?: Record<string, unknown> | null
             }
+            successPath?: string
         }
 
         if (!membershipLevel || typeof membershipLevel !== 'number') {
@@ -154,7 +155,7 @@ export async function POST(request: NextRequest) {
                 analytics_session_id: analyticsContext?.sessionId ?? '',
                 attribution_snapshot: JSON.stringify(attributionSnapshot),
             },
-            successUrl: `${appUrl}/dashboard/payment-success?session_id={CHECKOUT_SESSION_ID}`,
+            successUrl: `${appUrl}/dashboard/payment-success?session_id={CHECKOUT_SESSION_ID}${successPath ? `&next=${encodeURIComponent(successPath)}` : ''}`,
             cancelUrl: `${appUrl}/dashboard/payment-cancelled`,
         })
 

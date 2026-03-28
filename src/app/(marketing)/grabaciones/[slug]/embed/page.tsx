@@ -1,18 +1,10 @@
-import { notFound } from 'next/navigation'
-import { PublicEventEmbed } from '@/components/catalog/public-event-embed'
-import { getPublicEventBySlug } from '@/lib/supabase/queries/events'
+import { redirect } from 'next/navigation'
 
 interface PageProps {
     params: Promise<{ slug: string }>
 }
 
-export default async function RecordingEmbedPage({ params }: PageProps) {
+export default async function RecordingEmbedRedirect({ params }: PageProps) {
     const { slug } = await params
-    const event = await getPublicEventBySlug(slug)
-
-    if (!event || event.public_kind !== 'grabaciones') {
-        notFound()
-    }
-
-    return <PublicEventEmbed event={event} />
+    redirect(`/eventos/${slug}/embed`)
 }

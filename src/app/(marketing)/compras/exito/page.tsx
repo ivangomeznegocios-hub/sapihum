@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { getUserProfile } from '@/lib/supabase/server'
+import { reconcileCompletedCheckoutSession } from '@/lib/payments'
 import { getPublicEventBySlug } from '@/lib/supabase/queries/events'
 import { ArrowRight, CheckCircle2, Mail, Play } from 'lucide-react'
 
@@ -14,11 +15,20 @@ export const metadata = {
 }
 
 interface PageProps {
-    searchParams: Promise<{ slug?: string }>
+    searchParams: Promise<{ slug?: string; session_id?: string }>
 }
 
 export default async function PurchaseSuccessPage({ searchParams }: PageProps) {
-    const { slug } = await searchParams
+    const { slug, session_id } = await searchParams
+
+    if (session_id) {
+        try {
+            await reconcileCompletedCheckoutSession(session_id)
+        } catch (error) {
+            console.error('[PurchaseSuccess] Failed to reconcile checkout session:', error)
+        }
+    }
+
     const profile = await getUserProfile()
     const event = slug ? await getPublicEventBySlug(slug) : null
     const hubPath = event ? `/hub/${event.slug}` : '/mi-acceso'

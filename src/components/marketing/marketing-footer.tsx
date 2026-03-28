@@ -10,10 +10,8 @@ const FOOTER_LINKS = {
     { label: "Ver las 12", href: "/especialidades" },
   ],
   Academia: [
-    { label: "Cursos y Diplomados", href: "/precios" },
-    { label: "Certificaciones", href: "/precios" },
-    { label: "Eventos y Webinars", href: "/eventos" },
-    { label: "Supervisión Clínica", href: "/precios" },
+    { label: "Catálogo Completo", href: "/academia" },
+    { label: "Eventos en Vivo", href: "/eventos" },
   ],
   Recursos: [
     { label: "Blog", href: "/blog" },

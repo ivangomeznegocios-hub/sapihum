@@ -1,6 +1,6 @@
 import type { Event } from '@/types/database'
 
-export type PublicCatalogSection = 'eventos' | 'cursos' | 'grabaciones'
+export type PublicCatalogSection = 'eventos'
 
 type EventRouteLike = Pick<Event, 'event_type' | 'slug' | 'recording_url' | 'status'>
 
@@ -13,14 +13,15 @@ export function slugifyEventTitle(title: string) {
         .replace(/^-+|-+$/g, '') || 'evento'
 }
 
-export function getPublicCatalogSection(event: Pick<EventRouteLike, 'event_type'>): PublicCatalogSection {
-    if (event.event_type === 'course') return 'cursos'
-    if (event.event_type === 'on_demand') return 'grabaciones'
+/**
+ * All events are in the 'eventos' section. No more cursos/grabaciones split.
+ */
+export function getPublicCatalogSection(_event: Pick<EventRouteLike, 'event_type'>): PublicCatalogSection {
     return 'eventos'
 }
 
 export function getPublicEventPath(event: Pick<EventRouteLike, 'event_type' | 'slug'>) {
-    return `/${getPublicCatalogSection(event)}/${event.slug}`
+    return `/eventos/${event.slug}`
 }
 
 export function getPublicEventEmbedPath(event: Pick<EventRouteLike, 'event_type' | 'slug'>) {
@@ -40,20 +41,10 @@ export function getBlogArticlePath(slug: string) {
     return `/blog/${slug}`
 }
 
-export function getCatalogSectionTitle(section: PublicCatalogSection) {
-    if (section === 'cursos') return 'Cursos'
-    if (section === 'grabaciones') return 'Grabaciones'
+export function getCatalogSectionTitle(_section: PublicCatalogSection) {
     return 'Eventos'
 }
 
-export function getCatalogSectionDescription(section: PublicCatalogSection) {
-    if (section === 'cursos') {
-        return 'Programas y cohortes con contenido estructurado, acceso privado y continuidad formativa.'
-    }
-
-    if (section === 'grabaciones') {
-        return 'Replays y contenidos on-demand listos para compra, distribución y posicionamiento.'
-    }
-
-    return 'Eventos, cohortes y sesiones en vivo diseñadas como activos de captación, conversión y autoridad.'
+export function getCatalogSectionDescription(_section: PublicCatalogSection) {
+    return 'Eventos, formaciones y experiencias en vivo diseñadas para la comunidad de psicología profesional.'
 }

@@ -1,4 +1,4 @@
-export type BlogAssetKind = 'eventos' | 'cursos' | 'grabaciones'
+export type BlogAssetKind = 'eventos' | 'academia'
 
 export type BlogAssetLink = {
   label: string

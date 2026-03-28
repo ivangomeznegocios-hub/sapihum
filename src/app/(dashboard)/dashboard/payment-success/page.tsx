@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 
 interface PageProps {
-    searchParams: Promise<{ session_id?: string }>
+    searchParams: Promise<{ session_id?: string; next?: string }>
 }
 
 async function getEventFromSession(sessionId: string | undefined) {
@@ -36,7 +36,9 @@ async function getEventFromSession(sessionId: string | undefined) {
 }
 
 export default async function PaymentSuccessPage({ searchParams }: PageProps) {
-    const { session_id } = await searchParams
+    const params = await searchParams
+    const session_id = params.session_id
+    const nextUrl = params.next
     const event = await getEventFromSession(session_id)
 
     return (
@@ -73,6 +75,13 @@ export default async function PaymentSuccessPage({ searchParams }: PageProps) {
                                 </Link>
                             </Button>
                         </div>
+                    ) : nextUrl ? (
+                        <Button asChild className="w-full">
+                            <Link href={nextUrl}>
+                                Continuar
+                                <ArrowRight className="ml-2 h-4 w-4" />
+                            </Link>
+                        </Button>
                     ) : (
                         <Button asChild className="w-full">
                             <Link href="/dashboard/subscription">

@@ -3,9 +3,10 @@
 import Link from 'next/link'
 import { useState } from 'react'
 import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { getEventMemberAccessMessage } from '@/lib/events/pricing'
-import { getDefaultPublicCtaLabel, getPublicCatalogTitle, getPublicEventPath } from '@/lib/events/public'
+import { getDefaultPublicCtaLabel, getEventTypeLabel, getPublicEventPath } from '@/lib/events/public'
 import { PublicAccessCta } from './public-access-cta'
 
 function formatEventDate(date: string) {
@@ -136,18 +137,31 @@ function FaqAccordion({ items }: { items: { question: string; answer: string }[]
 export function PublicEventLanding({
     event,
     relatedEvents,
+    user,
+    membershipLevel = 0,
+    hasAccess = false,
 }: {
     event: any
     relatedEvents: any[]
+    user: any | null
+    membershipLevel: number
+    hasAccess: boolean
 }) {
     const ctaLabel = getDefaultPublicCtaLabel(event)
     const requiresPayment = Number(event.price || 0) > 0
     const memberMessage = getEventMemberAccessMessage(event)
+    const formatLabel = getEventTypeLabel(event.event_type)
     const faqItems = buildFaq(event)
-    const publicCategory = getPublicCatalogTitle(event.public_kind ?? 'eventos')
-    const formatLabel = event.event_type === 'course' ? 'Curso / cohorte'
-        : event.event_type === 'on_demand' ? 'On demand'
-            : 'Evento en vivo'
+    
+    // Determine the state logic for the CTA box
+    const userIsMember = membershipLevel > 0
+    const finalPrice = requiresPayment && userIsMember 
+        ? (event.member_price !== null && event.member_price !== undefined 
+            ? Number(event.member_price) 
+            : (event.member_access_type === 'free' ? 0 : Number(event.price)))
+        : Number(event.price || 0)
+        
+    const showMembershipUpsell = !hasAccess && !userIsMember && requiresPayment && event.member_access_type !== 'full_price'
 
     return (
         <div className="space-y-14 pb-20">
@@ -173,7 +187,7 @@ export function PublicEventLanding({
                         {/* Badges */}
                         <div className="flex flex-wrap items-center gap-2.5">
                             <span className="inline-flex items-center gap-1.5 rounded-full border border-teal-400/20 bg-teal-500/10 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-teal-300">
-                                {publicCategory}
+                                {getEventTypeLabel(event.event_type)}
                             </span>
                             {event.hero_badge && (
                                 <span className="inline-flex items-center rounded-full bg-white/10 px-3 py-1 text-xs font-medium text-white/80">
@@ -248,15 +262,19 @@ export function PublicEventLanding({
                         </div>
                     </div>
 
-                    {/* Right: Pricing Card */}
                     <div className="lg:sticky lg:top-24 lg:self-start">
                         <div className="overflow-hidden rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm shadow-2xl">
                             <div className="space-y-5 p-6">
                                 <div>
                                     <p className="text-xs font-medium uppercase tracking-widest text-slate-400">Precio</p>
                                     <p className="mt-1 text-3xl font-bold text-white">
-                                        {Number(event.price || 0) > 0 ? `$${Number(event.price).toFixed(0)} MXN` : 'Gratis'}
+                                        {finalPrice > 0 ? `$${finalPrice.toFixed(0)} MXN` : 'Gratis'}
                                     </p>
+                                    {finalPrice > 0 && finalPrice < Number(event.price || 0) && (
+                                        <p className="mt-1 text-sm text-emerald-400 font-medium">
+                                            ¡Tienes precio preferencial de miembro!
+                                        </p>
+                                    )}
                                 </div>
 
                                 <div className="rounded-xl border border-white/10 bg-white/5 p-3.5 text-sm">
@@ -264,20 +282,52 @@ export function PublicEventLanding({
                                     {memberMessage.note && <p className="mt-1.5 text-xs text-slate-400">{memberMessage.note}</p>}
                                 </div>
 
-                                <PublicAccessCta
-                                    eventId={event.id}
-                                    eventSlug={event.slug}
-                                    title={event.title}
-                                    label={ctaLabel}
-                                    requiresPayment={requiresPayment}
-                                />
+                                {hasAccess ? (
+                                    <div className="space-y-3 pt-2">
+                                        <Link href={`/hub/${event.slug}${event.status === 'completed' ? '/recording' : ''}`}>
+                                            <Button className="w-full bg-teal-500 hover:bg-teal-600 text-white" size="lg">
+                                                {event.status === 'completed' ? 'Ver grabación' : 'Entrar a la sala en vivo'}
+                                            </Button>
+                                        </Link>
+                                        <p className="text-center text-xs text-emerald-400 font-medium">
+                                            ✓ Ya tienes acceso a este contenido
+                                        </p>
+                                    </div>
+                                ) : (
+                                    <div className="space-y-3">
+                                        <PublicAccessCta
+                                            eventId={event.id}
+                                            eventSlug={event.slug}
+                                            title={event.title}
+                                            label={finalPrice > 0 ? ctaLabel : 'Recibir acceso gratis'}
+                                            requiresPayment={finalPrice > 0}
+                                        />
+                                        
+                                        {showMembershipUpsell && (
+                                            <>
+                                                <div className="relative py-3 flex items-center">
+                                                    <div className="flex-grow border-t border-white/10"></div>
+                                                    <span className="shrink-0 px-3 text-xs text-slate-400 uppercase tracking-widest">O también</span>
+                                                    <div className="flex-grow border-t border-white/10"></div>
+                                                </div>
+                                                <Link href={`/precios?next=/eventos/${event.slug}&autoCheckout=true`}>
+                                                    <Button variant="outline" className="w-full border-teal-500/30 bg-teal-500/10 text-teal-300 hover:bg-teal-500/20 hover:text-teal-200" size="lg">
+                                                        Suscríbete y {event.member_access_type === 'free' ? 'accede gratis' : 'ahorra'}
+                                                    </Button>
+                                                </Link>
+                                            </>
+                                        )}
+                                    </div>
+                                )}
 
-                                <p className="text-center text-[11px] text-slate-400">
-                                    ¿Ya compraste?{' '}
-                                    <Link href="/compras/recuperar" className="font-medium text-teal-400 hover:underline">
-                                        Recupera tu acceso
-                                    </Link>
-                                </p>
+                                {!hasAccess && (
+                                    <p className="text-center text-[11px] text-slate-400 mt-4">
+                                        ¿Ya lo adquiriste?{' '}
+                                        <Link href="/compras/recuperar" className="font-medium text-teal-400 hover:underline">
+                                            Recupera tu acceso
+                                        </Link>
+                                    </p>
+                                )}
                             </div>
                         </div>
                     </div>
@@ -312,7 +362,7 @@ export function PublicEventLanding({
                                     { icon: '🎯', title: 'Acceso completo', desc: 'Link exclusivo al evento en vivo o grabación' },
                                     { icon: '📧', title: 'Acceso por correo', desc: 'Inicia sin cuenta. Recupera tu acceso cuando quieras' },
                                     ...(event.recording_url || event.event_type === 'on_demand' ? [
-                                        { icon: '🔄', title: 'Replay disponible', desc: event.recording_expires_at ? 'Acceso temporal a la grabación' : 'Grabación disponible mientras tu acceso esté activo' }
+                                        { icon: '🔄', title: 'Replay incluido', desc: 'Quienes tengan acceso podrán ver la grabación cuando esté disponible' }
                                     ] : []),
                                     ...(Number(event.price || 0) > 0 ? [
                                         { icon: '💳', title: 'Pago seguro', desc: 'Procesado de forma segura con Stripe' }

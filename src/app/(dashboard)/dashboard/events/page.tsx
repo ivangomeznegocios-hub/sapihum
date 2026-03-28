@@ -608,27 +608,28 @@ export default async function EventsPage() {
             {/* Upcoming Events */}
             {upcoming.length > 0 && (
                 <section>
-                    <h2 className="mb-4 flex min-w-0 items-center gap-2 text-xl font-semibold">
-                        <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="20"
-                            height="20"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            className="text-primary"
-                        >
-                            <rect width="18" height="18" x="3" y="4" rx="2" ry="2" />
-                            <line x1="16" x2="16" y1="2" y2="6" />
-                            <line x1="8" x2="8" y1="2" y2="6" />
-                            <line x1="3" x2="21" y1="10" y2="10" />
-                        </svg>
-                        Próximos Eventos
+                    <h2 className="mb-6 flex min-w-0 items-center gap-2 text-2xl font-bold tracking-tight">
+                        <div className="flex items-center justify-center p-2 rounded-xl bg-teal-500/10 text-teal-600 dark:text-teal-400">
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="20"
+                                height="20"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2.5"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                            >
+                                <rect width="18" height="18" x="3" y="4" rx="2" ry="2" />
+                                <line x1="16" x2="16" y1="2" y2="6" />
+                                <line x1="8" x2="8" y1="2" y2="6" />
+                                <line x1="3" x2="21" y1="10" y2="10" />
+                            </svg>
+                        </div>
+                        Próximos Eventos en Vivo
                     </h2>
-                    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                    <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                         {upcoming.map(event => (
                             <EventCard
                                 key={event.id}
@@ -646,27 +647,34 @@ export default async function EventsPage() {
                 </section>
             )}
 
-            {/* Past Events */}
+            {/* Past Events / Recordings Library */}
             {past.length > 0 && (
-                <section>
-                    <h2 className="mb-4 flex min-w-0 items-center gap-2 text-xl font-semibold">
-                        <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="20"
-                            height="20"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            className="text-muted-foreground"
-                        >
-                            <polygon points="6 3 20 12 6 21 6 3" />
-                        </svg>
-                        Eventos Pasados
-                    </h2>
-                    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                <section className="mt-12 pt-10 border-t border-border/50">
+                    <div className="mb-6 space-y-1">
+                        <h2 className="flex min-w-0 items-center gap-2 text-2xl font-bold tracking-tight">
+                            <div className="flex items-center justify-center p-2 rounded-xl bg-purple-500/10 text-purple-600 dark:text-purple-400">
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    width="20"
+                                    height="20"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth="2.5"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                >
+                                    <polygon points="6 3 20 12 6 21 6 3" />
+                                </svg>
+                            </div>
+                            Biblioteca de Grabaciones
+                        </h2>
+                        <p className="text-muted-foreground ml-12 text-sm">
+                            Eventos anteriores a los que tienes acceso o que puedes adquirir.
+                        </p>
+                    </div>
+                    
+                    <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                         {past.map(event => (
                             <EventCard
                                 key={event.id}

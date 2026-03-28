@@ -10,7 +10,7 @@ import { sendEmail } from '@/lib/email/index'
 import { buildEventPurchaseEmail } from '@/lib/email/templates'
 import { syncMembershipEntitlementsForUser } from '@/lib/membership-entitlements'
 import { getPlanByPriceId } from './config'
-import { stripeAdapter } from './stripe'
+import { retrieveCompletedCheckoutPayment, stripeAdapter } from './stripe'
 import type {
     PaymentProvider,
     PaymentProviderAdapter,
@@ -86,7 +86,7 @@ async function fulfillEventPurchase(params: {
 
     const { data: event } = await params.supabase
         .from('events')
-        .select('id, title, event_type, recording_expires_at')
+        .select('id, title, slug, event_type, recording_expires_at, start_time')
         .eq('id', params.eventId)
         .maybeSingle()
 
@@ -145,6 +145,7 @@ async function fulfillEventPurchase(params: {
         .maybeSingle()
 
     const resolvedUserId = purchaseRow?.user_id || params.userId || params.profileId || matchedProfile?.id || null
+    const wasAlreadyConfirmed = purchaseRow?.status === 'confirmed'
     const paymentReference = params.data.paymentIntentId || params.data.sessionId
     const attributionSnapshot = parseAttributionSnapshot(params.data.metadata?.attribution_snapshot)
     const mergedMetadata = {
@@ -261,14 +262,16 @@ async function fulfillEventPurchase(params: {
 
     console.log(`[Payment] Event purchase confirmed, access granted for event: ${params.eventId}`)
 
-    // Send purchase confirmation email
-    try {
+    if (!wasAlreadyConfirmed) {
+        try {
         const { getAppUrl } = await import('@/lib/config/app-url')
         const appUrl = getAppUrl()
         const isGuest = !params.userId && params.data.metadata?.guest_checkout === 'true'
         const buyerName = purchaseRow?.full_name
             || normalizeWebhookValue(params.data.metadata?.buyer_full_name)
             || customerEmail.split('@')[0]
+        const hubPath = event.slug ? `/hub/${event.slug}` : '/mi-acceso'
+        const recoveryUrl = `${appUrl}/compras/recuperar?email=${encodeURIComponent(customerEmail)}&next=${encodeURIComponent(hubPath)}`
         const eventDate = event.start_time
             ? new Intl.DateTimeFormat('es-MX', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', hour: 'numeric', minute: '2-digit' }).format(new Date(event.start_time))
             : 'Por confirmar'
@@ -277,12 +280,10 @@ async function fulfillEventPurchase(params: {
             userName: buyerName,
             eventTitle: event.title,
             eventDate,
-            amount: params.data.amount / 100, // Stripe sends in cents
-            eventUrl: resolvedUserId
-                ? `${appUrl}/dashboard/events/${params.eventId}`
-                : `${appUrl}/mi-acceso`,
+            amount: params.data.amount,
+            eventUrl: isGuest ? recoveryUrl : `${appUrl}${hubPath}`,
             isGuest,
-            recoveryUrl: `${appUrl}/compras/recuperar`,
+            recoveryUrl,
         })
 
         await sendEmail({
@@ -293,6 +294,8 @@ async function fulfillEventPurchase(params: {
     } catch (emailError) {
         // Non-blocking — purchase is already confirmed
         console.error('[Payment] Failed to send purchase confirmation email:', emailError)
+    }
+
     }
 
     return { resolvedUserId }
@@ -605,6 +608,7 @@ export async function fulfillOneTimePayment(data: PaymentWebhookData): Promise<v
                 .or(lookupFilters.join(','))
                 .maybeSingle()
             : { data: null }
+    const isFirstCompletedTransaction = !existingTransaction
 
     if (!existingTransaction) {
         await supabase.from('payment_transactions').insert({
@@ -668,51 +672,63 @@ export async function fulfillOneTimePayment(data: PaymentWebhookData): Promise<v
         resolvedFulfillmentUserId = result.resolvedUserId
     }
 
-    await recordAnalyticsServerEvent({
-        eventName: 'payment_completed',
-        eventSource: 'webhook',
-        visitorId: analyticsVisitorId,
-        sessionId: analyticsSessionId,
-        userId: resolvedFulfillmentUserId,
-        touch: getPrimaryTouch(attributionSnapshot),
-        properties: {
-            purchaseType,
-            referenceId: referenceId || null,
-            amount: data.amount,
-            currency: data.currency,
-        },
-    })
-
-    if (purchaseType === 'event_purchase') {
+    if (isFirstCompletedTransaction) {
         await recordAnalyticsServerEvent({
-            eventName: 'event_purchased',
+            eventName: 'payment_completed',
             eventSource: 'webhook',
             visitorId: analyticsVisitorId,
             sessionId: analyticsSessionId,
             userId: resolvedFulfillmentUserId,
             touch: getPrimaryTouch(attributionSnapshot),
             properties: {
-                eventId: referenceId || null,
+                purchaseType,
+                referenceId: referenceId || null,
                 amount: data.amount,
+                currency: data.currency,
             },
         })
+
+        if (purchaseType === 'event_purchase') {
+            await recordAnalyticsServerEvent({
+                eventName: 'event_purchased',
+                eventSource: 'webhook',
+                visitorId: analyticsVisitorId,
+                sessionId: analyticsSessionId,
+                userId: resolvedFulfillmentUserId,
+                touch: getPrimaryTouch(attributionSnapshot),
+                properties: {
+                    eventId: referenceId || null,
+                    amount: data.amount,
+                },
+            })
+        }
+
+        if (purchaseType === 'ai_credits') {
+            await recordAnalyticsServerEvent({
+                eventName: 'ai_credits_purchased',
+                eventSource: 'webhook',
+                visitorId: analyticsVisitorId,
+                sessionId: analyticsSessionId,
+                userId: resolvedFulfillmentUserId,
+                touch: getPrimaryTouch(attributionSnapshot),
+                properties: {
+                    packageKey: referenceId || null,
+                    amount: data.amount,
+                    minutes: Number(data.metadata?.minutes || 0),
+                },
+            })
+        }
+    }
+}
+
+export async function reconcileCompletedCheckoutSession(sessionId: string): Promise<boolean> {
+    const payment = await retrieveCompletedCheckoutPayment(sessionId)
+    if (!payment) {
+        return false
     }
 
-    if (purchaseType === 'ai_credits') {
-        await recordAnalyticsServerEvent({
-            eventName: 'ai_credits_purchased',
-            eventSource: 'webhook',
-            visitorId: analyticsVisitorId,
-            sessionId: analyticsSessionId,
-            userId: resolvedFulfillmentUserId,
-            touch: getPrimaryTouch(attributionSnapshot),
-            properties: {
-                packageKey: referenceId || null,
-                amount: data.amount,
-                minutes: Number(data.metadata?.minutes || 0),
-            },
-        })
-    }
+    await fulfillOneTimePayment(payment)
+    return true
 }
 
 export { stripeAdapter } from './stripe'

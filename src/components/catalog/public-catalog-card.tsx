@@ -13,17 +13,32 @@ function formatEventDate(date: string) {
 }
 
 function getTypeMeta(event: any) {
-    if (event.event_type === 'course') {
-        return { label: 'Curso', color: 'bg-violet-500/90 text-white' }
-    }
-    if (event.event_type === 'on_demand' || (event.status === 'completed' && event.recording_url)) {
-        return { label: 'Grabación', color: 'bg-amber-500/90 text-white' }
-    }
     if (event.status === 'live') {
         return { label: 'En Vivo', color: 'bg-red-500/90 text-white animate-pulse' }
     }
+    if (event.event_type === 'course') {
+        return { label: 'Formación', color: 'bg-violet-500/90 text-white' }
+    }
+    if (event.event_type === 'presencial') {
+        return { label: 'Presencial', color: 'bg-blue-500/90 text-white' }
+    }
+    if (event.status === 'completed') {
+        return { label: 'Finalizado', color: 'bg-slate-500/90 text-white' }
+    }
     return { label: 'Evento', color: 'bg-teal-600/90 text-white' }
 }
+
+const SUBCATEGORY_LABELS: Record<string, string> = {
+    curso: 'Curso',
+    diplomado: 'Diplomado',
+    clase: 'Clase',
+    taller: 'Taller',
+    conferencia: 'Conferencia',
+    seminario: 'Seminario',
+    congreso: 'Congreso',
+    meetup: 'Meetup',
+}
+
 
 export function PublicCatalogCard({ event }: { event: any }) {
     const publicPath = getPublicEventPath(event)
@@ -35,6 +50,9 @@ export function PublicCatalogCard({ event }: { event: any }) {
     const speakerAvatar = event.speakers?.[0]?.speaker?.profile?.avatar_url
     const isFree = price === 0
     const memberFree = event.member_access_type === 'free' && price > 0
+    const subcategoryLabel = event.subcategory ? SUBCATEGORY_LABELS[event.subcategory] || null : null
+    const isMembersOnly = (event.target_audience || []).some((a: string) => a !== 'public') && !(event.target_audience || []).includes('public')
+
 
     return (
         <Link
@@ -66,13 +84,23 @@ export function PublicCatalogCard({ event }: { event: any }) {
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
 
                 {/* Type Badge */}
-                <div className="absolute left-3 top-3 flex items-center gap-2">
+                <div className="absolute left-3 top-3 flex items-center gap-1.5 flex-wrap max-w-[calc(100%-6rem)]">
                     <span className={`inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-semibold tracking-wide uppercase ${typeMeta.color}`}>
                         {typeMeta.label}
                     </span>
+                    {subcategoryLabel && (
+                        <span className="inline-flex items-center rounded-full bg-white/20 backdrop-blur-sm px-2 py-1 text-[10px] font-medium text-white">
+                            {subcategoryLabel}
+                        </span>
+                    )}
                     {event.hero_badge && (
                         <span className="inline-flex items-center rounded-full bg-white/20 backdrop-blur-sm px-2.5 py-1 text-[11px] font-medium text-white">
                             {event.hero_badge}
+                        </span>
+                    )}
+                    {isMembersOnly && (
+                        <span className="inline-flex items-center gap-1 rounded-full bg-purple-500/80 backdrop-blur-sm px-2 py-1 text-[10px] font-semibold text-white">
+                            🔒 Miembros
                         </span>
                     )}
                 </div>

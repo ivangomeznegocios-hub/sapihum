@@ -1,6 +1,10 @@
 import type { Event, EventType } from '@/types/database'
 
-export type PublicCatalogKind = 'eventos' | 'cursos' | 'grabaciones'
+/**
+ * All public events route to /eventos/ canonically.
+ * The old 'cursos' and 'grabaciones' routes now redirect here.
+ */
+export type PublicCatalogKind = 'eventos'
 
 export function slugifyCatalogText(value: string) {
     return value
@@ -8,7 +12,7 @@ export function slugifyCatalogText(value: string) {
         .replace(/[\u0300-\u036f]/g, '')
         .toLowerCase()
         .replace(/[^a-z0-9]+/g, '-')
-        .replace(/^-+|-+$/g, '')
+        .replace(/^-+|-+$/g, '-')
         .replace(/-{2,}/g, '-')
 }
 
@@ -20,35 +24,28 @@ export function isRecordingEventType(eventType?: EventType | null) {
     return eventType === 'on_demand'
 }
 
-export function getPublicCatalogKindForEvent(event: Pick<Event, 'event_type' | 'recording_url' | 'status'>): PublicCatalogKind {
-    if (isCourseEventType(event.event_type)) return 'cursos'
-    if (isRecordingEventType(event.event_type)) return 'grabaciones'
-    if (event.status === 'completed' && event.recording_url) return 'grabaciones'
+/**
+ * All events now resolve to 'eventos' as their public kind.
+ * Recordings are no longer a separate public catalog.
+ */
+export function getPublicCatalogKindForEvent(_event: Pick<Event, 'event_type' | 'recording_url' | 'status'>): PublicCatalogKind {
     return 'eventos'
 }
 
 export function getPublicEventPath(event: Pick<Event, 'slug' | 'event_type' | 'recording_url' | 'status'>) {
-    return `/${getPublicCatalogKindForEvent(event)}/${event.slug}`
+    return `/eventos/${event.slug}`
 }
 
 export function buildPublicEventUrl(baseUrl: string, event: Pick<Event, 'slug' | 'event_type' | 'recording_url' | 'status'>) {
     return `${baseUrl}${getPublicEventPath(event)}`
 }
 
-export function getPublicCatalogTitle(kind: PublicCatalogKind) {
-    if (kind === 'cursos') return 'Cursos'
-    if (kind === 'grabaciones') return 'Grabaciones'
+export function getPublicCatalogTitle(_kind: PublicCatalogKind) {
     return 'Eventos'
 }
 
-export function getPublicCatalogDescription(kind: PublicCatalogKind) {
-    if (kind === 'cursos') {
-        return 'Programas cohortizados y cursos evergreen con enfoque clínico, educativo y de negocio.'
-    }
-    if (kind === 'grabaciones') {
-        return 'Replays, clases bajo demanda y contenidos que siguen vendiendo después del vivo.'
-    }
-    return 'Eventos en vivo, cohortes y experiencias públicas o exclusivas para la comunidad.'
+export function getPublicCatalogDescription(_kind: PublicCatalogKind) {
+    return 'Eventos en vivo, formaciones, talleres, conferencias y experiencias de la comunidad SAPIHUM.'
 }
 
 export function buildEventSeoDescription(event: Pick<Event, 'seo_description' | 'og_description' | 'description' | 'title'>) {
@@ -56,12 +53,18 @@ export function buildEventSeoDescription(event: Pick<Event, 'seo_description' | 
     return description.slice(0, 160)
 }
 
+export function getEventTypeLabel(eventType?: EventType | null): string {
+    const labels: Record<string, string> = {
+        live: 'En Vivo',
+        course: 'Formación',
+        on_demand: 'Grabación',
+        presencial: 'Presencial',
+    }
+    return labels[eventType || ''] || 'Evento'
+}
+
 export function getDefaultPublicCtaLabel(event: Pick<Event, 'price' | 'event_type' | 'public_cta_label' | 'status' | 'recording_url'>) {
     if (event.public_cta_label) return event.public_cta_label
-    if (event.price <= 0) return 'Registrarme gratis'
-    if (isCourseEventType(event.event_type)) return 'Comprar curso'
-    if (isRecordingEventType(event.event_type) || (event.status === 'completed' && event.recording_url)) {
-        return 'Comprar acceso'
-    }
+    if (Number(event.price) <= 0) return 'Registrarme gratis'
     return 'Comprar acceso'
 }

@@ -382,3 +382,70 @@ export async function getPublicCatalogEvents(kind: 'eventos' | 'cursos' | 'graba
         public_kind: getPublicCatalogKindForEvent(event),
     }))
 }
+
+/**
+ * Get ALL published events (excluding on_demand recordings) — unified catalog for Academia.
+ * Sorts upcoming first (by start_time ASC), completed last.
+ */
+export async function getUnifiedCatalogEvents() {
+    const supabase = await createClient()
+
+    const { data, error } = await (supabase
+        .from('events') as any)
+        .select('*')
+        .not('status', 'eq', 'draft')
+        .not('status', 'eq', 'cancelled')
+        .not('event_type', 'eq', 'on_demand')
+        .order('start_time', { ascending: true })
+
+    if (error || !data) {
+        console.error('Error fetching unified catalog events:', error)
+        return []
+    }
+
+    const ids = data.map((event: any) => event.id)
+    if (ids.length === 0) return []
+
+    const [{ data: speakers }, attendeeCounts] = await Promise.all([
+        (supabase
+            .from('event_speakers') as any)
+            .select(`
+                *,
+                speaker:speakers (
+                    *,
+                    profile:profiles (
+                        id,
+                        full_name,
+                        avatar_url
+                    )
+                )
+            `)
+            .in('event_id', ids)
+            .order('display_order', { ascending: true }),
+        getUniqueEventAccessCounts(supabase, ids),
+    ])
+
+    const speakerMap = new Map<string, any[]>()
+    for (const row of speakers ?? []) {
+        const collection = speakerMap.get(row.event_id) ?? []
+        collection.push(row)
+        speakerMap.set(row.event_id, collection)
+    }
+
+    const enriched = data.map((event: any) => ({
+        ...event,
+        speakers: speakerMap.get(event.id) ?? [],
+        attendee_count: attendeeCounts[event.id] || 0,
+        public_kind: getPublicCatalogKindForEvent(event),
+    }))
+
+    // Sort: upcoming/live first, then completed, by start_time
+    const now = new Date().toISOString()
+    return enriched.sort((a: any, b: any) => {
+        const aUpcoming = a.status === 'upcoming' || a.status === 'live' || a.start_time > now
+        const bUpcoming = b.status === 'upcoming' || b.status === 'live' || b.start_time > now
+        if (aUpcoming && !bUpcoming) return -1
+        if (!aUpcoming && bUpcoming) return 1
+        return new Date(a.start_time).getTime() - new Date(b.start_time).getTime()
+    })
+}

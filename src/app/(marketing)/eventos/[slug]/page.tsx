@@ -1,8 +1,11 @@
 import type { Metadata } from 'next'
-import { notFound, redirect } from 'next/navigation'
+import { notFound } from 'next/navigation'
 import { PublicEventLanding } from '@/components/catalog/public-event-landing'
 import { buildEventSeoDescription, getPublicEventPath } from '@/lib/events/public'
-import { getPublicCatalogEvents, getPublicEventBySlug } from '@/lib/supabase/queries/events'
+import { getUnifiedCatalogEvents, getPublicEventBySlug } from '@/lib/supabase/queries/events'
+import { createClient, getUserProfile } from '@/lib/supabase/server'
+import { getCommercialAccessContext } from '@/lib/access/commercial'
+import { getActiveEntitlementForEvent } from '@/lib/events/access'
 
 interface PageProps {
     params: Promise<{ slug: string }>
@@ -13,16 +16,29 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     const event = await getPublicEventBySlug(slug)
 
     if (!event) {
-        return { title: 'Activo no encontrado | Comunidad de Psicologia' }
+        return { title: 'Evento no encontrado | SAPIHUM' }
     }
 
     return {
-        title: event.seo_title || `${event.title} | Comunidad de Psicologia`,
+        title: event.seo_title || `${event.title} | SAPIHUM`,
         description: buildEventSeoDescription(event),
         openGraph: {
             title: event.seo_title || event.title,
             description: buildEventSeoDescription(event),
-            images: event.image_url ? [{ url: event.image_url }] : undefined,
+            images: event.image_url ? [{
+                url: event.image_url,
+                width: 1200,
+                height: 630,
+                alt: event.title,
+            }] : undefined,
+            type: 'website',
+            siteName: 'SAPIHUM Comunidad de Psicología',
+        },
+        twitter: {
+            card: 'summary_large_image',
+            title: event.seo_title || event.title,
+            description: buildEventSeoDescription(event),
+            images: event.image_url ? [event.image_url] : undefined,
         },
         alternates: {
             canonical: getPublicEventPath(event),
@@ -36,14 +52,34 @@ export default async function EventoPublicoPage({ params }: PageProps) {
 
     if (!event) notFound()
 
-    const canonicalPath = getPublicEventPath(event)
-    if (!canonicalPath.startsWith('/eventos/')) {
-        redirect(canonicalPath)
-    }
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    const profile = user ? await getUserProfile() : null
+    const commercialAccess = user && profile 
+        ? await getCommercialAccessContext({ supabase, userId: user.id, profile }) 
+        : null
+    
+    const membershipLevel = commercialAccess?.membershipLevel ?? 0
 
-    const relatedEvents = (await getPublicCatalogEvents('eventos'))
-        .filter((item: any) => item.id !== event.id)
+    const entitlement = user ? await getActiveEntitlementForEvent({
+        supabase,
+        eventId: event.id,
+        userId: user.id,
+        email: user.email,
+    }) : null
+
+    // Get related events from the unified catalog
+    const relatedEvents = (await getUnifiedCatalogEvents())
+        .filter((item: any) => item.id !== event.id && (item.status === 'upcoming' || item.status === 'live'))
         .slice(0, 3)
 
-    return <PublicEventLanding event={event} relatedEvents={relatedEvents} />
+    return (
+        <PublicEventLanding 
+            event={event} 
+            relatedEvents={relatedEvents} 
+            user={user}
+            membershipLevel={membershipLevel}
+            hasAccess={!!entitlement}
+        />
+    )
 }

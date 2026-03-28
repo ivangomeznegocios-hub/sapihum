@@ -43,10 +43,8 @@ const NAV_ITEMS = [
   {
     label: "Academia",
     children: [
-      { label: "Cursos y Diplomados", href: "/precios", description: "Programas de formación continua" },
-      { label: "Certificaciones", href: "/precios", description: "Acreditación profesional avalada" },
-      { label: "Eventos y Webinars", href: "/eventos", description: "Conferencias y networking de alto nivel" },
-      { label: "Supervisión Clínica", href: "/precios", description: "Supervisión grupal con especialistas" },
+      { label: "Explorar Catálogo", href: "/academia", description: "Todas las formaciones y eventos de SAPIHUM" },
+      { label: "Eventos en Vivo", href: "/eventos", description: "Conferencias, webinars y talleres" },
     ],
   },
   {
@@ -57,7 +55,6 @@ const NAV_ITEMS = [
       { label: "Casos de Estudio", href: "/casos-de-exito", description: "Profesionales que transformaron su práctica" },
     ],
   },
-  { label: "Eventos", href: "/eventos" },
   { label: "Investigación", href: "/nosotros" },
   { label: "Precios", href: "/precios" },
 ]

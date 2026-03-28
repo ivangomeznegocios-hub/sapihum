@@ -1,8 +1,58 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
+const AUTH_CALLBACK_QUERY_KEYS = new Set([
+    'code',
+    'token_hash',
+    'type',
+    'next',
+    'access_token',
+    'refresh_token',
+    'expires_at',
+    'expires_in',
+])
+
+function hasAuthCallbackPayload(request: NextRequest) {
+    const search = request.nextUrl.searchParams
+    return search.has('code') || (search.has('token_hash') && search.has('type'))
+}
+
+function getAuthCallbackNext(request: NextRequest) {
+    const explicitNext = request.nextUrl.searchParams.get('next')
+    if (explicitNext?.startsWith('/')) {
+        return explicitNext
+    }
+
+    const fallbackPath =
+        request.nextUrl.pathname === '/' || request.nextUrl.pathname.startsWith('/auth')
+            ? '/mi-acceso'
+            : request.nextUrl.pathname
+
+    const passthroughParams = new URLSearchParams()
+    request.nextUrl.searchParams.forEach((value, key) => {
+        if (!AUTH_CALLBACK_QUERY_KEYS.has(key)) {
+            passthroughParams.append(key, value)
+        }
+    })
+
+    const passthroughQuery = passthroughParams.toString()
+    return passthroughQuery ? `${fallbackPath}?${passthroughQuery}` : fallbackPath
+}
+
 export async function updateSession(request: NextRequest) {
     const pathname = request.nextUrl.pathname
+
+    if (pathname !== '/auth/callback' && hasAuthCallbackPayload(request)) {
+        const url = request.nextUrl.clone()
+        url.pathname = '/auth/callback'
+
+        if (!url.searchParams.get('next')) {
+            url.searchParams.set('next', getAuthCallbackNext(request))
+        }
+
+        return NextResponse.redirect(url)
+    }
+
     let supabaseResponse = NextResponse.next({
         request,
     })

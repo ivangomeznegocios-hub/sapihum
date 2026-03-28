@@ -1,7 +1,7 @@
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { SPECIALIZATION_CATALOG } from "@/lib/specializations"
-import { getPublicCatalogEvents } from "@/lib/supabase/queries/events"
+import { getUnifiedCatalogEvents } from "@/lib/supabase/queries/events"
 import { getPublicEventPath } from "@/lib/events/public"
 import { CheckCircle2, ChevronDown, Shield, Users, BookOpen, Scaling, Beaker, FileText, Smartphone, CalendarDays, ArrowRight } from "lucide-react"
 
@@ -146,7 +146,7 @@ const FAQS = [
 ]
 
 export default async function LandingPage() {
-  const upcomingEvents = (await getPublicCatalogEvents('eventos')).slice(0, 3)
+  const upcomingEvents = (await getUnifiedCatalogEvents()).filter((e: any) => e.status === 'upcoming' || e.status === 'live').slice(0, 3)
 
   return (
     <div className="flex flex-col items-center flex-1 w-full">
@@ -438,18 +438,18 @@ export default async function LandingPage() {
             <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between mb-12">
               <div>
                 <p className="text-sm font-semibold text-teal-600 dark:text-teal-400 uppercase tracking-wider mb-3">
-                  Formación en Vivo
+                  Academia SAPIHUM
                 </p>
                 <h2 className="text-3xl md:text-4xl font-bold tracking-tight">
-                  Próximos Eventos
+                  Próximos en la Academia
                 </h2>
                 <p className="mt-2 text-muted-foreground">
-                  Talleres, conferencias y experiencias de formación para la comunidad.
+                  Formaciones, eventos en vivo, cursos y experiencias para la comunidad.
                 </p>
               </div>
-              <Link href="/eventos" className="shrink-0">
+              <Link href="/academia" className="shrink-0">
                 <Button variant="outline" className="gap-2">
-                  Ver todos los eventos
+                  Ver catálogo completo
                   <ArrowRight className="h-4 w-4" />
                 </Button>
               </Link>
@@ -462,6 +462,12 @@ export default async function LandingPage() {
                 const dateStr = new Date(event.start_time).toLocaleDateString('es-MX', { day: 'numeric', month: 'short' })
                 const timeStr = new Date(event.start_time).toLocaleTimeString('es-MX', { hour: 'numeric', minute: '2-digit' })
                 const speakerName = event.speakers?.[0]?.speaker?.profile?.full_name
+                const typeLabels: Record<string, { label: string; color: string }> = {
+                  live: { label: 'En Vivo', color: 'bg-teal-600' },
+                  course: { label: 'Formación', color: 'bg-violet-500' },
+                  presencial: { label: 'Presencial', color: 'bg-blue-500' },
+                }
+                const typeBadge = typeLabels[event.event_type] || { label: 'Evento', color: 'bg-teal-600' }
 
                 return (
                   <Link
@@ -478,6 +484,9 @@ export default async function LandingPage() {
                         </div>
                       )}
                       <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
+                      <span className={`absolute top-3 left-3 inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-semibold text-white uppercase tracking-wide ${typeBadge.color}`}>
+                        {typeBadge.label}
+                      </span>
                       <div className="absolute bottom-3 left-3 flex items-center gap-1.5 rounded-lg bg-white/95 px-2.5 py-1.5 shadow-sm">
                         <CalendarDays className="h-3.5 w-3.5 text-teal-600" />
                         <span className="text-xs font-semibold text-slate-800">{dateStr}</span>

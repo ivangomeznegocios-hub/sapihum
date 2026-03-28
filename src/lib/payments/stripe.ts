@@ -9,6 +9,7 @@ import type {
     SubscriptionCheckoutResult,
     CreateOneTimeCheckoutParams,
     OneTimeCheckoutResult,
+    PaymentWebhookData,
     WebhookEvent,
 } from './types'
 import { getSubscriptionPlan } from './config'
@@ -20,6 +21,33 @@ function getStripeInstance(): Stripe {
         throw new Error('STRIPE_SECRET_KEY is not configured')
     }
     return new Stripe(key)
+}
+
+export async function retrieveCompletedCheckoutPayment(sessionId: string): Promise<PaymentWebhookData | null> {
+    const stripe = getStripeInstance()
+    const session = await stripe.checkout.sessions.retrieve(sessionId)
+
+    if (session.mode !== 'payment' || session.payment_status !== 'paid') {
+        return null
+    }
+
+    return {
+        sessionId: session.id,
+        paymentIntentId:
+            typeof session.payment_intent === 'string'
+                ? session.payment_intent
+                : session.payment_intent?.id || undefined,
+        amount: (session.amount_total || 0) / 100,
+        currency: session.currency || 'mxn',
+        customerEmail: session.customer_email || session.customer_details?.email || '',
+        customerId:
+            typeof session.customer === 'string'
+                ? session.customer
+                : (session.customer as any)?.id || undefined,
+        metadata: (session.metadata ?? {}) as Record<string, string>,
+        purchaseType: session.metadata?.purchase_type as any,
+        referenceId: session.metadata?.reference_id,
+    }
 }
 
 export const stripeAdapter: PaymentProviderAdapter = {
