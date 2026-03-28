@@ -17,6 +17,10 @@ import { getUniqueEventAccessCount } from '@/lib/events/attendance'
 import { getEventGrantAccessKinds } from '@/lib/events/entitlements'
 import { audienceAllowsAccess, getCommercialAccessContext } from '@/lib/access/commercial'
 
+function isUuid(value: string | null | undefined): value is string {
+    return Boolean(value && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value))
+}
+
 function guestCanAccessEventCheckout(event: any) {
     const audience = Array.isArray(event.target_audience) ? event.target_audience : ['public']
     const isRecordedProduct = isPurchasableRecordingEvent(event)
@@ -163,33 +167,37 @@ async function createPendingEventPurchase(params: {
     analyticsContext?: any
     attributionSnapshot?: any
 }) {
-    const { data, error } = await (params.supabase
+    const purchaseId = crypto.randomUUID()
+    const normalizedEmail = params.email.trim().toLowerCase()
+    const analyticsVisitorId = isUuid(params.analyticsContext?.visitorId) ? params.analyticsContext.visitorId : null
+    const analyticsSessionId = isUuid(params.analyticsContext?.sessionId) ? params.analyticsContext.sessionId : null
+
+    const { error } = await (params.supabase
         .from('event_purchases') as any)
         .insert({
+            id: purchaseId,
             event_id: params.eventId,
             user_id: params.userId ?? null,
-            email: params.email.toLowerCase(),
+            email: normalizedEmail,
             full_name: params.fullName ?? null,
             amount_paid: params.amount,
             currency: 'MXN',
             payment_method: 'card',
             status: 'pending',
-            analytics_visitor_id: params.analyticsContext?.visitorId ?? null,
-            analytics_session_id: params.analyticsContext?.sessionId ?? null,
+            analytics_visitor_id: analyticsVisitorId,
+            analytics_session_id: analyticsSessionId,
             attribution_snapshot: params.attributionSnapshot ?? {},
             metadata: {
                 analytics: params.analyticsContext ?? null,
                 attribution_snapshot: params.attributionSnapshot ?? null,
             },
         })
-        .select('id')
-        .single()
 
     if (error) {
         throw new Error(error.message)
     }
 
-    return data.id as string
+    return purchaseId
 }
 
 export async function POST(request: NextRequest) {
@@ -237,7 +245,7 @@ export async function POST(request: NextRequest) {
         let metadata: Record<string, string> = {}
         let successUrl = `${appUrl}/dashboard/payment-success?session_id={CHECKOUT_SESSION_ID}`
         let cancelUrl = `${appUrl}/dashboard/payment-cancelled`
-        let customerEmail = user?.email || profile.data?.email || email || ''
+        const customerEmail = user?.email || profile.data?.email || email || ''
         let customerId = profile.data?.stripe_customer_id || undefined
         let pendingEventPurchaseId = ''
 
