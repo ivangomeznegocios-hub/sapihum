@@ -14,6 +14,7 @@ import { slugifyCatalogText } from '@/lib/events/public'
 import { audienceAllowsAccess, getCommercialAccessContext } from '@/lib/access/commercial'
 import { sendEmail } from '@/lib/email/index'
 import { buildEventRegistrationEmail } from '@/lib/email/templates'
+import { DEFAULT_TIMEZONE, zonedDateTimeToUtcIso } from '@/lib/timezone'
 
 async function resolveUniqueEventSlug(supabase: any, baseValue: string, eventId?: string) {
     const fallbackBase = slugifyCatalogText(baseValue) || `evento-${crypto.randomUUID().slice(0, 8)}`
@@ -38,6 +39,151 @@ async function resolveUniqueEventSlug(supabase: any, baseValue: string, eventId?
 
         candidate = `${fallbackBase}-${suffix}`
         suffix += 1
+    }
+}
+
+function readTrimmedString(value: FormDataEntryValue | null) {
+    if (typeof value !== 'string') return null
+    const trimmed = value.trim()
+    return trimmed.length > 0 ? trimmed : null
+}
+
+function parseIntegerField(value: FormDataEntryValue | null) {
+    if (typeof value !== 'string') return null
+    const trimmed = value.trim()
+    if (!trimmed) return null
+
+    const parsed = Number.parseInt(trimmed, 10)
+    return Number.isFinite(parsed) ? parsed : null
+}
+
+function parseFloatField(value: FormDataEntryValue | null) {
+    if (typeof value !== 'string') return null
+    const trimmed = value.trim()
+    if (!trimmed) return null
+
+    const parsed = Number.parseFloat(trimmed)
+    return Number.isFinite(parsed) ? parsed : null
+}
+
+function parseJsonValue<T>(value: FormDataEntryValue | null, fallback: T): T {
+    if (typeof value !== 'string' || !value.trim()) {
+        return fallback
+    }
+
+    try {
+        return JSON.parse(value) as T
+    } catch {
+        return fallback
+    }
+}
+
+function normalizeStringList(value: unknown) {
+    if (Array.isArray(value)) {
+        const items = value
+            .map((item) => (typeof item === 'string' ? item.trim() : ''))
+            .filter(Boolean)
+
+        return items.length > 0 ? items : null
+    }
+
+    if (typeof value === 'string') {
+        const items = value
+            .split(';')
+            .map((item) => item.trim())
+            .filter(Boolean)
+
+        return items.length > 0 ? items : null
+    }
+
+    return null
+}
+
+function parseListField(formData: FormData, fieldName: string) {
+    if (!formData.has(fieldName)) {
+        return undefined
+    }
+
+    const rawValue = formData.get(fieldName)
+    if (typeof rawValue !== 'string') {
+        return null
+    }
+
+    const trimmed = rawValue.trim()
+    if (!trimmed) {
+        return null
+    }
+
+    try {
+        return normalizeStringList(JSON.parse(trimmed))
+    } catch {
+        return normalizeStringList(trimmed)
+    }
+}
+
+function parseRegistrationFields(formData: FormData) {
+    const fields = parseJsonValue<Array<{ label?: string; required?: boolean }>>(
+        formData.get('registrationFields'),
+        []
+    )
+
+    return fields
+        .map((field) => ({
+            label: typeof field?.label === 'string' ? field.label.trim() : '',
+            required: Boolean(field?.required),
+        }))
+        .filter((field) => field.label.length > 0)
+}
+
+function parseSpeakerIds(formData: FormData) {
+    const speakerIds = parseJsonValue<unknown[]>(formData.get('speakerIds'), [])
+
+    return speakerIds.filter((speakerId): speakerId is string => typeof speakerId === 'string' && speakerId.length > 0)
+}
+
+function parseSessionConfig(formData: FormData, eventType: string, location: string | null) {
+    const parsedConfig = parseJsonValue<Record<string, unknown> | null>(formData.get('sessionConfig'), null)
+    const parsedTotalSessions = Number(parsedConfig?.total_sessions || 1)
+    const parsedSessionDuration = Number(parsedConfig?.session_duration_minutes || 60)
+    const totalSessions = Number.isFinite(parsedTotalSessions) ? Math.max(1, parsedTotalSessions) : 1
+    const sessionDurationMinutes = Number.isFinite(parsedSessionDuration)
+        ? Math.max(30, parsedSessionDuration)
+        : 60
+    const recurrence =
+        typeof parsedConfig?.recurrence === 'string' && parsedConfig.recurrence.trim()
+            ? parsedConfig.recurrence.trim()
+            : undefined
+
+    let modality: 'online' | 'presencial' | 'hibrido' = 'online'
+    if (parsedConfig?.modality === 'presencial' || eventType === 'presencial') {
+        modality = 'presencial'
+    } else if (parsedConfig?.modality === 'hibrido') {
+        modality = 'hibrido'
+    }
+
+    return {
+        total_sessions: totalSessions,
+        session_duration_minutes: sessionDurationMinutes,
+        recurrence,
+        modality,
+        ...(location ? { location } : {}),
+    }
+}
+
+function buildEventDateRange(dateValue: string, timeValue: string, durationMinutes: number) {
+    const startTimeIso = zonedDateTimeToUtcIso(dateValue, timeValue, DEFAULT_TIMEZONE)
+    if (!startTimeIso) return null
+
+    const startTime = new Date(startTimeIso)
+    if (Number.isNaN(startTime.getTime())) return null
+
+    const safeDuration = Math.max(30, durationMinutes || 60)
+    const endTime = new Date(startTime.getTime() + safeDuration * 60000)
+
+    return {
+        startTimeIso: startTime.toISOString(),
+        endTimeIso: endTime.toISOString(),
+        safeDuration,
     }
 }
 
@@ -249,7 +395,7 @@ export async function createEvent(formData: FormData) {
         return { error: 'No autenticado' }
     }
 
-    // Verify user is admin or psychologist
+    // Verify user is admin or ponente
     const { data: profile } = await (supabase
         .from('profiles') as any)
         .select('role')
@@ -260,58 +406,75 @@ export async function createEvent(formData: FormData) {
         return { error: 'No tienes permisos para crear eventos' }
     }
 
-    const title = formData.get('title') as string
-    const customSlug = (formData.get('slug') as string | null)?.trim() || null
-    const subtitle = (formData.get('subtitle') as string | null)?.trim() || null
-    const description = formData.get('description') as string
-    const date = formData.get('date') as string
-    const time = formData.get('time') as string
-    const duration = parseInt(formData.get('duration') as string) || 60
-    const eventType = formData.get('eventType') as string || 'live'
-    const maxAttendees = parseInt(formData.get('maxAttendees') as string) || null
-    const meetingLink = formData.get('meetingLink') as string || null
-    const imageUrl = formData.get('imageUrl') as string || null
-    const price = parseFloat(formData.get('price') as string) || 0
-    const recordingDays = Math.min(30, Math.max(7, parseInt(formData.get('recordingDays') as string) || 15))
-    const location = formData.get('location') as string || null
-
-    // Parse session configuration
-    const sessionConfigRaw = formData.get('sessionConfig') as string
-    let sessionConfig = null
-    try {
-        if (sessionConfigRaw) sessionConfig = JSON.parse(sessionConfigRaw)
-    } catch { /* ignore */ }
-
-    // Parse target audience from checkboxes
-    const audienceRaw = formData.getAll('audience') as string[]
-    const targetAudience = audienceRaw.length > 0 ? audienceRaw : ['public']
-
-    // Parse registration fields (custom questions)
-    const registrationFieldsRaw = formData.get('registrationFields') as string
-    let registrationFields: any[] = []
-    try {
-        registrationFields = registrationFieldsRaw ? JSON.parse(registrationFieldsRaw) : []
-    } catch {
-        registrationFields = []
-    }
+    const isAdmin = profile.role === 'admin'
+    const title = readTrimmedString(formData.get('title'))
+    const subtitle = readTrimmedString(formData.get('subtitle'))
+    const description = readTrimmedString(formData.get('description'))
+    const date = readTrimmedString(formData.get('date'))
+    const time = readTrimmedString(formData.get('time'))
+    const eventType = readTrimmedString(formData.get('eventType')) || 'live'
+    const duration = parseIntegerField(formData.get('duration')) || 60
+    const imageUrl = readTrimmedString(formData.get('imageUrl'))
+    const price = Math.max(0, parseFloatField(formData.get('price')) || 0)
+    const recordingDays = Math.min(30, Math.max(7, parseIntegerField(formData.get('recordingDays')) || 15))
+    const location = readTrimmedString(formData.get('location'))
+    const recordingUrl = readTrimmedString(formData.get('recordingUrl'))
+    const maxAttendees = parseIntegerField(formData.get('maxAttendees'))
+    const customSlug = isAdmin ? readTrimmedString(formData.get('slug')) : null
+    const targetAudience = (formData.getAll('audience') as string[]).filter(Boolean)
+    const normalizedAudience = targetAudience.length > 0 ? targetAudience : ['public']
+    const registrationFields = parseRegistrationFields(formData)
+    const memberAccessType =
+        price > 0
+            ? (readTrimmedString(formData.get('memberAccessType')) || 'free')
+            : 'free'
+    const memberPrice =
+        memberAccessType === 'discounted'
+            ? Math.max(0, parseFloatField(formData.get('memberPrice')) || 0)
+            : 0
 
     if (!title || !date || !time) {
         return { error: 'Faltan campos requeridos' }
     }
 
-    const startTime = new Date(`${date}T${time}`)
-    const endTime = new Date(startTime.getTime() + duration * 60000)
+    if (eventType === 'presencial' && !location) {
+        return { error: 'La ubicacion es obligatoria para eventos presenciales' }
+    }
 
-    const memberPrice = parseFloat(formData.get('memberPrice') as string) || 0
-    const memberAccessType = (formData.get('memberAccessType') as string) || 'free'
-    const isEmbeddable = formData.get('isEmbeddable') === 'on'
-    const ogDescription = formData.get('ogDescription') as string || null
-    const seoTitle = formData.get('seoTitle') as string || null
-    const seoDescription = formData.get('seoDescription') as string || null
-    const heroBadge = formData.get('heroBadge') as string || null
-    const publicCtaLabel = formData.get('publicCtaLabel') as string || null
+    if (memberAccessType === 'discounted' && price > 0 && memberPrice <= 0) {
+        return { error: 'Ingresa un precio preferencial para miembros o cambia el tipo de acceso' }
+    }
 
+    const dateRange = buildEventDateRange(date, time, duration)
+    if (!dateRange) {
+        return { error: 'La fecha u hora del evento no son validas' }
+    }
+
+    const sessionConfig = parseSessionConfig(formData, eventType, location)
+    const idealFor = parseListField(formData, 'idealFor') ?? null
+    const learningOutcomes = parseListField(formData, 'learningOutcomes') ?? null
+    const includedResources = parseListField(formData, 'includedResources') ?? null
+    const certificateType = readTrimmedString(formData.get('certificateType')) || 'none'
+    const formationTrack = readTrimmedString(formData.get('formationTrack'))
     const slug = await resolveUniqueEventSlug(supabase, customSlug || title)
+    const meetingLink = eventType === 'presencial' ? null : readTrimmedString(formData.get('meetingLink'))
+    const advancedValues = isAdmin
+        ? {
+            is_embeddable: formData.has('isEmbeddable') ? formData.get('isEmbeddable') === 'on' : true,
+            og_description: formData.has('ogDescription') ? readTrimmedString(formData.get('ogDescription')) : null,
+            seo_title: formData.has('seoTitle') ? readTrimmedString(formData.get('seoTitle')) : null,
+            seo_description: formData.has('seoDescription') ? readTrimmedString(formData.get('seoDescription')) : null,
+            hero_badge: formData.has('heroBadge') ? readTrimmedString(formData.get('heroBadge')) : null,
+            public_cta_label: formData.has('publicCtaLabel') ? readTrimmedString(formData.get('publicCtaLabel')) : null,
+        }
+        : {
+            is_embeddable: true,
+            og_description: null,
+            seo_title: null,
+            seo_description: null,
+            hero_badge: null,
+            public_cta_label: null,
+        }
 
     const { data: newEvent, error } = await (supabase
         .from('events') as any)
@@ -319,10 +482,10 @@ export async function createEvent(formData: FormData) {
             slug,
             title,
             subtitle,
-            description: description || null,
+            description,
             image_url: imageUrl,
-            start_time: startTime.toISOString(),
-            end_time: endTime.toISOString(),
+            start_time: dateRange.startTimeIso,
+            end_time: dateRange.endTimeIso,
             event_type: eventType,
             status: profile.role === 'admin' ? 'upcoming' : 'draft',
             meeting_link: meetingLink,
@@ -330,21 +493,22 @@ export async function createEvent(formData: FormData) {
             price,
             member_price: memberPrice,
             member_access_type: memberAccessType,
-            is_embeddable: isEmbeddable,
-            og_description: ogDescription,
-            seo_title: seoTitle,
-            seo_description: seoDescription,
-            hero_badge: heroBadge,
-            public_cta_label: publicCtaLabel,
-            target_audience: targetAudience,
+            ...advancedValues,
+            target_audience: normalizedAudience,
             registration_fields: registrationFields,
             recording_available_days: recordingDays,
-            is_members_only: targetAudience.includes('members'),
+            is_members_only: normalizedAudience.includes('members'),
             created_by: user.id,
-            category: (formData.get('category') as string) || 'general',
-            subcategory: (formData.get('subcategory') as string) || null,
+            category: readTrimmedString(formData.get('category')) || 'general',
+            subcategory: readTrimmedString(formData.get('subcategory')),
             session_config: sessionConfig,
             location,
+            ideal_for: idealFor,
+            learning_outcomes: learningOutcomes,
+            included_resources: includedResources,
+            certificate_type: certificateType,
+            formation_track: formationTrack,
+            recording_url: recordingUrl,
         })
         .select('id')
         .single()
@@ -354,19 +518,16 @@ export async function createEvent(formData: FormData) {
     }
 
     // Handle speaker assignments
-    const speakerIdsRaw = formData.get('speakerIds') as string
-    if (speakerIdsRaw && newEvent) {
-        try {
-            const speakerIds = JSON.parse(speakerIdsRaw) as string[]
-            for (let i = 0; i < speakerIds.length; i++) {
-                await (supabase.from('event_speakers') as any)
-                    .insert({
-                        event_id: newEvent.id,
-                        speaker_id: speakerIds[i],
-                        display_order: i
-                    })
-            }
-        } catch { /* ignore parse errors */ }
+    const speakerIds = parseSpeakerIds(formData)
+    if (speakerIds.length > 0 && newEvent) {
+        for (let i = 0; i < speakerIds.length; i++) {
+            await (supabase.from('event_speakers') as any)
+                .insert({
+                    event_id: newEvent.id,
+                    speaker_id: speakerIds[i],
+                    display_order: i
+                })
+        }
     }
 
     revalidatePath('/dashboard/events')
@@ -399,41 +560,63 @@ export async function updateEvent(eventId: string, formData: FormData) {
         return { error: 'No tienes permisos para editar este evento' }
     }
 
-    const title = formData.get('title') as string
-    const customSlug = (formData.get('slug') as string | null)?.trim() || null
-    const subtitle = (formData.get('subtitle') as string | null)?.trim() || null
-    const description = formData.get('description') as string
-    const date = formData.get('date') as string
-    const time = formData.get('time') as string
-    const duration = parseInt(formData.get('duration') as string) || 60
-    const eventType = formData.get('eventType') as string
-    const maxAttendees = parseInt(formData.get('maxAttendees') as string) || null
-    const meetingLink = formData.get('meetingLink') as string
-    const imageUrl = formData.get('imageUrl') as string
-    const price = parseFloat(formData.get('price') as string) || 0
-    const recordingDays = Math.min(30, Math.max(7, parseInt(formData.get('recordingDays') as string) || 15))
-    const recordingUrl = formData.get('recordingUrl') as string
-    const status = formData.get('status') as string
-    const location = formData.get('location') as string
-
-    // Parse session configuration
-    const sessionConfigRaw = formData.get('sessionConfig') as string
-    let sessionConfig: any = undefined
-    try {
-        if (sessionConfigRaw) sessionConfig = JSON.parse(sessionConfigRaw)
-    } catch { /* ignore */ }
-
-    // Parse target audience from checkboxes
-    const audienceRaw = formData.getAll('audience') as string[]
+    const isAdmin = profile?.role === 'admin'
+    const title = readTrimmedString(formData.get('title'))
+    const subtitle = readTrimmedString(formData.get('subtitle'))
+    const description = formData.has('description')
+        ? readTrimmedString(formData.get('description'))
+        : undefined
+    const date = readTrimmedString(formData.get('date'))
+    const time = readTrimmedString(formData.get('time'))
+    const duration = parseIntegerField(formData.get('duration')) || 60
+    const eventType = readTrimmedString(formData.get('eventType'))
+    const maxAttendees = parseIntegerField(formData.get('maxAttendees'))
+    const imageUrl = formData.has('imageUrl')
+        ? readTrimmedString(formData.get('imageUrl'))
+        : undefined
+    const price = Math.max(0, parseFloatField(formData.get('price')) || 0)
+    const recordingDays = Math.min(30, Math.max(7, parseIntegerField(formData.get('recordingDays')) || 15))
+    const recordingUrl = formData.has('recordingUrl')
+        ? readTrimmedString(formData.get('recordingUrl'))
+        : undefined
+    const location = formData.has('location')
+        ? readTrimmedString(formData.get('location'))
+        : undefined
+    const audienceRaw = (formData.getAll('audience') as string[]).filter(Boolean)
     const targetAudience = audienceRaw.length > 0 ? audienceRaw : undefined
+    const registrationFields = formData.has('registrationFields')
+        ? parseRegistrationFields(formData)
+        : undefined
+    const memberAccessType =
+        price > 0
+            ? (readTrimmedString(formData.get('memberAccessType')) || 'free')
+            : 'free'
+    const memberPrice =
+        memberAccessType === 'discounted'
+            ? Math.max(0, parseFloatField(formData.get('memberPrice')) || 0)
+            : 0
+    const status = readTrimmedString(formData.get('status'))
+    const category = readTrimmedString(formData.get('category'))
+    const subcategory = formData.has('subcategory')
+        ? readTrimmedString(formData.get('subcategory'))
+        : undefined
+    const idealFor = parseListField(formData, 'idealFor')
+    const learningOutcomes = parseListField(formData, 'learningOutcomes')
+    const includedResources = parseListField(formData, 'includedResources')
+    const certificateType = formData.has('certificateType')
+        ? (readTrimmedString(formData.get('certificateType')) || 'none')
+        : undefined
+    const formationTrack = formData.has('formationTrack')
+        ? readTrimmedString(formData.get('formationTrack'))
+        : undefined
+    const customSlug = isAdmin ? readTrimmedString(formData.get('slug')) : null
 
-    // Parse registration fields (custom questions)
-    const registrationFieldsRaw = formData.get('registrationFields') as string
-    let registrationFields: any[] | undefined = undefined
-    try {
-        registrationFields = registrationFieldsRaw ? JSON.parse(registrationFieldsRaw) : undefined
-    } catch {
-        registrationFields = undefined
+    if (eventType === 'presencial' && !location) {
+        return { error: 'La ubicacion es obligatoria para eventos presenciales' }
+    }
+
+    if (memberAccessType === 'discounted' && price > 0 && memberPrice <= 0) {
+        return { error: 'Ingresa un precio preferencial para miembros o cambia el tipo de acceso' }
     }
 
     const updates: Record<string, any> = {}
@@ -443,60 +626,68 @@ export async function updateEvent(eventId: string, formData: FormData) {
     if (imageUrl !== undefined) updates.image_url = imageUrl || null
 
     if (date && time) {
-        const startTime = new Date(`${date}T${time}`)
-        const endTime = new Date(startTime.getTime() + duration * 60000)
-        updates.start_time = startTime.toISOString()
-        updates.end_time = endTime.toISOString()
+        const dateRange = buildEventDateRange(date, time, duration)
+        if (!dateRange) {
+            return { error: 'La fecha u hora del evento no son validas' }
+        }
+
+        updates.start_time = dateRange.startTimeIso
+        updates.end_time = dateRange.endTimeIso
     }
 
     if (eventType) updates.event_type = eventType
-    // Only admins can change status from draft. 
-    // If a non-admin (ponente) edits the event, it must always revert to draft for review.
-    if (profile?.role === 'admin') {
+    if (isAdmin) {
         if (status) updates.status = status
     } else {
         updates.status = 'draft'
     }
-    if (meetingLink !== undefined) updates.meeting_link = meetingLink || null
-    if (maxAttendees !== undefined) updates.max_attendees = maxAttendees || null
-    if (price !== undefined) updates.price = price
+    if (eventType === 'presencial') {
+        updates.meeting_link = null
+        updates.location = location || null
+    } else {
+        if (formData.has('meetingLink')) {
+            updates.meeting_link = readTrimmedString(formData.get('meetingLink')) || null
+        }
+        updates.location = null
+    }
+    if (formData.has('maxAttendees')) updates.max_attendees = maxAttendees || null
+    if (formData.has('price')) updates.price = price
     if (targetAudience) updates.target_audience = targetAudience
     if (registrationFields !== undefined) updates.registration_fields = registrationFields
-    if (recordingDays !== undefined) updates.recording_available_days = recordingDays
+    if (formData.has('recordingDays')) updates.recording_available_days = recordingDays
     if (recordingUrl !== undefined) updates.recording_url = recordingUrl || null
-    if (sessionConfig !== undefined) updates.session_config = sessionConfig
-    if (location !== undefined) updates.location = location || null
+    if (eventType) {
+        updates.session_config = parseSessionConfig(formData, eventType, updates.location)
+    }
 
     if (targetAudience) {
         updates.is_members_only = targetAudience.includes('members')
     }
 
-    // Category and subcategory
-    const category = formData.get('category') as string
-    const subcategory = formData.get('subcategory') as string
     if (category) updates.category = category
     if (subcategory !== undefined) updates.subcategory = subcategory || null
 
-    // New pricing/embed fields
-    const memberPrice = formData.get('memberPrice') as string
-    const memberAccessType = formData.get('memberAccessType') as string
-    const isEmbeddable = formData.get('isEmbeddable')
-    const ogDescription = formData.get('ogDescription') as string
-    const seoTitle = formData.get('seoTitle') as string
-    const seoDescription = formData.get('seoDescription') as string
-    const heroBadge = formData.get('heroBadge') as string
-    const publicCtaLabel = formData.get('publicCtaLabel') as string
-
-    if (memberPrice !== null) updates.member_price = parseFloat(memberPrice) || 0
-    if (memberAccessType) updates.member_access_type = memberAccessType
-    if (isEmbeddable !== null) updates.is_embeddable = isEmbeddable === 'on'
-    if (ogDescription !== undefined) updates.og_description = ogDescription || null
-    if (seoTitle !== undefined) updates.seo_title = seoTitle || null
-    if (seoDescription !== undefined) updates.seo_description = seoDescription || null
-    if (heroBadge !== undefined) updates.hero_badge = heroBadge || null
-    if (publicCtaLabel !== undefined) updates.public_cta_label = publicCtaLabel || null
+    if (formData.has('memberPrice') || formData.has('memberAccessType') || formData.has('price')) {
+        updates.member_price = memberPrice
+        updates.member_access_type = memberAccessType
+    }
     if (subtitle !== undefined) updates.subtitle = subtitle || null
-    if (customSlug !== null) {
+    if (idealFor !== undefined) updates.ideal_for = idealFor
+    if (learningOutcomes !== undefined) updates.learning_outcomes = learningOutcomes
+    if (includedResources !== undefined) updates.included_resources = includedResources
+    if (certificateType !== undefined) updates.certificate_type = certificateType || 'none'
+    if (formationTrack !== undefined) updates.formation_track = formationTrack || null
+
+    if (isAdmin) {
+        if (formData.has('isEmbeddable')) updates.is_embeddable = formData.get('isEmbeddable') === 'on'
+        if (formData.has('ogDescription')) updates.og_description = readTrimmedString(formData.get('ogDescription')) || null
+        if (formData.has('seoTitle')) updates.seo_title = readTrimmedString(formData.get('seoTitle')) || null
+        if (formData.has('seoDescription')) updates.seo_description = readTrimmedString(formData.get('seoDescription')) || null
+        if (formData.has('heroBadge')) updates.hero_badge = readTrimmedString(formData.get('heroBadge')) || null
+        if (formData.has('publicCtaLabel')) updates.public_cta_label = readTrimmedString(formData.get('publicCtaLabel')) || null
+    }
+
+    if (isAdmin && customSlug !== null) {
         const normalizedSlug = slugifyCatalogText(customSlug)
         if (normalizedSlug) {
             updates.slug = await resolveUniqueEventSlug(supabase, normalizedSlug, eventId)
@@ -513,26 +704,21 @@ export async function updateEvent(eventId: string, formData: FormData) {
     }
 
     // Handle speaker assignments on update
-    const speakerIdsRaw = formData.get('speakerIds') as string
-    if (speakerIdsRaw) {
-        try {
-            const speakerIds = JSON.parse(speakerIdsRaw) as string[]
+    if (formData.has('speakerIds')) {
+        const speakerIds = parseSpeakerIds(formData)
 
-            // Delete existing speakers
+        await (supabase.from('event_speakers') as any)
+            .delete()
+            .eq('event_id', eventId)
+
+        for (let i = 0; i < speakerIds.length; i++) {
             await (supabase.from('event_speakers') as any)
-                .delete()
-                .eq('event_id', eventId)
-
-            // Insert new ones
-            for (let i = 0; i < speakerIds.length; i++) {
-                await (supabase.from('event_speakers') as any)
-                    .insert({
-                        event_id: eventId,
-                        speaker_id: speakerIds[i],
-                        display_order: i
-                    })
-            }
-        } catch { /* ignore parse errors */ }
+                .insert({
+                    event_id: eventId,
+                    speaker_id: speakerIds[i],
+                    display_order: i
+                })
+        }
     }
 
     revalidatePath('/dashboard/events')

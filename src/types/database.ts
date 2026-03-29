@@ -657,6 +657,12 @@ export interface Event {
     public_cta_label: string | null
     // Session configuration
     session_config: SessionConfig | null
+    // Academic metadata
+    ideal_for: string[] | null
+    learning_outcomes: string[] | null
+    included_resources: string[] | null
+    certificate_type: string | null
+    formation_track: string | null
 }
 
 export interface EventInsert {
@@ -692,6 +698,12 @@ export interface EventInsert {
     hero_badge?: string | null
     public_cta_label?: string | null
     session_config?: SessionConfig | null
+    // Academic metadata
+    ideal_for?: string[] | null
+    learning_outcomes?: string[] | null
+    included_resources?: string[] | null
+    certificate_type?: string | null
+    formation_track?: string | null
 }
 
 export interface EventUpdate {
@@ -724,6 +736,12 @@ export interface EventUpdate {
     hero_badge?: string | null
     public_cta_label?: string | null
     session_config?: SessionConfig | null
+    // Academic metadata
+    ideal_for?: string[] | null
+    learning_outcomes?: string[] | null
+    included_resources?: string[] | null
+    certificate_type?: string | null
+    formation_track?: string | null
 }
 
 export interface EventRegistration {

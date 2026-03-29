@@ -203,6 +203,12 @@ export function PublicEventLanding({
                                     {event.hero_badge}
                                 </span>
                             )}
+                            {event.formation_track && (
+                                <span className="inline-flex items-center gap-1 rounded-full bg-indigo-500/20 border border-indigo-400/20 px-3 py-1 text-xs font-semibold tracking-wide text-indigo-300">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" /><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" /></svg>
+                                    Parte de: {event.formation_track}
+                                </span>
+                            )}
                             {event.member_access_type === 'free' && Number(event.price || 0) > 0 && (
                                 <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/20 px-3 py-1 text-xs font-semibold text-emerald-300">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z" /></svg>
@@ -377,6 +383,49 @@ export function PublicEventLanding({
                         </Card>
                     )}
 
+                    {/* Academic Value */}
+                    {(event.ideal_for?.length > 0 || event.learning_outcomes?.length > 0) && (
+                        <Card className="border-border/50">
+                            <CardHeader>
+                                <CardTitle className="text-xl">Valor Académico</CardTitle>
+                            </CardHeader>
+                            <CardContent className="grid gap-8 sm:grid-cols-2">
+                                {event.ideal_for?.length > 0 && (
+                                    <div className="space-y-4">
+                                        <h4 className="font-semibold text-primary flex items-center gap-2">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M22 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>
+                                            ¿A quién va dirigido?
+                                        </h4>
+                                        <ul className="space-y-3">
+                                            {event.ideal_for.map((item: string, i: number) => (
+                                                <li key={i} className="flex items-start text-sm text-foreground">
+                                                    <svg className="mr-2 h-4 w-4 shrink-0 text-emerald-500 mt-0.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
+                                                    <span className="leading-snug">{item}</span>
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </div>
+                                )}
+                                {event.learning_outcomes?.length > 0 && (
+                                    <div className="space-y-4">
+                                        <h4 className="font-semibold text-sky-500 flex items-center gap-2">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m12 14 4-4" /><path d="M3.34 19a10 10 0 1 1 17.32 0" /></svg>
+                                            ¿Qué aprenderás?
+                                        </h4>
+                                        <ul className="space-y-3">
+                                            {event.learning_outcomes.map((item: string, i: number) => (
+                                                <li key={i} className="flex items-start text-sm text-foreground">
+                                                    <svg className="mr-2 h-4 w-4 shrink-0 text-sky-500 mt-0.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
+                                                    <span className="leading-snug">{item}</span>
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </div>
+                                )}
+                            </CardContent>
+                        </Card>
+                    )}
+
                     {/* What you'll get */}
                     <Card className="border-border/50">
                         <CardHeader>
@@ -390,6 +439,16 @@ export function PublicEventLanding({
                                     ...(event.recording_url || event.event_type === 'on_demand' ? [
                                         { icon: '🔄', title: 'Replay incluido', desc: 'Quienes tengan acceso podrán ver la grabación cuando esté disponible' }
                                     ] : []),
+                                    ...(event.certificate_type && event.certificate_type !== 'none' ? [{
+                                        icon: '🎓',
+                                        title: event.certificate_type === 'completion' ? 'Diploma de finalización' : event.certificate_type === 'specialized' ? 'Acreditación Especializada' : 'Constancia por asistencia',
+                                        desc: 'Documento acreditativo'
+                                    }] : []),
+                                    ...(event.included_resources?.length > 0 ? [{
+                                        icon: '📦',
+                                        title: 'Recursos extra',
+                                        desc: `${event.included_resources.length} materiales descargables`
+                                    }] : []),
                                     ...(Number(event.price || 0) > 0 ? [
                                         { icon: '💳', title: 'Pago seguro', desc: 'Procesado de forma segura con Stripe' }
                                     ] : []),

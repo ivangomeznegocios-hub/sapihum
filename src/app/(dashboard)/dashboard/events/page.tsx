@@ -497,7 +497,7 @@ export default async function EventsPage() {
                             </Link>
                         </Button>
                     )}
-                    {/* Create Event Button (Admin + Psychologist) */}
+                    {/* Create Event Button (Admin + Ponente) */}
                     {(profile?.role === 'admin' || profile?.role === 'ponente') && (
                         <Button asChild className="w-full sm:w-auto">
                             <Link href="/dashboard/events/new">

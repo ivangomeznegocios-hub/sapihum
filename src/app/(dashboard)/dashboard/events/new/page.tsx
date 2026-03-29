@@ -12,8 +12,8 @@ export default async function NewEventPage() {
         redirect('/auth/login')
     }
 
-    // Only admins, psychologists, and ponentes can create events
-    if (!['admin', 'psychologist', 'ponente'].includes(profile.role || '')) {
+    // Only admins and ponentes can create events
+    if (!['admin', 'ponente'].includes(profile.role || '')) {
         redirect('/dashboard/events')
     }
 
@@ -31,11 +31,11 @@ export default async function NewEventPage() {
             <div>
                 <h1 className="text-3xl font-bold tracking-tight">Crear Nuevo Evento</h1>
                 <p className="text-muted-foreground mt-1">
-                    Configura los detalles de tu evento
+                    Configura los detalles de tu evento como admin o ponente
                 </p>
             </div>
 
-            <Card className="max-w-2xl">
+            <Card className="max-w-5xl">
                 <CardHeader>
                     <CardTitle>Detalles del Evento</CardTitle>
                 </CardHeader>
