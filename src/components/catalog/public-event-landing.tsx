@@ -148,10 +148,19 @@ export function PublicEventLanding({
     hasAccess: boolean
 }) {
     const ctaLabel = getDefaultPublicCtaLabel(event)
-    const requiresPayment = Number(event.price || 0) > 0
+    const isMembersOnly = Array.isArray(event.target_audience) 
+        ? event.target_audience.includes('members') && !event.target_audience.includes('public') 
+        : false
+        
+    const requiresPayment = !isMembersOnly && Number(event.price || 0) > 0
     const memberMessage = getEventMemberAccessMessage(event)
     const formatLabel = getEventTypeLabel(event.event_type)
     const faqItems = buildFaq(event)
+    
+    // Validate edge/blocking cases
+    const isFull = event.max_attendees ? (event.attendee_count || 0) >= event.max_attendees : false
+    const isExpired = event.recording_expires_at ? new Date(event.recording_expires_at) < new Date() : false
+    const isBlocked = !hasAccess && (isFull || isExpired)
     
     // Determine the state logic for the CTA box
     const userIsMember = membershipLevel > 0
@@ -161,7 +170,7 @@ export function PublicEventLanding({
             : (event.member_access_type === 'free' ? 0 : Number(event.price)))
         : Number(event.price || 0)
         
-    const showMembershipUpsell = !hasAccess && !userIsMember && requiresPayment && event.member_access_type !== 'full_price'
+    const showMembershipUpsell = !hasAccess && !isBlocked && !userIsMember && (isMembersOnly || (requiresPayment && event.member_access_type !== 'full_price'))
 
     return (
         <div className="space-y-14 pb-20">
@@ -293,26 +302,43 @@ export function PublicEventLanding({
                                             ✓ Ya tienes acceso a este contenido
                                         </p>
                                     </div>
+                                ) : isBlocked ? (
+                                    <div className="space-y-4 pt-2">
+                                        <Button variant="secondary" className="w-full text-base font-semibold py-6 opacity-60 cursor-not-allowed" disabled>
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="mr-2"><circle cx="12" cy="12" r="10" /><line x1="12" x2="12" y1="8" y2="12" /><line x1="12" x2="12.01" y1="16" y2="16" /></svg>
+                                            {isExpired ? 'Este material ya expiró' : 'Cupo Lleno'}
+                                        </Button>
+                                        <p className="text-center text-xs text-slate-400">
+                                            {isExpired 
+                                                ? 'Las grabaciones o inscripciones para este evento cerraron.'
+                                                : 'Lo sentimos, este evento ya alcanzó su máxima capacidad.'}
+                                        </p>
+                                    </div>
                                 ) : (
                                     <div className="space-y-3">
-                                        <PublicAccessCta
-                                            eventId={event.id}
-                                            eventSlug={event.slug}
-                                            title={event.title}
-                                            label={finalPrice > 0 ? ctaLabel : 'Recibir acceso gratis'}
-                                            requiresPayment={finalPrice > 0}
-                                        />
+                                        {!isMembersOnly && (
+                                            <PublicAccessCta
+                                                eventId={event.id}
+                                                eventSlug={event.slug}
+                                                title={event.title}
+                                                label={finalPrice > 0 ? ctaLabel : 'Recibir acceso gratis'}
+                                                requiresPayment={finalPrice > 0}
+                                            />
+                                        )}
                                         
                                         {showMembershipUpsell && (
                                             <>
+                                                {!isMembersOnly && (
                                                 <div className="relative py-3 flex items-center">
                                                     <div className="flex-grow border-t border-white/10"></div>
                                                     <span className="shrink-0 px-3 text-xs text-slate-400 uppercase tracking-widest">O también</span>
                                                     <div className="flex-grow border-t border-white/10"></div>
                                                 </div>
-                                                <Link href={`/precios?next=/eventos/${event.slug}&autoCheckout=true`}>
-                                                    <Button variant="outline" className="w-full border-teal-500/30 bg-teal-500/10 text-teal-300 hover:bg-teal-500/20 hover:text-teal-200" size="lg">
-                                                        Suscríbete y {event.member_access_type === 'free' ? 'accede gratis' : 'ahorra'}
+                                                )}
+                                                <Link href={`/precios?next=/eventos/${event.slug}&autoCheckout=true`} className="block w-full">
+                                                    <Button variant={isMembersOnly ? "default" : "outline"} className={`w-full ${isMembersOnly ? 'bg-teal-500 hover:bg-teal-600 text-white shadow-lg py-6 text-base' : 'border-teal-500/30 bg-teal-500/10 text-teal-300 hover:bg-teal-500/20 hover:text-teal-200'}`} size="lg">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="mr-2"><rect width="18" height="11" x="3" y="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>
+                                                        {isMembersOnly ? 'Hazte miembro para participar' : `Suscríbete y ${event.member_access_type === 'free' ? 'accede gratis' : 'ahorra'}`}
                                                     </Button>
                                                 </Link>
                                             </>
