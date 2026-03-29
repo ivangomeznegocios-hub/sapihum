@@ -114,6 +114,7 @@ const navGroups: NavGroup[] = [
         roles: ['admin', 'ponente'],
         items: [
             { name: 'Mis Eventos', href: '/dashboard/events', icon: CalendarDays, roles: ['admin', 'ponente'] },
+            { name: 'Formaciones', href: '/dashboard/events/formations', icon: GraduationCap, roles: ['admin'] },
             { name: 'Ganancias', href: '/dashboard/earnings', icon: DollarSign, roles: ['admin', 'ponente'] },
             { name: 'Crear Evento', href: '/dashboard/events/new', icon: CalendarPlus, roles: ['admin', 'ponente'] },
             { name: 'Mi Perfil Ponente', href: '/dashboard/settings', icon: Mic2, roles: ['admin', 'ponente'] },

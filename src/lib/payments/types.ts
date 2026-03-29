@@ -5,7 +5,7 @@
 // ============================================
 
 export type PaymentProvider = 'stripe' | 'paypal' | 'mercadopago' | 'manual'
-export type PurchaseType = 'subscription_payment' | 'ai_credits' | 'event_purchase'
+export type PurchaseType = 'subscription_payment' | 'ai_credits' | 'event_purchase' | 'formation_purchase'
 export type SubscriptionStatusType = 'trialing' | 'active' | 'past_due' | 'cancelled' | 'expired' | 'paused' | 'incomplete'
 export type TransactionStatus = 'pending' | 'completed' | 'failed' | 'refunded'
 
@@ -34,7 +34,7 @@ export interface SubscriptionCheckoutResult {
 // ---- One-time Checkout ----
 
 export interface CreateOneTimeCheckoutParams {
-    purchaseType: 'ai_credits' | 'event_purchase'
+    purchaseType: 'ai_credits' | 'event_purchase' | 'formation_purchase'
     amount: number                // In smallest currency unit or decimal
     currency?: string
     customerEmail: string

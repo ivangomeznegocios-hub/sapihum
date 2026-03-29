@@ -546,7 +546,7 @@ export async function updateEvent(eventId: string, formData: FormData) {
     // Verify user is admin or event creator
     const { data: event } = await (supabase
         .from('events') as any)
-        .select('created_by')
+        .select('created_by, status, formation_id')
         .eq('id', eventId)
         .single()
 
@@ -718,6 +718,38 @@ export async function updateEvent(eventId: string, formData: FormData) {
                     speaker_id: speakerIds[i],
                     display_order: i
                 })
+        }
+    }
+
+    // Post-update: check if event transitioned to completed
+    if (updates.status === 'completed' && event.status !== 'completed' && event.formation_id) {
+        const { data: registrations } = await (supabase
+            .from('event_registrations') as any)
+            .select('user_id, status, registration_data, profiles(email)')
+            .eq('event_id', eventId)
+
+        if (registrations) {
+            // Include attendees, or if they haven't explicitly set attendance, all valid registrations
+            const attendedRegs = registrations.filter((r: any) => 
+                r.status === 'attended' || r.status === 'registered' || !r.status
+            )
+
+            for (const reg of attendedRegs) {
+                const userEmail = reg.profiles?.email || reg.registration_data?.email
+                if (userEmail) {
+                    await (supabase
+                        .from('formation_progress') as any)
+                        .upsert({
+                            formation_id: event.formation_id,
+                            event_id: eventId,
+                            email: userEmail,
+                            user_id: reg.user_id || null,
+                            completed_at: new Date().toISOString(),
+                            certificate_issued: true,
+                            certificate_issued_at: new Date().toISOString(),
+                        }, { onConflict: 'formation_id,email,event_id' })
+                }
+            }
         }
     }
 

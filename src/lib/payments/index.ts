@@ -301,6 +301,167 @@ async function fulfillEventPurchase(params: {
     return { resolvedUserId }
 }
 
+async function fulfillFormationPurchase(params: {
+    supabase: any
+    data: PaymentWebhookData
+    formationId: string
+    userId: string | null
+    profileId: string | null
+}) {
+    const customerEmail = normalizeWebhookValue(params.data.customerEmail)?.toLowerCase()
+    if (!customerEmail) {
+        console.error('[Payment] Formation purchase missing customer email:', params.data)
+        return { resolvedUserId: params.userId || params.profileId || null }
+    }
+
+    const { data: formation } = await params.supabase
+        .from('formations')
+        .select('id, title, slug')
+        .eq('id', params.formationId)
+        .maybeSingle()
+
+    if (!formation) {
+        console.error('[Payment] Formation not found for purchase fulfillment:', params.formationId)
+        return { resolvedUserId: params.userId || params.profileId || null }
+    }
+
+    const purchaseIdFromMetadata = normalizeWebhookValue(params.data.metadata?.formation_purchase_id)
+    let purchaseRow: any = null
+
+    if (purchaseIdFromMetadata) {
+        const { data: existingById } = await (params.supabase
+            .from('formation_purchases') as any)
+            .select('*')
+            .eq('id', purchaseIdFromMetadata)
+            .maybeSingle()
+        purchaseRow = existingById ?? null
+    }
+
+    if (!purchaseRow) {
+        const { data: fallbackPurchase } = await (params.supabase
+            .from('formation_purchases') as any)
+            .select('*')
+            .eq('formation_id', params.formationId)
+            .eq('email', customerEmail)
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .maybeSingle()
+        purchaseRow = fallbackPurchase ?? null
+    }
+
+    const { data: matchedProfile } = await (params.supabase
+        .from('profiles') as any)
+        .select('id')
+        .eq('email', customerEmail)
+        .maybeSingle()
+
+    const resolvedUserId = purchaseRow?.user_id || params.userId || params.profileId || matchedProfile?.id || null
+    const paymentReference = params.data.paymentIntentId || params.data.sessionId
+    const attributionSnapshot = parseAttributionSnapshot(params.data.metadata?.attribution_snapshot)
+    const mergedMetadata = {
+        ...(purchaseRow?.metadata ?? {}),
+        ...(params.data.metadata ?? {}),
+        webhook: {
+            session_id: params.data.sessionId,
+            payment_intent_id: params.data.paymentIntentId || null,
+            fulfilled_at: new Date().toISOString(),
+        },
+    }
+
+    let purchaseId = purchaseRow?.id as string | null
+
+    if (purchaseId) {
+        await (params.supabase
+            .from('formation_purchases') as any)
+            .update({
+                user_id: resolvedUserId,
+                email: customerEmail,
+                payment_intent_id: paymentReference,
+                metadata: mergedMetadata,
+                status: 'confirmed',
+                updated_at: new Date().toISOString(),
+            })
+            .eq('id', purchaseId)
+    } else {
+        const purchaseIdUuid = crypto.randomUUID()
+        await (params.supabase
+            .from('formation_purchases') as any)
+            .insert({
+                id: purchaseIdUuid,
+                formation_id: params.formationId,
+                user_id: resolvedUserId,
+                email: customerEmail,
+                amount_paid: params.data.amount,
+                currency: (params.data.currency || 'mxn').toUpperCase(),
+                payment_intent_id: paymentReference,
+                metadata: mergedMetadata,
+                status: 'confirmed',
+            })
+        purchaseId = purchaseIdUuid
+    }
+
+    const { data: linkedEvents } = await params.supabase
+        .from('events')
+        .select('id, event_type, recording_expires_at')
+        .eq('formation_id', params.formationId)
+
+    if (linkedEvents && linkedEvents.length > 0) {
+        for (const ev of linkedEvents) {
+            await grantEventEntitlements({
+                event: ev,
+                email: customerEmail,
+                userId: resolvedUserId,
+                sourceType: 'purchase',
+                sourceReference: purchaseId,
+                metadata: {
+                    payment_reference: paymentReference,
+                    formation_id: formation.id,
+                    provider_session_id: params.data.sessionId,
+                    provider_payment_id: params.data.paymentIntentId || null,
+                },
+            })
+
+            if (resolvedUserId && ev.event_type !== 'on_demand') {
+                const { data: existingRegistration } = await (params.supabase
+                    .from('event_registrations') as any)
+                    .select('id, registration_data')
+                    .eq('event_id', ev.id)
+                    .eq('user_id', resolvedUserId)
+                    .maybeSingle()
+
+                const registrationPayload = {
+                    payment_reference: paymentReference,
+                    source: 'formation_purchase',
+                    formation_id: formation.id,
+                }
+
+                if (existingRegistration) {
+                     await (params.supabase
+                        .from('event_registrations') as any)
+                        .update({
+                            status: 'registered',
+                            registration_data: {
+                                ...(existingRegistration.registration_data ?? {}),
+                                ...registrationPayload,
+                            },
+                        })
+                        .eq('id', existingRegistration.id)
+                } else {
+                    await (params.supabase.from('event_registrations') as any).insert({
+                        event_id: ev.id,
+                        user_id: resolvedUserId,
+                        status: 'registered',
+                        registration_data: registrationPayload,
+                    })
+                }
+            }
+        }
+    }
+
+    console.log(`[Payment] Formation purchase confirmed, access granted for ${linkedEvents?.length || 0} courses.`)
+    return { resolvedUserId }
+}
+
 export async function fulfillSubscriptionCreated(data: SubscriptionWebhookData): Promise<void> {
     const supabase = getServiceSupabase()
     const analyticsVisitorId = data.metadata?.analytics_visitor_id || null
@@ -670,6 +831,15 @@ export async function fulfillOneTimePayment(data: PaymentWebhookData): Promise<v
             profileId,
         })
         resolvedFulfillmentUserId = result.resolvedUserId
+    } else if (purchaseType === 'formation_purchase' && referenceId) {
+        const result = await fulfillFormationPurchase({
+            supabase,
+            data,
+            formationId: referenceId,
+            userId,
+            profileId,
+        })
+        resolvedFulfillmentUserId = result.resolvedUserId
     }
 
     if (isFirstCompletedTransaction) {
@@ -715,6 +885,21 @@ export async function fulfillOneTimePayment(data: PaymentWebhookData): Promise<v
                     packageKey: referenceId || null,
                     amount: data.amount,
                     minutes: Number(data.metadata?.minutes || 0),
+                },
+            })
+        }
+
+        if (purchaseType === 'formation_purchase') {
+            await recordAnalyticsServerEvent({
+                eventName: 'formation_purchased',
+                eventSource: 'webhook',
+                visitorId: analyticsVisitorId,
+                sessionId: analyticsSessionId,
+                userId: resolvedFulfillmentUserId,
+                touch: getPrimaryTouch(attributionSnapshot),
+                properties: {
+                    formationId: referenceId || null,
+                    amount: data.amount,
                 },
             })
         }

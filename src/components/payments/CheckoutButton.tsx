@@ -7,9 +7,10 @@ import type { AICreditPackageKey } from '@/lib/payments/config'
 import { collectAnalyticsEvent, getClientAnalyticsContext } from '@/lib/analytics/client'
 
 interface CheckoutButtonProps {
-    purchaseType: 'ai_credits' | 'event_purchase'
+    purchaseType: 'ai_credits' | 'event_purchase' | 'formation_purchase'
     packageKey?: AICreditPackageKey
     eventId?: string
+    formationId?: string
     label?: string
     variant?: 'default' | 'outline'
     className?: string
@@ -19,6 +20,7 @@ export function CheckoutButton({
     purchaseType,
     packageKey,
     eventId,
+    formationId,
     label = 'Pagar',
     variant = 'default',
     className = '',
@@ -31,8 +33,10 @@ export function CheckoutButton({
         setError(null)
 
         try {
+            const funnelType = purchaseType === 'event_purchase' || purchaseType === 'formation_purchase' ? 'event' : 'ai_credits'
+            
             const analyticsContext = getClientAnalyticsContext({
-                funnel: purchaseType === 'event_purchase' ? 'event' : 'ai_credits',
+                funnel: funnelType,
             })
 
             await collectAnalyticsEvent('checkout_started', {
@@ -40,9 +44,10 @@ export function CheckoutButton({
                     purchaseType,
                     packageKey: packageKey ?? null,
                     eventId: eventId ?? null,
+                    formationId: formationId ?? null,
                 },
                 touch: {
-                    funnel: purchaseType === 'event_purchase' ? 'event' : 'ai_credits',
+                    funnel: funnelType,
                 },
             })
 
@@ -53,6 +58,7 @@ export function CheckoutButton({
                     purchaseType,
                     packageKey,
                     eventId,
+                    formationId,
                     analyticsContext,
                 }),
             })
@@ -82,7 +88,7 @@ export function CheckoutButton({
                 disabled={isLoading}
                 data-analytics-cta
                 data-analytics-label={label}
-                data-analytics-funnel={purchaseType === 'event_purchase' ? 'event' : 'ai_credits'}
+                data-analytics-funnel={purchaseType === 'event_purchase' || purchaseType === 'formation_purchase' ? 'event' : 'ai_credits'}
             >
                 {isLoading ? (
                     <>

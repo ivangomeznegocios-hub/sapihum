@@ -200,16 +200,127 @@ async function createPendingEventPurchase(params: {
     return purchaseId
 }
 
+async function resolveFormationPurchaseDetails(
+    supabase: any,
+    params: {
+        formationId: string
+        userId?: string | null
+        guestEmail?: string | null
+    }
+) {
+    const { data: formation } = await (supabase
+        .from('formations') as any)
+        .select('*')
+        .eq('id', params.formationId)
+        .single()
+
+    if (!formation) {
+        return { error: 'Formación no encontrada' as const }
+    }
+
+    if (formation.status !== 'active') {
+        return { error: 'Esta formación ya no está disponible' as const }
+    }
+
+    if (params.userId) {
+        const { data: profile } = await (supabase
+            .from('profiles') as any)
+            .select('role, email')
+            .eq('id', params.userId)
+            .single()
+
+        // Check if already purchased
+        const { data: existingPurchase } = await (supabase
+            .from('formation_purchases') as any)
+            .select('id')
+            .eq('formation_id', params.formationId)
+            .eq('user_id', params.userId)
+            .eq('status', 'confirmed')
+            .maybeSingle()
+
+        if (existingPurchase) {
+            return { error: 'Ya has adquirido esta formación completa' as const }
+        }
+
+        const amount = Number(formation.bundle_price)
+
+        if (amount <= 0) {
+            return { error: 'Este bundle es de acceso gratuito o no requiere pago por checkout' as const }
+        }
+
+        return {
+            amount,
+            description: `Acceso a Formación: ${formation.title}`,
+            referenceId: formation.id,
+            formation,
+        }
+    }
+
+    if (!params.guestEmail) {
+        return { error: 'No autenticado', requiresGuestDetails: true as const }
+    }
+
+    const amount = Number(formation.bundle_price || 0)
+    if (amount <= 0) {
+        return { error: 'Esta formación no requiere pago. Inicia sesión.' as const }
+    }
+
+    return {
+        amount,
+        description: `Acceso a Formación: ${formation.title}`,
+        referenceId: formation.id,
+        formation,
+    }
+}
+
+async function createPendingFormationPurchase(params: {
+    supabase: any
+    formationId: string
+    userId?: string | null
+    email: string
+    fullName?: string | null
+    amount: number
+    analyticsContext?: any
+    attributionSnapshot?: any
+}) {
+    const purchaseId = crypto.randomUUID()
+    const normalizedEmail = params.email.trim().toLowerCase()
+
+    const { error } = await (params.supabase
+        .from('formation_purchases') as any)
+        .insert({
+            id: purchaseId,
+            formation_id: params.formationId,
+            user_id: params.userId ?? null,
+            email: normalizedEmail,
+            amount_paid: params.amount,
+            currency: 'MXN',
+            status: 'pending',
+            metadata: {
+                analytics: params.analyticsContext ?? null,
+                attribution_snapshot: params.attributionSnapshot ?? null,
+                full_name: params.fullName ?? null,
+            },
+        })
+
+    if (error) {
+        throw new Error(error.message)
+    }
+
+    return purchaseId
+}
+
 export async function POST(request: NextRequest) {
     try {
         const supabase = await createClient()
         const { data: { user } } = await supabase.auth.getUser()
 
         const body = await request.json()
-        const { purchaseType, packageKey, eventId, analyticsContext, email, fullName } = body as {
+        const { purchaseType, packageKey, eventId, formationId, analyticsContext, email, fullName } = body as {
             purchaseType?: string
             packageKey?: AICreditPackageKey
             eventId?: string
+            formationId?: string
             analyticsContext?: any
             email?: string
             fullName?: string
@@ -219,7 +330,7 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'Tipo de compra requerido' }, { status: 400 })
         }
 
-        if (!user && purchaseType !== 'event_purchase') {
+        if (!user && purchaseType !== 'event_purchase' && purchaseType !== 'formation_purchase') {
             return NextResponse.json({ error: 'No autenticado' }, { status: 401 })
         }
 
@@ -320,6 +431,69 @@ export async function POST(request: NextRequest) {
                 cancelUrl = `${appUrl}/compras/cancelada?slug=${resolvedEventPurchase.event.slug}`
                 customerId = undefined
             }
+        } else if (purchaseType === 'formation_purchase') {
+            if (!formationId) {
+                return NextResponse.json({ error: 'Datos de la formación requeridos' }, { status: 400 })
+            }
+
+            const resolvedFormationPurchase = await resolveFormationPurchaseDetails(supabase, {
+                formationId,
+                userId: user?.id,
+                guestEmail: email ?? null,
+            })
+
+            if ('error' in resolvedFormationPurchase) {
+                const statusCode = resolvedFormationPurchase.requiresGuestDetails ? 401 : 400
+                return NextResponse.json(
+                    {
+                        error: resolvedFormationPurchase.error,
+                        requiresGuestDetails: Boolean(resolvedFormationPurchase.requiresGuestDetails),
+                    },
+                    { status: statusCode }
+                )
+            }
+
+            checkoutAmount = resolvedFormationPurchase.amount
+            checkoutDescription = resolvedFormationPurchase.description
+            referenceId = resolvedFormationPurchase.referenceId
+
+            if (!customerEmail) {
+                return NextResponse.json(
+                    { error: 'Correo requerido para continuar', requiresGuestDetails: true },
+                    { status: 401 }
+                )
+            }
+
+            let pendingFormationPurchaseId = ''
+            try {
+                pendingFormationPurchaseId = await createPendingFormationPurchase({
+                    supabase,
+                    formationId,
+                    userId: user?.id ?? null,
+                    email: customerEmail,
+                    fullName: fullName || profile.data?.full_name || null,
+                    amount: checkoutAmount,
+                    analyticsContext,
+                    attributionSnapshot,
+                })
+            } catch (purchaseError) {
+                console.error('[API] Failed to create pending formation purchase:', purchaseError)
+                return NextResponse.json(
+                    { error: 'No fue posible iniciar la compra. Intenta de nuevo.' },
+                    { status: 500 }
+                )
+            }
+
+            metadata = {
+                formation_purchase_id: pendingFormationPurchaseId,
+                buyer_full_name: fullName || profile.data?.full_name || '',
+            }
+
+            if (!user) {
+                successUrl = `${appUrl}/compras/exito?session_id={CHECKOUT_SESSION_ID}&slug=${resolvedFormationPurchase.formation.slug}`
+                cancelUrl = `${appUrl}/compras/cancelada?slug=${resolvedFormationPurchase.formation.slug}`
+                customerId = undefined
+            }
         } else {
             return NextResponse.json({ error: 'Tipo de compra no valido' }, { status: 400 })
         }
@@ -338,11 +512,12 @@ export async function POST(request: NextRequest) {
             sessionId: analyticsContext?.sessionId ?? null,
             userId: user?.id ?? null,
             touch: (analyticsContext?.touch as any) ?? {
-                funnel: purchaseType === 'event_purchase' ? 'event' : 'ai_credits',
+                funnel: purchaseType === 'event_purchase' ? 'event' : purchaseType === 'formation_purchase' ? 'formation' : 'ai_credits',
             },
             properties: {
                 purchaseType,
                 eventId: eventId ?? null,
+                formationId: formationId ?? null,
                 packageKey: packageKey ?? null,
                 amount: checkoutAmount,
                 guestCheckout: !user,
@@ -353,7 +528,7 @@ export async function POST(request: NextRequest) {
         let result
         try {
             result = await provider.createOneTimeCheckout({
-                purchaseType: purchaseType as 'ai_credits' | 'event_purchase',
+                purchaseType: purchaseType as 'ai_credits' | 'event_purchase' | 'formation_purchase',
                 amount: checkoutAmount,
                 customerEmail,
                 customerId,
@@ -385,7 +560,7 @@ export async function POST(request: NextRequest) {
                         .eq('id', profile.data.id)
                 }
                 result = await provider.createOneTimeCheckout({
-                    purchaseType: purchaseType as 'ai_credits' | 'event_purchase',
+                    purchaseType: purchaseType as 'ai_credits' | 'event_purchase' | 'formation_purchase',
                     amount: checkoutAmount,
                     customerEmail,
                     customerId: undefined,

@@ -663,6 +663,7 @@ export interface Event {
     included_resources: string[] | null
     certificate_type: string | null
     formation_track: string | null
+    formation_id: string | null
 }
 
 export interface EventInsert {
@@ -704,6 +705,7 @@ export interface EventInsert {
     included_resources?: string[] | null
     certificate_type?: string | null
     formation_track?: string | null
+    formation_id?: string | null
 }
 
 export interface EventUpdate {
@@ -736,12 +738,12 @@ export interface EventUpdate {
     hero_badge?: string | null
     public_cta_label?: string | null
     session_config?: SessionConfig | null
-    // Academic metadata
     ideal_for?: string[] | null
     learning_outcomes?: string[] | null
     included_resources?: string[] | null
     certificate_type?: string | null
     formation_track?: string | null
+    formation_id?: string | null
 }
 
 export interface EventRegistration {
@@ -837,8 +839,6 @@ export interface EventSpeakerInsert {
     display_order?: number
 }
 
-// ============================================
-// TABLE: event_purchases
 // ============================================
 export type EventPurchaseStatus = 'pending' | 'confirmed' | 'cancelled' | 'refunded'
 
@@ -1992,4 +1992,150 @@ export interface CertificateEligibilitySnapshot {
     source_snapshot: Record<string, any>
     created_at: string
     updated_at: string
+}
+
+// ============================================
+// TABLE: formations
+// ============================================
+export type FormationStatus = 'draft' | 'active' | 'archived'
+export type FormationCertificateType = 'none' | 'participation' | 'completion' | 'specialized'
+
+export interface Formation {
+    id: string
+    slug: string
+    title: string
+    subtitle: string | null
+    description: string | null
+    image_url: string | null
+    bundle_price: number
+    bundle_member_price: number
+    individual_certificate_type: FormationCertificateType
+    full_certificate_type: FormationCertificateType
+    full_certificate_label: string
+    status: FormationStatus
+    created_by: string | null
+    created_at: string
+    updated_at: string
+}
+
+export interface FormationInsert {
+    slug: string
+    title: string
+    subtitle?: string | null
+    description?: string | null
+    image_url?: string | null
+    bundle_price: number
+    bundle_member_price?: number
+    individual_certificate_type?: FormationCertificateType
+    full_certificate_type?: FormationCertificateType
+    full_certificate_label?: string
+    status?: FormationStatus
+    created_by?: string
+}
+
+export interface FormationUpdate {
+    slug?: string
+    title?: string
+    subtitle?: string | null
+    description?: string | null
+    image_url?: string | null
+    bundle_price?: number
+    bundle_member_price?: number
+    individual_certificate_type?: FormationCertificateType
+    full_certificate_type?: FormationCertificateType
+    full_certificate_label?: string
+    status?: FormationStatus
+}
+
+// ============================================
+// TABLE: formation_courses
+// ============================================
+export interface FormationCourse {
+    id: string
+    formation_id: string
+    event_id: string
+    display_order: number
+    is_required: boolean
+    created_at: string
+}
+
+export interface FormationCourseInsert {
+    formation_id: string
+    event_id: string
+    display_order?: number
+    is_required?: boolean
+}
+
+// ============================================
+// TABLE: formation_purchases
+// ============================================
+export type FormationPurchaseStatus = 'pending' | 'confirmed' | 'cancelled' | 'refunded'
+
+export interface FormationPurchase {
+    id: string
+    formation_id: string
+    user_id: string | null
+    email: string
+    full_name: string | null
+    amount_paid: number
+    currency: string
+    payment_reference: string | null
+    provider_session_id: string | null
+    provider_payment_id: string | null
+    access_token: string
+    status: FormationPurchaseStatus
+    metadata: Record<string, any>
+    purchased_at: string
+    confirmed_at: string | null
+}
+
+export interface FormationPurchaseInsert {
+    formation_id: string
+    user_id?: string | null
+    email: string
+    full_name?: string | null
+    amount_paid: number
+    currency?: string
+    payment_reference?: string | null
+    provider_session_id?: string | null
+    provider_payment_id?: string | null
+    metadata?: Record<string, any>
+}
+
+// ============================================
+// TABLE: formation_progress
+// ============================================
+export interface FormationProgress {
+    id: string
+    formation_id: string
+    user_id: string | null
+    email: string
+    event_id: string
+    completed_at: string
+    certificate_issued: boolean
+    certificate_issued_at: string | null
+    created_at: string
+}
+
+export interface FormationProgressInsert {
+    formation_id: string
+    user_id?: string | null
+    email: string
+    event_id: string
+    certificate_issued?: boolean
+    certificate_issued_at?: string | null
+}
+
+// Formation with courses and progress
+export interface FormationWithCourses extends Formation {
+    courses?: (FormationCourse & { event?: Event })[]
+    total_courses?: number
+    total_individual_price?: number
+}
+
+export interface FormationWithProgress extends FormationWithCourses {
+    progress?: FormationProgress[]
+    completed_count?: number
+    is_fully_completed?: boolean
+    has_full_certificate?: boolean
 }

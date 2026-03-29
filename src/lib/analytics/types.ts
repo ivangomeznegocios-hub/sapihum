@@ -44,6 +44,7 @@ export type AnalyticsEventName =
     | 'subscription_past_due'
     | 'event_registered'
     | 'event_purchased'
+    | 'formation_purchased'
     | 'ai_credits_purchased'
     | 'marketing_service_updated'
     | 'marketing_brief_updated'

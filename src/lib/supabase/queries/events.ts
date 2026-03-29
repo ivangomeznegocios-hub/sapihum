@@ -302,7 +302,12 @@ export async function getPublicEventBySlug(slug: string): Promise<any | null> {
 
     const { data: event, error } = await (supabase
         .from('events') as any)
-        .select('*')
+        .select(`
+            id,
+            slug,
+            status,
+            formation:formations(id, slug, title)
+        `)
         .eq('slug', slug)
         .not('status', 'eq', 'draft')
         .not('status', 'eq', 'cancelled')
