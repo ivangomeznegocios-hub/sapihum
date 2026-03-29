@@ -1534,7 +1534,7 @@ export interface SubscriptionUpdate {
 // TABLE: payment_transactions
 // ============================================
 export type PaymentTransactionStatus = 'pending' | 'completed' | 'failed' | 'refunded'
-export type PurchaseType = 'subscription_payment' | 'ai_credits' | 'event_purchase'
+export type PurchaseType = 'subscription_payment' | 'ai_credits' | 'event_purchase' | 'formation_purchase'
 
 export interface PaymentTransaction {
     id: string

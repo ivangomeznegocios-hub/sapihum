@@ -725,17 +725,17 @@ export async function updateEvent(eventId: string, formData: FormData) {
     if (updates.status === 'completed' && event.status !== 'completed' && event.formation_id) {
         const { data: registrations } = await (supabase
             .from('event_registrations') as any)
-            .select('user_id, status, registration_data, profiles(email)')
+            .select('user_id, status, attended_at, registration_data, user:profiles(email)')
             .eq('event_id', eventId)
 
         if (registrations) {
-            // Include attendees, or if they haven't explicitly set attendance, all valid registrations
+            // Advance only attendees that were explicitly marked as attended.
             const attendedRegs = registrations.filter((r: any) => 
-                r.status === 'attended' || r.status === 'registered' || !r.status
+                r.status === 'attended' || Boolean(r.attended_at)
             )
 
             for (const reg of attendedRegs) {
-                const userEmail = reg.profiles?.email || reg.registration_data?.email
+                const userEmail = reg.user?.email || reg.registration_data?.email
                 if (userEmail) {
                     await (supabase
                         .from('formation_progress') as any)

@@ -1,14 +1,11 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { createServerActionClient } from '@supabase/auth-helpers-nextjs'
-import { cookies } from 'next/headers'
-import { v4 as uuidv4 } from 'uuid'
-import type { Database } from '@/types/supabase'
-import type { FormationInsert, FormationUpdate, FormationCourseInsert } from '@/types/database'
+import { createClient } from '@/lib/supabase/server'
+import type { FormationInsert, FormationUpdate } from '@/types/database'
 
 export async function createFormation(formation: FormationInsert, courseIds: string[]) {
-    const supabase = createServerActionClient<Database>({ cookies })
+    const supabase = await createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
@@ -16,8 +13,8 @@ export async function createFormation(formation: FormationInsert, courseIds: str
     }
 
     // 1. Create formation
-    const { data: newFormation, error: formationError } = await supabase
-        .from('formations')
+    const { data: newFormation, error: formationError } = await (supabase
+        .from('formations') as any)
         .insert({
             ...formation,
             created_by: user.id
@@ -38,19 +35,19 @@ export async function createFormation(formation: FormationInsert, courseIds: str
             is_required: true
         }))
 
-        const { error: coursesError } = await supabase
-            .from('formation_courses')
+        const { error: coursesError } = await (supabase
+            .from('formation_courses') as any)
             .insert(formationCourses)
 
         if (coursesError) {
             // Rollback is manual since RPC is not used
-            await supabase.from('formations').delete().eq('id', newFormation.id)
+            await (supabase.from('formations') as any).delete().eq('id', newFormation.id)
             throw new Error(`Error al vincular los cursos: ${coursesError.message}`)
         }
 
         // 3. Update events to point to this formation
-        await supabase
-            .from('events')
+        await (supabase
+            .from('events') as any)
             .update({ formation_id: newFormation.id })
             .in('id', courseIds)
     }
@@ -60,7 +57,7 @@ export async function createFormation(formation: FormationInsert, courseIds: str
 }
 
 export async function updateFormation(formationId: string, updates: FormationUpdate, newCourseIds: string[]) {
-    const supabase = createServerActionClient<Database>({ cookies })
+    const supabase = await createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
@@ -68,8 +65,8 @@ export async function updateFormation(formationId: string, updates: FormationUpd
     }
 
     // 1. Update formation details
-    const { error: updateError } = await supabase
-        .from('formations')
+    const { error: updateError } = await (supabase
+        .from('formations') as any)
         .update(updates)
         .eq('id', formationId)
 
@@ -78,27 +75,27 @@ export async function updateFormation(formationId: string, updates: FormationUpd
     }
 
     // 2. Fetch existing courses
-    const { data: existingCourses } = await supabase
-        .from('formation_courses')
+    const { data: existingCourses } = await (supabase
+        .from('formation_courses') as any)
         .select('event_id')
         .eq('formation_id', formationId)
 
-    const existingCourseIds = existingCourses?.map(ec => ec.event_id) || []
+    const existingCourseIds = existingCourses?.map((ec: { event_id: string }) => ec.event_id) || []
 
     // 3. Determine courses to add and remove
-    const coursesToRemove = existingCourseIds.filter(id => !newCourseIds.includes(id))
+    const coursesToRemove = existingCourseIds.filter((id: string) => !newCourseIds.includes(id))
     
     if (coursesToRemove.length > 0) {
         // Remove relationships
-        await supabase
-            .from('formation_courses')
+        await ((supabase
+            .from('formation_courses' as any)) as any)
             .delete()
             .eq('formation_id', formationId)
             .in('event_id', coursesToRemove)
             
         // Disconnect from events table
-        await supabase
-            .from('events')
+        await (supabase
+            .from('events') as any)
             .update({ formation_id: null })
             .eq('formation_id', formationId)
             .in('id', coursesToRemove)
@@ -110,8 +107,8 @@ export async function updateFormation(formationId: string, updates: FormationUpd
         const isNew = !existingCourseIds.includes(eventId)
 
         if (isNew) {
-            await supabase
-                .from('formation_courses')
+            await ((supabase
+                .from('formation_courses' as any)) as any)
                 .insert({
                     formation_id: formationId,
                     event_id: eventId,
@@ -119,8 +116,8 @@ export async function updateFormation(formationId: string, updates: FormationUpd
                     is_required: true
                 })
         } else {
-            await supabase
-                .from('formation_courses')
+            await ((supabase
+                .from('formation_courses' as any)) as any)
                 .update({ display_order: i })
                 .eq('formation_id', formationId)
                 .eq('event_id', eventId)
@@ -129,8 +126,8 @@ export async function updateFormation(formationId: string, updates: FormationUpd
 
     // Connect new ones to events table
     if (newCourseIds.length > 0) {
-        await supabase
-            .from('events')
+        await (supabase
+            .from('events') as any)
             .update({ formation_id: formationId })
             .in('id', newCourseIds)
     }
@@ -141,7 +138,7 @@ export async function updateFormation(formationId: string, updates: FormationUpd
 }
 
 export async function deleteFormation(formationId: string) {
-    const supabase = createServerActionClient<Database>({ cookies })
+    const supabase = await createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
@@ -149,13 +146,13 @@ export async function deleteFormation(formationId: string) {
     }
 
     // Disconnect events
-    await supabase
-        .from('events')
+    await (supabase
+        .from('events') as any)
         .update({ formation_id: null })
         .eq('formation_id', formationId)
 
-    const { error } = await supabase
-        .from('formations')
+    const { error } = await (supabase
+        .from('formations') as any)
         .delete()
         .eq('id', formationId)
 
@@ -168,10 +165,10 @@ export async function deleteFormation(formationId: string) {
 }
 
 export async function getFormationsForAdmin() {
-    const supabase = createServerActionClient<Database>({ cookies })
+    const supabase = await createClient()
 
-    const { data, error } = await supabase
-        .from('formations')
+    const { data, error } = await (supabase
+        .from('formations') as any)
         .select(`
             id,
             slug,
@@ -189,7 +186,7 @@ export async function getFormationsForAdmin() {
         return []
     }
 
-    return data.map(f => ({
+    return data.map((f: any) => ({
         ...f,
         total_courses: f.courses?.[0]?.count || 0,
         total_purchases: f.purchases?.[0]?.count || 0
@@ -197,10 +194,10 @@ export async function getFormationsForAdmin() {
 }
 
 export async function getFormationById(id: string) {
-    const supabase = createServerActionClient<Database>({ cookies })
+    const supabase = await createClient()
 
-    const { data: formation, error } = await supabase
-        .from('formations')
+    const { data: formation, error } = await (supabase
+        .from('formations') as any)
         .select('*')
         .eq('id', id)
         .single()
@@ -209,8 +206,8 @@ export async function getFormationById(id: string) {
         return null
     }
 
-    const { data: courses } = await supabase
-        .from('formation_courses')
+    const { data: courses } = await (supabase
+        .from('formation_courses') as any)
         .select(`
             id,
             event_id,
@@ -229,17 +226,17 @@ export async function getFormationById(id: string) {
 
 // Client helper
 export async function markCourseCompleted(formationId: string, eventId: string, email: string) {
-    const supabase = createServerActionClient<Database>({ cookies })
+    const supabase = await createClient()
 
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) throw new Error('No autorizado')
 
     // Find the student profile to link
-    const { data: profile } = await supabase.from('profiles').select('id').eq('email', email).maybeSingle()
+    const { data: profile } = await (supabase.from('profiles') as any).select('id').eq('email', email).maybeSingle()
 
     // Upsert progress
-    const { error } = await supabase
-        .from('formation_progress')
+    const { error } = await (supabase
+        .from('formation_progress') as any)
         .upsert({
             formation_id: formationId,
             event_id: eventId,
@@ -259,7 +256,7 @@ export async function markCourseCompleted(formationId: string, eventId: string, 
 }
 
 // Issue the final full certificate
-export async function issueFullCertificate(formationId: string, email: string) {
+export async function issueFullCertificate() {
     // This is a placeholder since the final certificate logic will be manual for now,
     // but we can track it globally per user if needed
     // Usually we would insert this into a global certificates table

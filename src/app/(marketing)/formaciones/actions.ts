@@ -1,14 +1,12 @@
 'use server'
 
-import { createServerActionClient } from '@supabase/auth-helpers-nextjs'
-import { cookies } from 'next/headers'
-import type { Database } from '@/types/supabase'
+import { createClient } from '@/lib/supabase/server'
 
 export async function getPublicFormations() {
-    const supabase = createServerActionClient<Database>({ cookies })
+    const supabase = await createClient()
 
-    const { data: formations, error } = await supabase
-        .from('formations')
+    const { data: formations, error } = await (supabase
+        .from('formations') as any)
         .select('*')
         .eq('status', 'active')
         .order('created_at', { ascending: false })
@@ -22,11 +20,11 @@ export async function getPublicFormations() {
 }
 
 export async function getPublicFormationBySlug(slug: string) {
-    const supabase = createServerActionClient<Database>({ cookies })
+    const supabase = await createClient()
 
     // Fetch formation
-    const { data: formation, error } = await supabase
-        .from('formations')
+    const { data: formation, error } = await (supabase
+        .from('formations') as any)
         .select('*')
         .eq('slug', slug)
         .eq('status', 'active')
@@ -37,8 +35,8 @@ export async function getPublicFormationBySlug(slug: string) {
     }
 
     // Fetch courses included
-    const { data: courses } = await supabase
-        .from('formation_courses')
+    const { data: courses } = await (supabase
+        .from('formation_courses') as any)
         .select(`
             id,
             display_order,
@@ -59,8 +57,8 @@ export async function getPublicFormationBySlug(slug: string) {
     
     if (user) {
         // Did they buy the bundle?
-        const { data: bundlePurchases } = await supabase
-            .from('formation_purchases')
+        const { data: bundlePurchases } = await (supabase
+            .from('formation_purchases') as any)
             .select('id')
             .eq('formation_id', formation.id)
             .eq('user_id', user.id)
@@ -70,7 +68,7 @@ export async function getPublicFormationBySlug(slug: string) {
             hasPurchasedBundle = true
         } else {
             // Check individual events access
-            const courseEventIds = courses?.map(c => c.event?.id).filter(Boolean) || []
+            const courseEventIds = courses?.map((c: any) => c.event?.id).filter(Boolean) || []
             if (courseEventIds.length > 0) {
                 const { data: accessData } = await supabase
                     .from('event_entitlements')
@@ -79,7 +77,7 @@ export async function getPublicFormationBySlug(slug: string) {
                     .in('event_id', courseEventIds)
                     .eq('access_kind', 'course_access')
                     
-                purchasedCourses = accessData?.map(a => a.event_id) || []
+                purchasedCourses = accessData?.map((a: any) => a.event_id) || []
             }
         }
     }

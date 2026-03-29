@@ -223,12 +223,6 @@ async function resolveFormationPurchaseDetails(
     }
 
     if (params.userId) {
-        const { data: profile } = await (supabase
-            .from('profiles') as any)
-            .select('role, email')
-            .eq('id', params.userId)
-            .single()
-
         // Check if already purchased
         const { data: existingPurchase } = await (supabase
             .from('formation_purchases') as any)
@@ -293,6 +287,7 @@ async function createPendingFormationPurchase(params: {
             formation_id: params.formationId,
             user_id: params.userId ?? null,
             email: normalizedEmail,
+            full_name: params.fullName ?? null,
             amount_paid: params.amount,
             currency: 'MXN',
             status: 'pending',

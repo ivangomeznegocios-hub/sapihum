@@ -1,14 +1,12 @@
-import { createServerComponentClient } from '@supabase/auth-helpers-nextjs'
-import { cookies } from 'next/headers'
-import type { Database } from '@/types/supabase'
 import { FormationForm } from '@/components/formations/formation-form'
+import { createClient } from '@/lib/supabase/server'
 
 export const metadata = {
     title: 'Crear Formación | SAPIHUM Admin',
 }
 
 export default async function NewFormationPage() {
-    const supabase = createServerComponentClient<Database>({ cookies })
+    const supabase = await createClient()
 
     // Fetch all events to let the admin select which ones belong to the formation
     const { data: events } = await supabase

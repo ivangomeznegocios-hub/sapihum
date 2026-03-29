@@ -1,18 +1,17 @@
 import { notFound } from 'next/navigation'
-import { createServerComponentClient } from '@supabase/auth-helpers-nextjs'
-import { cookies } from 'next/headers'
-import type { Database } from '@/types/supabase'
 import { getFormationById } from '../../formation-actions'
 import { FormationForm } from '@/components/formations/formation-form'
+import { createClient } from '@/lib/supabase/server'
 
 export const metadata = {
     title: 'Editar Formación | SAPIHUM Admin',
 }
 
-export default async function EditFormationPage({ params }: { params: { id: string } }) {
-    const supabase = createServerComponentClient<Database>({ cookies })
+export default async function EditFormationPage({ params }: { params: Promise<{ id: string }> }) {
+    const supabase = await createClient()
+    const { id } = await params
 
-    const formation = await getFormationById(params.id)
+    const formation = await getFormationById(id)
 
     if (!formation) {
         notFound()

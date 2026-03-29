@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
-import { GraduationCap, CheckCircle2, Award, PlayCircle, Lock, ArrowRight, ShieldCheck } from 'lucide-react'
+import { GraduationCap, CheckCircle2, Award, PlayCircle, ArrowRight, ShieldCheck } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { getPublicFormationBySlug } from '../actions'
@@ -11,8 +11,9 @@ export const metadata = {
     title: 'Formación Completa | SAPIHUM',
 }
 
-export default async function FormationLandingPage({ params }: { params: { slug: string } }) {
-    const data = await getPublicFormationBySlug(params.slug)
+export default async function FormationLandingPage({ params }: { params: Promise<{ slug: string }> }) {
+    const { slug } = await params
+    const data = await getPublicFormationBySlug(slug)
 
     if (!data) {
         notFound()
@@ -100,6 +101,7 @@ export default async function FormationLandingPage({ params }: { params: { slug:
                                             <CheckoutButton
                                                 purchaseType="formation_purchase"
                                                 formationId={data.id}
+                                                title={data.title}
                                                 label="Comprar Formación Completa"
                                                 className="w-full py-6 text-lg rounded-full"
                                             />

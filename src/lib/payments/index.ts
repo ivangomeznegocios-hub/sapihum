@@ -343,7 +343,7 @@ async function fulfillFormationPurchase(params: {
             .select('*')
             .eq('formation_id', params.formationId)
             .eq('email', customerEmail)
-            .order('created_at', { ascending: false })
+            .order('purchased_at', { ascending: false })
             .limit(1)
             .maybeSingle()
         purchaseRow = fallbackPurchase ?? null
@@ -357,7 +357,6 @@ async function fulfillFormationPurchase(params: {
 
     const resolvedUserId = purchaseRow?.user_id || params.userId || params.profileId || matchedProfile?.id || null
     const paymentReference = params.data.paymentIntentId || params.data.sessionId
-    const attributionSnapshot = parseAttributionSnapshot(params.data.metadata?.attribution_snapshot)
     const mergedMetadata = {
         ...(purchaseRow?.metadata ?? {}),
         ...(params.data.metadata ?? {}),
@@ -376,10 +375,13 @@ async function fulfillFormationPurchase(params: {
             .update({
                 user_id: resolvedUserId,
                 email: customerEmail,
-                payment_intent_id: paymentReference,
+                full_name: purchaseRow?.full_name || normalizeWebhookValue(params.data.metadata?.buyer_full_name),
+                payment_reference: paymentReference,
+                provider_session_id: params.data.sessionId,
+                provider_payment_id: params.data.paymentIntentId || null,
                 metadata: mergedMetadata,
                 status: 'confirmed',
-                updated_at: new Date().toISOString(),
+                confirmed_at: new Date().toISOString(),
             })
             .eq('id', purchaseId)
     } else {
@@ -391,11 +393,15 @@ async function fulfillFormationPurchase(params: {
                 formation_id: params.formationId,
                 user_id: resolvedUserId,
                 email: customerEmail,
+                full_name: normalizeWebhookValue(params.data.metadata?.buyer_full_name),
                 amount_paid: params.data.amount,
                 currency: (params.data.currency || 'mxn').toUpperCase(),
-                payment_intent_id: paymentReference,
+                payment_reference: paymentReference,
+                provider_session_id: params.data.sessionId,
+                provider_payment_id: params.data.paymentIntentId || null,
                 metadata: mergedMetadata,
                 status: 'confirmed',
+                confirmed_at: new Date().toISOString(),
             })
         purchaseId = purchaseIdUuid
     }
