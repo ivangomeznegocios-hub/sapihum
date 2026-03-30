@@ -114,7 +114,7 @@ export function FormationProgressManager({ formationId, learners }: FormationPro
                                             {learner.completedRequiredCount}/{learner.totalRequiredCount} cursos requeridos
                                         </Badge>
                                         {learner.hasFullCertificate ? (
-                                            <Badge className="bg-emerald-600 hover:bg-emerald-600 text-white">
+                                            <Badge className="bg-brand-brown hover:bg-brand-brown text-white">
                                                 <Award className="mr-1 h-3.5 w-3.5" />
                                                 Certificado final emitido
                                             </Badge>

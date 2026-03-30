@@ -321,8 +321,13 @@ export async function getPublicEventBySlug(slug: string): Promise<any | null> {
     const hydrated = await getPublicEventById(event.id)
     if (!hydrated) return null
 
+    const formation = Array.isArray(event.formation)
+        ? event.formation[0] ?? null
+        : event.formation ?? null
+
     return {
         ...hydrated,
+        formation,
         public_kind: getPublicCatalogKindForEvent(hydrated),
     }
 }

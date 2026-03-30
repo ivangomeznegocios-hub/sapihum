@@ -69,7 +69,7 @@ function getNoteTypeColor(type: string) {
         assessment: 'bg-brand-brown text-brand-brown',
         treatment_plan: 'bg-brand-brown text-brand-brown',
         progress_note: 'bg-brand-yellow text-brand-yellow',
-        intake: 'bg-cyan-100 text-cyan-800',
+        intake: 'bg-brand-yellow/20 text-brand-yellow',
         discharge: 'bg-rose-100 text-brand-brown'
     }
     return colors[type] || 'bg-gray-100 text-gray-800'
@@ -90,7 +90,7 @@ function getDocCategoryLabel(cat: string) {
 function getDocCategoryColor(cat: string) {
     const colors: Record<string, string> = {
         test_result: 'bg-brand-brown text-brand-brown',
-        referral: 'bg-cyan-100 text-cyan-800',
+        referral: 'bg-brand-yellow/20 text-brand-yellow',
         consent: 'surface-alert-success',
         report: 'bg-orange-100 text-orange-800',
         intake_form: 'bg-brand-yellow text-brand-yellow',

@@ -248,7 +248,7 @@ export function PsychologistDashboard({
                         percentage={profileCompleteness}
                         label="Tu Consultorio"
                         sublabel={appointmentsToday > 0 ? `${appointmentsToday} cita${appointmentsToday > 1 ? 's' : ''} hoy` : 'Sin citas hoy'}
-                        color={membershipLevel === 3 ? 'amber' : 'blue'}
+                        color={membershipLevel === 3 ? 'primary' : 'secondary'}
                         size={100}
                     />
                     <div className="flex-1 min-w-0">

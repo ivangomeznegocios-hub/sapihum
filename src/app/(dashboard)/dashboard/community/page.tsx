@@ -64,7 +64,7 @@ const communityLinks = [
         description: 'Material educativo, guías, plantillas y documentos de apoyo',
         href: '/dashboard/resources',
         icon: BookOpen,
-        color: 'bg-cyan-100 text-cyan-600 dark:bg-cyan-900/30 dark:text-cyan-400',
+        color: 'bg-brand-yellow/20 text-brand-yellow dark:bg-brand-yellow/30 dark:text-brand-yellow',
     },
     {
         title: 'Newsletter',

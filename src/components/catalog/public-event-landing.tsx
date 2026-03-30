@@ -302,6 +302,27 @@ export function PublicEventLanding({
                                     {memberMessage.note && <p className="mt-1.5 text-xs text-neutral-500">{memberMessage.note}</p>}
                                 </div>
 
+                                {event.formation && !Array.isArray(event.formation) && (
+                                    <div className="rounded-xl border border-brand-yellow/20 bg-brand-yellow/10 p-4 text-sm">
+                                        <p className="font-medium text-white">
+                                            Este curso forma parte del diplomado {event.formation.title}.
+                                        </p>
+                                        <p className="mt-1 text-xs text-neutral-400">
+                                            Puedes comprar solo este curso o ver el paquete completo del diplomado.
+                                        </p>
+                                        <Link
+                                            href={`/formaciones/${event.formation.slug}`}
+                                            className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-brand-yellow hover:text-brand-yellow"
+                                        >
+                                            Ver diplomado completo
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                                <path d="M5 12h14" />
+                                                <path d="m12 5 7 7-7 7" />
+                                            </svg>
+                                        </Link>
+                                    </div>
+                                )}
+
                                 {hasAccess ? (
                                     <div className="space-y-3 pt-2">
                                         <Link href={`/hub/${event.slug}${event.status === 'completed' ? '/recording' : ''}`}>
