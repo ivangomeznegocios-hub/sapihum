@@ -10,6 +10,7 @@ import { createFormation, updateFormation } from '@/app/(dashboard)/dashboard/ev
 interface FormationFormProps {
     initialData?: any
     availableEvents: any[]
+    canPublish?: boolean
 }
 
 const STATUS_OPTIONS = [
@@ -31,7 +32,7 @@ const CERTIFICATE_OPTIONS = [
     { value: 'specialized', label: 'Acreditacion especializada' },
 ]
 
-export function FormationForm({ initialData, availableEvents }: FormationFormProps) {
+export function FormationForm({ initialData, availableEvents, canPublish = true }: FormationFormProps) {
     const router = useRouter()
     const isEdit = Boolean(initialData)
 
@@ -58,8 +59,8 @@ export function FormationForm({ initialData, availableEvents }: FormationFormPro
     )
 
     const sumIndividualPrices = selectedCourses.reduce((sum, item) => {
-        const event = availableEvents.find((candidate) => candidate.id === item.eventId)
-        return sum + (Number(event?.price) || 0)
+        const selectedEvent = availableEvents.find((candidate) => candidate.id === item.eventId)
+        return sum + (Number(selectedEvent?.price) || 0)
     }, 0)
 
     const memberPricingNote =
@@ -68,6 +69,10 @@ export function FormationForm({ initialData, availableEvents }: FormationFormPro
             : bundleMemberAccessType === 'discounted'
                 ? 'Define aqui el precio exclusivo para miembros. Debe ser menor al precio publico.'
                 : 'Los miembros pagaran el mismo precio publico; el campo preferencial se ignora.'
+
+    const draftNote = isEdit
+        ? 'Como ponente, cualquier cambio se guardara en borrador hasta que un admin lo publique.'
+        : 'Como ponente, esta formacion se creara en borrador para revision antes de publicarse.'
 
     const handleTitleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const newTitle = event.target.value
@@ -87,7 +92,9 @@ export function FormationForm({ initialData, availableEvents }: FormationFormPro
     }
 
     const handleAddCourse = () => {
-        const unselectedEvent = availableEvents.find((event) => !selectedCourses.some((course) => course.eventId === event.id))
+        const unselectedEvent = availableEvents.find((availableEvent) =>
+            !selectedCourses.some((course) => course.eventId === availableEvent.id)
+        )
 
         if (unselectedEvent) {
             setSelectedCourses((current) => [...current, { id: Math.random().toString(), eventId: unselectedEvent.id }])
@@ -241,20 +248,30 @@ export function FormationForm({ initialData, availableEvents }: FormationFormPro
                                     className="mt-1 w-full rounded-md border px-3 py-2 text-sm"
                                 />
                             </div>
-                            <div>
-                                <label className="text-sm font-medium">Estado</label>
-                                <select
-                                    value={status}
-                                    onChange={(event) => setStatus(event.target.value)}
-                                    className="mt-1 w-full rounded-md border bg-background px-3 py-2 text-sm"
-                                >
-                                    {STATUS_OPTIONS.map((option) => (
-                                        <option key={option.value} value={option.value}>
-                                            {option.label}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
+                            {canPublish ? (
+                                <div>
+                                    <label className="text-sm font-medium">Estado</label>
+                                    <select
+                                        value={status}
+                                        onChange={(event) => setStatus(event.target.value)}
+                                        className="mt-1 w-full rounded-md border bg-background px-3 py-2 text-sm"
+                                    >
+                                        {STATUS_OPTIONS.map((option) => (
+                                            <option key={option.value} value={option.value}>
+                                                {option.label}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+                            ) : (
+                                <div>
+                                    <label className="text-sm font-medium">Estado</label>
+                                    <div className="mt-1 rounded-md border bg-muted/50 px-3 py-2 text-sm font-medium">
+                                        Borrador
+                                    </div>
+                                    <p className="mt-1 text-xs text-muted-foreground">{draftNote}</p>
+                                </div>
+                            )}
                         </div>
                     </CardContent>
                 </Card>
@@ -466,7 +483,7 @@ export function FormationForm({ initialData, availableEvents }: FormationFormPro
                     </Button>
                     <Button type="submit" disabled={isLoading} className="px-8">
                         {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Check className="mr-2 h-4 w-4" />}
-                        {isEdit ? 'Guardar Cambios' : 'Crear Formacion'}
+                        {isEdit ? 'Guardar Cambios' : canPublish ? 'Crear Formacion' : 'Crear Formacion en Borrador'}
                     </Button>
                 </div>
             </div>
