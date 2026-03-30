@@ -617,6 +617,14 @@ export type EventCategory = 'general' | 'networking' | 'clinical' | 'business'
 export type EventSubcategory = 'curso' | 'diplomado' | 'clase' | 'taller' | 'conferencia' | 'seminario' | 'congreso' | 'meetup' | 'otro'
 export type MemberAccessType = 'free' | 'discounted' | 'full_price'
 export type EventSpeakerRole = 'speaker' | 'moderator' | 'host'
+export type MaterialLinkType = 'presentation' | 'document' | 'folder' | 'download' | 'other'
+
+export interface MaterialLink {
+    id: string
+    title: string
+    url: string
+    type: MaterialLinkType
+}
 
 export interface Event {
     id: string
@@ -663,6 +671,7 @@ export interface Event {
     ideal_for: string[] | null
     learning_outcomes: string[] | null
     included_resources: string[] | null
+    material_links: MaterialLink[] | null
     certificate_type: string | null
     formation_track: string | null
     formation_id: string | null
@@ -705,6 +714,7 @@ export interface EventInsert {
     ideal_for?: string[] | null
     learning_outcomes?: string[] | null
     included_resources?: string[] | null
+    material_links?: MaterialLink[] | null
     certificate_type?: string | null
     formation_track?: string | null
     formation_id?: string | null
@@ -743,6 +753,7 @@ export interface EventUpdate {
     ideal_for?: string[] | null
     learning_outcomes?: string[] | null
     included_resources?: string[] | null
+    material_links?: MaterialLink[] | null
     certificate_type?: string | null
     formation_track?: string | null
     formation_id?: string | null
@@ -2029,6 +2040,7 @@ export interface Formation {
     bundle_member_price: number
     bundle_member_access_type: FormationMemberAccessType
     total_hours: number
+    material_links: MaterialLink[] | null
     individual_certificate_type: FormationCertificateType
     full_certificate_type: FormationCertificateType
     full_certificate_label: string
@@ -2048,6 +2060,7 @@ export interface FormationInsert {
     bundle_member_price?: number
     bundle_member_access_type?: FormationMemberAccessType
     total_hours?: number
+    material_links?: MaterialLink[] | null
     individual_certificate_type?: FormationCertificateType
     full_certificate_type?: FormationCertificateType
     full_certificate_label?: string
@@ -2065,6 +2078,7 @@ export interface FormationUpdate {
     bundle_member_price?: number
     bundle_member_access_type?: FormationMemberAccessType
     total_hours?: number
+    material_links?: MaterialLink[] | null
     individual_certificate_type?: FormationCertificateType
     full_certificate_type?: FormationCertificateType
     full_certificate_label?: string

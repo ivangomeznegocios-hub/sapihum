@@ -44,9 +44,9 @@ export default async function PonentesPage() {
                             <Link href={`/speakers/${speaker.id}`} className="flex h-full flex-col">
                                 <CardHeader className="pb-4 text-center">
                                     <div className="mx-auto mb-4 h-24 w-24 overflow-hidden rounded-full border-4 border-primary/10 shadow-sm">
-                                        {speaker.profile?.avatar_url ? (
+                                        {speaker.photo_url || speaker.profile?.avatar_url ? (
                                             <img
-                                                src={speaker.profile.avatar_url}
+                                                src={speaker.photo_url || speaker.profile?.avatar_url}
                                                 alt={speaker.profile.full_name || 'Ponente'}
                                                 className="h-full w-full object-cover"
                                             />

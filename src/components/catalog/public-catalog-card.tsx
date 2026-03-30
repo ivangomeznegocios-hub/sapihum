@@ -47,7 +47,7 @@ export function PublicCatalogCard({ event }: { event: any }) {
     const typeMeta = getTypeMeta(event)
     const dateInfo = formatEventDate(event.start_time)
     const speakerName = event.speakers?.[0]?.speaker?.profile?.full_name
-    const speakerAvatar = event.speakers?.[0]?.speaker?.profile?.avatar_url
+    const speakerAvatar = event.speakers?.[0]?.speaker?.photo_url || event.speakers?.[0]?.speaker?.profile?.avatar_url
     const isFree = price === 0
     const memberFree = event.member_access_type === 'free' && price > 0
     const subcategoryLabel = event.subcategory ? SUBCATEGORY_LABELS[event.subcategory] || null : null

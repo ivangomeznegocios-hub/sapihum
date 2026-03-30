@@ -42,6 +42,9 @@ export default async function FormationLandingPage({ params }: { params: Promise
     const savings = totalIndividualValue - pricing.effectivePrice
     const totalHoursLabel = formatHours(data.total_hours)
     const showsFullCertificate = data.full_certificate_type && data.full_certificate_type !== 'none'
+    const materialLinks = Array.isArray(data.material_links)
+        ? data.material_links.filter((item: any) => item?.title && item?.url)
+        : []
 
     return (
         <div className="min-h-screen bg-white">
@@ -90,6 +93,12 @@ export default async function FormationLandingPage({ params }: { params: Promise
                                 <div className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-neutral-200">
                                     <Clock3 className="h-4 w-4 text-brand-yellow" />
                                     {totalHoursLabel} totales
+                                </div>
+                            )}
+
+                            {materialLinks.length > 0 && (
+                                <div className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-neutral-200">
+                                    {materialLinks.length} materiales por enlace
                                 </div>
                             )}
                         </div>
@@ -264,6 +273,44 @@ export default async function FormationLandingPage({ params }: { params: Promise
                     </div>
                 </div>
             </section>
+
+            {userState.hasPurchasedBundle && materialLinks.length > 0 && (
+                <section className="pb-20 sm:pb-24">
+                    <div className="mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8">
+                        <div className="rounded-[28px] border border-neutral-200 bg-neutral-50 p-8">
+                            <div className="mb-8">
+                                <h2 className="text-3xl font-black tracking-tight text-black sm:text-4xl">
+                                    Materiales Incluidos
+                                </h2>
+                                <p className="mt-3 max-w-2xl text-sm leading-relaxed text-neutral-500">
+                                    Estos enlaces estan disponibles para quienes ya activaron la formacion completa.
+                                </p>
+                            </div>
+
+                            <div className="grid gap-4 md:grid-cols-2">
+                                {materialLinks.map((item: any) => (
+                                    <div key={item.id || item.url} className="flex flex-col gap-4 rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm sm:flex-row sm:items-center sm:justify-between">
+                                        <div>
+                                            <p className="text-base font-bold text-black">{item.title}</p>
+                                            <p className="mt-1 text-sm text-neutral-500">
+                                                {item.type === 'presentation' ? 'Presentacion' :
+                                                    item.type === 'document' ? 'Documento' :
+                                                        item.type === 'folder' ? 'Carpeta' :
+                                                            item.type === 'download' ? 'Descarga' : 'Enlace externo'}
+                                            </p>
+                                        </div>
+                                        <Button asChild variant="outline" className="shrink-0">
+                                            <a href={item.url} target="_blank" rel="noopener noreferrer">
+                                                Abrir material
+                                            </a>
+                                        </Button>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            )}
         </div>
     )
 }

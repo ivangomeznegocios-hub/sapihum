@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { getPublicEventPath } from '@/lib/events/public'
 import { getSpeakerById, getSpeakerEvents } from '@/lib/supabase/queries/speakers'
+import { isEventPast } from '@/lib/timezone'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -21,6 +22,7 @@ import {
 
 interface PageProps {
     params: Promise<{ id: string }>
+    searchParams: Promise<{ returnTo?: string }>
 }
 
 function formatEventDate(dateStr: string) {
@@ -33,8 +35,21 @@ function formatEventDate(dateStr: string) {
     }).format(date)
 }
 
-export default async function PublicSpeakerDetailPage({ params }: PageProps) {
+function getSpeakerImage(speaker: any) {
+    return speaker?.photo_url || speaker?.profile?.avatar_url || null
+}
+
+function getSafeReturnTo(value?: string) {
+    if (!value || !value.startsWith('/') || value.startsWith('//')) {
+        return null
+    }
+
+    return value
+}
+
+export default async function PublicSpeakerDetailPage({ params, searchParams }: PageProps) {
     const { id } = await params
+    const { returnTo } = await searchParams
     const speaker = await getSpeakerById(id)
 
     if (!speaker || !speaker.is_public) {
@@ -42,26 +57,50 @@ export default async function PublicSpeakerDetailPage({ params }: PageProps) {
     }
 
     const events = await getSpeakerEvents(id)
-    const upcomingEvents = events.filter((e: any) => e.status === 'upcoming' || e.status === 'live')
-    const pastEvents = events.filter((e: any) => e.status === 'completed')
+    const publishedEvents = events.filter((event: any) => event && event.status !== 'draft' && event.status !== 'cancelled')
+    const upcomingEvents = publishedEvents
+        .filter((event: any) => {
+            if (event.status === 'completed') return false
+            if (event.status === 'live') return true
+            return !isEventPast(event.start_time)
+        })
+        .sort((a: any, b: any) => new Date(a.start_time).getTime() - new Date(b.start_time).getTime())
+    const pastEvents = publishedEvents
+        .filter((event: any) => {
+            if (event.status === 'completed') return true
+            if (event.status === 'live') return false
+            return isEventPast(event.start_time)
+        })
+        .sort((a: any, b: any) => new Date(b.start_time).getTime() - new Date(a.start_time).getTime())
     const socialLinks = speaker.social_links || {}
+    const speakerImage = getSpeakerImage(speaker)
+    const safeReturnTo = getSafeReturnTo(returnTo)
+    const backHref = safeReturnTo || '/speakers'
+    const backLabel = safeReturnTo ? 'Volver al evento' : 'Volver al Directorio'
 
     return (
         <div className="mx-auto max-w-5xl space-y-8 px-4 py-10 sm:px-6 sm:py-12">
-            <Button variant="ghost" size="sm" asChild className="w-full justify-start sm:w-auto">
-                <Link href="/speakers">
-                    <ArrowLeft className="mr-2 h-4 w-4" />
-                    Volver al Directorio
-                </Link>
-            </Button>
+            <div className="flex flex-wrap items-center gap-3">
+                <Button variant="ghost" size="sm" asChild className="w-full justify-start sm:w-auto">
+                    <Link href={backHref}>
+                        <ArrowLeft className="mr-2 h-4 w-4" />
+                        {backLabel}
+                    </Link>
+                </Button>
+                {safeReturnTo && (
+                    <Button variant="outline" size="sm" asChild className="w-full sm:w-auto">
+                        <Link href="/speakers">Ver directorio completo</Link>
+                    </Button>
+                )}
+            </div>
 
             <div className="relative overflow-hidden rounded-2xl border bg-gradient-to-br from-primary/20 via-primary/5 to-background">
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(var(--primary-rgb),0.1),transparent_70%)]" />
                 <div className="relative flex flex-col items-center gap-6 p-6 sm:p-8 md:flex-row md:items-start md:gap-8 md:p-12">
                     <div className="h-36 w-36 flex-shrink-0 overflow-hidden rounded-2xl border-4 border-background shadow-xl sm:h-40 sm:w-40 md:h-48 md:w-48">
-                        {speaker.profile?.avatar_url ? (
+                        {speakerImage ? (
                             <img
-                                src={speaker.profile.avatar_url}
+                                src={speakerImage}
                                 alt={speaker.profile?.full_name || 'Ponente'}
                                 className="h-full w-full object-cover"
                             />

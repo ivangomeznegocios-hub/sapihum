@@ -2,7 +2,6 @@
 
 import Link from 'next/link'
 import { useState } from 'react'
-import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { getEventMemberAccessMessage } from '@/lib/events/pricing'
@@ -98,6 +97,16 @@ function buildStructuredData(event: any) {
     return JSON.stringify(base)
 }
 
+function getSpeakerImage(speaker: any) {
+    return speaker?.photo_url || speaker?.profile?.avatar_url || null
+}
+
+function getPublicSpeakerHref(speaker: any, returnTo?: string) {
+    if (!speaker?.id || !speaker?.is_public) return null
+    if (!returnTo) return `/speakers/${speaker.id}`
+    return `/speakers/${speaker.id}?returnTo=${encodeURIComponent(returnTo)}`
+}
+
 function FaqAccordion({ items }: { items: { question: string; answer: string }[] }) {
     const [openIndex, setOpenIndex] = useState<number | null>(null)
 
@@ -137,13 +146,11 @@ function FaqAccordion({ items }: { items: { question: string; answer: string }[]
 export function PublicEventLanding({
     event,
     relatedEvents,
-    user,
     membershipLevel = 0,
     hasAccess = false,
 }: {
     event: any
     relatedEvents: any[]
-    user: any | null
     membershipLevel: number
     hasAccess: boolean
 }) {
@@ -156,11 +163,15 @@ export function PublicEventLanding({
     const memberMessage = getEventMemberAccessMessage(event)
     const formatLabel = getEventTypeLabel(event.event_type)
     const faqItems = buildFaq(event)
+    const speakerReturnTo = getPublicEventPath(event)
     
     // Validate edge/blocking cases
     const isFull = event.max_attendees ? (event.attendee_count || 0) >= event.max_attendees : false
     const isExpired = event.recording_expires_at ? new Date(event.recording_expires_at) < new Date() : false
     const isBlocked = !hasAccess && (isFull || isExpired)
+    const materialLinks = Array.isArray(event.material_links)
+        ? event.material_links.filter((item: any) => item?.title && item?.url)
+        : []
     
     // Determine the state logic for the CTA box
     const userIsMember = membershipLevel > 0
@@ -236,10 +247,12 @@ export function PublicEventLanding({
                         {event.speakers?.length > 0 && (
                             <div className="flex flex-wrap items-center gap-4">
                                 {event.speakers.map((item: any) => {
-                                    const name = item.speaker?.profile?.full_name || 'Ponente'
-                                    const avatar = item.speaker?.profile?.avatar_url
-                                    return (
-                                        <div key={item.id} className="flex items-center gap-2.5">
+                                    const speaker = item.speaker
+                                    const name = speaker?.profile?.full_name || 'Ponente'
+                                    const avatar = getSpeakerImage(speaker)
+                                    const speakerHref = getPublicSpeakerHref(speaker, speakerReturnTo)
+                                    const speakerPreview = (
+                                        <>
                                             {avatar ? (
                                                 <img src={avatar} alt={name} className="h-8 w-8 rounded-full object-cover ring-2 ring-white/20" />
                                             ) : (
@@ -249,11 +262,34 @@ export function PublicEventLanding({
                                             )}
                                             <div>
                                                 <p className="text-sm font-medium text-white">{name}</p>
-                                                {item.speaker?.headline && (
-                                                    <p className="text-xs text-neutral-500">{item.speaker.headline}</p>
+                                                {speaker?.headline && (
+                                                    <p className="text-xs text-neutral-500">{speaker.headline}</p>
+                                                )}
+                                                {speakerHref && (
+                                                    <p className="text-[11px] font-semibold uppercase tracking-wide text-brand-yellow/90">
+                                                        Ver perfil
+                                                    </p>
                                                 )}
                                             </div>
-                                        </div>
+                                        </>
+                                    )
+
+                                    if (!speakerHref) {
+                                        return (
+                                            <div key={item.id} className="flex items-center gap-2.5">
+                                                {speakerPreview}
+                                            </div>
+                                        )
+                                    }
+
+                                    return (
+                                        <Link
+                                            key={item.id}
+                                            href={speakerHref}
+                                            className="group flex items-center gap-2.5 rounded-full border border-white/10 bg-white/5 px-3 py-2 transition-colors hover:border-brand-yellow/30 hover:bg-white/10"
+                                        >
+                                            {speakerPreview}
+                                        </Link>
                                     )
                                 })}
                             </div>
@@ -491,6 +527,36 @@ export function PublicEventLanding({
                         </CardContent>
                     </Card>
 
+                    {hasAccess && materialLinks.length > 0 && (
+                        <Card className="border-border/50">
+                            <CardHeader>
+                                <CardTitle className="text-xl">Materiales del Evento</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <div className="space-y-3">
+                                    {materialLinks.map((item: any) => (
+                                        <div key={item.id || item.url} className="flex flex-col gap-3 rounded-xl border border-border/40 bg-muted/30 p-4 sm:flex-row sm:items-center sm:justify-between">
+                                            <div>
+                                                <p className="text-sm font-medium">{item.title}</p>
+                                                <p className="mt-1 text-xs text-muted-foreground">
+                                                    {item.type === 'presentation' ? 'Presentacion' :
+                                                        item.type === 'document' ? 'Documento' :
+                                                            item.type === 'folder' ? 'Carpeta' :
+                                                                item.type === 'download' ? 'Descarga' : 'Enlace externo'}
+                                                </p>
+                                            </div>
+                                            <Button asChild variant="outline" className="shrink-0">
+                                                <a href={item.url} target="_blank" rel="noopener noreferrer">
+                                                    Abrir material
+                                                </a>
+                                            </Button>
+                                        </div>
+                                    ))}
+                                </div>
+                            </CardContent>
+                        </Card>
+                    )}
+
                     {/* Speakers section */}
                     {event.speakers?.length > 0 && (
                         <Card className="border-border/50">
@@ -499,10 +565,18 @@ export function PublicEventLanding({
                             </CardHeader>
                             <CardContent className="grid gap-4 sm:grid-cols-2">
                                 {event.speakers.map((item: any) => {
-                                    const name = item.speaker?.profile?.full_name || 'Ponente'
-                                    const avatar = item.speaker?.profile?.avatar_url
-                                    return (
-                                        <div key={item.id} className="flex items-start gap-3.5 rounded-xl border border-border/40 bg-muted/30 p-4">
+                                    const speaker = item.speaker
+                                    const name = speaker?.profile?.full_name || 'Ponente'
+                                    const avatar = getSpeakerImage(speaker)
+                                    const speakerHref = getPublicSpeakerHref(speaker, speakerReturnTo)
+                                    const specialties = Array.isArray(speaker?.specialties)
+                                        ? speaker.specialties.filter(Boolean).slice(0, 3)
+                                        : []
+                                    const credentials = Array.isArray(speaker?.credentials)
+                                        ? speaker.credentials.filter(Boolean).slice(0, 2)
+                                        : []
+                                    const speakerCard = (
+                                        <>
                                             {avatar ? (
                                                 <img src={avatar} alt={name} className="h-12 w-12 rounded-full object-cover ring-2 ring-border" />
                                             ) : (
@@ -510,13 +584,66 @@ export function PublicEventLanding({
                                                     {name.charAt(0)}
                                                 </div>
                                             )}
-                                            <div>
-                                                <p className="font-medium">{name}</p>
-                                                {item.speaker?.headline && (
-                                                    <p className="mt-0.5 text-sm text-muted-foreground">{item.speaker.headline}</p>
+                                            <div className="min-w-0 flex-1 space-y-3">
+                                                <div>
+                                                    <p className="font-medium">{name}</p>
+                                                    {speaker?.headline && (
+                                                        <p className="mt-0.5 text-sm text-muted-foreground">{speaker.headline}</p>
+                                                    )}
+                                                </div>
+
+                                                {specialties.length > 0 && (
+                                                    <div className="flex flex-wrap gap-2">
+                                                        {specialties.map((specialty: string) => (
+                                                            <span
+                                                                key={specialty}
+                                                                className="inline-flex rounded-full bg-background px-2.5 py-1 text-[11px] font-medium text-muted-foreground"
+                                                            >
+                                                                {specialty}
+                                                            </span>
+                                                        ))}
+                                                    </div>
+                                                )}
+
+                                                {credentials.length > 0 && (
+                                                    <div className="space-y-1.5">
+                                                        {credentials.map((credential: string) => (
+                                                            <p key={credential} className="line-clamp-2 text-sm text-muted-foreground">
+                                                                {credential}
+                                                            </p>
+                                                        ))}
+                                                    </div>
+                                                )}
+
+                                                {speakerHref && (
+                                                    <span className="inline-flex items-center gap-1 text-sm font-medium text-brand-yellow">
+                                                        Ver perfil completo
+                                                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                                            <path d="M5 12h14" />
+                                                            <path d="m12 5 7 7-7 7" />
+                                                        </svg>
+                                                    </span>
                                                 )}
                                             </div>
-                                        </div>
+                                        </>
+                                    )
+
+                                    if (!speakerHref) {
+                                        return (
+                                            <div key={item.id} className="flex items-start gap-3.5 rounded-xl border border-border/40 bg-muted/30 p-4">
+                                                {speakerCard}
+                                            </div>
+                                        )
+                                    }
+
+                                    return (
+                                        <Link
+                                            key={item.id}
+                                            href={speakerHref}
+                                            className="group flex h-full items-start gap-3.5 rounded-xl border border-border/40 bg-muted/30 p-4 transition-colors hover:border-brand-yellow/30 hover:bg-muted/50"
+                                        >
+                                            {speakerCard}
+                                        </Link>
                                     )
                                 })}
                             </CardContent>

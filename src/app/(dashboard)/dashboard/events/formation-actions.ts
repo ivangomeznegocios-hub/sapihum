@@ -7,6 +7,7 @@ import {
     issueFormationFullCertificateRecord,
     markFormationCourseCompletedRecord,
 } from '@/lib/formations/service'
+import { sanitizeMaterialLinks } from '@/lib/material-links'
 
 type FormationEditorRole = 'admin' | 'ponente'
 
@@ -111,6 +112,7 @@ export async function createFormation(formation: FormationInsert, courseIds: str
         .from('formations') as any)
         .insert({
             ...formation,
+            material_links: sanitizeMaterialLinks(formation.material_links),
             status: editor.isAdmin ? (formation.status || 'draft') : 'draft',
             created_by: editor.userId,
         })
@@ -152,11 +154,15 @@ export async function updateFormation(formationId: string, updates: FormationUpd
     const supabase = await createClient()
     const { editor } = await requireFormationAccess(supabase, formationId)
     const validatedCourseIds = await validateCourseSelection(supabase, editor, newCourseIds, formationId)
+    const normalizedMaterialLinks = updates.material_links !== undefined
+        ? sanitizeMaterialLinks(updates.material_links)
+        : undefined
 
     const { error: updateError } = await (supabase
         .from('formations') as any)
         .update({
             ...updates,
+            ...(normalizedMaterialLinks !== undefined ? { material_links: normalizedMaterialLinks } : {}),
             status: editor.isAdmin ? updates.status : 'draft',
         })
         .eq('id', formationId)

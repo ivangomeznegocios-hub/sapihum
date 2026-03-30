@@ -12,6 +12,7 @@ const FOOTER_LINKS = {
   Academia: [
     { label: "Catálogo Completo", href: "/academia" },
     { label: "Eventos en Vivo", href: "/eventos" },
+    { label: "Ponentes", href: "/speakers" },
   ],
   Recursos: [
     { label: "Blog", href: "/blog" },

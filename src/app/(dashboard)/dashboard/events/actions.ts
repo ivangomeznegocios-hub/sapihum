@@ -22,6 +22,7 @@ import {
     normalizeSpeakerCompensationValue,
     type SpeakerCompensationType,
 } from '@/lib/earnings/compensation'
+import { sanitizeMaterialLinks } from '@/lib/material-links'
 
 async function resolveUniqueEventSlug(supabase: any, baseValue: string, eventId?: string) {
     const fallbackBase = slugifyCatalogText(baseValue) || `evento-${crypto.randomUUID().slice(0, 8)}`
@@ -126,6 +127,14 @@ function parseListField(formData: FormData, fieldName: string) {
     } catch {
         return normalizeStringList(trimmed)
     }
+}
+
+function parseMaterialLinksField(formData: FormData, fieldName: string) {
+    if (!formData.has(fieldName)) {
+        return undefined
+    }
+
+    return sanitizeMaterialLinks(parseJsonValue<unknown[]>(formData.get(fieldName), []))
 }
 
 function parseRegistrationFields(formData: FormData) {
@@ -518,6 +527,7 @@ export async function createEvent(formData: FormData) {
     const idealFor = parseListField(formData, 'idealFor') ?? null
     const learningOutcomes = parseListField(formData, 'learningOutcomes') ?? null
     const includedResources = parseListField(formData, 'includedResources') ?? null
+    const materialLinks = parseMaterialLinksField(formData, 'materialLinks') ?? []
     const certificateType = readTrimmedString(formData.get('certificateType')) || 'none'
     const formationTrack = readTrimmedString(formData.get('formationTrack'))
     const slug = await resolveUniqueEventSlug(supabase, customSlug || title)
@@ -570,6 +580,7 @@ export async function createEvent(formData: FormData) {
             ideal_for: idealFor,
             learning_outcomes: learningOutcomes,
             included_resources: includedResources,
+            material_links: materialLinks,
             certificate_type: certificateType,
             formation_track: formationTrack,
             recording_url: recordingUrl,
@@ -674,6 +685,7 @@ export async function updateEvent(eventId: string, formData: FormData) {
     const idealFor = parseListField(formData, 'idealFor')
     const learningOutcomes = parseListField(formData, 'learningOutcomes')
     const includedResources = parseListField(formData, 'includedResources')
+    const materialLinks = parseMaterialLinksField(formData, 'materialLinks')
     const certificateType = formData.has('certificateType')
         ? (readTrimmedString(formData.get('certificateType')) || 'none')
         : undefined
@@ -746,6 +758,7 @@ export async function updateEvent(eventId: string, formData: FormData) {
     if (idealFor !== undefined) updates.ideal_for = idealFor
     if (learningOutcomes !== undefined) updates.learning_outcomes = learningOutcomes
     if (includedResources !== undefined) updates.included_resources = includedResources
+    if (materialLinks !== undefined) updates.material_links = materialLinks
     if (certificateType !== undefined) updates.certificate_type = certificateType || 'none'
     if (formationTrack !== undefined) updates.formation_track = formationTrack || null
 

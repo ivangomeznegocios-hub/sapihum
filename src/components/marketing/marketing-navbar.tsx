@@ -45,6 +45,7 @@ const NAV_ITEMS = [
     children: [
       { label: "Explorar Catálogo", href: "/academia", description: "Todas las formaciones y eventos de SAPIHUM" },
       { label: "Eventos en Vivo", href: "/eventos", description: "Conferencias, webinars y talleres" },
+      { label: "Nuestros Ponentes", href: "/speakers", description: "Directorio publico de expertos y facilitadores" },
     ],
   },
   {

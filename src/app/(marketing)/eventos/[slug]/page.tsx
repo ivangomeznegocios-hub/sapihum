@@ -77,7 +77,6 @@ export default async function EventoPublicoPage({ params }: PageProps) {
         <PublicEventLanding 
             event={event} 
             relatedEvents={relatedEvents} 
-            user={user}
             membershipLevel={membershipLevel}
             hasAccess={!!entitlement}
         />

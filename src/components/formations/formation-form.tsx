@@ -6,6 +6,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Loader2, AlertCircle, Plus, Trash2, Check } from 'lucide-react'
 import { createFormation, updateFormation } from '@/app/(dashboard)/dashboard/events/formation-actions'
+import { MaterialLinksEditor, type EditableMaterialLink } from '@/components/materials/material-links-editor'
+import { isValidMaterialLinkUrl } from '@/lib/material-links'
 
 interface FormationFormProps {
     initialData?: any
@@ -51,6 +53,14 @@ export function FormationForm({ initialData, availableEvents, canPublish = true 
     const [individualCert, setIndividualCert] = useState(initialData?.individual_certificate_type || 'participation')
     const [fullCert, setFullCert] = useState(initialData?.full_certificate_type || 'specialized')
     const [fullCertLabel, setFullCertLabel] = useState(initialData?.full_certificate_label || 'Certificacion de Formacion Completa')
+    const [materialLinkItems, setMaterialLinkItems] = useState<EditableMaterialLink[]>(
+        (initialData?.material_links || []).map((item: any, index: number) => ({
+            id: typeof item?.id === 'string' ? item.id : `material-${index}`,
+            title: typeof item?.title === 'string' ? item.title : '',
+            url: typeof item?.url === 'string' ? item.url : '',
+            type: item?.type || 'document',
+        }))
+    )
     const [selectedCourses, setSelectedCourses] = useState<{ id: string; eventId: string }[]>(
         (initialData?.courses || []).map((course: any) => ({
             id: course.id || Math.random().toString(),
@@ -142,6 +152,21 @@ export function FormationForm({ initialData, availableEvents, canPublish = true 
             return
         }
 
+        const invalidMaterialLink = materialLinkItems.find((item) => {
+            const hasContent = item.title.trim() || item.url.trim()
+            if (!hasContent) {
+                return false
+            }
+
+            return !item.title.trim() || !item.url.trim() || !isValidMaterialLinkUrl(item.url.trim())
+        })
+
+        if (invalidMaterialLink) {
+            setError('Cada material debe tener nombre y una URL valida que empiece con http o https.')
+            setIsLoading(false)
+            return
+        }
+
         const formData = {
             title,
             slug,
@@ -153,6 +178,14 @@ export function FormationForm({ initialData, availableEvents, canPublish = true 
             bundle_member_price: bundleMemberAccessType === 'discounted' ? preferredMemberPrice : 0,
             bundle_member_access_type: bundleMemberAccessType,
             total_hours: Number(totalHours) || 0,
+            material_links: materialLinkItems
+                .map((item) => ({
+                    id: item.id,
+                    title: item.title.trim(),
+                    url: item.url.trim(),
+                    type: item.type,
+                }))
+                .filter((item) => item.title && item.url),
             individual_certificate_type: individualCert,
             full_certificate_type: fullCert,
             full_certificate_label: fullCertLabel || null,
@@ -412,6 +445,27 @@ export function FormationForm({ initialData, availableEvents, canPublish = true 
                                 placeholder="Ej: Certificacion Internacional..."
                             />
                         </div>
+                    </CardContent>
+                </Card>
+
+                <Card className="md:col-span-2">
+                    <CardHeader>
+                        <CardTitle>Materiales y Enlaces</CardTitle>
+                        <CardDescription>
+                            Agrega presentaciones, PDFs, carpetas o enlaces externos para que los alumnos puedan abrirlos despues.
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <MaterialLinksEditor
+                            items={materialLinkItems}
+                            onChange={setMaterialLinkItems}
+                            helperText={
+                                canPublish
+                                    ? 'Estos enlaces se guardaran dentro de la formacion y quedaran listos para mostrarse cuando la publicacion este activa.'
+                                    : 'Como ponente, la formacion y sus materiales se enviaran en borrador para revision administrativa.'
+                            }
+                            emptyText="Todavia no hay materiales por enlace para esta formacion."
+                        />
                     </CardContent>
                 </Card>
 

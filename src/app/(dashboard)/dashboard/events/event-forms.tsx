@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { registerForEvent, cancelEventRegistration, createEvent, updateEvent, deleteEvent } from './actions'
 import { createClient } from '@/lib/supabase/client'
 import { getPublicEventPath } from '@/lib/events/public'
+import { MaterialLinksEditor, type EditableMaterialLink } from '@/components/materials/material-links-editor'
 import {
     DEFAULT_SPEAKER_PERCENTAGE_RATE,
     normalizeSpeakerCompensationType,
@@ -20,6 +21,7 @@ import {
     getEventInputTimeValue,
     zonedDateTimeToUtcIso,
 } from '@/lib/timezone'
+import { isValidMaterialLinkUrl } from '@/lib/material-links'
 import { Plus, X, Loader2, Check, UserPlus, UserMinus, Users, Lock, Globe, Stethoscope, Heart, Pencil, Trash2, AlertTriangle, GripVertical, Copy, Code2, Link2, Calendar, Clock, GraduationCap, Award, Mic2, ChevronDown } from 'lucide-react'
 
 interface Event {
@@ -544,6 +546,7 @@ export function CreateEventForm({ onClose, isEmbedded = false, initialData, even
             initialData?.ideal_for?.length ||
             initialData?.learning_outcomes?.length ||
             initialData?.included_resources?.length ||
+            initialData?.material_links?.length ||
             initialData?.certificate_type ||
             initialData?.formation_track
         )
@@ -601,6 +604,14 @@ export function CreateEventForm({ onClose, isEmbedded = false, initialData, even
     )
     const [includedResourceItems, setIncludedResourceItems] = useState<{ id: number; value: string }[]>(
         (initialData?.included_resources || []).map((value: string) => ({ id: listIdCounter.current++, value }))
+    )
+    const [materialLinkItems, setMaterialLinkItems] = useState<EditableMaterialLink[]>(
+        (initialData?.material_links || []).map((item: any, index: number) => ({
+            id: typeof item?.id === 'string' ? item.id : `material-${index}`,
+            title: typeof item?.title === 'string' ? item.title : '',
+            url: typeof item?.url === 'string' ? item.url : '',
+            type: item?.type || 'document',
+        }))
     )
 
     const publicPath = initialData?.slug
@@ -749,6 +760,14 @@ export function CreateEventForm({ onClose, isEmbedded = false, initialData, even
             if (idealForItems.length === 0) setIdealForItems([createEditableItem()])
             if (learningOutcomeItems.length === 0) setLearningOutcomeItems([createEditableItem()])
             if (includedResourceItems.length === 0) setIncludedResourceItems([createEditableItem()])
+            if (materialLinkItems.length === 0) {
+                setMaterialLinkItems([{
+                    id: crypto.randomUUID(),
+                    title: '',
+                    url: '',
+                    type: 'document',
+                }])
+            }
         }
 
         setShowLandingDetails((current) => !current)
@@ -1186,6 +1205,32 @@ export function CreateEventForm({ onClose, isEmbedded = false, initialData, even
         formData.set('idealFor', JSON.stringify(idealForItems.map((item) => item.value.trim()).filter(Boolean)))
         formData.set('learningOutcomes', JSON.stringify(learningOutcomeItems.map((item) => item.value.trim()).filter(Boolean)))
         formData.set('includedResources', JSON.stringify(includedResourceItems.map((item) => item.value.trim()).filter(Boolean)))
+
+        const invalidMaterialLink = materialLinkItems.find((item) => {
+            const hasContent = item.title.trim() || item.url.trim()
+            if (!hasContent) {
+                return false
+            }
+
+            return !item.title.trim() || !item.url.trim() || !isValidMaterialLinkUrl(item.url.trim())
+        })
+
+        if (invalidMaterialLink) {
+            setError('Cada material debe tener nombre y una URL valida que empiece con http o https.')
+            setIsLoading(false)
+            return
+        }
+
+        formData.set('materialLinks', JSON.stringify(
+            materialLinkItems
+                .map((item) => ({
+                    id: item.id,
+                    title: item.title.trim(),
+                    url: item.url.trim(),
+                    type: item.type,
+                }))
+                .filter((item) => item.title && item.url)
+        ))
 
         if (isAdmin) {
             formData.set('isEmbeddable', isEmbeddable ? 'on' : 'off')
@@ -1753,6 +1798,17 @@ export function CreateEventForm({ onClose, isEmbedded = false, initialData, even
                                 />
                             </div>
                         </div>
+
+                        <MaterialLinksEditor
+                            items={materialLinkItems}
+                            onChange={setMaterialLinkItems}
+                            helperText={
+                                isAdmin
+                                    ? 'Agrega presentaciones, PDFs, carpetas o enlaces externos para que la gente con acceso pueda abrirlos despues.'
+                                    : 'Agrega presentaciones, PDFs, carpetas o enlaces externos. Como ponente, el evento quedara en borrador para revision con estos materiales.'
+                            }
+                            emptyText="Todavia no hay materiales por enlace para este evento."
+                        />
                     </div>
                 )}
             </SectionCard>

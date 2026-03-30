@@ -186,6 +186,9 @@ export default async function EventDetailPage({ params }: PageProps) {
 
     // Get linked resources
     const eventResources = await getResourcesByEvent(id)
+    const directMaterialLinks = Array.isArray(event.material_links)
+        ? event.material_links.filter((item: any) => item?.title && item?.url)
+        : []
 
     // Check if user can see meeting link
     const now = new Date()
@@ -420,6 +423,33 @@ export default async function EventDetailPage({ params }: PageProps) {
                                     <p className="text-muted-foreground whitespace-pre-wrap">
                                         {event.description}
                                     </p>
+                                </div>
+                            )}
+
+                            {(canManageEvent || hasEventAccess) && directMaterialLinks.length > 0 && (
+                                <div>
+                                    <h3 className="font-semibold mb-3">Materiales por enlace</h3>
+                                    <div className="space-y-3">
+                                        {directMaterialLinks.map((item: any) => (
+                                            <div key={item.id || item.url} className="flex flex-col gap-3 rounded-lg border bg-muted/20 p-4 sm:flex-row sm:items-center sm:justify-between">
+                                                <div>
+                                                    <p className="text-sm font-medium">{item.title}</p>
+                                                    <p className="mt-1 text-xs text-muted-foreground">
+                                                        {item.type === 'presentation' ? 'Presentacion' :
+                                                            item.type === 'document' ? 'Documento' :
+                                                                item.type === 'folder' ? 'Carpeta' :
+                                                                    item.type === 'download' ? 'Descarga' : 'Enlace externo'}
+                                                    </p>
+                                                </div>
+                                                <Button asChild variant="secondary" size="sm">
+                                                    <a href={item.url} target="_blank" rel="noopener noreferrer">
+                                                        Abrir
+                                                        <ExternalLink className="h-3 w-3 ml-1" />
+                                                    </a>
+                                                </Button>
+                                            </div>
+                                        ))}
+                                    </div>
                                 </div>
                             )}
 
