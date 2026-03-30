@@ -87,7 +87,7 @@ function BillingToggle({
       >
         Anual
         {savingsPercent > 0 && (
-          <span className="inline-flex items-center rounded-full bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-xs font-bold px-2 py-0.5">
+          <span className="inline-flex items-center rounded-full bg-brand-brown/20 text-brand-brown dark:text-brand-brown text-xs font-bold px-2 py-0.5">
             -{savingsPercent}%
           </span>
         )}
@@ -167,8 +167,8 @@ export function PricingContent({
           <CardHeader className="pb-4">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div className="flex items-center gap-3">
-                <div className="flex items-center justify-center h-12 w-12 rounded-xl bg-emerald-500/10">
-                  <Users className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
+                <div className="flex items-center justify-center h-12 w-12 rounded-xl bg-brand-brown/10">
+                  <Users className="h-6 w-6 text-brand-brown dark:text-brand-brown" />
                 </div>
                 <div>
                   <CardTitle className="text-2xl">Nivel 1 — Comunidad</CardTitle>
@@ -188,7 +188,7 @@ export function PricingContent({
               <ul className="grid gap-3 sm:grid-cols-2">
                 {level1Features.map((feature) => (
                   <li key={feature} className="flex items-start gap-2.5 text-sm">
-                    <Check className="h-4 w-4 text-emerald-500 shrink-0 mt-0.5" />
+                    <Check className="h-4 w-4 text-brand-brown shrink-0 mt-0.5" />
                     <span>{feature}</span>
                   </li>
                 ))}
@@ -219,8 +219,8 @@ export function PricingContent({
       <section className="w-full px-4 sm:px-6 lg:px-8 pb-12 max-w-6xl mx-auto">
         <div className="mb-8 text-center sm:text-left">
           <div className="flex items-center gap-3 justify-center sm:justify-start mb-2">
-            <div className="flex items-center justify-center h-10 w-10 rounded-xl bg-blue-500/10">
-              <BookOpen className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+            <div className="flex items-center justify-center h-10 w-10 rounded-xl bg-brand-yellow/10">
+              <BookOpen className="h-5 w-5 text-brand-yellow dark:text-brand-yellow" />
             </div>
             <h2 className="text-3xl font-bold">Nivel 2 — Especialización</h2>
           </div>
@@ -248,7 +248,7 @@ export function PricingContent({
                       <div>
                         <div className="flex items-center gap-2 flex-wrap">
                           <CardTitle className="text-xl">{spec.name}</CardTitle>
-                          <Badge className="bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border-emerald-500/30 text-xs">
+                          <Badge className="bg-brand-brown/15 text-brand-brown dark:text-brand-brown border-brand-brown/30 text-xs">
                             Activa
                           </Badge>
                           {spec.includesSoftware && (
@@ -277,7 +277,7 @@ export function PricingContent({
                     <ul className="grid gap-3 sm:grid-cols-2">
                       {spec.benefits.map((benefit) => (
                         <li key={benefit} className="flex items-start gap-2.5 text-sm">
-                          <Check className="h-4 w-4 text-emerald-500 shrink-0 mt-0.5" />
+                          <Check className="h-4 w-4 text-brand-brown shrink-0 mt-0.5" />
                           <span>{benefit}</span>
                         </li>
                       ))}
@@ -294,7 +294,7 @@ export function PricingContent({
                       <ul className="grid gap-3 sm:grid-cols-2">
                         {spec.tools.map((tool) => (
                           <li key={tool} className="flex items-start gap-2.5 text-sm">
-                            <Sparkles className="h-4 w-4 text-amber-500 shrink-0 mt-0.5" />
+                            <Sparkles className="h-4 w-4 text-brand-yellow shrink-0 mt-0.5" />
                             <span>{tool}</span>
                           </li>
                         ))}
@@ -368,16 +368,16 @@ export function PricingContent({
       {/* ═══════ NIVEL 3 ═══════ */}
       {level3Visible && level3Plan && (
         <section className="w-full px-4 sm:px-6 lg:px-8 pb-12 max-w-6xl mx-auto" id="nivel-3-section">
-          <Card className="sapihum-card-glow overflow-hidden border-amber-400/40 bg-gradient-to-br from-amber-50/80 via-orange-50/50 to-background dark:from-amber-950/30 dark:via-orange-950/20 dark:to-background">
+          <Card className="sapihum-card-glow overflow-hidden border-brand-yellow/40 bg-gradient-to-br from-brand-yellow/80 via-brand-brown/50 to-background dark:from-brand-yellow/30 dark:via-brand-brown/20 dark:to-background">
             <CardHeader className="pb-4">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div className="flex items-center gap-3">
-                  <div className="flex items-center justify-center h-12 w-12 rounded-xl bg-amber-500/15 sapihum-glow-cta">
-                    <Crown className="h-6 w-6 text-amber-600 dark:text-amber-400" />
+                  <div className="flex items-center justify-center h-12 w-12 rounded-xl bg-brand-yellow/15 sapihum-glow-cta">
+                    <Crown className="h-6 w-6 text-brand-yellow dark:text-brand-yellow" />
                   </div>
                   <div>
                     <CardTitle className="text-2xl flex items-center gap-2">
-                      <Sparkles className="h-5 w-5 text-amber-500" />
+                      <Sparkles className="h-5 w-5 text-brand-yellow" />
                       Nivel 3 — Avanzado
                     </CardTitle>
                     <CardDescription className="text-sm mt-0.5">
@@ -389,14 +389,14 @@ export function PricingContent({
               </div>
             </CardHeader>
             <CardContent className="space-y-6">
-              <div className="border-t border-amber-200/50 dark:border-amber-800/30 pt-5">
+              <div className="border-t border-brand-yellow/50 dark:border-brand-yellow/30 pt-5">
                 <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-4">
                   Todo lo que incluye (además del Nivel 1 y tu especialización)
                 </p>
                 <ul className="grid gap-3 sm:grid-cols-2">
                   {level3Features.map((feature) => (
                     <li key={feature} className="flex items-start gap-2.5 text-sm">
-                      <Sparkles className="h-4 w-4 text-amber-500 shrink-0 mt-0.5" />
+                      <Sparkles className="h-4 w-4 text-brand-yellow shrink-0 mt-0.5" />
                       <span>{feature}</span>
                     </li>
                   ))}
@@ -409,7 +409,7 @@ export function PricingContent({
               >
                 <Button
                   size="lg"
-                  className="gap-2 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white shadow-lg hover:shadow-xl transition-all"
+                  className="gap-2 bg-gradient-to-r from-brand-yellow to-brand-brown hover:from-brand-yellow hover:to-brand-brown text-white shadow-lg hover:shadow-xl transition-all"
                   data-analytics-cta
                   data-analytics-label={isLoggedIn ? 'Activar Nivel 3' : 'Inicia sesión para verlo'}
                   data-analytics-funnel={isLoggedIn ? 'subscription' : 'registration'}
@@ -440,21 +440,21 @@ export function PricingContent({
                 <th className="text-left p-4 font-semibold min-w-[200px]">Característica</th>
                 <th className="text-center p-4 font-semibold min-w-[120px]">
                   <div className="flex flex-col items-center gap-1">
-                    <Users className="h-4 w-4 text-emerald-500" />
+                    <Users className="h-4 w-4 text-brand-brown" />
                     <span>Nivel 1</span>
                     <span className="text-xs font-normal text-muted-foreground">Comunidad</span>
                   </div>
                 </th>
                 <th className="text-center p-4 font-semibold min-w-[120px]">
                   <div className="flex flex-col items-center gap-1">
-                    <BookOpen className="h-4 w-4 text-blue-500" />
+                    <BookOpen className="h-4 w-4 text-brand-yellow" />
                     <span>Nivel 2</span>
                     <span className="text-xs font-normal text-muted-foreground">Especialización</span>
                   </div>
                 </th>
                 <th className="text-center p-4 font-semibold min-w-[120px]">
                   <div className="flex flex-col items-center gap-1">
-                    <Crown className="h-4 w-4 text-amber-500" />
+                    <Crown className="h-4 w-4 text-brand-yellow" />
                     <span>Nivel 3</span>
                     <span className="text-xs font-normal text-muted-foreground">Avanzado</span>
                   </div>
@@ -529,7 +529,7 @@ interface ComparisonRow {
 function ComparisonCell({ value }: { value: CellValue }) {
   if (typeof value === 'boolean') {
     return value ? (
-      <Check className="h-4 w-4 text-emerald-500 inline-block" />
+      <Check className="h-4 w-4 text-brand-brown inline-block" />
     ) : (
       <X className="h-4 w-4 text-muted-foreground/40 inline-block" />
     )

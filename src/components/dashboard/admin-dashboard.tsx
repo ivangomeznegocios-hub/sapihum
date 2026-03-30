@@ -47,10 +47,10 @@ function getGreeting(): string {
 }
 
 const roleLabels: Record<string, { label: string; color: string }> = {
-    psychologist: { label: 'Psicólogo', color: 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300' },
+    psychologist: { label: 'Psicólogo', color: 'bg-brand-yellow text-brand-yellow dark:bg-brand-yellow/40 dark:text-brand-yellow' },
     patient: { label: 'Paciente', color: 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300' },
-    admin: { label: 'Admin', color: 'bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300' },
-    ponente: { label: 'Ponente', color: 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300' },
+    admin: { label: 'Admin', color: 'bg-brand-brown text-brand-brown dark:bg-brand-brown/40 dark:text-brand-brown' },
+    ponente: { label: 'Ponente', color: 'bg-brand-yellow text-brand-yellow dark:bg-brand-yellow/40 dark:text-brand-yellow' },
 }
 
 export function AdminDashboard({
@@ -72,7 +72,7 @@ export function AdminDashboard({
     return (
         <div className="space-y-8 dashboard-stagger">
             {/* Hero Banner */}
-            <div className="rounded-2xl border bg-gradient-to-br from-card to-purple-50/30 dark:from-card dark:to-purple-950/10 p-6 sm:p-8">
+            <div className="rounded-2xl border bg-gradient-to-br from-card to-brand-brown/30 dark:from-card dark:to-brand-brown/10 p-6 sm:p-8">
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                     <div>
                         <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
@@ -87,7 +87,7 @@ export function AdminDashboard({
                                 Sistema Operativo
                             </span>
                             {pendingReferrals > 0 && (
-                                <span className="text-xs px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 font-medium">
+                                <span className="text-xs px-2 py-0.5 rounded-full bg-brand-yellow text-brand-yellow dark:bg-brand-yellow/30 dark:text-brand-yellow font-medium">
                                     {pendingReferrals} referencia{pendingReferrals > 1 ? 's' : ''} pendiente{pendingReferrals > 1 ? 's' : ''}
                                 </span>
                             )}
@@ -110,7 +110,7 @@ export function AdminDashboard({
                     subtitle="Registrados en la plataforma"
                     trend={usersThisWeek > 0 ? `+${usersThisWeek} esta semana` : undefined}
                     icon="Users"
-                    color="blue"
+                    color="primary"
                     delay={0}
                 />
                 <StatCard
@@ -118,7 +118,7 @@ export function AdminDashboard({
                     value={totalPsychologists}
                     subtitle="Profesionales activos"
                     icon="Shield"
-                    color="purple"
+                    color="secondary"
                     delay={80}
                 />
                 <StatCard
@@ -126,7 +126,7 @@ export function AdminDashboard({
                     value={totalPatients}
                     subtitle="En tratamiento"
                     icon="Activity"
-                    color="emerald"
+                    color="primary"
                     delay={160}
                 />
                 <StatCard
@@ -135,7 +135,7 @@ export function AdminDashboard({
                     subtitle="Próximamente"
                     trend={eventsThisMonth > 0 ? `${eventsThisMonth} este mes` : undefined}
                     icon="Calendar"
-                    color="amber"
+                    color="primary"
                     delay={240}
                 />
                 <StatCard
@@ -143,7 +143,7 @@ export function AdminDashboard({
                     value={formatMXN(mrr)}
                     subtitle="Suscripciones Activas"
                     icon="TrendingUp"
-                    color="emerald"
+                    color="primary"
                     delay={320}
                 />
                 <StatCard
@@ -151,7 +151,7 @@ export function AdminDashboard({
                     value={formatMXN(eventsGmv)}
                     subtitle="Ventas de este mes"
                     icon="Activity"
-                    color="blue"
+                    color="primary"
                     delay={400}
                 />
             </div>

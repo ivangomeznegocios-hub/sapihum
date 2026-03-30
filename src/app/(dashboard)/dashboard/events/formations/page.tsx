@@ -16,8 +16,8 @@ const STATUS_LABELS: Record<string, string> = {
 }
 
 const STATUS_COLORS: Record<string, string> = {
-    draft: 'bg-slate-200 text-slate-800',
-    active: 'bg-emerald-100 text-emerald-800',
+    draft: 'bg-neutral-200 text-neutral-800',
+    active: 'bg-brand-brown text-brand-brown',
     archived: 'bg-orange-100 text-orange-800'
 }
 

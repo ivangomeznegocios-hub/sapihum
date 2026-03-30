@@ -164,7 +164,7 @@ export default async function ResourceDetailPage({ params }: PageProps) {
                         {typeLabels[resource.type] || resource.type}
                     </Badge>
                     {isInteractiveTool && (
-                        <Badge className="text-xs bg-teal-100 text-teal-700 dark:bg-teal-950 dark:text-teal-300">
+                        <Badge className="text-xs bg-brand-yellow text-brand-yellow dark:bg-brand-yellow dark:text-brand-yellow">
                             Interactiva
                         </Badge>
                     )}

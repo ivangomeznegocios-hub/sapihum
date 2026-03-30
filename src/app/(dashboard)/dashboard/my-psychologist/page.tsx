@@ -96,7 +96,7 @@ export default async function MyPsychologistPage() {
                     <Card className="lg:col-span-2">
                         <CardHeader>
                             <div className="flex items-start gap-4">
-                                <div className="h-20 w-20 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-2xl font-bold">
+                                <div className="h-20 w-20 rounded-full bg-gradient-to-br from-brand-yellow to-brand-brown flex items-center justify-center text-white text-2xl font-bold">
                                     {assignedPsychologist.full_name?.charAt(0) || 'P'}
                                 </div>
                                 <div className="flex-1">
@@ -198,7 +198,7 @@ export default async function MyPsychologistPage() {
                                             </span>
                                         </div>
                                         <div className="pt-2">
-                                            <span className="text-xs px-2 py-1 bg-blue-100 text-blue-800 rounded-full">
+                                            <span className="text-xs px-2 py-1 bg-brand-yellow text-brand-yellow rounded-full">
                                                 {nextAppointment.type === 'video' ? 'Videollamada' : 'Presencial'}
                                             </span>
                                         </div>

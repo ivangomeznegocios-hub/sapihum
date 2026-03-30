@@ -46,7 +46,7 @@ function getInitials(name: string): string {
 
 const attendanceIcon = (qualifies: boolean, hasData: boolean) => {
     if (!hasData) return <Clock className="h-4 w-4 text-muted-foreground" />
-    if (qualifies) return <CheckCircle className="h-4 w-4 text-emerald-500" />
+    if (qualifies) return <CheckCircle className="h-4 w-4 text-brand-brown" />
     return <XCircle className="h-4 w-4 text-red-500" />
 }
 
@@ -75,7 +75,7 @@ export function StudentTable({ students, showPaymentStatus = true }: StudentTabl
                     </div>
                     <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
                         <span className="flex items-center gap-1">
-                            <CheckCircle className="h-3 w-3 text-emerald-500" /> &gt;= 90%
+                            <CheckCircle className="h-3 w-3 text-brand-brown" /> &gt;= 90%
                         </span>
                         <span className="flex items-center gap-1">
                             <XCircle className="h-3 w-3 text-red-500" /> &lt; 90%

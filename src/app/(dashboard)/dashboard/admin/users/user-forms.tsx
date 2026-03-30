@@ -167,7 +167,7 @@ export function UserEditForm({ user, onClose }: UserEditFormProps) {
                         />
                     </div>
 
-                    <div className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-3 text-sm text-amber-900">
+                    <div className="rounded-lg border border-brand-yellow bg-brand-yellow px-3 py-3 text-sm text-brand-yellow">
                         Membresias y accesos se operan en{' '}
                         <Link href="/dashboard/admin/operations" className="font-medium underline underline-offset-4">
                             Operaciones

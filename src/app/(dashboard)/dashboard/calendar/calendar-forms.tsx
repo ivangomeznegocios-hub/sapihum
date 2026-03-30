@@ -276,7 +276,7 @@ export function CreateAppointmentForm({ patients: initialPatients, onClose }: Cr
 
                             {/* Show selected patient confirmation */}
                             {selectedPatientId && !showCreatePatient && (
-                                <div className="flex items-center gap-2 text-xs text-emerald-600 dark:text-emerald-400 animate-in fade-in">
+                                <div className="flex items-center gap-2 text-xs text-brand-brown dark:text-brand-brown animate-in fade-in">
                                     <CheckCircle2 className="h-3.5 w-3.5" />
                                     Paciente seleccionado: {patients.find(p => p.id === selectedPatientId)?.full_name}
                                 </div>

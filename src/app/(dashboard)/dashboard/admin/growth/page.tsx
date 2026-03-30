@@ -146,7 +146,7 @@ export default async function AdminGrowthPage() {
         <div className="w-full max-w-7xl space-y-8">
             <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
                 <div className="flex items-start gap-3">
-                    <div className="rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 p-2.5 text-white shadow-lg shadow-emerald-500/20">
+                    <div className="rounded-2xl bg-gradient-to-br from-brand-brown to-brand-brown p-2.5 text-white shadow-lg shadow-brand-brown/20">
                         <TrendingUp className="h-6 w-6" />
                     </div>
                     <div>
@@ -160,10 +160,10 @@ export default async function AdminGrowthPage() {
                 <CreateCampaignSection />
             </div>
 
-            <div className="rounded-2xl border bg-gradient-to-r from-emerald-50 via-white to-teal-50 p-5 dark:from-emerald-950/10 dark:via-background dark:to-teal-950/10">
+            <div className="rounded-2xl border bg-gradient-to-r from-brand-brown via-white to-brand-brown p-5 dark:from-brand-brown/10 dark:via-background dark:to-brand-brown/10">
                 <div className="grid gap-4 lg:grid-cols-[1.3fr_1fr]">
                     <div className="flex items-start gap-3">
-                        <div className="rounded-xl bg-emerald-100 p-2 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300">
+                        <div className="rounded-xl bg-brand-brown p-2 text-brand-brown dark:bg-brand-brown/40 dark:text-brand-brown">
                             <BriefcaseBusiness className="h-5 w-5" />
                         </div>
                         <div>
@@ -198,35 +198,35 @@ export default async function AdminGrowthPage() {
                         label="Codigos activos"
                         value={systemStats?.totalCodes ?? 0}
                         icon={Share2}
-                        color="text-blue-600 dark:text-blue-400"
+                        color="text-brand-yellow dark:text-brand-yellow"
                         description="Base de embajadores con codigo disponible"
                     />
                     <MetricCard
                         label="Invitados psicologos"
                         value={systemStats?.psychologistAttributions ?? 0}
                         icon={Users}
-                        color="text-emerald-600 dark:text-emerald-400"
+                        color="text-brand-brown dark:text-brand-brown"
                         description="Adquisicion del target principal"
                     />
                     <MetricCard
                         label="Invitados ponentes"
                         value={systemStats?.ponenteAttributions ?? 0}
                         icon={Megaphone}
-                        color="text-violet-600 dark:text-violet-400"
+                        color="text-brand-brown dark:text-brand-brown"
                         description="Expansion de speakers y visibilidad"
                     />
                     <MetricCard
                         label="Conversion"
                         value={`${conversionRate}%`}
                         icon={CheckCircle2}
-                        color="text-amber-600 dark:text-amber-400"
+                        color="text-brand-yellow dark:text-brand-yellow"
                         description="Invitaciones completadas o recompensadas"
                     />
                     <MetricCard
                         label="Rewards pendientes"
                         value={systemStats?.pendingRewards ?? 0}
                         icon={Gift}
-                        color="text-rose-600 dark:text-rose-400"
+                        color="text-brand-brown dark:text-brand-brown"
                         description="Eventos listos para procesar payout"
                     />
                 </div>
@@ -277,7 +277,7 @@ export default async function AdminGrowthPage() {
                                                 <span className="rounded-full bg-muted px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
                                                     {campaignTypeLabels[campaign.campaign_type] || campaign.campaign_type}
                                                 </span>
-                                                <span className="rounded-full bg-emerald-100 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-300">
+                                                <span className="rounded-full bg-brand-brown px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-brand-brown dark:bg-brand-brown/30 dark:text-brand-brown">
                                                     professional_invite
                                                 </span>
                                             </div>

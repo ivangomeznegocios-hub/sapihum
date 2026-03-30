@@ -38,7 +38,7 @@ export default async function AdminAnalyticsPage() {
         <div className="w-full max-w-7xl space-y-8">
             <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
                 <div className="flex items-start gap-3">
-                    <div className="rounded-2xl bg-gradient-to-br from-emerald-500 to-cyan-600 p-2.5 text-white shadow-lg shadow-emerald-500/20">
+                    <div className="rounded-2xl bg-gradient-to-br from-brand-brown to-cyan-600 p-2.5 text-white shadow-lg shadow-brand-brown/20">
                         <BarChart3 className="h-6 w-6" />
                     </div>
                     <div>

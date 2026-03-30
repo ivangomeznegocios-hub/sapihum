@@ -199,15 +199,15 @@ export function NotificationSettings() {
                     </button>
                 </div>
 
-                <div className="flex items-center justify-between rounded-lg border bg-blue-50/50 p-3 dark:bg-blue-950/20">
+                <div className="flex items-center justify-between rounded-lg border bg-brand-yellow/50 p-3 dark:bg-brand-yellow/20">
                     <div>
-                        <p className="flex items-center gap-2 font-medium text-blue-900 dark:text-blue-100">
+                        <p className="flex items-center gap-2 font-medium text-brand-yellow dark:text-brand-yellow">
                             Notificaciones Push (Navegador)
-                            <span className="rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-bold uppercase dark:bg-blue-900">
+                            <span className="rounded-full bg-brand-yellow px-2 py-0.5 text-[10px] font-bold uppercase dark:bg-brand-yellow">
                                 Nuevo
                             </span>
                         </p>
-                        <p className="text-sm text-blue-700/80 dark:text-blue-200/70">
+                        <p className="text-sm text-brand-yellow/80 dark:text-brand-yellow/70">
                             {isPushAvailable
                                 ? 'Alertas instantaneas en tu dispositivo'
                                 : 'Disponible cuando OneSignal este configurado'}

@@ -155,7 +155,7 @@ export default function EditSpeakerForm({ speaker }: EditSpeakerPageProps) {
                         Editar Ponente
                     </h1>
                     <p className="text-sm text-muted-foreground flex items-center gap-1 mt-1">
-                        <Shield className="h-3 w-3 text-amber-500" />
+                        <Shield className="h-3 w-3 text-brand-yellow" />
                         Acción de administrador / ponente
                     </p>
                 </div>
@@ -287,7 +287,7 @@ export default function EditSpeakerForm({ speaker }: EditSpeakerPageProps) {
                         </div>
 
                         {/* Admin Toggle: Enable Social Links for this Speaker */}
-                        <div className="border-2 border-amber-200 dark:border-amber-800 rounded-xl p-4 space-y-4">
+                        <div className="border-2 border-brand-yellow dark:border-brand-yellow rounded-xl p-4 space-y-4">
                             <div className="flex items-center gap-3">
                                 <input
                                     type="checkbox"
@@ -298,7 +298,7 @@ export default function EditSpeakerForm({ speaker }: EditSpeakerPageProps) {
                                 />
                                 <div>
                                     <label className="text-sm font-medium cursor-pointer flex items-center gap-2" htmlFor="social_links_enabled">
-                                        <Shield className="h-4 w-4 text-amber-500" />
+                                        <Shield className="h-4 w-4 text-brand-yellow" />
                                         Permitir redes sociales para este ponente
                                     </label>
                                     <p className="text-xs text-muted-foreground">

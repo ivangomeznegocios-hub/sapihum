@@ -87,38 +87,38 @@ export default async function MarketingHubPage() {
             <ServiceInitializer />
 
             {/* Header VIP */}
-            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-slate-900 to-indigo-950 text-white p-8 sm:p-12 shadow-lg border border-indigo-800/50">
+            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-neutral-900 to-brand-brown text-white p-8 sm:p-12 shadow-lg border border-brand-yellow/50">
                 <div className="absolute top-0 right-0 -translate-y-12 translate-x-1/3 opacity-20 pointer-events-none">
-                    <Sparkles className="w-96 h-96 text-indigo-300" />
+                    <Sparkles className="w-96 h-96 text-brand-yellow" />
                 </div>
 
                 <div className="relative z-10 max-w-3xl space-y-4">
-                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/20 text-indigo-200 text-sm font-medium border border-indigo-500/30 backdrop-blur-sm">
+                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-yellow/20 text-brand-yellow text-sm font-medium border border-brand-yellow/30 backdrop-blur-sm">
                         <Sparkles className="h-4 w-4" />
                         Membresía Marketing Premium
                     </div>
                     <h1 className="text-3xl sm:text-5xl font-bold tracking-tight">
                         Tu equipo de marketing, <br />
-                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-300 via-purple-300 to-amber-200">
+                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-yellow via-brand-brown to-brand-brown">
                             listo para escalar tu marca.
                         </span>
                     </h1>
-                    <p className="text-indigo-100/80 text-lg max-w-2xl leading-relaxed">
+                    <p className="text-brand-yellow/80 text-lg max-w-2xl leading-relaxed">
                         Bienvenido a tu hub central. Aquí podrás dar seguimiento al estado de todas tus campañas,
                         contactar a tu equipo asignado y revisar métricas de crecimiento mensuales.
                     </p>
 
                     {/* Progress bar */}
                     <div className="pt-2">
-                        <div className="flex items-center gap-3 text-sm text-indigo-200/80 mb-2">
+                        <div className="flex items-center gap-3 text-sm text-brand-yellow/80 mb-2">
                             <span>{activeCount} de {totalServices} servicios activos</span>
                             {inProgressCount > 0 && (
-                                <span className="text-blue-300">· {inProgressCount} en progreso</span>
+                                <span className="text-brand-yellow">· {inProgressCount} en progreso</span>
                             )}
                         </div>
-                        <div className="w-full h-2 bg-indigo-900/50 rounded-full overflow-hidden">
+                        <div className="w-full h-2 bg-brand-yellow/50 rounded-full overflow-hidden">
                             <div
-                                className="h-full bg-gradient-to-r from-emerald-400 to-emerald-500 rounded-full transition-all duration-500"
+                                className="h-full bg-gradient-to-r from-brand-brown to-brand-dark rounded-full transition-all duration-500"
                                 style={{ width: `${Math.max((activeCount / totalServices) * 100, 5)}%` }}
                             />
                         </div>
@@ -127,14 +127,14 @@ export default async function MarketingHubPage() {
                     <div className="pt-4 flex flex-wrap gap-4">
                         <BriefButton existingBrief={brief} variant="hero" />
                         {supportWhatsAppUrl ? (
-                            <Button variant="outline" className="border-indigo-500/50 text-white hover:bg-indigo-500/20 bg-transparent" asChild>
+                            <Button variant="outline" className="border-brand-yellow/50 text-white hover:bg-brand-yellow/20 bg-transparent" asChild>
                                 <a href={supportWhatsAppUrl} target="_blank" rel="noopener noreferrer">
                                     <MessageCircle className="w-4 h-4 mr-2" />
                                     Contactar a Soporte VIP
                                 </a>
                             </Button>
                         ) : (
-                            <Button variant="outline" className="border-indigo-500/50 text-white bg-transparent opacity-60" disabled>
+                            <Button variant="outline" className="border-brand-yellow/50 text-white bg-transparent opacity-60" disabled>
                                 <MessageCircle className="w-4 h-4 mr-2" />
                                 Soporte VIP pendiente de configurar
                             </Button>
@@ -158,10 +158,10 @@ export default async function MarketingHubPage() {
                                 const hasContact = !!service.contact_link
 
                                 return (
-                                    <Card key={service.id} className="flex flex-col h-full border-slate-200 dark:border-slate-800 overflow-hidden group hover:shadow-md transition-all">
+                                    <Card key={service.id} className="flex flex-col h-full border-neutral-200 dark:border-neutral-800 overflow-hidden group hover:shadow-md transition-all">
                                         <CardHeader className="pb-3">
                                             <div className="flex justify-between items-start mb-2">
-                                                <div className="p-2.5 rounded-lg bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 group-hover:scale-110 transition-transform">
+                                                <div className="p-2.5 rounded-lg bg-brand-yellow dark:bg-brand-yellow/50 text-brand-yellow dark:text-brand-yellow group-hover:scale-110 transition-transform">
                                                     <Icon className="w-5 h-5" />
                                                 </div>
                                                 <div className={`px-2.5 py-1 text-xs font-medium rounded-full border ${statusCfg.color}`}>
@@ -209,7 +209,7 @@ export default async function MarketingHubPage() {
                                                     <Clock className="w-4 h-4 ml-2" />
                                                 </Button>
                                             ) : service.status === 'active' ? (
-                                                <Button variant="secondary" className="w-full justify-between text-emerald-600" disabled>
+                                                <Button variant="secondary" className="w-full justify-between text-brand-brown" disabled>
                                                     <span className="flex items-center gap-2">
                                                         <CheckCircle2 className="w-4 h-4" />
                                                         Servicio Activo
@@ -232,10 +232,10 @@ export default async function MarketingHubPage() {
                 {/* Right Sidebar */}
                 <div className="space-y-6">
                     {/* Próximos Pasos — Dynamic */}
-                    <Card className="border-indigo-100 dark:border-indigo-900 bg-indigo-50/50 dark:bg-indigo-950/20 shadow-sm">
+                    <Card className="border-brand-yellow dark:border-brand-yellow bg-brand-yellow/50 dark:bg-brand-yellow/20 shadow-sm">
                         <CardHeader>
                             <CardTitle className="text-lg flex items-center gap-2">
-                                <CheckCircle2 className="text-indigo-600 dark:text-indigo-400 w-5 h-5" />
+                                <CheckCircle2 className="text-brand-yellow dark:text-brand-yellow w-5 h-5" />
                                 Próximos Pasos
                             </CardTitle>
                         </CardHeader>
@@ -243,8 +243,8 @@ export default async function MarketingHubPage() {
                             {/* Step 1: Brand Brief */}
                             <div className="flex gap-3">
                                 <div className={`flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${hasBrief
-                                    ? 'bg-emerald-500 text-white'
-                                    : 'bg-indigo-600 text-white'
+                                    ? 'bg-brand-brown text-white'
+                                    : 'bg-brand-yellow text-white'
                                     }`}>
                                     {hasBrief ? <CheckCircle2 className="w-3.5 h-3.5" /> : '1'}
                                 </div>
@@ -267,10 +267,10 @@ export default async function MarketingHubPage() {
                             {/* Step 2: Brief Review */}
                             <div className={`flex gap-3 ${hasBrief ? '' : 'text-muted-foreground'}`}>
                                 <div className={`flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${brief?.status === 'reviewed' || brief?.status === 'approved'
-                                    ? 'bg-emerald-500 text-white'
+                                    ? 'bg-brand-brown text-white'
                                     : hasBrief
-                                        ? 'bg-indigo-600 text-white'
-                                        : 'bg-slate-200 dark:bg-slate-800 text-slate-500'
+                                        ? 'bg-brand-yellow text-white'
+                                        : 'bg-neutral-200 dark:bg-neutral-800 text-neutral-500'
                                     }`}>
                                     {brief?.status === 'reviewed' || brief?.status === 'approved'
                                         ? <CheckCircle2 className="w-3.5 h-3.5" />
@@ -293,10 +293,10 @@ export default async function MarketingHubPage() {
                             {/* Step 3: Active Services */}
                             <div className={`flex gap-3 ${activeCount > 0 ? '' : 'text-muted-foreground'}`}>
                                 <div className={`flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${activeCount >= totalServices
-                                    ? 'bg-emerald-500 text-white'
+                                    ? 'bg-brand-brown text-white'
                                     : activeCount > 0
-                                        ? 'bg-indigo-600 text-white'
-                                        : 'bg-slate-200 dark:bg-slate-800 text-slate-500'
+                                        ? 'bg-brand-yellow text-white'
+                                        : 'bg-neutral-200 dark:bg-neutral-800 text-neutral-500'
                                     }`}>
                                     {activeCount >= totalServices ? <CheckCircle2 className="w-3.5 h-3.5" /> : '3'}
                                 </div>
@@ -315,10 +315,10 @@ export default async function MarketingHubPage() {
 
                     {/* Brief Status Card (if submitted) */}
                     {brief && (
-                        <Card className="border-emerald-100 dark:border-emerald-900 bg-emerald-50/50 dark:bg-emerald-950/20">
+                        <Card className="border-brand-brown dark:border-brand-brown bg-brand-brown/50 dark:bg-brand-brown/20">
                             <CardHeader className="pb-3">
                                 <CardTitle className="text-sm flex items-center gap-2">
-                                    <FileEdit className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                                    <FileEdit className="w-4 h-4 text-brand-brown dark:text-brand-brown" />
                                     Tu Brief de Marca
                                 </CardTitle>
                             </CardHeader>

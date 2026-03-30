@@ -154,45 +154,49 @@ export default async function LandingPage() {
       {/* ══════════════════════════════════════════════════
           1. HERO
       ══════════════════════════════════════════════════ */}
-      <section className="relative w-full overflow-hidden bg-[#0A1628]">
+      <section className="relative w-full overflow-hidden bg-white dark:bg-black">
         {/* Neural grid background */}
         <div className="absolute inset-0 -z-0 sapihum-grid-bg" />
         <div className="absolute inset-0 -z-0 sapihum-neural-dots" />
-        <div className="absolute left-1/2 top-0 -translate-x-1/2 h-[600px] w-[600px] rounded-full bg-gradient-to-br from-teal-500/15 to-emerald-500/10 blur-[120px]" />
+        <div className="absolute left-1/2 top-0 -translate-x-1/2 h-[600px] w-[600px] rounded-full bg-gradient-to-br from-[#f6ae02]/15 to-[#7a5602]/10 blur-[120px]" />
         
         <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-28 md:py-36 lg:py-48">
           <div className="max-w-4xl mx-auto text-center flex flex-col items-center">
             {/* Badge */}
-            <div className="sapihum-fade-up inline-flex items-center gap-2 rounded-full border border-teal-400/30 bg-teal-950/40 backdrop-blur-sm px-4 py-1.5 text-xs font-medium text-teal-300 mb-8">
+            <div className="sapihum-fade-up inline-flex items-center gap-2 rounded-lg border border-[#f6ae02]/30 bg-[#f6ae02]/5 backdrop-blur-sm px-4 py-1.5 text-xs font-bold text-[#f6ae02] uppercase tracking-[1px] mb-8">
               <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-teal-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-teal-400"></span>
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#f6ae02] opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-[#f6ae02]"></span>
               </span>
               Sistemas Avanzados de Psicología e Investigación Humana
             </div>
 
             {/* H1 */}
-            <h1 className="sapihum-fade-up text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.08] text-white" style={{ animationDelay: '0.1s' }}>
+            <h1 className="sapihum-fade-up text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.08] text-black dark:text-white" style={{ animationDelay: '0.1s' }}>
               La comunidad profesional para psicólogos que quieren{" "}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-400 via-emerald-400 to-teal-300">
-                elevar su nivel.
+              <span className="relative whitespace-nowrap">
+                <span className="relative z-10">elevar su nivel.</span>
+                <svg className="absolute -bottom-2 w-full h-3 text-[#f6ae02]" viewBox="0 0 100 10" preserveAspectRatio="none">
+                  <path d="M0 5 Q 50 10 100 5" stroke="currentColor" strokeWidth="3" fill="transparent"/>
+                </svg>
               </span>
             </h1>
 
             {/* Subtitle */}
-            <p className="sapihum-fade-up mt-7 text-lg md:text-xl text-slate-300 max-w-3xl leading-relaxed" style={{ animationDelay: '0.2s' }}>
+            <p className="sapihum-fade-up mt-7 text-lg md:text-xl text-[#2c2c2b]/80 dark:text-[#c0bfbc] max-w-3xl leading-relaxed" style={{ animationDelay: '0.2s' }}>
               Especializaciones, formación continua, investigación aplicada, herramientas profesionales y una red de colegas que entienden hacia dónde debe evolucionar la psicología.
             </p>
 
             {/* CTA Buttons */}
             <div className="sapihum-fade-up mt-10 flex flex-col sm:flex-row gap-4 w-full sm:w-auto" style={{ animationDelay: '0.3s' }}>
               <Link href="/especialidades" className="w-full sm:w-auto">
-                <Button size="lg" className="w-full text-base h-13 px-8 bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-400 hover:to-emerald-400 text-white shadow-lg shadow-teal-500/25 hover:shadow-xl hover:shadow-teal-500/30 transition-all border-0 font-semibold sapihum-glow-cta">
+                <Button size="lg" className="w-full text-base h-13 px-8 bg-[#f6ae02] hover:bg-[#7a5602] text-black hover:text-white shadow-lg shadow-[#f6ae02]/25 hover:shadow-xl hover:shadow-[#f6ae02]/30 transition-all border-0 font-semibold sapihum-glow-cta">
                   Explorar Especialidades
+                  <ArrowRight className="ml-2 w-5 h-5" />
                 </Button>
               </Link>
               <Link href="/nosotros" className="w-full sm:w-auto">
-                <Button size="lg" variant="outline" className="w-full text-base h-13 px-8 border-slate-500 text-slate-200 hover:bg-white/5 hover:text-white hover:border-teal-400/50 transition-all">
+                <Button size="lg" variant="outline" className="w-full text-base h-13 px-8 border-[#c0bfbc] dark:border-[#2c2c2b] text-[#2c2c2b] dark:text-[#c0bfbc] hover:bg-[#c0bfbc]/10 dark:hover:bg-white/5 hover:text-black dark:hover:text-white hover:border-[#2c2c2b] dark:hover:border-[#c0bfbc] transition-all font-semibold">
                   Conocer SAPIHUM →
                 </Button>
               </Link>
@@ -204,12 +208,12 @@ export default async function LandingPage() {
       {/* ══════════════════════════════════════════════════
           2. BLOQUE DE CREDIBILIDAD
       ══════════════════════════════════════════════════ */}
-      <section className="w-full border-y bg-muted/40 backdrop-blur-sm relative z-20 shadow-sm">
+      <section className="w-full border-y bg-muted/40 dark:bg-[#0a0a0a] backdrop-blur-sm relative z-20 shadow-sm">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-5">
           <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-3">
-            {CREDIBILITY_PILLS.map((pill, i) => (
-              <div key={pill} className="flex items-center text-sm font-medium text-foreground/80">
-                <CheckCircle2 className="w-4 h-4 mr-2 text-teal-600 dark:text-teal-400" />
+            {CREDIBILITY_PILLS.map((pill) => (
+              <div key={pill} className="flex items-center text-sm font-semibold text-foreground/80">
+                <CheckCircle2 className="w-4 h-4 mr-2 text-[#f6ae02]" />
                 {pill}
               </div>
             ))}
@@ -223,14 +227,14 @@ export default async function LandingPage() {
       <section className="w-full py-20 md:py-28 bg-background">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="max-w-4xl mx-auto text-center mb-12">
-            <p className="text-sm font-semibold text-teal-600 dark:text-teal-400 uppercase tracking-wider mb-3">
+            <p className="text-sm font-bold text-[#f6ae02] uppercase tracking-[1px] mb-3">
               Ecosistema
             </p>
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight leading-tight">
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight leading-tight text-black dark:text-white">
               Qué es SAPIHUM
             </h2>
             <p className="mt-6 text-xl text-muted-foreground leading-relaxed">
-              SAPIHUM es un ecosistema profesional en línea para psicólogos que buscan crecer con <strong>mayor profundidad, estructura y respaldo</strong>. Integramos todas las piezas del rompecabezas profesional en un solo lugar.
+              SAPIHUM es un ecosistema profesional en línea para psicólogos que buscan crecer con <strong className="text-foreground">mayor profundidad, estructura y respaldo</strong>. Integramos todas las piezas del rompecabezas profesional en un solo lugar.
             </p>
           </div>
         </div>
@@ -239,15 +243,15 @@ export default async function LandingPage() {
       {/* ══════════════════════════════════════════════════
           4. POR QUÉ PERTENECER (Aspiracional)
       ══════════════════════════════════════════════════ */}
-      <section className="w-full py-20 md:py-28 bg-muted/40 border-y">
+      <section className="w-full py-20 md:py-28 bg-muted/40 dark:bg-[#0a0a0a] border-y">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
             {/* Contexto y Pertenencia */}
             <div>
-              <p className="text-sm font-semibold text-teal-600 dark:text-teal-400 uppercase tracking-wider mb-3">
+              <p className="text-sm font-bold text-[#f6ae02] uppercase tracking-[1px] mb-3">
                 Identidad y Pertenencia
               </p>
-              <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-8">
+              <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-8 text-black dark:text-white">
                 El profesional que entra a SAPIHUM no busca solo cursos.
               </h2>
               <ul className="space-y-6">
@@ -260,7 +264,7 @@ export default async function LandingPage() {
                 ].map((item, idx) => (
                   <li key={idx} className="flex">
                     <div className="flex-shrink-0 mt-1">
-                      <div className="flex h-5 w-5 items-center justify-center rounded-full bg-teal-100 text-teal-600 dark:bg-teal-900/50 dark:text-teal-400">
+                      <div className="flex h-5 w-5 items-center justify-center rounded-full bg-[#f6ae02]/10 text-[#f6ae02]">
                         <CheckCircle2 className="h-3.5 w-3.5" />
                       </div>
                     </div>
@@ -271,8 +275,8 @@ export default async function LandingPage() {
             </div>
 
             {/* Tarjeta Por qué Pertenecer */}
-            <div className="rounded-3xl border bg-card p-8 md:p-12 sapihum-card-glow shadow-xl sm:mx-6 lg:mx-0 relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-teal-500/10 rounded-bl-full blur-[40px]" />
+            <div className="rounded-2xl border bg-card p-8 md:p-12 sapihum-card-glow shadow-xl sm:mx-6 lg:mx-0 relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-[#f6ae02]/10 rounded-bl-full blur-[40px]" />
               <h3 className="text-2xl font-bold mb-6 text-foreground">¿Por qué pertenecer a SAPIHUM?</h3>
               <div className="space-y-5">
                 {[
@@ -283,7 +287,7 @@ export default async function LandingPage() {
                   "Porque el futuro del psicólogo profesional exige más nivel, no más improvisación."
                 ].map((reason, idx) => (
                   <div key={idx} className="flex gap-4">
-                    <span className="text-teal-600 dark:text-teal-400 font-black">—</span>
+                    <span className="text-[#f6ae02] font-black">—</span>
                     <span className="text-foreground/80 font-medium">{reason}</span>
                   </div>
                 ))}
@@ -299,8 +303,8 @@ export default async function LandingPage() {
       <section className="w-full py-20 md:py-28">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="max-w-4xl mx-auto text-center mb-16">
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight mb-4">
-              Explora nuestras áreas de <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-600 to-emerald-600 dark:from-teal-400 dark:to-emerald-400">especialización en psicología</span>
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight mb-4 text-black dark:text-white">
+              Explora nuestras áreas de <span className="text-[#f6ae02]">especialización en psicología</span>
             </h2>
             <p className="mt-4 text-lg text-muted-foreground">
               Cada especialidad dentro de SAPIHUM integra formación, actualización, recursos y comunidad para fortalecer tu ejercicio profesional.
@@ -312,19 +316,19 @@ export default async function LandingPage() {
               <Link
                 key={spec.code}
                 href={`/especialidades/${spec.slug}`}
-                className="group relative rounded-2xl border bg-card p-6 sapihum-card-glow overflow-hidden"
+                className="group relative rounded-lg border bg-card p-6 sapihum-card-glow overflow-hidden"
               >
-                <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-teal-500 to-emerald-500 opacity-0 group-hover:opacity-100 transition-opacity rounded-l-2xl" />
-                <div className="text-3xl mb-4 bg-gradient-to-br from-teal-50 to-emerald-50 dark:from-teal-900/30 dark:to-emerald-900/30 w-14 h-14 rounded-xl flex items-center justify-center">
+                <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-[#f6ae02] to-[#7a5602] opacity-0 group-hover:opacity-100 transition-opacity rounded-l-lg" />
+                <div className="text-3xl mb-4 bg-[#f6ae02]/5 dark:bg-[#f6ae02]/10 w-14 h-14 rounded-lg flex items-center justify-center">
                   {spec.icon}
                 </div>
-                <h3 className="text-base font-bold mb-1.5 group-hover:text-teal-600 dark:group-hover:text-teal-400 transition-colors">
+                <h3 className="text-base font-bold mb-1.5 group-hover:text-[#f6ae02] transition-colors">
                   {spec.name}
                 </h3>
                 <p className="text-sm text-muted-foreground leading-relaxed mb-4">
                   {spec.tagline}
                 </p>
-                <div className="text-sm font-semibold text-teal-600 dark:text-teal-400 flex items-center">
+                <div className="text-sm font-bold text-[#f6ae02] flex items-center">
                   Ver especialidad <span className="ml-1 transition-transform group-hover:translate-x-1">→</span>
                 </div>
               </Link>
@@ -336,27 +340,27 @@ export default async function LandingPage() {
       {/* ══════════════════════════════════════════════════
           6. QUÉ OBTIENES DENTRO
       ══════════════════════════════════════════════════ */}
-      <section className="w-full py-20 md:py-28 bg-[#0A1628] text-white relative overflow-hidden">
+      <section className="w-full py-20 md:py-28 bg-black text-white relative overflow-hidden">
         <div className="absolute inset-0 sapihum-grid-bg opacity-40 mix-blend-overlay" />
-        <div className="absolute right-0 top-1/4 h-[400px] w-[400px] rounded-full bg-emerald-500/10 blur-[120px]" />
+        <div className="absolute right-0 top-1/4 h-[400px] w-[400px] rounded-full bg-[#f6ae02]/10 blur-[120px]" />
         
         <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-white mb-4">
               Qué obtienes dentro de tu membresía
             </h2>
-            <p className="text-slate-400 text-lg">Más allá de la teoría, construimos el entorno completo.</p>
+            <p className="text-[#c0bfbc] text-lg">Más allá de la teoría, construimos el entorno completo.</p>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {WHAT_YOU_GET.map((item, i) => (
               <div key={i} className="flex gap-4">
-                <div className="shrink-0 mt-1 h-12 w-12 rounded-xl flex items-center justify-center bg-gradient-to-br from-teal-500/20 to-emerald-500/20 text-teal-400 border border-teal-500/20">
+                <div className="shrink-0 mt-1 h-12 w-12 rounded-lg flex items-center justify-center bg-[#f6ae02]/10 text-[#f6ae02] border border-[#f6ae02]/20">
                   {item.icon}
                 </div>
                 <div>
                   <h3 className="text-lg font-bold mb-2 text-white">{item.title}</h3>
-                  <p className="text-slate-400 text-sm leading-relaxed">{item.description}</p>
+                  <p className="text-[#c0bfbc] text-sm leading-relaxed">{item.description}</p>
                 </div>
               </div>
             ))}
@@ -368,28 +372,28 @@ export default async function LandingPage() {
           7. INVESTIGACIÓN APLICADA
       ══════════════════════════════════════════════════ */}
       <section className="relative w-full py-24 border-b bg-background overflow-hidden">
-        <div className="absolute -left-32 top-1/2 -translate-y-1/2 w-96 h-96 bg-teal-500/10 rounded-full blur-[100px]" />
+        <div className="absolute -left-32 top-1/2 -translate-y-1/2 w-96 h-96 bg-[#f6ae02]/10 rounded-full blur-[100px]" />
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
             <div className="lg:col-span-8">
-              <p className="text-sm font-semibold text-teal-600 dark:text-teal-400 uppercase tracking-wider mb-3">
+              <p className="text-sm font-bold text-[#f6ae02] uppercase tracking-[1px] mb-3">
                 Diferenciador Institucional
               </p>
-              <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight leading-tight mb-6">
-                Investigación aplicada para una <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-600 to-emerald-600 dark:from-teal-400 dark:to-emerald-400">práctica más sólida.</span>
+              <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight leading-tight mb-6 text-black dark:text-white">
+                Investigación aplicada para una <span className="text-[#f6ae02]">práctica más sólida.</span>
               </h2>
-              <p className="text-xl text-muted-foreground leading-relaxed max-w-3xl border-l-4 border-teal-500 pl-6 my-8">
+              <p className="text-xl text-muted-foreground leading-relaxed max-w-3xl border-l-4 border-[#f6ae02] pl-6 my-8">
                 En SAPIHUM impulsamos una visión donde la formación, la práctica profesional y la investigación se conectan para generar más criterio, mejores decisiones y mayor profundidad clínica y profesional.
               </p>
             </div>
             <div className="lg:col-span-4 flex justify-end">
-              <div className="bg-card w-full border rounded-3xl p-8 flex flex-col justify-center items-center text-center shadow-lg">
-                <Beaker className="w-16 h-16 text-teal-500 mb-6" />
-                <h3 className="font-bold text-xl mb-4">Líneas de investigación activas</h3>
+              <div className="bg-card w-full border rounded-2xl p-8 flex flex-col justify-center items-center text-center shadow-lg">
+                <Beaker className="w-16 h-16 text-[#f6ae02] mb-6" />
+                <h3 className="font-bold text-xl mb-4 text-foreground">Líneas de investigación activas</h3>
                 <p className="text-sm text-muted-foreground mb-6">
                   Nuestros hallazgos alimentan directamente los protocolos, herramientas y cursos ofrecidos en el ecosistema.
                 </p>
-                <Link href="/nosotros" className="text-sm font-bold text-teal-600 dark:text-teal-400">
+                <Link href="/nosotros" className="text-sm font-bold text-[#f6ae02] hover:text-[#7a5602] transition-colors">
                   Explorar ciencia SAPIHUM →
                 </Link>
               </div>
@@ -401,13 +405,13 @@ export default async function LandingPage() {
       {/* ══════════════════════════════════════════════════
           8. RECURSOS Y HERRAMIENTAS (Software)
       ══════════════════════════════════════════════════ */}
-      <section className="w-full py-20 md:py-28 bg-muted/30 border-b">
+      <section className="w-full py-20 md:py-28 bg-muted/30 dark:bg-[#0a0a0a] border-b">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="max-w-2xl mx-auto text-center mb-16">
-            <p className="text-sm font-semibold text-teal-600 dark:text-teal-400 uppercase tracking-wider mb-3">
+            <p className="text-sm font-bold text-[#f6ae02] uppercase tracking-[1px] mb-3">
               Herramientas de Plataforma
             </p>
-            <h2 className="text-3xl md:text-4xl font-bold tracking-tight">
+            <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-black dark:text-white">
               Infraestructura digital que acelera tu trabajo
             </h2>
           </div>
@@ -416,9 +420,9 @@ export default async function LandingPage() {
             {PLATFORM_FEATURES.map((feature) => (
               <div
                 key={feature.title}
-                className="group rounded-2xl border bg-card p-6 hover:border-teal-500/40 hover:shadow-lg transition-all duration-300"
+                className="group rounded-lg border bg-card p-6 hover:border-[#f6ae02]/40 hover:shadow-lg transition-all duration-300"
               >
-                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-teal-50 dark:bg-teal-900/30 text-teal-600 dark:text-teal-400 mb-4">
+                <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-[#f6ae02]/5 dark:bg-[#f6ae02]/10 text-[#f6ae02] mb-4">
                   {feature.icon}
                 </div>
                 <h3 className="text-base font-bold mb-2">{feature.title}</h3>
@@ -437,10 +441,10 @@ export default async function LandingPage() {
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between mb-12">
               <div>
-                <p className="text-sm font-semibold text-teal-600 dark:text-teal-400 uppercase tracking-wider mb-3">
+                <p className="text-sm font-bold text-[#f6ae02] uppercase tracking-[1px] mb-3">
                   Academia SAPIHUM
                 </p>
-                <h2 className="text-3xl md:text-4xl font-bold tracking-tight">
+                <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-black dark:text-white">
                   Próximos en la Academia
                 </h2>
                 <p className="mt-2 text-muted-foreground">
@@ -448,7 +452,7 @@ export default async function LandingPage() {
                 </p>
               </div>
               <Link href="/academia" className="shrink-0">
-                <Button variant="outline" className="gap-2">
+                <Button variant="outline" className="gap-2 font-semibold hover:border-[#f6ae02]/50 hover:text-[#f6ae02]">
                   Ver catálogo completo
                   <ArrowRight className="h-4 w-4" />
                 </Button>
@@ -463,19 +467,19 @@ export default async function LandingPage() {
                 const timeStr = new Date(event.start_time).toLocaleTimeString('es-MX', { hour: 'numeric', minute: '2-digit' })
                 const speakerName = event.speakers?.[0]?.speaker?.profile?.full_name
                 const typeLabels: Record<string, { label: string; color: string }> = {
-                  live: { label: 'En Vivo', color: 'bg-teal-600' },
-                  course: { label: 'Formación', color: 'bg-violet-500' },
-                  presencial: { label: 'Presencial', color: 'bg-blue-500' },
+                  live: { label: 'En Vivo', color: 'bg-[#f6ae02]' },
+                  course: { label: 'Formación', color: 'bg-[#7a5602]' },
+                  presencial: { label: 'Presencial', color: 'bg-[#2c2c2b]' },
                 }
-                const typeBadge = typeLabels[event.event_type] || { label: 'Evento', color: 'bg-teal-600' }
+                const typeBadge = typeLabels[event.event_type] || { label: 'Evento', color: 'bg-[#f6ae02]' }
 
                 return (
                   <Link
                     key={event.id}
                     href={publicPath}
-                    className="group flex flex-col overflow-hidden rounded-2xl border bg-card transition-all duration-300 hover:shadow-xl hover:-translate-y-1 hover:border-teal-500/30"
+                    className="group flex flex-col overflow-hidden rounded-lg border bg-card transition-all duration-300 hover:shadow-xl hover:-translate-y-1 hover:border-[#f6ae02]/30"
                   >
-                    <div className="relative aspect-[16/9] overflow-hidden bg-gradient-to-br from-slate-900 via-slate-800 to-teal-900/40">
+                    <div className="relative aspect-[16/9] overflow-hidden bg-gradient-to-br from-black via-[#2c2c2b] to-[#7a5602]/40">
                       {event.image_url ? (
                         <img src={event.image_url} alt={event.title} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
                       ) : (
@@ -484,20 +488,20 @@ export default async function LandingPage() {
                         </div>
                       )}
                       <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
-                      <span className={`absolute top-3 left-3 inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-semibold text-white uppercase tracking-wide ${typeBadge.color}`}>
+                      <span className={`absolute top-3 left-3 inline-flex items-center rounded-lg px-2.5 py-1 text-[11px] font-bold text-white uppercase tracking-wide ${typeBadge.color}`}>
                         {typeBadge.label}
                       </span>
-                      <div className="absolute bottom-3 left-3 flex items-center gap-1.5 rounded-lg bg-white/95 px-2.5 py-1.5 shadow-sm">
-                        <CalendarDays className="h-3.5 w-3.5 text-teal-600" />
-                        <span className="text-xs font-semibold text-slate-800">{dateStr}</span>
-                        <span className="text-[10px] text-slate-500">{timeStr}</span>
+                      <div className="absolute bottom-3 left-3 flex items-center gap-1.5 rounded-lg bg-white/95 dark:bg-black/90 px-2.5 py-1.5 shadow-sm">
+                        <CalendarDays className="h-3.5 w-3.5 text-[#f6ae02]" />
+                        <span className="text-xs font-semibold text-black dark:text-white">{dateStr}</span>
+                        <span className="text-[10px] text-[#2c2c2b] dark:text-[#c0bfbc]">{timeStr}</span>
                       </div>
                     </div>
                     <div className="flex flex-1 flex-col p-5">
                       {speakerName && (
                         <p className="mb-1.5 text-xs font-medium text-muted-foreground">{speakerName}</p>
                       )}
-                      <h3 className="line-clamp-2 text-lg font-semibold leading-snug group-hover:text-teal-600 transition-colors">
+                      <h3 className="line-clamp-2 text-lg font-semibold leading-snug group-hover:text-[#f6ae02] transition-colors">
                         {event.title}
                       </h3>
                       <div className="flex-1" />
@@ -505,9 +509,9 @@ export default async function LandingPage() {
                         {price > 0 ? (
                           <span className="text-base font-bold">${price.toFixed(0)} MXN</span>
                         ) : (
-                          <span className="text-sm font-bold text-emerald-600">Gratis</span>
+                          <span className="text-sm font-bold text-[#f6ae02]">Gratis</span>
                         )}
-                        <span className="text-xs font-semibold text-teal-600 group-hover:underline">Ver detalles →</span>
+                        <span className="text-xs font-bold text-[#f6ae02] group-hover:underline">Ver detalles →</span>
                       </div>
                     </div>
                   </Link>
@@ -524,9 +528,9 @@ export default async function LandingPage() {
       <section className="w-full py-20 md:py-28 bg-background">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="max-w-2xl mx-auto text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold tracking-tight">
+            <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-black dark:text-white">
               El respaldo de la{" "}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-600 to-emerald-600 dark:from-teal-400 dark:to-emerald-400">
+              <span className="text-[#f6ae02]">
                 red SAPIHUM
               </span>
             </h2>
@@ -534,17 +538,17 @@ export default async function LandingPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {TESTIMONIALS.map((t, idx) => (
-              <div key={idx} className="relative rounded-2xl border bg-muted/20 p-8">
+              <div key={idx} className="relative rounded-lg border bg-muted/20 dark:bg-[#0a0a0a] p-8">
                 <blockquote className="text-muted-foreground text-sm leading-relaxed mb-6">
-                  "{t.quote}"
+                  &quot;{t.quote}&quot;
                 </blockquote>
                 <div className="flex items-center gap-3 mt-auto">
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-teal-500 to-emerald-600 flex items-center justify-center text-white font-bold text-sm shrink-0">
+                  <div className="w-10 h-10 rounded-lg bg-[#f6ae02] flex items-center justify-center text-black font-bold text-sm shrink-0">
                     {t.name.split(' ').slice(-1)[0][0]}
                   </div>
                   <div>
                     <div className="font-bold text-sm text-foreground">{t.name}</div>
-                    <div className="text-xs text-teal-600 dark:text-teal-400">
+                    <div className="text-xs text-[#f6ae02]">
                       {t.role}
                     </div>
                   </div>
@@ -558,14 +562,14 @@ export default async function LandingPage() {
       {/* ══════════════════════════════════════════════════
           10. FAQ SEO
       ══════════════════════════════════════════════════ */}
-      <section className="w-full py-20 md:py-28 bg-muted/30 border-y">
+      <section className="w-full py-20 md:py-28 bg-muted/30 dark:bg-[#0a0a0a] border-y">
         <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold tracking-tight">Preguntas Frecuentes</h2>
+            <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-black dark:text-white">Preguntas Frecuentes</h2>
           </div>
           <div className="space-y-4">
             {FAQS.map((faq, idx) => (
-              <details key={idx} className="group rounded-2xl border bg-card px-6 py-4 [&_summary::-webkit-details-marker]:hidden cursor-pointer shadow-sm">
+              <details key={idx} className="group rounded-lg border bg-card px-6 py-4 [&_summary::-webkit-details-marker]:hidden cursor-pointer shadow-sm">
                 <summary className="flex items-center justify-between font-bold text-lg outline-none">
                   {faq.q}
                   <span className="ml-4 transition-transform duration-300 group-open:rotate-180">
@@ -586,28 +590,27 @@ export default async function LandingPage() {
       ══════════════════════════════════════════════════ */}
       <section className="w-full py-20 md:py-32 bg-background">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="relative rounded-3xl bg-gradient-to-br from-[#0A1628] via-teal-900 to-[#0A1628] px-6 py-16 md:px-16 md:py-20 text-center overflow-hidden border border-teal-800/50 shadow-2xl">
+          <div className="relative rounded-2xl bg-white dark:bg-white text-black px-6 py-16 md:px-16 md:py-20 text-center overflow-hidden border border-[#c0bfbc] shadow-2xl">
             {/* Decorative elements */}
-            <div className="absolute top-0 left-0 h-64 w-64 rounded-full bg-teal-500/20 -translate-x-1/2 -translate-y-1/2 blur-3xl mix-blend-screen" />
-            <div className="absolute bottom-0 right-0 h-48 w-48 rounded-full bg-emerald-500/20 translate-x-1/3 translate-y-1/3 blur-3xl mix-blend-screen" />
-            <div className="absolute inset-0 sapihum-grid-bg opacity-30" />
+            <div className="absolute top-0 left-0 h-64 w-64 rounded-full bg-[#f6ae02]/20 -translate-x-1/2 -translate-y-1/2 blur-3xl" />
+            <div className="absolute bottom-0 right-0 h-48 w-48 rounded-full bg-[#f6ae02]/15 translate-x-1/3 translate-y-1/3 blur-3xl" />
 
             <div className="relative z-10 max-w-4xl mx-auto">
-              <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white tracking-tight leading-tight">
+              <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-black tracking-tight leading-tight">
                 No se trata solo de estudiar más. <br />
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-emerald-400 mt-2 block">
+                <span className="text-[#f6ae02] mt-2 block">
                   Se trata de convertirte en un profesional con más nivel, más criterio y más valor.
                 </span>
               </h2>
               
               <div className="mt-12 flex flex-col sm:flex-row gap-5 justify-center items-center">
                 <Link href="/precios" className="w-full sm:w-auto">
-                  <Button size="lg" className="w-full text-base h-14 px-10 bg-white text-[#0A1628] hover:bg-teal-50 hover:scale-105 shadow-xl transition-all font-bold">
+                  <Button size="lg" className="w-full text-base h-14 px-10 bg-[#f6ae02] text-black hover:bg-[#7a5602] hover:text-white hover:scale-105 shadow-xl transition-all font-bold">
                     Unirme a SAPIHUM
                   </Button>
                 </Link>
                 <Link href="/nosotros" className="w-full sm:w-auto">
-                  <Button size="lg" variant="outline" className="w-full text-base h-14 px-10 border-slate-400/50 text-slate-200 hover:bg-white/10 hover:text-white transition-all font-semibold">
+                  <Button size="lg" variant="outline" className="w-full text-base h-14 px-10 border-[#2c2c2b] text-[#2c2c2b] hover:bg-[#2c2c2b] hover:text-white transition-all font-semibold">
                     Conocer la comunidad
                   </Button>
                 </Link>

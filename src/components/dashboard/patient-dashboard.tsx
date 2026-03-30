@@ -94,13 +94,13 @@ export function PatientDashboard({
     return (
         <div className="space-y-8 dashboard-stagger">
             {/* Hero Banner */}
-            <div className="rounded-2xl border bg-gradient-to-br from-card via-emerald-50/20 to-green-50/30 dark:from-card dark:via-emerald-950/10 dark:to-green-950/10 p-6 sm:p-8">
+            <div className="rounded-2xl border bg-gradient-to-br from-card via-brand-brown/20 to-green-50/30 dark:from-card dark:via-brand-brown/10 dark:to-green-950/10 p-6 sm:p-8">
                 <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6">
                     <ProgressRing
                         percentage={wellnessPercentage}
                         label="Tu Bienestar"
                         sublabel="Progreso de actividades"
-                        color="emerald"
+                        color="primary"
                         size={100}
                     />
                     <div className="flex-1 min-w-0">
@@ -134,7 +134,7 @@ export function PatientDashboard({
                     value={psychologistName || 'Sin asignar'}
                     subtitle={psychologistName ? 'Asignado' : 'Contacta al administrador'}
                     icon="UserCog"
-                    color="blue"
+                    color="primary"
                     delay={0}
                 />
                 <StatCard
@@ -142,7 +142,7 @@ export function PatientDashboard({
                     value={upcomingAppointments}
                     subtitle="Programadas"
                     icon="Calendar"
-                    color="emerald"
+                    color="primary"
                     delay={80}
                 />
                 <StatCard
@@ -150,7 +150,7 @@ export function PatientDashboard({
                     value={resourcesAvailable}
                     subtitle="Asignados para ti"
                     icon="BookOpen"
-                    color="purple"
+                    color="secondary"
                     delay={160}
                 />
             </div>
@@ -165,25 +165,25 @@ export function PatientDashboard({
                     </CardHeader>
                     <CardContent>
                         {nextAppointment ? (
-                            <div className="bg-gradient-to-br from-blue-50 to-blue-100/50 dark:from-blue-950/30 dark:to-blue-900/20 rounded-xl p-5">
+                            <div className="bg-gradient-to-br from-brand-yellow to-brand-yellow/50 dark:from-brand-yellow/30 dark:to-brand-yellow/20 rounded-xl p-5">
                                 <div className="flex items-start gap-4">
-                                    <div className="p-3 bg-blue-100 dark:bg-blue-900/50 rounded-xl">
-                                        <Calendar className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+                                    <div className="p-3 bg-brand-yellow dark:bg-brand-yellow/50 rounded-xl">
+                                        <Calendar className="h-6 w-6 text-brand-yellow dark:text-brand-yellow" />
                                     </div>
                                     <div className="flex-1 min-w-0">
-                                        <p className="font-semibold text-blue-900 dark:text-blue-200">
+                                        <p className="font-semibold text-brand-yellow dark:text-brand-yellow">
                                             {new Date(nextAppointment.start_time).toLocaleDateString('es-MX', {
                                                 weekday: 'long', day: 'numeric', month: 'long'
                                             })}
                                         </p>
-                                        <p className="mt-0.5 break-words whitespace-normal text-sm text-blue-700 dark:text-blue-300">
+                                        <p className="mt-0.5 break-words whitespace-normal text-sm text-brand-yellow dark:text-brand-yellow">
                                             {new Date(nextAppointment.start_time).toLocaleTimeString('es-MX', {
                                                 hour: '2-digit', minute: '2-digit'
                                             })}
                                             {' · '}con {nextAppointment.psychologist_name}
                                         </p>
                                         <div className="mt-3">
-                                            <Button asChild size="sm" className="min-h-11 bg-blue-600 hover:bg-blue-700 sm:min-h-8">
+                                            <Button asChild size="sm" className="min-h-11 bg-brand-yellow hover:bg-brand-yellow sm:min-h-8">
                                                 <Link href="/dashboard/calendar">
                                                     Ver Detalles
                                                 </Link>
@@ -217,7 +217,7 @@ export function PatientDashboard({
                         </div>
                         {totalTasks > 0 && (
                             <div className="text-right">
-                                <span className="text-2xl font-bold text-emerald-600">
+                                <span className="text-2xl font-bold text-brand-brown">
                                     {totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0}%
                                 </span>
                             </div>
@@ -292,7 +292,7 @@ export function PatientDashboard({
             </Card>
 
             {/* Wellness Tip */}
-            <div className="rounded-xl bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950/20 dark:to-emerald-950/20 border border-green-200 dark:border-green-800 p-5">
+            <div className="rounded-xl bg-gradient-to-r from-green-50 to-brand-dark dark:from-green-950/20 dark:to-brand-dark/20 border border-green-200 dark:border-green-800 p-5">
                 <div className="flex items-start gap-4">
                     <div className="p-2.5 bg-green-100 dark:bg-green-900 rounded-full flex-shrink-0">
                         <Sparkles className="h-5 w-5 text-green-600 dark:text-green-400" />

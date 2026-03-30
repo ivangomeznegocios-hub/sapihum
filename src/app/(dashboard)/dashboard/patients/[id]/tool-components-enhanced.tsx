@@ -293,7 +293,7 @@ export function AssignToolModal({ patientId, tools, onClose }: AssignToolModalPr
                                                                 {tool.estimated_minutes || tool.schema?.metadata?.estimated_minutes || '?'} min
                                                             </span>
                                                             {tool.is_template && (
-                                                                <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-medium text-emerald-700">
+                                                                <span className="rounded-full bg-brand-brown px-2 py-0.5 text-[10px] font-medium text-brand-brown">
                                                                     Plantilla
                                                                 </span>
                                                             )}
@@ -669,7 +669,7 @@ export function ToolsTabContent({
                                                             Asignado: {new Date(assignment.assigned_at).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })}
                                                         </span>
                                                         {assignment.due_date && (
-                                                            <span className="font-medium text-amber-600">
+                                                            <span className="font-medium text-brand-yellow">
                                                                 Limite: {new Date(assignment.due_date).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })}
                                                             </span>
                                                         )}
@@ -683,7 +683,7 @@ export function ToolsTabContent({
                                                         <div className="mt-2 flex items-center gap-2">
                                                             <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-muted">
                                                                 <div
-                                                                    className="h-full rounded-full bg-blue-500 transition-all"
+                                                                    className="h-full rounded-full bg-brand-yellow transition-all"
                                                                     style={{ width: `${assignment.response.progress}%` }}
                                                                 />
                                                             </div>

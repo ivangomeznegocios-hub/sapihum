@@ -243,7 +243,7 @@ export default async function SpeakerDetailPage({ params }: PageProps) {
                                 <ul className="space-y-2">
                                     {speaker.credentials.map((cred, i) => (
                                         <li key={i} className="flex items-start gap-2 text-sm">
-                                            <Award className="h-4 w-4 text-amber-500 mt-0.5 shrink-0" />
+                                            <Award className="h-4 w-4 text-brand-yellow mt-0.5 shrink-0" />
                                             <span>{cred}</span>
                                         </li>
                                     ))}
@@ -257,7 +257,7 @@ export default async function SpeakerDetailPage({ params }: PageProps) {
                         <Card>
                             <CardHeader>
                                 <CardTitle className="text-lg flex items-center gap-2">
-                                    <GraduationCap className="h-5 w-5 text-violet-500" />
+                                    <GraduationCap className="h-5 w-5 text-brand-brown" />
                                     Formaciones
                                 </CardTitle>
                             </CardHeader>
@@ -265,7 +265,7 @@ export default async function SpeakerDetailPage({ params }: PageProps) {
                                 <ul className="space-y-2">
                                     {speaker.formations.map((formation, i) => (
                                         <li key={i} className="flex items-start gap-2 text-sm">
-                                            <Sparkles className="h-4 w-4 text-violet-500 mt-0.5 shrink-0" />
+                                            <Sparkles className="h-4 w-4 text-brand-brown mt-0.5 shrink-0" />
                                             <span>{formation}</span>
                                         </li>
                                     ))}

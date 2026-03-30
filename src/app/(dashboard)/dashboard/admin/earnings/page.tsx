@@ -46,35 +46,35 @@ export default async function AdminEarningsPage() {
 
             {/* Global Totals */}
             <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-                <Card className="border-blue-200 dark:border-blue-800/50">
+                <Card className="border-brand-yellow dark:border-brand-yellow/50">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                         <CardTitle className="text-sm font-medium text-muted-foreground">Total General</CardTitle>
-                        <TrendingUp className="h-4 w-4 text-blue-500" />
+                        <TrendingUp className="h-4 w-4 text-brand-yellow" />
                     </CardHeader>
                     <CardContent>
                         <div className="text-2xl font-bold">{formatMXN(data.totals.total)}</div>
                         <p className="text-xs text-muted-foreground mt-1">{data.speakers.length} ponentes</p>
                     </CardContent>
                 </Card>
-                <Card className="border-emerald-200 dark:border-emerald-800/50">
+                <Card className="border-brand-brown dark:border-brand-brown/50">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                         <CardTitle className="text-sm font-medium text-muted-foreground">Liberado</CardTitle>
-                        <CheckCircle2 className="h-4 w-4 text-emerald-500" />
+                        <CheckCircle2 className="h-4 w-4 text-brand-brown" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">
+                        <div className="text-2xl font-bold text-brand-brown dark:text-brand-brown">
                             {formatMXN(data.totals.released)}
                         </div>
                         <p className="text-xs text-muted-foreground mt-1">Listo para dispersión</p>
                     </CardContent>
                 </Card>
-                <Card className="border-amber-200 dark:border-amber-800/50">
+                <Card className="border-brand-yellow dark:border-brand-yellow/50">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                         <CardTitle className="text-sm font-medium text-muted-foreground">Pendiente</CardTitle>
-                        <Clock className="h-4 w-4 text-amber-500" />
+                        <Clock className="h-4 w-4 text-brand-yellow" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold text-amber-600 dark:text-amber-400">
+                        <div className="text-2xl font-bold text-brand-yellow dark:text-brand-yellow">
                             {formatMXN(data.totals.pending)}
                         </div>
                         <p className="text-xs text-muted-foreground mt-1">En periodo de 30 días</p>
@@ -124,13 +124,13 @@ export default async function AdminEarningsPage() {
                                     <div className="flex flex-wrap items-start gap-4 sm:flex-shrink-0 sm:items-center">
                                         <div className="text-right">
                                             <p className="text-xs text-muted-foreground">Liberado</p>
-                                            <p className="text-sm font-semibold text-emerald-600 dark:text-emerald-400">
+                                            <p className="text-sm font-semibold text-brand-brown dark:text-brand-brown">
                                                 {formatMXN(entry.totalReleased)}
                                             </p>
                                         </div>
                                         <div className="text-right">
                                             <p className="text-xs text-muted-foreground">Pendiente</p>
-                                            <p className="text-sm font-semibold text-amber-600 dark:text-amber-400">
+                                            <p className="text-sm font-semibold text-brand-yellow dark:text-brand-yellow">
                                                 {formatMXN(entry.totalPending)}
                                             </p>
                                         </div>

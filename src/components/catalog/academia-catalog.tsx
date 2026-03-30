@@ -80,10 +80,10 @@ export function AcademiaCatalog({ events }: { events: any[] }) {
                         </div>
                     )}
                     {upcomingCount > 0 && (
-                        <div className="inline-flex items-center gap-2 rounded-full border border-teal-500/20 bg-teal-500/10 px-4 py-2 text-sm font-semibold text-teal-700 dark:text-teal-300">
+                        <div className="inline-flex items-center gap-2 rounded-full border border-brand-yellow/20 bg-brand-yellow/10 px-4 py-2 text-sm font-semibold text-brand-yellow dark:text-brand-yellow">
                             <span className="relative flex h-2 w-2">
-                                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-teal-400 opacity-75" />
-                                <span className="relative inline-flex h-2 w-2 rounded-full bg-teal-500" />
+                                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-brand-yellow opacity-75" />
+                                <span className="relative inline-flex h-2 w-2 rounded-full bg-brand-yellow" />
                             </span>
                             {upcomingCount} evento{upcomingCount !== 1 ? 's' : ''} próximo{upcomingCount !== 1 ? 's' : ''}
                         </div>
@@ -100,7 +100,7 @@ export function AcademiaCatalog({ events }: { events: any[] }) {
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         placeholder="Buscar por título, ponente o tema..."
-                        className="w-full rounded-xl border border-border/60 bg-card pl-10 pr-10 py-3 text-sm outline-none transition-all focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 placeholder:text-muted-foreground/60"
+                        className="w-full rounded-xl border border-border/60 bg-card pl-10 pr-10 py-3 text-sm outline-none transition-all focus:border-brand-yellow focus:ring-2 focus:ring-brand-yellow/20 placeholder:text-muted-foreground/60"
                     />
                     {searchQuery && (
                         <button
@@ -113,12 +113,12 @@ export function AcademiaCatalog({ events }: { events: any[] }) {
                 </div>
                 <button
                     onClick={() => setShowFilters(!showFilters)}
-                    className={`inline-flex items-center gap-2 rounded-xl border px-4 py-3 text-sm font-medium transition-all shrink-0 ${showFilters ? 'border-teal-500 bg-teal-500/10 text-teal-700 dark:text-teal-300' : 'border-border/60 hover:bg-muted'}`}
+                    className={`inline-flex items-center gap-2 rounded-xl border px-4 py-3 text-sm font-medium transition-all shrink-0 ${showFilters ? 'border-brand-yellow bg-brand-yellow/10 text-brand-yellow dark:text-brand-yellow' : 'border-border/60 hover:bg-muted'}`}
                 >
                     <SlidersHorizontal className="h-4 w-4" />
                     Filtros
                     {hasActiveFilters && (
-                        <span className="h-2 w-2 rounded-full bg-teal-500" />
+                        <span className="h-2 w-2 rounded-full bg-brand-yellow" />
                     )}
                 </button>
             </div>
@@ -133,8 +133,8 @@ export function AcademiaCatalog({ events }: { events: any[] }) {
                             onClick={() => setTypeFilter(filter.value)}
                             className={`inline-flex items-center gap-1.5 rounded-full px-4 py-2.5 text-sm font-medium transition-all duration-200 ${
                                 isActive
-                                    ? 'bg-gradient-to-r from-teal-600 to-emerald-600 text-white shadow-lg shadow-teal-500/20 scale-[1.03]'
-                                    : 'border border-border/60 bg-card hover:bg-muted hover:border-teal-500/30 hover:shadow-sm'
+                                    ? 'bg-gradient-to-r from-brand-yellow to-brand-dark text-white shadow-lg shadow-brand-yellow/20 scale-[1.03]'
+                                    : 'border border-border/60 bg-card hover:bg-muted hover:border-brand-yellow/30 hover:shadow-sm'
                             }`}
                         >
                             <span>{filter.icon}</span>
@@ -158,7 +158,7 @@ export function AcademiaCatalog({ events }: { events: any[] }) {
                                     onClick={() => setCategoryFilter(opt.value)}
                                     className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-all ${
                                         categoryFilter === opt.value
-                                            ? 'bg-teal-600 text-white'
+                                            ? 'bg-brand-yellow text-white'
                                             : 'bg-muted/50 hover:bg-muted text-muted-foreground hover:text-foreground'
                                     }`}
                                 >
@@ -170,7 +170,7 @@ export function AcademiaCatalog({ events }: { events: any[] }) {
                     {hasActiveFilters && (
                         <button
                             onClick={clearAllFilters}
-                            className="text-xs font-medium text-rose-600 hover:text-rose-500 transition-colors flex items-center gap-1"
+                            className="text-xs font-medium text-brand-brown hover:text-brand-brown transition-colors flex items-center gap-1"
                         >
                             <X className="h-3 w-3" />
                             Limpiar todos los filtros
@@ -189,7 +189,7 @@ export function AcademiaCatalog({ events }: { events: any[] }) {
                 {hasActiveFilters && (
                     <button
                         onClick={clearAllFilters}
-                        className="text-xs font-medium text-teal-600 hover:text-teal-500 transition-colors"
+                        className="text-xs font-medium text-brand-yellow hover:text-brand-yellow transition-colors"
                     >
                         Limpiar filtros
                     </button>
@@ -225,7 +225,7 @@ export function AcademiaCatalog({ events }: { events: any[] }) {
                         {hasActiveFilters && (
                             <button
                                 onClick={clearAllFilters}
-                                className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-teal-600 to-emerald-600 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-teal-500/20 hover:shadow-teal-500/30 transition-all"
+                                className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-brand-yellow to-brand-dark px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-brand-yellow/20 hover:shadow-brand-yellow/30 transition-all"
                             >
                                 Limpiar filtros
                             </button>

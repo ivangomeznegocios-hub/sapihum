@@ -20,26 +20,26 @@ export default async function EventosPage() {
     return (
         <div className="flex flex-col items-center flex-1 w-full relative bg-background">
             {/* Hero */}
-            <section className="w-full relative overflow-hidden bg-gradient-to-b from-[#0A1628] to-background">
+            <section className="w-full relative overflow-hidden bg-gradient-to-b from-[#0a0a0a] to-background">
                 <div className="absolute inset-0 sapihum-grid-bg opacity-15" />
-                <div className="absolute left-1/3 top-0 h-[400px] w-[400px] rounded-full bg-teal-500/8 blur-[120px] pointer-events-none" />
+                <div className="absolute left-1/3 top-0 h-[400px] w-[400px] rounded-full bg-brand-yellow/8 blur-[120px] pointer-events-none" />
 
                 <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16 md:py-20">
                     <div className="max-w-3xl space-y-5">
-                        <div className="inline-flex items-center gap-2 rounded-full border border-teal-400/20 bg-teal-500/10 px-3.5 py-1.5 text-xs font-semibold uppercase tracking-[0.15em] text-teal-300">
+                        <div className="inline-flex items-center gap-2 rounded-full border border-brand-yellow/20 bg-brand-yellow/10 px-3.5 py-1.5 text-xs font-semibold uppercase tracking-[0.15em] text-brand-yellow">
                             <span className="relative flex h-1.5 w-1.5">
-                                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-teal-400 opacity-75" />
-                                <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-teal-400" />
+                                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-brand-yellow opacity-75" />
+                                <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-brand-yellow" />
                             </span>
                             En Vivo
                         </div>
                         <h1 className="text-4xl font-bold tracking-tight text-white sm:text-5xl">
                             Eventos en Vivo
                         </h1>
-                        <p className="max-w-2xl text-lg leading-relaxed text-slate-300">
+                        <p className="max-w-2xl text-lg leading-relaxed text-neutral-400">
                             Conferencias, talleres, webinars y experiencias de networking. Conéctate en tiempo real con la comunidad.
                         </p>
-                        <Link href="/academia" className="inline-flex items-center gap-1.5 text-sm font-medium text-teal-400 hover:text-teal-300 transition-colors">
+                        <Link href="/academia" className="inline-flex items-center gap-1.5 text-sm font-medium text-brand-yellow hover:text-brand-yellow transition-colors">
                             ← Ver catálogo completo
                         </Link>
                     </div>

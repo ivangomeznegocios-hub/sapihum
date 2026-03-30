@@ -51,13 +51,13 @@ export default async function SpecializationPage(props: Props) {
   return (
     <div className="relative flex flex-1 w-full flex-col items-center overflow-x-hidden bg-background">
       {/* Hero Section */}
-      <section className="relative flex w-full flex-col items-center overflow-hidden bg-gradient-to-b from-[#0A1628] to-background px-4 py-20 text-center md:py-32">
+      <section className="relative flex w-full flex-col items-center overflow-hidden bg-gradient-to-b from-[#0a0a0a] to-background px-4 py-20 text-center md:py-32">
         {/* Background effects */}
         <div className="absolute inset-0 top-0 h-[600px] sapihum-grid-bg opacity-30" />
-        <div className="absolute left-1/2 top-0 -translate-x-1/2 h-[500px] w-[500px] rounded-full bg-teal-500/10 blur-[120px] pointer-events-none" />
+        <div className="absolute left-1/2 top-0 -translate-x-1/2 h-[500px] w-[500px] rounded-full bg-brand-yellow/10 blur-[120px] pointer-events-none" />
 
         <div className="relative z-10 max-w-4xl flex flex-col items-center">
-          <div className="sapihum-fade-up mb-6 inline-flex max-w-full flex-wrap items-center justify-center gap-2 rounded-full border border-teal-500/30 bg-teal-950/40 px-4 py-1.5 text-center text-sm font-semibold text-teal-300">
+          <div className="sapihum-fade-up mb-6 inline-flex max-w-full flex-wrap items-center justify-center gap-2 rounded-full border border-brand-yellow/30 bg-brand-yellow/40 px-4 py-1.5 text-center text-sm font-semibold text-brand-yellow">
             <span className="text-xl leading-none">{spec.icon}</span>
             Especialidad: {spec.name}
           </div>
@@ -66,13 +66,13 @@ export default async function SpecializationPage(props: Props) {
             {spec.tagline}
           </h1>
           
-          <p className="sapihum-fade-up text-lg md:text-xl text-slate-300 max-w-2xl mb-10 leading-relaxed" style={{ animationDelay: '0.2s' }}>
+          <p className="sapihum-fade-up text-lg md:text-xl text-neutral-400 max-w-2xl mb-10 leading-relaxed" style={{ animationDelay: '0.2s' }}>
             {spec.description}
           </p>
           
           <div className="sapihum-fade-up" style={{ animationDelay: '0.3s' }}>
             <Link href={`/auth/register?plan=${isLevel2Active ? 'level2' : 'level1'}&specialization=${spec.code}`}>
-              <Button size="lg" className="h-auto max-w-full whitespace-normal px-8 py-4 text-center text-base font-bold text-white shadow-lg border-0 bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-400 hover:to-emerald-400 sapihum-glow-cta">
+              <Button size="lg" className="h-auto max-w-full whitespace-normal px-8 py-4 text-center text-base font-bold text-white shadow-lg border-0 bg-gradient-to-r from-brand-yellow to-brand-dark hover:from-brand-yellow hover:to-brand-dark sapihum-glow-cta">
                 {isLevel2Active ? 'Comenzar Especialización' : 'Comenzar con Nivel 1'}
               </Button>
             </Link>
@@ -94,8 +94,8 @@ export default async function SpecializationPage(props: Props) {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 sapihum-stagger">
             {spec.tools.map((tool, index) => (
-              <div key={tool} className="flex flex-col p-6 rounded-2xl border bg-card hover:border-teal-500/30 transition-colors sapihum-card-glow text-center items-center">
-                <div className="h-12 w-12 rounded-xl bg-teal-50 dark:bg-teal-950/30 text-teal-600 dark:text-teal-400 flex items-center justify-center mb-4 text-xl">
+              <div key={tool} className="flex flex-col p-6 rounded-2xl border bg-card hover:border-brand-yellow/30 transition-colors sapihum-card-glow text-center items-center">
+                <div className="h-12 w-12 rounded-xl bg-brand-yellow dark:bg-brand-yellow/30 text-brand-yellow dark:text-brand-yellow flex items-center justify-center mb-4 text-xl">
                   {/* Pseudo-icon based on index or just a check */}
                   {index % 4 === 0 ? '💻' : index % 4 === 1 ? '📊' : index % 4 === 2 ? '📋' : '🧠'}
                 </div>
@@ -111,7 +111,7 @@ export default async function SpecializationPage(props: Props) {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
             <div>
-              <p className="text-sm font-semibold text-teal-600 dark:text-teal-400 uppercase tracking-wider mb-3">
+              <p className="text-sm font-semibold text-brand-yellow dark:text-brand-yellow uppercase tracking-wider mb-3">
                 Beneficios Exclusivos
               </p>
               <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-6">
@@ -122,7 +122,7 @@ export default async function SpecializationPage(props: Props) {
               </p>
               
               <Link href={`/auth/register?plan=${isLevel2Active ? 'level2' : 'level1'}&specialization=${spec.code}`}>
-                <Button size="lg" className="h-auto max-w-full whitespace-normal px-8 py-3 text-center text-base text-white bg-gradient-to-r from-teal-500 to-emerald-500">
+                <Button size="lg" className="h-auto max-w-full whitespace-normal px-8 py-3 text-center text-base text-white bg-gradient-to-r from-brand-yellow to-brand-dark">
                   Crear Cuenta Gratis
                 </Button>
               </Link>
@@ -131,7 +131,7 @@ export default async function SpecializationPage(props: Props) {
             <div className="grid gap-4">
               {spec.benefits.map((benefit) => (
                 <div key={benefit} className="flex items-start gap-4 p-4 rounded-xl border bg-card sapihum-card-glow">
-                  <div className="mt-1 h-6 w-6 rounded-full bg-teal-100 dark:bg-teal-900/40 text-teal-600 dark:text-teal-400 flex items-center justify-center shrink-0">
+                  <div className="mt-1 h-6 w-6 rounded-full bg-brand-yellow dark:bg-brand-yellow/40 text-brand-yellow dark:text-brand-yellow flex items-center justify-center shrink-0">
                     <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                     </svg>
@@ -147,18 +147,18 @@ export default async function SpecializationPage(props: Props) {
       </section>
 
       {/* Pricing / Final CTA */}
-      <section className="w-full py-20 md:py-28 bg-[#0A1628] text-white relative overflow-hidden">
+      <section className="w-full py-20 md:py-28 bg-[#0a0a0a] text-white relative overflow-hidden">
         <div className="absolute inset-0 sapihum-grid-bg opacity-20" />
         <div className="relative z-10 max-w-4xl mx-auto text-center px-4">
           <h2 className="text-3xl md:text-5xl font-bold mb-6">
             Eleva tu estándar profesional hoy
           </h2>
-          <p className="text-xl text-slate-300 mb-10 max-w-2xl mx-auto">
+          <p className="text-xl text-neutral-400 mb-10 max-w-2xl mx-auto">
             Únete a cientos de colegas que ya gestionan su práctica y se capacitan en nuestra plataforma.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href={`/auth/register?plan=${isLevel2Active ? 'level2' : 'level1'}&specialization=${spec.code}`}>
-              <Button size="lg" className="h-auto max-w-full whitespace-normal px-10 py-4 text-center text-base font-bold text-white shadow-xl border-0 bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-400 hover:to-emerald-400 sapihum-glow-cta">
+              <Button size="lg" className="h-auto max-w-full whitespace-normal px-10 py-4 text-center text-base font-bold text-white shadow-xl border-0 bg-gradient-to-r from-brand-yellow to-brand-dark hover:from-brand-yellow hover:to-brand-dark sapihum-glow-cta">
                 {isLevel2Active ? `Activar Membresía ${spec.name}` : 'Unirme al Nivel 1'}
               </Button>
             </Link>

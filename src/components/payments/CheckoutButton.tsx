@@ -90,6 +90,12 @@ export function CheckoutButton({
                 return
             }
 
+            if (data.redirectTo) {
+                setDialogOpen(false)
+                window.location.href = data.redirectTo
+                return
+            }
+
             setDialogOpen(false)
             window.location.href = data.checkoutUrl
         } catch (err) {

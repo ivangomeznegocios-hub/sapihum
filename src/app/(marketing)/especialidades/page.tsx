@@ -13,21 +13,21 @@ export default function EspecialidadesIndexPage() {
   return (
     <div className="flex flex-col items-center flex-1 w-full">
       {/* Hero */}
-      <section className="relative w-full py-20 md:py-28 overflow-hidden bg-[#0A1628]">
+      <section className="relative w-full py-20 md:py-28 overflow-hidden bg-[#0a0a0a]">
         <div className="absolute inset-0 sapihum-grid-bg" />
-        <div className="absolute left-1/2 top-0 -translate-x-1/2 h-[500px] w-[500px] rounded-full bg-teal-500/10 blur-[120px]" />
+        <div className="absolute left-1/2 top-0 -translate-x-1/2 h-[500px] w-[500px] rounded-full bg-brand-yellow/10 blur-[120px]" />
 
         <div className="relative z-10 w-full max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <p className="text-sm font-semibold text-teal-400 uppercase tracking-wider mb-4">
+          <p className="text-sm font-semibold text-brand-yellow uppercase tracking-wider mb-4">
             12 Ramas de la Psicología
           </p>
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-white mb-6 leading-tight">
             Encuentra tu{' '}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-emerald-400">
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-yellow to-brand-dark">
               especialización
             </span>
           </h1>
-          <p className="text-lg text-slate-300 max-w-2xl mx-auto">
+          <p className="text-lg text-neutral-400 max-w-2xl mx-auto">
             Cada especialidad incluye formación continua, herramientas especializadas y una comunidad de profesionales enfocados en tu misma área.
           </p>
         </div>
@@ -43,17 +43,17 @@ export default function EspecialidadesIndexPage() {
               className="group relative rounded-2xl border bg-card p-7 sapihum-card-glow overflow-hidden"
             >
               {/* Left accent bar on hover */}
-              <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-teal-500 to-emerald-500 opacity-0 group-hover:opacity-100 transition-opacity rounded-l-2xl" />
+              <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-brand-yellow to-brand-dark opacity-0 group-hover:opacity-100 transition-opacity rounded-l-2xl" />
 
-              <div className="text-4xl mb-5 bg-gradient-to-br from-teal-50 to-emerald-50 dark:from-teal-900/30 dark:to-emerald-900/30 w-16 h-16 rounded-xl flex items-center justify-center">
+              <div className="text-4xl mb-5 bg-gradient-to-br from-brand-yellow to-brand-dark dark:from-brand-yellow/30 dark:to-brand-dark/30 w-16 h-16 rounded-xl flex items-center justify-center">
                 {spec.icon}
               </div>
 
-              <h2 className="text-xl font-bold mb-2 group-hover:text-teal-600 dark:group-hover:text-teal-400 transition-colors">
+              <h2 className="text-xl font-bold mb-2 group-hover:text-brand-yellow dark:group-hover:text-brand-yellow transition-colors">
                 {spec.name}
               </h2>
 
-              <p className="text-sm text-teal-600 dark:text-teal-400 font-medium mb-3">
+              <p className="text-sm text-brand-yellow dark:text-brand-yellow font-medium mb-3">
                 {spec.tagline}
               </p>
 
@@ -65,7 +65,7 @@ export default function EspecialidadesIndexPage() {
               <div className="space-y-1.5 mb-5">
                 {spec.tools.slice(0, 3).map((tool) => (
                   <div key={tool} className="text-xs text-muted-foreground flex items-center gap-2">
-                    <span className="h-1 w-1 rounded-full bg-teal-500 shrink-0" />
+                    <span className="h-1 w-1 rounded-full bg-brand-yellow shrink-0" />
                     {tool}
                   </div>
                 ))}
@@ -76,7 +76,7 @@ export default function EspecialidadesIndexPage() {
                 )}
               </div>
 
-              <div className="text-sm font-semibold text-teal-600 dark:text-teal-400 flex items-center">
+              <div className="text-sm font-semibold text-brand-yellow dark:text-brand-yellow flex items-center">
                 Explorar especialidad <span className="ml-1 transition-transform group-hover:translate-x-1">→</span>
               </div>
             </Link>
@@ -92,7 +92,7 @@ export default function EspecialidadesIndexPage() {
             SAPIHUM está en constante expansión. Contáctanos si tu rama de la psicología aún no está representada.
           </p>
           <Link href="/auth/register">
-            <Button className="bg-gradient-to-r from-teal-500 to-emerald-500 text-white">
+            <Button className="bg-gradient-to-r from-brand-yellow to-brand-dark text-white">
               Crear mi cuenta
             </Button>
           </Link>

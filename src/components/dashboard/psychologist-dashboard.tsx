@@ -94,7 +94,7 @@ export function PsychologistDashboard({
                             percentage={profileCompleteness}
                             label="Tu Perfil"
                             sublabel="Completa tu perfil"
-                            color="emerald"
+                            color="primary"
                             size={100}
                         />
                         <div className="flex-1 min-w-0">
@@ -105,7 +105,7 @@ export function PsychologistDashboard({
                                 Tu espacio de crecimiento profesional en Comunidad de Psicología
                             </p>
                             <div className="flex items-center gap-2 mt-3">
-                                <span className="text-xs px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 font-medium">
+                                <span className="text-xs px-2.5 py-1 rounded-full bg-brand-brown text-brand-brown dark:bg-brand-brown/30 dark:text-brand-brown font-medium">
                                     Nivel 1 · Comunidad y Crecimiento
                                 </span>
                             </div>
@@ -134,7 +134,7 @@ export function PsychologistDashboard({
                         value={activeEvents}
                         subtitle="Masterclasses y talleres"
                         icon="Calendar"
-                        color="blue"
+                        color="primary"
                         delay={0}
                     />
                     <StatCard
@@ -142,7 +142,7 @@ export function PsychologistDashboard({
                         value={availableResources}
                         subtitle="Documentos y plantillas"
                         icon="FileText"
-                        color="purple"
+                        color="secondary"
                         delay={100}
                     />
                     <StatCard
@@ -150,7 +150,7 @@ export function PsychologistDashboard({
                         value="Activa"
                         subtitle="Conecta con colegas"
                         icon="Users"
-                        color="emerald"
+                        color="primary"
                         delay={200}
                     />
                 </div>
@@ -167,7 +167,7 @@ export function PsychologistDashboard({
                     </div>
 
                     {/* Upgrade CTA */}
-                    <Card className="bg-gradient-to-br from-primary/5 via-primary/10 to-purple-500/10 border-primary/20 backdrop-blur-sm">
+                    <Card className="bg-gradient-to-br from-primary/5 via-primary/10 to-brand-brown/10 border-primary/20 backdrop-blur-sm">
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2">
                                 <Sparkles className="h-5 w-5 text-primary" />
@@ -184,15 +184,15 @@ export function PsychologistDashboard({
                             </p>
                             <ul className="space-y-1.5 text-xs text-muted-foreground">
                                 <li className="flex items-center gap-2">
-                                    <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />
+                                    <CheckCircle2 className="h-3.5 w-3.5 text-brand-brown" />
                                     Gestión de pacientes
                                 </li>
                                 <li className="flex items-center gap-2">
-                                    <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />
+                                    <CheckCircle2 className="h-3.5 w-3.5 text-brand-brown" />
                                     Agenda inteligente 24/7
                                 </li>
                                 <li className="flex items-center gap-2">
-                                    <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />
+                                    <CheckCircle2 className="h-3.5 w-3.5 text-brand-brown" />
                                     Expedientes clínicos
                                 </li>
                             </ul>
@@ -260,8 +260,8 @@ export function PsychologistDashboard({
                         </p>
                         <div className="flex items-center gap-2 mt-3">
                             <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${membershipLevel === 3
-                                    ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'
-                                    : 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
+                                    ? 'bg-brand-yellow text-brand-yellow dark:bg-brand-yellow/30 dark:text-brand-yellow'
+                                    : 'bg-brand-yellow text-brand-yellow dark:bg-brand-yellow/30 dark:text-brand-yellow'
                                 }`}>
                                 Nivel {membershipLevel} · {membershipLevel === 3 ? 'Gestión y Marketing Premium' : 'Consultorio Digital'}
                             </span>
@@ -270,7 +270,7 @@ export function PsychologistDashboard({
                     <div className="flex w-full flex-col gap-2 flex-shrink-0 sm:w-auto sm:flex-row">
                         {membershipLevel === 3 && (
                             <Link href="/dashboard/marketing">
-                                <Button variant="outline" className="w-full border-amber-500/50 text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-950 sm:w-auto">
+                                <Button variant="outline" className="w-full border-brand-yellow/50 text-brand-yellow hover:bg-brand-yellow dark:hover:bg-brand-yellow sm:w-auto">
                                     <TrendingUp className="mr-2 h-4 w-4" />
                                     Agencia
                                 </Button>
@@ -302,7 +302,7 @@ export function PsychologistDashboard({
                         value="Activo"
                         subtitle="Campaña de captación en curso"
                         icon="TrendingUp"
-                        color="amber"
+                        color="primary"
                         delay={0}
                     />
                     <StatCard
@@ -310,7 +310,7 @@ export function PsychologistDashboard({
                         value={`+${Math.floor(patientCount * 0.2)}`}
                         subtitle="Crecimiento estimado este mes"
                         icon="UserPlus"
-                        color="blue"
+                        color="primary"
                         delay={100}
                     />
                     <StatCard
@@ -318,7 +318,7 @@ export function PsychologistDashboard({
                         value="Disponible"
                         subtitle="Agenda tu mentoría 1 a 1"
                         icon="Users"
-                        color="emerald"
+                        color="primary"
                         delay={200}
                     />
                 </div>
@@ -331,7 +331,7 @@ export function PsychologistDashboard({
                     value={patientCount}
                     subtitle="Pacientes activos"
                     icon="Users"
-                    color="blue"
+                    color="primary"
                     delay={0}
                 />
                 <StatCard
@@ -339,7 +339,7 @@ export function PsychologistDashboard({
                     value={appointmentsToday}
                     subtitle="Sesiones programadas"
                     icon="Calendar"
-                    color="emerald"
+                    color="primary"
                     delay={80}
                 />
                 <StatCard
@@ -347,7 +347,7 @@ export function PsychologistDashboard({
                     value={hoursMonth}
                     subtitle="Sesiones completadas"
                     icon="Clock"
-                    color="purple"
+                    color="secondary"
                     delay={160}
                 />
                 <StatCard
@@ -355,7 +355,7 @@ export function PsychologistDashboard({
                     value={activeEvents}
                     subtitle="Masterclasses este mes"
                     icon="TrendingUp"
-                    color="amber"
+                    color="primary"
                     delay={240}
                 />
             </div>
@@ -402,7 +402,7 @@ export function PsychologistDashboard({
                                             <span className={`text-xs font-medium px-2 py-1 rounded-full self-start sm:self-auto ${diffMs < 0
                                                     ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
                                                     : diffHrs < 1
-                                                        ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'
+                                                        ? 'bg-brand-yellow text-brand-yellow dark:bg-brand-yellow/30 dark:text-brand-yellow'
                                                         : 'bg-muted text-muted-foreground'
                                                 }`}>
                                                 {timeLabel}

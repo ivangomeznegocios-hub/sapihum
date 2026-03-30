@@ -52,7 +52,7 @@ export default async function AdminMarketingPage() {
         <div className="w-full max-w-6xl space-y-8">
             {/* Header */}
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-                <div className="rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 p-2.5 text-white shadow-lg shadow-indigo-500/20">
+                <div className="rounded-xl bg-gradient-to-br from-brand-yellow to-brand-brown p-2.5 text-white shadow-lg shadow-brand-yellow/20">
                     <Sparkles className="h-6 w-6" />
                 </div>
                 <div>
@@ -66,28 +66,28 @@ export default async function AdminMarketingPage() {
             {/* Stats */}
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-4">
                 <div className="rounded-xl border bg-card p-4">
-                    <div className="flex items-center gap-2 text-indigo-600 dark:text-indigo-400">
+                    <div className="flex items-center gap-2 text-brand-yellow dark:text-brand-yellow">
                         <Users className="h-4 w-4" />
                         <span className="text-2xl font-bold">{totalUsers}</span>
                     </div>
                     <p className="text-xs text-muted-foreground mt-1">Clientes Nivel 3</p>
                 </div>
                 <div className="rounded-xl border bg-card p-4">
-                    <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400">
+                    <div className="flex items-center gap-2 text-brand-brown dark:text-brand-brown">
                         <FileEdit className="h-4 w-4" />
                         <span className="text-2xl font-bold">{usersWithBrief}</span>
                     </div>
                     <p className="text-xs text-muted-foreground mt-1">Briefs Recibidos</p>
                 </div>
                 <div className="rounded-xl border bg-card p-4">
-                    <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400">
+                    <div className="flex items-center gap-2 text-brand-yellow dark:text-brand-yellow">
                         <BarChart3 className="h-4 w-4" />
                         <span className="text-2xl font-bold">{totalActiveServices}</span>
                     </div>
                     <p className="text-xs text-muted-foreground mt-1">Servicios Activos</p>
                 </div>
                 <div className="rounded-xl border bg-card p-4">
-                    <div className="flex items-center gap-2 text-amber-600 dark:text-amber-400">
+                    <div className="flex items-center gap-2 text-brand-yellow dark:text-brand-yellow">
                         <Megaphone className="h-4 w-4" />
                         <span className="text-2xl font-bold">{totalServices}</span>
                     </div>
@@ -139,17 +139,17 @@ export default async function AdminMarketingPage() {
                                                 <span className={cn(
                                                     'text-xs px-2.5 py-1 rounded-full font-medium border',
                                                     client.brief.status === 'approved'
-                                                        ? 'text-emerald-700 bg-emerald-100 border-emerald-200 dark:text-emerald-400 dark:bg-emerald-900/30 dark:border-emerald-800'
+                                                        ? 'text-brand-brown bg-brand-brown border-brand-brown dark:text-brand-brown dark:bg-brand-brown/30 dark:border-brand-brown'
                                                         : client.brief.status === 'reviewed'
-                                                            ? 'text-blue-700 bg-blue-100 border-blue-200 dark:text-blue-400 dark:bg-blue-900/30 dark:border-blue-800'
-                                                            : 'text-amber-700 bg-amber-100 border-amber-200 dark:text-amber-400 dark:bg-amber-900/30 dark:border-amber-800'
+                                                            ? 'text-brand-yellow bg-brand-yellow border-brand-yellow dark:text-brand-yellow dark:bg-brand-yellow/30 dark:border-brand-yellow'
+                                                            : 'text-brand-yellow bg-brand-yellow border-brand-yellow dark:text-brand-yellow dark:bg-brand-yellow/30 dark:border-brand-yellow'
                                                 )}>
                                                     Brief: {client.brief.status === 'submitted' ? 'Enviado' : client.brief.status === 'reviewed' ? 'Revisado' : 'Aprobado'}
                                                 </span>
                                                 <BriefStatusButtons briefId={client.brief.id} currentStatus={client.brief.status} />
                                             </div>
                                         ) : (
-                                            <span className="text-xs px-2.5 py-1 rounded-full font-medium border text-slate-500 bg-slate-100 border-slate-200 dark:text-slate-400 dark:bg-slate-800 dark:border-slate-700">
+                                            <span className="text-xs px-2.5 py-1 rounded-full font-medium border text-neutral-500 bg-neutral-100 border-neutral-200 dark:text-neutral-500 dark:bg-neutral-800 dark:border-neutral-700">
                                                 Sin brief
                                             </span>
                                         )}
@@ -162,7 +162,7 @@ export default async function AdminMarketingPage() {
 
                                 {/* Brief Details (if submitted) */}
                                 {client.brief && (
-                                    <div className="px-5 py-3 border-b bg-indigo-50/30 dark:bg-indigo-950/10">
+                                    <div className="px-5 py-3 border-b bg-brand-yellow/30 dark:bg-brand-yellow/10">
                                         <p className="text-xs font-medium text-muted-foreground mb-1.5">Brief de Marca:</p>
                                         <div className="grid grid-cols-1 gap-2 text-xs sm:grid-cols-2 xl:grid-cols-4">
                                             {client.brief.brand_name && (
@@ -194,7 +194,7 @@ export default async function AdminMarketingPage() {
                                                 <div key={service.id} className="px-5 py-3">
                                                     <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                                                         <div className="flex items-start gap-3">
-                                                            <div className="p-1.5 rounded-md bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400">
+                                                            <div className="p-1.5 rounded-md bg-brand-yellow dark:bg-brand-yellow/50 text-brand-yellow dark:text-brand-yellow">
                                                                 <Icon className="w-4 h-4" />
                                                             </div>
                                                             <div>

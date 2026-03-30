@@ -153,7 +153,7 @@ export default async function DashboardPage() {
         // Build activity feed from recent data
         const adminActivity: ActivityItem[] = (recentUsersData || []).map((u: any) => ({
             icon: 'UserPlus',
-            iconColor: 'text-blue-500',
+            iconColor: 'text-brand-yellow',
             title: `${u.full_name || 'Usuario'} se registró`,
             description: u.role === 'psychologist' ? 'Nuevo psicólogo' : u.role === 'ponente' ? 'Nuevo ponente' : 'Nuevo usuario',
             timeAgo: timeAgo(u.created_at),
@@ -294,7 +294,7 @@ export default async function DashboardPage() {
             for (const apt of recentApts || []) {
                 recentActivity.push({
                     icon: 'Calendar',
-                    iconColor: 'text-emerald-500',
+                    iconColor: 'text-brand-brown',
                     title: `Sesión con ${apt.patient?.full_name || 'Paciente'}`,
                     description: 'Sesión completada',
                     timeAgo: timeAgo(apt.start_time),
@@ -312,7 +312,7 @@ export default async function DashboardPage() {
             for (const task of recentTasks || []) {
                 recentActivity.push({
                     icon: 'CheckSquare',
-                    iconColor: 'text-blue-500',
+                    iconColor: 'text-brand-yellow',
                     title: `Tarea asignada: ${task.title}`,
                     timeAgo: timeAgo(task.created_at),
                 })

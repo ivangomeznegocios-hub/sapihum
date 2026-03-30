@@ -9,55 +9,71 @@ const config: Config = {
     ],
     theme: {
         extend: {
+            fontFamily: {
+                sans: ['var(--font-montserrat)', 'Montserrat', 'system-ui', '-apple-system', 'sans-serif'],
+            },
             colors: {
-                border: 'hsl(var(--border))',
-                input: 'hsl(var(--input))',
-                ring: 'hsl(var(--ring))',
-                background: 'hsl(var(--background))',
-                foreground: 'hsl(var(--foreground))',
+                border: 'var(--border)',
+                input: 'var(--input)',
+                ring: 'var(--ring)',
+                background: 'var(--background)',
+                foreground: 'var(--foreground)',
                 primary: {
-                    DEFAULT: 'hsl(var(--primary))',
-                    foreground: 'hsl(var(--primary-foreground))',
+                    DEFAULT: 'var(--primary)',
+                    foreground: 'var(--primary-foreground)',
                 },
                 secondary: {
-                    DEFAULT: 'hsl(var(--secondary))',
-                    foreground: 'hsl(var(--secondary-foreground))',
+                    DEFAULT: 'var(--secondary)',
+                    foreground: 'var(--secondary-foreground)',
                 },
                 destructive: {
-                    DEFAULT: 'hsl(var(--destructive))',
-                    foreground: 'hsl(var(--destructive-foreground))',
+                    DEFAULT: 'var(--destructive)',
+                    foreground: 'var(--destructive-foreground)',
                 },
                 muted: {
-                    DEFAULT: 'hsl(var(--muted))',
-                    foreground: 'hsl(var(--muted-foreground))',
+                    DEFAULT: 'var(--muted)',
+                    foreground: 'var(--muted-foreground)',
                 },
                 accent: {
-                    DEFAULT: 'hsl(var(--accent))',
-                    foreground: 'hsl(var(--accent-foreground))',
+                    DEFAULT: 'var(--accent)',
+                    foreground: 'var(--accent-foreground)',
                 },
                 popover: {
-                    DEFAULT: 'hsl(var(--popover))',
-                    foreground: 'hsl(var(--popover-foreground))',
+                    DEFAULT: 'var(--popover)',
+                    foreground: 'var(--popover-foreground)',
                 },
                 card: {
-                    DEFAULT: 'hsl(var(--card))',
-                    foreground: 'hsl(var(--card-foreground))',
+                    DEFAULT: 'var(--card)',
+                    foreground: 'var(--card-foreground)',
                 },
                 sidebar: {
-                    DEFAULT: 'hsl(var(--sidebar-background))',
-                    foreground: 'hsl(var(--sidebar-foreground))',
-                    primary: 'hsl(var(--sidebar-primary))',
-                    'primary-foreground': 'hsl(var(--sidebar-primary-foreground))',
-                    accent: 'hsl(var(--sidebar-accent))',
-                    'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
-                    border: 'hsl(var(--sidebar-border))',
-                    ring: 'hsl(var(--sidebar-ring))',
+                    DEFAULT: 'var(--sidebar-background)',
+                    foreground: 'var(--sidebar-foreground)',
+                    primary: 'var(--sidebar-primary)',
+                    'primary-foreground': 'var(--sidebar-primary-foreground)',
+                    accent: 'var(--sidebar-accent)',
+                    'accent-foreground': 'var(--sidebar-accent-foreground)',
+                    border: 'var(--sidebar-border)',
+                    ring: 'var(--sidebar-ring)',
+                },
+                /* ── SAPIHUM Brand Colors ── */
+                brand: {
+                    yellow: '#f6ae02',
+                    brown: '#7a5602',
+                    carbon: '#2c2c2b',
+                    gray: '#c0bfbc',
+                    dark: '#0a0a0a',
                 },
             },
             borderRadius: {
                 lg: 'var(--radius)',
                 md: 'calc(var(--radius) - 2px)',
                 sm: 'calc(var(--radius) - 4px)',
+            },
+            boxShadow: {
+                'brand-base': '0 4px 12px rgba(0, 0, 0, 0.08)',
+                'brand-hover': '0 4px 12px rgba(0, 0, 0, 0.15)',
+                'brand-glow': '0 4px 12px rgba(246, 174, 2, 0.15)',
             },
             keyframes: {
                 'accordion-down': {

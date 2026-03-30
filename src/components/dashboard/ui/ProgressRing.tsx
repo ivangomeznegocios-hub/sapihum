@@ -8,15 +8,12 @@ interface ProgressRingProps {
     sublabel?: string
     size?: number
     strokeWidth?: number
-    color?: 'blue' | 'emerald' | 'purple' | 'amber' | 'rose'
+    color?: 'primary' | 'secondary'
 }
 
 const colorMap = {
-    blue: { stroke: 'stroke-blue-500', text: 'text-blue-500', track: 'stroke-blue-500/15' },
-    emerald: { stroke: 'stroke-emerald-500', text: 'text-emerald-500', track: 'stroke-emerald-500/15' },
-    purple: { stroke: 'stroke-purple-500', text: 'text-purple-500', track: 'stroke-purple-500/15' },
-    amber: { stroke: 'stroke-amber-500', text: 'text-amber-500', track: 'stroke-amber-500/15' },
-    rose: { stroke: 'stroke-rose-500', text: 'text-rose-500', track: 'stroke-rose-500/15' },
+    primary: { stroke: 'stroke-brand-yellow', text: 'text-brand-yellow', track: 'stroke-brand-yellow/15' },
+    secondary: { stroke: 'stroke-brand-brown', text: 'text-brand-brown', track: 'stroke-brand-brown/15' },
 }
 
 export function ProgressRing({
@@ -25,7 +22,7 @@ export function ProgressRing({
     sublabel,
     size = 120,
     strokeWidth = 8,
-    color = 'emerald'
+    color = 'primary'
 }: ProgressRingProps) {
     const [animatedPercentage, setAnimatedPercentage] = useState(0)
 

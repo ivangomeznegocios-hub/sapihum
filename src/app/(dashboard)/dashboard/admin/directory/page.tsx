@@ -85,7 +85,7 @@ export default async function AdminDirectoryPage() {
 
                             <CardHeader className="pb-3">
                                 <div className="flex items-start gap-3">
-                                    <div className="h-12 w-12 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white font-bold text-lg shrink-0">
+                                    <div className="h-12 w-12 rounded-full bg-gradient-to-br from-brand-yellow to-brand-yellow flex items-center justify-center text-white font-bold text-lg shrink-0">
                                         {psychologist.full_name?.charAt(0) || '?'}
                                     </div>
                                     <div className="min-w-0">
@@ -133,7 +133,7 @@ export default async function AdminDirectoryPage() {
                                         </p>
                                         <div className="flex flex-wrap gap-1">
                                             {psychologist.populations_served.map((population: string) => (
-                                                <span key={population} className="text-xs px-1.5 py-0.5 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 rounded">
+                                                <span key={population} className="text-xs px-1.5 py-0.5 bg-brand-yellow dark:bg-brand-yellow/20 text-brand-yellow dark:text-brand-yellow rounded">
                                                     {population}
                                                 </span>
                                             ))}
@@ -148,7 +148,7 @@ export default async function AdminDirectoryPage() {
                                         </p>
                                         <div className="flex flex-wrap gap-1">
                                             {psychologist.therapeutic_approaches.map((approach: string) => (
-                                                <span key={approach} className="text-xs px-1.5 py-0.5 bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300 rounded">
+                                                <span key={approach} className="text-xs px-1.5 py-0.5 bg-brand-brown dark:bg-brand-brown/20 text-brand-brown dark:text-brand-brown rounded">
                                                     {approach}
                                                 </span>
                                             ))}

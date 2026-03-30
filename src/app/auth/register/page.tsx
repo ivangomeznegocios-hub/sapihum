@@ -272,7 +272,7 @@ function RegisterForm() {
                 <CardDescription>Unete a Comunidad Psicologia</CardDescription>
 
                 {(preselectedPlan || preselectedSpecialization) && (
-                    <div className="mt-3 rounded-md border border-blue-200 bg-blue-50 px-3 py-2 text-left text-xs text-blue-900">
+                    <div className="mt-3 rounded-md border border-brand-yellow bg-brand-yellow px-3 py-2 text-left text-xs text-brand-yellow">
                         {preselectedPlan && <p>Plan sugerido: {preselectedPlan}</p>}
                         {preselectedSpecialization && <p>Especializacion sugerida: {preselectedSpecialization}</p>}
                     </div>

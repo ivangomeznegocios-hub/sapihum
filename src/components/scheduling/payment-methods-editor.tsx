@@ -59,7 +59,7 @@ export function PaymentMethodsEditor({ value, onChange }: PaymentMethodsEditorPr
                             className="h-4 w-4"
                         />
                         <label htmlFor="paypal-enabled" className="font-medium flex items-center gap-2">
-                            <Wallet className="h-4 w-4 text-blue-600" />
+                            <Wallet className="h-4 w-4 text-brand-yellow" />
                             PayPal
                         </label>
                     </div>
@@ -85,7 +85,7 @@ export function PaymentMethodsEditor({ value, onChange }: PaymentMethodsEditorPr
                             className="h-4 w-4"
                         />
                         <label htmlFor="stripe-enabled" className="font-medium flex items-center gap-2">
-                            <CreditCard className="h-4 w-4 text-purple-600" />
+                            <CreditCard className="h-4 w-4 text-brand-brown" />
                             Stripe (Link de pago)
                         </label>
                     </div>
@@ -111,7 +111,7 @@ export function PaymentMethodsEditor({ value, onChange }: PaymentMethodsEditorPr
                             className="h-4 w-4"
                         />
                         <label htmlFor="mercadopago-enabled" className="font-medium flex items-center gap-2">
-                            <Wallet className="h-4 w-4 text-sky-500" />
+                            <Wallet className="h-4 w-4 text-brand-yellow" />
                             MercadoPago (Link de pago)
                         </label>
                     </div>
@@ -188,7 +188,7 @@ export function PaymentMethodsEditor({ value, onChange }: PaymentMethodsEditorPr
                             className="h-4 w-4"
                         />
                         <label htmlFor="cash-enabled" className="font-medium flex items-center gap-2">
-                            <Banknote className="h-4 w-4 text-emerald-600" />
+                            <Banknote className="h-4 w-4 text-brand-brown" />
                             Efectivo (en consultorio)
                         </label>
                     </div>

@@ -191,7 +191,7 @@ function EventCard({
                 {/* Members Badge */}
                 {event.is_members_only && (
                     <div className="absolute top-3 right-3">
-                        <Badge variant={"warning" as any} className="bg-amber-500/90">
+                        <Badge variant={"warning" as any} className="bg-brand-yellow/90">
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
                                 width="12"
@@ -277,7 +277,7 @@ function EventCard({
 
                     {/* Views - Only for creator */}
                     {isCreator && (event as any).views > 0 && (
-                        <span className="flex items-center gap-1 text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full">
+                        <span className="flex items-center gap-1 text-xs bg-brand-brown text-brand-brown px-2 py-0.5 rounded-full">
                             <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                 <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
                                 <circle cx="12" cy="12" r="3" />
@@ -609,7 +609,7 @@ export default async function EventsPage() {
             {upcoming.length > 0 && (
                 <section>
                     <h2 className="mb-6 flex min-w-0 items-center gap-2 text-2xl font-bold tracking-tight">
-                        <div className="flex items-center justify-center p-2 rounded-xl bg-teal-500/10 text-teal-600 dark:text-teal-400">
+                        <div className="flex items-center justify-center p-2 rounded-xl bg-brand-yellow/10 text-brand-yellow dark:text-brand-yellow">
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
                                 width="20"
@@ -652,7 +652,7 @@ export default async function EventsPage() {
                 <section className="mt-12 pt-10 border-t border-border/50">
                     <div className="mb-6 space-y-1">
                         <h2 className="flex min-w-0 items-center gap-2 text-2xl font-bold tracking-tight">
-                            <div className="flex items-center justify-center p-2 rounded-xl bg-purple-500/10 text-purple-600 dark:text-purple-400">
+                            <div className="flex items-center justify-center p-2 rounded-xl bg-brand-brown/10 text-brand-brown dark:text-brand-brown">
                                 <svg
                                     xmlns="http://www.w3.org/2000/svg"
                                     width="20"

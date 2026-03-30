@@ -45,9 +45,9 @@ function EventStatusBadge({ status }: { status: string }) {
 }
 
 const CATEGORY_BADGES: Record<string, { label: string; className: string }> = {
-    networking: { label: 'Networking', className: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' },
-    clinical: { label: 'Clínico', className: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' },
-    business: { label: 'Negocios', className: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400' },
+    networking: { label: 'Networking', className: 'bg-brand-yellow text-brand-yellow dark:bg-brand-yellow/30 dark:text-brand-yellow' },
+    clinical: { label: 'Clínico', className: 'bg-brand-brown text-brand-brown dark:bg-brand-brown/30 dark:text-brand-brown' },
+    business: { label: 'Negocios', className: 'bg-brand-brown text-brand-brown dark:bg-brand-brown/30 dark:text-brand-brown' },
 }
 
 const SUBCATEGORY_LABELS: Record<string, string> = {
@@ -190,7 +190,7 @@ export function EventCard({
 
                 {event.is_members_only && (
                     <div className="absolute top-3 right-3">
-                        <Badge variant={"warning" as any} className="bg-amber-500/90">
+                        <Badge variant={"warning" as any} className="bg-brand-yellow/90">
                             <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-1">
                                 <path d="M12 2a10 10 0 1 0 10 10 4 4 0 0 1-5-5 4 4 0 0 1-5-5" />
                                 <path d="M8.5 8.5v.01" /><path d="M16 15.5v.01" /><path d="M12 12v.01" /><path d="M11 17v.01" /><path d="M7 14v.01" />

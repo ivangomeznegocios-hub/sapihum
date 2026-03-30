@@ -72,7 +72,7 @@ export default async function AnalyticsPage() {
             {/* 1. Salud Clínica y Retención */}
             <div>
                 <h2 className="text-xl font-semibold mb-3 flex items-center gap-2">
-                    <HeartPulse className="h-5 w-5 text-rose-500" />
+                    <HeartPulse className="h-5 w-5 text-brand-brown" />
                     Salud Clínica y Retención
                 </h2>
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -82,7 +82,7 @@ export default async function AnalyticsPage() {
                         subtitle="Completadas vs Canceladas"
                         statusIndicator={stats.attendanceRate >= 80 ? 'good' : stats.attendanceRate > 60 ? 'warning' : 'critical'}
                         icon="CheckCircle2"
-                        color="emerald"
+                        color="primary"
                         info="Mide el compromiso de los pacientes con sus terapias en toda la plataforma. Fórmula: Citas Completadas / (Completadas + Canceladas + No Show). Un número bajo indica problemas de recordatorios o compromiso."
                     />
                     <StatCard
@@ -91,7 +91,7 @@ export default async function AnalyticsPage() {
                         subtitle="Promedio Global de Ánimo"
                         statusIndicator={stats.healthScore >= 7 ? 'good' : stats.healthScore >= 5 ? 'warning' : 'critical'}
                         icon="Brain"
-                        color="purple"
+                        color="secondary"
                         info="El promedio histórico de cómo se sienten los pacientes después de sus sesiones, basado en la evaluación de los psicólogos (1-10)."
                     />
                     <StatCard
@@ -100,7 +100,7 @@ export default async function AnalyticsPage() {
                         subtitle="Abandono antes de 3 sesiones"
                         statusIndicator={stats.dropOffRate <= 20 ? 'good' : stats.dropOffRate <= 40 ? 'warning' : 'critical'}
                         icon="TrendingUp"
-                        color="rose"
+                        color="secondary"
                         info="Porcentaje de pacientes que tuvieron 1 o 2 sesiones y desaparecieron (más de 30 días sin regresar). Ayuda a medir la capacidad de los terapeutas para conectar y retener pacientes en primera instancia."
                     />
                 </div>
@@ -111,7 +111,7 @@ export default async function AnalyticsPage() {
                     {/* 2. Finanzas y Suscripciones */}
                     <div>
                 <h2 className="text-xl font-semibold mb-3 flex items-center gap-2">
-                    <DollarSign className="h-5 w-5 text-emerald-500" /> 
+                    <DollarSign className="h-5 w-5 text-brand-brown" /> 
                     Finanzas & Retención (SaaS)
                 </h2>
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -120,7 +120,7 @@ export default async function AnalyticsPage() {
                         value={formatMXN(stats.mrr)}
                         subtitle="Ingreso Mensual"
                         icon="TrendingUp"
-                        color="emerald"
+                        color="primary"
                         info="Monthly Recurring Revenue (Ingreso Recurrente Mensual). Es el dinero predecible que entra cada mes por las suscripciones activas. Fórmula: Σ(Costo Mensual de cada suscripción activa)."
                     />
                     <StatCard
@@ -129,7 +129,7 @@ export default async function AnalyticsPage() {
                         subtitle="NDR (Objetivo > 100%)"
                         statusIndicator={stats.ndr >= 100 ? 'good' : stats.ndr > 90 ? 'warning' : 'critical'}
                         icon="Target"
-                        color="blue"
+                        color="primary"
                         info="NDR mide cuánto retienes y creces financieramente sobre tu base de usuarios existente ignorando las nuevas ventas. Fórmula: ((MRR Inicial + Expansiones) - MRR Cancelado) / MRR Inicial. >100% significa que tu producto crece solo."
                     />
                     <StatCard
@@ -138,7 +138,7 @@ export default async function AnalyticsPage() {
                         subtitle="Cancelaciones últimos 30 días"
                         statusIndicator={stats.churnRate < 5 ? 'good' : stats.churnRate < 10 ? 'warning' : 'critical'}
                         icon="Activity"
-                        color="rose"
+                        color="secondary"
                         info="Tasa de Cancelación. El porcentaje de tus clientes iniciales que te abandonaron este mes. Fórmula: (Suscripciones canceladas en el mes / Suscriptores Totales al inicio del mes) * 100."
                     />
                     <StatCard
@@ -146,7 +146,7 @@ export default async function AnalyticsPage() {
                         value={formatMXN(stats.ltv || 0)}
                         subtitle="Lifetime Value bruto"
                         icon="DollarSign"
-                        color="purple"
+                        color="secondary"
                         info="Lifetime Value (Valor de Vida). El dinero total aproxmado que te dejará un solo usuario promedio desde que pisa la plataforma hasta que cancela para siempre. Fórmula: (Ingreso Promedio por Usuario * Margen Bruto) / Churn Rate."
                     />
                 </div>
@@ -155,7 +155,7 @@ export default async function AnalyticsPage() {
             {/* 3. Unit Economics */}
             <div>
                 <h2 className="text-xl font-semibold mb-3 flex items-center gap-2">
-                    <PieChart className="h-5 w-5 text-purple-500" />
+                    <PieChart className="h-5 w-5 text-brand-brown" />
                     Unit Economics
                 </h2>
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -164,7 +164,7 @@ export default async function AnalyticsPage() {
                         value={formatMXN(stats.cac)}
                         subtitle="Ingresado manualmente"
                         icon="Activity"
-                        color="amber"
+                        color="primary"
                         info="Customer Acquisition Cost. Lo que te cuesta en publicidad y mercadotecnia convencer a un extraño para que pague en tu plataforma. ¡Modifícalo en el botón 'Configurar Métricas' superior!"
                     />
                     <StatCard
@@ -173,7 +173,7 @@ export default async function AnalyticsPage() {
                         subtitle="Salud (Objetivo > 3.0x)"
                         statusIndicator={stats.ltvCacRatio >= 3 ? 'good' : stats.ltvCacRatio >= 1 ? 'warning' : 'critical'}
                         icon="Target"
-                        color="blue"
+                        color="primary"
                         info="La métrica rey del negocio digital. Por cada $1 que gastas en publicidad, ¿cuántos dólares regresan? Menos de 1.0 = tu negocio quema dinero. Mayor a 3.0 = Máquina de impresión de dinero lista para escalar."
                     />
                     <StatCard
@@ -181,7 +181,7 @@ export default async function AnalyticsPage() {
                         value={`${stats.margin || 0}%`}
                         subtitle="Margen operativo"
                         icon="Percent"
-                        color="emerald"
+                        color="primary"
                         info="El porcentaje de dólares puros que se queda tu plataforma DEBES descontar los costos operativos de tenerla encendida como servidores y sueldos directos. Para Software (SaaS) usualmente es el 85 a 90%."
                     />
                 </div>
@@ -190,7 +190,7 @@ export default async function AnalyticsPage() {
             {/* 4. Unit Economics Avanzados */}
             <div>
                 <h2 className="text-xl font-semibold mb-3 flex items-center gap-2">
-                    <PieChart className="h-5 w-5 text-indigo-500" />
+                    <PieChart className="h-5 w-5 text-brand-yellow" />
                     Unit Economics Avanzados
                 </h2>
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -199,7 +199,7 @@ export default async function AnalyticsPage() {
                         value={formatMXN(stats.arpuPsychologist)}
                         subtitle="Ingreso Promedio por Especialista"
                         icon="DollarSign"
-                        color="purple"
+                        color="secondary"
                         info="Average Revenue Per User. Mide cuánto dinero mensual te deja en promedio un Psicólogo que paga suscripciones. Vital para saber cuánto puedes gastar en campañas para adquirirlos."
                     />
                     <StatCard
@@ -207,7 +207,7 @@ export default async function AnalyticsPage() {
                         value={formatMXN(stats.arpuPatient)}
                         subtitle="Ingreso Promedio por Paciente"
                         icon="DollarSign"
-                        color="emerald"
+                        color="primary"
                         info="Promedio de dinero mensual que entra exclusivamente de pacientes por membresías o compras. Si este número es mayor al de psicólogos, tu negocio es predominantemente B2C."
                     />
                     <StatCard
@@ -216,7 +216,7 @@ export default async function AnalyticsPage() {
                         subtitle="Velocidad de Monetización"
                         statusIndicator={stats.timeToValueHours <= 24 ? 'good' : stats.timeToValueHours <= 72 ? 'warning' : 'critical'}
                         icon="Clock"
-                        color="blue"
+                        color="primary"
                         info="El tiempo promedio que transcurre desde que un usuario se registra hasta que realiza su primera transacción económica. Mientras más bajo sea este número, más rápido retorna tu inversión publicitaria."
                     />
                 </div>
@@ -225,7 +225,7 @@ export default async function AnalyticsPage() {
             {/* 5. Engagement & Marketplace */}
             <div>
                 <h2 className="text-xl font-semibold mb-3 flex items-center gap-2">
-                    <HeartPulse className="h-5 w-5 text-rose-500" />
+                    <HeartPulse className="h-5 w-5 text-brand-brown" />
                     Engagement & Marketplace
                 </h2>
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -234,7 +234,7 @@ export default async function AnalyticsPage() {
                         value={stats.dau}
                         subtitle="Usuarios Activos Diarios"
                         icon="Users"
-                        color="blue"
+                        color="primary"
                         info="Daily Active Users. Cantidad de usuarios reales e interacciones activas en las últimas 24 hrs. Excluye cuentas marcadas como [Test]."
                     />
                     <StatCard
@@ -242,7 +242,7 @@ export default async function AnalyticsPage() {
                         value={stats.mau}
                         subtitle="Usuarios Activos Mensuales"
                         icon="Users"
-                        color="purple"
+                        color="secondary"
                         info="Monthly Active Users. Cantidad de usuarios que entraron o interactuaron en los últimos 30 días. Tu motor debe buscar que esto crezca o se infeste tu plataforma de perfiles 'fantasma'."
                     />
                     <StatCard
@@ -251,7 +251,7 @@ export default async function AnalyticsPage() {
                         subtitle="Adherencia (Objetivo > 20%)"
                         statusIndicator={stats.dauMauRatio >= 20 ? 'good' : 'warning'}
                         icon="Activity"
-                        color="amber"
+                        color="primary"
                         info="Nivel de 'adicción' a tu plataforma. Mide qué porcentaje de los usuarios mensuales usa tu app DIARIO. Arriba del 20% es un producto con retención sana. Redes sociales suelen estar arriba del 50%."
                     />
                     <StatCard
@@ -259,7 +259,7 @@ export default async function AnalyticsPage() {
                         value={`${stats.fillRate.toFixed(1)}%`}
                         subtitle="Capacidad de Eventos del Mes"
                         icon="Users"
-                        color="emerald"
+                        color="primary"
                         info="Tasa de Llenado. Si tus ponentes abrieron 100 lugares combinados en sus eventos, esta métrica dice cuántos se ocuparon realmente. Fórmula: Asistentes / Asientos Ofertados."
                     />
                 </div>
@@ -268,7 +268,7 @@ export default async function AnalyticsPage() {
             {/* 6. Crecimiento Orgánico (Viralidad) */}
             <div>
                 <h2 className="text-xl font-semibold mb-3 flex items-center gap-2">
-                    <TrendingUp className="h-5 w-5 text-indigo-500" />
+                    <TrendingUp className="h-5 w-5 text-brand-yellow" />
                     Crecimiento Orgánico y Viralidad
                 </h2>
                 <div className="grid gap-4 sm:grid-cols-2">
@@ -278,7 +278,7 @@ export default async function AnalyticsPage() {
                         subtitle="Nuevos usuarios por usuario actual"
                         statusIndicator={stats.kFactor >= 1.0 ? 'good' : stats.kFactor >= 0.2 ? 'warning' : 'critical'}
                         icon="Users"
-                        color="indigo"
+                        color="primary"
                         info="La métrica rey del crecimiento orgánico. Indica a cuántos amigos activos invita cada perfil en promedio mediante Códigos de Invitación. Un factor > 1.0 significa crecimiento exponencial infinito."
                     />
                     <StatCard
@@ -287,7 +287,7 @@ export default async function AnalyticsPage() {
                         subtitle="Atribuciones exitosas"
                         statusIndicator={stats.referralConversionRate >= 30 ? 'good' : 'warning'}
                         icon="Percent"
-                        color="emerald"
+                        color="primary"
                         info="De todos los referimientos iniciados, este es el porcentaje que realmente completó el flujo necesario para obtener recompensas, indicando la calidad del tráfico referido."
                     />
                 </div>
@@ -298,7 +298,7 @@ export default async function AnalyticsPage() {
             {/* 7. Plataforma & Eventos (Métricas Base) */}
             <div>
                 <h2 className="text-xl font-semibold mb-3 flex items-center gap-2">
-                    <Calendar className="h-5 w-5 text-blue-500" />
+                    <Calendar className="h-5 w-5 text-brand-yellow" />
                     General de la Plataforma
                 </h2>
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -307,21 +307,21 @@ export default async function AnalyticsPage() {
                         value={stats.totalUsers}
                         subtitle="Registrados"
                         icon="Users"
-                        color="blue"
+                        color="primary"
                     />
                     <StatCard
                         title="Citas Completadas"
                         value={stats.completedAppointments}
                         subtitle={`De ${stats.totalAppointments} totales`}
                         icon="Calendar"
-                        color="emerald"
+                        color="primary"
                     />
                     <StatCard
                         title="Eventos Creados"
                         value={stats.totalEvents}
                         subtitle="Histórico"
                         icon="TrendingUp"
-                        color="purple"
+                        color="secondary"
                     />
                     {profile.role === 'admin' && (
                         <StatCard
@@ -329,7 +329,7 @@ export default async function AnalyticsPage() {
                             value={formatMXN(stats.eventsGmv)}
                             subtitle="Ventas (Mes Actual)"
                             icon="DollarSign"
-                            color="emerald"
+                            color="primary"
                         />
                     )}
                 </div>
@@ -353,9 +353,9 @@ export default async function AnalyticsPage() {
                                 stats.activity.map((item: any, i: number) => (
                                     <div key={i} className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg">
                                         <div className="p-2 bg-background rounded-full">
-                                            {item.type === 'appointment' && <Calendar className="h-4 w-4 text-blue-500" />}
+                                            {item.type === 'appointment' && <Calendar className="h-4 w-4 text-brand-yellow" />}
                                             {item.type === 'user' && <Users className="h-4 w-4 text-green-500" />}
-                                            {item.type === 'event' && <TrendingUp className="h-4 w-4 text-purple-500" />}
+                                            {item.type === 'event' && <TrendingUp className="h-4 w-4 text-brand-brown" />}
                                         </div>
                                         <div className="flex-1">
                                             <p className="text-sm font-medium line-clamp-2">{item.description}</p>

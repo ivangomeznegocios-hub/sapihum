@@ -14,7 +14,7 @@ const iconMap: Record<string, LucideIcon> = {
     CalendarDays, Eye, Shield, Activity, Mic2, UserCog,
     Brain, CheckSquare, Heart, Info
 }
-type ColorVariant = 'blue' | 'emerald' | 'purple' | 'amber' | 'rose' | 'indigo'
+type ColorVariant = 'primary' | 'secondary'
 
 interface StatCardProps {
     title: string
@@ -36,53 +36,21 @@ const colorStyles: Record<ColorVariant, {
     valueColor: string
     trendColor: string
 }> = {
-    blue: {
-        bg: 'bg-blue-50/50 dark:bg-blue-950/20',
-        border: 'border-blue-200/60 dark:border-blue-800/40',
-        iconBg: 'bg-blue-100 dark:bg-blue-900/50',
-        iconColor: 'text-blue-600 dark:text-blue-400',
-        valueColor: 'text-blue-700 dark:text-blue-300',
-        trendColor: 'text-blue-600/70 dark:text-blue-400/70',
+    primary: {
+        bg: 'bg-brand-yellow/50 dark:bg-brand-yellow/20',
+        border: 'border-brand-yellow/60 dark:border-brand-yellow/40',
+        iconBg: 'bg-brand-yellow dark:bg-brand-yellow/50',
+        iconColor: 'text-brand-yellow dark:text-brand-yellow',
+        valueColor: 'text-brand-yellow dark:text-brand-yellow',
+        trendColor: 'text-brand-yellow/70 dark:text-brand-yellow/70',
     },
-    emerald: {
-        bg: 'bg-emerald-50/50 dark:bg-emerald-950/20',
-        border: 'border-emerald-200/60 dark:border-emerald-800/40',
-        iconBg: 'bg-emerald-100 dark:bg-emerald-900/50',
-        iconColor: 'text-emerald-600 dark:text-emerald-400',
-        valueColor: 'text-emerald-700 dark:text-emerald-300',
-        trendColor: 'text-emerald-600/70 dark:text-emerald-400/70',
-    },
-    purple: {
-        bg: 'bg-purple-50/50 dark:bg-purple-950/20',
-        border: 'border-purple-200/60 dark:border-purple-800/40',
-        iconBg: 'bg-purple-100 dark:bg-purple-900/50',
-        iconColor: 'text-purple-600 dark:text-purple-400',
-        valueColor: 'text-purple-700 dark:text-purple-300',
-        trendColor: 'text-purple-600/70 dark:text-purple-400/70',
-    },
-    amber: {
-        bg: 'bg-amber-50/50 dark:bg-amber-950/20',
-        border: 'border-amber-200/60 dark:border-amber-800/40',
-        iconBg: 'bg-amber-100 dark:bg-amber-900/50',
-        iconColor: 'text-amber-600 dark:text-amber-400',
-        valueColor: 'text-amber-700 dark:text-amber-300',
-        trendColor: 'text-amber-600/70 dark:text-amber-400/70',
-    },
-    rose: {
-        bg: 'bg-rose-50/50 dark:bg-rose-950/20',
-        border: 'border-rose-200/60 dark:border-rose-800/40',
-        iconBg: 'bg-rose-100 dark:bg-rose-900/50',
-        iconColor: 'text-rose-600 dark:text-rose-400',
-        valueColor: 'text-rose-700 dark:text-rose-300',
-        trendColor: 'text-rose-600/70 dark:text-rose-400/70',
-    },
-    indigo: {
-        bg: 'bg-indigo-50/50 dark:bg-indigo-950/20',
-        border: 'border-indigo-200/60 dark:border-indigo-800/40',
-        iconBg: 'bg-indigo-100 dark:bg-indigo-900/50',
-        iconColor: 'text-indigo-600 dark:text-indigo-400',
-        valueColor: 'text-indigo-700 dark:text-indigo-300',
-        trendColor: 'text-indigo-600/70 dark:text-indigo-400/70',
+    secondary: {
+        bg: 'bg-brand-brown/50 dark:bg-brand-brown/20',
+        border: 'border-brand-brown/60 dark:border-brand-brown/40',
+        iconBg: 'bg-brand-brown dark:bg-brand-brown/50',
+        iconColor: 'text-brand-brown dark:text-brand-brown',
+        valueColor: 'text-brand-brown dark:text-brand-brown',
+        trendColor: 'text-brand-brown/70 dark:text-brand-brown/70',
     },
 }
 
@@ -92,7 +60,7 @@ export function StatCard({
     subtitle,
     trend,
     icon,
-    color = 'blue',
+    color = 'primary',
     delay = 0,
     statusIndicator,
     info
@@ -102,7 +70,7 @@ export function StatCard({
 
     let finalValueColor = styles.valueColor
     if (statusIndicator === 'good') finalValueColor = 'text-green-600 dark:text-green-400'
-    if (statusIndicator === 'warning') finalValueColor = 'text-amber-600 dark:text-amber-400'
+    if (statusIndicator === 'warning') finalValueColor = 'text-brand-yellow dark:text-brand-yellow'
     if (statusIndicator === 'critical') finalValueColor = 'text-red-600 dark:text-red-400'
 
     return (

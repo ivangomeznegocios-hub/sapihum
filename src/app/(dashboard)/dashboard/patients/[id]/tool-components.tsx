@@ -480,7 +480,7 @@ export function ToolsTabContent({
                                                             Asignado: {new Date(assignment.assigned_at).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })}
                                                         </span>
                                                         {assignment.due_date && (
-                                                            <span className="text-amber-600 font-medium">
+                                                            <span className="text-brand-yellow font-medium">
                                                                 Límite: {new Date(assignment.due_date).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })}
                                                             </span>
                                                         )}
@@ -495,7 +495,7 @@ export function ToolsTabContent({
                                                         <div className="mt-2 flex items-center gap-2">
                                                             <div className="flex-1 h-1.5 rounded-full bg-muted overflow-hidden">
                                                                 <div
-                                                                    className="h-full rounded-full bg-blue-500 transition-all"
+                                                                    className="h-full rounded-full bg-brand-yellow transition-all"
                                                                     style={{ width: `${assignment.response.progress}%` }}
                                                                 />
                                                             </div>

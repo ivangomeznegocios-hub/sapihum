@@ -208,7 +208,7 @@ export function ChatInterface({ currentUser, initialContacts }: ChatInterfacePro
                         </div>
 
                         {/* Messages Area */}
-                        <ScrollArea className="flex-1 min-h-0 p-3 sm:p-4 bg-slate-50 dark:bg-slate-900/50" ref={scrollRef}>
+                        <ScrollArea className="flex-1 min-h-0 p-3 sm:p-4 bg-neutral-50 dark:bg-neutral-900/50" ref={scrollRef}>
                             <div className="flex min-h-full flex-col justify-end gap-4">
                                 {isLoading ? (
                                     <div className="flex justify-center p-4">
@@ -231,7 +231,7 @@ export function ChatInterface({ currentUser, initialContacts }: ChatInterfacePro
                                                         max-w-[88%] rounded-2xl px-4 py-2 text-sm shadow-sm sm:max-w-[80%]
                                                         ${isMe
                                                             ? 'bg-primary text-primary-foreground rounded-br-none'
-                                                            : 'bg-white dark:bg-slate-800 border rounded-bl-none'}
+                                                            : 'bg-white dark:bg-neutral-800 border rounded-bl-none'}
                                                     `}
                                                 >
                                                     <p>{msg.content}</p>

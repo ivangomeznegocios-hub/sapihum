@@ -73,7 +73,7 @@ export function RecordingCountdown({ expiresAt, onExpired }: CountdownTimerProps
 
     return (
         <div className={`flex items-center gap-1.5 text-sm font-medium ${isCritical ? 'text-red-600 animate-pulse' :
-                isUrgent ? 'text-amber-600' :
+                isUrgent ? 'text-brand-yellow' :
                     'text-muted-foreground'
             }`}>
             <Clock className="h-3.5 w-3.5" />

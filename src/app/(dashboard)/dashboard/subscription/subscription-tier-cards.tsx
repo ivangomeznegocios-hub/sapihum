@@ -243,12 +243,12 @@ export function SubscriptionTierCards({
             </section>
 
             {level3Visible && level3Plan && (
-                <Card className={currentLevel >= 3 ? 'border-green-500' : 'border-amber-500/40'}>
+                <Card className={currentLevel >= 3 ? 'border-green-500' : 'border-brand-yellow/40'}>
                     <CardHeader>
                         <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                             <div>
                                 <CardTitle className="flex items-center gap-2">
-                                    <Sparkles className="h-5 w-5 text-amber-500" />
+                                    <Sparkles className="h-5 w-5 text-brand-yellow" />
                                     Nivel 3 - Avanzado
                                 </CardTitle>
                                 <CardDescription>
@@ -257,7 +257,7 @@ export function SubscriptionTierCards({
                                         : 'Desbloqueado por tu Nivel 2 activo'}
                                 </CardDescription>
                             </div>
-                            <Badge className="self-start bg-amber-500 hover:bg-amber-500">Desbloqueado</Badge>
+                            <Badge className="self-start bg-brand-yellow hover:bg-brand-yellow">Desbloqueado</Badge>
                         </div>
                         <div className="mt-2">
                             <span className="text-3xl font-bold">

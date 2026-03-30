@@ -12,23 +12,23 @@ export function PublicCatalogIndex({
     return (
         <div className="space-y-12 pb-20">
             {/* Hero Section */}
-            <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-900 via-slate-800 to-teal-900/80">
+            <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-neutral-900 via-neutral-800 to-brand-brown/80">
                 {/* Background pattern */}
                 <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, white 1px, transparent 0)', backgroundSize: '24px 24px' }} />
-                <div className="absolute -right-32 -top-32 h-64 w-64 rounded-full bg-teal-500/10 blur-3xl" />
-                <div className="absolute -bottom-20 -left-20 h-48 w-48 rounded-full bg-emerald-500/10 blur-3xl" />
+                <div className="absolute -right-32 -top-32 h-64 w-64 rounded-full bg-brand-yellow/10 blur-3xl" />
+                <div className="absolute -bottom-20 -left-20 h-48 w-48 rounded-full bg-brand-brown/10 blur-3xl" />
 
                 <div className="relative px-6 py-14 sm:px-10 sm:py-16 lg:py-20">
                     <div className="max-w-3xl space-y-5">
-                        <div className="inline-flex items-center gap-2 rounded-full border border-teal-400/20 bg-teal-500/10 px-3.5 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-teal-300">
+                        <div className="inline-flex items-center gap-2 rounded-full border border-brand-yellow/20 bg-brand-yellow/10 px-3.5 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-brand-yellow">
                             <span className="relative flex h-1.5 w-1.5">
-                                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-teal-400 opacity-75" />
-                                <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-teal-400" />
+                                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-brand-yellow opacity-75" />
+                                <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-brand-yellow" />
                             </span>
                             Catálogo Abierto
                         </div>
                         <h1 className="text-4xl font-bold tracking-tight text-white sm:text-5xl lg:text-6xl">{title}</h1>
-                        <p className="max-w-2xl text-lg leading-relaxed text-slate-300 sm:text-xl">{description}</p>
+                        <p className="max-w-2xl text-lg leading-relaxed text-neutral-400 sm:text-xl">{description}</p>
                     </div>
                 </div>
             </section>

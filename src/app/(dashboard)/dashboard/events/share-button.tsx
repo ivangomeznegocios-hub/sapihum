@@ -104,17 +104,17 @@ export function ShareEventButton({
                                 WhatsApp
                             </a>
                             <a href={shareLinks.facebook} target="_blank" rel="noopener noreferrer"
-                                className="flex min-w-[4rem] flex-1 items-center justify-center gap-2 rounded-lg bg-blue-500/10 p-2.5 text-sm font-medium text-blue-600 transition-colors hover:bg-blue-500/20"
+                                className="flex min-w-[4rem] flex-1 items-center justify-center gap-2 rounded-lg bg-brand-yellow/10 p-2.5 text-sm font-medium text-brand-yellow transition-colors hover:bg-brand-yellow/20"
                             >
                                 <Facebook className="h-4 w-4" />
                             </a>
                             <a href={shareLinks.twitter} target="_blank" rel="noopener noreferrer"
-                                className="flex min-w-[4rem] flex-1 items-center justify-center gap-2 rounded-lg bg-sky-500/10 p-2.5 text-sm font-medium text-sky-600 transition-colors hover:bg-sky-500/20"
+                                className="flex min-w-[4rem] flex-1 items-center justify-center gap-2 rounded-lg bg-brand-yellow/10 p-2.5 text-sm font-medium text-brand-yellow transition-colors hover:bg-brand-yellow/20"
                             >
                                 𝕏
                             </a>
                             <a href={shareLinks.linkedin} target="_blank" rel="noopener noreferrer"
-                                className="flex min-w-[4rem] flex-1 items-center justify-center gap-2 rounded-lg bg-blue-700/10 p-2.5 text-sm font-medium text-blue-700 transition-colors hover:bg-blue-700/20"
+                                className="flex min-w-[4rem] flex-1 items-center justify-center gap-2 rounded-lg bg-brand-yellow/10 p-2.5 text-sm font-medium text-brand-yellow transition-colors hover:bg-brand-yellow/20"
                             >
                                 <Linkedin className="h-4 w-4" />
                             </a>

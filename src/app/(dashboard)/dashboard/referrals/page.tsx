@@ -43,10 +43,10 @@ export default async function ReferralsPage() {
     const getStatusBadge = (status: string) => {
         const badges: Record<string, { class: string, icon: any, label: string }> = {
             pending: { class: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-200', icon: <Clock className="h-3 w-3" />, label: 'Pendiente' },
-            assigned: { class: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-200', icon: <User className="h-3 w-3" />, label: 'Asignada' },
+            assigned: { class: 'bg-brand-yellow text-brand-yellow dark:bg-brand-yellow/30 dark:text-brand-yellow', icon: <User className="h-3 w-3" />, label: 'Asignada' },
             accepted: { class: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-200', icon: <CheckCircle2 className="h-3 w-3" />, label: 'Aceptada' },
             rejected: { class: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-200', icon: <XCircle className="h-3 w-3" />, label: 'Rechazada' },
-            handoff_completed: { class: 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-200', icon: <CheckCircle2 className="h-3 w-3" />, label: 'Transferencia clinica' },
+            handoff_completed: { class: 'bg-brand-brown text-brand-brown dark:bg-brand-brown/30 dark:text-brand-brown', icon: <CheckCircle2 className="h-3 w-3" />, label: 'Transferencia clinica' },
             completed: { class: 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-200', icon: <CheckCircle2 className="h-3 w-3" />, label: 'Completada' },
             cancelled: { class: 'bg-gray-100 text-gray-500 dark:bg-gray-900/30 dark:text-gray-400', icon: <XCircle className="h-3 w-3" />, label: 'Cancelada' },
         }
@@ -189,7 +189,7 @@ export default async function ReferralsPage() {
                 <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                         <CardTitle className="text-sm font-medium">Enviadas</CardTitle>
-                        <ArrowUpRight className="h-4 w-4 text-blue-500" />
+                        <ArrowUpRight className="h-4 w-4 text-brand-yellow" />
                     </CardHeader>
                     <CardContent>
                         <div className="text-2xl font-bold">{sent.length}</div>
@@ -216,7 +216,7 @@ export default async function ReferralsPage() {
                 <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                         <CardTitle className="text-sm font-medium">Transferencias Cerradas</CardTitle>
-                        <CheckCircle2 className="h-4 w-4 text-purple-500" />
+                        <CheckCircle2 className="h-4 w-4 text-brand-brown" />
                     </CardHeader>
                     <CardContent>
                         <div className="text-2xl font-bold">{handoffCompletedCount}</div>
@@ -293,7 +293,7 @@ export default async function ReferralsPage() {
             <Card>
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2">
-                        <ArrowUpRight className="h-5 w-5 text-blue-500" />
+                        <ArrowUpRight className="h-5 w-5 text-brand-yellow" />
                         Canalizaciones Solicitadas
                     </CardTitle>
                     <CardDescription>Pacientes para quienes has pedido continuidad de cuidado con otro colega</CardDescription>

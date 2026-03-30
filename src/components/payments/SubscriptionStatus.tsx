@@ -127,7 +127,7 @@ export function SubscriptionStatus({ subscription, hasStripeCustomer }: Subscrip
                 )}
 
                 {subscription.status === 'trialing' && subscription.trial_end && (
-                    <div className="text-sm text-blue-600">
+                    <div className="text-sm text-brand-yellow">
                         Tu prueba gratuita termina el {formatDate(subscription.trial_end)}
                     </div>
                 )}

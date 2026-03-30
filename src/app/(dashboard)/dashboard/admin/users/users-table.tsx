@@ -23,10 +23,10 @@ interface UsersTableProps {
 
 const ROLE_BADGES: Record<string, string> = {
     admin: 'surface-alert-error dark:bg-red-900 dark:text-red-200',
-    support: 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200',
-    psychologist: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
+    support: 'bg-brand-yellow text-brand-yellow dark:bg-brand-yellow dark:text-brand-yellow',
+    psychologist: 'bg-brand-yellow text-brand-yellow dark:bg-brand-yellow dark:text-brand-yellow',
     patient: 'surface-alert-success dark:bg-green-900 dark:text-green-200',
-    ponente: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200',
+    ponente: 'bg-brand-brown text-brand-brown dark:bg-brand-brown dark:text-brand-brown',
 }
 
 const ROLE_LABELS: Record<string, string> = {

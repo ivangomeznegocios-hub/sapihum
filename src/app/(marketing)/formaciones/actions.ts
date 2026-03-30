@@ -1,6 +1,9 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { getCommercialAccessContext } from '@/lib/access/commercial'
+import { claimFormationRecordsByEmail } from '@/lib/formations/service'
+import { getFormationCommercialState, getFormationMemberAccessMessage } from '@/lib/formations/pricing'
 
 export async function getPublicFormations() {
     const supabase = await createClient()
@@ -22,7 +25,6 @@ export async function getPublicFormations() {
 export async function getPublicFormationBySlug(slug: string) {
     const supabase = await createClient()
 
-    // Fetch formation
     const { data: formation, error } = await (supabase
         .from('formations') as any)
         .select('*')
@@ -34,7 +36,6 @@ export async function getPublicFormationBySlug(slug: string) {
         return null
     }
 
-    // Fetch courses included
     const { data: courses } = await (supabase
         .from('formation_courses') as any)
         .select(`
@@ -49,35 +50,71 @@ export async function getPublicFormationBySlug(slug: string) {
         .eq('formation_id', formation.id)
         .order('display_order', { ascending: true })
 
-    // Check user purchase history if logged in
     let hasPurchasedBundle = false
     let purchasedCourses: string[] = []
+    let hasActiveMembership = false
+
+    const pricingState = {
+        publicPrice: Number(formation.bundle_price || 0),
+        effectivePrice: Number(formation.bundle_price || 0),
+        needsPayment: Number(formation.bundle_price || 0) > 0,
+        complimentaryByMembership: false,
+        discountedByMembership: false,
+    }
 
     const { data: { user } } = await supabase.auth.getUser()
-    
+
     if (user) {
-        // Did they buy the bundle?
-        const { data: bundlePurchases } = await (supabase
+        const { data: profile } = await (supabase
+            .from('profiles') as any)
+            .select('id, role, email, membership_level, subscription_status')
+            .eq('id', user.id)
+            .maybeSingle()
+
+        if (profile?.email) {
+            await claimFormationRecordsByEmail({
+                userId: user.id,
+                email: profile.email,
+            })
+        }
+
+        const commercialAccess = profile
+            ? await getCommercialAccessContext({
+                supabase,
+                userId: user.id,
+                profile,
+            })
+            : null
+
+        hasActiveMembership = Boolean(commercialAccess?.hasActiveMembership)
+
+        if (commercialAccess) {
+            Object.assign(pricingState, getFormationCommercialState(formation, commercialAccess.hasActiveMembership))
+        }
+
+        const bundlePurchaseQuery = (supabase
             .from('formation_purchases') as any)
             .select('id')
             .eq('formation_id', formation.id)
-            .eq('user_id', user.id)
             .eq('status', 'confirmed')
 
-        if (bundlePurchases && bundlePurchases.length > 0) {
-            hasPurchasedBundle = true
-        } else {
-            // Check individual events access
-            const courseEventIds = courses?.map((c: any) => c.event?.id).filter(Boolean) || []
+        const { data: bundlePurchase } = profile?.email
+            ? await bundlePurchaseQuery.or(`user_id.eq.${user.id},email.eq.${profile.email}`).maybeSingle()
+            : await bundlePurchaseQuery.eq('user_id', user.id).maybeSingle()
+
+        hasPurchasedBundle = Boolean(bundlePurchase)
+
+        if (!hasPurchasedBundle) {
+            const courseEventIds = (courses ?? []).map((course: any) => course.event?.id).filter(Boolean)
             if (courseEventIds.length > 0) {
-                const { data: accessData } = await supabase
-                    .from('event_entitlements')
+                const { data: accessData } = await (supabase
+                    .from('event_entitlements') as any)
                     .select('event_id')
                     .eq('user_id', user.id)
                     .in('event_id', courseEventIds)
                     .eq('access_kind', 'course_access')
-                    
-                purchasedCourses = accessData?.map((a: any) => a.event_id) || []
+
+                purchasedCourses = accessData?.map((item: any) => item.event_id) || []
             }
         }
     }
@@ -85,10 +122,15 @@ export async function getPublicFormationBySlug(slug: string) {
     return {
         ...formation,
         courses: courses || [],
+        pricing: {
+            ...pricingState,
+            memberMessage: getFormationMemberAccessMessage(formation),
+        },
         userState: {
             isLoggedIn: !!user,
+            hasActiveMembership,
             hasPurchasedBundle,
-            purchasedCourses
-        }
+            purchasedCourses,
+        },
     }
 }

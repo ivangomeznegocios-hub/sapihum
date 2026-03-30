@@ -50,10 +50,10 @@ export default async function AdminReferralsPage() {
     const getStatusBadge = (status: string) => {
         const badges: Record<string, { cls: string, label: string }> = {
             pending: { cls: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-200', label: 'Pendiente' },
-            assigned: { cls: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-200', label: 'Asignada' },
+            assigned: { cls: 'bg-brand-yellow text-brand-yellow dark:bg-brand-yellow/30 dark:text-brand-yellow', label: 'Asignada' },
             accepted: { cls: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-200', label: 'Aceptada' },
             rejected: { cls: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-200', label: 'Rechazada' },
-            handoff_completed: { cls: 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-200', label: 'Transferencia clinica' },
+            handoff_completed: { cls: 'bg-brand-brown text-brand-brown dark:bg-brand-brown/30 dark:text-brand-brown', label: 'Transferencia clinica' },
             completed: { cls: 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-200', label: 'Completada' },
             cancelled: { cls: 'bg-gray-100 text-gray-500 dark:bg-gray-900/30 dark:text-gray-400', label: 'Cancelada' },
         }
@@ -92,7 +92,7 @@ export default async function AdminReferralsPage() {
                 <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                         <CardTitle className="text-sm font-medium">En Seguimiento</CardTitle>
-                        <ArrowUpRight className="h-4 w-4 text-blue-500" />
+                        <ArrowUpRight className="h-4 w-4 text-brand-yellow" />
                     </CardHeader>
                     <CardContent>
                         <div className="text-2xl font-bold">{active.length}</div>
@@ -101,7 +101,7 @@ export default async function AdminReferralsPage() {
                 <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                         <CardTitle className="text-sm font-medium">Transferencias Cerradas</CardTitle>
-                        <CheckCircle2 className="h-4 w-4 text-purple-500" />
+                        <CheckCircle2 className="h-4 w-4 text-brand-brown" />
                     </CardHeader>
                     <CardContent>
                         <div className="text-2xl font-bold">{handoffCompleted.length}</div>

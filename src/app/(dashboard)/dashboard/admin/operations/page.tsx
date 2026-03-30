@@ -144,7 +144,7 @@ export default async function AdminOperationsPage({ searchParams }: { searchPara
             </div>
 
             {notice ? (
-                <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900">
+                <div className="rounded-lg border border-brand-brown bg-brand-brown px-4 py-3 text-sm text-brand-brown">
                     {notice}
                 </div>
             ) : null}
@@ -299,7 +299,7 @@ export default async function AdminOperationsPage({ searchParams }: { searchPara
                             </CardHeader>
                             <CardContent className="space-y-2">
                                 {membershipView.issues.map((issue) => (
-                                    <div key={issue} className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+                                    <div key={issue} className="rounded-lg border border-brand-yellow bg-brand-yellow px-4 py-3 text-sm text-brand-yellow">
                                         {issue}
                                     </div>
                                 ))}

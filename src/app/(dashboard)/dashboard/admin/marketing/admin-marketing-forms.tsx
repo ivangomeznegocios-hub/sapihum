@@ -196,7 +196,7 @@ export function BriefStatusButtons({ briefId, currentStatus }: BriefStatusButton
                 </Button>
             )}
             {currentStatus === 'approved' && (
-                <span className="text-xs text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                <span className="text-xs text-brand-brown dark:text-brand-brown flex items-center gap-1">
                     <CheckCircle2 className="w-3 h-3" />
                     Aprobado
                 </span>

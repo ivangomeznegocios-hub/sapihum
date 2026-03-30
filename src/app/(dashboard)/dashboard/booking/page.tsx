@@ -26,8 +26,8 @@ export default async function BookingPage() {
             <div className="max-w-md mx-auto py-12">
                 <Card>
                     <CardContent className="pt-8 pb-6 text-center space-y-4">
-                        <div className="mx-auto w-14 h-14 bg-amber-100 dark:bg-amber-900/30 rounded-full flex items-center justify-center">
-                            <AlertCircle className="h-7 w-7 text-amber-600" />
+                        <div className="mx-auto w-14 h-14 bg-brand-yellow dark:bg-brand-yellow/30 rounded-full flex items-center justify-center">
+                            <AlertCircle className="h-7 w-7 text-brand-yellow" />
                         </div>
                         <h2 className="text-xl font-bold">Sin psicólogo asignado</h2>
                         <p className="text-sm text-muted-foreground max-w-xs mx-auto">

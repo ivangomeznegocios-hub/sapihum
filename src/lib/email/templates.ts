@@ -1,10 +1,10 @@
 import { getAppUrl } from '@/lib/config/app-url'
 
-const BRAND_COLOR = '#14b8a6' // teal-500
-const BG_COLOR = '#f8fafb'
+const BRAND_COLOR = '#f6ae02' // SAPIHUM yellow
+const BG_COLOR = '#f5f5f5'
 const CARD_BG = '#ffffff'
-const TEXT_COLOR = '#1e293b'
-const MUTED_COLOR = '#64748b'
+const TEXT_COLOR = '#2c2c2b'
+const MUTED_COLOR = '#737373'
 
 function baseLayout(content: string) {
     const appUrl = getAppUrl()
@@ -22,7 +22,7 @@ function baseLayout(content: string) {
                 <!-- Header -->
                 <tr><td style="padding:0 0 24px;">
                     <a href="${appUrl}" style="text-decoration:none;display:inline-flex;align-items:center;gap:8px;">
-                        <span style="display:inline-block;width:32px;height:32px;background:linear-gradient(135deg,${BRAND_COLOR},#10b981);border-radius:8px;text-align:center;line-height:32px;color:white;font-size:10px;font-weight:800;">SH</span>
+                        <span style="display:inline-block;width:32px;height:32px;background:linear-gradient(135deg,${BRAND_COLOR},#7a5602);border-radius:8px;text-align:center;line-height:32px;color:white;font-size:10px;font-weight:800;">SH</span>
                         <span style="font-size:18px;font-weight:700;color:${TEXT_COLOR};letter-spacing:-0.5px;">SAPIHUM</span>
                     </a>
                 </td></tr>
@@ -54,7 +54,7 @@ function ctaButton(href: string, label: string) {
     return `
     <table width="100%" cellpadding="0" cellspacing="0" style="margin:24px 0 0;">
         <tr><td align="center">
-            <a href="${href}" style="display:inline-block;padding:14px 32px;background:linear-gradient(135deg,${BRAND_COLOR},#10b981);color:white;text-decoration:none;border-radius:10px;font-weight:600;font-size:15px;">
+            <a href="${href}" style="display:inline-block;padding:14px 32px;background:linear-gradient(135deg,${BRAND_COLOR},#7a5602);color:white;text-decoration:none;border-radius:10px;font-weight:600;font-size:15px;">
                 ${label}
             </a>
         </td></tr>
@@ -86,7 +86,7 @@ export function buildEventRegistrationEmail(params: {
             </tr>
             <tr>
                 <td style="padding:8px 0;font-size:13px;color:${MUTED_COLOR};">Acceso</td>
-                <td style="padding:8px 0;font-size:14px;font-weight:600;color:#10b981;text-align:right;">Confirmado</td>
+                <td style="padding:8px 0;font-size:14px;font-weight:600;color:#7a5602;text-align:right;">Confirmado</td>
             </tr>
         </table>
         ${ctaButton(params.eventUrl, 'Ir al evento →')}
@@ -129,7 +129,7 @@ export function buildEventPurchaseEmail(params: {
             </tr>
             <tr>
                 <td style="padding:8px 0;font-size:13px;color:${MUTED_COLOR};">Acceso</td>
-                <td style="padding:8px 0;font-size:14px;font-weight:600;color:#10b981;text-align:right;">✅ Activo</td>
+                <td style="padding:8px 0;font-size:14px;font-weight:600;color:#7a5602;text-align:right;">✅ Activo</td>
             </tr>
         </table>
         ${ctaButton(params.eventUrl, 'Acceder al evento →')}

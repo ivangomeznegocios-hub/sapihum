@@ -63,13 +63,13 @@ export default async function RecordingsPage() {
             </div>
 
             {/* Info Notice */}
-            <Card className="border-blue-200 bg-blue-50 dark:bg-blue-950/30 dark:border-blue-800">
+            <Card className="border-brand-yellow bg-brand-yellow dark:bg-brand-yellow/30 dark:border-brand-yellow">
                 <CardContent className="pt-6">
                     <div className="flex items-start gap-4">
-                        <Video className="h-6 w-6 text-blue-600 flex-shrink-0" />
+                        <Video className="h-6 w-6 text-brand-yellow flex-shrink-0" />
                         <div>
-                            <h3 className="font-semibold text-blue-800 dark:text-blue-300">Solo eventos inscritos</h3>
-                            <p className="text-sm text-blue-700 dark:text-blue-400 mt-1">
+                            <h3 className="font-semibold text-brand-yellow dark:text-brand-yellow">Solo eventos inscritos</h3>
+                            <p className="text-sm text-brand-yellow dark:text-brand-yellow mt-1">
                                 Aquí aparecen las grabaciones de los eventos en los que te inscribiste.
                                 Las grabaciones pueden tardar hasta 24 horas después del evento.
                             </p>
@@ -102,7 +102,7 @@ export default async function RecordingsPage() {
                             <RecordingCardWrapper key={event.id} expiresAt={event.recording_expires_at}>
                                 <Card className="overflow-hidden group hover:shadow-lg transition-shadow">
                                     {/* Thumbnail */}
-                                    <div className="relative aspect-video bg-gradient-to-br from-purple-500/20 to-primary/20">
+                                    <div className="relative aspect-video bg-gradient-to-br from-brand-brown/20 to-primary/20">
                                         {event.image_url ? (
                                             <img
                                                 src={event.image_url}

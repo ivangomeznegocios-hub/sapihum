@@ -1,13 +1,13 @@
 import Link from 'next/link'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { getUserProfile } from '@/lib/supabase/server'
+import { getUserProfile, createClient } from '@/lib/supabase/server'
 import { reconcileCompletedCheckoutSession } from '@/lib/payments'
 import { getPublicEventBySlug } from '@/lib/supabase/queries/events'
 import { ArrowRight, CheckCircle2, Mail, Play } from 'lucide-react'
 
 export const metadata = {
-    title: 'Compra confirmada | Comunidad Psicología',
+    title: 'Compra confirmada | Comunidad PsicologÃ­a',
     robots: {
         index: false,
         follow: false,
@@ -15,11 +15,23 @@ export const metadata = {
 }
 
 interface PageProps {
-    searchParams: Promise<{ slug?: string; session_id?: string }>
+    searchParams: Promise<{ slug?: string; session_id?: string; kind?: string }>
+}
+
+async function getFormationBySlug(slug: string) {
+    const supabase = await createClient()
+    const { data } = await (supabase
+        .from('formations') as any)
+        .select('id, slug, title')
+        .eq('slug', slug)
+        .eq('status', 'active')
+        .maybeSingle()
+
+    return data ?? null
 }
 
 export default async function PurchaseSuccessPage({ searchParams }: PageProps) {
-    const { slug, session_id } = await searchParams
+    const { slug, session_id, kind } = await searchParams
 
     if (session_id) {
         try {
@@ -30,28 +42,38 @@ export default async function PurchaseSuccessPage({ searchParams }: PageProps) {
     }
 
     const profile = await getUserProfile()
-    const event = slug ? await getPublicEventBySlug(slug) : null
+    const event = slug && kind !== 'formation' ? await getPublicEventBySlug(slug) : null
+    const formation = slug && !event ? await getFormationBySlug(slug) : null
+
     const hubPath = event ? `/hub/${event.slug}` : '/mi-acceso'
     const recoveryPath = `/compras/recuperar?next=${encodeURIComponent(hubPath)}`
+    const publicPath = event
+        ? `/${event.public_kind}/${event.slug}`
+        : formation
+            ? `/formaciones/${formation.slug}`
+            : '/eventos'
+    const title = event?.title || formation?.title || 'tu acceso'
 
     return (
         <section className="mx-auto flex w-full max-w-3xl flex-1 items-center px-4 py-12 sm:px-6 lg:px-8">
-            <Card className="w-full border-emerald-500/20 shadow-xl">
+            <Card className="w-full border-brand-brown/20 shadow-xl">
                 <CardHeader className="space-y-4 text-center">
-                    <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-600">
+                    <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-brand-brown/10 text-brand-brown">
                         <CheckCircle2 className="h-8 w-8" />
                     </div>
                     <div className="space-y-2">
                         <CardTitle className="text-3xl">Compra confirmada</CardTitle>
                         <CardDescription className="text-base">
-                            Tu pago se registró correctamente. El acceso se libera en tu hub privado en cuanto confirmamos la compra.
+                            {formation
+                                ? `Tu acceso al diplomado "${title}" ya quedÃ³ activo.`
+                                : `Tu pago se registrÃ³ correctamente. El acceso a "${title}" se libera en tu hub privado en cuanto confirmamos la compra.`}
                         </CardDescription>
                     </div>
                 </CardHeader>
                 <CardContent className="space-y-4">
                     <div className="rounded-xl border border-border/70 bg-muted/30 p-4 text-sm text-muted-foreground">
                         {profile
-                            ? 'Ya tienes sesión iniciada, así que puedes entrar directo a tu acceso.'
+                            ? 'Ya tienes sesiÃ³n iniciada, asÃ­ que puedes entrar directo a tus accesos.'
                             : 'Si compraste como invitado, usa el mismo correo para recuperar tu acceso con magic link.'}
                     </div>
 
@@ -63,8 +85,8 @@ export default async function PurchaseSuccessPage({ searchParams }: PageProps) {
                             </Link>
                         </Button>
                         <Button asChild variant="outline" className="flex-1">
-                            <Link href={event ? `/${event.public_kind}/${event.slug}` : '/eventos'}>
-                                Ver página pública
+                            <Link href={publicPath}>
+                                Ver pÃ¡gina pÃºblica
                                 <ArrowRight className="ml-2 h-4 w-4" />
                             </Link>
                         </Button>

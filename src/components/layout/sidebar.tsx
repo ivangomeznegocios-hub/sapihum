@@ -243,17 +243,17 @@ function MembershipBadge({
     const tier = getMembershipTier(level)
 
     const badgeStyles: Record<number, string> = {
-        0: 'from-slate-100 to-slate-50 border-slate-200 dark:from-slate-800 dark:to-slate-900 dark:border-slate-700',
-        1: 'from-blue-50 to-indigo-50 border-blue-200 dark:from-blue-950 dark:to-indigo-950 dark:border-blue-800',
-        2: 'from-violet-50 to-purple-50 border-violet-200 dark:from-violet-950 dark:to-purple-950 dark:border-violet-800',
-        3: 'from-amber-50 to-orange-50 border-amber-200 dark:from-amber-950 dark:to-orange-950 dark:border-amber-800',
+        0: 'from-neutral-100 to-neutral-50 border-neutral-200 dark:from-neutral-800 dark:to-neutral-900 dark:border-neutral-700',
+        1: 'from-brand-yellow to-brand-brown border-brand-yellow dark:from-brand-yellow dark:to-brand-brown dark:border-brand-yellow',
+        2: 'from-brand-brown to-brand-brown border-brand-brown dark:from-brand-brown dark:to-brand-brown dark:border-brand-brown',
+        3: 'from-brand-yellow to-brand-brown border-brand-yellow dark:from-brand-yellow dark:to-brand-brown dark:border-brand-yellow',
     }
 
     const dotStyles: Record<number, string> = {
-        0: 'bg-slate-400',
-        1: 'bg-blue-500',
-        2: 'bg-violet-500',
-        3: 'bg-amber-500',
+        0: 'bg-neutral-400',
+        1: 'bg-brand-yellow',
+        2: 'bg-brand-brown',
+        3: 'bg-brand-yellow',
     }
 
     return (

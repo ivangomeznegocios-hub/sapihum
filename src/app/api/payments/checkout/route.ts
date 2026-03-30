@@ -16,6 +16,8 @@ import { getActiveEntitlementForEvent } from '@/lib/events/access'
 import { getUniqueEventAccessCount } from '@/lib/events/attendance'
 import { getEventGrantAccessKinds } from '@/lib/events/entitlements'
 import { audienceAllowsAccess, getCommercialAccessContext } from '@/lib/access/commercial'
+import { getFormationCommercialState } from '@/lib/formations/pricing'
+import { createConfirmedFormationPurchaseAndGrantAccess } from '@/lib/formations/service'
 
 function isUuid(value: string | null | undefined): value is string {
     return Boolean(value && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value))
@@ -144,6 +146,26 @@ async function resolveEventPurchaseDetails(
         return { error: 'Este activo no permite compra publica individual' as const }
     }
 
+    const normalizedGuestEmail = params.guestEmail.trim().toLowerCase()
+    const existingGuestEntitlement = await getActiveEntitlementForEvent({
+        supabase,
+        eventId: params.eventId,
+        email: normalizedGuestEmail,
+        allowedAccessKinds: getEventGrantAccessKinds(event),
+    })
+
+    const { data: existingGuestPurchase } = await (supabase
+        .from('event_purchases') as any)
+        .select('id')
+        .eq('event_id', params.eventId)
+        .eq('email', normalizedGuestEmail)
+        .eq('status', 'confirmed')
+        .maybeSingle()
+
+    if (existingGuestEntitlement || existingGuestPurchase) {
+        return { error: 'Este correo ya tiene acceso a este evento' as const }
+    }
+
     const amount = Number(event.price || 0)
     if (amount <= 0 && !canBuyRecordedAccess) {
         return { error: 'Este evento no requiere pago. Usa el acceso gratuito.' as const }
@@ -223,30 +245,48 @@ async function resolveFormationPurchaseDetails(
     }
 
     if (params.userId) {
-        // Check if already purchased
-        const { data: existingPurchase } = await (supabase
+        const { data: profile } = await (supabase
+            .from('profiles') as any)
+            .select('role, membership_level, subscription_status, email')
+            .eq('id', params.userId)
+            .single()
+
+        if (!profile) {
+            return { error: 'Perfil no encontrado' as const }
+        }
+
+        const normalizedEmail = profile.email?.trim().toLowerCase() || null
+        const purchaseQuery = (supabase
             .from('formation_purchases') as any)
             .select('id')
             .eq('formation_id', params.formationId)
-            .eq('user_id', params.userId)
             .eq('status', 'confirmed')
-            .maybeSingle()
+
+        const { data: existingPurchase } = normalizedEmail
+            ? await purchaseQuery.or(`user_id.eq.${params.userId},email.eq.${normalizedEmail}`).maybeSingle()
+            : await purchaseQuery.eq('user_id', params.userId).maybeSingle()
 
         if (existingPurchase) {
             return { error: 'Ya has adquirido esta formación completa' as const }
         }
 
-        const amount = Number(formation.bundle_price)
-
-        if (amount <= 0) {
-            return { error: 'Este bundle es de acceso gratuito o no requiere pago por checkout' as const }
+        const commercialAccess = await getCommercialAccessContext({
+            supabase,
+            userId: params.userId,
+            profile,
+        })
+        if (!commercialAccess) {
+            return { error: 'No fue posible resolver el acceso comercial de esta cuenta' as const }
         }
+        const pricing = getFormationCommercialState(formation, Boolean(commercialAccess?.hasActiveMembership))
 
         return {
-            amount,
+            amount: pricing.effectivePrice,
             description: `Acceso a Formación: ${formation.title}`,
             referenceId: formation.id,
             formation,
+            requiresPayment: pricing.needsPayment,
+            pricing,
         }
     }
 
@@ -254,8 +294,21 @@ async function resolveFormationPurchaseDetails(
         return { error: 'No autenticado', requiresGuestDetails: true as const }
     }
 
+    const normalizedGuestEmail = params.guestEmail.trim().toLowerCase()
+    const { data: existingGuestPurchase } = await (supabase
+        .from('formation_purchases') as any)
+        .select('id')
+        .eq('formation_id', params.formationId)
+        .eq('email', normalizedGuestEmail)
+        .eq('status', 'confirmed')
+        .maybeSingle()
+
+    if (existingGuestPurchase) {
+        return { error: 'Este correo ya tiene acceso a la formaciÃ³n completa' as const }
+    }
+
     const amount = Number(formation.bundle_price || 0)
-    if (amount <= 0) {
+    if (amount < 0) {
         return { error: 'Esta formación no requiere pago. Inicia sesión.' as const }
     }
 
@@ -264,6 +317,14 @@ async function resolveFormationPurchaseDetails(
         description: `Acceso a Formación: ${formation.title}`,
         referenceId: formation.id,
         formation,
+        requiresPayment: amount > 0,
+        pricing: {
+            publicPrice: amount,
+            effectivePrice: amount,
+            needsPayment: amount > 0,
+            complimentaryByMembership: false,
+            discountedByMembership: false,
+        },
     }
 }
 
@@ -459,6 +520,40 @@ export async function POST(request: NextRequest) {
                 )
             }
 
+            if (!resolvedFormationPurchase.requiresPayment) {
+                try {
+                    await createConfirmedFormationPurchaseAndGrantAccess({
+                        supabase,
+                        formationId,
+                        userId: user?.id ?? null,
+                        email: customerEmail,
+                        fullName: fullName || profile.data?.full_name || null,
+                        amountPaid: 0,
+                        currency: 'MXN',
+                        paymentReference: `formation-free-${crypto.randomUUID()}`,
+                        metadata: {
+                            analytics: analyticsContext ?? null,
+                            attribution_snapshot: attributionSnapshot ?? null,
+                            pricing: resolvedFormationPurchase.pricing,
+                            source: 'free_formation_access',
+                        },
+                        source: 'formation_free_access',
+                    })
+                } catch (purchaseError) {
+                    console.error('[API] Failed to grant direct formation access:', purchaseError)
+                    return NextResponse.json(
+                        { error: 'No fue posible activar la formaciÃ³n. Intenta de nuevo.' },
+                        { status: 500 }
+                    )
+                }
+
+                const redirectTo = user
+                    ? `/dashboard/payment-success?kind=formation&formation_id=${resolvedFormationPurchase.formation.id}`
+                    : `/compras/exito?kind=formation&slug=${resolvedFormationPurchase.formation.slug}`
+
+                return NextResponse.json({ redirectTo })
+            }
+
             let pendingFormationPurchaseId = ''
             try {
                 pendingFormationPurchaseId = await createPendingFormationPurchase({
@@ -484,9 +579,12 @@ export async function POST(request: NextRequest) {
                 buyer_full_name: fullName || profile.data?.full_name || '',
             }
 
+            successUrl = `${appUrl}/dashboard/payment-success?session_id={CHECKOUT_SESSION_ID}&kind=formation&formation_id=${resolvedFormationPurchase.formation.id}`
+            cancelUrl = `${appUrl}/dashboard/payment-cancelled?kind=formation&formation_id=${resolvedFormationPurchase.formation.id}`
+
             if (!user) {
-                successUrl = `${appUrl}/compras/exito?session_id={CHECKOUT_SESSION_ID}&slug=${resolvedFormationPurchase.formation.slug}`
-                cancelUrl = `${appUrl}/compras/cancelada?slug=${resolvedFormationPurchase.formation.slug}`
+                successUrl = `${appUrl}/compras/exito?session_id={CHECKOUT_SESSION_ID}&kind=formation&slug=${resolvedFormationPurchase.formation.slug}`
+                cancelUrl = `${appUrl}/compras/cancelada?kind=formation&slug=${resolvedFormationPurchase.formation.slug}`
                 customerId = undefined
             }
         } else {
@@ -494,8 +592,13 @@ export async function POST(request: NextRequest) {
         }
 
         if (checkoutAmount <= 0) {
+            const noPaymentMessage =
+                purchaseType === 'formation_purchase'
+                    ? 'Esta formacion no requiere pago. Activa el acceso directo.'
+                    : 'Este evento no requiere pago. Usa el registro gratuito.'
+
             return NextResponse.json(
-                { error: 'Este evento no requiere pago. Usa el registro gratuito.' },
+                { error: noPaymentMessage },
                 { status: 400 }
             )
         }

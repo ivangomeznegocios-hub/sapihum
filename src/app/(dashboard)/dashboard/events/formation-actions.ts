@@ -3,6 +3,10 @@
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import type { FormationInsert, FormationUpdate } from '@/types/database'
+import {
+    issueFormationFullCertificateRecord,
+    markFormationCourseCompletedRecord,
+} from '@/lib/formations/service'
 
 export async function createFormation(formation: FormationInsert, courseIds: string[]) {
     const supabase = await createClient()
@@ -175,6 +179,7 @@ export async function getFormationsForAdmin() {
             title,
             status,
             bundle_price,
+            total_hours,
             created_at,
             courses:formation_courses(count),
             purchases:formation_purchases(count)
@@ -213,7 +218,7 @@ export async function getFormationById(id: string) {
             event_id,
             display_order,
             is_required,
-            event:events(id, title, status, event_type, price)
+            event:events(id, slug, title, status, event_type, price)
         `)
         .eq('formation_id', id)
         .order('display_order', { ascending: true })
@@ -222,6 +227,95 @@ export async function getFormationById(id: string) {
         ...formation,
         courses: courses || []
     }
+}
+
+export async function getFormationLearnerProgress(formationId: string) {
+    const supabase = await createClient()
+
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) {
+        throw new Error('No autorizado')
+    }
+
+    const [{ data: courses }, { data: purchases }, { data: progress }, { data: certificates }] = await Promise.all([
+        (supabase
+            .from('formation_courses') as any)
+            .select(`
+                event_id,
+                display_order,
+                is_required,
+                event:events(id, title, slug)
+            `)
+            .eq('formation_id', formationId)
+            .order('display_order', { ascending: true }),
+        (supabase
+            .from('formation_purchases') as any)
+            .select('id, user_id, email, full_name, purchased_at, confirmed_at, amount_paid, status')
+            .eq('formation_id', formationId)
+            .eq('status', 'confirmed')
+            .order('confirmed_at', { ascending: false }),
+        (supabase
+            .from('formation_progress') as any)
+            .select('user_id, email, event_id, completed_at, certificate_issued, certificate_issued_at')
+            .eq('formation_id', formationId),
+        (supabase
+            .from('formation_certificates') as any)
+            .select('user_id, email, scope_type, scope_reference, event_id, label, issued_at')
+            .eq('formation_id', formationId),
+    ])
+
+    const courseList = (courses ?? []).map((course: any) => ({
+        event_id: course.event_id,
+        display_order: course.display_order,
+        is_required: course.is_required,
+        event: Array.isArray(course.event) ? course.event[0] : course.event,
+    }))
+
+    const progressByEmail = new Map<string, any[]>()
+    for (const row of progress ?? []) {
+        const key = String(row.email || '').trim().toLowerCase()
+        const collection = progressByEmail.get(key) ?? []
+        collection.push(row)
+        progressByEmail.set(key, collection)
+    }
+
+    const certificatesByEmail = new Map<string, any[]>()
+    for (const row of certificates ?? []) {
+        const key = String(row.email || '').trim().toLowerCase()
+        const collection = certificatesByEmail.get(key) ?? []
+        collection.push(row)
+        certificatesByEmail.set(key, collection)
+    }
+
+    return (purchases ?? []).map((purchase: any) => {
+        const emailKey = String(purchase.email || '').trim().toLowerCase()
+        const learnerProgress = progressByEmail.get(emailKey) ?? []
+        const learnerCertificates = certificatesByEmail.get(emailKey) ?? []
+        const completedEventIds = new Set(learnerProgress.map((item: any) => item.event_id))
+        const fullCertificate = learnerCertificates.find((item: any) => item.scope_type === 'full_program') ?? null
+        const completedRequiredCount = courseList.filter((course: any) => course.is_required !== false && completedEventIds.has(course.event_id)).length
+        const totalRequiredCount = courseList.filter((course: any) => course.is_required !== false).length
+
+        return {
+            ...purchase,
+            completedRequiredCount,
+            totalRequiredCount,
+            hasFullCertificate: Boolean(fullCertificate),
+            fullCertificateIssuedAt: fullCertificate?.issued_at ?? null,
+            courses: courseList.map((course: any) => {
+                const courseProgress = learnerProgress.find((item: any) => item.event_id === course.event_id) ?? null
+                const courseCertificate = learnerCertificates.find((item: any) => item.scope_type === 'individual_course' && item.event_id === course.event_id) ?? null
+
+                return {
+                    ...course,
+                    isCompleted: Boolean(courseProgress),
+                    completedAt: courseProgress?.completed_at ?? null,
+                    hasCertificate: Boolean(courseCertificate),
+                    certificateIssuedAt: courseCertificate?.issued_at ?? courseProgress?.certificate_issued_at ?? null,
+                }
+            }),
+        }
+    })
 }
 
 // Client helper
@@ -234,31 +328,36 @@ export async function markCourseCompleted(formationId: string, eventId: string, 
     // Find the student profile to link
     const { data: profile } = await (supabase.from('profiles') as any).select('id').eq('email', email).maybeSingle()
 
-    // Upsert progress
-    const { error } = await (supabase
-        .from('formation_progress') as any)
-        .upsert({
-            formation_id: formationId,
-            event_id: eventId,
-            email: email,
-            user_id: profile?.id || null,
-            completed_at: new Date().toISOString(),
-            certificate_issued: true, // as requested: mark as granted automatically or by admin
-            certificate_issued_at: new Date().toISOString()
-        }, { onConflict: 'formation_id,email,event_id' })
-
-    if (error) {
-        throw new Error(`Error al marcar como completado: ${error.message}`)
-    }
+    await markFormationCourseCompletedRecord({
+        supabase,
+        formationId,
+        eventId,
+        email,
+        userId: profile?.id || null,
+        issuedBy: user.id,
+    })
 
     revalidatePath(`/dashboard/events/formations/${formationId}`)
     return { success: true }
 }
 
 // Issue the final full certificate
-export async function issueFullCertificate() {
-    // This is a placeholder since the final certificate logic will be manual for now,
-    // but we can track it globally per user if needed
-    // Usually we would insert this into a global certificates table
+export async function issueFullCertificate(formationId: string, email: string) {
+    const supabase = await createClient()
+
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) throw new Error('No autorizado')
+
+    const { data: profile } = await (supabase.from('profiles') as any).select('id').eq('email', email).maybeSingle()
+
+    await issueFormationFullCertificateRecord({
+        supabase,
+        formationId,
+        email,
+        userId: profile?.id || null,
+        issuedBy: user.id,
+    })
+
+    revalidatePath(`/dashboard/events/formations/${formationId}`)
     return { success: true }
 }

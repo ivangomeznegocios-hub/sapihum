@@ -50,7 +50,7 @@ export default function ThankYouPage() {
       
       {/* Background decoration */}
       <div className="absolute inset-0 z-0">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full bg-blue-500/5 dark:bg-blue-500/10 blur-[100px]" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full bg-brand-yellow/5 dark:bg-brand-yellow/10 blur-[100px]" />
       </div>
 
       <div className="max-w-xl w-full px-4 py-16 text-center z-10">
@@ -75,14 +75,14 @@ export default function ThankYouPage() {
           <h3 className="font-semibold text-foreground mb-4">En los próximos 5 minutos:</h3>
           <ul className="space-y-4">
             <li className="flex items-start gap-3">
-              <span className="flex-shrink-0 w-6 h-6 rounded-full bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 flex items-center justify-center text-sm font-bold">1</span>
+              <span className="flex-shrink-0 w-6 h-6 rounded-full bg-brand-yellow dark:bg-brand-yellow/50 text-brand-yellow dark:text-brand-yellow flex items-center justify-center text-sm font-bold">1</span>
               <div>
                 <p className="font-medium">Recibirás un email con tus accesos</p>
                 <p className="text-sm text-muted-foreground">Revisa tu bandeja de entrada o spam.</p>
               </div>
             </li>
             <li className="flex items-start gap-3">
-              <span className="flex-shrink-0 w-6 h-6 rounded-full bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400 flex items-center justify-center text-sm font-bold">2</span>
+              <span className="flex-shrink-0 w-6 h-6 rounded-full bg-brand-yellow dark:bg-brand-yellow/50 text-brand-yellow dark:text-brand-yellow flex items-center justify-center text-sm font-bold">2</span>
               <div>
                 <p className="font-medium">La comunidad te dará la bienvenida</p>
                 <p className="text-sm text-muted-foreground">Podrás presentarte con los cientos de psicólogos activos.</p>
@@ -93,7 +93,7 @@ export default function ThankYouPage() {
 
         {/* Único CTA Fuerte */}
         <Link href="/dashboard">
-          <Button size="lg" className="w-full sm:w-auto text-base h-14 px-10 font-bold bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-xl shadow-blue-500/25">
+          <Button size="lg" className="w-full sm:w-auto text-base h-14 px-10 font-bold bg-gradient-to-r from-brand-yellow to-brand-brown hover:from-brand-yellow hover:to-brand-brown text-white shadow-xl shadow-brand-yellow/25">
             Configura tu Perfil → Ir al Dashboard
           </Button>
         </Link>

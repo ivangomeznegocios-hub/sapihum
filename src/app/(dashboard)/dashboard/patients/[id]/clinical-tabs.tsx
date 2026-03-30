@@ -65,12 +65,12 @@ function getNoteTypeLabel(type: string) {
 
 function getNoteTypeColor(type: string) {
     const colors: Record<string, string> = {
-        session_note: 'bg-blue-100 text-blue-800',
-        assessment: 'bg-purple-100 text-purple-800',
-        treatment_plan: 'bg-emerald-100 text-emerald-800',
-        progress_note: 'bg-amber-100 text-amber-800',
+        session_note: 'bg-brand-yellow text-brand-yellow',
+        assessment: 'bg-brand-brown text-brand-brown',
+        treatment_plan: 'bg-brand-brown text-brand-brown',
+        progress_note: 'bg-brand-yellow text-brand-yellow',
         intake: 'bg-cyan-100 text-cyan-800',
-        discharge: 'bg-rose-100 text-rose-800'
+        discharge: 'bg-rose-100 text-brand-brown'
     }
     return colors[type] || 'bg-gray-100 text-gray-800'
 }
@@ -89,11 +89,11 @@ function getDocCategoryLabel(cat: string) {
 
 function getDocCategoryColor(cat: string) {
     const colors: Record<string, string> = {
-        test_result: 'bg-violet-100 text-violet-800',
+        test_result: 'bg-brand-brown text-brand-brown',
         referral: 'bg-cyan-100 text-cyan-800',
         consent: 'surface-alert-success',
         report: 'bg-orange-100 text-orange-800',
-        intake_form: 'bg-blue-100 text-blue-800',
+        intake_form: 'bg-brand-yellow text-brand-yellow',
         other: 'bg-gray-100 text-gray-800'
     }
     return colors[cat] || 'bg-gray-100 text-gray-800'
@@ -186,8 +186,8 @@ export function ClinicalTabs({ patient, notes, documents, appointments, sessionS
                         <Card>
                             <CardContent className="pt-6">
                                 <div className="flex items-center gap-3">
-                                    <div className="h-10 w-10 rounded-lg bg-blue-100 flex items-center justify-center">
-                                        <ClipboardList className="h-5 w-5 text-blue-600" />
+                                    <div className="h-10 w-10 rounded-lg bg-brand-yellow flex items-center justify-center">
+                                        <ClipboardList className="h-5 w-5 text-brand-yellow" />
                                     </div>
                                     <div>
                                         <p className="text-2xl font-bold">{totalSessions}</p>
@@ -199,8 +199,8 @@ export function ClinicalTabs({ patient, notes, documents, appointments, sessionS
                         <Card>
                             <CardContent className="pt-6">
                                 <div className="flex items-center gap-3">
-                                    <div className="h-10 w-10 rounded-lg bg-purple-100 flex items-center justify-center">
-                                        <FileText className="h-5 w-5 text-purple-600" />
+                                    <div className="h-10 w-10 rounded-lg bg-brand-brown flex items-center justify-center">
+                                        <FileText className="h-5 w-5 text-brand-brown" />
                                     </div>
                                     <div>
                                         <p className="text-2xl font-bold">{notes.length}</p>
@@ -225,8 +225,8 @@ export function ClinicalTabs({ patient, notes, documents, appointments, sessionS
                         <Card>
                             <CardContent className="pt-6">
                                 <div className="flex items-center gap-3">
-                                    <div className="h-10 w-10 rounded-lg bg-amber-100 flex items-center justify-center">
-                                        <Calendar className="h-5 w-5 text-amber-600" />
+                                    <div className="h-10 w-10 rounded-lg bg-brand-yellow flex items-center justify-center">
+                                        <Calendar className="h-5 w-5 text-brand-yellow" />
                                     </div>
                                     <div>
                                         <p className="text-sm font-medium">
@@ -299,8 +299,8 @@ export function ClinicalTabs({ patient, notes, documents, appointments, sessionS
                                 <div className="space-y-3">
                                     {notes.slice(0, 5).map((note: any) => (
                                         <div key={note.id} className="flex items-start gap-3 text-sm">
-                                            <div className="h-8 w-8 rounded-full bg-blue-50 flex items-center justify-center flex-shrink-0 mt-0.5">
-                                                <FileText className="h-3.5 w-3.5 text-blue-600" />
+                                            <div className="h-8 w-8 rounded-full bg-brand-yellow flex items-center justify-center flex-shrink-0 mt-0.5">
+                                                <FileText className="h-3.5 w-3.5 text-brand-yellow" />
                                             </div>
                                             <div className="flex-1 min-w-0">
                                                 <p className="font-medium text-sm">
@@ -403,7 +403,7 @@ export function ClinicalTabs({ patient, notes, documents, appointments, sessionS
                                                         {formatDateTime(note.created_at)}
                                                     </span>
                                                     {isSoap && (
-                                                        <span className="text-[10px] bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded border">
+                                                        <span className="text-[10px] bg-neutral-100 text-neutral-600 px-1.5 py-0.5 rounded border">
                                                             SOAP
                                                         </span>
                                                     )}
@@ -431,7 +431,7 @@ export function ClinicalTabs({ patient, notes, documents, appointments, sessionS
                                                 <div className="grid gap-3 text-sm">
                                                     {content.subjective && (
                                                         <div className="flex gap-2">
-                                                            <span className="w-6 h-6 rounded bg-blue-100 flex items-center justify-center text-xs font-bold text-blue-700 flex-shrink-0">S</span>
+                                                            <span className="w-6 h-6 rounded bg-brand-yellow flex items-center justify-center text-xs font-bold text-brand-yellow flex-shrink-0">S</span>
                                                             <p className="whitespace-pre-wrap text-sm">{content.subjective}</p>
                                                         </div>
                                                     )}
@@ -443,13 +443,13 @@ export function ClinicalTabs({ patient, notes, documents, appointments, sessionS
                                                     )}
                                                     {content.assessment && (
                                                         <div className="flex gap-2">
-                                                            <span className="w-6 h-6 rounded bg-amber-100 flex items-center justify-center text-xs font-bold text-amber-700 flex-shrink-0">A</span>
+                                                            <span className="w-6 h-6 rounded bg-brand-yellow flex items-center justify-center text-xs font-bold text-brand-yellow flex-shrink-0">A</span>
                                                             <p className="whitespace-pre-wrap text-sm">{content.assessment}</p>
                                                         </div>
                                                     )}
                                                     {content.plan && (
                                                         <div className="flex gap-2">
-                                                            <span className="w-6 h-6 rounded bg-purple-100 flex items-center justify-center text-xs font-bold text-purple-700 flex-shrink-0">P</span>
+                                                            <span className="w-6 h-6 rounded bg-brand-brown flex items-center justify-center text-xs font-bold text-brand-brown flex-shrink-0">P</span>
                                                             <p className="whitespace-pre-wrap text-sm">{content.plan}</p>
                                                         </div>
                                                     )}
@@ -556,7 +556,7 @@ export function ClinicalTabs({ patient, notes, documents, appointments, sessionS
                                     pending: 'bg-yellow-100 text-yellow-800',
                                     confirmed: 'surface-alert-success',
                                     cancelled: 'surface-alert-error',
-                                    scheduled: 'bg-blue-100 text-blue-800',
+                                    scheduled: 'bg-brand-yellow text-brand-yellow',
                                     completed: 'bg-gray-100 text-gray-800'
                                 }
 
@@ -581,12 +581,12 @@ export function ClinicalTabs({ patient, notes, documents, appointments, sessionS
 
                                             {/* Session Summary */}
                                             {linkedSummary && (
-                                                <div className="p-3 rounded-lg bg-amber-50 border border-amber-200 mb-3">
+                                                <div className="p-3 rounded-lg bg-brand-yellow border border-brand-yellow mb-3">
                                                     <div className="flex items-center gap-2 mb-2">
-                                                        <Star className="h-3.5 w-3.5 text-amber-600" />
-                                                        <span className="text-xs font-semibold text-amber-800">Resumen de Sesión</span>
+                                                        <Star className="h-3.5 w-3.5 text-brand-yellow" />
+                                                        <span className="text-xs font-semibold text-brand-yellow">Resumen de Sesión</span>
                                                         {linkedSummary.mood_rating && (
-                                                            <span className="text-[10px] bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded">
+                                                            <span className="text-[10px] bg-brand-yellow text-brand-yellow px-1.5 py-0.5 rounded">
                                                                 Ánimo: {linkedSummary.mood_rating}/10
                                                             </span>
                                                         )}
@@ -600,7 +600,7 @@ export function ClinicalTabs({ patient, notes, documents, appointments, sessionS
                                                     {linkedSummary.key_topics?.length > 0 && (
                                                         <div className="flex flex-wrap gap-1 mt-2">
                                                             {linkedSummary.key_topics.map((topic: string) => (
-                                                                <span key={topic} className="text-[10px] px-1.5 py-0.5 rounded bg-amber-100 text-amber-700">
+                                                                <span key={topic} className="text-[10px] px-1.5 py-0.5 rounded bg-brand-yellow text-brand-yellow">
                                                                     {topic}
                                                                 </span>
                                                             ))}
@@ -608,8 +608,8 @@ export function ClinicalTabs({ patient, notes, documents, appointments, sessionS
                                                     )}
                                                     {linkedSummary.homework && (
                                                         <div className="mt-2 text-xs">
-                                                            <span className="font-medium text-amber-800">Tarea:</span>{' '}
-                                                            <span className="text-amber-700">{linkedSummary.homework}</span>
+                                                            <span className="font-medium text-brand-yellow">Tarea:</span>{' '}
+                                                            <span className="text-brand-yellow">{linkedSummary.homework}</span>
                                                         </div>
                                                     )}
                                                 </div>

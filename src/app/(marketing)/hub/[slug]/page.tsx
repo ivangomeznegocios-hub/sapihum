@@ -69,7 +69,7 @@ export default async function EventHubPage({ params }: PageProps) {
             <section className="mx-auto w-full max-w-4xl px-4 py-12 sm:px-6 lg:px-8">
                 <Card>
                     <CardHeader className="space-y-3 text-center">
-                        <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-amber-500/10 text-amber-600">
+                        <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-brand-yellow/10 text-brand-yellow">
                             <Lock className="h-6 w-6" />
                         </div>
                         <CardTitle>No encontramos un acceso activo para este hub</CardTitle>
@@ -122,7 +122,7 @@ export default async function EventHubPage({ params }: PageProps) {
                         <ArrowLeft className="mr-2 h-4 w-4" />
                         Volver a mis accesos
                     </Link>
-                    <div className="inline-flex items-center gap-2 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-3 py-1 text-xs font-medium uppercase tracking-[0.24em] text-emerald-700">
+                    <div className="inline-flex items-center gap-2 rounded-full border border-brand-brown/20 bg-brand-brown/10 px-3 py-1 text-xs font-medium uppercase tracking-[0.24em] text-brand-brown">
                         <ShieldCheck className="h-3.5 w-3.5" />
                         Hub privado
                     </div>
@@ -149,9 +149,9 @@ export default async function EventHubPage({ params }: PageProps) {
                     )}
 
                     {canSeeMeetingLink && (
-                        <Card className="border-emerald-500/30">
+                        <Card className="border-brand-brown/30">
                             <CardHeader>
-                                <CardTitle className="flex items-center gap-2 text-emerald-700">
+                                <CardTitle className="flex items-center gap-2 text-brand-brown">
                                     <Video className="h-5 w-5" />
                                     Tu enlace de acceso en vivo
                                 </CardTitle>
@@ -190,12 +190,12 @@ export default async function EventHubPage({ params }: PageProps) {
                     )}
 
                     {event.status === 'completed' && !event.recording_url && (
-                        <Card className="border-amber-500/30">
+                        <Card className="border-brand-yellow/30">
                             <CardContent className="flex items-start gap-3 pt-6">
-                                <Video className="mt-0.5 h-5 w-5 flex-shrink-0 text-amber-600" />
+                                <Video className="mt-0.5 h-5 w-5 flex-shrink-0 text-brand-yellow" />
                                 <div>
-                                    <p className="font-medium text-amber-800">Grabación en proceso</p>
-                                    <p className="text-sm text-amber-700/90">
+                                    <p className="font-medium text-brand-yellow">Grabación en proceso</p>
+                                    <p className="text-sm text-brand-yellow/90">
                                         Todavía no publicamos el replay. Si este activo incluye grabación, aparecerá aquí automáticamente.
                                     </p>
                                 </div>

@@ -74,19 +74,19 @@ export const SERVICE_LABELS: Record<MarketingServiceKey, { title: string; descri
 export const STATUS_CONFIG: Record<string, { label: string; color: string }> = {
     pending_brief: {
         label: 'Esperando Brief',
-        color: 'text-amber-600 dark:text-amber-500 bg-amber-100 dark:bg-amber-900/30 border-amber-200 dark:border-amber-800',
+        color: 'text-brand-yellow dark:text-brand-yellow bg-brand-yellow dark:bg-brand-yellow/30 border-brand-yellow dark:border-brand-yellow',
     },
     in_progress: {
         label: 'En Progreso',
-        color: 'text-blue-700 dark:text-blue-400 bg-blue-100 dark:bg-blue-900/30 border-blue-200 dark:border-blue-800',
+        color: 'text-brand-yellow dark:text-brand-yellow bg-brand-yellow dark:bg-brand-yellow/30 border-brand-yellow dark:border-brand-yellow',
     },
     active: {
         label: 'Activo',
-        color: 'text-emerald-700 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-900/30 border-emerald-200 dark:border-emerald-800',
+        color: 'text-brand-brown dark:text-brand-brown bg-brand-brown dark:bg-brand-brown/30 border-brand-brown dark:border-brand-brown',
     },
     paused: {
         label: 'Pausado',
-        color: 'text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700',
+        color: 'text-neutral-600 dark:text-neutral-500 bg-neutral-100 dark:bg-neutral-800 border-neutral-200 dark:border-neutral-700',
     },
 }
 

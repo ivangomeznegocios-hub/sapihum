@@ -26,9 +26,9 @@ const typeIcons = {
 }
 
 const typeBadges: Record<string, { label: string; className: string }> = {
-    event: { label: 'Evento', className: 'bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300' },
-    resource: { label: 'Recurso', className: 'bg-purple-100 text-purple-700 dark:bg-purple-900/50 dark:text-purple-300' },
-    newsletter: { label: 'Newsletter', className: 'bg-amber-100 text-amber-700 dark:bg-amber-900/50 dark:text-amber-300' },
+    event: { label: 'Evento', className: 'bg-brand-yellow text-brand-yellow dark:bg-brand-yellow/50 dark:text-brand-yellow' },
+    resource: { label: 'Recurso', className: 'bg-brand-brown text-brand-brown dark:bg-brand-brown/50 dark:text-brand-brown' },
+    newsletter: { label: 'Newsletter', className: 'bg-brand-yellow text-brand-yellow dark:bg-brand-yellow/50 dark:text-brand-yellow' },
 }
 
 export function ContentCarousel({

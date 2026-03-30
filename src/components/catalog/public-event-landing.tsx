@@ -107,7 +107,7 @@ function FaqAccordion({ items }: { items: { question: string; answer: string }[]
                 <div key={item.question}>
                     <button
                         onClick={() => setOpenIndex(openIndex === index ? null : index)}
-                        className="flex w-full items-center justify-between py-4 text-left text-sm font-medium text-foreground transition-colors hover:text-teal-600"
+                        className="flex w-full items-center justify-between py-4 text-left text-sm font-medium text-foreground transition-colors hover:text-brand-yellow"
                     >
                         {item.question}
                         <svg
@@ -179,14 +179,14 @@ export function PublicEventLanding({
             {/* ── HERO ── */}
             <section className="relative overflow-hidden rounded-3xl">
                 {/* Background image or gradient */}
-                <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-slate-800 to-teal-900/80">
+                <div className="absolute inset-0 bg-gradient-to-br from-neutral-900 via-neutral-800 to-brand-brown/80">
                     {event.image_url && (
                         <img src={event.image_url} alt="" className="absolute inset-0 h-full w-full object-cover opacity-20 blur-sm" />
                     )}
-                    <div className="absolute inset-0 bg-gradient-to-t from-slate-900/95 via-slate-900/70 to-slate-900/50" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-neutral-900/95 via-neutral-900/70 to-neutral-900/50" />
                     {/* Decorative */}
-                    <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-teal-500/10 blur-3xl" />
-                    <div className="absolute -bottom-10 -left-10 h-48 w-48 rounded-full bg-emerald-500/8 blur-3xl" />
+                    <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-brand-yellow/10 blur-3xl" />
+                    <div className="absolute -bottom-10 -left-10 h-48 w-48 rounded-full bg-brand-brown/8 blur-3xl" />
                     <div className="absolute inset-0 opacity-[0.02]" style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, white 1px, transparent 0)', backgroundSize: '24px 24px' }} />
                 </div>
 
@@ -195,7 +195,7 @@ export function PublicEventLanding({
                     <div className="space-y-6">
                         {/* Badges */}
                         <div className="flex flex-wrap items-center gap-2.5">
-                            <span className="inline-flex items-center gap-1.5 rounded-full border border-teal-400/20 bg-teal-500/10 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-teal-300">
+                            <span className="inline-flex items-center gap-1.5 rounded-full border border-brand-yellow/20 bg-brand-yellow/10 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-brand-yellow">
                                 {getEventTypeLabel(event.event_type)}
                             </span>
                             {event.hero_badge && (
@@ -204,18 +204,18 @@ export function PublicEventLanding({
                                 </span>
                             )}
                             {event.formation && !Array.isArray(event.formation) ? (
-                                <Link href={`/formaciones/${event.formation.slug}`} className="inline-flex items-center gap-1.5 rounded-full bg-indigo-500/20 border border-indigo-400/30 px-3 py-1 text-xs font-semibold tracking-wide text-indigo-300 hover:bg-indigo-500/40 hover:text-white transition-colors cursor-pointer group">
+                                <Link href={`/formaciones/${event.formation.slug}`} className="inline-flex items-center gap-1.5 rounded-full bg-brand-yellow/20 border border-brand-yellow/30 px-3 py-1 text-xs font-semibold tracking-wide text-brand-yellow hover:bg-brand-yellow/40 hover:text-white transition-colors cursor-pointer group">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="group-hover:-rotate-12 transition-transform"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" /><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" /></svg>
                                     Parte de: {event.formation.title}
                                 </Link>
                             ) : event.formation_track ? (
-                                <span className="inline-flex items-center gap-1.5 rounded-full bg-indigo-500/20 border border-indigo-400/20 px-3 py-1 text-xs font-semibold tracking-wide text-indigo-300">
+                                <span className="inline-flex items-center gap-1.5 rounded-full bg-brand-yellow/20 border border-brand-yellow/20 px-3 py-1 text-xs font-semibold tracking-wide text-brand-yellow">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" /><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" /></svg>
                                     Parte de: {event.formation_track}
                                 </span>
                             ) : null}
                             {event.member_access_type === 'free' && Number(event.price || 0) > 0 && (
-                                <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/20 px-3 py-1 text-xs font-semibold text-emerald-300">
+                                <span className="inline-flex items-center gap-1 rounded-full bg-brand-brown/20 px-3 py-1 text-xs font-semibold text-brand-brown">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z" /></svg>
                                     Incluido para miembros
                                 </span>
@@ -228,7 +228,7 @@ export function PublicEventLanding({
                                 {event.title}
                             </h1>
                             {event.subtitle && (
-                                <p className="max-w-2xl text-lg text-slate-300 sm:text-xl">{event.subtitle}</p>
+                                <p className="max-w-2xl text-lg text-neutral-400 sm:text-xl">{event.subtitle}</p>
                             )}
                         </div>
 
@@ -243,14 +243,14 @@ export function PublicEventLanding({
                                             {avatar ? (
                                                 <img src={avatar} alt={name} className="h-8 w-8 rounded-full object-cover ring-2 ring-white/20" />
                                             ) : (
-                                                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-teal-600/30 text-xs font-bold text-teal-200">
+                                                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-brand-yellow/30 text-xs font-bold text-brand-yellow">
                                                     {name.charAt(0)}
                                                 </div>
                                             )}
                                             <div>
                                                 <p className="text-sm font-medium text-white">{name}</p>
                                                 {item.speaker?.headline && (
-                                                    <p className="text-xs text-slate-400">{item.speaker.headline}</p>
+                                                    <p className="text-xs text-neutral-500">{item.speaker.headline}</p>
                                                 )}
                                             </div>
                                         </div>
@@ -262,22 +262,22 @@ export function PublicEventLanding({
                         {/* Info pills */}
                         <div className="flex flex-wrap gap-3">
                             <div className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-2.5">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-teal-400">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-brand-yellow">
                                     <rect width="18" height="18" x="3" y="4" rx="2" ry="2" /><line x1="16" x2="16" y1="2" y2="6" /><line x1="8" x2="8" y1="2" y2="6" /><line x1="3" x2="21" y1="10" y2="10" />
                                 </svg>
-                                <span className="text-sm text-slate-200">{formatEventDate(event.start_time)}</span>
+                                <span className="text-sm text-neutral-200">{formatEventDate(event.start_time)}</span>
                             </div>
                             <div className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-2.5">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-teal-400">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-brand-yellow">
                                     <path d="m22 8-6 4 6 4V8Z" /><rect width="14" height="12" x="2" y="6" rx="2" ry="2" />
                                 </svg>
-                                <span className="text-sm text-slate-200">{formatLabel}</span>
+                                <span className="text-sm text-neutral-200">{formatLabel}</span>
                             </div>
                             <div className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-2.5">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-teal-400">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-brand-yellow">
                                     <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" />
                                 </svg>
-                                <span className="text-sm text-slate-200">{getAudienceLabel(event.target_audience)}</span>
+                                <span className="text-sm text-neutral-200">{getAudienceLabel(event.target_audience)}</span>
                             </div>
                         </div>
                     </div>
@@ -286,12 +286,12 @@ export function PublicEventLanding({
                         <div className="overflow-hidden rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm shadow-2xl">
                             <div className="space-y-5 p-6">
                                 <div>
-                                    <p className="text-xs font-medium uppercase tracking-widest text-slate-400">Precio</p>
+                                    <p className="text-xs font-medium uppercase tracking-widest text-neutral-500">Precio</p>
                                     <p className="mt-1 text-3xl font-bold text-white">
                                         {finalPrice > 0 ? `$${finalPrice.toFixed(0)} MXN` : 'Gratis'}
                                     </p>
                                     {finalPrice > 0 && finalPrice < Number(event.price || 0) && (
-                                        <p className="mt-1 text-sm text-emerald-400 font-medium">
+                                        <p className="mt-1 text-sm text-brand-brown font-medium">
                                             ¡Tienes precio preferencial de miembro!
                                         </p>
                                     )}
@@ -299,17 +299,17 @@ export function PublicEventLanding({
 
                                 <div className="rounded-xl border border-white/10 bg-white/5 p-3.5 text-sm">
                                     <p className="font-medium text-white">{memberMessage.label}</p>
-                                    {memberMessage.note && <p className="mt-1.5 text-xs text-slate-400">{memberMessage.note}</p>}
+                                    {memberMessage.note && <p className="mt-1.5 text-xs text-neutral-500">{memberMessage.note}</p>}
                                 </div>
 
                                 {hasAccess ? (
                                     <div className="space-y-3 pt-2">
                                         <Link href={`/hub/${event.slug}${event.status === 'completed' ? '/recording' : ''}`}>
-                                            <Button className="w-full bg-teal-500 hover:bg-teal-600 text-white" size="lg">
+                                            <Button className="w-full bg-brand-yellow hover:bg-brand-yellow text-white" size="lg">
                                                 {event.status === 'completed' ? 'Ver grabación' : 'Entrar a la sala en vivo'}
                                             </Button>
                                         </Link>
-                                        <p className="text-center text-xs text-emerald-400 font-medium">
+                                        <p className="text-center text-xs text-brand-brown font-medium">
                                             ✓ Ya tienes acceso a este contenido
                                         </p>
                                     </div>
@@ -319,7 +319,7 @@ export function PublicEventLanding({
                                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="mr-2"><circle cx="12" cy="12" r="10" /><line x1="12" x2="12" y1="8" y2="12" /><line x1="12" x2="12.01" y1="16" y2="16" /></svg>
                                             {isExpired ? 'Este material ya expiró' : 'Cupo Lleno'}
                                         </Button>
-                                        <p className="text-center text-xs text-slate-400">
+                                        <p className="text-center text-xs text-neutral-500">
                                             {isExpired 
                                                 ? 'Las grabaciones o inscripciones para este evento cerraron.'
                                                 : 'Lo sentimos, este evento ya alcanzó su máxima capacidad.'}
@@ -342,12 +342,12 @@ export function PublicEventLanding({
                                                 {!isMembersOnly && (
                                                 <div className="relative py-3 flex items-center">
                                                     <div className="flex-grow border-t border-white/10"></div>
-                                                    <span className="shrink-0 px-3 text-xs text-slate-400 uppercase tracking-widest">O también</span>
+                                                    <span className="shrink-0 px-3 text-xs text-neutral-500 uppercase tracking-widest">O también</span>
                                                     <div className="flex-grow border-t border-white/10"></div>
                                                 </div>
                                                 )}
                                                 <Link href={`/precios?next=/eventos/${event.slug}&autoCheckout=true`} className="block w-full">
-                                                    <Button variant={isMembersOnly ? "default" : "outline"} className={`w-full ${isMembersOnly ? 'bg-teal-500 hover:bg-teal-600 text-white shadow-lg py-6 text-base' : 'border-teal-500/30 bg-teal-500/10 text-teal-300 hover:bg-teal-500/20 hover:text-teal-200'}`} size="lg">
+                                                    <Button variant={isMembersOnly ? "default" : "outline"} className={`w-full ${isMembersOnly ? 'bg-brand-yellow hover:bg-brand-yellow text-white shadow-lg py-6 text-base' : 'border-brand-yellow/30 bg-brand-yellow/10 text-brand-yellow hover:bg-brand-yellow/20 hover:text-brand-yellow'}`} size="lg">
                                                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="mr-2"><rect width="18" height="11" x="3" y="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>
                                                         {isMembersOnly ? 'Hazte miembro para participar' : `Suscríbete y ${event.member_access_type === 'free' ? 'accede gratis' : 'ahorra'}`}
                                                     </Button>
@@ -358,9 +358,9 @@ export function PublicEventLanding({
                                 )}
 
                                 {!hasAccess && (
-                                    <p className="text-center text-[11px] text-slate-400 mt-4">
+                                    <p className="text-center text-[11px] text-neutral-500 mt-4">
                                         ¿Ya lo adquiriste?{' '}
-                                        <Link href="/compras/recuperar" className="font-medium text-teal-400 hover:underline">
+                                        <Link href="/compras/recuperar" className="font-medium text-brand-yellow hover:underline">
                                             Recupera tu acceso
                                         </Link>
                                     </p>
@@ -404,7 +404,7 @@ export function PublicEventLanding({
                                         <ul className="space-y-3">
                                             {event.ideal_for.map((item: string, i: number) => (
                                                 <li key={i} className="flex items-start text-sm text-foreground">
-                                                    <svg className="mr-2 h-4 w-4 shrink-0 text-emerald-500 mt-0.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
+                                                    <svg className="mr-2 h-4 w-4 shrink-0 text-brand-brown mt-0.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
                                                     <span className="leading-snug">{item}</span>
                                                 </li>
                                             ))}
@@ -413,14 +413,14 @@ export function PublicEventLanding({
                                 )}
                                 {event.learning_outcomes?.length > 0 && (
                                     <div className="space-y-4">
-                                        <h4 className="font-semibold text-sky-500 flex items-center gap-2">
+                                        <h4 className="font-semibold text-brand-yellow flex items-center gap-2">
                                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m12 14 4-4" /><path d="M3.34 19a10 10 0 1 1 17.32 0" /></svg>
                                             ¿Qué aprenderás?
                                         </h4>
                                         <ul className="space-y-3">
                                             {event.learning_outcomes.map((item: string, i: number) => (
                                                 <li key={i} className="flex items-start text-sm text-foreground">
-                                                    <svg className="mr-2 h-4 w-4 shrink-0 text-sky-500 mt-0.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
+                                                    <svg className="mr-2 h-4 w-4 shrink-0 text-brand-yellow mt-0.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
                                                     <span className="leading-snug">{item}</span>
                                                 </li>
                                             ))}
@@ -485,7 +485,7 @@ export function PublicEventLanding({
                                             {avatar ? (
                                                 <img src={avatar} alt={name} className="h-12 w-12 rounded-full object-cover ring-2 ring-border" />
                                             ) : (
-                                                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-teal-100 text-sm font-bold text-teal-700">
+                                                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-brand-yellow text-sm font-bold text-brand-yellow">
                                                     {name.charAt(0)}
                                                 </div>
                                             )}
@@ -516,10 +516,10 @@ export function PublicEventLanding({
                 {/* Sidebar */}
                 <div className="space-y-6 lg:sticky lg:top-24 lg:self-start">
                     {/* For members */}
-                    <Card className="border-border/50 bg-gradient-to-br from-teal-50/50 to-emerald-50/30 dark:from-teal-950/30 dark:to-emerald-950/20">
+                    <Card className="border-border/50 bg-gradient-to-br from-brand-yellow/50 to-brand-dark/30 dark:from-brand-yellow/30 dark:to-brand-dark/20">
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2 text-base">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-teal-600"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z" /></svg>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-brand-yellow"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z" /></svg>
                                 Para miembros
                             </CardTitle>
                         </CardHeader>
@@ -527,19 +527,19 @@ export function PublicEventLanding({
                             <p>La membresía potencia tu acceso con ahorro acumulado y contenido preferencial.</p>
                             <ul className="space-y-1.5 text-sm">
                                 <li className="flex items-start gap-2">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="mt-0.5 shrink-0 text-teal-600"><polyline points="20 6 9 17 4 12" /></svg>
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="mt-0.5 shrink-0 text-brand-yellow"><polyline points="20 6 9 17 4 12" /></svg>
                                     Acceso incluido o precio preferencial
                                 </li>
                                 <li className="flex items-start gap-2">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="mt-0.5 shrink-0 text-teal-600"><polyline points="20 6 9 17 4 12" /></svg>
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="mt-0.5 shrink-0 text-brand-yellow"><polyline points="20 6 9 17 4 12" /></svg>
                                     Biblioteca privada de replays
                                 </li>
                                 <li className="flex items-start gap-2">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="mt-0.5 shrink-0 text-teal-600"><polyline points="20 6 9 17 4 12" /></svg>
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="mt-0.5 shrink-0 text-brand-yellow"><polyline points="20 6 9 17 4 12" /></svg>
                                     Comunidad y networking exclusivo
                                 </li>
                             </ul>
-                            <Link href="/precios" className="inline-flex items-center gap-1 text-sm font-medium text-teal-600 hover:text-teal-700">
+                            <Link href="/precios" className="inline-flex items-center gap-1 text-sm font-medium text-brand-yellow hover:text-brand-yellow">
                                 Ver planes
                                 <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14" /><path d="m12 5 7 7-7 7" /></svg>
                             </Link>
@@ -567,7 +567,7 @@ export function PublicEventLanding({
                                             </div>
                                         )}
                                         <div>
-                                            <p className="text-sm font-medium group-hover:text-teal-600 transition-colors">{item.title}</p>
+                                            <p className="text-sm font-medium group-hover:text-brand-yellow transition-colors">{item.title}</p>
                                             <p className="mt-0.5 text-xs text-muted-foreground">
                                                 {Number(item.price || 0) > 0 ? `$${Number(item.price).toFixed(0)} MXN` : 'Gratis'}
                                             </p>

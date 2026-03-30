@@ -146,23 +146,23 @@ export default async function CalendarPage() {
             case 'pending':
                 return {
                     label: 'Pendiente',
-                    color: 'bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300',
+                    color: 'bg-brand-yellow text-brand-yellow dark:bg-brand-yellow/30 dark:text-brand-yellow',
                     icon: <Timer className="h-3 w-3" />,
-                    dot: 'bg-amber-500'
+                    dot: 'bg-brand-yellow'
                 }
             case 'confirmed':
                 return {
                     label: 'Confirmada',
-                    color: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300',
+                    color: 'bg-brand-brown text-brand-brown dark:bg-brand-brown/30 dark:text-brand-brown',
                     icon: <CheckCircle2 className="h-3 w-3" />,
-                    dot: 'bg-emerald-500'
+                    dot: 'bg-brand-brown'
                 }
             case 'completed':
                 return {
                     label: 'Completada',
-                    color: 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300',
+                    color: 'bg-neutral-100 text-neutral-600 dark:bg-neutral-800 dark:text-neutral-400',
                     icon: <CheckCircle2 className="h-3 w-3" />,
-                    dot: 'bg-slate-400'
+                    dot: 'bg-neutral-400'
                 }
             case 'cancelled':
                 return {
@@ -240,8 +240,8 @@ export default async function CalendarPage() {
                 <Card>
                     <CardContent className="pt-5 pb-4">
                         <div className="flex items-center gap-3">
-                            <div className="p-2 rounded-lg bg-emerald-100 dark:bg-emerald-900/30">
-                                <CheckCircle2 className="h-5 w-5 text-emerald-600" />
+                            <div className="p-2 rounded-lg bg-brand-brown dark:bg-brand-brown/30">
+                                <CheckCircle2 className="h-5 w-5 text-brand-brown" />
                             </div>
                             <div>
                                 <p className="text-2xl font-bold">{confirmedCount}</p>
@@ -253,8 +253,8 @@ export default async function CalendarPage() {
                 <Card>
                     <CardContent className="pt-5 pb-4">
                         <div className="flex items-center gap-3">
-                            <div className="p-2 rounded-lg bg-amber-100 dark:bg-amber-900/30">
-                                <Timer className="h-5 w-5 text-amber-600" />
+                            <div className="p-2 rounded-lg bg-brand-yellow dark:bg-brand-yellow/30">
+                                <Timer className="h-5 w-5 text-brand-yellow" />
                             </div>
                             <div>
                                 <p className="text-2xl font-bold">{pendingCount}</p>
@@ -266,8 +266,8 @@ export default async function CalendarPage() {
                 <Card>
                     <CardContent className="pt-5 pb-4">
                         <div className="flex items-center gap-3">
-                            <div className="p-2 rounded-lg bg-blue-100 dark:bg-blue-900/30">
-                                <Calendar className="h-5 w-5 text-blue-600" />
+                            <div className="p-2 rounded-lg bg-brand-yellow dark:bg-brand-yellow/30">
+                                <Calendar className="h-5 w-5 text-brand-yellow" />
                             </div>
                             <div>
                                 <p className="text-2xl font-bold">{totalAppointments}</p>

@@ -184,7 +184,7 @@ export function CampaignForm({
                 </span>
             </div>
 
-            <div className="rounded-lg border border-emerald-200 bg-emerald-50/70 p-3 text-xs text-emerald-800 dark:border-emerald-900 dark:bg-emerald-950/20 dark:text-emerald-200">
+            <div className="rounded-lg border border-brand-brown bg-brand-brown/70 p-3 text-xs text-brand-brown dark:border-brand-brown dark:bg-brand-brown/20 dark:text-brand-brown">
                 Este formulario solo configura incentivos para adquisicion de psicologos y ponentes. No aplica a canalizacion clinica de pacientes.
             </div>
 

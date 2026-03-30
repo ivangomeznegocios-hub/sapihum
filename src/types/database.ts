@@ -2015,6 +2015,8 @@ export interface CertificateEligibilitySnapshot {
 // ============================================
 export type FormationStatus = 'draft' | 'active' | 'archived'
 export type FormationCertificateType = 'none' | 'participation' | 'completion' | 'specialized'
+export type FormationMemberAccessType = 'free' | 'discounted' | 'full_price'
+export type FormationCertificateScopeType = 'individual_course' | 'full_program'
 
 export interface Formation {
     id: string
@@ -2025,6 +2027,8 @@ export interface Formation {
     image_url: string | null
     bundle_price: number
     bundle_member_price: number
+    bundle_member_access_type: FormationMemberAccessType
+    total_hours: number
     individual_certificate_type: FormationCertificateType
     full_certificate_type: FormationCertificateType
     full_certificate_label: string
@@ -2042,6 +2046,8 @@ export interface FormationInsert {
     image_url?: string | null
     bundle_price: number
     bundle_member_price?: number
+    bundle_member_access_type?: FormationMemberAccessType
+    total_hours?: number
     individual_certificate_type?: FormationCertificateType
     full_certificate_type?: FormationCertificateType
     full_certificate_label?: string
@@ -2057,6 +2063,8 @@ export interface FormationUpdate {
     image_url?: string | null
     bundle_price?: number
     bundle_member_price?: number
+    bundle_member_access_type?: FormationMemberAccessType
+    total_hours?: number
     individual_certificate_type?: FormationCertificateType
     full_certificate_type?: FormationCertificateType
     full_certificate_label?: string
@@ -2142,6 +2150,51 @@ export interface FormationProgressInsert {
     certificate_issued_at?: string | null
 }
 
+// ============================================
+// TABLE: formation_certificates
+// ============================================
+export interface FormationCertificate {
+    id: string
+    formation_id: string
+    user_id: string | null
+    email: string
+    identity_key: string
+    scope_type: FormationCertificateScopeType
+    scope_reference: string
+    event_id: string | null
+    certificate_type: Exclude<FormationCertificateType, 'none'>
+    label: string
+    issued_by: string | null
+    issued_at: string
+    metadata: Record<string, any>
+    created_at: string
+}
+
+export interface FormationCertificateInsert {
+    formation_id: string
+    user_id?: string | null
+    email: string
+    identity_key: string
+    scope_type: FormationCertificateScopeType
+    scope_reference: string
+    event_id?: string | null
+    certificate_type: Exclude<FormationCertificateType, 'none'>
+    label: string
+    issued_by?: string | null
+    issued_at?: string
+    metadata?: Record<string, any>
+}
+
+export interface FormationCertificateUpdate {
+    user_id?: string | null
+    event_id?: string | null
+    certificate_type?: Exclude<FormationCertificateType, 'none'>
+    label?: string
+    issued_by?: string | null
+    issued_at?: string
+    metadata?: Record<string, any>
+}
+
 // Formation with courses and progress
 export interface FormationWithCourses extends Formation {
     courses?: (FormationCourse & { event?: Event })[]
@@ -2151,6 +2204,7 @@ export interface FormationWithCourses extends Formation {
 
 export interface FormationWithProgress extends FormationWithCourses {
     progress?: FormationProgress[]
+    certificates?: FormationCertificate[]
     completed_count?: number
     is_fully_completed?: boolean
     has_full_certificate?: boolean

@@ -67,19 +67,19 @@ function TaskCard({ task }: { task: Task }) {
 
     const getIcon = (type: string) => {
         switch (type) {
-            case 'journal': return <BookOpen className="h-5 w-5 text-blue-500" />
+            case 'journal': return <BookOpen className="h-5 w-5 text-brand-yellow" />
             case 'exercise': return <Activity className="h-5 w-5 text-green-500" />
-            case 'reading': return <FileText className="h-5 w-5 text-purple-500" />
-            default: return <CheckSquare className="h-5 w-5 text-slate-500" />
+            case 'reading': return <FileText className="h-5 w-5 text-brand-brown" />
+            default: return <CheckSquare className="h-5 w-5 text-neutral-500" />
         }
     }
 
     const getStatusColor = (status: string) => {
         switch (status) {
             case 'completed': return 'surface-alert-success border-green-200'
-            case 'reviewed': return 'bg-blue-100 text-blue-800 border-blue-200'
+            case 'reviewed': return 'bg-brand-yellow text-brand-yellow border-brand-yellow'
             case 'pending': return 'bg-yellow-100 text-yellow-800 border-yellow-200'
-            default: return 'bg-slate-100 text-slate-800'
+            default: return 'bg-neutral-100 text-neutral-800'
         }
     }
 
@@ -144,7 +144,7 @@ function TaskCard({ task }: { task: Task }) {
                             <a
                                 href={task.content.link}
                                 target="_blank"
-                                className="flex items-center gap-2 text-blue-600 hover:underline mt-4"
+                                className="flex items-center gap-2 text-brand-yellow hover:underline mt-4"
                             >
                                 <LinkIcon className="h-4 w-4" />
                                 {task.content.link_text || 'Ver recurso adjunto'}

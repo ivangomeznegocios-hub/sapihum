@@ -52,7 +52,7 @@ export default async function SubscriptionPage() {
             </div>
 
             {/* Current Level */}
-            <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border-blue-200 dark:border-blue-900">
+            <Card className="bg-gradient-to-r from-brand-yellow to-brand-brown dark:from-brand-yellow/30 dark:to-brand-brown/30 border-brand-yellow dark:border-brand-yellow">
                 <CardContent className="pt-6">
                     <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                         <div>
@@ -94,10 +94,10 @@ export default async function SubscriptionPage() {
 
             {/* AI Credits Section */}
             {!isAdmin && currentLevel >= 2 && (
-                <Card className="border-purple-200 dark:border-purple-900 bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-950/30 dark:to-pink-950/30">
+                <Card className="border-brand-brown dark:border-brand-brown bg-gradient-to-r from-brand-brown to-pink-50 dark:from-brand-brown/30 dark:to-pink-950/30">
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2">
-                            <Zap className="h-5 w-5 text-purple-600" />
+                            <Zap className="h-5 w-5 text-brand-brown" />
                             Recargas de Inteligencia Artificial
                         </CardTitle>
                         <CardDescription>
@@ -105,7 +105,7 @@ export default async function SubscriptionPage() {
                         </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-6">
-                        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between p-4 bg-white dark:bg-slate-900 rounded-lg border">
+                        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between p-4 bg-white dark:bg-neutral-900 rounded-lg border">
                             <div>
                                 <p className="text-sm text-muted-foreground">Minutos Disponibles</p>
                                 <h3 className="text-2xl font-bold">{profile.ai_minutes_available || 0}</h3>

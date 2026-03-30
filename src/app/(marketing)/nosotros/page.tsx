@@ -10,21 +10,21 @@ export default function NosotrosPage() {
   return (
     <div className="flex flex-col items-center flex-1 w-full relative bg-background">
       {/* Hero */}
-      <section className="w-full py-20 md:py-32 flex flex-col items-center text-center px-4 bg-[#0A1628] text-white relative overflow-hidden">
+      <section className="w-full py-20 md:py-32 flex flex-col items-center text-center px-4 bg-[#0a0a0a] text-white relative overflow-hidden">
         <div className="absolute inset-0 sapihum-grid-bg opacity-30" />
-        <div className="absolute left-1/2 top-0 -translate-x-1/2 h-[600px] w-[600px] rounded-full bg-teal-500/10 blur-[150px] pointer-events-none" />
+        <div className="absolute left-1/2 top-0 -translate-x-1/2 h-[600px] w-[600px] rounded-full bg-brand-yellow/10 blur-[150px] pointer-events-none" />
         
         <div className="relative z-10 max-w-4xl flex flex-col items-center">
-          <div className="sapihum-fade-up mb-6 inline-flex items-center gap-2 rounded-full border border-teal-500/30 bg-teal-950/40 px-4 py-1.5 text-sm font-semibold text-teal-300">
+          <div className="sapihum-fade-up mb-6 inline-flex items-center gap-2 rounded-full border border-brand-yellow/30 bg-brand-yellow/40 px-4 py-1.5 text-sm font-semibold text-brand-yellow">
             Nuestra Historia
           </div>
           <h1 className="sapihum-fade-up text-4xl md:text-5xl lg:text-7xl font-bold tracking-tight mb-6 leading-tight" style={{ animationDelay: '0.1s' }}>
             De Comunidad a <br className="hidden sm:inline" />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-emerald-400">
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-yellow to-brand-dark">
               Ecosistema Profesional
             </span>
           </h1>
-          <p className="sapihum-fade-up text-lg md:text-xl text-slate-300 max-w-3xl mb-10 leading-relaxed" style={{ animationDelay: '0.2s' }}>
+          <p className="sapihum-fade-up text-lg md:text-xl text-neutral-400 max-w-3xl mb-10 leading-relaxed" style={{ animationDelay: '0.2s' }}>
             Nacimos como una simple comunidad de psicólogos buscando compartir recursos. Hoy somos SAPIHUM, la infraestructura clínica, académica y de investigación más completa para el profesional de salud mental en habla hispana.
           </p>
         </div>
@@ -34,16 +34,16 @@ export default function NosotrosPage() {
       <section className="w-full py-20 md:py-28 px-4 max-w-7xl mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12 lg:gap-20">
           <div className="p-8 md:p-12 rounded-3xl border bg-card sapihum-card-glow relative overflow-hidden">
-            <div className="absolute -right-10 -top-10 text-9xl text-teal-500/5 select-none font-serif">"</div>
-            <h2 className="text-sm font-bold uppercase tracking-wider text-teal-600 dark:text-teal-400 mb-4">Misión</h2>
+            <div className="absolute -right-10 -top-10 text-9xl text-brand-yellow/5 select-none font-serif">"</div>
+            <h2 className="text-sm font-bold uppercase tracking-wider text-brand-yellow dark:text-brand-yellow mb-4">Misión</h2>
             <p className="text-xl md:text-2xl font-medium leading-relaxed">
               Dignificar la práctica psicológica dotando a los profesionales de herramientas tecnológicas de primer nivel, formación basada en evidencia empírica y respaldada por investigación rigurosa.
             </p>
           </div>
 
           <div className="p-8 md:p-12 rounded-3xl border bg-card sapihum-card-glow relative overflow-hidden">
-             <div className="absolute -right-10 -top-10 text-9xl text-amber-500/5 select-none font-serif">"</div>
-            <h2 className="text-sm font-bold uppercase tracking-wider text-amber-600 dark:text-amber-500 mb-4">Visión</h2>
+             <div className="absolute -right-10 -top-10 text-9xl text-brand-yellow/5 select-none font-serif">"</div>
+            <h2 className="text-sm font-bold uppercase tracking-wider text-brand-yellow dark:text-brand-yellow mb-4">Visión</h2>
             <p className="text-xl md:text-2xl font-medium leading-relaxed">
               Convertirnos en el estándar de oro (Gold Standard) operativo, académico e investigativo para el profesional de la psicología y ciencias del comportamiento.
             </p>
@@ -62,9 +62,9 @@ export default function NosotrosPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 sapihum-stagger">
             {[1, 2, 3].map((i) => (
               <div key={i} className="flex flex-col items-center">
-                <div className="w-32 h-32 rounded-full overflow-hidden bg-gradient-to-br from-slate-200 to-slate-300 dark:from-slate-800 dark:to-slate-900 border-4 border-background shadow-xl mb-4" />
+                <div className="w-32 h-32 rounded-full overflow-hidden bg-gradient-to-br from-neutral-200 to-neutral-300 dark:from-neutral-800 dark:to-neutral-900 border-4 border-background shadow-xl mb-4" />
                 <h3 className="font-bold text-lg">Dr/Dra. Investigador {i}</h3>
-                <p className="text-teal-600 dark:text-teal-400 text-sm font-medium">Director Científico</p>
+                <p className="text-brand-yellow dark:text-brand-yellow text-sm font-medium">Director Científico</p>
                 <p className="text-muted-foreground text-sm mt-3 max-w-xs text-center">Especialista en desarrollo de proyectos de la división.</p>
               </div>
             ))}
@@ -80,7 +80,7 @@ export default function NosotrosPage() {
             La psicología no es solo una ciencia empírica, es una responsabilidad ética monumental. Descubre los pilares que rigen todo lo que construimos en SAPIHUM.
           </p>
           <Link href="/manifiesto">
-            <Button size="lg" className="h-14 px-8 text-base bg-gradient-to-r from-teal-500 to-emerald-500 text-white shadow-lg sapihum-glow-cta">
+            <Button size="lg" className="h-14 px-8 text-base bg-gradient-to-r from-brand-yellow to-brand-dark text-white shadow-lg sapihum-glow-cta">
               Leer el Manifiesto SAPIHUM
             </Button>
           </Link>

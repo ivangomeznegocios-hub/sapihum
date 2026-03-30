@@ -186,9 +186,9 @@ export default async function TasksPage() {
                                             <div className="flex-1">
                                                 <div className="flex items-center gap-2">
                                                     <h3 className="font-medium">{task.title}</h3>
-                                                    <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${task.type === 'journal' ? 'bg-blue-100 text-blue-800' :
+                                                    <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${task.type === 'journal' ? 'bg-brand-yellow text-brand-yellow' :
                                                         task.type === 'exercise' ? 'surface-alert-success' :
-                                                            task.type === 'reading' ? 'bg-purple-100 text-purple-800' :
+                                                            task.type === 'reading' ? 'bg-brand-brown text-brand-brown' :
                                                                 task.type === 'form' ? 'bg-orange-100 text-orange-800' :
                                                                     'bg-gray-100 text-gray-800'
                                                         }`}>

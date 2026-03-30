@@ -47,28 +47,28 @@ const roleLabels: Record<string, string> = {
 const campaignTypeConfig: Record<string, { icon: LucideIcon; color: string; bg: string }> = {
     referral_boost: {
         icon: Zap,
-        color: 'text-amber-700 dark:text-amber-300',
-        bg: 'bg-amber-50/80 border-amber-200 dark:bg-amber-950/20 dark:border-amber-900',
+        color: 'text-brand-yellow dark:text-brand-yellow',
+        bg: 'bg-brand-yellow/80 border-brand-yellow dark:bg-brand-yellow/20 dark:border-brand-yellow',
     },
     milestone: {
         icon: Trophy,
-        color: 'text-violet-700 dark:text-violet-300',
-        bg: 'bg-violet-50/80 border-violet-200 dark:bg-violet-950/20 dark:border-violet-900',
+        color: 'text-brand-brown dark:text-brand-brown',
+        bg: 'bg-brand-brown/80 border-brand-brown dark:bg-brand-brown/20 dark:border-brand-brown',
     },
     promo: {
         icon: Gift,
-        color: 'text-emerald-700 dark:text-emerald-300',
-        bg: 'bg-emerald-50/80 border-emerald-200 dark:bg-emerald-950/20 dark:border-emerald-900',
+        color: 'text-brand-brown dark:text-brand-brown',
+        bg: 'bg-brand-brown/80 border-brand-brown dark:bg-brand-brown/20 dark:border-brand-brown',
     },
     challenge: {
         icon: Target,
-        color: 'text-rose-700 dark:text-rose-300',
+        color: 'text-brand-brown dark:text-brand-brown',
         bg: 'bg-rose-50/80 border-rose-200 dark:bg-rose-950/20 dark:border-rose-900',
     },
     custom: {
         icon: Sparkles,
-        color: 'text-sky-700 dark:text-sky-300',
-        bg: 'bg-sky-50/80 border-sky-200 dark:bg-sky-950/20 dark:border-sky-900',
+        color: 'text-brand-yellow dark:text-brand-yellow',
+        bg: 'bg-brand-yellow/80 border-brand-yellow dark:bg-brand-yellow/20 dark:border-brand-yellow',
     },
 }
 
@@ -145,7 +145,7 @@ export function CopyCodeButton({ code }: { code: string }) {
         <Button variant="outline" size="sm" onClick={handleCopy} className="gap-1.5">
             {copied ? (
                 <>
-                    <Check className="h-3.5 w-3.5 text-emerald-500" />
+                    <Check className="h-3.5 w-3.5 text-brand-brown" />
                     Copiado
                 </>
             ) : (
@@ -218,7 +218,7 @@ export function CopyLinkButton({ code, baseUrl }: { code: string; baseUrl: strin
         <Button variant="ghost" size="sm" onClick={handleCopy} className="gap-1.5 text-xs">
             {copied ? (
                 <>
-                    <Check className="h-3 w-3 text-emerald-500" />
+                    <Check className="h-3 w-3 text-brand-brown" />
                     Link copiado
                 </>
             ) : (
@@ -377,7 +377,7 @@ export function LeaderboardTable({
         )
     }
 
-    const medalColors = ['text-amber-500', 'text-slate-400', 'text-orange-600']
+    const medalColors = ['text-brand-yellow', 'text-neutral-500', 'text-orange-600']
 
     return (
         <div className="space-y-2">
@@ -457,8 +457,8 @@ export function RewardTimeline({ rewards }: { rewards: InviteRewardEvent[] }) {
                             className={cn(
                                 'mt-0.5 rounded-full p-1.5',
                                 reward.processed
-                                    ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/30 dark:text-emerald-400'
-                                    : 'bg-amber-50 text-amber-600 dark:bg-amber-950/30 dark:text-amber-400'
+                                    ? 'bg-brand-brown text-brand-brown dark:bg-brand-brown/30 dark:text-brand-brown'
+                                    : 'bg-brand-yellow text-brand-yellow dark:bg-brand-yellow/30 dark:text-brand-yellow'
                             )}
                         >
                             {reward.processed ? (
@@ -495,8 +495,8 @@ export function RewardTimeline({ rewards }: { rewards: InviteRewardEvent[] }) {
                             className={cn(
                                 'shrink-0 rounded-full px-2 py-0.5 text-[10px] font-medium',
                                 reward.processed
-                                    ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300'
-                                    : 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300'
+                                    ? 'bg-brand-brown text-brand-brown dark:bg-brand-brown/30 dark:text-brand-brown'
+                                    : 'bg-brand-yellow text-brand-yellow dark:bg-brand-yellow/30 dark:text-brand-yellow'
                             )}
                         >
                             {reward.processed ? 'Entregada' : 'Pendiente'}

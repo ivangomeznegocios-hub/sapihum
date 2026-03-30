@@ -152,7 +152,7 @@ export default async function EventAnalyticsPage() {
                                             </div>
                                         </td>
                                         <td className="p-4">
-                                            <span className={`text-xs px-2 py-1 rounded-full ${event.status === 'upcoming' ? 'bg-blue-100 text-blue-800' :
+                                            <span className={`text-xs px-2 py-1 rounded-full ${event.status === 'upcoming' ? 'bg-brand-yellow text-brand-yellow' :
                                                     event.status === 'live' ? 'surface-alert-success' :
                                                         'bg-gray-100 text-gray-800'
                                                 }`}>

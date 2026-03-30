@@ -70,10 +70,10 @@ export function MarketingNavbar({ isLoggedIn }: MarketingNavbarProps) {
     <header className="sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur-lg supports-[backdrop-filter]:bg-background/60">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         <Link href="/" className="flex items-center gap-2.5 shrink-0">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-teal-500 to-emerald-600 text-white font-bold text-[10px] tracking-tighter">
-            SH
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-black dark:bg-white">
+            <span className="text-[#f6ae02] dark:text-black font-bold text-[10px] tracking-tighter">SH</span>
           </div>
-          <span className="font-bold text-lg tracking-tight hidden sm:inline-block">
+          <span className="font-bold text-lg tracking-[1px] uppercase hidden sm:inline-block">
             SAPIHUM
           </span>
         </Link>
@@ -82,14 +82,14 @@ export function MarketingNavbar({ isLoggedIn }: MarketingNavbarProps) {
           {NAV_ITEMS.map((item) =>
             item.children ? (
               <div key={item.label} className="relative group">
-                <button className="flex items-center gap-1 px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors rounded-md hover:bg-accent/50">
+                <button className="flex items-center gap-1 px-3 py-2 text-sm font-semibold text-muted-foreground hover:text-foreground transition-colors rounded-md hover:bg-accent/50">
                   {item.label}
                   <svg className="h-3.5 w-3.5 ml-0.5 transition-transform group-hover:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
                   </svg>
                 </button>
                 <div className="invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all duration-200 absolute top-full left-0 pt-2 w-72">
-                  <div className="rounded-xl border bg-popover p-2 shadow-xl shadow-black/5 ring-1 ring-black/5">
+                  <div className="rounded-lg border bg-popover p-2 shadow-xl shadow-black/5 ring-1 ring-black/5">
                     {item.children.map((child) => (
                       <Link
                         key={child.href + child.label}
@@ -100,7 +100,7 @@ export function MarketingNavbar({ isLoggedIn }: MarketingNavbarProps) {
                         data-analytics-funnel="landing"
                         className="flex flex-col gap-0.5 rounded-lg px-3 py-2.5 hover:bg-accent transition-colors"
                       >
-                        <span className="text-sm font-medium text-foreground">{child.label}</span>
+                        <span className="text-sm font-semibold text-foreground">{child.label}</span>
                         <span className="text-xs text-muted-foreground leading-snug">{child.description}</span>
                       </Link>
                     ))}
@@ -115,7 +115,7 @@ export function MarketingNavbar({ isLoggedIn }: MarketingNavbarProps) {
                 data-analytics-label={item.label}
                 data-analytics-surface="marketing_nav"
                 data-analytics-funnel="landing"
-                className="px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors rounded-md hover:bg-accent/50"
+                className="px-3 py-2 text-sm font-semibold text-muted-foreground hover:text-foreground transition-colors rounded-md hover:bg-accent/50"
               >
                 {item.label}
               </Link>
@@ -126,24 +126,24 @@ export function MarketingNavbar({ isLoggedIn }: MarketingNavbarProps) {
         <div className="flex items-center gap-2 sm:gap-3">
           {isLoggedIn ? (
             <Link href="/dashboard">
-              <Button size="sm" className="font-medium bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-400 hover:to-emerald-400 text-white shadow-md shadow-teal-500/25" data-analytics-cta data-analytics-label="Ir al Dashboard" data-analytics-surface="marketing_nav" data-analytics-funnel="dashboard">
+              <Button size="sm" className="font-semibold bg-[#f6ae02] hover:bg-[#7a5602] text-black hover:text-white shadow-md shadow-[#f6ae02]/25 transition-all border-0" data-analytics-cta data-analytics-label="Ir al Dashboard" data-analytics-surface="marketing_nav" data-analytics-funnel="dashboard">
                 Ir al Dashboard
               </Button>
             </Link>
           ) : (
             <>
               <Link href="/auth/login" className="hidden sm:inline-flex">
-                <Button variant="ghost" size="sm" className="font-medium" data-analytics-cta data-analytics-label="Iniciar Sesión" data-analytics-surface="marketing_nav" data-analytics-funnel="registration">
+                <Button variant="ghost" size="sm" className="font-semibold" data-analytics-cta data-analytics-label="Iniciar Sesión" data-analytics-surface="marketing_nav" data-analytics-funnel="registration">
                   Iniciar Sesión
                 </Button>
               </Link>
               <Link href="/auth/register" className="hidden sm:inline-flex">
-                <Button size="sm" className="font-medium bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-400 hover:to-emerald-400 text-white shadow-md shadow-teal-500/25" data-analytics-cta data-analytics-label="Comenzar" data-analytics-surface="marketing_nav" data-analytics-funnel="registration">
+                <Button size="sm" className="font-semibold bg-[#f6ae02] hover:bg-[#7a5602] text-black hover:text-white shadow-md shadow-[#f6ae02]/25 transition-all border-0" data-analytics-cta data-analytics-label="Comenzar" data-analytics-surface="marketing_nav" data-analytics-funnel="registration">
                   Comenzar
                 </Button>
               </Link>
               <Link href="/auth/register" className="sm:hidden">
-                <Button size="sm" className="font-medium bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-400 hover:to-emerald-400 text-white shadow-md shadow-teal-500/25" data-analytics-cta data-analytics-label="Unirme" data-analytics-surface="marketing_nav" data-analytics-funnel="registration">
+                <Button size="sm" className="font-semibold bg-[#f6ae02] hover:bg-[#7a5602] text-black hover:text-white shadow-md shadow-[#f6ae02]/25 transition-all border-0" data-analytics-cta data-analytics-label="Unirme" data-analytics-surface="marketing_nav" data-analytics-funnel="registration">
                   Unirme
                 </Button>
               </Link>
@@ -167,7 +167,7 @@ export function MarketingNavbar({ isLoggedIn }: MarketingNavbarProps) {
           {NAV_ITEMS.map((item) =>
             item.children ? (
               <div key={item.label} className="space-y-1">
-                <p className="px-3 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                <p className="px-3 py-2 text-xs font-bold text-muted-foreground uppercase tracking-wider">
                   {item.label}
                 </p>
                 {item.children.map((child) => (
@@ -179,7 +179,7 @@ export function MarketingNavbar({ isLoggedIn }: MarketingNavbarProps) {
                     data-analytics-label={child.label}
                     data-analytics-surface="marketing_nav_mobile"
                     data-analytics-funnel="landing"
-                    className="block rounded-lg px-3 py-2 text-sm font-medium text-foreground hover:bg-accent transition-colors"
+                    className="block rounded-lg px-3 py-2 text-sm font-semibold text-foreground hover:bg-accent transition-colors"
                   >
                     {child.label}
                   </Link>
@@ -194,7 +194,7 @@ export function MarketingNavbar({ isLoggedIn }: MarketingNavbarProps) {
                 data-analytics-label={item.label}
                 data-analytics-surface="marketing_nav_mobile"
                 data-analytics-funnel="landing"
-                className="block rounded-lg px-3 py-2 text-sm font-medium text-foreground hover:bg-accent transition-colors"
+                className="block rounded-lg px-3 py-2 text-sm font-semibold text-foreground hover:bg-accent transition-colors"
               >
                 {item.label}
               </Link>
@@ -204,10 +204,10 @@ export function MarketingNavbar({ isLoggedIn }: MarketingNavbarProps) {
           {!isLoggedIn && (
             <div className="pt-3 border-t mt-3">
               <Link href="/auth/login" onClick={() => setMobileOpen(false)}>
-                <Button variant="outline" className="w-full mb-2" data-analytics-cta data-analytics-label="Iniciar Sesión" data-analytics-surface="marketing_nav_mobile" data-analytics-funnel="registration">Iniciar Sesión</Button>
+                <Button variant="outline" className="w-full mb-2 font-semibold" data-analytics-cta data-analytics-label="Iniciar Sesión" data-analytics-surface="marketing_nav_mobile" data-analytics-funnel="registration">Iniciar Sesión</Button>
               </Link>
               <Link href="/auth/register" onClick={() => setMobileOpen(false)}>
-                <Button className="w-full bg-gradient-to-r from-teal-500 to-emerald-500 text-white" data-analytics-cta data-analytics-label="Comenzar" data-analytics-surface="marketing_nav_mobile" data-analytics-funnel="registration">Comenzar</Button>
+                <Button className="w-full bg-[#f6ae02] hover:bg-[#7a5602] text-black hover:text-white font-semibold" data-analytics-cta data-analytics-label="Comenzar" data-analytics-surface="marketing_nav_mobile" data-analytics-funnel="registration">Comenzar</Button>
               </Link>
             </div>
           )}
