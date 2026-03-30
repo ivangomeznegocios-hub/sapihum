@@ -24,6 +24,7 @@ interface PsychologistDashboardProps {
     appointmentsToday: number
     hoursMonth: number
     userName: string
+    greeting: string
     upcomingAppointments: any[]
     activeEvents: number
     availableResources: number
@@ -69,6 +70,7 @@ export function PsychologistDashboard({
     appointmentsToday,
     hoursMonth,
     userName,
+    greeting: initialGreeting,
     upcomingAppointments,
     activeEvents,
     availableResources,
@@ -79,7 +81,7 @@ export function PsychologistDashboard({
     contentItems,
     pendingReferrals,
 }: PsychologistDashboardProps) {
-    const greeting = getGreeting()
+    const greeting = initialGreeting
 
     // Level 1: Comunidad y Crecimiento
     if (membershipLevel === 1) {

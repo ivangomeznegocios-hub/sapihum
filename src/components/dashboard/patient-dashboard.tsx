@@ -22,6 +22,7 @@ interface PatientDashboardProps {
     upcomingAppointments: number
     resourcesAvailable: number
     userName: string
+    greeting: string
     // New dynamic data
     completedSessions: number
     completedTasks: number
@@ -76,6 +77,7 @@ export function PatientDashboard({
     upcomingAppointments,
     resourcesAvailable,
     userName,
+    greeting: initialGreeting,
     completedSessions,
     completedTasks,
     totalTasks,
@@ -83,7 +85,7 @@ export function PatientDashboard({
     nextAppointment,
     contentItems,
 }: PatientDashboardProps) {
-    const greeting = getGreeting()
+    const greeting = initialGreeting
     const tip = getWellnessTip()
     const milestones = getPatientMilestones(completedSessions, completedTasks)
 

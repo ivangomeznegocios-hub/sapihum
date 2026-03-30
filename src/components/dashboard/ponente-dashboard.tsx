@@ -8,6 +8,7 @@ import { StatCard } from './ui/StatCard'
 
 interface PonenteDashboardProps {
     userName: string
+    greeting: string
     // New dynamic data
     totalEvents: number
     upcomingEvents: number
@@ -54,6 +55,7 @@ const statusBadges: Record<string, { label: string; color: string }> = {
 
 export function PonenteDashboard({
     userName,
+    greeting: initialGreeting,
     totalEvents,
     upcomingEvents,
     totalAttendees,
@@ -65,7 +67,7 @@ export function PonenteDashboard({
     currentMonthEarnings = 0,
     nextPaymentDate = null,
 }: PonenteDashboardProps) {
-    const greeting = getGreeting()
+    const greeting = initialGreeting
     const milestones = getSpeakerMilestones(profileCompleteness, totalEvents, totalAttendees)
 
     return (

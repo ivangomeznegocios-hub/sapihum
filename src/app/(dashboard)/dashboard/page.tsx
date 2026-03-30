@@ -11,6 +11,7 @@ import { getCommercialAccessContext } from '@/lib/access/commercial'
 import { canAccessClinicalWorkspace, getPsychologistDashboardLevel } from '@/lib/access/internal-modules'
 import { getEventsWithRegistration } from '@/lib/supabase/queries/events'
 import { getVisibleResources } from '@/lib/supabase/queries/resources'
+import { DEFAULT_TIMEZONE, getGreetingForTimezone } from '@/lib/timezone'
 import { ArrowRight, Library } from 'lucide-react'
 
 // Helper to calculate profile completeness for psychologists
@@ -94,6 +95,8 @@ export default async function DashboardPage() {
         profile,
     })
     const effectiveMembershipLevel = commercialAccess?.membershipLevel ?? 0
+    const userTimezone = (profile as any).timezone || DEFAULT_TIMEZONE
+    const greeting = getGreetingForTimezone(userTimezone)
 
     if (userRole === 'support') {
         redirect('/dashboard/admin/operations')
@@ -168,6 +171,7 @@ export default async function DashboardPage() {
                     totalPatients={totalPatients || 0}
                     activeEvents={activeEvents || 0}
                     userName={userName}
+                    greeting={greeting}
                     recentUsers={recentUsersData || []}
                     recentActivity={adminActivity}
                     usersThisWeek={usersThisWeek || 0}
@@ -352,6 +356,7 @@ export default async function DashboardPage() {
                     appointmentsToday={appointmentsToday}
                     hoursMonth={Math.round(hoursThisMonth * 10) / 10}
                     userName={userName}
+                    greeting={greeting}
                     upcomingAppointments={upcomingAppointments}
                     activeEvents={activeEvents}
                     availableResources={availableResources}
@@ -441,6 +446,7 @@ export default async function DashboardPage() {
                     upcomingAppointments={appointmentCount || 0}
                     resourcesAvailable={resourceCount || 0}
                     userName={userName}
+                    greeting={greeting}
                     completedSessions={sessionsCount || 0}
                     completedTasks={completedTaskCount}
                     totalTasks={(allTasks || []).length}
@@ -523,6 +529,7 @@ export default async function DashboardPage() {
                 <DashboardAccessShortcut />
                 <PonenteDashboard
                     userName={userName}
+                    greeting={greeting}
                     totalEvents={totalEvents}
                     upcomingEvents={upcomingEvents}
                     totalAttendees={totalAttendees}

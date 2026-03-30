@@ -25,6 +25,7 @@ interface AdminDashboardProps {
     totalPatients: number
     activeEvents: number
     userName: string
+    greeting: string
     // New dynamic data
     recentUsers: { id: string; full_name: string | null; role: string; created_at: string }[]
     recentActivity: ActivityItem[]
@@ -59,6 +60,7 @@ export function AdminDashboard({
     totalPatients,
     activeEvents,
     userName,
+    greeting: initialGreeting,
     recentUsers,
     recentActivity,
     usersThisWeek,
@@ -67,7 +69,7 @@ export function AdminDashboard({
     mrr,
     eventsGmv,
 }: AdminDashboardProps) {
-    const greeting = getGreeting()
+    const greeting = initialGreeting
 
     return (
         <div className="space-y-8 dashboard-stagger">

@@ -24,6 +24,28 @@ export const TIMEZONE_OPTIONS = [
 
 export const DEFAULT_TIMEZONE = 'America/Mexico_City'
 
+export function getCurrentHourInTimezone(timezone: string = DEFAULT_TIMEZONE, now = new Date()) {
+    try {
+        const formattedHour = new Intl.DateTimeFormat('en-US', {
+            hour: 'numeric',
+            hourCycle: 'h23',
+            timeZone: timezone || DEFAULT_TIMEZONE,
+        }).format(now)
+
+        return Number(formattedHour)
+    } catch {
+        return now.getHours()
+    }
+}
+
+export function getGreetingForTimezone(timezone: string = DEFAULT_TIMEZONE, now = new Date()) {
+    const hour = getCurrentHourInTimezone(timezone, now)
+
+    if (hour < 12) return 'Buenos dias'
+    if (hour < 18) return 'Buenas tardes'
+    return 'Buenas noches'
+}
+
 /**
  * Format an event date string in the user's timezone
  */
