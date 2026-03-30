@@ -4,21 +4,17 @@ import { getUserProfile } from '@/lib/supabase/server'
 import { getMyAccessibleEvents } from '@/lib/supabase/queries/event-entitlements'
 
 export const metadata = {
-    title: 'Mi acceso | Comunidad Psicologia',
-    robots: {
-        index: false,
-        follow: false,
-    },
+    title: 'Mis accesos | Dashboard',
 }
 
-export default async function MyAccessPage() {
+export default async function DashboardMyAccessPage() {
     const profile = await getUserProfile()
 
     if (!profile) {
-        redirect('/compras/recuperar?next=/mi-acceso')
+        redirect('/auth/login')
     }
 
     const accesses = await getMyAccessibleEvents()
 
-    return <MyAccessContent accesses={accesses} />
+    return <MyAccessContent accesses={accesses} withinDashboard />
 }

@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { Bell, CreditCard, LogOut, Menu, Search, User } from 'lucide-react'
+import { Bell, CreditCard, Library, LogOut, Menu, Search, User } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -138,6 +138,12 @@ export function Header({
                                     <Link href="/dashboard/settings" className="flex cursor-pointer items-center">
                                         <User className="mr-2 h-4 w-4" />
                                         <span>Mi perfil</span>
+                                    </Link>
+                                </DropdownMenuItem>
+                                <DropdownMenuItem asChild>
+                                    <Link href="/dashboard/mi-acceso" className="flex cursor-pointer items-center">
+                                        <Library className="mr-2 h-4 w-4" />
+                                        <span>Mis accesos</span>
                                     </Link>
                                 </DropdownMenuItem>
                                 {userRole !== 'patient' && (

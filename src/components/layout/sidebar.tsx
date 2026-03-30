@@ -34,6 +34,7 @@ import {
     Gift,
     TrendingUp,
     ShieldCheck,
+    Library,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { getMembershipTier } from '@/lib/membership'
@@ -59,6 +60,7 @@ const navGroups: NavGroup[] = [
         roles: ['admin', 'psychologist', 'patient', 'ponente'],
         items: [
             { name: 'Inicio', href: '/dashboard', icon: Home, roles: ['admin', 'psychologist', 'patient', 'ponente'] },
+            { name: 'Mi Acceso', href: '/dashboard/mi-acceso', icon: Library, roles: ['admin', 'psychologist', 'patient', 'ponente'] },
             { name: 'Calendario', href: '/dashboard/calendar', icon: Calendar, roles: ['admin', 'patient'] },
             { name: 'Mensajes', href: '/dashboard/messages', icon: MessageSquare, roles: ['admin', 'psychologist', 'patient'] },
             { name: 'Invitacion Pro', href: '/dashboard/growth', icon: Gift, roles: ['admin', 'psychologist', 'ponente'] },

@@ -1,6 +1,9 @@
 import { createClient, getUserProfile } from '@/lib/supabase/server'
 import { PsychologistDashboard, PatientDashboard, AdminDashboard, PonenteDashboard } from '@/components/dashboard'
+import Link from 'next/link'
 import { redirect } from 'next/navigation'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
 import type { ActivityItem } from '@/components/dashboard/ui/ActivityFeed'
 import type { ContentItem } from '@/components/dashboard/ui/ContentCarousel'
 import { getAssignedPsychologistForPatient } from '@/lib/supabase/queries/relationships'
@@ -8,6 +11,7 @@ import { getCommercialAccessContext } from '@/lib/access/commercial'
 import { canAccessClinicalWorkspace, getPsychologistDashboardLevel } from '@/lib/access/internal-modules'
 import { getEventsWithRegistration } from '@/lib/supabase/queries/events'
 import { getVisibleResources } from '@/lib/supabase/queries/resources'
+import { ArrowRight, Library } from 'lucide-react'
 
 // Helper to calculate profile completeness for psychologists
 function calculatePsychologistCompleteness(profile: any): number {
@@ -48,6 +52,30 @@ function timeAgo(dateStr: string): string {
     if (hrs < 24) return `Hace ${hrs}h`
     if (days < 7) return `Hace ${days}d`
     return d.toLocaleDateString('es-MX', { day: 'numeric', month: 'short' })
+}
+
+function DashboardAccessShortcut() {
+    return (
+        <Card className="border-primary/20 bg-gradient-to-r from-primary/5 via-background to-primary/10">
+            <CardContent className="flex flex-col gap-4 p-4 sm:flex-row sm:items-center sm:justify-between">
+                <div className="min-w-0">
+                    <div className="flex items-center gap-2 text-sm font-medium text-primary">
+                        <Library className="h-4 w-4" />
+                        Mi acceso
+                    </div>
+                    <p className="mt-1 text-sm text-muted-foreground">
+                        Tus eventos, cursos y grabaciones activas en un solo lugar.
+                    </p>
+                </div>
+                <Button asChild className="w-full sm:w-auto">
+                    <Link href="/dashboard/mi-acceso">
+                        Abrir mis accesos
+                        <ArrowRight className="ml-2 h-4 w-4" />
+                    </Link>
+                </Button>
+            </CardContent>
+        </Card>
+    )
 }
 
 export default async function DashboardPage() {
@@ -132,20 +160,23 @@ export default async function DashboardPage() {
         }))
 
         return (
-            <AdminDashboard
-                totalUsers={totalUsers || 0}
-                totalPsychologists={totalPsychologists || 0}
-                totalPatients={totalPatients || 0}
-                activeEvents={activeEvents || 0}
-                userName={userName}
-                recentUsers={recentUsersData || []}
-                recentActivity={adminActivity}
-                usersThisWeek={usersThisWeek || 0}
-                eventsThisMonth={eventsThisMonth || 0}
-                pendingReferrals={pendingReferrals || 0}
-                mrr={Math.round((analytics.mrr || 0) * 100) / 100}
-                eventsGmv={Math.round((analytics.eventsGmv || 0) * 100) / 100}
-            />
+            <div className="space-y-6">
+                <DashboardAccessShortcut />
+                <AdminDashboard
+                    totalUsers={totalUsers || 0}
+                    totalPsychologists={totalPsychologists || 0}
+                    totalPatients={totalPatients || 0}
+                    activeEvents={activeEvents || 0}
+                    userName={userName}
+                    recentUsers={recentUsersData || []}
+                    recentActivity={adminActivity}
+                    usersThisWeek={usersThisWeek || 0}
+                    eventsThisMonth={eventsThisMonth || 0}
+                    pendingReferrals={pendingReferrals || 0}
+                    mrr={Math.round((analytics.mrr || 0) * 100) / 100}
+                    eventsGmv={Math.round((analytics.eventsGmv || 0) * 100) / 100}
+                />
+            </div>
         )
     }
 
@@ -313,22 +344,25 @@ export default async function DashboardPage() {
         }
 
         return (
-            <PsychologistDashboard
-                membershipLevel={dashboardMembershipLevel}
-                patientCount={patientCount}
-                appointmentsToday={appointmentsToday}
-                hoursMonth={Math.round(hoursThisMonth * 10) / 10}
-                userName={userName}
-                upcomingAppointments={upcomingAppointments}
-                activeEvents={activeEvents}
-                availableResources={availableResources}
-                profileCompleteness={profileCompleteness}
-                eventsAttended={eventsAttended}
-                completedSessions={completedSessions}
-                recentActivity={recentActivity}
-                contentItems={contentItems}
-                pendingReferrals={pendingReferrals}
-            />
+            <div className="space-y-6">
+                <DashboardAccessShortcut />
+                <PsychologistDashboard
+                    membershipLevel={dashboardMembershipLevel}
+                    patientCount={patientCount}
+                    appointmentsToday={appointmentsToday}
+                    hoursMonth={Math.round(hoursThisMonth * 10) / 10}
+                    userName={userName}
+                    upcomingAppointments={upcomingAppointments}
+                    activeEvents={activeEvents}
+                    availableResources={availableResources}
+                    profileCompleteness={profileCompleteness}
+                    eventsAttended={eventsAttended}
+                    completedSessions={completedSessions}
+                    recentActivity={recentActivity}
+                    contentItems={contentItems}
+                    pendingReferrals={pendingReferrals}
+                />
+            </div>
         )
     }
 
@@ -400,18 +434,21 @@ export default async function DashboardPage() {
         }
 
         return (
-            <PatientDashboard
-                psychologistName={psychologistName}
-                upcomingAppointments={appointmentCount || 0}
-                resourcesAvailable={resourceCount || 0}
-                userName={userName}
-                completedSessions={sessionsCount || 0}
-                completedTasks={completedTaskCount}
-                totalTasks={(allTasks || []).length}
-                pendingTasks={pendingTasks.slice(0, 3)}
-                nextAppointment={nextAppointment}
-                contentItems={contentItems}
-            />
+            <div className="space-y-6">
+                <DashboardAccessShortcut />
+                <PatientDashboard
+                    psychologistName={psychologistName}
+                    upcomingAppointments={appointmentCount || 0}
+                    resourcesAvailable={resourceCount || 0}
+                    userName={userName}
+                    completedSessions={sessionsCount || 0}
+                    completedTasks={completedTaskCount}
+                    totalTasks={(allTasks || []).length}
+                    pendingTasks={pendingTasks.slice(0, 3)}
+                    nextAppointment={nextAppointment}
+                    contentItems={contentItems}
+                />
+            </div>
         )
     }
 
@@ -482,19 +519,22 @@ export default async function DashboardPage() {
         ).toISOString().split('T')[0]
 
         return (
-            <PonenteDashboard
-                userName={userName}
-                totalEvents={totalEvents}
-                upcomingEvents={upcomingEvents}
-                totalAttendees={totalAttendees}
-                profileCompleteness={profileCompleteness}
-                events={eventsWithAttendees}
-                totalAccumulated={Math.round(totalAccumulated * 100) / 100}
-                availableForPayment={Math.round(availableForPayment * 100) / 100}
-                pendingAmount={Math.round(pendingAmount * 100) / 100}
-                currentMonthEarnings={Math.round(currentMonthEarnings * 100) / 100}
-                nextPaymentDate={nextPaymentDate}
-            />
+            <div className="space-y-6">
+                <DashboardAccessShortcut />
+                <PonenteDashboard
+                    userName={userName}
+                    totalEvents={totalEvents}
+                    upcomingEvents={upcomingEvents}
+                    totalAttendees={totalAttendees}
+                    profileCompleteness={profileCompleteness}
+                    events={eventsWithAttendees}
+                    totalAccumulated={Math.round(totalAccumulated * 100) / 100}
+                    availableForPayment={Math.round(availableForPayment * 100) / 100}
+                    pendingAmount={Math.round(pendingAmount * 100) / 100}
+                    currentMonthEarnings={Math.round(currentMonthEarnings * 100) / 100}
+                    nextPaymentDate={nextPaymentDate}
+                />
+            </div>
         )
     }
 
