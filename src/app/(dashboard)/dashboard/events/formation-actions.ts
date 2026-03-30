@@ -8,35 +8,125 @@ import {
     markFormationCourseCompletedRecord,
 } from '@/lib/formations/service'
 
-export async function createFormation(formation: FormationInsert, courseIds: string[]) {
-    const supabase = await createClient()
+type FormationEditorRole = 'admin' | 'ponente'
 
+type FormationEditorContext = {
+    userId: string
+    role: FormationEditorRole
+    isAdmin: boolean
+}
+
+async function requireFormationEditor(supabase: any): Promise<FormationEditorContext> {
     const { data: { user } } = await supabase.auth.getUser()
+
     if (!user) {
         throw new Error('No autorizado')
     }
 
-    // 1. Create formation
+    const { data: profile } = await (supabase
+        .from('profiles') as any)
+        .select('role')
+        .eq('id', user.id)
+        .single()
+
+    if (!profile || !['admin', 'ponente'].includes(profile.role)) {
+        throw new Error('No tienes permisos para gestionar formaciones')
+    }
+
+    return {
+        userId: user.id,
+        role: profile.role as FormationEditorRole,
+        isAdmin: profile.role === 'admin',
+    }
+}
+
+async function requireFormationAccess(supabase: any, formationId: string) {
+    const editor = await requireFormationEditor(supabase)
+
+    const { data: formation } = await (supabase
+        .from('formations') as any)
+        .select('id, created_by')
+        .eq('id', formationId)
+        .single()
+
+    if (!formation) {
+        throw new Error('Formacion no encontrada')
+    }
+
+    if (!editor.isAdmin && formation.created_by !== editor.userId) {
+        throw new Error('No tienes permisos para editar esta formacion')
+    }
+
+    return { editor, formation }
+}
+
+async function validateCourseSelection(
+    supabase: any,
+    editor: FormationEditorContext,
+    courseIds: string[],
+    currentFormationId?: string
+) {
+    const uniqueCourseIds = Array.from(new Set(courseIds.filter(Boolean)))
+
+    if (uniqueCourseIds.length === 0) {
+        return []
+    }
+
+    let query = (supabase
+        .from('events') as any)
+        .select('id, created_by, formation_id')
+        .in('id', uniqueCourseIds)
+
+    if (!editor.isAdmin) {
+        query = query.eq('created_by', editor.userId)
+    }
+
+    const { data: events, error } = await query
+
+    if (error) {
+        throw new Error(`Error al validar los cursos de la formacion: ${error.message}`)
+    }
+
+    if (!events || events.length !== uniqueCourseIds.length) {
+        throw new Error('Solo puedes vincular cursos propios que existan en el sistema')
+    }
+
+    const blockedEvent = events.find((event: any) =>
+        event.formation_id && event.formation_id !== currentFormationId
+    )
+
+    if (blockedEvent) {
+        throw new Error('Uno de los cursos seleccionados ya pertenece a otra formacion')
+    }
+
+    return uniqueCourseIds
+}
+
+export async function createFormation(formation: FormationInsert, courseIds: string[]) {
+    const supabase = await createClient()
+    const editor = await requireFormationEditor(supabase)
+    const validatedCourseIds = await validateCourseSelection(supabase, editor, courseIds)
+
     const { data: newFormation, error: formationError } = await (supabase
         .from('formations') as any)
         .insert({
             ...formation,
-            created_by: user.id
+            status: editor.isAdmin ? (formation.status || 'draft') : 'draft',
+            created_by: editor.userId,
         })
         .select()
         .single()
 
     if (formationError) {
-        throw new Error(`Error al crear la formación: ${formationError.message}`)
+        throw new Error(`Error al crear la formacion: ${formationError.message}`)
     }
 
-    // 2. Add courses
-    if (courseIds && courseIds.length > 0) {
-        const formationCourses = courseIds.map((eventId, index) => ({
+    if (validatedCourseIds.length > 0) {
+        const formationCourses = validatedCourseIds.map((eventId, index) => ({
             formation_id: newFormation.id,
             event_id: eventId,
             display_order: index,
-            is_required: true
+            is_required: true,
         }))
 
         const { error: coursesError } = await (supabase
@@ -44,16 +134,14 @@ export async function createFormation(formation: FormationInsert, courseIds: str
             .insert(formationCourses)
 
         if (coursesError) {
-            // Rollback is manual since RPC is not used
             await (supabase.from('formations') as any).delete().eq('id', newFormation.id)
             throw new Error(`Error al vincular los cursos: ${coursesError.message}`)
         }
 
-        // 3. Update events to point to this formation
         await (supabase
             .from('events') as any)
             .update({ formation_id: newFormation.id })
-            .in('id', courseIds)
+            .in('id', validatedCourseIds)
     }
 
     revalidatePath('/dashboard/events/formations')
@@ -62,42 +150,36 @@ export async function createFormation(formation: FormationInsert, courseIds: str
 
 export async function updateFormation(formationId: string, updates: FormationUpdate, newCourseIds: string[]) {
     const supabase = await createClient()
+    const { editor } = await requireFormationAccess(supabase, formationId)
+    const validatedCourseIds = await validateCourseSelection(supabase, editor, newCourseIds, formationId)
 
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) {
-        throw new Error('No autorizado')
-    }
-
-    // 1. Update formation details
     const { error: updateError } = await (supabase
         .from('formations') as any)
-        .update(updates)
+        .update({
+            ...updates,
+            status: editor.isAdmin ? updates.status : 'draft',
+        })
         .eq('id', formationId)
 
     if (updateError) {
-        throw new Error(`Error al actualizar la formación: ${updateError.message}`)
+        throw new Error(`Error al actualizar la formacion: ${updateError.message}`)
     }
 
-    // 2. Fetch existing courses
     const { data: existingCourses } = await (supabase
         .from('formation_courses') as any)
         .select('event_id')
         .eq('formation_id', formationId)
 
-    const existingCourseIds = existingCourses?.map((ec: { event_id: string }) => ec.event_id) || []
+    const existingCourseIds = existingCourses?.map((course: { event_id: string }) => course.event_id) || []
+    const coursesToRemove = existingCourseIds.filter((id: string) => !validatedCourseIds.includes(id))
 
-    // 3. Determine courses to add and remove
-    const coursesToRemove = existingCourseIds.filter((id: string) => !newCourseIds.includes(id))
-    
     if (coursesToRemove.length > 0) {
-        // Remove relationships
         await ((supabase
             .from('formation_courses' as any)) as any)
             .delete()
             .eq('formation_id', formationId)
             .in('event_id', coursesToRemove)
-            
-        // Disconnect from events table
+
         await (supabase
             .from('events') as any)
             .update({ formation_id: null })
@@ -105,9 +187,8 @@ export async function updateFormation(formationId: string, updates: FormationUpd
             .in('id', coursesToRemove)
     }
 
-    // Update orders of all new courses
-    for (let i = 0; i < newCourseIds.length; i++) {
-        const eventId = newCourseIds[i]
+    for (let index = 0; index < validatedCourseIds.length; index += 1) {
+        const eventId = validatedCourseIds[index]
         const isNew = !existingCourseIds.includes(eventId)
 
         if (isNew) {
@@ -116,24 +197,23 @@ export async function updateFormation(formationId: string, updates: FormationUpd
                 .insert({
                     formation_id: formationId,
                     event_id: eventId,
-                    display_order: i,
-                    is_required: true
+                    display_order: index,
+                    is_required: true,
                 })
         } else {
             await ((supabase
                 .from('formation_courses' as any)) as any)
-                .update({ display_order: i })
+                .update({ display_order: index })
                 .eq('formation_id', formationId)
                 .eq('event_id', eventId)
         }
     }
 
-    // Connect new ones to events table
-    if (newCourseIds.length > 0) {
+    if (validatedCourseIds.length > 0) {
         await (supabase
             .from('events') as any)
             .update({ formation_id: formationId })
-            .in('id', newCourseIds)
+            .in('id', validatedCourseIds)
     }
 
     revalidatePath(`/dashboard/events/formations/${formationId}`)
@@ -143,13 +223,8 @@ export async function updateFormation(formationId: string, updates: FormationUpd
 
 export async function deleteFormation(formationId: string) {
     const supabase = await createClient()
+    await requireFormationAccess(supabase, formationId)
 
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) {
-        throw new Error('No autorizado')
-    }
-
-    // Disconnect events
     await (supabase
         .from('events') as any)
         .update({ formation_id: null })
@@ -161,7 +236,7 @@ export async function deleteFormation(formationId: string) {
         .eq('id', formationId)
 
     if (error) {
-        throw new Error(`Error al eliminar la formación: ${error.message}`)
+        throw new Error(`Error al eliminar la formacion: ${error.message}`)
     }
 
     revalidatePath('/dashboard/events/formations')
@@ -170,8 +245,9 @@ export async function deleteFormation(formationId: string) {
 
 export async function getFormationsForAdmin() {
     const supabase = await createClient()
+    const editor = await requireFormationEditor(supabase)
 
-    const { data, error } = await (supabase
+    let query = (supabase
         .from('formations') as any)
         .select(`
             id,
@@ -184,28 +260,39 @@ export async function getFormationsForAdmin() {
             courses:formation_courses(count),
             purchases:formation_purchases(count)
         `)
-        .order('created_at', { ascending: false })
+
+    if (!editor.isAdmin) {
+        query = query.eq('created_by', editor.userId)
+    }
+
+    const { data, error } = await query.order('created_at', { ascending: false })
 
     if (error) {
         console.error('Error fetching formations:', error)
         return []
     }
 
-    return data.map((f: any) => ({
-        ...f,
-        total_courses: f.courses?.[0]?.count || 0,
-        total_purchases: f.purchases?.[0]?.count || 0
+    return data.map((formation: any) => ({
+        ...formation,
+        total_courses: formation.courses?.[0]?.count || 0,
+        total_purchases: formation.purchases?.[0]?.count || 0,
     }))
 }
 
 export async function getFormationById(id: string) {
     const supabase = await createClient()
+    const editor = await requireFormationEditor(supabase)
 
-    const { data: formation, error } = await (supabase
+    let query = (supabase
         .from('formations') as any)
         .select('*')
         .eq('id', id)
-        .single()
+
+    if (!editor.isAdmin) {
+        query = query.eq('created_by', editor.userId)
+    }
+
+    const { data: formation, error } = await query.single()
 
     if (error || !formation) {
         return null
@@ -225,16 +312,16 @@ export async function getFormationById(id: string) {
 
     return {
         ...formation,
-        courses: courses || []
+        courses: courses || [],
     }
 }
 
 export async function getFormationLearnerProgress(formationId: string) {
     const supabase = await createClient()
+    const editor = await requireFormationEditor(supabase)
 
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) {
-        throw new Error('No autorizado')
+    if (!editor.isAdmin) {
+        throw new Error('Solo el administrador puede revisar el avance de alumnos')
     }
 
     const [{ data: courses }, { data: purchases }, { data: progress }, { data: certificates }] = await Promise.all([
@@ -318,14 +405,14 @@ export async function getFormationLearnerProgress(formationId: string) {
     })
 }
 
-// Client helper
 export async function markCourseCompleted(formationId: string, eventId: string, email: string) {
     const supabase = await createClient()
+    const editor = await requireFormationEditor(supabase)
 
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) throw new Error('No autorizado')
+    if (!editor.isAdmin) {
+        throw new Error('Solo el administrador puede marcar cursos como completados')
+    }
 
-    // Find the student profile to link
     const { data: profile } = await (supabase.from('profiles') as any).select('id').eq('email', email).maybeSingle()
 
     await markFormationCourseCompletedRecord({
@@ -334,19 +421,20 @@ export async function markCourseCompleted(formationId: string, eventId: string, 
         eventId,
         email,
         userId: profile?.id || null,
-        issuedBy: user.id,
+        issuedBy: editor.userId,
     })
 
     revalidatePath(`/dashboard/events/formations/${formationId}`)
     return { success: true }
 }
 
-// Issue the final full certificate
 export async function issueFullCertificate(formationId: string, email: string) {
     const supabase = await createClient()
+    const editor = await requireFormationEditor(supabase)
 
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) throw new Error('No autorizado')
+    if (!editor.isAdmin) {
+        throw new Error('Solo el administrador puede emitir certificados finales')
+    }
 
     const { data: profile } = await (supabase.from('profiles') as any).select('id').eq('email', email).maybeSingle()
 
@@ -355,7 +443,7 @@ export async function issueFullCertificate(formationId: string, email: string) {
         formationId,
         email,
         userId: profile?.id || null,
-        issuedBy: user.id,
+        issuedBy: editor.userId,
     })
 
     revalidatePath(`/dashboard/events/formations/${formationId}`)

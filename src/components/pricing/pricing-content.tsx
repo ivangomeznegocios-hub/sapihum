@@ -146,7 +146,7 @@ export function PricingContent({
           <Badge variant="outline" className="mb-5 text-sm px-4 py-1.5 border-foreground/20">
             Modelo por niveles
           </Badge>
-          <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight mb-5 bg-gradient-to-r from-foreground via-foreground/80 to-foreground bg-clip-text">
+          <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight mb-5 text-foreground">
             Tu inversión en crecimiento profesional
           </h1>
           <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed">

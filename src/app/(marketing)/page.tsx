@@ -610,7 +610,7 @@ export default async function LandingPage() {
                   </Button>
                 </Link>
                 <Link href="/nosotros" className="w-full sm:w-auto">
-                  <Button size="lg" variant="outline" className="w-full text-base h-14 px-10 border-[#2c2c2b] text-[#2c2c2b] hover:bg-[#2c2c2b] hover:text-white transition-all font-semibold">
+                  <Button size="lg" variant="outline" className="w-full text-base h-14 px-10 border-2 border-black text-black hover:bg-black hover:text-[#f6ae02] transition-colors font-bold">
                     Conocer la comunidad
                   </Button>
                 </Link>

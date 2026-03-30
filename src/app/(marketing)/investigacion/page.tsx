@@ -41,8 +41,8 @@ export default function InvestigacionPage() {
               Todos los datos están alineados estrictamente con LFPDPPP y anonimizados desde su origen.
             </p>
             <Link href="/auth/register">
-              <Button className="mt-4 bg-gradient-to-r from-brand-yellow to-brand-dark text-white shadow-lg">
-                Quiero participar en investigaciones
+              <Button className="mt-4 bg-brand-yellow hover:bg-brand-yellow/90 text-black font-bold shadow-lg border-0">
+                Ver Proyectos Activos
               </Button>
             </Link>
           </div>

@@ -45,30 +45,30 @@
 .dark {
   /* ── SAPIHUM Dark Mode ── */
   --background: #000000;
-  --foreground: rgba(192, 191, 188, 0.85);
+  --foreground: #ffffff;
   --card: #0a0a0a;
-  --card-foreground: #e5e5e4;
+  --card-foreground: #ffffff;
   --popover: #0a0a0a;
-  --popover-foreground: #e5e5e4;
+  --popover-foreground: #ffffff;
   --primary: #f6ae02;
   --primary-foreground: #000000;
   --secondary: #161616;
-  --secondary-foreground: #e5e5e4;
+  --secondary-foreground: #ffffff;
   --muted: #161616;
-  --muted-foreground: #8a8a89;
+  --muted-foreground: #a1a1aa;
   --accent: rgba(246, 174, 2, 0.08);
-  --accent-foreground: #e5e5e4;
+  --accent-foreground: #ffffff;
   --destructive: #ef4444;
   --destructive-foreground: #fafafa;
   --border: rgba(44, 44, 43, 0.8);
   --input: rgba(44, 44, 43, 0.8);
   --ring: #f6ae02;
   --sidebar-background: #0a0a0a;
-  --sidebar-foreground: #e5e5e4;
+  --sidebar-foreground: #ffffff;
   --sidebar-primary: #f6ae02;
   --sidebar-primary-foreground: #000000;
   --sidebar-accent: #161616;
-  --sidebar-accent-foreground: #e5e5e4;
+  --sidebar-accent-foreground: #ffffff;
   --sidebar-border: rgba(44, 44, 43, 0.6);
   --sidebar-ring: #f6ae02;
   --chart-1: #f6ae02;

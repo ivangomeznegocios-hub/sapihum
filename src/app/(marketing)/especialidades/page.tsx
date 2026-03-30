@@ -23,7 +23,7 @@ export default function EspecialidadesIndexPage() {
           </p>
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-white mb-6 leading-tight">
             Encuentra tu{' '}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-yellow to-brand-dark">
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-yellow to-white">
               especialización
             </span>
           </h1>
@@ -43,9 +43,9 @@ export default function EspecialidadesIndexPage() {
               className="group relative rounded-2xl border bg-card p-7 sapihum-card-glow overflow-hidden"
             >
               {/* Left accent bar on hover */}
-              <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-brand-yellow to-brand-dark opacity-0 group-hover:opacity-100 transition-opacity rounded-l-2xl" />
+              <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-brand-yellow to-white opacity-0 group-hover:opacity-100 transition-opacity rounded-l-2xl" />
 
-              <div className="text-4xl mb-5 bg-gradient-to-br from-brand-yellow to-brand-dark dark:from-brand-yellow/30 dark:to-brand-dark/30 w-16 h-16 rounded-xl flex items-center justify-center">
+              <div className="text-4xl mb-5 bg-gradient-to-br from-brand-yellow to-white dark:from-brand-yellow/30 dark:to-white/30 w-16 h-16 rounded-xl flex items-center justify-center">
                 {spec.icon}
               </div>
 
@@ -92,7 +92,7 @@ export default function EspecialidadesIndexPage() {
             SAPIHUM está en constante expansión. Contáctanos si tu rama de la psicología aún no está representada.
           </p>
           <Link href="/auth/register">
-            <Button className="bg-gradient-to-r from-brand-yellow to-brand-dark text-white">
+            <Button size="lg" className="h-12 px-8 bg-brand-yellow hover:bg-brand-yellow/90 text-black font-bold shadow-lg border-0">
               Crear mi cuenta
             </Button>
           </Link>

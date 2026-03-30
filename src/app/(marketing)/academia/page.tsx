@@ -48,7 +48,7 @@ export default async function AcademiaPage() {
 
                             <h1 className="sapihum-fade-up text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-6 leading-[1.1] text-white" style={{ animationDelay: '0.1s' }}>
                                 Donde se forman los{' '}
-                                <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-yellow via-brand-brown to-brand-brown">
+                                <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-yellow to-white">
                                     mejores psicólogos
                                 </span>
                             </h1>
@@ -59,7 +59,7 @@ export default async function AcademiaPage() {
 
                             <div className="sapihum-fade-up flex flex-wrap gap-3" style={{ animationDelay: '0.3s' }}>
                                 <a href="#catalogo">
-                                    <Button size="lg" className="h-12 px-7 text-sm shadow-xl bg-gradient-to-r from-brand-yellow to-brand-dark hover:from-brand-yellow hover:to-brand-dark text-white font-bold border-0 sapihum-glow-cta">
+                                    <Button size="lg" className="h-12 px-7 text-sm shadow-xl bg-brand-yellow hover:bg-brand-yellow/90 text-black font-bold border-0 sapihum-glow-cta">
                                         Explorar catálogo
                                     </Button>
                                 </a>
@@ -155,7 +155,7 @@ function FeaturedEventCard({ event }: { event: any }) {
                 {event.image_url ? (
                     <img src={event.image_url} alt={event.title} className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-700" />
                 ) : (
-                    <div className="h-full w-full bg-gradient-to-br from-brand-yellow/60 to-brand-dark/40 flex items-center justify-center">
+                    <div className="h-full w-full bg-gradient-to-br from-brand-yellow/60 to-white/40 flex items-center justify-center">
                         <span className="text-6xl opacity-20">🎓</span>
                     </div>
                 )}
@@ -163,7 +163,7 @@ function FeaturedEventCard({ event }: { event: any }) {
 
                 {/* Badges */}
                 <div className="absolute top-3 left-3 flex items-center gap-2">
-                    <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[11px] font-bold text-white uppercase tracking-wide ${isLive ? 'bg-red-500 animate-pulse' : 'bg-gradient-to-r from-brand-yellow to-brand-dark'}`}>
+                    <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[11px] font-bold text-white uppercase tracking-wide ${isLive ? 'bg-red-500 animate-pulse' : 'bg-gradient-to-r from-brand-yellow to-white'}`}>
                         {isLive && (
                             <span className="relative flex h-1.5 w-1.5">
                                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-white opacity-75" />

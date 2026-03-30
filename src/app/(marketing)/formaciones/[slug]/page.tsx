@@ -44,10 +44,10 @@ export default async function FormationLandingPage({ params }: { params: Promise
     const showsFullCertificate = data.full_certificate_type && data.full_certificate_type !== 'none'
 
     return (
-        <div className="min-h-screen bg-slate-50">
-            <section className="relative overflow-hidden bg-slate-950 py-24 sm:py-28">
+        <div className="min-h-screen bg-white">
+            <section className="relative overflow-hidden bg-black py-24 sm:py-28">
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(246,174,2,0.16),_transparent_34%),radial-gradient(circle_at_bottom_right,_rgba(122,86,2,0.22),_transparent_28%)]" />
-                <div className="absolute inset-0 bg-[linear-gradient(120deg,rgba(15,23,42,0.94),rgba(2,6,23,0.82))]" />
+                <div className="absolute inset-0 bg-[linear-gradient(120deg,rgba(10,10,10,0.94),rgba(0,0,0,0.82))]" />
 
                 <div className="relative mx-auto grid w-full max-w-6xl gap-12 px-4 sm:px-6 lg:grid-cols-[minmax(0,1fr)_440px] lg:px-8">
                     <div className="max-w-2xl space-y-6 text-white">
@@ -62,13 +62,13 @@ export default async function FormationLandingPage({ params }: { params: Promise
                             </h1>
 
                             {data.subtitle && (
-                                <p className="text-lg font-light leading-relaxed text-slate-300 sm:text-2xl">
+                                <p className="text-lg font-light leading-relaxed text-neutral-300 sm:text-2xl">
                                     {data.subtitle}
                                 </p>
                             )}
 
                             {data.description && (
-                                <p className="max-w-xl text-base leading-relaxed text-slate-400">
+                                <p className="max-w-xl text-base leading-relaxed text-neutral-400">
                                     {data.description}
                                 </p>
                             )}
@@ -82,12 +82,12 @@ export default async function FormationLandingPage({ params }: { params: Promise
                                 </div>
                             )}
 
-                            <div className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-slate-200">
+                            <div className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-neutral-200">
                                 {courses.length} cursos especializados
                             </div>
 
                             {totalHoursLabel && (
-                                <div className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-slate-200">
+                                <div className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-neutral-200">
                                     <Clock3 className="h-4 w-4 text-brand-yellow" />
                                     {totalHoursLabel} totales
                                 </div>
@@ -96,14 +96,14 @@ export default async function FormationLandingPage({ params }: { params: Promise
                     </div>
 
                     <div className="lg:justify-self-end">
-                        <div className="rounded-[28px] bg-white p-8 text-center shadow-2xl ring-1 ring-slate-900/5">
+                        <div className="rounded-[28px] bg-white p-8 text-center shadow-2xl ring-1 ring-black/5">
                             {userState.hasPurchasedBundle ? (
                                 <div className="flex w-full flex-col items-center py-8">
                                     <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-brand-brown/10 text-brand-brown">
                                         <ShieldCheck className="h-8 w-8" />
                                     </div>
-                                    <h3 className="text-2xl font-bold text-slate-900">Ya estas inscrito</h3>
-                                    <p className="mb-8 mt-2 text-slate-500">
+                                    <h3 className="text-2xl font-bold text-black">Ya estas inscrito</h3>
+                                    <p className="mb-8 mt-2 text-neutral-500">
                                         Tienes acceso completo a toda esta formacion.
                                     </p>
                                     <Button asChild size="lg" className="w-full rounded-full">
@@ -112,13 +112,13 @@ export default async function FormationLandingPage({ params }: { params: Promise
                                 </div>
                             ) : (
                                 <>
-                                    <h3 className="mb-4 text-sm font-bold uppercase tracking-[0.3em] text-slate-400">
+                                    <h3 className="mb-4 text-sm font-bold uppercase tracking-[0.3em] text-neutral-400">
                                         Paquete Completo
                                     </h3>
 
                                     <div className="mb-2 flex items-baseline justify-center gap-2">
-                                        <span className="text-5xl font-black text-slate-900">{pricing.effectivePrice}</span>
-                                        <span className="text-lg font-bold text-slate-500">MXN</span>
+                                        <span className="text-5xl font-black text-black">{pricing.effectivePrice}</span>
+                                        <span className="text-lg font-bold text-neutral-500">MXN</span>
                                     </div>
 
                                     {pricing.discountedByMembership && (
@@ -135,18 +135,18 @@ export default async function FormationLandingPage({ params }: { params: Promise
                                         </Badge>
                                     )}
 
-                                    <div className="mb-1 text-sm text-slate-500 line-through">
+                                    <div className="mb-1 text-sm text-neutral-500 line-through">
                                         Valor individual: {formatCurrency(totalIndividualValue)}
                                     </div>
 
                                     {savings > 0 && (
-                                        <Badge className="mb-4 border-brand-brown bg-brand-brown text-brand-brown hover:bg-brand-brown">
+                                        <Badge className="mb-4 border-brand-yellow bg-brand-yellow text-black hover:bg-brand-yellow/90 font-bold uppercase tracking-wider">
                                             Ahorras {formatCurrency(savings)}
                                         </Badge>
                                     )}
 
                                     {pricing.memberMessage?.note && (
-                                        <p className="mb-6 text-xs leading-relaxed text-slate-500">
+                                        <p className="mb-6 text-xs leading-relaxed text-neutral-500">
                                             {pricing.memberMessage.note}
                                         </p>
                                     )}
@@ -159,7 +159,7 @@ export default async function FormationLandingPage({ params }: { params: Promise
                                         className="w-full rounded-full py-6 text-lg"
                                     />
 
-                                    <p className="mt-4 text-xs leading-relaxed text-slate-400">
+                                    <p className="mt-4 text-xs leading-relaxed text-neutral-400">
                                         Obtienes acceso inmediato a los {courses.length} cursos
                                         {totalHoursLabel ? ` y a ${totalHoursLabel} de contenido` : ''}.
                                     </p>
@@ -173,15 +173,15 @@ export default async function FormationLandingPage({ params }: { params: Promise
             <section className="py-20 sm:py-24">
                 <div className="mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8">
                     <div className="mb-14 text-center">
-                        <h2 className="text-3xl font-black tracking-tight text-slate-900 sm:text-4xl">
+                        <h2 className="text-3xl font-black tracking-tight text-black sm:text-4xl">
                             Ruta de Formacion
                         </h2>
-                        <p className="mx-auto mt-4 max-w-2xl text-lg leading-relaxed text-slate-500">
+                        <p className="mx-auto mt-4 max-w-2xl text-lg leading-relaxed text-neutral-500">
                             Completa paso a paso cada uno de estos modulos para obtener tu certificacion final.
                         </p>
                     </div>
 
-                    <div className="relative space-y-8 before:absolute before:bottom-0 before:left-7 before:top-0 before:w-px before:bg-gradient-to-b before:from-transparent before:via-slate-200 before:to-transparent md:before:left-1/2 md:before:-translate-x-1/2">
+                    <div className="relative space-y-8 before:absolute before:bottom-0 before:left-7 before:top-0 before:w-px before:bg-gradient-to-b before:from-transparent before:via-neutral-200 before:to-transparent md:before:left-1/2 md:before:-translate-x-1/2">
                         {courses.map((course: any, index: number) => {
                             const event = course.event
                             if (!event) return null
@@ -196,7 +196,7 @@ export default async function FormationLandingPage({ params }: { params: Promise
                                     <div className={`md:${index % 2 === 0 ? 'col-start-1' : 'col-start-3'} ${index % 2 === 0 ? '' : 'md:text-left'}`}>
                                         <div className="rounded-2xl border bg-white p-4 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md">
                                             <div className="flex flex-col gap-4 sm:flex-row">
-                                                <div className="relative aspect-video w-full overflow-hidden rounded-xl bg-slate-100 sm:w-36 shrink-0">
+                                                <div className="relative aspect-video w-full overflow-hidden rounded-xl bg-neutral-100 sm:w-36 shrink-0">
                                                     {event.image_url ? (
                                                         <img
                                                             src={event.image_url}
@@ -205,7 +205,7 @@ export default async function FormationLandingPage({ params }: { params: Promise
                                                         />
                                                     ) : (
                                                         <div className="absolute inset-0 flex items-center justify-center">
-                                                            <PlayCircle className="h-8 w-8 text-slate-300" />
+                                                            <PlayCircle className="h-8 w-8 text-neutral-300" />
                                                         </div>
                                                     )}
                                                 </div>
@@ -219,7 +219,7 @@ export default async function FormationLandingPage({ params }: { params: Promise
                                                         )}
 
                                                         {hasAccess ? (
-                                                            <Badge className="border-none bg-brand-brown text-brand-brown hover:bg-brand-brown">
+                                                            <Badge className="border-none bg-brand-yellow/20 text-brand-yellow hover:bg-brand-brown">
                                                                 <CheckCircle2 className="mr-1 h-3 w-3" />
                                                                 Tienes acceso
                                                             </Badge>
@@ -230,12 +230,12 @@ export default async function FormationLandingPage({ params }: { params: Promise
                                                         )}
                                                     </div>
 
-                                                    <h3 className="text-lg font-bold leading-tight text-slate-900 hover:underline">
+                                                    <h3 className="text-lg font-bold leading-tight text-black hover:underline">
                                                         <Link href={`/eventos/${event.slug}`}>{event.title}</Link>
                                                     </h3>
 
                                                     {event.subtitle && (
-                                                        <p className="line-clamp-2 text-sm leading-relaxed text-slate-500">
+                                                        <p className="line-clamp-2 text-sm leading-relaxed text-neutral-500">
                                                             {event.subtitle}
                                                         </p>
                                                     )}
@@ -244,7 +244,7 @@ export default async function FormationLandingPage({ params }: { params: Promise
 
                                             {!hasAccess && !userState.hasPurchasedBundle && (
                                                 <div className="mt-4 flex justify-end border-t pt-4">
-                                                    <Button variant="ghost" size="sm" asChild className="text-slate-600 hover:text-primary">
+                                                    <Button variant="ghost" size="sm" asChild className="text-neutral-600 hover:text-primary">
                                                         <Link href={`/eventos/${event.slug}`}>
                                                             Ver curso individual
                                                             <ArrowRight className="ml-2 h-4 w-4" />
@@ -255,8 +255,8 @@ export default async function FormationLandingPage({ params }: { params: Promise
                                         </div>
                                     </div>
 
-                                    <div className="relative z-10 flex h-14 w-14 shrink-0 items-center justify-center rounded-full border-4 border-slate-50 bg-white shadow md:col-start-2 md:mx-auto">
-                                        <span className="font-bold text-slate-400">{index + 1}</span>
+                                    <div className="relative z-10 flex h-14 w-14 shrink-0 items-center justify-center rounded-full border-4 border-white bg-white shadow md:col-start-2 md:mx-auto">
+                                        <span className="font-bold text-neutral-400">{index + 1}</span>
                                     </div>
                                 </div>
                             )

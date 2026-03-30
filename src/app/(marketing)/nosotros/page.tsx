@@ -20,7 +20,7 @@ export default function NosotrosPage() {
           </div>
           <h1 className="sapihum-fade-up text-4xl md:text-5xl lg:text-7xl font-bold tracking-tight mb-6 leading-tight" style={{ animationDelay: '0.1s' }}>
             De Comunidad a <br className="hidden sm:inline" />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-yellow to-brand-dark">
+            <span className="text-brand-yellow">
               Ecosistema Profesional
             </span>
           </h1>
@@ -80,7 +80,7 @@ export default function NosotrosPage() {
             La psicología no es solo una ciencia empírica, es una responsabilidad ética monumental. Descubre los pilares que rigen todo lo que construimos en SAPIHUM.
           </p>
           <Link href="/manifiesto">
-            <Button size="lg" className="h-14 px-8 text-base bg-gradient-to-r from-brand-yellow to-brand-dark text-white shadow-lg sapihum-glow-cta">
+            <Button size="lg" className="h-14 px-8 text-base bg-brand-yellow hover:bg-brand-yellow/90 text-black font-bold shadow-lg sapihum-glow-cta">
               Leer el Manifiesto SAPIHUM
             </Button>
           </Link>

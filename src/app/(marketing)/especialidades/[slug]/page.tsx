@@ -72,7 +72,7 @@ export default async function SpecializationPage(props: Props) {
           
           <div className="sapihum-fade-up" style={{ animationDelay: '0.3s' }}>
             <Link href={`/auth/register?plan=${isLevel2Active ? 'level2' : 'level1'}&specialization=${spec.code}`}>
-              <Button size="lg" className="h-auto max-w-full whitespace-normal px-8 py-4 text-center text-base font-bold text-white shadow-lg border-0 bg-gradient-to-r from-brand-yellow to-brand-dark hover:from-brand-yellow hover:to-brand-dark sapihum-glow-cta">
+              <Button size="lg" className="h-auto max-w-full whitespace-normal px-8 py-4 text-center text-base font-bold text-white shadow-lg border-0 bg-gradient-to-r from-brand-yellow to-white hover:from-brand-yellow hover:to-white sapihum-glow-cta">
                 {isLevel2Active ? 'Comenzar Especialización' : 'Comenzar con Nivel 1'}
               </Button>
             </Link>
@@ -122,7 +122,7 @@ export default async function SpecializationPage(props: Props) {
               </p>
               
               <Link href={`/auth/register?plan=${isLevel2Active ? 'level2' : 'level1'}&specialization=${spec.code}`}>
-                <Button size="lg" className="h-auto max-w-full whitespace-normal px-8 py-3 text-center text-base text-white bg-gradient-to-r from-brand-yellow to-brand-dark">
+                <Button size="lg" className="h-auto max-w-full whitespace-normal px-8 py-3 text-center text-base text-white bg-gradient-to-r from-brand-yellow to-white">
                   Crear Cuenta Gratis
                 </Button>
               </Link>
@@ -158,7 +158,7 @@ export default async function SpecializationPage(props: Props) {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href={`/auth/register?plan=${isLevel2Active ? 'level2' : 'level1'}&specialization=${spec.code}`}>
-              <Button size="lg" className="h-auto max-w-full whitespace-normal px-10 py-4 text-center text-base font-bold text-white shadow-xl border-0 bg-gradient-to-r from-brand-yellow to-brand-dark hover:from-brand-yellow hover:to-brand-dark sapihum-glow-cta">
+              <Button size="lg" className="h-auto max-w-full whitespace-normal px-10 py-4 text-center text-base font-bold text-white shadow-xl border-0 bg-gradient-to-r from-brand-yellow to-white hover:from-brand-yellow hover:to-white sapihum-glow-cta">
                 {isLevel2Active ? `Activar Membresía ${spec.name}` : 'Unirme al Nivel 1'}
               </Button>
             </Link>
