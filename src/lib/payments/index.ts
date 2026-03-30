@@ -8,9 +8,14 @@ import type { AttributionSnapshot } from '@/lib/analytics/types'
 import { grantEventEntitlements } from '@/lib/events/entitlements'
 import { sendEmail } from '@/lib/email/index'
 import { buildEventPurchaseEmail } from '@/lib/email/templates'
+import { upsertAutomaticEventSpeakerEarnings } from '@/lib/earnings/compensation'
 import { syncMembershipEntitlementsForUser } from '@/lib/membership-entitlements'
 import { getPlanByPriceId } from './config'
-import { retrieveCompletedCheckoutPayment, stripeAdapter } from './stripe'
+import {
+    retrieveCompletedCheckoutPayment,
+    retrieveCompletedCheckoutSubscription,
+    stripeAdapter,
+} from './stripe'
 import type {
     PaymentProvider,
     PaymentProviderAdapter,
@@ -69,6 +74,36 @@ function getPrimaryTouch(snapshot: AttributionSnapshot) {
 function normalizeWebhookValue(value: string | null | undefined) {
     const normalized = value?.trim()
     return normalized ? normalized : null
+}
+
+async function upsertPremiumCommission(params: {
+    supabase: any
+    eventId: string
+    studentId: string | null
+    transactionId: string | null
+    grossAmount: number
+}) {
+    if (!params.studentId || params.grossAmount <= 0) {
+        return
+    }
+
+    const today = new Date()
+    const attendanceDate = today.toISOString().split('T')[0]
+    const releaseDate = new Date(today.getTime() + 30 * 24 * 60 * 60 * 1000)
+        .toISOString()
+        .split('T')[0]
+
+    await upsertAutomaticEventSpeakerEarnings({
+        supabase: params.supabase,
+        eventId: params.eventId,
+        studentId: params.studentId,
+        grossAmount: params.grossAmount,
+        earningType: 'premium_commission',
+        attendanceDate,
+        releaseDate,
+        monthKey: today.toISOString().slice(0, 7),
+        sourceTransactionId: params.transactionId,
+    })
 }
 
 async function fulfillEventPurchase(params: {
@@ -473,6 +508,11 @@ export async function fulfillSubscriptionCreated(data: SubscriptionWebhookData):
     const analyticsVisitorId = data.metadata?.analytics_visitor_id || null
     const analyticsSessionId = data.metadata?.analytics_session_id || null
     const attributionSnapshot = parseAttributionSnapshot(data.metadata?.attribution_snapshot)
+    const { data: existingSubscription } = await supabase
+        .from('subscriptions')
+        .select('id')
+        .eq('provider_subscription_id', data.providerSubscriptionId)
+        .maybeSingle()
 
     let profileId: string | null = null
     let userId: string | null = null
@@ -554,19 +594,21 @@ export async function fulfillSubscriptionCreated(data: SubscriptionWebhookData):
 
     console.log(`[Payment] Subscription activated: user=${profileId}, level=${membershipLevel}`)
 
-    await recordAnalyticsServerEvent({
-        eventName: 'subscription_created',
-        eventSource: 'webhook',
-        visitorId: analyticsVisitorId,
-        sessionId: analyticsSessionId,
-        userId,
-        touch: getPrimaryTouch(attributionSnapshot),
-        properties: {
-            providerSubscriptionId: data.providerSubscriptionId,
-            membershipLevel,
-            specializationCode,
-        },
-    })
+    if (!existingSubscription) {
+        await recordAnalyticsServerEvent({
+            eventName: 'subscription_created',
+            eventSource: 'webhook',
+            visitorId: analyticsVisitorId,
+            sessionId: analyticsSessionId,
+            userId,
+            touch: getPrimaryTouch(attributionSnapshot),
+            properties: {
+                providerSubscriptionId: data.providerSubscriptionId,
+                membershipLevel,
+                specializationCode,
+            },
+        })
+    }
 }
 
 export async function fulfillSubscriptionRenewed(data: SubscriptionWebhookData): Promise<void> {
@@ -673,6 +715,10 @@ export async function fulfillSubscriptionUpdated(data: SubscriptionWebhookData):
     if (data.cancelledAt) updates.cancelled_at = data.cancelledAt
     if (data.currentPeriodStart) updates.current_period_start = data.currentPeriodStart
     if (data.currentPeriodEnd) updates.current_period_end = data.currentPeriodEnd
+    if (data.providerCustomerId) updates.provider_customer_id = data.providerCustomerId
+    if (data.priceId) updates.provider_price_id = data.priceId
+    if (data.membershipLevel !== undefined) updates.membership_level = data.membershipLevel
+    if (data.specializationCode !== undefined) updates.specialization_code = data.specializationCode
 
     await supabase.from('subscriptions').update(updates).eq('provider_subscription_id', data.providerSubscriptionId)
 
@@ -708,11 +754,25 @@ export async function fulfillSubscriptionUpdated(data: SubscriptionWebhookData):
     } else {
         const { data: sub } = await supabase
             .from('subscriptions')
-            .select('profile_id')
+            .select('profile_id, membership_level, specialization_code')
             .eq('provider_subscription_id', data.providerSubscriptionId)
             .single()
 
         if (sub?.profile_id) {
+            const profileUpdates: Record<string, any> = {
+                subscription_status: data.status === 'trialing' ? 'trial' : 'active',
+            }
+
+            if (typeof sub.membership_level === 'number') {
+                profileUpdates.membership_level = sub.membership_level
+                if (sub.membership_level < 2) {
+                    profileUpdates.membership_specialization_code = null
+                } else if (sub.specialization_code) {
+                    profileUpdates.membership_specialization_code = sub.specialization_code
+                }
+            }
+
+            await supabase.from('profiles').update(profileUpdates).eq('id', sub.profile_id)
             await syncMembershipEntitlementsForUser(sub.profile_id)
         }
     }
@@ -776,26 +836,37 @@ export async function fulfillOneTimePayment(data: PaymentWebhookData): Promise<v
                 .maybeSingle()
             : { data: null }
     const isFirstCompletedTransaction = !existingTransaction
+    let transactionId = existingTransaction?.id ?? null
 
     if (!existingTransaction) {
-        await supabase.from('payment_transactions').insert({
-            user_id: userId || null,
-            profile_id: profileId || null,
-            email: data.customerEmail,
-            purchase_type: purchaseType || 'ai_credits',
-            purchase_reference_id: referenceId || null,
-            amount: data.amount,
-            currency: data.currency,
-            payment_provider: 'stripe',
-            provider_session_id: data.sessionId,
-            provider_payment_id: data.paymentIntentId || null,
-            status: 'completed',
-            metadata: data.metadata || {},
-            analytics_visitor_id: analyticsVisitorId,
-            analytics_session_id: analyticsSessionId,
-            attribution_snapshot: attributionSnapshot,
-            completed_at: new Date().toISOString(),
-        })
+        const { data: insertedTransaction, error: insertTransactionError } = await supabase
+            .from('payment_transactions')
+            .insert({
+                user_id: userId || null,
+                profile_id: profileId || null,
+                email: data.customerEmail,
+                purchase_type: purchaseType || 'ai_credits',
+                purchase_reference_id: referenceId || null,
+                amount: data.amount,
+                currency: data.currency,
+                payment_provider: 'stripe',
+                provider_session_id: data.sessionId,
+                provider_payment_id: data.paymentIntentId || null,
+                status: 'completed',
+                metadata: data.metadata || {},
+                analytics_visitor_id: analyticsVisitorId,
+                analytics_session_id: analyticsSessionId,
+                attribution_snapshot: attributionSnapshot,
+                completed_at: new Date().toISOString(),
+            })
+            .select('id')
+            .single()
+
+        if (insertTransactionError) {
+            throw insertTransactionError
+        }
+
+        transactionId = insertedTransaction.id as string
     }
 
     if (purchaseType === 'ai_credits' && profileId) {
@@ -837,6 +908,18 @@ export async function fulfillOneTimePayment(data: PaymentWebhookData): Promise<v
             profileId,
         })
         resolvedFulfillmentUserId = result.resolvedUserId
+
+        try {
+            await upsertPremiumCommission({
+                supabase,
+                eventId: referenceId,
+                studentId: resolvedFulfillmentUserId,
+                transactionId,
+                grossAmount: data.amount,
+            })
+        } catch (commissionError) {
+            console.error('[Payment] Failed to create premium commission:', commissionError)
+        }
     } else if (purchaseType === 'formation_purchase' && referenceId) {
         const result = await fulfillFormationPurchase({
             supabase,
@@ -846,6 +929,16 @@ export async function fulfillOneTimePayment(data: PaymentWebhookData): Promise<v
             profileId,
         })
         resolvedFulfillmentUserId = result.resolvedUserId
+    }
+
+    if (transactionId && resolvedFulfillmentUserId && (!userId || !profileId)) {
+        await supabase
+            .from('payment_transactions')
+            .update({
+                user_id: resolvedFulfillmentUserId,
+                profile_id: resolvedFulfillmentUserId,
+            })
+            .eq('id', transactionId)
     }
 
     if (isFirstCompletedTransaction) {
@@ -914,11 +1007,17 @@ export async function fulfillOneTimePayment(data: PaymentWebhookData): Promise<v
 
 export async function reconcileCompletedCheckoutSession(sessionId: string): Promise<boolean> {
     const payment = await retrieveCompletedCheckoutPayment(sessionId)
-    if (!payment) {
+    if (payment) {
+        await fulfillOneTimePayment(payment)
+        return true
+    }
+
+    const subscription = await retrieveCompletedCheckoutSubscription(sessionId)
+    if (!subscription) {
         return false
     }
 
-    await fulfillOneTimePayment(payment)
+    await fulfillSubscriptionCreated(subscription)
     return true
 }
 

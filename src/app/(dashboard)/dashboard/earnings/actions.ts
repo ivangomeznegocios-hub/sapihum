@@ -1,6 +1,10 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import {
+    formatSpeakerCompensationLabel,
+    upsertAutomaticEventSpeakerEarnings,
+} from '@/lib/earnings/compensation'
 import type { SpeakerFinancialSummary } from '@/types/database'
 
 // ============================================
@@ -107,7 +111,7 @@ export async function getSpeakerEarningsHistory(month?: string) {
     let query = (supabase
         .from('speaker_earnings') as any)
         .select(`
-            id, earning_type, gross_amount, commission_rate, net_amount,
+            id, earning_type, gross_amount, commission_rate, compensation_type, compensation_value, net_amount,
             status, attendance_date, release_date, released_at, voided_at,
             void_reason, month_key, created_at,
             student:profiles!speaker_earnings_student_id_fkey(id, full_name, avatar_url),
@@ -322,8 +326,6 @@ export async function recordAttendance(
 
     // If qualifies, create/update earning record
     if (qualifies) {
-        const speakerId = event.created_by
-
         // Calculate the prorated earning
         // Count total events this student attended this month
         const currentMonth = new Date().toISOString().slice(0, 7)
@@ -336,38 +338,26 @@ export async function recordAttendance(
         const totalEvents = totalStudentEvents || 1
         const grossAmount = Math.round((POOL_PER_USER / totalEvents) * 100) / 100
 
-        // Get speaker commission rate
-        const { data: speakerData } = await (supabase
-            .from('speakers') as any)
-            .select('commission_rate')
-            .eq('id', speakerId)
-            .single()
-
-        const commissionRate = speakerData?.commission_rate || 1.0
-        const netAmount = Math.round(grossAmount * commissionRate * 100) / 100
-
         const today = new Date()
+        const attendanceDate = today.toISOString().split('T')[0]
         const releaseDate = new Date(today.getTime() + RELEASE_DAYS * 24 * 60 * 60 * 1000)
             .toISOString().split('T')[0]
 
-        const { error: earningError } = await (supabase
-            .from('speaker_earnings') as any)
-            .upsert({
-                speaker_id: speakerId,
-                event_id: eventId,
-                student_id: studentId,
-                earning_type: 'membership_proration',
-                gross_amount: grossAmount,
-                commission_rate: commissionRate,
-                net_amount: netAmount,
-                status: 'pending',
-                attendance_date: today.toISOString().split('T')[0],
-                release_date: releaseDate,
-                attendance_log_id: attendanceLog.id,
-                month_key: currentMonth,
-            }, { onConflict: 'speaker_id,event_id,student_id' })
-
-        if (earningError) return { error: earningError.message }
+        try {
+            await upsertAutomaticEventSpeakerEarnings({
+                supabase,
+                eventId,
+                studentId,
+                grossAmount,
+                earningType: 'membership_proration',
+                attendanceDate,
+                releaseDate,
+                monthKey: currentMonth,
+                attendanceLogId: attendanceLog.id,
+            })
+        } catch (earningError: any) {
+            return { error: earningError?.message || 'No se pudo registrar la ganancia del ponente' }
+        }
     }
 
     return {
@@ -410,40 +400,32 @@ export async function recordPremiumCommission(
 
     if (!event) return { error: 'Evento no encontrado' }
 
-    const speakerId = event.created_by
-
-    // Get speaker commission rate
-    const { data: speakerData } = await (supabase.from('speakers') as any)
-        .select('commission_rate')
-        .eq('id', speakerId)
-        .single()
-
-    const commissionRate = speakerData?.commission_rate || 0.5
-    const netAmount = Math.round(coursePrice * commissionRate * 100) / 100
-
     const today = new Date()
+    const attendanceDate = today.toISOString().split('T')[0]
     const releaseDate = new Date(today.getTime() + RELEASE_DAYS * 24 * 60 * 60 * 1000)
         .toISOString().split('T')[0]
 
-    const { error } = await (supabase.from('speaker_earnings') as any)
-        .upsert({
-            speaker_id: speakerId,
-            event_id: eventId,
-            student_id: studentId,
-            earning_type: 'premium_commission',
-            gross_amount: coursePrice,
-            commission_rate: commissionRate,
-            net_amount: netAmount,
-            status: 'pending',
-            attendance_date: today.toISOString().split('T')[0],
-            release_date: releaseDate,
-            source_transaction_id: transactionId || null,
-            month_key: today.toISOString().slice(0, 7),
-        }, { onConflict: 'speaker_id,event_id,student_id' })
+    try {
+        const result = await upsertAutomaticEventSpeakerEarnings({
+            supabase,
+            eventId,
+            studentId,
+            grossAmount: coursePrice,
+            earningType: 'premium_commission',
+            attendanceDate,
+            releaseDate,
+            monthKey: today.toISOString().slice(0, 7),
+            sourceTransactionId: transactionId || null,
+        })
 
-    if (error) return { error: error.message }
-
-    return { success: true, netAmount, commissionRate }
+        return {
+            success: true,
+            appliedCount: result.applied.length,
+            skippedManualCount: result.skippedManual.length,
+        }
+    } catch (error: any) {
+        return { error: error?.message || 'No se pudo registrar la comision premium' }
+    }
 }
 
 // ============================================
@@ -458,7 +440,7 @@ export async function getEarningsReportData(month: string) {
     const { data: earnings, error } = await (supabase
         .from('speaker_earnings') as any)
         .select(`
-            id, earning_type, gross_amount, commission_rate, net_amount,
+            id, earning_type, gross_amount, commission_rate, compensation_type, compensation_value, net_amount,
             status, attendance_date, release_date, month_key,
             student:profiles!speaker_earnings_student_id_fkey(full_name),
             event:events!speaker_earnings_event_id_fkey(title)
@@ -475,7 +457,11 @@ export async function getEarningsReportData(month: string) {
         evento: e.event?.title || 'N/A',
         tipo: e.earning_type === 'membership_proration' ? 'Membresía (Prorrateo)' : e.earning_type === 'premium_commission' ? 'Programa Premium' : 'Manual / Bono',
         monto_bruto: e.gross_amount,
-        tasa_comision: `${(e.commission_rate * 100).toFixed(1)}%`,
+        esquema_pago: formatSpeakerCompensationLabel(
+            e.compensation_type,
+            e.compensation_value,
+            e.commission_rate
+        ),
         monto_neto: e.net_amount,
         estado: e.status === 'pending' ? 'Pendiente' : e.status === 'released' ? 'Liberado' : 'Anulado',
         fecha_asistencia: e.attendance_date,

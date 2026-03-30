@@ -8,6 +8,12 @@ import { registerForEvent, cancelEventRegistration, createEvent, updateEvent, de
 import { createClient } from '@/lib/supabase/client'
 import { getPublicEventPath } from '@/lib/events/public'
 import {
+    DEFAULT_SPEAKER_PERCENTAGE_RATE,
+    normalizeSpeakerCompensationType,
+    normalizeSpeakerCompensationValue,
+    type SpeakerCompensationType,
+} from '@/lib/earnings/compensation'
+import {
     DEFAULT_TIMEZONE,
     formatEventDateTime,
     getEventInputDateValue,
@@ -174,6 +180,58 @@ interface CreateEventFormProps {
     initialData?: any // Should be typed properly with Event type
     eventId?: string
     userRole?: string
+}
+
+type SpeakerAssignmentState = {
+    speakerId: string
+    compensationType: SpeakerCompensationType
+    compensationValue: string
+}
+
+function formatSpeakerCompensationInputValue(
+    compensationType: SpeakerCompensationType,
+    compensationValue: number | null
+) {
+    if (compensationType === 'variable' || compensationValue == null) {
+        return ''
+    }
+
+    if (compensationType === 'percentage') {
+        const percentValue = Math.round(compensationValue * 10000) / 100
+        return Number.isInteger(percentValue) ? String(percentValue) : String(percentValue)
+    }
+
+    return String(compensationValue)
+}
+
+function createDefaultSpeakerAssignment(speakerId: string): SpeakerAssignmentState {
+    return {
+        speakerId,
+        compensationType: 'percentage',
+        compensationValue: String(DEFAULT_SPEAKER_PERCENTAGE_RATE * 100),
+    }
+}
+
+function mapSpeakerAssignmentFromSource(source: any): SpeakerAssignmentState | null {
+    const speakerId = typeof source?.speaker_id === 'string'
+        ? source.speaker_id
+        : typeof source?.speakerId === 'string'
+            ? source.speakerId
+            : ''
+
+    if (!speakerId) return null
+
+    const compensationType = normalizeSpeakerCompensationType(source?.compensation_type ?? source?.compensationType)
+    const compensationValue = normalizeSpeakerCompensationValue(
+        compensationType,
+        source?.compensation_value ?? source?.compensationValue
+    )
+
+    return {
+        speakerId,
+        compensationType,
+        compensationValue: formatSpeakerCompensationInputValue(compensationType, compensationValue),
+    }
 }
 
 const CATEGORY_OPTIONS = [
@@ -519,10 +577,13 @@ export function CreateEventForm({ onClose, isEmbedded = false, initialData, even
 
     // Speakers selection
     const [availableSpeakers, setAvailableSpeakers] = useState<{ id: string; name: string; avatar: string | null }[]>([])
-    const [selectedSpeakers, setSelectedSpeakers] = useState<string[]>(
-        initialData?.speakers?.map((s: any) => s.speaker_id) || []
+    const [selectedSpeakerAssignments, setSelectedSpeakerAssignments] = useState<SpeakerAssignmentState[]>(
+        (initialData?.speakers || [])
+            .map((speaker: any) => mapSpeakerAssignmentFromSource(speaker))
+            .filter((assignment: SpeakerAssignmentState | null): assignment is SpeakerAssignmentState => Boolean(assignment))
     )
     const [loadingSpeakers, setLoadingSpeakers] = useState(true)
+    const selectedSpeakerIds = selectedSpeakerAssignments.map((assignment) => assignment.speakerId)
 
     // Use a counter ref to generate stable unique IDs
     const questionIdCounter = useRef(0)
@@ -580,7 +641,7 @@ export function CreateEventForm({ onClose, isEmbedded = false, initialData, even
                 eventId
                     ? supabase
                         .from('event_speakers')
-                        .select('speaker_id')
+                        .select('speaker_id, compensation_type, compensation_value')
                         .eq('event_id', eventId)
                     : Promise.resolve({ data: [], error: null }),
             ])
@@ -596,7 +657,11 @@ export function CreateEventForm({ onClose, isEmbedded = false, initialData, even
             }
 
             if ((!initialData?.speakers || initialData.speakers.length === 0) && selectedSpeakerResponse.data) {
-                setSelectedSpeakers(selectedSpeakerResponse.data.map((row: any) => row.speaker_id))
+                setSelectedSpeakerAssignments(
+                    selectedSpeakerResponse.data
+                        .map((row: any) => mapSpeakerAssignmentFromSource(row))
+                        .filter((assignment: SpeakerAssignmentState | null): assignment is SpeakerAssignmentState => Boolean(assignment))
+                )
             }
 
             setLoadingSpeakers(false)
@@ -623,12 +688,56 @@ export function CreateEventForm({ onClose, isEmbedded = false, initialData, even
     }
 
     function toggleSpeaker(speakerId: string) {
-        setSelectedSpeakers(prev => {
-            if (prev.includes(speakerId)) {
-                return prev.filter(id => id !== speakerId)
+        setSelectedSpeakerAssignments(prev => {
+            const alreadySelected = prev.some((assignment) => assignment.speakerId === speakerId)
+
+            if (alreadySelected) {
+                return prev.filter((assignment) => assignment.speakerId !== speakerId)
             }
-            return [...prev, speakerId]
+
+            return [...prev, createDefaultSpeakerAssignment(speakerId)]
         })
+    }
+
+    function updateSpeakerAssignment(
+        speakerId: string,
+        updates: Partial<SpeakerAssignmentState>
+    ) {
+        setSelectedSpeakerAssignments((prev) => prev.map((assignment) => {
+            if (assignment.speakerId !== speakerId) {
+                return assignment
+            }
+
+            return {
+                ...assignment,
+                ...updates,
+            }
+        }))
+    }
+
+    function updateSpeakerCompensationType(speakerId: string, nextType: SpeakerCompensationType) {
+        setSelectedSpeakerAssignments((prev) => prev.map((assignment) => {
+            if (assignment.speakerId !== speakerId) {
+                return assignment
+            }
+
+            const nextValue =
+                nextType === 'percentage'
+                    ? assignment.compensationType === 'percentage' && assignment.compensationValue.trim()
+                        ? assignment.compensationValue
+                        : String(DEFAULT_SPEAKER_PERCENTAGE_RATE * 100)
+                    : nextType === 'fixed'
+                        ? assignment.compensationType === 'fixed'
+                            ? assignment.compensationValue
+                            : ''
+                        : ''
+
+            return {
+                ...assignment,
+                compensationType: nextType,
+                compensationValue: nextValue,
+            }
+        }))
     }
 
     function createEditableItem(value = '') {
@@ -692,7 +801,7 @@ export function CreateEventForm({ onClose, isEmbedded = false, initialData, even
                         </p>
                     </div>
                     <div className="rounded-full bg-muted px-3 py-1 text-xs text-muted-foreground">
-                        {selectedSpeakers.length} seleccionados
+                        {selectedSpeakerAssignments.length} seleccionados
                     </div>
                 </div>
 
@@ -704,7 +813,7 @@ export function CreateEventForm({ onClose, isEmbedded = false, initialData, even
                     ) : availableSpeakers.length > 0 ? (
                         <div className="grid gap-2 md:grid-cols-2">
                             {availableSpeakers.map((speaker) => {
-                                const isSelected = selectedSpeakers.includes(speaker.id)
+                                const isSelected = selectedSpeakerIds.includes(speaker.id)
 
                                 return (
                                     <button
@@ -746,6 +855,86 @@ export function CreateEventForm({ onClose, isEmbedded = false, initialData, even
                         </p>
                     )}
                 </div>
+
+                {selectedSpeakerAssignments.length > 0 && (
+                    <div className="space-y-3 rounded-xl border bg-background p-4">
+                        <div>
+                            <h4 className="text-sm font-medium">Pago por ponente</h4>
+                            <p className="text-xs text-muted-foreground">
+                                Aqui defines cuanto le toca a cada ponente especificamente para este evento.
+                            </p>
+                        </div>
+
+                        <div className="space-y-3">
+                            {selectedSpeakerAssignments.map((assignment, index) => {
+                                const speaker = availableSpeakers.find((item) => item.id === assignment.speakerId)
+                                const valueLabel = assignment.compensationType === 'percentage'
+                                    ? 'Porcentaje del precio'
+                                    : 'Monto fijo por venta (MXN)'
+
+                                const helperText = assignment.compensationType === 'percentage'
+                                    ? 'Ejemplo: 50 significa que al ponente le toca el 50% de cada compra.'
+                                    : 'Ejemplo: 250 significa que al ponente le tocan $250 MXN por cada compra confirmada.'
+
+                                return (
+                                    <div key={assignment.speakerId} className="space-y-3 rounded-xl border bg-muted/10 p-4">
+                                        <div className="flex items-center justify-between gap-3">
+                                            <div>
+                                                <p className="text-sm font-medium">{speaker?.name || 'Ponente seleccionado'}</p>
+                                                <p className="text-xs text-muted-foreground">Orden del evento: {index + 1}</p>
+                                            </div>
+                                        </div>
+
+                                        <div className="grid gap-4 lg:grid-cols-[220px_1fr]">
+                                            <div>
+                                                <label className="text-sm font-medium">Esquema de pago</label>
+                                                <select
+                                                    value={assignment.compensationType}
+                                                    onChange={(e) => updateSpeakerCompensationType(
+                                                        assignment.speakerId,
+                                                        e.target.value as SpeakerCompensationType
+                                                    )}
+                                                    className="mt-1 w-full rounded-lg border bg-background px-3 py-2"
+                                                >
+                                                    <option value="percentage">% del evento</option>
+                                                    <option value="fixed">Monto fijo por venta</option>
+                                                    <option value="variable">Variable / manual</option>
+                                                </select>
+                                            </div>
+
+                                            {assignment.compensationType === 'variable' ? (
+                                                <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+                                                    Este esquema no genera la ganancia automaticamente. Se deja para ajuste manual despues.
+                                                </div>
+                                            ) : (
+                                                <div>
+                                                    <label className="text-sm font-medium">{valueLabel}</label>
+                                                    <div className="mt-1 flex items-center gap-2">
+                                                        <input
+                                                            type="number"
+                                                            min="0"
+                                                            step={assignment.compensationType === 'percentage' ? '0.01' : '1'}
+                                                            value={assignment.compensationValue}
+                                                            onChange={(e) => updateSpeakerAssignment(assignment.speakerId, {
+                                                                compensationValue: e.target.value,
+                                                            })}
+                                                            className="w-full rounded-lg border bg-background px-3 py-2"
+                                                            placeholder={assignment.compensationType === 'percentage' ? '50' : '250'}
+                                                        />
+                                                        <span className="text-xs text-muted-foreground">
+                                                            {assignment.compensationType === 'percentage' ? '%' : 'MXN'}
+                                                        </span>
+                                                    </div>
+                                                    <p className="mt-1 text-xs text-muted-foreground">{helperText}</p>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                )
+                            })}
+                        </div>
+                    </div>
+                )}
             </div>
         )
     }
@@ -960,8 +1149,40 @@ export function CreateEventForm({ onClose, isEmbedded = false, initialData, even
             ...(modality === 'presencial' && locationValue.trim() ? { location: locationValue.trim() } : {}),
         }))
 
-        // Add selected speakers
-        formData.set('speakerIds', JSON.stringify(selectedSpeakers))
+        // Add selected speakers and their payout configuration
+        const invalidSpeakerAssignment = selectedSpeakerAssignments.find((assignment) => {
+            if (assignment.compensationType === 'variable') {
+                return false
+            }
+
+            const parsedValue = Number.parseFloat(assignment.compensationValue)
+            return !Number.isFinite(parsedValue) || parsedValue <= 0
+        })
+
+        if (invalidSpeakerAssignment) {
+            setError('Cada ponente con esquema fijo o porcentual necesita un valor mayor a 0.')
+            setIsLoading(false)
+            return
+        }
+
+        const serializedSpeakerAssignments = selectedSpeakerAssignments.map((assignment) => {
+            const normalizedType = normalizeSpeakerCompensationType(assignment.compensationType)
+            const parsedValue = Number.parseFloat(assignment.compensationValue)
+            const normalizedValue = normalizedType === 'variable'
+                ? null
+                : normalizedType === 'percentage'
+                    ? Math.max(0, parsedValue / 100)
+                    : normalizeSpeakerCompensationValue(normalizedType, assignment.compensationValue)
+
+            return {
+                speakerId: assignment.speakerId,
+                compensationType: normalizedType,
+                compensationValue: normalizedValue,
+            }
+        })
+
+        formData.set('speakerIds', JSON.stringify(selectedSpeakerAssignments.map((assignment) => assignment.speakerId)))
+        formData.set('speakerAssignments', JSON.stringify(serializedSpeakerAssignments))
         formData.set('idealFor', JSON.stringify(idealForItems.map((item) => item.value.trim()).filter(Boolean)))
         formData.set('learningOutcomes', JSON.stringify(learningOutcomeItems.map((item) => item.value.trim()).filter(Boolean)))
         formData.set('includedResources', JSON.stringify(includedResourceItems.map((item) => item.value.trim()).filter(Boolean)))

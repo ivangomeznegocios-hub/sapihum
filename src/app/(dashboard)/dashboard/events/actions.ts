@@ -15,6 +15,13 @@ import { audienceAllowsAccess, getCommercialAccessContext } from '@/lib/access/c
 import { sendEmail } from '@/lib/email/index'
 import { buildEventRegistrationEmail } from '@/lib/email/templates'
 import { DEFAULT_TIMEZONE, zonedDateTimeToUtcIso } from '@/lib/timezone'
+import {
+    DEFAULT_SPEAKER_COMPENSATION_TYPE,
+    DEFAULT_SPEAKER_PERCENTAGE_RATE,
+    normalizeSpeakerCompensationType,
+    normalizeSpeakerCompensationValue,
+    type SpeakerCompensationType,
+} from '@/lib/earnings/compensation'
 
 async function resolveUniqueEventSlug(supabase: any, baseValue: string, eventId?: string) {
     const fallbackBase = slugifyCatalogText(baseValue) || `evento-${crypto.randomUUID().slice(0, 8)}`
@@ -139,6 +146,63 @@ function parseSpeakerIds(formData: FormData) {
     const speakerIds = parseJsonValue<unknown[]>(formData.get('speakerIds'), [])
 
     return speakerIds.filter((speakerId): speakerId is string => typeof speakerId === 'string' && speakerId.length > 0)
+}
+
+type SpeakerAssignmentInput = {
+    speakerId: string
+    compensationType: SpeakerCompensationType
+    compensationValue: number | null
+}
+
+function validateSpeakerAssignments(assignments: SpeakerAssignmentInput[]) {
+    const invalidAssignment = assignments.find((assignment) =>
+        assignment.compensationType !== 'variable'
+        && (!assignment.compensationValue || assignment.compensationValue <= 0)
+    )
+
+    if (!invalidAssignment) {
+        return null
+    }
+
+    return 'Cada ponente con esquema fijo o porcentual necesita un valor mayor a 0.'
+}
+
+function parseSpeakerAssignments(formData: FormData): SpeakerAssignmentInput[] {
+    const assignments = parseJsonValue<unknown[]>(formData.get('speakerAssignments'), [])
+
+    const parsedAssignments = assignments
+        .map((assignment) => {
+            if (!assignment || typeof assignment !== 'object') return null
+
+            const speakerId = typeof (assignment as any).speakerId === 'string'
+                ? (assignment as any).speakerId.trim()
+                : ''
+
+            if (!speakerId) return null
+
+            const compensationType = normalizeSpeakerCompensationType((assignment as any).compensationType)
+            const compensationValue = normalizeSpeakerCompensationValue(
+                compensationType,
+                (assignment as any).compensationValue
+            )
+
+            return {
+                speakerId,
+                compensationType,
+                compensationValue,
+            }
+        })
+        .filter((assignment): assignment is SpeakerAssignmentInput => Boolean(assignment))
+
+    if (parsedAssignments.length > 0) {
+        return parsedAssignments
+    }
+
+    return parseSpeakerIds(formData).map((speakerId) => ({
+        speakerId,
+        compensationType: DEFAULT_SPEAKER_COMPENSATION_TYPE,
+        compensationValue: DEFAULT_SPEAKER_PERCENTAGE_RATE,
+    }))
 }
 
 function parseSessionConfig(formData: FormData, eventType: string, location: string | null) {
@@ -518,14 +582,21 @@ export async function createEvent(formData: FormData) {
     }
 
     // Handle speaker assignments
-    const speakerIds = parseSpeakerIds(formData)
-    if (speakerIds.length > 0 && newEvent) {
-        for (let i = 0; i < speakerIds.length; i++) {
+    const speakerAssignments = parseSpeakerAssignments(formData)
+    const speakerAssignmentError = validateSpeakerAssignments(speakerAssignments)
+    if (speakerAssignmentError) {
+        return { error: speakerAssignmentError }
+    }
+
+    if (speakerAssignments.length > 0 && newEvent) {
+        for (let i = 0; i < speakerAssignments.length; i++) {
             await (supabase.from('event_speakers') as any)
                 .insert({
                     event_id: newEvent.id,
-                    speaker_id: speakerIds[i],
-                    display_order: i
+                    speaker_id: speakerAssignments[i].speakerId,
+                    display_order: i,
+                    compensation_type: speakerAssignments[i].compensationType,
+                    compensation_value: speakerAssignments[i].compensationValue,
                 })
         }
     }
@@ -704,19 +775,25 @@ export async function updateEvent(eventId: string, formData: FormData) {
     }
 
     // Handle speaker assignments on update
-    if (formData.has('speakerIds')) {
-        const speakerIds = parseSpeakerIds(formData)
+    if (formData.has('speakerIds') || formData.has('speakerAssignments')) {
+        const speakerAssignments = parseSpeakerAssignments(formData)
+        const speakerAssignmentError = validateSpeakerAssignments(speakerAssignments)
+        if (speakerAssignmentError) {
+            return { error: speakerAssignmentError }
+        }
 
         await (supabase.from('event_speakers') as any)
             .delete()
             .eq('event_id', eventId)
 
-        for (let i = 0; i < speakerIds.length; i++) {
+        for (let i = 0; i < speakerAssignments.length; i++) {
             await (supabase.from('event_speakers') as any)
                 .insert({
                     event_id: eventId,
-                    speaker_id: speakerIds[i],
-                    display_order: i
+                    speaker_id: speakerAssignments[i].speakerId,
+                    display_order: i,
+                    compensation_type: speakerAssignments[i].compensationType,
+                    compensation_value: speakerAssignments[i].compensationValue,
                 })
         }
     }
@@ -812,7 +889,13 @@ export async function addSpeakerToEvent(eventId: string, speakerId: string, role
     }
 
     const { error } = await (supabase.from('event_speakers') as any)
-        .insert({ event_id: eventId, speaker_id: speakerId, role })
+        .insert({
+            event_id: eventId,
+            speaker_id: speakerId,
+            role,
+            compensation_type: DEFAULT_SPEAKER_COMPENSATION_TYPE,
+            compensation_value: DEFAULT_SPEAKER_PERCENTAGE_RATE,
+        })
 
     if (error) return { error: error.message }
 

@@ -20,11 +20,13 @@ export type ReferralDomain = 'clinical_referral'
 
 export type CommissionStatus = 'pending' | 'paid' | 'cancelled'
 
-export type EarningType = 'membership_proration' | 'premium_commission'
+export type EarningType = 'membership_proration' | 'premium_commission' | 'manual_bonus'
 
 export type EarningStatus = 'pending' | 'released' | 'voided'
 
 export type AttendanceSource = 'manual' | 'embedded_page' | 'api' | 'jitsi' | 'youtube'
+
+export type SpeakerCompensationType = 'percentage' | 'fixed' | 'variable'
 
 export type TaskStatus = 'pending' | 'in_progress' | 'completed' | 'reviewed'
 
@@ -788,6 +790,7 @@ export interface Speaker {
     social_links: Record<string, string>
     social_links_enabled: boolean
     is_public: boolean
+    commission_rate: number
     created_at: string
     updated_at: string
 }
@@ -803,6 +806,7 @@ export interface SpeakerInsert {
     social_links?: Record<string, string>
     social_links_enabled?: boolean
     is_public?: boolean
+    commission_rate?: number
 }
 
 export interface SpeakerUpdate {
@@ -815,6 +819,7 @@ export interface SpeakerUpdate {
     social_links?: Record<string, string>
     social_links_enabled?: boolean
     is_public?: boolean
+    commission_rate?: number
 }
 
 export interface SpeakerWithProfile extends Speaker {
@@ -830,6 +835,8 @@ export interface EventSpeaker {
     speaker_id: string
     role: EventSpeakerRole
     display_order: number
+    compensation_type: SpeakerCompensationType
+    compensation_value: number | null
 }
 
 export interface EventSpeakerInsert {
@@ -837,6 +844,8 @@ export interface EventSpeakerInsert {
     speaker_id: string
     role?: EventSpeakerRole
     display_order?: number
+    compensation_type?: SpeakerCompensationType
+    compensation_value?: number | null
 }
 
 // ============================================
@@ -1821,11 +1830,13 @@ export interface SpeakerAttendanceLogUpdate {
 export interface SpeakerEarning {
     id: string
     speaker_id: string
-    event_id: string
-    student_id: string
+    event_id: string | null
+    student_id: string | null
     earning_type: EarningType
     gross_amount: number
     commission_rate: number
+    compensation_type: SpeakerCompensationType
+    compensation_value: number | null
     net_amount: number
     status: EarningStatus
     attendance_date: string
@@ -1836,6 +1847,7 @@ export interface SpeakerEarning {
     source_transaction_id: string | null
     attendance_log_id: string | null
     month_key: string
+    description: string | null
     is_frozen: boolean
     frozen_at: string | null
     created_at: string
@@ -1844,11 +1856,13 @@ export interface SpeakerEarning {
 
 export interface SpeakerEarningInsert {
     speaker_id: string
-    event_id: string
-    student_id: string
+    event_id?: string | null
+    student_id?: string | null
     earning_type?: EarningType
     gross_amount: number
     commission_rate?: number
+    compensation_type?: SpeakerCompensationType
+    compensation_value?: number | null
     net_amount: number
     status?: EarningStatus
     attendance_date?: string
@@ -1856,6 +1870,7 @@ export interface SpeakerEarningInsert {
     source_transaction_id?: string | null
     attendance_log_id?: string | null
     month_key?: string
+    description?: string | null
 }
 
 export interface SpeakerEarningUpdate {
@@ -1865,6 +1880,7 @@ export interface SpeakerEarningUpdate {
     void_reason?: string | null
     is_frozen?: boolean
     frozen_at?: string | null
+    description?: string | null
 }
 
 export interface SpeakerEarningWithDetails extends SpeakerEarning {

@@ -2,6 +2,7 @@
 
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { formatSpeakerCompensationLabel } from '@/lib/earnings/compensation'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { ArrowDownToLine, FileSpreadsheet } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -12,6 +13,8 @@ interface EarningRow {
     earning_type: string
     gross_amount: number
     commission_rate: number
+    compensation_type?: string | null
+    compensation_value?: number | null
     net_amount: number
     status: string
     attendance_date: string
@@ -137,8 +140,12 @@ export function EarningsTable({ earnings, csvData, showStudentPaymentStatus = tr
                                             <p>{formatMXN(earning.gross_amount)}</p>
                                         </div>
                                         <div className="text-right">
-                                            <p className="text-[11px] uppercase tracking-wide text-muted-foreground">Comision</p>
-                                            <p>{(earning.commission_rate * 100).toFixed(0)}%</p>
+                                            <p className="text-[11px] uppercase tracking-wide text-muted-foreground">Esquema</p>
+                                            <p>{formatSpeakerCompensationLabel(
+                                                earning.compensation_type,
+                                                earning.compensation_value,
+                                                earning.commission_rate
+                                            )}</p>
                                         </div>
                                     </div>
 
@@ -162,7 +169,7 @@ export function EarningsTable({ earnings, csvData, showStudentPaymentStatus = tr
                                     <TableHead>Evento</TableHead>
                                     <TableHead>Tipo</TableHead>
                                     <TableHead className="text-right">Monto Bruto</TableHead>
-                                    <TableHead className="text-right">Comisión</TableHead>
+                                    <TableHead className="text-right">Esquema</TableHead>
                                     <TableHead className="text-right">Monto Neto</TableHead>
                                     {showStudentPaymentStatus && (
                                         <TableHead>Estado de Pago</TableHead>
@@ -191,7 +198,11 @@ export function EarningsTable({ earnings, csvData, showStudentPaymentStatus = tr
                                                 {formatMXN(earning.gross_amount)}
                                             </TableCell>
                                             <TableCell className="text-right text-muted-foreground">
-                                                {(earning.commission_rate * 100).toFixed(0)}%
+                                                {formatSpeakerCompensationLabel(
+                                                    earning.compensation_type,
+                                                    earning.compensation_value,
+                                                    earning.commission_rate
+                                                )}
                                             </TableCell>
                                             <TableCell className="text-right font-semibold">
                                                 {formatMXN(earning.net_amount)}

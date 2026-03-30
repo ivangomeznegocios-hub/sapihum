@@ -95,10 +95,12 @@ ALTER TABLE public.formation_progress ENABLE ROW LEVEL SECURITY;
 -- ============================================
 
 -- formations: anyone can read active, admins can manage
+DROP POLICY IF EXISTS "Anyone can see active formations" ON public.formations;
 CREATE POLICY "Anyone can see active formations"
     ON public.formations FOR SELECT
     USING (status = 'active');
 
+DROP POLICY IF EXISTS "Admins full access to formations" ON public.formations;
 CREATE POLICY "Admins full access to formations"
     ON public.formations FOR ALL
     USING (
@@ -109,10 +111,12 @@ CREATE POLICY "Admins full access to formations"
     );
 
 -- formation_courses: anyone can read, admins can manage
+DROP POLICY IF EXISTS "Anyone can see formation courses" ON public.formation_courses;
 CREATE POLICY "Anyone can see formation courses"
     ON public.formation_courses FOR SELECT
     USING (true);
 
+DROP POLICY IF EXISTS "Admins full access to formation courses" ON public.formation_courses;
 CREATE POLICY "Admins full access to formation courses"
     ON public.formation_courses FOR ALL
     USING (
@@ -123,14 +127,17 @@ CREATE POLICY "Admins full access to formation courses"
     );
 
 -- formation_purchases: users see own, admins see all
+DROP POLICY IF EXISTS "Users can see own formation purchases" ON public.formation_purchases;
 CREATE POLICY "Users can see own formation purchases"
     ON public.formation_purchases FOR SELECT
     USING (user_id = auth.uid());
 
+DROP POLICY IF EXISTS "Anyone can create formation purchases" ON public.formation_purchases;
 CREATE POLICY "Anyone can create formation purchases"
     ON public.formation_purchases FOR INSERT
     WITH CHECK (true);
 
+DROP POLICY IF EXISTS "Admins full access to formation purchases" ON public.formation_purchases;
 CREATE POLICY "Admins full access to formation purchases"
     ON public.formation_purchases FOR ALL
     USING (
@@ -141,10 +148,12 @@ CREATE POLICY "Admins full access to formation purchases"
     );
 
 -- formation_progress: users see own, admins see all
+DROP POLICY IF EXISTS "Users can see own formation progress" ON public.formation_progress;
 CREATE POLICY "Users can see own formation progress"
     ON public.formation_progress FOR SELECT
     USING (user_id = auth.uid());
 
+DROP POLICY IF EXISTS "Admins full access to formation progress" ON public.formation_progress;
 CREATE POLICY "Admins full access to formation progress"
     ON public.formation_progress FOR ALL
     USING (
@@ -172,6 +181,7 @@ CREATE INDEX IF NOT EXISTS idx_formation_progress_user ON public.formation_progr
 -- ============================================
 -- 7. TRIGGERS
 -- ============================================
+DROP TRIGGER IF EXISTS update_formations_updated_at ON public.formations;
 CREATE TRIGGER update_formations_updated_at
     BEFORE UPDATE ON public.formations
     FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();

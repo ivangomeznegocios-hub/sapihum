@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button'
 import { CheckCircle, ArrowRight, Clock, CalendarDays } from 'lucide-react'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
+import { reconcileCompletedCheckoutSession } from '@/lib/payments'
 
 interface PageProps {
     searchParams: Promise<{ session_id?: string; next?: string }>
@@ -16,7 +17,7 @@ async function getEventFromSession(sessionId: string | undefined) {
         const { data: purchase } = await (supabase as any)
             .from('event_purchases')
             .select('event_id, events(id, title, slug)')
-            .eq('stripe_session_id', sessionId)
+            .eq('provider_session_id', sessionId)
             .single()
 
         if (!purchase?.events) {
@@ -39,6 +40,15 @@ export default async function PaymentSuccessPage({ searchParams }: PageProps) {
     const params = await searchParams
     const session_id = params.session_id
     const nextUrl = params.next
+
+    if (session_id) {
+        try {
+            await reconcileCompletedCheckoutSession(session_id)
+        } catch (error) {
+            console.error('[PaymentSuccess] Failed to reconcile checkout session:', error)
+        }
+    }
+
     const event = await getEventFromSession(session_id)
 
     return (

@@ -10,6 +10,7 @@ import type {
     CreateOneTimeCheckoutParams,
     OneTimeCheckoutResult,
     PaymentWebhookData,
+    SubscriptionWebhookData,
     WebhookEvent,
 } from './types'
 import { getSubscriptionPlan } from './config'
@@ -50,6 +51,68 @@ export async function retrieveCompletedCheckoutPayment(sessionId: string): Promi
     }
 }
 
+export async function retrieveCompletedCheckoutSubscription(sessionId: string): Promise<SubscriptionWebhookData | null> {
+    const stripe = getStripeInstance()
+    const session = await stripe.checkout.sessions.retrieve(sessionId)
+
+    if (session.mode !== 'subscription') {
+        return null
+    }
+
+    const subscriptionId =
+        typeof session.subscription === 'string'
+            ? session.subscription
+            : session.subscription?.id
+
+    if (!subscriptionId) {
+        return null
+    }
+
+    const subscription = await stripe.subscriptions.retrieve(subscriptionId)
+    const normalizedStatus = mapStripeSubscriptionStatus(subscription.status)
+
+    if (!['trialing', 'active', 'past_due'].includes(normalizedStatus)) {
+        return null
+    }
+
+    const subscriptionAny = subscription as any
+
+    return {
+        providerSubscriptionId: subscription.id,
+        providerCustomerId:
+            typeof subscription.customer === 'string'
+                ? subscription.customer
+                : (subscription.customer as any)?.id || '',
+        status: normalizedStatus,
+        membershipLevel:
+            Number(session.metadata?.membership_level || subscription.metadata?.membership_level || 0) || undefined,
+        specializationCode:
+            session.metadata?.specialization_code || subscription.metadata?.specialization_code || undefined,
+        currentPeriodStart: subscriptionAny.current_period_start
+            ? new Date(subscriptionAny.current_period_start * 1000).toISOString()
+            : undefined,
+        currentPeriodEnd: subscriptionAny.current_period_end
+            ? new Date(subscriptionAny.current_period_end * 1000).toISOString()
+            : undefined,
+        cancelAtPeriodEnd: subscription.cancel_at_period_end,
+        cancelledAt: subscription.canceled_at
+            ? new Date(subscription.canceled_at * 1000).toISOString()
+            : undefined,
+        trialStart: subscriptionAny.trial_start
+            ? new Date(subscriptionAny.trial_start * 1000).toISOString()
+            : undefined,
+        trialEnd: subscriptionAny.trial_end
+            ? new Date(subscriptionAny.trial_end * 1000).toISOString()
+            : undefined,
+        priceId: subscription.items.data[0]?.price?.id || session.metadata?.price_id || undefined,
+        customerEmail: session.customer_email || session.customer_details?.email || '',
+        metadata: {
+            ...(subscription.metadata || {}),
+            ...((session.metadata || {}) as Record<string, string>),
+        },
+    }
+}
+
 export const stripeAdapter: PaymentProviderAdapter = {
     name: 'stripe',
 
@@ -82,6 +145,7 @@ export const stripeAdapter: PaymentProviderAdapter = {
                 profile_id: params.profileId,
                 membership_level: String(params.membershipLevel),
                 specialization_code: params.specializationCode || '',
+                price_id: resolvedPriceId,
                 purchase_type: 'subscription_payment',
                 ...(params.metadata || {}),
             },
@@ -91,6 +155,7 @@ export const stripeAdapter: PaymentProviderAdapter = {
                     profile_id: params.profileId,
                     membership_level: String(params.membershipLevel),
                     specialization_code: params.specializationCode || '',
+                    price_id: resolvedPriceId,
                     ...(params.metadata || {}),
                 },
                 ...(plan.trialDays > 0 ? { trial_period_days: plan.trialDays } : {}),
@@ -214,11 +279,11 @@ function mapStripeEvent(event: Stripe.Event): WebhookEvent {
                     data: {
                         providerSubscriptionId: session.subscription as string,
                         providerCustomerId: session.customer as string,
-                        status: 'active',
+                        status: session.payment_status === 'no_payment_required' ? 'trialing' : 'active',
                         membershipLevel: Number(session.metadata?.membership_level || 0),
                         specializationCode: session.metadata?.specialization_code || undefined,
                         customerEmail: session.customer_email || session.customer_details?.email || '',
-                        priceId: '',
+                        priceId: session.metadata?.price_id || '',
                         metadata: session.metadata as Record<string, string>,
                     },
                 }

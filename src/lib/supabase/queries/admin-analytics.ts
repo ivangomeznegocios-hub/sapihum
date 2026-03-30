@@ -4,11 +4,13 @@ import { getTouchByModel } from '@/lib/analytics/attribution'
 import type { AttributionModel, AttributionSnapshot } from '@/lib/analytics/types'
 
 type RevenueRow = {
-    source: 'subscription' | 'event' | 'ai_credits' | 'manual_deal'
+    source: 'subscription' | 'event' | 'formation' | 'ai_credits' | 'manual_deal'
     amount: number
     occurredAt: string
     userId: string | null
     attributionSnapshot: AttributionSnapshot | null
+    providerSessionId: string | null
+    providerPaymentId: string | null
 }
 
 type ChannelPerformanceRow = {
@@ -64,6 +66,28 @@ function formatCurrency(value: number) {
     }).format(value)
 }
 
+function normalizeAttributionSnapshot(value: unknown): AttributionSnapshot | null {
+    if (!value) return null
+    if (typeof value === 'string') {
+        try {
+            return JSON.parse(value) as AttributionSnapshot
+        } catch {
+            return null
+        }
+    }
+    return value as AttributionSnapshot
+}
+
+function isCoveredByTransaction(
+    row: { provider_session_id?: string | null; provider_payment_id?: string | null },
+    refs: { sessionIds: Set<string>; paymentIds: Set<string> }
+) {
+    return Boolean(
+        (row.provider_session_id && refs.sessionIds.has(row.provider_session_id)) ||
+        (row.provider_payment_id && refs.paymentIds.has(row.provider_payment_id))
+    )
+}
+
 export async function getAdminAnalyticsDashboard(model: AttributionModel = 'last_non_direct') {
     const admin = await createAdminClient()
     const windowStart = daysAgo(30)
@@ -81,17 +105,19 @@ export async function getAdminAnalyticsDashboard(model: AttributionModel = 'last
         manualDealsResult,
         waitlistResult,
         eventPurchasesResult,
+        formationPurchasesResult,
     ] = await Promise.all([
         (admin.from('profiles') as any).select('id, is_test'),
         (admin.from('analytics_visitors') as any).select('id, user_id, first_seen_at'),
         (admin.from('analytics_sessions') as any).select('id, visitor_id, user_id, started_at, attribution_snapshot'),
         (admin.from('analytics_events') as any).select('id, user_id, event_name, occurred_at, attribution_snapshot, properties'),
-        (admin.from('payment_transactions') as any).select('id, user_id, profile_id, purchase_type, amount, status, completed_at, created_at, attribution_snapshot'),
+        (admin.from('payment_transactions') as any).select('id, user_id, profile_id, purchase_type, amount, status, completed_at, created_at, attribution_snapshot, provider_session_id, provider_payment_id'),
         (admin.from('subscriptions') as any).select('id, user_id, membership_level, specialization_code, provider_price_id, status, created_at, cancelled_at, attribution_snapshot'),
         (admin.from('marketing_cost_entries') as any).select('*').order('period_start', { ascending: false }),
         (admin.from('manual_deals') as any).select('*').order('closed_at', { ascending: false }),
         (admin.from('specialization_waitlist') as any).select('id, user_id, created_at, metadata'),
-        (admin.from('event_purchases') as any).select('id, amount_paid, status, purchased_at, attribution_snapshot'),
+        (admin.from('event_purchases') as any).select('id, user_id, amount_paid, status, purchased_at, confirmed_at, attribution_snapshot, provider_session_id, provider_payment_id'),
+        (admin.from('formation_purchases') as any).select('id, user_id, amount_paid, status, purchased_at, confirmed_at, metadata, provider_session_id, provider_payment_id'),
     ])
 
     const testUserIds = new Set(
@@ -114,7 +140,24 @@ export async function getAdminAnalyticsDashboard(model: AttributionModel = 'last
     )
 
     const subscriptions = ((subscriptionsResult.data || []) as any[]).filter((row) => !row.user_id || !testUserIds.has(row.user_id))
-    const eventPurchases = ((eventPurchasesResult.data || []) as any[]).filter((row) => row.status === 'confirmed')
+    const eventPurchases = ((eventPurchasesResult.data || []) as any[]).filter(
+        (row) => row.status === 'confirmed' && (!row.user_id || !testUserIds.has(row.user_id))
+    )
+    const formationPurchases = ((formationPurchasesResult.data || []) as any[]).filter(
+        (row) => row.status === 'confirmed' && (!row.user_id || !testUserIds.has(row.user_id))
+    )
+    const transactionRefs = {
+        sessionIds: new Set(
+            transactions
+                .map((row) => row.provider_session_id)
+                .filter((value): value is string => typeof value === 'string' && value.length > 0)
+        ),
+        paymentIds: new Set(
+            transactions
+                .map((row) => row.provider_payment_id)
+                .filter((value): value is string => typeof value === 'string' && value.length > 0)
+        ),
+    }
 
     const sessions30d = sessions.filter((row) => new Date(row.started_at) >= windowStart)
     const events30d = events.filter((row) => new Date(row.occurred_at) >= windowStart)
@@ -145,6 +188,8 @@ export async function getAdminAnalyticsDashboard(model: AttributionModel = 'last
             source:
                 row.purchase_type === 'event_purchase'
                     ? ('event' as const)
+                    : row.purchase_type === 'formation_purchase'
+                        ? ('formation' as const)
                     : row.purchase_type === 'ai_credits'
                         ? ('ai_credits' as const)
                         : ('subscription' as const),
@@ -152,6 +197,8 @@ export async function getAdminAnalyticsDashboard(model: AttributionModel = 'last
             occurredAt: row.completed_at || row.created_at,
             userId: row.user_id || row.profile_id || null,
             attributionSnapshot: (row.attribution_snapshot || null) as AttributionSnapshot | null,
+            providerSessionId: row.provider_session_id || null,
+            providerPaymentId: row.provider_payment_id || null,
         })),
         ...manualDeals
             .filter((row) => row.stage === 'won')
@@ -161,13 +208,30 @@ export async function getAdminAnalyticsDashboard(model: AttributionModel = 'last
                 occurredAt: row.closed_at,
                 userId: row.user_id || null,
                 attributionSnapshot: (row.attribution_snapshot || null) as AttributionSnapshot | null,
+                providerSessionId: null,
+                providerPaymentId: null,
             })),
-        ...eventPurchases.map((row) => ({
+        ...eventPurchases
+            .filter((row) => !isCoveredByTransaction(row, transactionRefs))
+            .map((row) => ({
             source: 'event' as const,
             amount: Number(row.amount_paid || 0),
-            occurredAt: row.purchased_at,
-            userId: null,
+            occurredAt: row.confirmed_at || row.purchased_at,
+            userId: row.user_id || null,
             attributionSnapshot: (row.attribution_snapshot || null) as AttributionSnapshot | null,
+            providerSessionId: row.provider_session_id || null,
+            providerPaymentId: row.provider_payment_id || null,
+        })),
+        ...formationPurchases
+            .filter((row) => !isCoveredByTransaction(row, transactionRefs))
+            .map((row) => ({
+            source: 'formation' as const,
+            amount: Number(row.amount_paid || 0),
+            occurredAt: row.confirmed_at || row.purchased_at,
+            userId: row.user_id || null,
+            attributionSnapshot: normalizeAttributionSnapshot(row.metadata?.attribution_snapshot),
+            providerSessionId: row.provider_session_id || null,
+            providerPaymentId: row.provider_payment_id || null,
         })),
     ]
 
@@ -338,7 +402,7 @@ export async function getAdminAnalyticsDashboard(model: AttributionModel = 'last
         }))
         .sort((a, b) => b.revenue - a.revenue || b.visits - a.visits)
 
-    const revenueByProduct = ['subscription', 'event', 'ai_credits', 'manual_deal'].map((source) => {
+    const revenueByProduct = ['subscription', 'event', 'formation', 'ai_credits', 'manual_deal'].map((source) => {
         const rows = revenue30d.filter((row) => row.source === source)
         return {
             source,
