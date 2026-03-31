@@ -1,16 +1,5 @@
 import Link from 'next/link'
 import { notFound, redirect } from 'next/navigation'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { VideoPlayer } from '@/components/ui/video-player'
-import { AddToCalendarButton } from '@/components/add-to-calendar'
-import { InteractiveToolViewer } from '@/components/interactive-tool-viewer'
-import { getPublicEventBySlug } from '@/lib/supabase/queries/events'
-import { userHasEventHubAccess } from '@/lib/supabase/queries/event-entitlements'
-import { getResourcesByEvent } from '@/lib/supabase/queries/resources'
-import { createClient } from '@/lib/supabase/server'
-import { getActiveEntitlementForEvent } from '@/lib/events/access'
 import {
     ArrowLeft,
     Calendar,
@@ -21,9 +10,21 @@ import {
     ShieldCheck,
     Video,
 } from 'lucide-react'
+import { AddToCalendarButton } from '@/components/add-to-calendar'
+import { InteractiveToolViewer } from '@/components/interactive-tool-viewer'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { VideoPlayer } from '@/components/ui/video-player'
+import { getActiveEntitlementForEvent } from '@/lib/events/access'
+import { createClient } from '@/lib/supabase/server'
+import { userHasEventHubAccess } from '@/lib/supabase/queries/event-entitlements'
+import { getPublicEventBySlug } from '@/lib/supabase/queries/events'
+import { getResourcesByEvent } from '@/lib/supabase/queries/resources'
+import { formatPageTitle } from '@/lib/brand'
 
 export const metadata = {
-    title: 'Hub privado | Comunidad Psicología',
+    title: formatPageTitle('Hub privado'),
     robots: {
         index: false,
         follow: false,
@@ -54,9 +55,7 @@ export default async function EventHubPage({ params }: PageProps) {
     const { slug } = await params
     const event = await getPublicEventBySlug(slug)
 
-    if (!event) {
-        notFound()
-    }
+    if (!event) notFound()
 
     const access = await userHasEventHubAccess(event)
 
@@ -75,7 +74,7 @@ export default async function EventHubPage({ params }: PageProps) {
                         <CardTitle>No encontramos un acceso activo para este hub</CardTitle>
                         <CardDescription>
                             Si compraste o te registraste con otro correo, recupera tu acceso desde el email correcto o vuelve a la
-                            página pública para revisar la oferta.
+                            pagina publica para revisar la oferta.
                         </CardDescription>
                     </CardHeader>
                     <CardContent className="flex flex-col gap-3 sm:flex-row sm:justify-center">
@@ -83,7 +82,7 @@ export default async function EventHubPage({ params }: PageProps) {
                             <Link href={`/compras/recuperar?next=${encodeURIComponent(`/hub/${slug}`)}`}>Recuperar acceso por correo</Link>
                         </Button>
                         <Button asChild variant="outline">
-                            <Link href={`/${event.public_kind}/${event.slug}`}>Volver a la página pública</Link>
+                            <Link href={`/${event.public_kind}/${event.slug}`}>Volver a la pagina publica</Link>
                         </Button>
                     </CardContent>
                 </Card>
@@ -132,7 +131,7 @@ export default async function EventHubPage({ params }: PageProps) {
                 <div className="flex flex-col gap-2 sm:items-end">
                     <Button asChild variant="outline">
                         <Link href={`/${event.public_kind}/${event.slug}`}>
-                            Ver página pública
+                            Ver pagina publica
                             <ExternalLink className="ml-2 h-4 w-4" />
                         </Link>
                     </Button>
@@ -156,7 +155,7 @@ export default async function EventHubPage({ params }: PageProps) {
                                     Tu enlace de acceso en vivo
                                 </CardTitle>
                                 <CardDescription>
-                                    La sala se habilita en la ventana de acceso. Usa este botón para entrar directamente a la sesión.
+                                    La sala se habilita en la ventana de acceso. Usa este boton para entrar directamente a la sesion.
                                 </CardDescription>
                             </CardHeader>
                             <CardContent>
@@ -175,7 +174,7 @@ export default async function EventHubPage({ params }: PageProps) {
                             <CardHeader>
                                 <CardTitle className="flex items-center gap-2">
                                     <Play className="h-5 w-5 text-primary" />
-                                    Grabación disponible
+                                    Contenido disponible
                                 </CardTitle>
                                 {event.recording_expires_at && (
                                     <CardDescription>
@@ -194,9 +193,9 @@ export default async function EventHubPage({ params }: PageProps) {
                             <CardContent className="flex items-start gap-3 pt-6">
                                 <Video className="mt-0.5 h-5 w-5 flex-shrink-0 text-brand-yellow" />
                                 <div>
-                                    <p className="font-medium text-brand-yellow">Grabación en proceso</p>
+                                    <p className="font-medium text-brand-yellow">Contenido en proceso</p>
                                     <p className="text-sm text-brand-yellow/90">
-                                        Todavía no publicamos el replay. Si este activo incluye grabación, aparecerá aquí automáticamente.
+                                        Todavia no publicamos este contenido. Si tu acceso lo incluye, aparecera aqui automaticamente.
                                     </p>
                                 </div>
                             </CardContent>
@@ -280,7 +279,7 @@ export default async function EventHubPage({ params }: PageProps) {
                             </div>
                             {event.description && (
                                 <div className="rounded-xl border p-4">
-                                    <p className="text-sm whitespace-pre-wrap text-muted-foreground">{event.description}</p>
+                                    <p className="whitespace-pre-wrap text-sm text-muted-foreground">{event.description}</p>
                                 </div>
                             )}
                         </CardContent>

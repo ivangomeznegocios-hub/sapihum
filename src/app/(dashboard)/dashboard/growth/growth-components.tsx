@@ -164,8 +164,8 @@ export function ShareLinkButton({ code, baseUrl }: { code: string; baseUrl: stri
 
     async function handleShare() {
         const shareData: ShareData = {
-            title: 'Invitacion profesional a Comunidad de Psicologia',
-            text: 'Te invito a sumarte a la plataforma como profesional. Usa mi codigo para registrarte.',
+            title: 'Invitación profesional a SAPIHUM',
+            text: 'Te invito a sumarte a SAPIHUM como profesional. Usa mi código para registrarte.',
             url: inviteLink,
         }
 

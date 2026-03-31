@@ -9,6 +9,7 @@ export interface CommercialAccessSnapshot extends ViewerAccessContext {
     role: Profile['role']
     email: string | null
     membershipLevel: number
+    membershipSpecializationCode: Profile['membership_specialization_code']
     hasActiveMembership: boolean
     membershipSource: 'subscription' | 'profile_legacy' | null
     viewer: ViewerAccessContext
@@ -25,7 +26,9 @@ export async function getViewerCommercialAccessContext(supabase: any, userId: st
 export async function getCommercialAccessContext(params: {
     supabase: any
     userId: string
-    profile?: Pick<Profile, 'role' | 'email' | 'membership_level' | 'subscription_status'> | null
+    profile?: Pick<Profile, 'role' | 'email' | 'membership_level' | 'subscription_status'> & {
+        membership_specialization_code?: Profile['membership_specialization_code']
+    } | null
 }): Promise<CommercialAccessSnapshot | null> {
     const viewer = await resolveViewerAccessContext({
         supabase: params.supabase,
@@ -37,6 +40,7 @@ export async function getCommercialAccessContext(params: {
                 email: params.profile.email ?? null,
                 membership_level: params.profile.membership_level ?? 0,
                 subscription_status: params.profile.subscription_status ?? null,
+                membership_specialization_code: params.profile.membership_specialization_code ?? null,
             }
             : null,
         includeActiveRelationship: true,
@@ -50,6 +54,7 @@ export async function getCommercialAccessContext(params: {
         role: viewer.profile.role,
         email: viewer.profile.email ?? null,
         membershipLevel: viewer.membershipLevel,
+        membershipSpecializationCode: viewer.membershipSpecializationCode,
         hasActiveMembership: viewer.membershipActive,
         membershipSource: viewer.subscription ? 'subscription' : viewer.membershipActive ? 'profile_legacy' : null,
         viewer,
@@ -77,10 +82,10 @@ export function audienceAllowsAccess(
 }
 
 export function resolveEventCommercialState(
-    event: Pick<Event, 'price' | 'member_price' | 'member_access_type' | 'target_audience'>,
+    event: Pick<Event, 'price' | 'member_price' | 'member_access_type' | 'specialization_code' | 'target_audience'>,
     context: CommercialAccessSnapshot
 ) {
-    const effectivePrice = getEffectiveEventPriceForMembership(event, context.hasActiveMembership)
+    const effectivePrice = getEffectiveEventPriceForMembership(event, context)
     const publicPrice = Number(event.price || 0)
 
     return {

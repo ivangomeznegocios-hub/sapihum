@@ -4,8 +4,9 @@ import Link from 'next/link'
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { getEventMemberAccessMessage } from '@/lib/events/pricing'
+import { getEffectiveEventPriceForProfile, getEventMemberAccessMessage, isEventIncludedForMatchingSpecialization } from '@/lib/events/pricing'
 import { getDefaultPublicCtaLabel, getEventTypeLabel, getPublicEventPath } from '@/lib/events/public'
+import { getSpecializationByCode } from '@/lib/specializations'
 import { PublicAccessCta } from './public-access-cta'
 
 function formatEventDate(date: string) {
@@ -20,42 +21,32 @@ function formatEventDate(date: string) {
 }
 
 function getAudienceLabel(audience: string[] | null | undefined): string {
-    if (!audience || audience.length === 0) return 'Público general'
+    if (!audience || audience.length === 0) return 'Publico general'
     const labels: Record<string, string> = {
-        public: 'Público general',
+        public: 'Publico general',
         members: 'Miembros de la comunidad',
-        psychologist: 'Profesionales de psicología',
+        psychologist: 'Profesionales de psicologia',
         admin: 'Administradores',
         ponente: 'Ponentes',
     }
-    return audience.map(a => labels[a] || a).join(' · ')
+    return audience.map(a => labels[a] || a).join(' / ')
 }
 
 function buildFaq(event: any) {
     const items = [
         {
-            question: '¿Cómo funciona el acceso después de registrarme o comprar?',
-            answer: 'Recibirás acceso al hub privado del evento. Desde ahí podrás entrar al vivo, ver materiales y recuperar tu acceso con tu correo.',
+            question: 'Como funciona el acceso despues de registrarme o comprar?',
+            answer: 'Recibiras acceso al hub privado del evento. Desde ahi podras entrar al vivo, ver materiales y recuperar tu acceso con tu correo.',
         },
         {
-            question: '¿Necesito una cuenta completa para participar?',
-            answer: 'No. Puedes comenzar con acceso rápido por correo y crear tu cuenta después si quieres acceder a la comunidad y networking.',
+            question: 'Necesito una cuenta completa para participar?',
+            answer: 'No. Puedes comenzar con acceso rapido por correo y crear tu cuenta despues si quieres acceder a la comunidad y networking.',
         },
     ]
-
-    if (event.recording_url || event.event_type === 'on_demand') {
-        items.push({
-            question: '¿La grabación queda disponible después?',
-            answer: event.recording_expires_at
-                ? `Sí. La ventana actual termina el ${new Intl.DateTimeFormat('es-MX', { day: 'numeric', month: 'long', year: 'numeric' }).format(new Date(event.recording_expires_at))}.`
-                : 'Sí. La grabación queda disponible mientras tu acceso esté activo.',
-        })
-    }
-
     if (Number(event.price || 0) > 0) {
         items.push({
-            question: '¿Qué obtengo si ya soy miembro?',
-            answer: getEventMemberAccessMessage(event).note || 'La membresía puede incluir acceso o precio preferencial según la oferta de este evento.',
+            question: 'Que obtengo si ya soy miembro?',
+            answer: getEventMemberAccessMessage(event).note || 'La membresia puede incluir acceso o precio preferencial segun la oferta de este evento.',
         })
     }
 
@@ -65,9 +56,7 @@ function buildFaq(event: any) {
 function buildStructuredData(event: any) {
     const schemaType = event.event_type === 'course'
         ? 'Course'
-        : event.event_type === 'on_demand' || (event.status === 'completed' && event.recording_url)
-            ? 'Product'
-            : 'Event'
+        : 'Event'
 
     const base: Record<string, any> = {
         '@context': 'https://schema.org',
@@ -87,11 +76,7 @@ function buildStructuredData(event: any) {
 
     if (schemaType === 'Course') {
         base.provider = { '@type': 'Organization', name: 'SAPIHUM' }
-        base.educationalCredentialAwarded = 'Formación continua'
-    }
-
-    if (schemaType === 'Product') {
-        base.offers = { '@type': 'Offer', price: Number(event.price || 0), priceCurrency: 'MXN', availability: 'https://schema.org/InStock' }
+        base.educationalCredentialAwarded = 'Formacion continua'
     }
 
     return JSON.stringify(base)
@@ -147,19 +132,27 @@ export function PublicEventLanding({
     event,
     relatedEvents,
     membershipLevel = 0,
+    hasActiveMembership = false,
+    membershipSpecializationCode = null,
     hasAccess = false,
 }: {
     event: any
     relatedEvents: any[]
     membershipLevel: number
+    hasActiveMembership: boolean
+    membershipSpecializationCode: string | null
     hasAccess: boolean
 }) {
     const ctaLabel = getDefaultPublicCtaLabel(event)
     const isMembersOnly = Array.isArray(event.target_audience) 
         ? event.target_audience.includes('members') && !event.target_audience.includes('public') 
         : false
-        
-    const requiresPayment = !isMembersOnly && Number(event.price || 0) > 0
+    const specialization = getSpecializationByCode(event.specialization_code)
+    const finalPrice = getEffectiveEventPriceForProfile(event, {
+        membershipLevel,
+        hasActiveMembership,
+        membershipSpecializationCode,
+    })
     const memberMessage = getEventMemberAccessMessage(event)
     const formatLabel = getEventTypeLabel(event.event_type)
     const faqItems = buildFaq(event)
@@ -174,20 +167,36 @@ export function PublicEventLanding({
         : []
     
     // Determine the state logic for the CTA box
-    const userIsMember = membershipLevel > 0
-    const finalPrice = requiresPayment && userIsMember 
-        ? (event.member_price !== null && event.member_price !== undefined 
-            ? Number(event.member_price) 
-            : (event.member_access_type === 'free' ? 0 : Number(event.price)))
-        : Number(event.price || 0)
-        
-    const showMembershipUpsell = !hasAccess && !isBlocked && !userIsMember && (isMembersOnly || (requiresPayment && event.member_access_type !== 'full_price'))
+    const userIsMember = hasActiveMembership
+    const includedBySpecialization = isEventIncludedForMatchingSpecialization(event, {
+        membershipLevel,
+        hasActiveMembership,
+        membershipSpecializationCode,
+    })
+    const showMembershipUpsell =
+        !hasAccess
+        && !isBlocked
+        && !userIsMember
+        && (
+            isMembersOnly
+            || (Number(event.price || 0) > 0 && Boolean(event.specialization_code))
+            || (Number(event.price || 0) > 0 && event.member_access_type !== 'full_price')
+        )
+    const membershipCtaLabel = isMembersOnly
+        ? 'Hazte miembro para participar'
+        : specialization
+            ? event.member_access_type === 'discounted'
+                ? 'Activa tu especialidad o suscribete y ahorra'
+                : event.member_access_type === 'free'
+                    ? 'Suscribete y accede sin costo'
+                    : 'Activa tu especialidad y accede sin costo'
+            : `Suscribete y ${event.member_access_type === 'free' ? 'accede gratis' : 'ahorra'}`
 
     return (
         <div className="space-y-14 pb-20">
             <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: buildStructuredData(event) }} />
 
-            {/* ── HERO ── */}
+            {/* -- HERO -- */}
             <section className="relative overflow-hidden rounded-3xl">
                 {/* Background image or gradient */}
                 <div className="absolute inset-0 bg-gradient-to-br from-neutral-900 via-neutral-800 to-brand-brown/80">
@@ -214,6 +223,11 @@ export function PublicEventLanding({
                                     {event.hero_badge}
                                 </span>
                             )}
+                            {specialization && (
+                                <span className="inline-flex items-center rounded-full border border-brand-brown/30 bg-brand-brown/20 px-3 py-1 text-xs font-semibold text-white">
+                                    {specialization.name}
+                                </span>
+                            )}
                             {event.formation && !Array.isArray(event.formation) ? (
                                 <Link href={`/formaciones/${event.formation.slug}`} className="inline-flex items-center gap-1.5 rounded-full bg-brand-yellow/20 border border-brand-yellow/30 px-3 py-1 text-xs font-semibold tracking-wide text-brand-yellow hover:bg-brand-yellow/40 hover:text-white transition-colors cursor-pointer group">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="group-hover:-rotate-12 transition-transform"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" /><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" /></svg>
@@ -225,7 +239,7 @@ export function PublicEventLanding({
                                     Parte de: {event.formation_track}
                                 </span>
                             ) : null}
-                            {event.member_access_type === 'free' && Number(event.price || 0) > 0 && (
+                            {!event.specialization_code && event.member_access_type === 'free' && Number(event.price || 0) > 0 && (
                                 <span className="inline-flex items-center gap-1 rounded-full bg-brand-brown/20 px-3 py-1 text-xs font-semibold text-brand-brown">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z" /></svg>
                                     Incluido para miembros
@@ -326,9 +340,14 @@ export function PublicEventLanding({
                                     <p className="mt-1 text-3xl font-bold text-white">
                                         {finalPrice > 0 ? `$${finalPrice.toFixed(0)} MXN` : 'Gratis'}
                                     </p>
+                                    {includedBySpecialization && (
+                                        <p className="mt-1 text-sm font-medium text-brand-brown">
+                                            Incluido por tu especialidad
+                                        </p>
+                                    )}
                                     {finalPrice > 0 && finalPrice < Number(event.price || 0) && (
                                         <p className="mt-1 text-sm text-brand-brown font-medium">
-                                            ¡Tienes precio preferencial de miembro!
+                                            Tienes precio preferencial de miembro
                                         </p>
                                     )}
                                 </div>
@@ -361,25 +380,25 @@ export function PublicEventLanding({
 
                                 {hasAccess ? (
                                     <div className="space-y-3 pt-2">
-                                        <Link href={`/hub/${event.slug}${event.status === 'completed' ? '/recording' : ''}`}>
-                                            <Button className="w-full bg-brand-yellow hover:bg-brand-yellow text-white" size="lg">
-                                                {event.status === 'completed' ? 'Ver grabación' : 'Entrar a la sala en vivo'}
+                                        <Link href={`/hub/${event.slug}`}>
+                                            <Button className="w-full" size="lg">
+                                                Entrar al hub privado
                                             </Button>
                                         </Link>
                                         <p className="text-center text-xs text-brand-brown font-medium">
-                                            ✓ Ya tienes acceso a este contenido
+                                            Ya tienes acceso a este contenido
                                         </p>
                                     </div>
                                 ) : isBlocked ? (
                                     <div className="space-y-4 pt-2">
                                         <Button variant="secondary" className="w-full text-base font-semibold py-6 opacity-60 cursor-not-allowed" disabled>
                                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="mr-2"><circle cx="12" cy="12" r="10" /><line x1="12" x2="12" y1="8" y2="12" /><line x1="12" x2="12.01" y1="16" y2="16" /></svg>
-                                            {isExpired ? 'Este material ya expiró' : 'Cupo Lleno'}
+                                            {isExpired ? 'Este material ya expiro' : 'Cupo Lleno'}
                                         </Button>
                                         <p className="text-center text-xs text-neutral-500">
                                             {isExpired 
-                                                ? 'Las grabaciones o inscripciones para este evento cerraron.'
-                                                : 'Lo sentimos, este evento ya alcanzó su máxima capacidad.'}
+                                                ? 'Este acceso ya no esta disponible.'
+                                                : 'Lo sentimos, este evento ya alcanzo su maxima capacidad.'}
                                         </p>
                                     </div>
                                 ) : (
@@ -399,14 +418,18 @@ export function PublicEventLanding({
                                                 {!isMembersOnly && (
                                                 <div className="relative py-3 flex items-center">
                                                     <div className="flex-grow border-t border-white/10"></div>
-                                                    <span className="shrink-0 px-3 text-xs text-neutral-500 uppercase tracking-widest">O también</span>
+                                                    <span className="shrink-0 px-3 text-xs text-neutral-500 uppercase tracking-widest">O tambien</span>
                                                     <div className="flex-grow border-t border-white/10"></div>
                                                 </div>
                                                 )}
                                                 <Link href={`/precios?next=/eventos/${event.slug}&autoCheckout=true`} className="block w-full">
-                                                    <Button variant={isMembersOnly ? "default" : "outline"} className={`w-full ${isMembersOnly ? 'bg-brand-yellow hover:bg-brand-yellow text-white shadow-lg py-6 text-base' : 'border-brand-yellow/30 bg-brand-yellow/10 text-brand-yellow hover:bg-brand-yellow/20 hover:text-brand-yellow'}`} size="lg">
+                                                    <Button
+                                                        variant={isMembersOnly ? "default" : "outline"}
+                                                        className={`w-full ${isMembersOnly ? 'py-6 text-base shadow-lg' : 'border-primary/20 bg-primary/10 text-primary hover:border-primary/30 hover:bg-primary/15 hover:text-primary'}`}
+                                                        size="lg"
+                                                    >
                                                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="mr-2"><rect width="18" height="11" x="3" y="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>
-                                                        {isMembersOnly ? 'Hazte miembro para participar' : `Suscríbete y ${event.member_access_type === 'free' ? 'accede gratis' : 'ahorra'}`}
+                                                        {membershipCtaLabel}
                                                     </Button>
                                                 </Link>
                                             </>
@@ -416,7 +439,7 @@ export function PublicEventLanding({
 
                                 {!hasAccess && (
                                     <p className="text-center text-[11px] text-neutral-500 mt-4">
-                                        ¿Ya lo adquiriste?{' '}
+                                        Ya lo adquiriste?{' '}
                                         <Link href="/compras/recuperar" className="font-medium text-brand-yellow hover:underline">
                                             Recupera tu acceso
                                         </Link>
@@ -428,7 +451,7 @@ export function PublicEventLanding({
                 </div>
             </section>
 
-            {/* ── CONTENT ── */}
+            {/* -- CONTENT -- */}
             <section className="grid gap-8 lg:grid-cols-[1fr_340px]">
                 <div className="space-y-8">
                     {/* Description */}
@@ -449,14 +472,14 @@ export function PublicEventLanding({
                     {(event.ideal_for?.length > 0 || event.learning_outcomes?.length > 0) && (
                         <Card className="border-border/50">
                             <CardHeader>
-                                <CardTitle className="text-xl">Valor Académico</CardTitle>
+                                <CardTitle className="text-xl">Valor Academico</CardTitle>
                             </CardHeader>
                             <CardContent className="grid gap-8 sm:grid-cols-2">
                                 {event.ideal_for?.length > 0 && (
                                     <div className="space-y-4">
                                         <h4 className="font-semibold text-primary flex items-center gap-2">
                                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M22 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>
-                                            ¿A quién va dirigido?
+                                            A quien va dirigido?
                                         </h4>
                                         <ul className="space-y-3">
                                             {event.ideal_for.map((item: string, i: number) => (
@@ -472,7 +495,7 @@ export function PublicEventLanding({
                                     <div className="space-y-4">
                                         <h4 className="font-semibold text-brand-yellow flex items-center gap-2">
                                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m12 14 4-4" /><path d="M3.34 19a10 10 0 1 1 17.32 0" /></svg>
-                                            ¿Qué aprenderás?
+                                            Que aprenderas?
                                         </h4>
                                         <ul className="space-y-3">
                                             {event.learning_outcomes.map((item: string, i: number) => (
@@ -491,28 +514,25 @@ export function PublicEventLanding({
                     {/* What you'll get */}
                     <Card className="border-border/50">
                         <CardHeader>
-                            <CardTitle className="text-xl">¿Qué incluye?</CardTitle>
+                            <CardTitle className="text-xl">Que incluye?</CardTitle>
                         </CardHeader>
                         <CardContent>
                             <div className="grid gap-3 sm:grid-cols-2">
                                 {[
-                                    { icon: '🎯', title: 'Acceso completo', desc: 'Link exclusivo al evento en vivo o grabación' },
-                                    { icon: '📧', title: 'Acceso por correo', desc: 'Inicia sin cuenta. Recupera tu acceso cuando quieras' },
-                                    ...(event.recording_url || event.event_type === 'on_demand' ? [
-                                        { icon: '🔄', title: 'Replay incluido', desc: 'Quienes tengan acceso podrán ver la grabación cuando esté disponible' }
-                                    ] : []),
+                                    { icon: '+', title: 'Acceso completo', desc: 'Link exclusivo al evento y sus materiales' },
+                                    { icon: '+', title: 'Acceso por correo', desc: 'Inicia sin cuenta. Recupera tu acceso cuando quieras' },
                                     ...(event.certificate_type && event.certificate_type !== 'none' ? [{
-                                        icon: '🎓',
-                                        title: event.certificate_type === 'completion' ? 'Diploma de finalización' : event.certificate_type === 'specialized' ? 'Acreditación Especializada' : 'Constancia por asistencia',
+                                        icon: '+',
+                                        title: event.certificate_type === 'completion' ? 'Diploma de finalizacion' : event.certificate_type === 'specialized' ? 'Acreditacion Especializada' : 'Constancia por asistencia',
                                         desc: 'Documento acreditativo'
                                     }] : []),
                                     ...(event.included_resources?.length > 0 ? [{
-                                        icon: '📦',
+                                        icon: '+',
                                         title: 'Recursos extra',
                                         desc: `${event.included_resources.length} materiales descargables`
                                     }] : []),
                                     ...(Number(event.price || 0) > 0 ? [
-                                        { icon: '💳', title: 'Pago seguro', desc: 'Procesado de forma segura con Stripe' }
+                                        { icon: '+', title: 'Pago seguro', desc: 'Procesado de forma segura con Stripe' }
                                     ] : []),
                                 ].map((item) => (
                                     <div key={item.title} className="flex gap-3 rounded-xl border border-border/40 bg-muted/30 p-3.5">
@@ -672,7 +692,7 @@ export function PublicEventLanding({
                             </CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-3 text-sm text-muted-foreground">
-                            <p>La membresía potencia tu acceso con ahorro acumulado y contenido preferencial.</p>
+                            <p>La membresia potencia tu acceso con ahorro acumulado y contenido preferencial.</p>
                             <ul className="space-y-1.5 text-sm">
                                 <li className="flex items-start gap-2">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="mt-0.5 shrink-0 text-brand-yellow"><polyline points="20 6 9 17 4 12" /></svg>
@@ -680,7 +700,7 @@ export function PublicEventLanding({
                                 </li>
                                 <li className="flex items-start gap-2">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="mt-0.5 shrink-0 text-brand-yellow"><polyline points="20 6 9 17 4 12" /></svg>
-                                    Biblioteca privada de replays
+                                    Acceso preferencial a encuentros y contenidos
                                 </li>
                                 <li className="flex items-start gap-2">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="mt-0.5 shrink-0 text-brand-yellow"><polyline points="20 6 9 17 4 12" /></svg>
@@ -698,7 +718,7 @@ export function PublicEventLanding({
                     {relatedEvents.length > 0 && (
                         <Card className="border-border/50">
                             <CardHeader>
-                                <CardTitle className="text-base">También te puede interesar</CardTitle>
+                                <CardTitle className="text-base">Tambien te puede interesar</CardTitle>
                             </CardHeader>
                             <CardContent className="space-y-3">
                                 {relatedEvents.map((item) => (

@@ -201,7 +201,7 @@ export function PricingContent({
             >
               <Button
                 size="lg"
-                className="gap-2 shadow-md hover:shadow-lg transition-shadow"
+                className="gap-2"
                 data-analytics-cta
                 data-analytics-label={isLoggedIn ? 'Gestionar en mi cuenta' : 'Comenzar Nivel 1'}
                 data-analytics-funnel={isLoggedIn ? 'subscription' : 'registration'}
@@ -312,7 +312,7 @@ export function PricingContent({
                   >
                     <Button
                       size="lg"
-                      className="gap-2 shadow-md hover:shadow-lg transition-shadow"
+                      className="gap-2"
                       data-analytics-cta
                       data-analytics-label={isLoggedIn ? 'Subir desde mi cuenta' : `Quiero ${spec.name}`}
                       data-analytics-funnel={isLoggedIn ? 'subscription' : 'registration'}
@@ -409,7 +409,7 @@ export function PricingContent({
               >
                 <Button
                   size="lg"
-                  className="gap-2 bg-gradient-to-r from-brand-yellow to-brand-brown hover:from-brand-yellow hover:to-brand-brown text-white shadow-lg hover:shadow-xl transition-all"
+                  className="gap-2"
                   data-analytics-cta
                   data-analytics-label={isLoggedIn ? 'Activar Nivel 3' : 'Inicia sesión para verlo'}
                   data-analytics-funnel={isLoggedIn ? 'subscription' : 'registration'}

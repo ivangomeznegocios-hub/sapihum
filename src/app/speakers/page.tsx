@@ -2,9 +2,10 @@ import Link from 'next/link'
 import { getPublicSpeakers } from '@/lib/supabase/queries/speakers'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { formatPageTitle } from '@/lib/brand'
 
 export const metadata = {
-    title: 'Nuestros Ponentes | Comunidad de Psicologia',
+    title: formatPageTitle('Nuestros Ponentes'),
     description: 'Conoce a los expertos y ponentes que imparten nuestros eventos y talleres.',
 }
 

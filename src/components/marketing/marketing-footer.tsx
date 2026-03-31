@@ -10,8 +10,7 @@ const FOOTER_LINKS = {
     { label: "Ver las 12", href: "/especialidades" },
   ],
   Academia: [
-    { label: "Catálogo Completo", href: "/academia" },
-    { label: "Eventos en Vivo", href: "/eventos" },
+    { label: "Próximos Encuentros", href: "/academia" },
     { label: "Ponentes", href: "/speakers" },
   ],
   Recursos: [

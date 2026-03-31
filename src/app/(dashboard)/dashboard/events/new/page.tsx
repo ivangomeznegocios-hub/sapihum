@@ -40,7 +40,7 @@ export default async function NewEventPage() {
                     <CardTitle>Detalles del Evento</CardTitle>
                 </CardHeader>
                 <CardContent>
-                    <CreateEventForm userRole={profile.role || ''} />
+                    <CreateEventForm isEmbedded userRole={profile.role || ''} />
                 </CardContent>
             </Card>
         </div>

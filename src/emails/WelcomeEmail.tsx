@@ -8,6 +8,7 @@ import {
     Preview,
     Text,
 } from '@react-email/components'
+import { brandName } from '@/lib/brand'
 
 interface WelcomeEmailProps {
     name: string
@@ -17,12 +18,12 @@ export default function WelcomeEmail({ name }: WelcomeEmailProps) {
     return (
         <Html>
             <Head />
-            <Preview>Bienvenido(a) a la Comunidad de Psicologia</Preview>
+            <Preview>Bienvenido(a) a {brandName}</Preview>
             <Body style={main}>
                 <Container style={container}>
                     <Heading style={h1}>Bienvenido(a), {name}!</Heading>
                     <Text style={text}>
-                        Tu cuenta en la Comunidad de Psicologia ya esta lista.
+                        Tu cuenta en {brandName} ya esta lista.
                         Ahora puedes acceder a tu panel y continuar con tu proceso en la plataforma.
                     </Text>
                     <Text style={text}>

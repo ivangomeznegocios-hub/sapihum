@@ -1,5 +1,6 @@
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
+import { splitPublicCatalogEvents } from "@/lib/events/public"
 import { SPECIALIZATION_CATALOG } from "@/lib/specializations"
 import { getUnifiedCatalogEvents } from "@/lib/supabase/queries/events"
 import { getPublicEventPath } from "@/lib/events/public"
@@ -146,7 +147,7 @@ const FAQS = [
 ]
 
 export default async function LandingPage() {
-  const upcomingEvents = (await getUnifiedCatalogEvents()).filter((e: any) => e.status === 'upcoming' || e.status === 'live').slice(0, 3)
+  const upcomingEvents = splitPublicCatalogEvents(await getUnifiedCatalogEvents()).upcoming.slice(0, 3)
 
   return (
     <div className="flex flex-col items-center flex-1 w-full">
@@ -190,7 +191,7 @@ export default async function LandingPage() {
             {/* CTA Buttons */}
             <div className="sapihum-fade-up mt-10 flex flex-col sm:flex-row gap-4 w-full sm:w-auto" style={{ animationDelay: '0.3s' }}>
               <Link href="/especialidades" className="w-full sm:w-auto">
-                <Button size="lg" className="w-full text-base h-13 px-8 bg-[#f6ae02] hover:bg-[#7a5602] text-black hover:text-white shadow-lg shadow-[#f6ae02]/25 hover:shadow-xl hover:shadow-[#f6ae02]/30 transition-all border-0 font-semibold sapihum-glow-cta">
+                <Button size="lg" className="w-full h-13 px-8 text-base font-semibold sapihum-glow-cta">
                   Explorar Especialidades
                   <ArrowRight className="ml-2 w-5 h-5" />
                 </Button>
@@ -448,7 +449,7 @@ export default async function LandingPage() {
                   Próximos en la Academia
                 </h2>
                 <p className="mt-2 text-muted-foreground">
-                  Formaciones, eventos en vivo, cursos y experiencias para la comunidad.
+                  Talleres, formaciones, conferencias y experiencias en vivo para la comunidad.
                 </p>
               </div>
               <Link href="/academia" className="shrink-0">
@@ -605,7 +606,7 @@ export default async function LandingPage() {
               
               <div className="mt-12 flex flex-col sm:flex-row gap-5 justify-center items-center">
                 <Link href="/precios" className="w-full sm:w-auto">
-                  <Button size="lg" className="w-full text-base h-14 px-10 bg-[#f6ae02] text-black hover:bg-[#7a5602] hover:text-white hover:scale-105 shadow-xl transition-all font-bold">
+                  <Button size="lg" className="w-full h-14 px-10 text-base font-bold hover:scale-105">
                     Unirme a SAPIHUM
                   </Button>
                 </Link>

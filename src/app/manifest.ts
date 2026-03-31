@@ -1,10 +1,11 @@
 import { MetadataRoute } from 'next'
+import { brandName, brandShortDescription } from '@/lib/brand'
 
 export default function manifest(): MetadataRoute.Manifest {
     return {
-        name: 'Comunidad Psicología App',
-        short_name: 'Psicología',
-        description: 'Plataforma exclusiva para miembros de la comunidad de psicología',
+        name: brandName,
+        short_name: brandName,
+        description: brandShortDescription,
         start_url: '/',
         display: 'standalone',
         background_color: '#ffffff',
@@ -14,7 +15,7 @@ export default function manifest(): MetadataRoute.Manifest {
                 src: '/icon.svg',
                 sizes: 'any',
                 type: 'image/svg+xml',
-            }
+            },
         ],
     }
 }

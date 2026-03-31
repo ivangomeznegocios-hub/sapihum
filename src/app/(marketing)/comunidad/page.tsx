@@ -12,8 +12,8 @@ const highlights = [
   },
   {
     icon: CalendarDays,
-    title: "Eventos y grabaciones",
-    description: "Consulta talleres, transmisiones y contenido curado desde cualquier pantalla.",
+    title: "Eventos y formaciones",
+    description: "Consulta talleres, transmisiones y rutas de aprendizaje desde cualquier pantalla.",
   },
   {
     icon: MessageSquare,

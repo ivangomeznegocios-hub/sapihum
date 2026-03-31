@@ -6,6 +6,7 @@ import { getUnifiedCatalogEvents, getPublicEventBySlug } from '@/lib/supabase/qu
 import { createClient, getUserProfile } from '@/lib/supabase/server'
 import { getCommercialAccessContext } from '@/lib/access/commercial'
 import { getActiveEntitlementForEvent } from '@/lib/events/access'
+import { brandFullName } from '@/lib/brand'
 
 interface PageProps {
     params: Promise<{ slug: string }>
@@ -32,7 +33,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
                 alt: event.title,
             }] : undefined,
             type: 'website',
-            siteName: 'SAPIHUM Comunidad de Psicología',
+            siteName: brandFullName,
         },
         twitter: {
             card: 'summary_large_image',
@@ -78,6 +79,8 @@ export default async function EventoPublicoPage({ params }: PageProps) {
             event={event} 
             relatedEvents={relatedEvents} 
             membershipLevel={membershipLevel}
+            hasActiveMembership={commercialAccess?.hasActiveMembership ?? false}
+            membershipSpecializationCode={commercialAccess?.membershipSpecializationCode ?? null}
             hasAccess={!!entitlement}
         />
     )

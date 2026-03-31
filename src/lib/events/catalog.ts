@@ -46,5 +46,5 @@ export function getCatalogSectionTitle(_section: PublicCatalogSection) {
 }
 
 export function getCatalogSectionDescription(_section: PublicCatalogSection) {
-    return 'Eventos, formaciones y experiencias en vivo diseñadas para la comunidad de psicología profesional.'
+    return 'Eventos, formaciones y experiencias en vivo diseñadas para la comunidad profesional de SAPIHUM.'
 }

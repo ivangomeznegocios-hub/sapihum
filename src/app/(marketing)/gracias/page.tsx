@@ -67,7 +67,7 @@ export default function ThankYouPage() {
         </h1>
         
         <p className="text-lg text-muted-foreground mb-10">
-          Ya eres parte de Comunidad de Psicología. Tu membresía ha sido activada y tu viaje hacia una clínica más profesional comienza ahora.
+          Ya eres parte de SAPIHUM. Tu membresía ha sido activada y tu camino hacia una práctica más profesional comienza ahora.
         </p>
 
         {/* Expectation Setting Box */}
@@ -84,7 +84,7 @@ export default function ThankYouPage() {
             <li className="flex items-start gap-3">
               <span className="flex-shrink-0 w-6 h-6 rounded-full bg-brand-yellow dark:bg-brand-yellow/50 text-brand-yellow dark:text-brand-yellow flex items-center justify-center text-sm font-bold">2</span>
               <div>
-                <p className="font-medium">La comunidad te dará la bienvenida</p>
+                <p className="font-medium">La comunidad SAPIHUM te dará la bienvenida</p>
                 <p className="text-sm text-muted-foreground">Podrás presentarte con los cientos de psicólogos activos.</p>
               </div>
             </li>
@@ -93,7 +93,7 @@ export default function ThankYouPage() {
 
         {/* Único CTA Fuerte */}
         <Link href="/dashboard">
-          <Button size="lg" className="w-full sm:w-auto text-base h-14 px-10 font-bold bg-gradient-to-r from-brand-yellow to-brand-brown hover:from-brand-yellow hover:to-brand-brown text-white shadow-xl shadow-brand-yellow/25">
+          <Button size="lg" className="h-14 w-full px-10 text-base font-bold sm:w-auto">
             Configura tu Perfil → Ir al Dashboard
           </Button>
         </Link>

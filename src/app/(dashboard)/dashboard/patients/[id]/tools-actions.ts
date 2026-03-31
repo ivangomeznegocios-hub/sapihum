@@ -158,7 +158,7 @@ export async function createToolAction(input: {
             version: '1.0',
             metadata: {
                 name: title,
-                author: 'Comunidad Psicologia',
+                author: 'SAPIHUM',
                 estimated_minutes: estimatedMinutes,
                 instructions: input.instructions?.trim() || 'Lee la consigna y responde la actividad.',
             },

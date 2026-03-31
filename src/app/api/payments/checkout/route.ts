@@ -39,7 +39,7 @@ async function resolveEventPurchaseDetails(
 ) {
     const { data: event } = await (supabase
         .from('events') as any)
-        .select('id, slug, title, price, member_price, member_access_type, target_audience, status, created_by, recording_url, recording_expires_at, event_type, max_attendees')
+        .select('id, slug, title, price, member_price, member_access_type, specialization_code, target_audience, status, created_by, recording_url, recording_expires_at, event_type, max_attendees')
         .eq('id', params.eventId)
         .single()
 
@@ -118,11 +118,13 @@ async function resolveEventPurchaseDetails(
                 price: event.price,
                 member_price: event.member_price,
                 member_access_type: normalizeMemberAccessType(event.member_access_type),
+                specialization_code: event.specialization_code,
             },
             {
                 role: profile.role,
                 membershipLevel: commercialAccess.membershipLevel,
                 hasActiveMembership: commercialAccess.hasActiveMembership,
+                membershipSpecializationCode: commercialAccess.membershipSpecializationCode,
             }
         )
 

@@ -5,7 +5,7 @@ const sections = [
     {
         title: 'Responsable del tratamiento',
         items: [
-            'La plataforma Comunidad de Psicologia actua como responsable de los datos personales que recopila y procesa.',
+            'La plataforma SAPIHUM actua como responsable de los datos personales que recopila y procesa.',
             'Este aviso aplica a usuarios, psicologos, pacientes, ponentes y visitantes del sitio.',
         ],
     },
@@ -68,7 +68,7 @@ export default function AvisoPrivacidadPage() {
                     Aviso de Privacidad
                 </p>
                 <h1 className="text-4xl font-bold tracking-tight">
-                    Tratamiento de datos personales en Comunidad de Psicologia
+                    Tratamiento de datos personales en SAPIHUM
                 </h1>
                 <p className="max-w-3xl text-muted-foreground">
                     Version vigente: 2026-03-18. Este aviso resume como operamos los datos personales, incluidos datos clinicos sensibles, dentro de la plataforma.

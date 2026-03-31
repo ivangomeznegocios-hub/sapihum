@@ -1,12 +1,13 @@
 import Link from 'next/link'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { getPublicEventBySlug } from '@/lib/supabase/queries/events'
-import { createClient } from '@/lib/supabase/server'
 import { ArrowLeft, XCircle } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { createClient } from '@/lib/supabase/server'
+import { getPublicEventBySlug } from '@/lib/supabase/queries/events'
+import { formatPageTitle } from '@/lib/brand'
 
 export const metadata = {
-    title: 'Compra cancelada | Comunidad PsicologÃ­a',
+    title: formatPageTitle('Compra cancelada'),
     robots: {
         index: false,
         follow: false,
@@ -49,7 +50,7 @@ export default async function PurchaseCancelledPage({ searchParams }: PageProps)
                     <div className="space-y-2">
                         <CardTitle className="text-3xl">Compra cancelada</CardTitle>
                         <CardDescription className="text-base">
-                            No se realizÃ³ ningÃºn cargo. Si quieres, puedes volver a la pÃ¡gina del activo y retomar la compra cuando te convenga.
+                            No se realizo ningun cargo. Si quieres, puedes volver a la pagina del activo y retomar la compra cuando te convenga.
                         </CardDescription>
                     </div>
                 </CardHeader>

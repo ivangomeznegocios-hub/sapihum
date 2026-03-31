@@ -8,7 +8,7 @@ const canonicalAssetLinks = {
     kind: 'eventos' as const,
   },
   academia: {
-    label: 'Ver catálogo',
+    label: 'Ver catalogo',
     href: '/academia',
     kind: 'academia' as const,
   },
@@ -17,11 +17,11 @@ const canonicalAssetLinks = {
 const blogPosts: BlogPost[] = [
   {
     slug: 'evento-como-activo-comercial',
-    title: 'Por qué cada evento debe vender como un activo comercial, no como una agenda',
+    title: 'Por que cada evento debe vender como un activo comercial, no como una agenda',
     description:
-      'Una landing canónica, un hub privado y una pieza editorial de apoyo convierten cada evento en un activo de promoción, exposición y ventas.',
+      'Una landing canonica, un hub privado y una pieza editorial de apoyo convierten cada evento en un activo de promocion, exposicion y ventas.',
     excerpt:
-      'El evento deja de ser un simple ticket cuando lo diseñas como producto: la página vende, el blog atrae y el hub entrega acceso.',
+      'El evento deja de ser un simple ticket cuando lo disenas como producto: la pagina vende, el blog atrae y el hub entrega acceso.',
     publishedAt: '2026-03-24',
     updatedAt: '2026-03-24',
     readTime: '6 min',
@@ -34,33 +34,33 @@ const blogPosts: BlogPost[] = [
       canonicalAssetLinks.academia,
     ],
     intro:
-      'La mejor manera de pensar un evento no es como un calendario, sino como una pieza de negocio con vida propia: capta tráfico, convierte intención y abre la puerta a una relación más larga.',
+      'La mejor manera de pensar un evento no es como un calendario, sino como una pieza de negocio con vida propia: capta trafico, convierte intencion y abre la puerta a una relacion mas larga.',
     sections: [
       {
-        heading: 'La página del activo es la vendedora',
+        heading: 'La pagina del activo es la vendedora',
         paragraphs: [
-          'Cuando alguien llega por SEO, aliado, campaña o link directo, necesita una sola verdad: qué es el activo, para quién sirve, por qué importa y cómo acceder.',
-          'Por eso la landing no debe parecer una ficha vacía. Tiene que responder como una venta editorial, con contexto, promesa, prueba social y una llamada a la acción clara.',
+          'Cuando alguien llega por SEO, aliado, campana o link directo, necesita una sola verdad: que es el activo, para quien sirve, por que importa y como acceder.',
+          'Por eso la landing no debe parecer una ficha vacia. Tiene que responder como una venta editorial, con contexto, promesa, prueba social y una llamada a la accion clara.',
         ],
         points: [
-          'Promesa clara y específica.',
-          'A quién va dirigido.',
-          'Qué aprende o resuelve.',
-          'CTA único por oferta.',
+          'Promesa clara y especifica.',
+          'A quien va dirigido.',
+          'Que aprende o resuelve.',
+          'CTA unico por oferta.',
         ],
       },
       {
         heading: 'El blog no compite con la landing',
         paragraphs: [
-          'El blog cumple otra función: captar demanda, explicar el problema y posicionar la idea antes de la conversión.',
-          'Cada artículo puede empujar a un evento o formación, pero no debe intentar hacer todo en una sola página.',
+          'El blog cumple otra funcion: captar demanda, explicar el problema y posicionar la idea antes de la conversion.',
+          'Cada articulo puede empujar a un evento o formacion, pero no debe intentar hacer todo en una sola pagina.',
         ],
       },
       {
         heading: 'El hub privado cierra el circuito',
         paragraphs: [
-          'Una vez pagado o registrado, el usuario no debería perderse en la plataforma. El acceso vive en un hub privado con join link, materiales, replay y soporte.',
-          'Eso reduce fricción, mejora la experiencia y hace mucho más fácil reactivar o vender de nuevo.',
+          'Una vez pagado o registrado, el usuario no deberia perderse en la plataforma. El acceso vive en un hub privado con enlace de entrada, materiales y soporte.',
+          'Eso reduce friccion, mejora la experiencia y hace mucho mas facil reactivar o vender de nuevo.',
         ],
       },
     ],
@@ -68,45 +68,45 @@ const blogPosts: BlogPost[] = [
   },
   {
     slug: 'cuando-cobrar-un-evento-y-cuando-regalarlo',
-    title: 'Cuándo conviene cobrar un evento y cuándo usarlo como captación',
+    title: 'Cuando conviene cobrar un evento y cuando usarlo como captacion',
     description:
-      'Una regla práctica para decidir entre evento gratuito y evento pagado según el objetivo comercial.',
+      'Una regla practica para decidir entre evento gratuito y evento pagado segun el objetivo comercial.',
     excerpt:
-      'No todo evento debe monetizarse igual. Algunos están hechos para atraer audiencia; otros para filtrar intención y recuperar inversión.',
+      'No todo evento debe monetizarse igual. Algunos estan hechos para atraer audiencia; otros para filtrar intencion y recuperar inversion.',
     publishedAt: '2026-03-24',
     updatedAt: '2026-03-24',
     readTime: '5 min',
     category: 'Estrategia comercial',
-    tags: ['pricing', 'captacion', 'conversión', 'campañas'],
+    tags: ['pricing', 'captacion', 'conversion', 'campanas'],
     canonicalFocus: ['eventos', 'academia'],
     assetLinks: [canonicalAssetLinks.eventos, canonicalAssetLinks.academia],
     intro:
-      'El criterio no debería ser solamente cuánto tiempo te toma organizar el evento. La pregunta correcta es qué papel cumple dentro de la escalera de valor.',
+      'El criterio no deberia ser solamente cuanto tiempo te toma organizar el evento. La pregunta correcta es que papel cumple dentro de la escalera de valor.',
     sections: [
       {
         heading: 'Gratis si necesitas alcance',
         paragraphs: [
-          'Un evento gratuito funciona muy bien cuando quieres mover audiencia nueva, crecer lista, abrir conversación o alimentar alianzas.',
-          'En esa etapa, la conversión no ocurre por el ticket, sino por la captura de contacto y el seguimiento posterior.',
+          'Un evento gratuito funciona muy bien cuando quieres mover audiencia nueva, crecer lista, abrir conversacion o alimentar alianzas.',
+          'En esa etapa, la conversion no ocurre por el ticket, sino por la captura de contacto y el seguimiento posterior.',
         ],
       },
       {
         heading: 'Pagado si necesitas filtro y valor percibido',
         paragraphs: [
-          'Cobrar tiene sentido cuando el tema es específico, el resultado es fuerte y existe una expectativa clara de transformación o especialización.',
-          'También ayuda a ordenar la demanda: quien paga suele estar más cerca de consumir, asistir y volver a comprar.',
+          'Cobrar tiene sentido cuando el tema es especifico, el resultado es fuerte y existe una expectativa clara de transformacion o especializacion.',
+          'Tambien ayuda a ordenar la demanda: quien paga suele estar mas cerca de consumir, asistir y volver a comprar.',
         ],
         points: [
-          'Tema de alta intención.',
+          'Tema de alta intencion.',
           'Audiencia con problema definido.',
-          'Oferta con replay o continuidad.',
+          'Oferta con continuidad clara.',
         ],
       },
       {
-        heading: 'La grabación como beneficio, no como producto aparte',
+        heading: 'La continuidad como beneficio del evento',
         paragraphs: [
-          'Si el evento ya demostró demanda, la grabación es un beneficio para quienes asistieron o compraron acceso.',
-          'Eso aumenta el valor percibido del evento original sin fragmentar el catálogo.',
+          'Si el evento ya demostro demanda, la continuidad del acceso puede reforzar el valor para quienes asistieron o compraron.',
+          'Eso aumenta el valor percibido del evento original sin fragmentar el catalogo.',
         ],
       },
     ],
@@ -114,15 +114,15 @@ const blogPosts: BlogPost[] = [
   },
   {
     slug: 'membresia-que-retiene-y-no-cannibaliza',
-    title: 'La membresía correcta no compite con tu catálogo: lo vuelve más rentable',
+    title: 'La membresia correcta no compite con tu catalogo: lo vuelve mas rentable',
     description:
-      'Cómo diseñar beneficios, descuentos y accesos para que la membresía retenga sin reemplazar eventos o formaciones.',
+      'Como disenar beneficios, descuentos y accesos para que la membresia retenga sin reemplazar eventos o formaciones.',
     excerpt:
-      'La membresía funciona mejor cuando es continuidad, no atajo: acceso preferencial, ahorro y comunidad sin borrar el valor del catálogo individual.',
+      'La membresia funciona mejor cuando es continuidad, no atajo: acceso preferencial, ahorro y comunidad sin borrar el valor del catalogo individual.',
     publishedAt: '2026-03-24',
     updatedAt: '2026-03-24',
     readTime: '7 min',
-    category: 'Membresías',
+    category: 'Membresias',
     featured: true,
     tags: ['membresia', 'retencion', 'LTV', 'beneficios'],
     canonicalFocus: ['academia', 'eventos'],
@@ -131,36 +131,36 @@ const blogPosts: BlogPost[] = [
       canonicalAssetLinks.eventos,
     ],
     intro:
-      'La membresía debe resolver una pregunta simple: ¿por qué quedarse aquí cuando el usuario ya recibió valor de un evento o formación?',
+      'La membresia debe resolver una pregunta simple: por que quedarse aqui cuando el usuario ya recibio valor de un evento o formacion?',
     sections: [
       {
         heading: 'No la uses como sustituto',
         paragraphs: [
-          'Si la membresía intenta incluirlo todo sin límites, se vuelve un descuento permanente y termina debilitando la percepción del catálogo.',
-          'En cambio, si ofrece continuidad, beneficios y acceso preferente, eleva el valor de todo lo demás.',
+          'Si la membresia intenta incluirlo todo sin limites, se vuelve un descuento permanente y termina debilitando la percepcion del catalogo.',
+          'En cambio, si ofrece continuidad, beneficios y acceso preferente, eleva el valor de todo lo demas.',
         ],
       },
       {
-        heading: 'Sí debe crear hábitos de consumo',
+        heading: 'Si debe crear habitos de consumo',
         paragraphs: [
-          'Los mejores programas de membresía invitan a volver: nuevos eventos, nuevas formaciones y ventajas prácticas.',
+          'Los mejores programas de membresia invitan a volver: nuevos eventos, nuevas formaciones y ventajas practicas.',
           'El usuario paga por seguir avanzando, no solo por "tener acceso".',
         ],
         points: [
-          'Replays extendidos.',
+          'Continuidad de acceso.',
           'Preventa o prioridad.',
           'Ahorro frente a compra individual.',
         ],
       },
       {
-        heading: 'El catálogo conserva el margen',
+        heading: 'El catalogo conserva el margen',
         paragraphs: [
-          'Si cada pieza conserva su landing y su lógica de valor, puedes vender por separado, agrupar o incluir sin destruir el resto de tu arquitectura comercial.',
+          'Si cada pieza conserva su landing y su logica de valor, puedes vender por separado, agrupar o incluir sin destruir el resto de tu arquitectura comercial.',
           'Ese equilibrio es el que hace escalable el sistema.',
         ],
       },
     ],
-    ctaLabel: 'Explorar catálogo',
+    ctaLabel: 'Explorar catalogo',
   },
 ]
 

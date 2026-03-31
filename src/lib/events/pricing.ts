@@ -1,6 +1,18 @@
 import type { Event, EventType } from '@/types/database'
+import { getSpecializationByCode } from '@/lib/specializations'
 
 export type NormalizedMemberAccessType = 'free' | 'discounted' | 'full_price'
+
+export type EventPricingContext = {
+    role?: string
+    membershipLevel?: number
+    hasActiveMembership?: boolean
+    membershipSpecializationCode?: string | null
+}
+
+type EventPricingEvent = Pick<Event, 'price' | 'member_price' | 'member_access_type'> & {
+    specialization_code?: string | null
+}
 
 export function normalizeMemberAccessType(value: unknown): NormalizedMemberAccessType {
     if (value === 'free' || value === 'discounted' || value === 'full_price') {
@@ -18,15 +30,48 @@ export function normalizeMemberAccessType(value: unknown): NormalizedMemberAcces
     return 'free'
 }
 
-export function getEventMemberAccessMessage(event: Pick<Event, 'price' | 'member_price' | 'member_access_type'>) {
+export function isEventIncludedForMatchingSpecialization(
+    event: { specialization_code?: string | null },
+    context?: EventPricingContext | null
+) {
+    if (!event.specialization_code) return false
+    if (!context?.hasActiveMembership) return false
+    if ((context.membershipLevel ?? 0) < 2) return false
+
+    return context.membershipSpecializationCode === event.specialization_code
+}
+
+export function getEventMemberAccessMessage(event: EventPricingEvent) {
     const publicPrice = Number(event.price || 0)
     const memberPrice = Number(event.member_price ?? publicPrice)
     const accessType = normalizeMemberAccessType(event.member_access_type)
+    const specialization = getSpecializationByCode(event.specialization_code)
 
     if (publicPrice <= 0) {
         return {
             label: 'Gratis',
             note: null as string | null,
+        }
+    }
+
+    if (specialization) {
+        if (accessType === 'free') {
+            return {
+                label: `Incluido en ${specialization.name} Nivel 2+`,
+                note: `Miembros activos de Nivel 2 o superior en ${specialization.name} acceden sin costo. El resto de miembros activos tambien accede sin costo y el publico general paga $${publicPrice.toFixed(2)} MXN.`,
+            }
+        }
+
+        if (accessType === 'discounted') {
+            return {
+                label: `Incluido en ${specialization.name} Nivel 2+`,
+                note: `Miembros activos de Nivel 2 o superior en ${specialization.name} acceden sin costo. Otros miembros activos pagan $${memberPrice.toFixed(2)} MXN y el publico general $${publicPrice.toFixed(2)} MXN.`,
+            }
+        }
+
+        return {
+            label: `Incluido en ${specialization.name} Nivel 2+`,
+            note: `Miembros activos de Nivel 2 o superior en ${specialization.name} acceden sin costo. Otros miembros activos y el publico general pagan $${publicPrice.toFixed(2)} MXN.`,
         }
     }
 
@@ -51,14 +96,27 @@ export function getEventMemberAccessMessage(event: Pick<Event, 'price' | 'member
 }
 
 export function getEffectiveEventPriceForMembership(
-    event: Pick<Event, 'price' | 'member_price' | 'member_access_type'>,
-    hasActiveMembership: boolean
+    event: EventPricingEvent,
+    membership: boolean | EventPricingContext
 ) {
+    const context =
+        typeof membership === 'object' && membership !== null
+            ? membership
+            : { hasActiveMembership: membership }
     const publicPrice = Number(event.price || 0)
     const memberPrice = event.member_price !== null && event.member_price !== undefined
         ? Number(event.member_price)
         : publicPrice
     const accessType = normalizeMemberAccessType(event.member_access_type)
+    const hasActiveMembership = Boolean(context.hasActiveMembership)
+
+    if (publicPrice <= 0) {
+        return 0
+    }
+
+    if (hasActiveMembership && isEventIncludedForMatchingSpecialization(event, context)) {
+        return 0
+    }
 
     if (hasActiveMembership) {
         switch (accessType) {
@@ -76,16 +134,23 @@ export function getEffectiveEventPriceForMembership(
 }
 
 export function getEffectiveEventPriceForProfile(
-    event: Pick<Event, 'price' | 'member_price' | 'member_access_type'>,
-    roleOrContext?: string | { role?: string; membershipLevel?: number; hasActiveMembership?: boolean },
+    event: EventPricingEvent,
+    roleOrContext?: string | EventPricingContext,
     membershipLevel = 0
 ) {
-    const hasActiveMembership =
+    const context =
         typeof roleOrContext === 'object' && roleOrContext !== null
-            ? (roleOrContext.hasActiveMembership ?? (roleOrContext.membershipLevel ?? 0) > 0)
-            : membershipLevel > 0
+            ? {
+                ...roleOrContext,
+                hasActiveMembership:
+                    roleOrContext.hasActiveMembership ?? (roleOrContext.membershipLevel ?? 0) > 0,
+            }
+            : {
+                membershipLevel,
+                hasActiveMembership: membershipLevel > 0,
+            }
 
-    return getEffectiveEventPriceForMembership(event, hasActiveMembership)
+    return getEffectiveEventPriceForMembership(event, context)
 }
 
 export function isPurchasableRecordingEvent(event: Pick<Event, 'status' | 'recording_url' | 'recording_expires_at' | 'event_type'>, now = new Date()) {

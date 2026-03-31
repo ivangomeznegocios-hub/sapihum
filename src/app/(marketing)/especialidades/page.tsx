@@ -92,7 +92,7 @@ export default function EspecialidadesIndexPage() {
             SAPIHUM está en constante expansión. Contáctanos si tu rama de la psicología aún no está representada.
           </p>
           <Link href="/auth/register">
-            <Button size="lg" className="h-12 px-8 bg-brand-yellow hover:bg-brand-yellow/90 text-black font-bold shadow-lg border-0">
+            <Button size="lg" className="h-12 px-8 font-bold shadow-lg">
               Crear mi cuenta
             </Button>
           </Link>

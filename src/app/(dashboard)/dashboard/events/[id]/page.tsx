@@ -8,7 +8,7 @@ import { getEventSpeakers } from '@/lib/supabase/queries/speakers'
 import { getResourcesByEvent } from '@/lib/supabase/queries/resources'
 import { redirect, notFound } from 'next/navigation'
 import Link from 'next/link'
-import { EventRegistrationButton, EditEventButton, DeleteEventButton } from '../event-forms'
+import { EventRegistrationButton, EditEventButton, DeleteEventButton, DuplicateEventButton } from '../event-forms'
 import { CheckoutButton } from '@/components/payments/CheckoutButton'
 import { AddToCalendarButton } from '@/components/add-to-calendar'
 import { InteractiveToolViewer } from '@/components/interactive-tool-viewer'
@@ -21,6 +21,7 @@ import {
     normalizeMemberAccessType,
 } from '@/lib/events/pricing'
 import { audienceAllowsAccess, getCommercialAccessContext, isCommunityReadOnlyViewer } from '@/lib/access/commercial'
+import { getSpecializationByCode } from '@/lib/specializations'
 import {
     Calendar,
     Clock,
@@ -168,11 +169,13 @@ export default async function EventDetailPage({ params }: PageProps) {
                 price: event.price,
                 member_price: event.member_price,
                 member_access_type: normalizeMemberAccessType(event.member_access_type),
+                specialization_code: event.specialization_code,
             },
             {
                 role: commercialAccess?.role ?? profile.role,
                 membershipLevel: commercialAccess?.membershipLevel ?? 0,
                 hasActiveMembership: commercialAccess?.hasActiveMembership ?? false,
+                membershipSpecializationCode: commercialAccess?.membershipSpecializationCode ?? null,
             }
         )
 
@@ -258,6 +261,8 @@ export default async function EventDetailPage({ params }: PageProps) {
         return audience?.map(a => labels[a] || a).join(', ') || 'Público'
     }
 
+    const eventSpecialization = getSpecializationByCode(event.specialization_code)
+
     return (
         <div className="space-y-8">
             {/* Header Actions */}
@@ -271,7 +276,8 @@ export default async function EventDetailPage({ params }: PageProps) {
                 </Link>
 
                 {(profile.role === 'admin' || profile.id === (event as any).created_by) && (
-                    <div className="flex gap-2">
+                    <div className="flex flex-wrap justify-end gap-2">
+                        <DuplicateEventButton eventId={event.id} />
                         <EditEventButton event={event} userRole={profile.role || ''} />
                         <DeleteEventButton eventId={event.id} />
                     </div>
@@ -702,14 +708,21 @@ export default async function EventDetailPage({ params }: PageProps) {
                         </CardHeader>
                         <CardContent className="space-y-4">
                             {/* Dual pricing display */}
-                            {normalizeMemberAccessType(event.member_access_type) === 'free' && event.price > 0 && (
+                            {eventSpecialization && event.price > 0 && (
+                                <div className="p-2 bg-brand-brown/10 rounded-lg border border-brand-brown/20 text-center">
+                                    <p className="text-sm font-medium text-brand-brown">
+                                        Incluido en {eventSpecialization.name} Nivel 2+
+                                    </p>
+                                </div>
+                            )}
+                            {!eventSpecialization && normalizeMemberAccessType(event.member_access_type) === 'free' && event.price > 0 && (
                                 <div className="p-2 bg-green-50 dark:bg-green-950 rounded-lg border border-green-200 dark:border-green-800 text-center">
                                     <p className="text-sm font-medium text-green-700 dark:text-green-300">
                                         ✨ Gratis para miembros
                                     </p>
                                 </div>
                             )}
-                            {normalizeMemberAccessType(event.member_access_type) === 'discounted' && (
+                            {!eventSpecialization && normalizeMemberAccessType(event.member_access_type) === 'discounted' && (
                                 <div className="p-2 bg-brand-yellow dark:bg-brand-yellow rounded-lg border border-brand-yellow dark:border-brand-yellow text-center">
                                     <p className="text-sm font-medium text-brand-yellow dark:text-brand-yellow">
                                         ✨ Miembros: ${event.member_price?.toFixed(2)} MXN

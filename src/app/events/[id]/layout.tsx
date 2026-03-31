@@ -1,6 +1,7 @@
 import { Metadata } from 'next'
 import { buildEventSeoDescription, getPublicEventPath } from '@/lib/events/public'
 import { getPublicEventById } from '@/lib/supabase/queries/events'
+import { brandName } from '@/lib/brand'
 
 interface LayoutProps {
     children: React.ReactNode
@@ -13,7 +14,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 
     if (!event) {
         return {
-            title: 'Evento no encontrado | Comunidad de Psicologia',
+            title: `Evento no encontrado | ${brandName}`,
         }
     }
 
@@ -21,7 +22,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
     const imageUrl = event.image_url || undefined
 
     return {
-        title: event.seo_title || `${event.title} | Comunidad de Psicologia`,
+        title: event.seo_title || `${event.title} | ${brandName}`,
         description,
         alternates: {
             canonical: getPublicEventPath(event),

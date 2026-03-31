@@ -1,13 +1,14 @@
 import Link from 'next/link'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { getUserProfile, createClient } from '@/lib/supabase/server'
-import { reconcileCompletedCheckoutSession } from '@/lib/payments'
-import { getPublicEventBySlug } from '@/lib/supabase/queries/events'
 import { ArrowRight, CheckCircle2, Mail, Play } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { reconcileCompletedCheckoutSession } from '@/lib/payments'
+import { createClient, getUserProfile } from '@/lib/supabase/server'
+import { getPublicEventBySlug } from '@/lib/supabase/queries/events'
+import { formatPageTitle } from '@/lib/brand'
 
 export const metadata = {
-    title: 'Compra confirmada | Comunidad PsicologÃ­a',
+    title: formatPageTitle('Compra confirmada'),
     robots: {
         index: false,
         follow: false,
@@ -65,15 +66,15 @@ export default async function PurchaseSuccessPage({ searchParams }: PageProps) {
                         <CardTitle className="text-3xl">Compra confirmada</CardTitle>
                         <CardDescription className="text-base">
                             {formation
-                                ? `Tu acceso al diplomado "${title}" ya quedÃ³ activo.`
-                                : `Tu pago se registrÃ³ correctamente. El acceso a "${title}" se libera en tu hub privado en cuanto confirmamos la compra.`}
+                                ? `Tu acceso al diplomado "${title}" ya quedo activo.`
+                                : `Tu pago se registro correctamente. El acceso a "${title}" se libera en tu hub privado en cuanto confirmamos la compra.`}
                         </CardDescription>
                     </div>
                 </CardHeader>
                 <CardContent className="space-y-4">
                     <div className="rounded-xl border border-border/70 bg-muted/30 p-4 text-sm text-muted-foreground">
                         {profile
-                            ? 'Ya tienes sesiÃ³n iniciada, asÃ­ que puedes entrar directo a tus accesos.'
+                            ? 'Ya tienes sesion iniciada, asi que puedes entrar directo a tus accesos.'
                             : 'Si compraste como invitado, usa el mismo correo para recuperar tu acceso con magic link.'}
                     </div>
 
@@ -86,7 +87,7 @@ export default async function PurchaseSuccessPage({ searchParams }: PageProps) {
                         </Button>
                         <Button asChild variant="outline" className="flex-1">
                             <Link href={publicPath}>
-                                Ver pÃ¡gina pÃºblica
+                                Ver pagina publica
                                 <ArrowRight className="ml-2 h-4 w-4" />
                             </Link>
                         </Button>

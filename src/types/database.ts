@@ -673,6 +673,7 @@ export interface Event {
     included_resources: string[] | null
     material_links: MaterialLink[] | null
     certificate_type: string | null
+    specialization_code: SpecializationCode | null
     formation_track: string | null
     formation_id: string | null
 }
@@ -716,6 +717,7 @@ export interface EventInsert {
     included_resources?: string[] | null
     material_links?: MaterialLink[] | null
     certificate_type?: string | null
+    specialization_code?: SpecializationCode | null
     formation_track?: string | null
     formation_id?: string | null
 }
@@ -755,6 +757,7 @@ export interface EventUpdate {
     included_resources?: string[] | null
     material_links?: MaterialLink[] | null
     certificate_type?: string | null
+    specialization_code?: SpecializationCode | null
     formation_track?: string | null
     formation_id?: string | null
 }

@@ -43,9 +43,8 @@ const NAV_ITEMS = [
   {
     label: "Academia",
     children: [
-      { label: "Explorar Catálogo", href: "/academia", description: "Todas las formaciones y eventos de SAPIHUM" },
-      { label: "Eventos en Vivo", href: "/eventos", description: "Conferencias, webinars y talleres" },
-      { label: "Nuestros Ponentes", href: "/speakers", description: "Directorio publico de expertos y facilitadores" },
+      { label: "Próximos Encuentros", href: "/academia", description: "Talleres, formaciones y sesiones en vivo" },
+      { label: "Nuestros Ponentes", href: "/speakers", description: "Directorio público de expertos y facilitadores" },
     ],
   },
   {
@@ -127,24 +126,24 @@ export function MarketingNavbar({ isLoggedIn }: MarketingNavbarProps) {
         <div className="flex items-center gap-2 sm:gap-3">
           {isLoggedIn ? (
             <Link href="/dashboard">
-              <Button size="sm" className="font-semibold bg-[#f6ae02] hover:bg-[#7a5602] text-black hover:text-white shadow-md shadow-[#f6ae02]/25 transition-all border-0" data-analytics-cta data-analytics-label="Ir al Dashboard" data-analytics-surface="marketing_nav" data-analytics-funnel="dashboard">
+              <Button size="sm" className="font-semibold" data-analytics-cta data-analytics-label="Ir al Dashboard" data-analytics-surface="marketing_nav" data-analytics-funnel="dashboard">
                 Ir al Dashboard
               </Button>
             </Link>
           ) : (
             <>
               <Link href="/auth/login" className="hidden sm:inline-flex">
-                <Button variant="ghost" size="sm" className="font-semibold" data-analytics-cta data-analytics-label="Iniciar Sesión" data-analytics-surface="marketing_nav" data-analytics-funnel="registration">
+                <Button variant="outline" size="sm" className="font-semibold" data-analytics-cta data-analytics-label="Iniciar Sesión" data-analytics-surface="marketing_nav" data-analytics-funnel="registration">
                   Iniciar Sesión
                 </Button>
               </Link>
               <Link href="/auth/register" className="hidden sm:inline-flex">
-                <Button size="sm" className="font-semibold bg-[#f6ae02] hover:bg-[#7a5602] text-black hover:text-white shadow-md shadow-[#f6ae02]/25 transition-all border-0" data-analytics-cta data-analytics-label="Comenzar" data-analytics-surface="marketing_nav" data-analytics-funnel="registration">
+                <Button size="sm" className="font-semibold" data-analytics-cta data-analytics-label="Comenzar" data-analytics-surface="marketing_nav" data-analytics-funnel="registration">
                   Comenzar
                 </Button>
               </Link>
               <Link href="/auth/register" className="sm:hidden">
-                <Button size="sm" className="font-semibold bg-[#f6ae02] hover:bg-[#7a5602] text-black hover:text-white shadow-md shadow-[#f6ae02]/25 transition-all border-0" data-analytics-cta data-analytics-label="Unirme" data-analytics-surface="marketing_nav" data-analytics-funnel="registration">
+                <Button size="sm" className="font-semibold" data-analytics-cta data-analytics-label="Unirme" data-analytics-surface="marketing_nav" data-analytics-funnel="registration">
                   Unirme
                 </Button>
               </Link>
@@ -208,7 +207,7 @@ export function MarketingNavbar({ isLoggedIn }: MarketingNavbarProps) {
                 <Button variant="outline" className="w-full mb-2 font-semibold" data-analytics-cta data-analytics-label="Iniciar Sesión" data-analytics-surface="marketing_nav_mobile" data-analytics-funnel="registration">Iniciar Sesión</Button>
               </Link>
               <Link href="/auth/register" onClick={() => setMobileOpen(false)}>
-                <Button className="w-full bg-[#f6ae02] hover:bg-[#7a5602] text-black hover:text-white font-semibold" data-analytics-cta data-analytics-label="Comenzar" data-analytics-surface="marketing_nav_mobile" data-analytics-funnel="registration">Comenzar</Button>
+                <Button className="w-full font-semibold" data-analytics-cta data-analytics-label="Comenzar" data-analytics-surface="marketing_nav_mobile" data-analytics-funnel="registration">Comenzar</Button>
               </Link>
             </div>
           )}

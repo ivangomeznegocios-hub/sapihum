@@ -259,7 +259,7 @@ export default async function ResourcesPage({
 
         if (creators) {
             for (const c of creators) {
-                creatorMap[c.id] = c.role === 'admin' ? 'Comunidad de Psicología' : (c.full_name || 'Ponente')
+                creatorMap[c.id] = c.role === 'admin' ? 'SAPIHUM' : (c.full_name || 'Ponente')
             }
         }
     }

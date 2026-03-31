@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
+import { brandName } from '@/lib/brand'
 
 export default function LoginPage() {
     return (
@@ -59,8 +60,8 @@ function LoginForm() {
     return (
         <Card className="border-border/50 shadow-xl">
             <CardHeader className="space-y-1 text-center">
-                <div className="flex justify-center mb-4">
-                    <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
+                <div className="mb-4 flex justify-center">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
                         <svg
                             className="h-6 w-6 text-primary"
                             fill="none"
@@ -78,13 +79,13 @@ function LoginForm() {
                 </div>
                 <CardTitle className="text-2xl font-bold">Bienvenido</CardTitle>
                 <CardDescription>
-                    Ingresa a tu cuenta de Comunidad Psicología
+                    Ingresa a tu cuenta de {brandName}
                 </CardDescription>
             </CardHeader>
             <form onSubmit={handleLogin}>
                 <CardContent className="space-y-4">
                     {error && (
-                        <div className="p-3 rounded-md bg-destructive/10 text-destructive text-sm">
+                        <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
                             {error}
                         </div>
                     )}
@@ -115,12 +116,12 @@ function LoginForm() {
                     <Button type="submit" className="w-full" disabled={loading}>
                         {loading ? 'Iniciando sesión...' : 'Iniciar sesión'}
                     </Button>
-                    <Link href="/auth/forgot-password" className="text-sm text-muted-foreground hover:text-primary transition-colors text-center">
+                    <Link href="/auth/forgot-password" className="text-center text-sm text-muted-foreground transition-colors hover:text-primary">
                         ¿Olvidaste tu contraseña?
                     </Link>
-                    <p className="text-sm text-muted-foreground text-center">
+                    <p className="text-center text-sm text-muted-foreground">
                         ¿No tienes cuenta?{' '}
-                        <Link href={`/auth/register?next=${encodeURIComponent(nextPath)}`} className="text-primary hover:underline font-medium">
+                        <Link href={`/auth/register?next=${encodeURIComponent(nextPath)}`} className="font-medium text-primary hover:underline">
                             Regístrate
                         </Link>
                     </p>

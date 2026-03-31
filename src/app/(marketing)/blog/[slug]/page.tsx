@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { ArrowRight, CalendarDays, Tag } from 'lucide-react'
 import { getBlogPostBySlug, getBlogPosts } from '@/lib/blog/posts'
+import { brandName, formatPageTitle } from '@/lib/brand'
 
 type PageProps = {
   params: Promise<{ slug: string }>
@@ -18,12 +19,12 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   if (!post) {
     return {
-      title: 'Articulo no encontrado | Comunidad de Psicologia',
+      title: formatPageTitle('Artículo no encontrado'),
     }
   }
 
   return {
-    title: `${post.title} | Blog | Comunidad de Psicologia`,
+    title: `${post.title} | Blog | ${brandName}`,
     description: post.description,
     alternates: {
       canonical: `/blog/${post.slug}`,

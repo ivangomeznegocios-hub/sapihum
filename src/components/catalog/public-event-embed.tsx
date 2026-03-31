@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation'
 import { getAppUrl } from '@/lib/config/app-url'
 import { getPublicEventPath } from '@/lib/events/public'
+import { getSpecializationByCode } from '@/lib/specializations'
 
 function formatDate(dateStr: string) {
     return new Intl.DateTimeFormat('es-MX', {
@@ -19,6 +20,7 @@ export function PublicEventEmbed({ event }: { event: any }) {
 
     const isFree = Number(event.price || 0) === 0
     const isPast = event.status === 'completed'
+    const specialization = getSpecializationByCode(event.specialization_code)
     const baseUrl = getAppUrl()
     const eventUrl = `${baseUrl}${getPublicEventPath(event)}`
 
@@ -136,10 +138,21 @@ export function PublicEventEmbed({ event }: { event: any }) {
                         <div className="price-row">
                             <div>
                                 <div className="price">{isFree ? 'Gratis' : `$${Number(event.price || 0).toFixed(2)} MXN`}</div>
-                                {event.member_access_type === 'free' && !isFree && (
+                                {specialization && !isFree && (
+                                    <>
+                                        <div className="member-price">Incluido en {specialization.name} Nivel 2+</div>
+                                        {event.member_access_type === 'discounted' && (
+                                            <div className="member-price">Otros miembros: ${Number(event.member_price || 0).toFixed(2)} MXN</div>
+                                        )}
+                                        {event.member_access_type === 'free' && (
+                                            <div className="member-price">Otros miembros: gratis</div>
+                                        )}
+                                    </>
+                                )}
+                                {!specialization && event.member_access_type === 'free' && !isFree && (
                                     <div className="member-price">Gratis para miembros</div>
                                 )}
-                                {event.member_access_type === 'discounted' && (
+                                {!specialization && event.member_access_type === 'discounted' && (
                                     <div className="member-price">Miembros: ${Number(event.member_price || 0).toFixed(2)} MXN</div>
                                 )}
                             </div>
@@ -149,11 +162,11 @@ export function PublicEventEmbed({ event }: { event: any }) {
                         </div>
                         {!isPast && (
                             <a href={eventUrl} target="_blank" rel="noopener noreferrer" className="btn">
-                                Ver activo →
+                                Ver en SAPIHUM →
                             </a>
                         )}
                     </div>
-                    <div className="powered">Comunidad de Psicología</div>
+                    <div className="powered">SAPIHUM</div>
                 </div>
             </body>
         </html>

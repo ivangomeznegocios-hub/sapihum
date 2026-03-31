@@ -1,16 +1,18 @@
 import type { Metadata, Viewport } from 'next'
-import { Montserrat } from 'next/font/google'
+import { Manrope } from 'next/font/google'
 import { Suspense } from 'react'
 import { ThemeProvider } from '@/components/theme-provider'
 import { OneSignalSetup } from '@/components/providers/onesignal-provider'
 import { AnalyticsProvider } from '@/components/providers/analytics-provider'
 import { CookieConsentBanner } from '@/components/gdpr/cookie-consent-banner'
+import { DataLayerProvider } from '@/components/providers/data-layer-provider'
+import { brandFullName, brandName, brandShortDescription } from '@/lib/brand'
 import './globals.css'
 
-const montserrat = Montserrat({
-    variable: '--font-montserrat',
+const manrope = Manrope({
+    variable: '--font-manrope',
     subsets: ['latin'],
-    weight: ['400', '600', '700'],
+    weight: ['400', '500', '600', '700', '800'],
 })
 
 export const viewport: Viewport = {
@@ -18,19 +20,17 @@ export const viewport: Viewport = {
 }
 
 export const metadata: Metadata = {
-    title: 'SAPIHUM | Psicología Avanzada e Investigación Humana',
-    description: 'Plataforma integral para profesionales de la psicología. Formación especializada, herramientas clínicas digitales e investigación aplicada.',
+    title: brandFullName,
+    description: brandShortDescription,
     appleWebApp: {
         capable: true,
-        statusBarStyle: 'default',
-        title: 'SAPIHUM',
+        statusBarStyle: 'black-translucent',
+        title: brandName,
     },
     formatDetection: {
         telephone: false,
     },
 }
-
-import { DataLayerProvider } from '@/components/providers/data-layer-provider'
 
 export default function RootLayout({
     children,
@@ -39,12 +39,12 @@ export default function RootLayout({
 }>) {
     return (
         <html lang="es" suppressHydrationWarning>
-            <body className={`${montserrat.variable} antialiased`}>
+            <body className={`${manrope.variable} antialiased`}>
                 <DataLayerProvider />
                 <ThemeProvider
                     attribute="class"
                     defaultTheme="dark"
-                    enableSystem
+                    enableSystem={false}
                     disableTransitionOnChange
                 >
                     <Suspense fallback={null}>

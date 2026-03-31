@@ -1,176 +1,189 @@
 'use client'
 
-import { useState, useMemo } from 'react'
-import { PublicCatalogCard } from './public-catalog-card'
+import { useMemo, useState } from 'react'
 import { Search, SlidersHorizontal, X } from 'lucide-react'
+import { PublicCatalogCard } from './public-catalog-card'
 
-type FilterTag = 'all' | 'live' | 'course' | 'presencial'
-
-const TYPE_FILTERS: { value: FilterTag; label: string; icon: string }[] = [
-    { value: 'all', label: 'Todos', icon: '✨' },
-    { value: 'live', label: 'En Vivo', icon: '🟢' },
-    { value: 'course', label: 'Formaciones', icon: '📚' },
-    { value: 'presencial', label: 'Presencial', icon: '📍' },
-]
-
-const CATEGORY_FILTERS = [
-    { value: 'all', label: 'Todas las áreas' },
-    { value: 'clinical', label: 'Escuela Clínica' },
-    { value: 'networking', label: 'Networking / Social' },
-    { value: 'business', label: 'Negocios' },
+const AREA_FILTERS = [
+    { value: 'all', label: 'Todas las areas' },
+    { value: 'clinical', label: 'Escuela Clinica' },
+    { value: 'networking', label: 'Networking y Comunidad' },
+    { value: 'business', label: 'Negocios y Marketing' },
     { value: 'general', label: 'General' },
-]
+] as const
 
-export function AcademiaCatalog({ events }: { events: any[] }) {
-    const [typeFilter, setTypeFilter] = useState<FilterTag>('all')
-    const [categoryFilter, setCategoryFilter] = useState('all')
+const FORMAT_FILTERS = [
+    { value: 'all', label: 'Todos los formatos' },
+    { value: 'taller', label: 'Taller / Masterclass' },
+    { value: 'curso', label: 'Curso' },
+    { value: 'diplomado', label: 'Diplomado' },
+    { value: 'conferencia', label: 'Conferencia' },
+    { value: 'seminario', label: 'Seminario' },
+    { value: 'congreso', label: 'Congreso' },
+    { value: 'meetup', label: 'Meetup' },
+    { value: 'presencial', label: 'Presencial' },
+] as const
+
+interface AcademiaCatalogProps {
+    events: any[]
+}
+
+export function AcademiaCatalog({ events }: AcademiaCatalogProps) {
+    const [areaFilter, setAreaFilter] = useState<string>('all')
+    const [formatFilter, setFormatFilter] = useState<string>('all')
     const [searchQuery, setSearchQuery] = useState('')
     const [showFilters, setShowFilters] = useState(false)
 
-    const filtered = useMemo(() => {
+    const filteredEvents = useMemo(() => {
         return events.filter((event) => {
-            // Type filter
-            if (typeFilter !== 'all') {
-                if (event.event_type !== typeFilter) return false
+            if (areaFilter !== 'all' && event.category !== areaFilter) return false
+
+            if (formatFilter !== 'all') {
+                if (formatFilter === 'presencial') {
+                    if (event.event_type !== 'presencial') return false
+                } else if (event.subcategory !== formatFilter) {
+                    return false
+                }
             }
 
-            // Category filter
-            if (categoryFilter !== 'all' && event.category !== categoryFilter) return false
-
-            // Search
             if (searchQuery.trim()) {
-                const q = searchQuery.toLowerCase()
+                const query = searchQuery.toLowerCase()
                 const title = (event.title || '').toLowerCase()
-                const desc = (event.description || '').toLowerCase()
+                const description = (event.description || '').toLowerCase()
                 const subtitle = (event.subtitle || '').toLowerCase()
                 const speakerName = event.speakers?.[0]?.speaker?.profile?.full_name?.toLowerCase() || ''
-                if (!title.includes(q) && !desc.includes(q) && !subtitle.includes(q) && !speakerName.includes(q)) {
+
+                if (
+                    !title.includes(query) &&
+                    !description.includes(query) &&
+                    !subtitle.includes(query) &&
+                    !speakerName.includes(query)
+                ) {
                     return false
                 }
             }
 
             return true
         })
-    }, [events, typeFilter, categoryFilter, searchQuery])
+    }, [events, areaFilter, formatFilter, searchQuery])
 
-    const hasActiveFilters = typeFilter !== 'all' || categoryFilter !== 'all' || searchQuery.trim() !== ''
-
-    // Stats
-    const upcomingCount = events.filter(e => e.status === 'upcoming' || e.status === 'live').length
-    const liveCount = events.filter(e => e.status === 'live').length
+    const hasActiveFilters =
+        areaFilter !== 'all' || formatFilter !== 'all' || searchQuery.trim() !== ''
+    const liveCount = events.filter((event) => event.status === 'live').length
 
     function clearAllFilters() {
-        setTypeFilter('all')
-        setCategoryFilter('all')
+        setAreaFilter('all')
+        setFormatFilter('all')
         setSearchQuery('')
     }
 
     return (
-        <div className="space-y-8">
-            {/* Live indicator */}
-            {(upcomingCount > 0 || liveCount > 0) && (
+        <div className="space-y-10">
+            {(events.length > 0 || liveCount > 0) && (
                 <div className="flex flex-wrap gap-3">
                     {liveCount > 0 && (
-                        <div className="inline-flex items-center gap-2 rounded-full border border-red-500/20 bg-red-500/10 px-4 py-2 text-sm font-semibold text-red-600 dark:text-red-400 animate-pulse">
+                        <div className="inline-flex items-center gap-2 rounded-full border border-red-500/20 bg-red-500/10 px-4 py-2 text-sm font-semibold text-red-200 animate-pulse">
                             <span className="relative flex h-2.5 w-2.5">
-                                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-500 opacity-75" />
-                                <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-red-500" />
+                                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-400 opacity-75" />
+                                <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-red-400" />
                             </span>
                             {liveCount} en vivo ahora
                         </div>
                     )}
-                    {upcomingCount > 0 && (
-                        <div className="inline-flex items-center gap-2 rounded-full border border-brand-yellow/20 bg-brand-yellow/10 px-4 py-2 text-sm font-semibold text-brand-yellow dark:text-brand-yellow">
+
+                    {events.length > 0 && (
+                        <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-4 py-2 text-sm font-semibold text-primary">
                             <span className="relative flex h-2 w-2">
-                                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-brand-yellow opacity-75" />
-                                <span className="relative inline-flex h-2 w-2 rounded-full bg-brand-yellow" />
+                                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75" />
+                                <span className="relative inline-flex h-2 w-2 rounded-full bg-primary" />
                             </span>
-                            {upcomingCount} evento{upcomingCount !== 1 ? 's' : ''} próximo{upcomingCount !== 1 ? 's' : ''}
+                            {events.length} encuentro{events.length !== 1 ? 's' : ''} publico{events.length !== 1 ? 's' : ''}
                         </div>
                     )}
                 </div>
             )}
 
-            {/* Search + Filter Toggle */}
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
                 <div className="relative flex-1">
-                    <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                     <input
                         type="text"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        placeholder="Buscar por título, ponente o tema..."
-                        className="w-full rounded-xl border border-border/60 bg-card pl-10 pr-10 py-3 text-sm outline-none transition-all focus:border-brand-yellow focus:ring-2 focus:ring-brand-yellow/20 placeholder:text-muted-foreground/60"
+                        placeholder="Buscar por titulo, ponente o tema..."
+                        className="w-full rounded-xl border border-border/60 bg-card py-3 pl-10 pr-10 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20 placeholder:text-muted-foreground/60"
                     />
                     {searchQuery && (
                         <button
                             onClick={() => setSearchQuery('')}
-                            className="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded-full hover:bg-muted transition-colors"
+                            className="absolute right-3 top-1/2 rounded-full p-1 -translate-y-1/2 transition-colors hover:bg-muted"
                         >
                             <X className="h-3.5 w-3.5 text-muted-foreground" />
                         </button>
                     )}
                 </div>
+
                 <button
                     onClick={() => setShowFilters(!showFilters)}
-                    className={`inline-flex items-center gap-2 rounded-xl border px-4 py-3 text-sm font-medium transition-all shrink-0 ${showFilters ? 'border-brand-yellow bg-brand-yellow/10 text-brand-yellow dark:text-brand-yellow' : 'border-border/60 hover:bg-muted'}`}
+                    className={`inline-flex shrink-0 items-center gap-2 rounded-xl border px-4 py-3 text-sm font-semibold transition-all ${
+                        showFilters
+                            ? 'border-primary/20 bg-primary/10 text-primary'
+                            : 'border-border/60 text-foreground/80 hover:border-primary/30 hover:bg-white/[0.05] hover:text-foreground'
+                    }`}
                 >
                     <SlidersHorizontal className="h-4 w-4" />
                     Filtros
-                    {hasActiveFilters && (
-                        <span className="h-2 w-2 rounded-full bg-brand-yellow" />
-                    )}
+                    {hasActiveFilters && <span className="h-2 w-2 rounded-full bg-primary" />}
                 </button>
             </div>
 
-            {/* Type Filter Chips */}
             <div className="flex flex-wrap gap-2">
-                {TYPE_FILTERS.map(filter => {
-                    const isActive = typeFilter === filter.value
+                {AREA_FILTERS.map((filter) => {
+                    const isActive = areaFilter === filter.value
+
                     return (
                         <button
                             key={filter.value}
-                            onClick={() => setTypeFilter(filter.value)}
-                            className={`inline-flex items-center gap-1.5 rounded-full px-4 py-2.5 text-sm font-medium transition-all duration-200 ${
+                            onClick={() => setAreaFilter(filter.value)}
+                            className={`inline-flex items-center rounded-full px-4 py-2.5 text-sm font-semibold tracking-[0.01em] transition-all duration-200 ${
                                 isActive
-                                    ? 'bg-gradient-to-r from-brand-yellow to-brand-dark text-white shadow-lg shadow-brand-yellow/20 scale-[1.03]'
-                                    : 'border border-border/60 bg-card hover:bg-muted hover:border-brand-yellow/30 hover:shadow-sm'
+                                    ? 'scale-[1.03] border border-primary/20 bg-primary text-primary-foreground shadow-[0_14px_32px_rgba(246,174,2,0.16)]'
+                                    : 'border border-white/12 bg-white/[0.03] text-foreground/80 hover:border-primary/30 hover:bg-white/[0.05] hover:text-foreground'
                             }`}
                         >
-                            <span>{filter.icon}</span>
                             {filter.label}
                         </button>
                     )
                 })}
             </div>
 
-            {/* Advanced Filters Panel */}
             {showFilters && (
-                <div className="rounded-2xl border border-border/60 bg-card/80 backdrop-blur-sm p-5 space-y-4 animate-in slide-in-from-top-2 duration-200 shadow-sm">
+                <div className="space-y-4 rounded-2xl border border-border/60 bg-card/80 p-5 shadow-sm backdrop-blur-sm">
                     <div>
-                        <label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2 block">
-                            Área temática
+                        <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                            Formato del encuentro
                         </label>
                         <div className="flex flex-wrap gap-2">
-                            {CATEGORY_FILTERS.map(opt => (
+                            {FORMAT_FILTERS.map((option) => (
                                 <button
-                                    key={opt.value}
-                                    onClick={() => setCategoryFilter(opt.value)}
+                                    key={option.value}
+                                    onClick={() => setFormatFilter(option.value)}
                                     className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-all ${
-                                        categoryFilter === opt.value
-                                            ? 'bg-brand-yellow text-white'
-                                            : 'bg-muted/50 hover:bg-muted text-muted-foreground hover:text-foreground'
+                                        formatFilter === option.value
+                                            ? 'border border-primary/20 bg-primary text-primary-foreground'
+                                            : 'border border-white/10 bg-white/[0.03] text-muted-foreground hover:bg-white/[0.05] hover:text-foreground'
                                     }`}
                                 >
-                                    {opt.label}
+                                    {option.label}
                                 </button>
                             ))}
                         </div>
                     </div>
+
                     {hasActiveFilters && (
                         <button
                             onClick={clearAllFilters}
-                            className="text-xs font-medium text-brand-brown hover:text-brand-brown transition-colors flex items-center gap-1"
+                            className="flex items-center gap-1 text-xs font-medium text-primary transition-colors hover:text-foreground"
                         >
                             <X className="h-3 w-3" />
                             Limpiar todos los filtros
@@ -179,53 +192,55 @@ export function AcademiaCatalog({ events }: { events: any[] }) {
                 </div>
             )}
 
-            {/* Results Count */}
             <div className="flex items-center justify-between pt-1">
                 <p className="text-sm text-muted-foreground">
-                    <span className="font-semibold text-foreground">{filtered.length}</span>{' '}
-                    {filtered.length === 1 ? 'evento encontrado' : 'eventos encontrados'}
-                    {hasActiveFilters && <span className="text-muted-foreground/60"> de {events.length} en total</span>}
+                    <span className="font-semibold text-foreground">{filteredEvents.length}</span>{' '}
+                    {filteredEvents.length === 1 ? 'resultado' : 'resultados'}
+                    {hasActiveFilters && (
+                        <span className="text-muted-foreground/60"> de {events.length} en total</span>
+                    )}
                 </p>
+
                 {hasActiveFilters && (
                     <button
                         onClick={clearAllFilters}
-                        className="text-xs font-medium text-brand-yellow hover:text-brand-yellow transition-colors"
+                        className="text-xs font-medium text-primary transition-colors hover:text-foreground"
                     >
                         Limpiar filtros
                     </button>
                 )}
             </div>
 
-            {/* Events Grid */}
-            {filtered.length > 0 ? (
-                <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
-                    {filtered.map((event, i) => (
-                        <div
-                            key={event.id}
-                            className="animate-in fade-in-0 zoom-in-95 duration-300"
-                            style={{ animationDelay: `${Math.min(i * 50, 300)}ms` }}
-                        >
-                            <PublicCatalogCard event={event} />
-                        </div>
-                    ))}
-                </div>
+            {filteredEvents.length > 0 ? (
+                <section>
+                    <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+                        {filteredEvents.map((event, index) => (
+                            <div
+                                key={event.id}
+                                className="h-full animate-in fade-in-0 zoom-in-95 duration-300"
+                                style={{ animationDelay: `${Math.min(index * 50, 300)}ms` }}
+                            >
+                                <PublicCatalogCard event={event} hidePrice fixedLayout />
+                            </div>
+                        ))}
+                    </div>
+                </section>
             ) : (
                 <div className="rounded-3xl border-2 border-dashed border-border/40 bg-gradient-to-br from-muted/30 to-muted/10 px-6 py-20 text-center">
                     <div className="mx-auto max-w-sm space-y-4">
-                        <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-muted/60 text-3xl">
-                            🎓
+                        <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-sm font-semibold text-primary">
+                            S
                         </div>
                         <h2 className="text-xl font-bold">Sin resultados</h2>
-                        <p className="text-sm text-muted-foreground leading-relaxed">
+                        <p className="text-sm leading-relaxed text-muted-foreground">
                             {hasActiveFilters
-                                ? 'No encontramos eventos con esos filtros. Intenta con otra combinación.'
-                                : 'Estamos preparando nuevas formaciones. Vuelve pronto para explorar todo lo que tenemos.'
-                            }
+                                ? 'No encontramos eventos con esos filtros. Intenta con otra combinacion.'
+                                : 'Estamos preparando nuevas formaciones. Vuelve pronto para explorar todo lo que tenemos.'}
                         </p>
                         {hasActiveFilters && (
                             <button
                                 onClick={clearAllFilters}
-                                className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-brand-yellow to-brand-dark px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-brand-yellow/20 hover:shadow-brand-yellow/30 transition-all"
+                                className="mt-2 inline-flex items-center gap-1.5 rounded-full border border-primary/20 bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-[0_14px_32px_rgba(246,174,2,0.16)] transition-all hover:-translate-y-0.5 hover:bg-[#e7a103]"
                             >
                                 Limpiar filtros
                             </button>

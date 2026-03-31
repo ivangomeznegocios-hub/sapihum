@@ -80,7 +80,7 @@ export default function NosotrosPage() {
             La psicología no es solo una ciencia empírica, es una responsabilidad ética monumental. Descubre los pilares que rigen todo lo que construimos en SAPIHUM.
           </p>
           <Link href="/manifiesto">
-            <Button size="lg" className="h-14 px-8 text-base bg-brand-yellow hover:bg-brand-yellow/90 text-black font-bold shadow-lg sapihum-glow-cta">
+            <Button size="lg" className="h-14 px-8 text-base font-bold shadow-lg sapihum-glow-cta">
               Leer el Manifiesto SAPIHUM
             </Button>
           </Link>

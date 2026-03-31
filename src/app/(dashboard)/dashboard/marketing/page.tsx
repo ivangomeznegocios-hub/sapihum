@@ -28,11 +28,12 @@ import {
     type MarketingServiceKey,
 } from '@/lib/supabase/queries/marketing-services'
 import { BriefButton, ServiceInitializer } from './marketing-client'
+import { brandName } from '@/lib/brand'
 
 const supportWhatsAppUrl = process.env.NEXT_PUBLIC_SUPPORT_WHATSAPP_URL?.trim() || null
 
 export const metadata = {
-    title: 'Marketing Premium Hub | Comunidad Psicología',
+    title: `Marketing Premium Hub | ${brandName}`,
     description: 'Gestiona tus servicios de Marketing Premium',
 }
 

@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { registerForEvent, cancelEventRegistration, createEvent, updateEvent, deleteEvent } from './actions'
+import { registerForEvent, cancelEventRegistration, createEvent, updateEvent, deleteEvent, duplicateEvent } from './actions'
 import { createClient } from '@/lib/supabase/client'
 import { getPublicEventPath } from '@/lib/events/public'
 import { MaterialLinksEditor, type EditableMaterialLink } from '@/components/materials/material-links-editor'
@@ -22,6 +22,7 @@ import {
     zonedDateTimeToUtcIso,
 } from '@/lib/timezone'
 import { isValidMaterialLinkUrl } from '@/lib/material-links'
+import { getMembershipSpecializations } from '@/lib/specializations'
 import { Plus, X, Loader2, Check, UserPlus, UserMinus, Users, Lock, Globe, Stethoscope, Heart, Pencil, Trash2, AlertTriangle, GripVertical, Copy, Code2, Link2, Calendar, Clock, GraduationCap, Award, Mic2, ChevronDown } from 'lucide-react'
 
 interface Event {
@@ -311,6 +312,11 @@ const MEETING_PLATFORM_OPTIONS = [
     { value: 'zoom', label: 'Zoom' },
 ]
 
+const MEMBERSHIP_SPECIALIZATION_OPTIONS = getMembershipSpecializations().map((specialization) => ({
+    value: specialization.code,
+    label: specialization.name,
+}))
+
 function EditableList({
     label,
     helperText,
@@ -519,6 +525,7 @@ export function CreateEventForm({ onClose, isEmbedded = false, initialData, even
     const [eventType, setEventType] = useState(initialData?.event_type || 'live')
     const [memberAccessType, setMemberAccessType] = useState(initialData?.member_access_type || 'free')
     const [priceValue, setPriceValue] = useState(String(initialData?.price ?? 0))
+    const [selectedSpecializationCode, setSelectedSpecializationCode] = useState(initialData?.specialization_code || '')
     const [memberPriceValue, setMemberPriceValue] = useState(
         initialData?.member_price ? String(initialData.member_price) : ''
     )
@@ -577,6 +584,8 @@ export function CreateEventForm({ onClose, isEmbedded = false, initialData, even
     const statusPreview = isAdmin ? (initialData ? selectedStatus : 'upcoming') : 'draft'
     const numericPrice = Number.parseFloat(priceValue || '0') || 0
     const numericMemberPrice = Number.parseFloat(memberPriceValue || '0') || 0
+    const selectedSpecializationLabel =
+        MEMBERSHIP_SPECIALIZATION_OPTIONS.find((option) => option.value === selectedSpecializationCode)?.label ?? null
 
     // Speakers selection
     const [availableSpeakers, setAvailableSpeakers] = useState<{ id: string; name: string; avatar: string | null }[]>([])
@@ -629,6 +638,12 @@ export function CreateEventForm({ onClose, isEmbedded = false, initialData, even
     const memberAccessSummary =
         numericPrice <= 0
             ? 'Los miembros entran sin costo porque el evento es gratuito.'
+            : selectedSpecializationCode
+                ? memberAccessType === 'discounted'
+                    ? `${selectedSpecializationLabel || 'La especialidad seleccionada'} entra incluida con membresia activa Nivel 2+. Otros miembros pagan $${numericMemberPrice.toFixed(0)} MXN y publico ${summaryPrice}.`
+                    : memberAccessType === 'free'
+                        ? `${selectedSpecializationLabel || 'La especialidad seleccionada'} entra incluida con membresia activa Nivel 2+. El resto de miembros tambien entra sin costo y publico paga ${summaryPrice}.`
+                        : `${selectedSpecializationLabel || 'La especialidad seleccionada'} entra incluida con membresia activa Nivel 2+. Otros miembros y publico pagan ${summaryPrice}.`
             : memberAccessType === 'discounted'
                 ? `Miembros pagan $${numericMemberPrice.toFixed(0)} MXN.`
                 : memberAccessType === 'full_price'
@@ -1205,6 +1220,7 @@ export function CreateEventForm({ onClose, isEmbedded = false, initialData, even
         formData.set('idealFor', JSON.stringify(idealForItems.map((item) => item.value.trim()).filter(Boolean)))
         formData.set('learningOutcomes', JSON.stringify(learningOutcomeItems.map((item) => item.value.trim()).filter(Boolean)))
         formData.set('includedResources', JSON.stringify(includedResourceItems.map((item) => item.value.trim()).filter(Boolean)))
+        formData.set('specializationCode', selectedSpecializationCode)
 
         const invalidMaterialLink = materialLinkItems.find((item) => {
             const hasContent = item.title.trim() || item.url.trim()
@@ -1611,7 +1627,7 @@ export function CreateEventForm({ onClose, isEmbedded = false, initialData, even
 
                         <div>
                             <label className="text-sm font-medium" htmlFor="memberAccessType">
-                                Acceso para miembros
+                                {selectedSpecializationCode ? 'Acceso para otros miembros' : 'Acceso para miembros'}
                             </label>
                             <select
                                 id="memberAccessType"
@@ -1628,7 +1644,7 @@ export function CreateEventForm({ onClose, isEmbedded = false, initialData, even
 
                         <div>
                             <label className="text-sm font-medium" htmlFor="memberPrice">
-                                Precio miembros (MXN)
+                                {selectedSpecializationCode ? 'Precio otros miembros (MXN)' : 'Precio miembros (MXN)'}
                             </label>
                             <input
                                 id="memberPrice"
@@ -1641,6 +1657,29 @@ export function CreateEventForm({ onClose, isEmbedded = false, initialData, even
                                 className="mt-1 w-full rounded-lg border bg-background px-3 py-2 disabled:cursor-not-allowed disabled:opacity-60"
                                 placeholder={memberAccessType === 'discounted' && numericPrice > 0 ? 'Ej: 399' : 'Solo aplica con descuento'}
                             />
+                        </div>
+
+                        <div className="sm:col-span-2">
+                            <label className="text-sm font-medium" htmlFor="specializationCode">
+                                Especialidad incluida
+                            </label>
+                            <select
+                                id="specializationCode"
+                                name="specializationCode"
+                                value={selectedSpecializationCode}
+                                onChange={(e) => setSelectedSpecializationCode(e.target.value)}
+                                className="mt-1 w-full rounded-lg border bg-background px-3 py-2"
+                            >
+                                <option value="">Sin especialidad asignada</option>
+                                {MEMBERSHIP_SPECIALIZATION_OPTIONS.map((option) => (
+                                    <option key={option.value} value={option.value}>
+                                        {option.label}
+                                    </option>
+                                ))}
+                            </select>
+                            <p className="mt-1 text-xs text-muted-foreground">
+                                Si eliges una especialidad, los miembros activos Nivel 2 o superior de esa especialidad entran sin costo. Los demas miembros siguen el ajuste que definas arriba.
+                            </p>
                         </div>
                     </div>
 
@@ -1987,6 +2026,31 @@ export function DeleteEventButton({ eventId }: { eventId: string }) {
         <Button variant="destructive" size="sm" onClick={() => setShowConfirm(true)}>
             <Trash2 className="mr-2 h-4 w-4" />
             Eliminar
+        </Button>
+    )
+}
+
+export function DuplicateEventButton({ eventId }: { eventId: string }) {
+    const router = useRouter()
+    const [isLoading, setIsLoading] = useState(false)
+
+    async function handleDuplicate() {
+        setIsLoading(true)
+        const result = await duplicateEvent(eventId)
+
+        if (result.success && result.eventId) {
+            router.push(`/dashboard/events/${result.eventId}`)
+            return
+        }
+
+        alert(result.error || 'Error al duplicar evento')
+        setIsLoading(false)
+    }
+
+    return (
+        <Button variant="outline" size="sm" onClick={handleDuplicate} disabled={isLoading}>
+            {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Copy className="mr-2 h-4 w-4" />}
+            Duplicar
         </Button>
     )
 }

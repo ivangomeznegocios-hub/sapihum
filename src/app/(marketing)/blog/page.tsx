@@ -3,11 +3,12 @@ import Link from 'next/link'
 import { ArrowRight, BookOpen, CalendarDays, Sparkles } from 'lucide-react'
 import { getBlogPosts, getFeaturedBlogPosts } from '@/lib/blog/posts'
 import { getPublicCatalogDescription } from '@/lib/events/public'
+import { formatPageTitle } from '@/lib/brand'
 
 export const metadata: Metadata = {
-  title: 'Blog | Comunidad de Psicologia',
+  title: formatPageTitle('Blog'),
   description:
-    'Articulos editoriales que conectan eventos, cursos y grabaciones con una arquitectura comercial pensada para posicionar y convertir.',
+    'Articulos editoriales que conectan eventos, cursos y formaciones con una arquitectura comercial pensada para posicionar y convertir.',
 }
 
 export default function BlogPage() {
@@ -25,7 +26,7 @@ export default function BlogPage() {
           <div className="mt-5 grid gap-8 lg:grid-cols-[1.4fr_0.9fr] lg:items-end">
             <div className="space-y-5">
               <h1 className="max-w-3xl text-4xl font-semibold tracking-tight sm:text-5xl">
-                Blog para posicionar eventos, cursos y grabaciones como activos comerciales
+                Blog para posicionar eventos, cursos y formaciones como activos comerciales
               </h1>
               <p className="max-w-2xl text-base text-muted-foreground sm:text-lg">
                 El blog atrae, explica y deriva a las paginas canónicas del catálogo.
@@ -117,8 +118,8 @@ export default function BlogPage() {
                   <p className="mt-1 text-muted-foreground">Landing pages con promesa, temario y acceso privado.</p>
                 </div>
                 <div className="rounded-2xl bg-muted/40 p-4">
-                  <p className="font-medium">Grabaciones</p>
-                  <p className="mt-1 text-muted-foreground">Replays on-demand con vida comercial propia.</p>
+                  <p className="font-medium">Formaciones</p>
+                  <p className="mt-1 text-muted-foreground">Experiencias educativas con estructura, promesa y acceso claro.</p>
                 </div>
               </div>
             </div>

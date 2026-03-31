@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { PublicCatalogCard } from '@/components/catalog/public-catalog-card'
+import { splitPublicCatalogEvents } from '@/lib/events/public'
 import { getUnifiedCatalogEvents } from '@/lib/supabase/queries/events'
 
 export const metadata: Metadata = {
@@ -11,8 +12,7 @@ export const metadata: Metadata = {
 
 export default async function EventosPage() {
     const allItems = await getUnifiedCatalogEvents()
-    const items = allItems.filter((e: any) => 
-        (e.status === 'upcoming' || e.status === 'live') && 
+    const items = splitPublicCatalogEvents(allItems).upcoming.filter((e: any) =>
         e.event_type !== 'course' && 
         e.event_type !== 'on_demand'
     )

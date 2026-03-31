@@ -49,7 +49,7 @@ export function downloadIcsFile(event: Event) {
     const icsContent = [
         "BEGIN:VCALENDAR",
         "VERSION:2.0",
-        "PRODID:-//Comunidad Psicologia//Events//EN",
+        "PRODID:-//SAPIHUM//Events//EN",
         "BEGIN:VEVENT",
         `components:VEVENT`,
         `UID:${event.id}@comunidadpsicologia.com`,

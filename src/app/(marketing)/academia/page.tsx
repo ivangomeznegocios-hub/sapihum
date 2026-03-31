@@ -1,77 +1,80 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { Button } from '@/components/ui/button'
 import { AcademiaCatalog } from '@/components/catalog/academia-catalog'
+import { Button } from '@/components/ui/button'
+import { splitPublicCatalogEvents } from '@/lib/events/public'
+import { getSpecializationByCode } from '@/lib/specializations'
 import { getUnifiedCatalogEvents } from '@/lib/supabase/queries/events'
 
 export const metadata: Metadata = {
-    title: 'Academia SAPIHUM | Formación Continua en Psicología',
-    description: 'Explora el catálogo completo de formación continua: eventos en vivo, formaciones, talleres, supervisión clínica y más para profesionales de la psicología.',
+    title: 'Academia SAPIHUM | Formacion Continua en Psicologia',
+    description: 'Explora el catalogo completo de formacion continua: encuentros en vivo, talleres y supervision clinica para profesionales de la psicologia.',
     openGraph: {
-        title: 'Academia SAPIHUM | Formación Continua en Psicología',
-        description: 'Eventos en vivo, formaciones, talleres y supervisión clínica. Desarrollo profesional con respaldo científico.',
+        title: 'Academia SAPIHUM | Formacion Continua en Psicologia',
+        description: 'Encuentros en vivo, talleres y supervision clinica. Desarrollo profesional con respaldo cientifico.',
     },
 }
 
 export default async function AcademiaPage() {
     const allEvents = await getUnifiedCatalogEvents()
+    const { upcoming, past } = splitPublicCatalogEvents(allEvents)
 
-    const featuredEvent = allEvents.find(
-        (e: any) => (e.status === 'upcoming' || e.status === 'live') && e.image_url
-    ) || allEvents.find((e: any) => e.status === 'upcoming' || e.status === 'live')
-
-    const upcomingCount = allEvents.filter((e: any) => e.status === 'upcoming' || e.status === 'live').length
+    const featuredEvent = upcoming.find((event: any) => event.image_url) || upcoming[0]
 
     return (
-        <div className="flex flex-col items-center flex-1 w-full relative bg-background">
-            {/* ── HERO ── */}
-            <section className="w-full relative overflow-hidden bg-gradient-to-b from-[#0a0a0a] via-[#111111] to-background">
-                {/* Background effects */}
-                <div className="absolute inset-0 sapihum-grid-bg opacity-20" />
-                <div className="absolute left-1/4 top-0 h-[600px] w-[600px] rounded-full bg-brand-yellow/8 blur-[150px] pointer-events-none" />
-                <div className="absolute right-0 bottom-0 h-[400px] w-[400px] rounded-full bg-brand-brown/6 blur-[120px] pointer-events-none" />
+        <div className="relative flex w-full flex-1 flex-col items-center bg-background">
+            <section className="relative w-full overflow-hidden bg-gradient-to-b from-[#0a0a0a] via-[#111111] to-background">
+                <div className="sapihum-grid-bg pointer-events-none absolute inset-0 opacity-20" />
+                <div className="pointer-events-none absolute left-1/4 top-0 h-[600px] w-[600px] rounded-full bg-brand-yellow/8 blur-[150px]" />
+                <div className="pointer-events-none absolute bottom-0 right-0 h-[400px] w-[400px] rounded-full bg-brand-brown/6 blur-[120px]" />
 
-                <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-20 md:py-28">
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-                        {/* Text */}
+                <div className="relative z-10 mx-auto max-w-7xl px-4 py-20 sm:px-6 md:py-28 lg:px-8">
+                    <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-2">
                         <div className="flex flex-col">
-                            <div className="sapihum-fade-up mb-6 inline-flex items-center gap-2 rounded-full border border-brand-yellow/30 bg-brand-yellow/50 px-4 py-2 text-sm font-semibold text-brand-yellow w-fit backdrop-blur-sm">
+                            <div className="sapihum-fade-up mb-6 inline-flex w-fit items-center gap-2 rounded-full border border-brand-yellow/30 bg-brand-yellow/10 px-4 py-2 text-sm font-semibold text-brand-yellow backdrop-blur-sm">
                                 <span className="relative flex h-2 w-2">
                                     <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-brand-yellow opacity-75" />
                                     <span className="relative inline-flex h-2 w-2 rounded-full bg-brand-yellow" />
                                 </span>
-                                {upcomingCount > 0
-                                    ? `${upcomingCount} evento${upcomingCount !== 1 ? 's' : ''} activo${upcomingCount !== 1 ? 's' : ''}`
-                                    : 'Academia SAPIHUM'
-                                }
+                                {upcoming.length > 0
+                                    ? `${upcoming.length} encuentro${upcoming.length !== 1 ? 's' : ''} activo${upcoming.length !== 1 ? 's' : ''}`
+                                    : 'Academia SAPIHUM'}
                             </div>
 
-                            <h1 className="sapihum-fade-up text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-6 leading-[1.1] text-white" style={{ animationDelay: '0.1s' }}>
+                            <h1
+                                className="sapihum-fade-up mb-6 text-4xl font-bold leading-[1.1] tracking-tight text-white md:text-5xl lg:text-6xl"
+                                style={{ animationDelay: '0.1s' }}
+                            >
                                 Donde se forman los{' '}
-                                <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-yellow to-white">
-                                    mejores psicólogos
+                                <span className="relative inline-block">
+                                    <span className="pointer-events-none absolute inset-x-1 bottom-1 h-4 rounded-full bg-brand-yellow/20 blur-xl" />
+                                    <span className="relative bg-gradient-to-r from-[#f6ae02] via-[#ffd36a] to-[#fff3cf] bg-clip-text text-transparent drop-shadow-[0_10px_30px_rgba(246,174,2,0.28)]">
+                                        mejores psicologos
+                                    </span>
                                 </span>
                             </h1>
 
-                            <p className="sapihum-fade-up text-lg md:text-xl text-neutral-400/90 max-w-xl mb-10 leading-relaxed" style={{ animationDelay: '0.2s' }}>
-                                Eventos en vivo, formaciones clínicas, talleres y supervisión con los mejores profesionales de habla hispana.
+                            <p
+                                className="sapihum-fade-up mb-10 max-w-xl text-lg leading-relaxed text-neutral-400/90 md:text-xl"
+                                style={{ animationDelay: '0.2s' }}
+                            >
+                                Talleres, formaciones clinicas, supervision y networking con profesionales de habla hispana, todo en vivo.
                             </p>
 
                             <div className="sapihum-fade-up flex flex-wrap gap-3" style={{ animationDelay: '0.3s' }}>
                                 <a href="#catalogo">
-                                    <Button size="lg" className="h-12 px-7 text-sm shadow-xl bg-brand-yellow hover:bg-brand-yellow/90 text-black font-bold border-0 sapihum-glow-cta">
-                                        Explorar catálogo
+                                    <Button size="lg" className="sapihum-glow-cta h-12 px-7 text-sm font-bold shadow-xl">
+                                        Explorar catalogo
                                     </Button>
                                 </a>
                                 <Link href="/precios">
-                                    <Button size="lg" variant="outline" className="h-12 px-7 text-sm border-neutral-500/40 text-neutral-200 hover:bg-white/5 hover:text-white hover:border-brand-yellow/50 transition-all backdrop-blur-sm">
-                                        Ver Planes →
+                                    <Button size="lg" variant="outline" className="h-12 px-7 text-sm font-semibold backdrop-blur-sm">
+                                        Ver planes
                                     </Button>
                                 </Link>
                             </div>
                         </div>
 
-                        {/* Featured Event Card */}
                         {featuredEvent && (
                             <div className="sapihum-fade-up hidden lg:block" style={{ animationDelay: '0.25s' }}>
                                 <FeaturedEventCard event={featuredEvent} />
@@ -80,48 +83,48 @@ export default async function AcademiaPage() {
                     </div>
                 </div>
 
-                {/* Bottom fade */}
                 <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-background to-transparent" />
             </section>
 
-            {/* ── CATÁLOGO ── */}
-            <section id="catalogo" className="w-full py-16 md:py-20 px-4 sm:px-6 lg:px-8 scroll-mt-8">
+            <section id="catalogo" className="scroll-mt-8 w-full px-4 py-16 sm:px-6 md:py-20 lg:px-8">
                 <div className="mx-auto max-w-7xl">
                     <div className="mb-10">
-                        <h2 className="text-2xl md:text-3xl font-bold tracking-tight">
-                            Catálogo de Formación
-                        </h2>
-                        <p className="mt-2 text-muted-foreground max-w-2xl">
-                            Encuentra tu próximo evento. Filtra por tipo, área temática o busca por nombre.
+                        <h2 className="text-2xl font-bold tracking-tight md:text-3xl">Proximos Encuentros</h2>
+                        <p className="mt-2 max-w-2xl text-muted-foreground">
+                            Encuentra lo que viene en camino. Filtra por area tematica, formato o busca por nombre.
                         </p>
                     </div>
-                    <AcademiaCatalog events={allEvents} />
+                    <AcademiaCatalog events={upcoming} />
+
+                    {past.length > 0 && (
+                        <div className="mt-16 border-t border-border/60 pt-16">
+                            <div className="mb-10">
+                                <h2 className="text-2xl font-bold tracking-tight md:text-3xl">Eventos Pasados</h2>
+                            </div>
+                            <AcademiaCatalog events={past} />
+                        </div>
+                    )}
                 </div>
             </section>
 
-            {/* ── CTA BAND ── */}
-            <section className="w-full py-16 px-4">
-                <div className="max-w-4xl mx-auto relative overflow-hidden rounded-3xl shadow-2xl">
-                    {/* Background */}
+            <section className="w-full px-4 py-16">
+                <div className="relative mx-auto max-w-4xl overflow-hidden rounded-3xl shadow-2xl">
                     <div className="absolute inset-0 bg-gradient-to-br from-[#0a0a0a] via-[#111111] to-[#0a0a0a]" />
-                    <div className="absolute inset-0 sapihum-grid-bg opacity-20" />
+                    <div className="sapihum-grid-bg absolute inset-0 opacity-20" />
                     <div className="absolute -right-20 -top-20 h-48 w-48 rounded-full bg-brand-yellow/15 blur-3xl" />
-                    <div className="absolute -left-20 -bottom-20 h-48 w-48 rounded-full bg-brand-brown/10 blur-3xl" />
+                    <div className="absolute -bottom-20 -left-20 h-48 w-48 rounded-full bg-brand-brown/10 blur-3xl" />
 
-                    <div className="relative z-10 p-8 md:p-14 text-center text-white">
-                        <div className="mb-3 inline-flex items-center gap-1 rounded-full bg-brand-yellow/10 border border-brand-yellow/20 px-3 py-1 text-xs font-semibold text-brand-yellow">
-                            ✨ Beneficio de membresía
+                    <div className="relative z-10 p-8 text-center text-white md:p-14">
+                        <div className="mb-3 inline-flex items-center gap-1 rounded-full border border-brand-yellow/20 bg-brand-yellow/10 px-3 py-1 text-xs font-semibold text-brand-yellow">
+                            Beneficio de membresia
                         </div>
-                        <h3 className="text-2xl md:text-3xl font-bold mb-4">
-                            La Academia está incluida en tu membresía
-                        </h3>
-                        <p className="text-neutral-400/90 md:text-lg mb-8 max-w-2xl mx-auto leading-relaxed">
-                            Al suscribirte a SAPIHUM, obtienes acceso a eventos exclusivos, precios preferenciales
-                            y una comunidad de aprendizaje continuo.
+                        <h3 className="mb-4 text-2xl font-bold md:text-3xl">La Academia esta incluida en tu membresia</h3>
+                        <p className="mx-auto mb-8 max-w-2xl text-neutral-400/90 md:text-lg">
+                            Al suscribirte a SAPIHUM, obtienes acceso a encuentros exclusivos, precios preferenciales y una comunidad de aprendizaje continuo.
                         </p>
                         <Link href="/precios">
-                            <Button size="lg" className="h-13 px-8 text-base bg-white text-[#0a0a0a] hover:bg-neutral-100 border-0 font-bold shadow-xl">
-                                Ver Planes y Precios
+                            <Button size="lg" className="h-13 px-8 text-base font-bold shadow-xl">
+                                Ver planes y precios
                             </Button>
                         </Link>
                     </div>
@@ -131,70 +134,95 @@ export default async function AcademiaPage() {
     )
 }
 
-/* ──────────────────────────────────────
-   Featured Event Card (Server Component)
-   ────────────────────────────────────── */
 function FeaturedEventCard({ event }: { event: any }) {
     const price = Number(event.price || 0)
-    const dateStr = new Date(event.start_time).toLocaleDateString('es-MX', { weekday: 'long', day: 'numeric', month: 'long' })
-    const timeStr = new Date(event.start_time).toLocaleTimeString('es-MX', { hour: 'numeric', minute: '2-digit' })
+    const dateStr = new Date(event.start_time).toLocaleDateString('es-MX', {
+        weekday: 'long',
+        day: 'numeric',
+        month: 'long',
+    })
+    const timeStr = new Date(event.start_time).toLocaleTimeString('es-MX', {
+        hour: 'numeric',
+        minute: '2-digit',
+    })
     const speakerName = event.speakers?.[0]?.speaker?.profile?.full_name
     const speakerAvatar = event.speakers?.[0]?.speaker?.profile?.avatar_url
     const isLive = event.status === 'live'
+    const specialization = getSpecializationByCode(event.specialization_code)
 
-    const typeLabels: Record<string, string> = {
-        live: 'En Vivo',
-        course: 'Formación',
-        presencial: 'Presencial',
+    const subcategoryLabels: Record<string, string> = {
+        curso: 'Curso',
+        diplomado: 'Diplomado',
+        clase: 'Clase',
+        taller: 'Taller',
+        conferencia: 'Conferencia',
+        seminario: 'Seminario',
+        congreso: 'Congreso',
+        meetup: 'Meetup',
     }
 
+    const badgeLabel = isLive
+        ? 'En vivo'
+        : event.subcategory
+            ? subcategoryLabels[event.subcategory] || 'Encuentro'
+            : 'Encuentro'
+
     return (
-        <div className="relative rounded-2xl overflow-hidden border border-white/10 bg-white/[0.03] backdrop-blur-sm shadow-2xl group hover:border-brand-yellow/20 transition-all duration-500">
-            {/* Image */}
+        <div className="group relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] shadow-2xl backdrop-blur-sm transition-all duration-500 hover:border-brand-yellow/20">
             <div className="relative aspect-[16/9] overflow-hidden">
                 {event.image_url ? (
-                    <img src={event.image_url} alt={event.title} className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-700" />
+                    <img
+                        src={event.image_url}
+                        alt={event.title}
+                        className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                    />
                 ) : (
-                    <div className="h-full w-full bg-gradient-to-br from-brand-yellow/60 to-white/40 flex items-center justify-center">
-                        <span className="text-6xl opacity-20">🎓</span>
+                    <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-brand-yellow/60 to-white/40">
+                        <span className="text-6xl opacity-20">S</span>
                     </div>
                 )}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
 
-                {/* Badges */}
-                <div className="absolute top-3 left-3 flex items-center gap-2">
-                    <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[11px] font-bold text-white uppercase tracking-wide ${isLive ? 'bg-red-500 animate-pulse' : 'bg-gradient-to-r from-brand-yellow to-white'}`}>
+                <div className="absolute left-3 top-3 flex items-center gap-2">
+                    <span
+                        className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[11px] font-bold uppercase tracking-wide text-white ${
+                            isLive ? 'animate-pulse bg-red-500' : 'bg-gradient-to-r from-brand-yellow to-white'
+                        }`}
+                    >
                         {isLive && (
                             <span className="relative flex h-1.5 w-1.5">
                                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-white opacity-75" />
                                 <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-white" />
                             </span>
                         )}
-                        {typeLabels[event.event_type] || 'Evento'}
+                        {badgeLabel}
                     </span>
                     {event.hero_badge && (
-                        <span className="inline-flex items-center rounded-full bg-white/15 backdrop-blur-sm px-2.5 py-1 text-[11px] font-medium text-white">
+                        <span className="inline-flex items-center rounded-full bg-white/15 px-2.5 py-1 text-[11px] font-medium text-white backdrop-blur-sm">
                             {event.hero_badge}
+                        </span>
+                    )}
+                    {specialization && (
+                        <span className="inline-flex items-center rounded-full bg-brand-brown/70 px-2.5 py-1 text-[11px] font-semibold text-white backdrop-blur-sm">
+                            {specialization.name}
                         </span>
                     )}
                 </div>
 
-                {/* Floating label */}
                 <div className="absolute bottom-3 right-3">
-                    <span className="text-[10px] font-bold text-brand-yellow uppercase tracking-wider bg-black/50 backdrop-blur-sm px-2 py-1 rounded">
-                        Próximo evento ✨
+                    <span className="rounded bg-black/50 px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-brand-yellow backdrop-blur-sm">
+                        Proximo encuentro
                     </span>
                 </div>
             </div>
 
-            {/* Content */}
-            <div className="p-5 space-y-3">
+            <div className="space-y-3 p-5">
                 {speakerName && (
                     <div className="flex items-center gap-2">
                         {speakerAvatar ? (
                             <img src={speakerAvatar} alt="" className="h-6 w-6 rounded-full object-cover ring-1 ring-white/20" />
                         ) : (
-                            <div className="h-6 w-6 rounded-full bg-brand-yellow/30 flex items-center justify-center text-[10px] font-bold text-brand-yellow">
+                            <div className="flex h-6 w-6 items-center justify-center rounded-full bg-brand-yellow/30 text-[10px] font-bold text-brand-yellow">
                                 {speakerName.charAt(0)}
                             </div>
                         )}
@@ -202,22 +230,22 @@ function FeaturedEventCard({ event }: { event: any }) {
                     </div>
                 )}
 
-                <h3 className="text-lg font-bold text-white line-clamp-2 leading-snug">{event.title}</h3>
+                <h3 className="line-clamp-2 text-lg font-bold leading-snug text-white">{event.title}</h3>
 
                 <div className="flex items-center gap-3 text-xs text-neutral-500">
-                    <span className="flex items-center gap-1">📅 {dateStr}</span>
+                    <span>{dateStr}</span>
                     <span className="text-neutral-600">·</span>
-                    <span className="flex items-center gap-1">🕐 {timeStr}</span>
+                    <span>{timeStr}</span>
                 </div>
 
-                <div className="flex items-center justify-between pt-2 border-t border-white/5">
+                <div className="flex items-center justify-between border-t border-white/5 pt-2">
                     {price > 0 ? (
                         <span className="text-lg font-bold text-white">${price.toFixed(0)} MXN</span>
                     ) : (
                         <span className="text-sm font-bold text-brand-brown">Gratis</span>
                     )}
-                    <span className="text-xs font-semibold text-brand-yellow group-hover:text-brand-yellow transition-colors">
-                        Ver detalles →
+                    <span className="text-xs font-semibold text-brand-yellow transition-colors group-hover:text-brand-yellow">
+                        Ver detalles
                     </span>
                 </div>
             </div>

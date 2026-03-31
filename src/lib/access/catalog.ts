@@ -8,18 +8,23 @@ const MEMBERSHIP_PAST_DUE_GRACE_DAYS = 3
 type ViewerProfileSnapshot = Pick<
     Profile,
     'id' | 'email' | 'role' | 'membership_level' | 'subscription_status'
->
+> & {
+    membership_specialization_code?: Profile['membership_specialization_code']
+}
 
 type ViewerSubscriptionSnapshot = Pick<
     Subscription,
     'id' | 'membership_level' | 'status' | 'current_period_end' | 'cancel_at_period_end'
->
+> & {
+    specialization_code?: Subscription['specialization_code']
+}
 
 export interface ViewerAccessContext {
     profile: ViewerProfileSnapshot
     subscription: ViewerSubscriptionSnapshot | null
     membershipActive: boolean
     membershipLevel: number
+    membershipSpecializationCode: Profile['membership_specialization_code']
     hasActivePatientRelationship: boolean
 }
 
@@ -69,11 +74,13 @@ export async function resolveViewerAccessContext(params: {
     if (!userId) return null
 
     let profile = params.profile ?? null
+    const needsProfileHydration =
+        !profile || !Object.prototype.hasOwnProperty.call(profile, 'membership_specialization_code')
 
-    if (!profile) {
+    if (needsProfileHydration) {
         const { data } = await (params.supabase
             .from('profiles') as any)
-            .select('id, email, role, membership_level, subscription_status')
+            .select('id, email, role, membership_level, subscription_status, membership_specialization_code')
             .eq('id', userId)
             .maybeSingle()
 
@@ -84,7 +91,7 @@ export async function resolveViewerAccessContext(params: {
 
     const { data: subscriptionData } = await (params.supabase
         .from('subscriptions') as any)
-        .select('id, membership_level, status, current_period_end, cancel_at_period_end')
+        .select('id, membership_level, specialization_code, status, current_period_end, cancel_at_period_end')
         .eq('user_id', userId)
         .order('created_at', { ascending: false })
         .limit(1)
@@ -98,6 +105,9 @@ export async function resolveViewerAccessContext(params: {
     const membershipLevel = membershipActive
         ? Number(subscription?.membership_level ?? profile.membership_level ?? 0)
         : 0
+    const membershipSpecializationCode = membershipActive
+        ? (subscription?.specialization_code ?? profile.membership_specialization_code ?? null)
+        : null
 
     let hasActivePatientRelationship = false
     if (params.includeActiveRelationship && profile.role === 'patient') {
@@ -115,6 +125,7 @@ export async function resolveViewerAccessContext(params: {
         subscription,
         membershipActive,
         membershipLevel,
+        membershipSpecializationCode,
         hasActivePatientRelationship,
     }
 }

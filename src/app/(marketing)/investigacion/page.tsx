@@ -41,7 +41,7 @@ export default function InvestigacionPage() {
               Todos los datos están alineados estrictamente con LFPDPPP y anonimizados desde su origen.
             </p>
             <Link href="/auth/register">
-              <Button className="mt-4 bg-brand-yellow hover:bg-brand-yellow/90 text-black font-bold shadow-lg border-0">
+              <Button className="mt-4 font-bold shadow-lg">
                 Ver Proyectos Activos
               </Button>
             </Link>
@@ -74,7 +74,7 @@ export default function InvestigacionPage() {
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-10">
             SAPIHUM colabora activamente con universidades, centros de investigación y hospitales. Ofrecemos acceso a datos anonimizados para investigadores principales (PI) que cumplan con nuestro comité de ética y bioseguridad.
           </p>
-          <Button variant="outline" size="lg" className="border-brand-yellow text-brand-yellow hover:bg-brand-yellow">
+          <Button variant="outline" size="lg" className="border-brand-yellow/40 text-brand-yellow hover:border-brand-yellow hover:bg-brand-yellow hover:text-black">
             Solicitar acceso para investigadores principales
           </Button>
         </div>

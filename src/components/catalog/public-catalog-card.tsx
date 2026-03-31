@@ -1,6 +1,6 @@
 import Link from 'next/link'
-import { Badge } from '@/components/ui/badge'
-import { getPublicEventPath } from '@/lib/events/public'
+import { getPublicEventPath, isPastPublicCatalogEvent } from '@/lib/events/public'
+import { getSpecializationByCode } from '@/lib/specializations'
 
 function formatEventDate(date: string) {
     const d = new Date(date)
@@ -13,6 +13,9 @@ function formatEventDate(date: string) {
 }
 
 function getTypeMeta(event: any) {
+    if (isPastPublicCatalogEvent(event)) {
+        return { label: 'Finalizado', color: 'bg-neutral-500/90 text-white' }
+    }
     if (event.status === 'live') {
         return { label: 'En Vivo', color: 'bg-red-500/90 text-white animate-pulse' }
     }
@@ -21,9 +24,6 @@ function getTypeMeta(event: any) {
     }
     if (event.event_type === 'presencial') {
         return { label: 'Presencial', color: 'bg-brand-yellow/90 text-white' }
-    }
-    if (event.status === 'completed') {
-        return { label: 'Finalizado', color: 'bg-neutral-500/90 text-white' }
     }
     return { label: 'Evento', color: 'bg-brand-yellow/90 text-white' }
 }
@@ -40,7 +40,15 @@ const SUBCATEGORY_LABELS: Record<string, string> = {
 }
 
 
-export function PublicCatalogCard({ event }: { event: any }) {
+export function PublicCatalogCard({
+    event,
+    hidePrice = false,
+    fixedLayout = false,
+}: {
+    event: any
+    hidePrice?: boolean
+    fixedLayout?: boolean
+}) {
     const publicPath = getPublicEventPath(event)
     const price = Number(event.price || 0)
     const priceLabel = price > 0 ? `$${price.toFixed(0)} MXN` : 'Gratis'
@@ -49,7 +57,8 @@ export function PublicCatalogCard({ event }: { event: any }) {
     const speakerName = event.speakers?.[0]?.speaker?.profile?.full_name
     const speakerAvatar = event.speakers?.[0]?.speaker?.photo_url || event.speakers?.[0]?.speaker?.profile?.avatar_url
     const isFree = price === 0
-    const memberFree = event.member_access_type === 'free' && price > 0
+    const specialization = getSpecializationByCode(event.specialization_code)
+    const memberFree = !event.specialization_code && event.member_access_type === 'free' && price > 0
     const subcategoryLabel = event.subcategory ? SUBCATEGORY_LABELS[event.subcategory] || null : null
     const isMembersOnly = (event.target_audience || []).some((a: string) => a !== 'public') && !(event.target_audience || []).includes('public')
 
@@ -57,7 +66,9 @@ export function PublicCatalogCard({ event }: { event: any }) {
     return (
         <Link
             href={publicPath}
-            className="group relative flex flex-col overflow-hidden rounded-2xl border border-border/50 bg-card transition-all duration-300 hover:shadow-xl hover:shadow-brand-yellow/5 hover:-translate-y-1 hover:border-brand-yellow/30"
+            className={`group relative flex flex-col overflow-hidden rounded-2xl border border-border/50 bg-card transition-all duration-300 hover:-translate-y-1 hover:border-brand-yellow/30 hover:shadow-xl hover:shadow-brand-yellow/5 ${
+                fixedLayout ? 'h-full' : ''
+            }`}
         >
             {/* Image Section */}
             <div className="relative aspect-[16/9] overflow-hidden bg-gradient-to-br from-neutral-900 via-neutral-800 to-brand-brown/40">
@@ -91,6 +102,11 @@ export function PublicCatalogCard({ event }: { event: any }) {
                     {subcategoryLabel && (
                         <span className="inline-flex items-center rounded-full bg-white/20 backdrop-blur-sm px-2 py-1 text-[10px] font-medium text-white">
                             {subcategoryLabel}
+                        </span>
+                    )}
+                    {specialization && (
+                        <span className="inline-flex items-center rounded-full bg-brand-brown/80 backdrop-blur-sm px-2 py-1 text-[10px] font-semibold text-white">
+                            {specialization.name}
                         </span>
                     )}
                     {event.hero_badge && (
@@ -138,48 +154,56 @@ export function PublicCatalogCard({ event }: { event: any }) {
             </div>
 
             {/* Content Section */}
-            <div className="flex flex-1 flex-col p-5">
+            <div className={`flex flex-1 flex-col p-5 ${fixedLayout ? 'min-h-[15.5rem]' : ''}`}>
                 {/* Speaker */}
-                {speakerName && (
-                    <div className="mb-2.5 flex items-center gap-2">
-                        {speakerAvatar ? (
-                            <img src={speakerAvatar} alt={speakerName} className="h-5 w-5 rounded-full object-cover ring-1 ring-border" />
-                        ) : (
-                            <div className="h-5 w-5 rounded-full bg-brand-yellow flex items-center justify-center text-[9px] font-bold text-brand-yellow">
-                                {speakerName.charAt(0)}
-                            </div>
-                        )}
-                        <span className="text-xs font-medium text-muted-foreground">{speakerName}</span>
-                    </div>
-                )}
+                <div className={fixedLayout ? 'mb-2.5 min-h-[1.25rem]' : 'mb-2.5'}>
+                    {speakerName && (
+                        <div className="flex items-center gap-2">
+                            {speakerAvatar ? (
+                                <img src={speakerAvatar} alt={speakerName} className="h-5 w-5 rounded-full object-cover ring-1 ring-border" />
+                            ) : (
+                                <div className="flex h-5 w-5 items-center justify-center rounded-full bg-brand-yellow text-[9px] font-bold text-brand-yellow">
+                                    {speakerName.charAt(0)}
+                                </div>
+                            )}
+                            <span className="line-clamp-1 text-xs font-medium text-muted-foreground">{speakerName}</span>
+                        </div>
+                    )}
+                </div>
 
-                {/* Title */}
-                <h3 className="line-clamp-2 text-lg font-semibold leading-snug text-foreground transition-colors group-hover:text-brand-yellow">
-                    {event.title}
-                </h3>
+                <div className={fixedLayout ? 'min-h-[5.75rem]' : ''}>
+                    {/* Title */}
+                    <h3 className="line-clamp-2 text-lg font-semibold leading-snug text-foreground transition-colors group-hover:text-brand-yellow">
+                        {event.title}
+                    </h3>
 
-                {/* Subtitle */}
-                {event.subtitle && (
-                    <p className="mt-1.5 line-clamp-2 text-sm text-muted-foreground leading-relaxed">
-                        {event.subtitle}
-                    </p>
-                )}
+                    {/* Subtitle */}
+                    {event.subtitle ? (
+                        <p className="mt-1.5 line-clamp-2 text-sm leading-relaxed text-muted-foreground">
+                            {event.subtitle}
+                        </p>
+                    ) : (
+                        fixedLayout && <div className="mt-1.5 min-h-[2.75rem]" />
+                    )}
+                </div>
 
                 {/* Spacer */}
                 <div className="flex-1" />
 
                 {/* Footer: Price + CTA */}
-                <div className="mt-4 flex items-center justify-between border-t border-border/50 pt-4">
-                    <div>
-                        {isFree ? (
-                            <span className="inline-flex items-center gap-1 text-sm font-bold text-brand-brown">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
-                                Gratis
-                            </span>
-                        ) : (
-                            <span className="text-lg font-bold text-foreground">{priceLabel}</span>
-                        )}
-                    </div>
+                <div className={`mt-4 flex items-center border-t border-border/50 pt-4 ${hidePrice ? 'justify-end' : 'justify-between'}`}>
+                    {!hidePrice && (
+                        <div>
+                            {isFree ? (
+                                <span className="inline-flex items-center gap-1 text-sm font-bold text-brand-brown">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
+                                    Gratis
+                                </span>
+                            ) : (
+                                <span className="text-lg font-bold text-foreground">{priceLabel}</span>
+                            )}
+                        </div>
+                    )}
                     <span className="inline-flex items-center gap-1 rounded-full bg-brand-yellow px-3 py-1.5 text-xs font-semibold text-brand-yellow transition-colors group-hover:bg-brand-yellow group-hover:text-white dark:bg-brand-yellow dark:text-brand-yellow dark:group-hover:bg-brand-yellow dark:group-hover:text-white">
                         Ver detalles
                         <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14" /><path d="m12 5 7 7-7 7" /></svg>

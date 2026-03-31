@@ -1,8 +1,9 @@
 import type { Event, EventType } from '@/types/database'
+import { isEventPast } from '@/lib/timezone'
 
 /**
- * All public events route to /eventos/ canonically.
- * The old 'cursos' and 'grabaciones' routes now redirect here.
+ * All public events route to /eventos canonically.
+ * Legacy /cursos and /grabaciones routes should not be surfaced publicly.
  */
 export type PublicCatalogKind = 'eventos'
 
@@ -24,11 +25,8 @@ export function isRecordingEventType(eventType?: EventType | null) {
     return eventType === 'on_demand'
 }
 
-/**
- * All events now resolve to 'eventos' as their public kind.
- * Recordings are no longer a separate public catalog.
- */
-export function getPublicCatalogKindForEvent(_event: Pick<Event, 'event_type' | 'recording_url' | 'status'>): PublicCatalogKind {
+export function getPublicCatalogKindForEvent(event: Pick<Event, 'event_type' | 'recording_url' | 'status'>): PublicCatalogKind {
+    void event
     return 'eventos'
 }
 
@@ -40,24 +38,65 @@ export function buildPublicEventUrl(baseUrl: string, event: Pick<Event, 'slug' |
     return `${baseUrl}${getPublicEventPath(event)}`
 }
 
-export function getPublicCatalogTitle(_kind: PublicCatalogKind) {
+export function getPublicCatalogTitle(kind: PublicCatalogKind) {
+    void kind
     return 'Eventos'
 }
 
-export function getPublicCatalogDescription(_kind: PublicCatalogKind) {
+export function getPublicCatalogDescription(kind: PublicCatalogKind) {
+    void kind
     return 'Eventos en vivo, formaciones, talleres, conferencias y experiencias de la comunidad SAPIHUM.'
 }
 
+type PublicCatalogTimelineEvent = Pick<Event, 'status' | 'start_time' | 'end_time'>
+
+export function isUpcomingPublicCatalogEvent(event: PublicCatalogTimelineEvent) {
+    if (event.status === 'completed' || event.status === 'cancelled') return false
+
+    if (event.status === 'live') {
+        if (event.end_time) {
+            return new Date(event.end_time) >= new Date()
+        }
+
+        return true
+    }
+
+    return !isEventPast(event.start_time)
+}
+
+export function isPastPublicCatalogEvent(event: PublicCatalogTimelineEvent) {
+    if (event.status === 'completed') return true
+    if (event.status === 'cancelled') return false
+
+    if (event.status === 'live') {
+        return Boolean(event.end_time && new Date(event.end_time) < new Date())
+    }
+
+    return isEventPast(event.start_time)
+}
+
+export function splitPublicCatalogEvents<T extends PublicCatalogTimelineEvent>(events: T[]) {
+    const upcoming = events
+        .filter((event) => isUpcomingPublicCatalogEvent(event))
+        .sort((a, b) => new Date(a.start_time).getTime() - new Date(b.start_time).getTime())
+
+    const past = events
+        .filter((event) => isPastPublicCatalogEvent(event))
+        .sort((a, b) => new Date(b.start_time).getTime() - new Date(a.start_time).getTime())
+
+    return { upcoming, past }
+}
+
 export function buildEventSeoDescription(event: Pick<Event, 'seo_description' | 'og_description' | 'description' | 'title'>) {
-    const description = event.seo_description || event.og_description || event.description || `${event.title} en Comunidad de Psicologia`
+    const description = event.seo_description || event.og_description || event.description || `${event.title} en SAPIHUM`
     return description.slice(0, 160)
 }
 
 export function getEventTypeLabel(eventType?: EventType | null): string {
     const labels: Record<string, string> = {
-        live: 'En Vivo',
-        course: 'Formación',
-        on_demand: 'Grabación',
+        live: 'En vivo',
+        course: 'Formacion',
+        on_demand: 'Contenido exclusivo',
         presencial: 'Presencial',
     }
     return labels[eventType || ''] || 'Evento'

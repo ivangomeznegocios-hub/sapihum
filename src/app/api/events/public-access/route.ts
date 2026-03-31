@@ -28,7 +28,7 @@ export async function POST(request: NextRequest) {
 
         const { data: event } = await (supabase
             .from('events') as any)
-            .select('id, slug, title, price, member_price, member_access_type, target_audience, status, event_type, created_by, recording_expires_at, max_attendees')
+            .select('id, slug, title, price, member_price, member_access_type, specialization_code, target_audience, status, event_type, created_by, recording_expires_at, max_attendees')
             .eq('id', eventId)
             .single()
 
@@ -74,11 +74,13 @@ export async function POST(request: NextRequest) {
                     price: event.price,
                     member_price: event.member_price,
                     member_access_type: normalizeMemberAccessType(event.member_access_type),
+                    specialization_code: event.specialization_code,
                 },
                 {
                     role: profile.role,
                     membershipLevel: commercialAccess.membershipLevel,
                     hasActiveMembership: commercialAccess.hasActiveMembership,
+                    membershipSpecializationCode: commercialAccess.membershipSpecializationCode,
                 }
             )
 

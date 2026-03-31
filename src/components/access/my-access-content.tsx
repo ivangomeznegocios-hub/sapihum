@@ -6,7 +6,7 @@ import { ArrowRight, Calendar, ExternalLink, Library, Play } from 'lucide-react'
 
 function getTypeLabel(type: string) {
     if (type === 'course') return 'Curso'
-    if (type === 'on_demand') return 'Grabacion'
+    if (type === 'on_demand') return 'Contenido'
     return 'Evento'
 }
 
@@ -36,7 +36,7 @@ export function MyAccessContent({ accesses, withinDashboard = false }: MyAccessC
                 </div>
                 <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">Mis accesos</h1>
                 <p className="max-w-3xl text-sm text-muted-foreground sm:text-base">
-                    Aqui centralizamos tus eventos, cursos y grabaciones activas. Cada activo conserva su pagina publica para vender
+                    Aqui centralizamos tus eventos, cursos y contenidos activos. Cada activo conserva su pagina publica para vender
                     y su hub privado para consumir.
                 </p>
             </div>

@@ -56,6 +56,16 @@ function readTrimmedString(value: FormDataEntryValue | null) {
     return trimmed.length > 0 ? trimmed : null
 }
 
+function buildDuplicateEventTitle(value: string) {
+    const normalized = value.trim()
+
+    if (/\(Copia(?: \d+)?\)$/i.test(normalized)) {
+        return normalized
+    }
+
+    return `${normalized} (Copia)`
+}
+
 function parseIntegerField(value: FormDataEntryValue | null) {
     if (typeof value !== 'string') return null
     const trimmed = value.trim()
@@ -272,7 +282,7 @@ export async function registerForEvent(eventId: string, registrationData: Record
     // Get event to check audience requirements and pricing
     const { data: event } = await (supabase
         .from('events') as any)
-        .select('target_audience, required_subscription, max_attendees, price, member_access_type, member_price, event_type, recording_expires_at')
+        .select('target_audience, required_subscription, max_attendees, price, member_access_type, member_price, specialization_code, event_type, recording_expires_at')
         .eq('id', eventId)
         .single()
 
@@ -283,7 +293,7 @@ export async function registerForEvent(eventId: string, registrationData: Record
     // Get user profile
     const { data: profile } = await (supabase
         .from('profiles') as any)
-        .select('role, membership_level, subscription_status, email')
+        .select('role, membership_level, subscription_status, membership_specialization_code, email')
         .eq('id', user.id)
         .single()
 
@@ -314,11 +324,13 @@ export async function registerForEvent(eventId: string, registrationData: Record
                 price: eventData.price,
                 member_price: eventData.member_price,
                 member_access_type: normalizeMemberAccessType(eventData.member_access_type),
+                specialization_code: eventData.specialization_code,
             },
             {
                 role: profileData.role,
                 membershipLevel: commercialAccess?.membershipLevel ?? profileData.membership_level ?? 0,
                 hasActiveMembership: commercialAccess?.hasActiveMembership ?? false,
+                membershipSpecializationCode: commercialAccess?.membershipSpecializationCode ?? null,
             }
         )
 
@@ -529,6 +541,7 @@ export async function createEvent(formData: FormData) {
     const includedResources = parseListField(formData, 'includedResources') ?? null
     const materialLinks = parseMaterialLinksField(formData, 'materialLinks') ?? []
     const certificateType = readTrimmedString(formData.get('certificateType')) || 'none'
+    const specializationCode = readTrimmedString(formData.get('specializationCode'))
     const formationTrack = readTrimmedString(formData.get('formationTrack'))
     const slug = await resolveUniqueEventSlug(supabase, customSlug || title)
     const meetingLink = eventType === 'presencial' ? null : readTrimmedString(formData.get('meetingLink'))
@@ -582,6 +595,7 @@ export async function createEvent(formData: FormData) {
             included_resources: includedResources,
             material_links: materialLinks,
             certificate_type: certificateType,
+            specialization_code: specializationCode,
             formation_track: formationTrack,
             recording_url: recordingUrl,
         })
@@ -689,6 +703,9 @@ export async function updateEvent(eventId: string, formData: FormData) {
     const certificateType = formData.has('certificateType')
         ? (readTrimmedString(formData.get('certificateType')) || 'none')
         : undefined
+    const specializationCode = formData.has('specializationCode')
+        ? readTrimmedString(formData.get('specializationCode'))
+        : undefined
     const formationTrack = formData.has('formationTrack')
         ? readTrimmedString(formData.get('formationTrack'))
         : undefined
@@ -760,6 +777,7 @@ export async function updateEvent(eventId: string, formData: FormData) {
     if (includedResources !== undefined) updates.included_resources = includedResources
     if (materialLinks !== undefined) updates.material_links = materialLinks
     if (certificateType !== undefined) updates.certificate_type = certificateType || 'none'
+    if (specializationCode !== undefined) updates.specialization_code = specializationCode || null
     if (formationTrack !== undefined) updates.formation_track = formationTrack || null
 
     if (isAdmin) {
@@ -885,6 +903,142 @@ export async function deleteEvent(eventId: string) {
 
     revalidatePath('/dashboard/events')
     return { success: true }
+}
+
+export async function duplicateEvent(eventId: string) {
+    const supabase = await createClient()
+
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) {
+        return { error: 'No autenticado' }
+    }
+
+    const [{ data: event }, { data: profile }] = await Promise.all([
+        (supabase
+            .from('events') as any)
+            .select('*')
+            .eq('id', eventId)
+            .single(),
+        (supabase
+            .from('profiles') as any)
+            .select('role')
+            .eq('id', user.id)
+            .single(),
+    ])
+
+    if (!event || (event.created_by !== user.id && profile?.role !== 'admin')) {
+        return { error: 'No tienes permisos para duplicar este evento' }
+    }
+
+    const duplicateTitle = buildDuplicateEventTitle(event.title || 'Evento')
+    const slug = await resolveUniqueEventSlug(supabase, duplicateTitle)
+
+    const { data: duplicatedEvent, error: duplicateError } = await (supabase
+        .from('events') as any)
+        .insert({
+            slug,
+            title: duplicateTitle,
+            subtitle: event.subtitle,
+            description: event.description,
+            image_url: event.image_url,
+            start_time: event.start_time,
+            end_time: event.end_time,
+            status: 'draft',
+            event_type: event.event_type,
+            location: event.location,
+            meeting_link: event.meeting_link,
+            recording_url: null,
+            max_attendees: event.max_attendees,
+            price: event.price,
+            is_members_only: event.is_members_only,
+            target_audience: event.target_audience,
+            required_subscription: event.required_subscription,
+            recording_available_days: event.recording_available_days,
+            prerequisite_event_id: null,
+            created_by: event.created_by || user.id,
+            registration_fields: event.registration_fields,
+            category: event.category,
+            subcategory: event.subcategory,
+            member_price: event.member_price,
+            member_access_type: event.member_access_type,
+            is_embeddable: event.is_embeddable,
+            og_description: event.og_description,
+            seo_title: event.seo_title,
+            seo_description: event.seo_description,
+            hero_badge: event.hero_badge,
+            public_cta_label: event.public_cta_label,
+            session_config: event.session_config,
+            ideal_for: event.ideal_for,
+            learning_outcomes: event.learning_outcomes,
+            included_resources: event.included_resources,
+            material_links: event.material_links,
+            certificate_type: event.certificate_type,
+            specialization_code: event.specialization_code,
+            formation_track: event.formation_track,
+            formation_id: null,
+        })
+        .select('id')
+        .single()
+
+    if (duplicateError || !duplicatedEvent) {
+        return { error: duplicateError?.message || 'No fue posible duplicar el evento' }
+    }
+
+    const [{ data: speakerAssignments }, { data: resourceLinks }] = await Promise.all([
+        (supabase
+            .from('event_speakers') as any)
+            .select('speaker_id, role, display_order, compensation_type, compensation_value')
+            .eq('event_id', eventId)
+            .order('display_order', { ascending: true }),
+        (supabase
+            .from('event_resources') as any)
+            .select('resource_id, is_locked, unlock_at, display_order')
+            .eq('event_id', eventId)
+            .order('display_order', { ascending: true }),
+    ])
+
+    if (speakerAssignments && speakerAssignments.length > 0) {
+        const { error: speakersError } = await (supabase
+            .from('event_speakers') as any)
+            .insert(
+                speakerAssignments.map((assignment: any) => ({
+                    event_id: duplicatedEvent.id,
+                    speaker_id: assignment.speaker_id,
+                    role: assignment.role,
+                    display_order: assignment.display_order,
+                    compensation_type: assignment.compensation_type,
+                    compensation_value: assignment.compensation_value,
+                }))
+            )
+
+        if (speakersError) {
+            return { error: speakersError.message }
+        }
+    }
+
+    if (resourceLinks && resourceLinks.length > 0) {
+        const { error: resourcesError } = await (supabase
+            .from('event_resources') as any)
+            .insert(
+                resourceLinks.map((resourceLink: any) => ({
+                    event_id: duplicatedEvent.id,
+                    resource_id: resourceLink.resource_id,
+                    is_locked: resourceLink.is_locked,
+                    unlock_at: resourceLink.unlock_at,
+                    display_order: resourceLink.display_order,
+                }))
+            )
+
+        if (resourcesError) {
+            return { error: resourcesError.message }
+        }
+    }
+
+    revalidatePath('/dashboard/events')
+    revalidatePath(`/dashboard/events/${duplicatedEvent.id}`)
+
+    return { success: true, eventId: duplicatedEvent.id }
 }
 
 export async function addSpeakerToEvent(eventId: string, speakerId: string, role: string = 'speaker') {

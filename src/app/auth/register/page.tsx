@@ -10,6 +10,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Label } from '@/components/ui/label'
 import { buildRegistrationConsentMetadata, CONSENT_POLICY_VERSION } from '@/lib/consent'
 import { collectAnalyticsEvent, getClientAnalyticsContext } from '@/lib/analytics/client'
+import { brandCommunityLabel } from '@/lib/brand'
 
 function normalizeRegistrationValue(value: string | null): string {
     return (value || '').trim().toLowerCase()
@@ -269,7 +270,7 @@ function RegisterForm() {
                     </div>
                 </div>
                 <CardTitle className="text-2xl font-bold">Crear cuenta</CardTitle>
-                <CardDescription>Unete a Comunidad Psicologia</CardDescription>
+                <CardDescription>Únete a {brandCommunityLabel}</CardDescription>
 
                 {(preselectedPlan || preselectedSpecialization) && (
                     <div className="mt-3 rounded-md border border-brand-yellow bg-brand-yellow px-3 py-2 text-left text-xs text-brand-yellow">

@@ -75,7 +75,7 @@ export default function ManifiestoPage() {
             SAPIHUM es la trinchera de los profesionales que se toman el cuidado mental humano con el mayor nivel de responsabilidad posible.
           </p>
           <Link href="/auth/register">
-            <Button size="lg" className="h-14 px-8 text-base bg-brand-yellow hover:bg-brand-yellow/90 text-black font-bold shadow-lg sapihum-glow-cta border-0">
+            <Button size="lg" className="h-14 px-8 text-base font-bold shadow-lg sapihum-glow-cta">
               Unete a la revolucion
             </Button>
           </Link>

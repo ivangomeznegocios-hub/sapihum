@@ -104,7 +104,7 @@ export function PsychologistDashboard({
                                 {greeting}, {userName} 👋
                             </h1>
                             <p className="text-muted-foreground mt-1">
-                                Tu espacio de crecimiento profesional en Comunidad de Psicología
+                                Tu espacio de crecimiento profesional en SAPIHUM
                             </p>
                             <div className="flex items-center gap-2 mt-3">
                                 <span className="text-xs px-2.5 py-1 rounded-full bg-brand-brown text-brand-brown dark:bg-brand-brown/30 dark:text-brand-brown font-medium">

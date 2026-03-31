@@ -1,11 +1,12 @@
 import { Resend } from 'resend'
 import WelcomeEmail from '@/emails/WelcomeEmail'
 import AppointmentConfirmationEmail from '@/emails/AppointmentConfirmation'
+import { emailFromName } from '@/lib/brand'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 
 // Set this to your verified domain in Resend
-const FROM_EMAIL = 'Comunidad de Psicologia <notificaciones@comunidaddepsicologia.com>'
+const FROM_EMAIL = `${emailFromName} <notificaciones@comunidaddepsicologia.com>`
 const DEFAULT_REPLY_TO = 'soporte@comunidaddepsicologia.com'
 
 export async function sendWelcomeEmail({
@@ -24,7 +25,7 @@ export async function sendWelcomeEmail({
         const { data, error } = await resend.emails.send({
             from: FROM_EMAIL,
             to,
-            subject: 'Bienvenido(a) a la Comunidad de Psicologia',
+            subject: `Bienvenido(a) a ${emailFromName}`,
             react: WelcomeEmail({ name }),
             replyTo: DEFAULT_REPLY_TO,
         })
