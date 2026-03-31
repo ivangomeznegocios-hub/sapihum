@@ -7,7 +7,6 @@ import {
     Calendar,
     BarChart3,
     ArrowRight,
-    Shield,
     Activity,
     TrendingUp,
     FileText,
@@ -69,7 +68,10 @@ export function AdminDashboard({
     mrr,
     eventsGmv,
 }: AdminDashboardProps) {
-    const greeting = initialGreeting
+    const greeting = initialGreeting || getGreeting()
+    const heroDescription = userName
+        ? `${greeting}, ${userName}. Gestiona la plataforma desde aqui.`
+        : 'Gestiona la plataforma desde aqui.'
 
     return (
         <div className="space-y-8 dashboard-stagger">
@@ -81,7 +83,7 @@ export function AdminDashboard({
                             Panel de Administración 🔐
                         </h1>
                         <p className="text-muted-foreground mt-1">
-                            {greeting}, {userName}. Gestiona la plataforma desde aquí.
+                            {heroDescription}
                         </p>
                         <div className="flex items-center gap-3 mt-3">
                             <span className="flex items-center gap-1.5 text-xs font-medium text-green-600 dark:text-green-400">

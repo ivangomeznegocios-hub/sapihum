@@ -9,22 +9,29 @@ import { getPaymentProvider } from '@/lib/payments'
 import {
     getSubscriptionPlan,
     getStripePriceId,
-    isStripePriceIdConfigured,
     type BillingInterval,
 } from '@/lib/payments/config'
 import { canUserSeeLevel3Offer, getSpecializationByCode } from '@/lib/specializations'
+
+function normalizeEmail(value: string | null | undefined) {
+    return value?.trim().toLowerCase() || ''
+}
 
 export async function POST(request: NextRequest) {
     try {
         const supabase = await createClient()
         const { data: { user } } = await supabase.auth.getUser()
 
-        if (!user) {
-            return NextResponse.json({ error: 'No autenticado' }, { status: 401 })
-        }
-
         const body = await request.json()
-        const { membershipLevel, billingInterval = 'monthly', specializationCode, analyticsContext, successPath } = body as {
+        const {
+            membershipLevel,
+            billingInterval = 'monthly',
+            specializationCode,
+            analyticsContext,
+            successPath,
+            email,
+            fullName,
+        } = body as {
             membershipLevel: number
             billingInterval?: BillingInterval
             specializationCode?: string
@@ -34,10 +41,12 @@ export async function POST(request: NextRequest) {
                 touch?: Record<string, unknown> | null
             }
             successPath?: string
+            email?: string
+            fullName?: string
         }
 
         if (!membershipLevel || typeof membershipLevel !== 'number') {
-            return NextResponse.json({ error: 'Nivel de membresía requerido' }, { status: 400 })
+            return NextResponse.json({ error: 'Nivel de membresia requerido' }, { status: 400 })
         }
 
         const plan = getSubscriptionPlan(membershipLevel, specializationCode)
@@ -61,36 +70,38 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'Precio no encontrado' }, { status: 400 })
         }
 
-        if (!isStripePriceIdConfigured(priceId)) {
+        const normalizedGuestEmail = normalizeEmail(email)
+        if (!user && !normalizedGuestEmail) {
             return NextResponse.json(
-                { error: 'Stripe no esta configurado completamente para este plan' },
-                { status: 503 }
+                { error: 'Correo requerido para continuar', requiresGuestDetails: true },
+                { status: 401 }
             )
         }
 
-        // Get profile for Stripe customer ID
-        const { data: profile } = await (supabase as any)
-            .from('profiles')
-            .select('id, stripe_customer_id, membership_level, membership_specialization_code, role')
-            .eq('id', user.id)
-            .single() as {
-                data: {
-                    id: string
-                    stripe_customer_id: string | null
-                    membership_level: number | null
-                    membership_specialization_code: string | null
-                    role: string
-                } | null
-            }
+        const profile = user
+            ? await ((supabase as any)
+                .from('profiles')
+                .select('id, stripe_customer_id, membership_level, membership_specialization_code, role')
+                .eq('id', user.id)
+                .single() as Promise<{
+                    data: {
+                        id: string
+                        stripe_customer_id: string | null
+                        membership_level: number | null
+                        membership_specialization_code: string | null
+                        role: string
+                    } | null
+                }>)
+            : { data: null }
 
-        if (!profile) {
+        if (user && !profile.data) {
             return NextResponse.json({ error: 'Perfil no encontrado' }, { status: 404 })
         }
 
-        const currentLevel = profile.membership_level ?? 0
-        const currentSpecializationCode = profile.membership_specialization_code
+        const currentLevel = profile.data?.membership_level ?? 0
+        const currentSpecializationCode = profile.data?.membership_specialization_code ?? null
 
-        if (membershipLevel === 3 && profile.role !== 'admin') {
+        if (membershipLevel === 3 && profile.data?.role !== 'admin') {
             const canSeeLevel3 = canUserSeeLevel3Offer({
                 membershipLevel: currentLevel,
                 specializationCode: currentSpecializationCode,
@@ -110,7 +121,7 @@ export async function POST(request: NextRequest) {
             currentSpecializationCode &&
             resolvedSpecializationCode &&
             currentSpecializationCode !== resolvedSpecializationCode &&
-            profile.role !== 'admin'
+            profile.data?.role !== 'admin'
         ) {
             return NextResponse.json(
                 { error: 'Ya tienes una especializacion activa. Contacta soporte para cambio.' },
@@ -121,13 +132,44 @@ export async function POST(request: NextRequest) {
         const appUrl = getAppUrl()
         const provider = getPaymentProvider('stripe')
         const attributionSnapshot = await resolveAttributionSnapshot(analyticsContext)
+        const nextPath = successPath?.startsWith('/') ? successPath : '/dashboard/subscription'
+        const customerEmail = user?.email || normalizedGuestEmail
+        let customerId = profile.data?.stripe_customer_id || undefined
+
+        if (!customerEmail) {
+            return NextResponse.json({ error: 'Correo requerido para continuar' }, { status: 400 })
+        }
+
+        let resolvedSuccessUrl = `${appUrl}/dashboard/payment-success?session_id={CHECKOUT_SESSION_ID}${successPath ? `&next=${encodeURIComponent(nextPath)}` : ''}`
+        let resolvedCancelUrl = `${appUrl}/dashboard/payment-cancelled`
+
+        if (!user) {
+            const subscriptionParams = new URLSearchParams({
+                kind: 'subscription',
+                session_id: '{CHECKOUT_SESSION_ID}',
+                level: String(membershipLevel),
+                next: nextPath,
+            })
+
+            if (resolvedSpecializationCode) {
+                subscriptionParams.set('specialization', resolvedSpecializationCode)
+            }
+
+            if (customerEmail) {
+                subscriptionParams.set('email', customerEmail)
+            }
+
+            resolvedSuccessUrl = `${appUrl}/compras/exito?${subscriptionParams.toString()}`
+            resolvedCancelUrl = `${appUrl}/compras/cancelada?kind=subscription`
+            customerId = undefined
+        }
 
         await recordAnalyticsServerEvent({
             eventName: 'checkout_started',
             eventSource: 'server',
             visitorId: analyticsContext?.visitorId ?? null,
             sessionId: analyticsContext?.sessionId ?? null,
-            userId: user.id,
+            userId: user?.id ?? null,
             touch: (analyticsContext?.touch as any) ?? {
                 funnel: 'checkout',
                 targetPlan: `level_${membershipLevel}`,
@@ -138,26 +180,63 @@ export async function POST(request: NextRequest) {
                 membershipLevel,
                 billingInterval,
                 specializationCode: resolvedSpecializationCode ?? null,
+                guestCheckout: !user,
             },
         })
 
-        const result = await provider.createSubscriptionCheckout({
-            membershipLevel,
-            specializationCode: resolvedSpecializationCode ?? undefined,
-            customerEmail: user.email!,
-            customerId: profile.stripe_customer_id || undefined,
-            userId: user.id,
-            profileId: profile.id,
-            trialDays: plan.trialDays,
-            priceId,
-            metadata: {
-                analytics_visitor_id: analyticsContext?.visitorId ?? '',
-                analytics_session_id: analyticsContext?.sessionId ?? '',
-                attribution_snapshot: JSON.stringify(attributionSnapshot),
-            },
-            successUrl: `${appUrl}/dashboard/payment-success?session_id={CHECKOUT_SESSION_ID}${successPath ? `&next=${encodeURIComponent(successPath)}` : ''}`,
-            cancelUrl: `${appUrl}/dashboard/payment-cancelled`,
-        })
+        const checkoutMetadata = {
+            analytics_visitor_id: analyticsContext?.visitorId ?? '',
+            analytics_session_id: analyticsContext?.sessionId ?? '',
+            attribution_snapshot: JSON.stringify(attributionSnapshot),
+            guest_checkout: user ? 'false' : 'true',
+            buyer_full_name: fullName?.trim() || '',
+            post_checkout_path: nextPath,
+        }
+
+        let result
+        try {
+            result = await provider.createSubscriptionCheckout({
+                membershipLevel,
+                specializationCode: resolvedSpecializationCode ?? undefined,
+                billingInterval,
+                customerEmail,
+                customerId,
+                userId: user?.id || '',
+                profileId: profile.data?.id || '',
+                trialDays: plan.trialDays,
+                priceId,
+                metadata: checkoutMetadata,
+                successUrl: resolvedSuccessUrl,
+                cancelUrl: resolvedCancelUrl,
+            })
+        } catch (stripeError: any) {
+            const message = stripeError?.message || ''
+            if (customerId && (message.includes('No such customer') || message.includes('customer'))) {
+                if (profile.data?.id) {
+                    await (supabase as any)
+                        .from('profiles')
+                        .update({ stripe_customer_id: null })
+                        .eq('id', profile.data.id)
+                }
+
+                result = await provider.createSubscriptionCheckout({
+                    membershipLevel,
+                    specializationCode: resolvedSpecializationCode ?? undefined,
+                    billingInterval,
+                    customerEmail,
+                    customerId: undefined,
+                    userId: user?.id || '',
+                    profileId: profile.data?.id || '',
+                    trialDays: plan.trialDays,
+                    priceId,
+                    metadata: checkoutMetadata,
+                    successUrl: resolvedSuccessUrl,
+                    cancelUrl: resolvedCancelUrl,
+                })
+            } else {
+                throw stripeError
+            }
+        }
 
         return NextResponse.json({
             checkoutUrl: result.checkoutUrl,
@@ -166,7 +245,7 @@ export async function POST(request: NextRequest) {
     } catch (error) {
         console.error('[API] Subscribe error:', error)
         return NextResponse.json(
-            { error: 'Error al crear sesión de pago' },
+            { error: 'Error al crear sesion de pago' },
             { status: 500 }
         )
     }

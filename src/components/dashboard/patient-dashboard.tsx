@@ -4,7 +4,6 @@ import Link from 'next/link'
 import {
     UserCog,
     Calendar,
-    BookOpen,
     Heart,
     ArrowRight,
     Clock,
@@ -85,7 +84,8 @@ export function PatientDashboard({
     nextAppointment,
     contentItems,
 }: PatientDashboardProps) {
-    const greeting = initialGreeting
+    const greeting = initialGreeting || getGreeting()
+    const heroGreeting = userName ? `${greeting}, ${userName}` : 'Tu espacio de bienestar'
     const tip = getWellnessTip()
     const milestones = getPatientMilestones(completedSessions, completedTasks)
 
@@ -107,7 +107,7 @@ export function PatientDashboard({
                     />
                     <div className="flex-1 min-w-0">
                         <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
-                            {greeting}, {userName} 🌱
+                            {heroGreeting}
                         </h1>
                         <p className="text-muted-foreground mt-1">
                             Tu espacio de bienestar personal

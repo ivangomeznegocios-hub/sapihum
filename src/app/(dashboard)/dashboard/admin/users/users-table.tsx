@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Search, Users } from 'lucide-react'
 import { UserRowActions } from './user-forms'
+import { getSpecializationByCode } from '@/lib/specializations'
 
 interface Profile {
     id: string
@@ -13,7 +14,11 @@ interface Profile {
     bio: string | null
     specialty: string | null
     hourly_rate: number | null
+    membership_level: number | null
+    membership_specialization_code?: string | null
+    subscription_status?: string | null
     email?: string
+    email_confirmed_at?: string | null
     is_test?: boolean
 }
 
@@ -70,7 +75,7 @@ export function UsersTable({ users }: UsersTableProps) {
             <CardHeader>
                 <CardTitle>Todos los Usuarios</CardTitle>
                 <CardDescription>
-                    Busca usuarios por nombre, correo o rol. Membresias y accesos se operan en Operaciones.
+                    Busca usuarios por nombre, correo o rol. Desde aqui tambien puedes confirmar correos y ajustar nivel/comercial.
                 </CardDescription>
             </CardHeader>
             <CardContent>
@@ -106,19 +111,20 @@ export function UsersTable({ users }: UsersTableProps) {
                     </div>
                 ) : (
                     <div className="overflow-x-auto rounded-lg border">
-                        <table className="min-w-[880px] w-full">
+                        <table className="min-w-[1040px] w-full">
                             <thead>
                                 <tr className="border-b">
                                     <th className="px-4 py-3 text-left font-medium">Usuario</th>
                                     <th className="px-4 py-3 text-left font-medium">Correo</th>
                                     <th className="px-4 py-3 text-left font-medium">Rol</th>
+                                    <th className="px-4 py-3 text-left font-medium">Acceso</th>
                                     <th className="px-4 py-3 text-left font-medium">Registro</th>
                                     <th className="px-4 py-3 text-right font-medium">Acciones</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {filteredUsers.map((user) => (
-                                    <tr key={user.id} className="border-b hover:bg-muted/50">
+                                    <tr key={user.id} className="border-b align-top hover:bg-muted/50">
                                         <td className="px-4 py-3">
                                             <div className="flex items-center gap-3">
                                                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-gray-400 to-gray-600 font-medium text-white">
@@ -140,14 +146,37 @@ export function UsersTable({ users }: UsersTableProps) {
                                             </div>
                                         </td>
                                         <td className="px-4 py-3">
-                                            <span className="block max-w-[200px] truncate text-sm text-muted-foreground">
-                                                {user.email}
-                                            </span>
+                                            <div className="max-w-[220px] space-y-1">
+                                                <span className="block truncate text-sm text-muted-foreground">
+                                                    {user.email}
+                                                </span>
+                                                <span className={`inline-flex rounded-full px-2 py-0.5 text-[10px] font-medium ${user.email_confirmed_at
+                                                    ? 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300'
+                                                    : 'bg-brand-yellow/20 text-brand-yellow dark:bg-brand-yellow/20 dark:text-brand-yellow'
+                                                    }`}>
+                                                    {user.email_confirmed_at ? 'Correo confirmado' : 'Correo pendiente'}
+                                                </span>
+                                            </div>
                                         </td>
                                         <td className="px-4 py-3">
                                             <span className={`whitespace-nowrap rounded-full px-2 py-1 text-xs ${ROLE_BADGES[user.role] || 'bg-gray-100 text-gray-800'}`}>
                                                 {ROLE_LABELS[user.role] || user.role}
                                             </span>
+                                        </td>
+                                        <td className="px-4 py-3">
+                                            <div className="space-y-1 text-sm">
+                                                <p className="font-medium">
+                                                    Nivel {user.membership_level ?? 0}
+                                                </p>
+                                                {user.membership_specialization_code ? (
+                                                    <p className="text-xs text-muted-foreground">
+                                                        {getSpecializationByCode(user.membership_specialization_code)?.name || user.membership_specialization_code}
+                                                    </p>
+                                                ) : null}
+                                                <span className="inline-flex rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
+                                                    {user.subscription_status || 'sin suscripcion'}
+                                                </span>
+                                            </div>
                                         </td>
                                         <td className="px-4 py-3">
                                             <span className="whitespace-nowrap text-sm text-muted-foreground">
@@ -163,6 +192,10 @@ export function UsersTable({ users }: UsersTableProps) {
                                                     bio: user.bio,
                                                     specialty: user.specialty,
                                                     hourly_rate: user.hourly_rate,
+                                                    membership_level: user.membership_level,
+                                                    membership_specialization_code: user.membership_specialization_code ?? null,
+                                                    subscription_status: user.subscription_status ?? null,
+                                                    email_confirmed_at: user.email_confirmed_at ?? null,
                                                     is_test: user.is_test,
                                                 }}
                                             />

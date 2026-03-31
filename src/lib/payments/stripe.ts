@@ -13,7 +13,7 @@ import type {
     SubscriptionWebhookData,
     WebhookEvent,
 } from './types'
-import { getSubscriptionPlan } from './config'
+import { getSubscriptionPlan, isStripePriceIdConfigured } from './config'
 
 // Initialize Stripe with the secret key
 function getStripeInstance(): Stripe {
@@ -125,17 +125,36 @@ export const stripeAdapter: PaymentProviderAdapter = {
             throw new Error(`No subscription plan found for membership level ${params.membershipLevel}`)
         }
 
-        // Build checkout session params
-        const resolvedPriceId = params.priceId || plan.monthly.stripePriceId
+        const billingInterval = params.billingInterval || 'monthly'
+        const resolvedPriceId =
+            params.priceId ||
+            (billingInterval === 'annual' ? plan.annual.stripePriceId : plan.monthly.stripePriceId)
+        const useCatalogPrice = isStripePriceIdConfigured(resolvedPriceId)
+        const intervalAmount = billingInterval === 'annual' ? plan.annual.amount : plan.monthly.amount
+
+        const lineItem: Stripe.Checkout.SessionCreateParams.LineItem = useCatalogPrice
+            ? {
+                price: resolvedPriceId,
+                quantity: 1,
+            }
+            : {
+                price_data: {
+                    currency: 'mxn',
+                    product_data: {
+                        name: plan.name,
+                    },
+                    recurring: {
+                        interval: billingInterval === 'annual' ? 'year' : 'month',
+                    },
+                    unit_amount: Math.round(intervalAmount * 100),
+                },
+                quantity: 1,
+            }
+
         const sessionParams: Stripe.Checkout.SessionCreateParams = {
             mode: 'subscription',
             payment_method_types: ['card'],
-            line_items: [
-                {
-                    price: resolvedPriceId,
-                    quantity: 1,
-                },
-            ],
+            line_items: [lineItem],
             success_url: params.successUrl,
             cancel_url: params.cancelUrl,
             customer_email: params.customerId ? undefined : (params.customerEmail || undefined),

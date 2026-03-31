@@ -87,7 +87,7 @@ export default async function DashboardPage() {
         redirect('/auth/login')
     }
 
-    const userName = profile.full_name?.split(' ')[0] || 'Usuario'
+    const userName = profile.full_name?.trim().split(/\s+/)[0] || ''
     const userRole = profile.role
     const commercialAccess = await getCommercialAccessContext({
         supabase,
@@ -96,7 +96,7 @@ export default async function DashboardPage() {
     })
     const effectiveMembershipLevel = commercialAccess?.membershipLevel ?? 0
     const userTimezone = (profile as any).timezone || DEFAULT_TIMEZONE
-    const greeting = getGreetingForTimezone(userTimezone)
+    const greeting = userName ? getGreetingForTimezone(userTimezone) : ''
 
     if (userRole === 'support') {
         redirect('/dashboard/admin/operations')

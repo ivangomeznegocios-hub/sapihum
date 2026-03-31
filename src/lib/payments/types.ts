@@ -14,6 +14,7 @@ export type TransactionStatus = 'pending' | 'completed' | 'failed' | 'refunded'
 export interface CreateSubscriptionParams {
     membershipLevel: number
     specializationCode?: string
+    billingInterval?: 'monthly' | 'annual'
     customerEmail: string
     customerId?: string           // Existing Stripe customer ID
     userId: string

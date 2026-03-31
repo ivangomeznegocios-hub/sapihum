@@ -1,5 +1,5 @@
 import { createClient, createAdminClient, getUserProfile } from '@/lib/supabase/server'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { redirect } from 'next/navigation'
 import { AssignButton, AddUserButton } from './user-forms'
@@ -20,7 +20,11 @@ interface Profile {
     bio: string | null
     specialty: string | null
     hourly_rate: number | null
+    membership_level: number | null
+    membership_specialization_code?: string | null
+    subscription_status?: string | null
     email?: string
+    email_confirmed_at?: string | null
     is_test?: boolean
 }
 
@@ -45,7 +49,7 @@ export default async function AdminUsersPage() {
         .order('created_at', { ascending: false })
 
     // Get auth users to match emails
-    const { data: authData } = await adminSupabase.auth.admin.listUsers()
+    const { data: authData } = await adminSupabase.auth.admin.listUsers({ page: 1, perPage: 1000 })
     const authUsers = authData?.users || []
 
     const allUsers: Profile[] = (users || []).map((u: any) => {
@@ -53,7 +57,8 @@ export default async function AdminUsersPage() {
         return {
             ...u,
             is_test: u.is_test || false,
-            email: authUser?.email || 'Sin correo'
+            email: authUser?.email || u.email || 'Sin correo',
+            email_confirmed_at: authUser?.email_confirmed_at || null,
         }
     })
 
@@ -73,7 +78,7 @@ export default async function AdminUsersPage() {
                         Gestión de Usuarios
                     </h1>
                     <p className="text-muted-foreground mt-1">
-                        Administra identidades y perfiles. Membresias, compras y accesos se operan en Operaciones.
+                        Administra identidades, confirma correos, ajusta niveles y edita perfiles. Operaciones sigue disponible para casos avanzados.
                     </p>
                 </div>
                 <div className="flex w-full flex-wrap items-stretch gap-3 md:w-auto md:justify-end">

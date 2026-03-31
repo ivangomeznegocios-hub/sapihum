@@ -17,6 +17,7 @@ import {
   X,
 } from 'lucide-react'
 import { WaitlistCTA } from '@/components/specializations/waitlist-cta'
+import { SubscribeButton } from '@/components/payments/SubscribeButton'
 
 /* ─── Types for serialized data from server ─── */
 interface SerializedPlan {
@@ -195,22 +196,31 @@ export function PricingContent({
               </ul>
             </div>
 
-            <Link
-              href={isLoggedIn ? '/dashboard/subscription' : '/auth/register?plan=level1'}
-              className="inline-block"
-            >
-              <Button
-                size="lg"
-                className="gap-2"
-                data-analytics-cta
-                data-analytics-label={isLoggedIn ? 'Gestionar en mi cuenta' : 'Comenzar Nivel 1'}
-                data-analytics-funnel={isLoggedIn ? 'subscription' : 'registration'}
-                data-analytics-plan="level1"
-              >
-                {isLoggedIn ? 'Gestionar en mi cuenta' : 'Comenzar Nivel 1'}
-                <ArrowRight className="h-4 w-4" />
-              </Button>
-            </Link>
+            {isLoggedIn ? (
+              <Link href="/dashboard/subscription" className="inline-block">
+                <Button
+                  size="lg"
+                  className="gap-2"
+                  data-analytics-cta
+                  data-analytics-label="Gestionar en mi cuenta"
+                  data-analytics-funnel="subscription"
+                  data-analytics-plan="level1"
+                >
+                  Gestionar en mi cuenta
+                  <ArrowRight className="h-4 w-4" />
+                </Button>
+              </Link>
+            ) : (
+              <div className="max-w-sm">
+                <SubscribeButton
+                  membershipLevel={1}
+                  billingInterval={isAnnual ? 'annual' : 'monthly'}
+                  label="Comprar Nivel 1"
+                  title="tu Nivel 1"
+                  successPath="/dashboard/subscription"
+                />
+              </div>
+            )}
           </CardContent>
         </Card>
       </section>
@@ -302,27 +312,33 @@ export function PricingContent({
                     </div>
                   )}
 
-                  <Link
-                    href={
-                      isLoggedIn
-                        ? '/dashboard/subscription'
-                        : `/auth/register?plan=level2&specialization=${spec.code}`
-                    }
-                    className="inline-block"
-                  >
-                    <Button
-                      size="lg"
-                      className="gap-2"
-                      data-analytics-cta
-                      data-analytics-label={isLoggedIn ? 'Subir desde mi cuenta' : `Quiero ${spec.name}`}
-                      data-analytics-funnel={isLoggedIn ? 'subscription' : 'registration'}
-                      data-analytics-plan="level2"
-                      data-analytics-specialization={spec.code}
-                    >
-                      {isLoggedIn ? 'Subir desde mi cuenta' : `Quiero ${spec.name}`}
-                      <ArrowRight className="h-4 w-4" />
-                    </Button>
-                  </Link>
+                  {isLoggedIn ? (
+                    <Link href="/dashboard/subscription" className="inline-block">
+                      <Button
+                        size="lg"
+                        className="gap-2"
+                        data-analytics-cta
+                        data-analytics-label="Subir desde mi cuenta"
+                        data-analytics-funnel="subscription"
+                        data-analytics-plan="level2"
+                        data-analytics-specialization={spec.code}
+                      >
+                        Subir desde mi cuenta
+                        <ArrowRight className="h-4 w-4" />
+                      </Button>
+                    </Link>
+                  ) : (
+                    <div className="max-w-sm">
+                      <SubscribeButton
+                        membershipLevel={2}
+                        specializationCode={spec.code}
+                        billingInterval={isAnnual ? 'annual' : 'monthly'}
+                        label={`Comprar ${spec.name}`}
+                        title={spec.name}
+                        successPath="/dashboard/subscription"
+                      />
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             )

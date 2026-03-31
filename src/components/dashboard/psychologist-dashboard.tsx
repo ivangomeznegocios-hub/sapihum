@@ -81,7 +81,8 @@ export function PsychologistDashboard({
     contentItems,
     pendingReferrals,
 }: PsychologistDashboardProps) {
-    const greeting = initialGreeting
+    const greeting = initialGreeting || getGreeting()
+    const heroGreeting = userName ? `${greeting}, ${userName}` : 'Tu espacio profesional'
 
     // Level 1: Comunidad y Crecimiento
     if (membershipLevel === 1) {
@@ -101,7 +102,7 @@ export function PsychologistDashboard({
                         />
                         <div className="flex-1 min-w-0">
                             <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
-                                {greeting}, {userName} 👋
+                                {heroGreeting}
                             </h1>
                             <p className="text-muted-foreground mt-1">
                                 Tu espacio de crecimiento profesional en SAPIHUM
@@ -255,7 +256,7 @@ export function PsychologistDashboard({
                     />
                     <div className="flex-1 min-w-0">
                         <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
-                            {greeting}, {userName} 👋
+                            {heroGreeting}
                         </h1>
                         <p className="text-muted-foreground mt-1">
                             Tu {membershipLevel === 3 ? 'panel premium de gestión y marketing' : 'consultorio digital'}

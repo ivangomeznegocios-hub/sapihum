@@ -5,6 +5,7 @@
 import { createClient as createServiceClient } from '@supabase/supabase-js'
 import { recordAnalyticsServerEvent } from '@/lib/analytics/server'
 import type { AttributionSnapshot } from '@/lib/analytics/types'
+import { getAppUrl } from '@/lib/config/app-url'
 import { grantEventEntitlements } from '@/lib/events/entitlements'
 import { sendEmail } from '@/lib/email/index'
 import { buildEventPurchaseEmail } from '@/lib/email/templates'
@@ -74,6 +75,165 @@ function getPrimaryTouch(snapshot: AttributionSnapshot) {
 function normalizeWebhookValue(value: string | null | undefined) {
     const normalized = value?.trim()
     return normalized ? normalized : null
+}
+
+function normalizeEmailValue(value: string | null | undefined) {
+    return normalizeWebhookValue(value)?.toLowerCase() ?? null
+}
+
+function isDuplicateUserError(error: { message?: string } | null | undefined) {
+    const message = error?.message?.toLowerCase() ?? ''
+    return message.includes('already') || message.includes('exists') || message.includes('registered')
+}
+
+async function findAuthUserByEmail(supabase: ReturnType<typeof getServiceSupabase>, email: string) {
+    const normalizedEmail = email.trim().toLowerCase()
+
+    for (let page = 1; page <= 10; page += 1) {
+        const { data, error } = await supabase.auth.admin.listUsers({ page, perPage: 200 })
+        if (error) {
+            throw error
+        }
+
+        const users = data?.users ?? []
+        const match = users.find((entry) => entry.email?.trim().toLowerCase() === normalizedEmail)
+        if (match) {
+            return match
+        }
+
+        if (users.length < 200) {
+            break
+        }
+    }
+
+    return null
+}
+
+async function sendGuestSubscriptionAccessLink(email: string, nextPath: string) {
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+    const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+
+    if (!url || !anonKey) {
+        throw new Error('Supabase anon credentials are not configured')
+    }
+
+    const client = createServiceClient(url, anonKey, {
+        auth: {
+            autoRefreshToken: false,
+            persistSession: false,
+        },
+    })
+
+    const safeNextPath = nextPath.startsWith('/') ? nextPath : '/dashboard/subscription'
+    const { error } = await client.auth.signInWithOtp({
+        email,
+        options: {
+            emailRedirectTo: `${getAppUrl()}/auth/callback?next=${encodeURIComponent(safeNextPath)}`,
+        },
+    })
+
+    if (error) {
+        throw error
+    }
+}
+
+async function resolveSubscriptionIdentity(params: {
+    supabase: ReturnType<typeof getServiceSupabase>
+    providerCustomerId?: string
+    customerEmail?: string
+    membershipLevel: number
+    specializationCode?: string | null
+    fullName?: string | null
+}) {
+    const normalizedEmail = normalizeEmailValue(params.customerEmail)
+    let profileId: string | null = null
+    let userId: string | null = null
+    let createdNewUser = false
+
+    if (params.providerCustomerId) {
+        const { data: profile } = await params.supabase
+            .from('profiles')
+            .select('id')
+            .eq('stripe_customer_id', params.providerCustomerId)
+            .maybeSingle()
+
+        if (profile?.id) {
+            profileId = profile.id
+            userId = profile.id
+        }
+    }
+
+    if (!profileId && normalizedEmail) {
+        const existingUser = await findAuthUserByEmail(params.supabase, normalizedEmail)
+        if (existingUser) {
+            userId = existingUser.id
+            profileId = existingUser.id
+        }
+    }
+
+    if (!profileId && normalizedEmail) {
+        const generatedPassword = `Sapihum_${crypto.randomUUID()}!`
+        const { data: createdUserResponse, error: createError } = await params.supabase.auth.admin.createUser({
+            email: normalizedEmail,
+            password: generatedPassword,
+            email_confirm: true,
+            user_metadata: {
+                full_name: params.fullName || undefined,
+                name: params.fullName || undefined,
+                source: 'guest_subscription_checkout',
+                purchased_membership_level: params.membershipLevel,
+                purchased_specialization_code: params.specializationCode || undefined,
+            },
+        })
+
+        if (createError && !isDuplicateUserError(createError)) {
+            throw createError
+        }
+
+        const resolvedUser = createdUserResponse?.user || await findAuthUserByEmail(params.supabase, normalizedEmail)
+        if (resolvedUser) {
+            userId = resolvedUser.id
+            profileId = resolvedUser.id
+            createdNewUser = Boolean(createdUserResponse?.user)
+        }
+    }
+
+    if (!profileId || !userId) {
+        return {
+            profileId: null,
+            userId: null,
+            createdNewUser: false,
+            normalizedEmail,
+        }
+    }
+
+    const profileUpdate: Record<string, any> = {
+        updated_at: new Date().toISOString(),
+    }
+
+    if (params.providerCustomerId) {
+        profileUpdate.stripe_customer_id = params.providerCustomerId
+    }
+
+    if (params.fullName) {
+        profileUpdate.full_name = params.fullName
+    }
+
+    if (createdNewUser && params.membershipLevel > 0) {
+        profileUpdate.role = 'psychologist'
+    }
+
+    await params.supabase
+        .from('profiles')
+        .update(profileUpdate)
+        .eq('id', profileId)
+
+    return {
+        profileId,
+        userId,
+        createdNewUser,
+        normalizedEmail,
+    }
 }
 
 async function upsertPremiumCommission(params: {
@@ -514,44 +674,24 @@ export async function fulfillSubscriptionCreated(data: SubscriptionWebhookData):
         .eq('provider_subscription_id', data.providerSubscriptionId)
         .maybeSingle()
 
-    let profileId: string | null = null
-    let userId: string | null = null
-
-    if (data.providerCustomerId) {
-        const { data: profile } = await supabase
-            .from('profiles')
-            .select('id')
-            .eq('stripe_customer_id', data.providerCustomerId)
-            .single()
-
-        if (profile) {
-            profileId = profile.id
-            userId = profile.id
-        }
-    }
-
-    if (!profileId && data.customerEmail) {
-        const { data: users } = await supabase.auth.admin.listUsers()
-        const user = users?.users?.find((entry) => entry.email === data.customerEmail)
-        if (user) {
-            userId = user.id
-            profileId = user.id
-
-            await supabase
-                .from('profiles')
-                .update({ stripe_customer_id: data.providerCustomerId })
-                .eq('id', profileId)
-        }
-    }
+    const membershipLevel = data.membershipLevel || (data.priceId ? getPlanByPriceId(data.priceId)?.membershipLevel : null) || 0
+    const specializationCode =
+        data.specializationCode || (data.priceId ? getPlanByPriceId(data.priceId)?.specializationCode : null) || null
+    const identity = await resolveSubscriptionIdentity({
+        supabase,
+        providerCustomerId: data.providerCustomerId,
+        customerEmail: data.customerEmail,
+        membershipLevel,
+        specializationCode,
+        fullName: normalizeWebhookValue(data.metadata?.buyer_full_name),
+    })
+    const profileId = identity.profileId
+    const userId = identity.userId
 
     if (!profileId || !userId) {
         console.error('[Payment] Could not find user for subscription:', data)
         return
     }
-
-    const membershipLevel = data.membershipLevel || (data.priceId ? getPlanByPriceId(data.priceId)?.membershipLevel : null) || 0
-    const specializationCode =
-        data.specializationCode || (data.priceId ? getPlanByPriceId(data.priceId)?.specializationCode : null) || null
 
     await supabase
         .from('subscriptions')
@@ -593,6 +733,17 @@ export async function fulfillSubscriptionCreated(data: SubscriptionWebhookData):
     await syncMembershipEntitlementsForUser(profileId)
 
     console.log(`[Payment] Subscription activated: user=${profileId}, level=${membershipLevel}`)
+
+    if (identity.createdNewUser && data.metadata?.guest_checkout === 'true' && identity.normalizedEmail) {
+        try {
+            await sendGuestSubscriptionAccessLink(
+                identity.normalizedEmail,
+                normalizeWebhookValue(data.metadata?.post_checkout_path) || '/dashboard/subscription'
+            )
+        } catch (magicLinkError) {
+            console.error('[Payment] Failed to send guest subscription access link:', magicLinkError)
+        }
+    }
 
     if (!existingSubscription) {
         await recordAnalyticsServerEvent({

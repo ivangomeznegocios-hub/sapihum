@@ -34,11 +34,16 @@ export default async function PurchaseCancelledPage({ searchParams }: PageProps)
     const { slug, kind } = await searchParams
     const event = slug && kind !== 'formation' ? await getPublicEventBySlug(slug) : null
     const formation = slug && !event ? await getFormationBySlug(slug) : null
-    const backHref = event
-        ? `/${event.public_kind}/${event.slug}`
-        : formation
-            ? `/formaciones/${formation.slug}`
-            : '/eventos'
+    const backHref = kind === 'subscription'
+        ? '/precios'
+        : event
+            ? `/${event.public_kind}/${event.slug}`
+            : formation
+                ? `/formaciones/${formation.slug}`
+                : '/eventos'
+    const description = kind === 'subscription'
+        ? 'No se realizo ningun cargo de membresia. Si quieres, puedes volver a precios y retomar la compra cuando te convenga.'
+        : 'No se realizo ningun cargo. Si quieres, puedes volver a la pagina del activo y retomar la compra cuando te convenga.'
 
     return (
         <section className="mx-auto flex w-full max-w-3xl flex-1 items-center px-4 py-12 sm:px-6 lg:px-8">
@@ -50,7 +55,7 @@ export default async function PurchaseCancelledPage({ searchParams }: PageProps)
                     <div className="space-y-2">
                         <CardTitle className="text-3xl">Compra cancelada</CardTitle>
                         <CardDescription className="text-base">
-                            No se realizo ningun cargo. Si quieres, puedes volver a la pagina del activo y retomar la compra cuando te convenga.
+                            {description}
                         </CardDescription>
                     </div>
                 </CardHeader>

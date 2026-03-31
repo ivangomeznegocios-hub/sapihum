@@ -1,6 +1,6 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { CalendarDays, Mic2, ArrowRight, Users, Eye, Award, DollarSign, Clock, CheckCircle2, TrendingUp } from 'lucide-react'
+import { CalendarDays, Mic2, ArrowRight, Users, DollarSign, Clock, CheckCircle2, TrendingUp } from 'lucide-react'
 import Link from 'next/link'
 import { ProgressRing } from './ui/ProgressRing'
 import { MilestoneTracker, type Milestone } from './ui/MilestoneTracker'
@@ -67,7 +67,8 @@ export function PonenteDashboard({
     currentMonthEarnings = 0,
     nextPaymentDate = null,
 }: PonenteDashboardProps) {
-    const greeting = initialGreeting
+    const greeting = initialGreeting || getGreeting()
+    const heroGreeting = userName ? `${greeting}, ${userName}` : 'Tu panel de ponente'
     const milestones = getSpeakerMilestones(profileCompleteness, totalEvents, totalAttendees)
 
     return (
@@ -84,7 +85,7 @@ export function PonenteDashboard({
                     />
                     <div className="flex-1 min-w-0">
                         <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
-                            {greeting}, {userName} 🎙️
+                            {heroGreeting}
                         </h1>
                         <p className="text-muted-foreground mt-1 text-lg">
                             Tu panel de ponente. Gestiona tus eventos y perfil profesional.
@@ -159,6 +160,15 @@ export function PonenteDashboard({
                         </p>
                     </div>
                 </div>
+                {nextPaymentDate && (
+                    <p className="mt-4 text-xs text-muted-foreground">
+                        Proximo pago estimado: {new Date(nextPaymentDate).toLocaleDateString('es-MX', {
+                            day: 'numeric',
+                            month: 'long',
+                            year: 'numeric',
+                        })}
+                    </p>
+                )}
             </div>
 
             {/* Stats */}
