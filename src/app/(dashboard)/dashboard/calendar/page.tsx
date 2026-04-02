@@ -1,22 +1,52 @@
-import { getCurrentInternalAccessContext } from '@/lib/access/internal-server'
-import { canAccessCalendarModule } from '@/lib/access/internal-modules'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
-import { NewAppointmentButton, AppointmentActions } from './calendar-forms'
-import {
-    Calendar,
-    Clock,
-    Video,
-    MapPin,
-    CalendarDays,
-    CheckCircle2,
-    XCircle,
-    Timer
-} from 'lucide-react'
+import { Calendar, CalendarCheck2, CalendarDays, Plus, RefreshCcw, ShieldCheck } from 'lucide-react'
+import { getCurrentInternalAccessContext } from '@/lib/access/internal-server'
+import { canAccessCalendarModule } from '@/lib/access/internal-modules'
+import { getGoogleCalendarEventsForUser, getGoogleIntegrationForUser, isGoogleCalendarSyncAvailable } from '@/lib/calendar-sync'
+import { ScheduleCalendar, type ScheduleCalendarItem } from '@/components/calendar/schedule-calendar'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { NewAppointmentButton } from './calendar-forms'
 
-// Type for appointments with patient/psychologist info
+type SearchParams = Promise<Record<string, string | string[] | undefined>>
+
+function readSingleParam(value: string | string[] | undefined) {
+    return Array.isArray(value) ? value[0] : value
+}
+
+function getCalendarNoticeMessage(notice: string | undefined) {
+    switch (notice) {
+        case 'google_connected':
+            return {
+                tone: 'success',
+                text: 'Google Calendar quedo conectado. A partir de ahora, esta agenda puede mostrar tus bloques externos y evitar cruces.',
+            }
+        case 'google_denied':
+            return {
+                tone: 'error',
+                text: 'Cancelaste la conexion con Google Calendar antes de completarla.',
+            }
+        case 'google_state_error':
+            return {
+                tone: 'error',
+                text: 'No pudimos validar la conexion con Google Calendar. Intenta de nuevo.',
+            }
+        case 'google_error':
+            return {
+                tone: 'error',
+                text: 'No fue posible completar la conexion con Google Calendar. Intenta de nuevo.',
+            }
+        case 'google_unavailable':
+            return {
+                tone: 'error',
+                text: 'La sincronizacion de Google Calendar todavia no esta habilitada.',
+            }
+        default:
+            return null
+    }
+}
+
 interface AppointmentWithDetails {
     id: string
     start_time: string
@@ -29,30 +59,71 @@ interface AppointmentWithDetails {
     psychologist: { full_name: string } | null
 }
 
-export default async function CalendarPage() {
+function getAppointmentStatusLabel(status: string) {
+    switch (status) {
+        case 'pending':
+            return 'Pendiente'
+        case 'confirmed':
+            return 'Confirmada'
+        case 'completed':
+            return 'Completada'
+        case 'cancelled':
+            return 'Cancelada'
+        default:
+            return status
+    }
+}
+
+function getEventStatusLabel(status: string) {
+    switch (status) {
+        case 'draft':
+            return 'Borrador'
+        case 'upcoming':
+            return 'Programado'
+        case 'live':
+            return 'En vivo'
+        case 'completed':
+            return 'Finalizado'
+        case 'cancelled':
+            return 'Cancelado'
+        default:
+            return status
+    }
+}
+
+export default async function CalendarPage({ searchParams }: { searchParams: SearchParams }) {
     const { supabase, profile, viewer } = await getCurrentInternalAccessContext()
+    const params = await searchParams
 
     if (!profile || !viewer) {
         redirect('/auth/login')
     }
 
-    const userRole = profile.role
-    const today = new Date()
-
     if (!canAccessCalendarModule(viewer)) {
-        if (userRole === 'psychologist') {
+        if (profile.role === 'psychologist') {
             redirect('/dashboard/subscription')
         }
 
         redirect('/dashboard')
     }
 
-    // Fetch appointments based on role
-    let appointments: AppointmentWithDetails[] = []
+    const today = new Date()
+    const monthStart = new Date(today.getFullYear(), today.getMonth(), 1).toISOString()
+    const scheduleWindowEnd = new Date(today.getFullYear(), today.getMonth() + 4, 1).toISOString()
+    const userRole = profile.role
+    const supportsGoogleSync = userRole === 'psychologist' || userRole === 'ponente'
+    const googleSyncAvailable = supportsGoogleSync ? await isGoogleCalendarSyncAvailable() : false
+    const googleIntegration = googleSyncAvailable
+        ? await getGoogleIntegrationForUser(profile.id)
+        : null
+    const googleConnectHref = `/api/calendar/google/connect?next=${encodeURIComponent('/dashboard/calendar#google-sync')}`
+    const calendarNotice = getCalendarNoticeMessage(readSingleParam(params.calendar_notice))
+
     let patients: { id: string; full_name: string | null }[] = []
+    let scheduleItems: ScheduleCalendarItem[] = []
+    let externalItems: ScheduleCalendarItem[] = []
 
     if (userRole === 'psychologist') {
-        // Get psychologist's patients for the form
         const { data: relationships } = await (supabase
             .from('patient_psychologist_relationships') as any)
             .select('patient_id')
@@ -60,153 +131,243 @@ export default async function CalendarPage() {
             .eq('status', 'active')
 
         if (relationships && relationships.length > 0) {
-            const patientIds = relationships.map((r: any) => r.patient_id)
+            const patientIds = relationships.map((relationship: any) => relationship.patient_id)
             const { data: patientProfiles } = await (supabase
                 .from('profiles') as any)
                 .select('id, full_name')
                 .in('id', patientIds)
+
             patients = patientProfiles || []
         }
 
-        const { data } = await (supabase
+        const { data: appointmentsData } = await (supabase
             .from('appointments') as any)
             .select(`
                 id, start_time, end_time, status, type, notes, meeting_link,
                 patient:patient_id(full_name)
             `)
             .eq('psychologist_id', profile.id)
-            .gte('start_time', new Date(today.getFullYear(), today.getMonth(), today.getDate()).toISOString())
+            .gte('end_time', monthStart)
             .neq('status', 'cancelled')
             .order('start_time', { ascending: true })
-            .limit(50)
+            .limit(200)
 
-        appointments = (data || []).map((apt: any) => ({
-            ...apt,
-            patient: apt.patient,
-            psychologist: null
+        const appointments: AppointmentWithDetails[] = (appointmentsData || []).map((appointment: any) => ({
+            ...appointment,
+            patient: appointment.patient,
+            psychologist: null,
+        }))
+
+        scheduleItems = appointments.map((appointment) => ({
+            id: appointment.id,
+            kind: 'appointment',
+            title: appointment.patient?.full_name || 'Paciente',
+            subtitle: appointment.type === 'video' ? 'Sesion online' : 'Sesion presencial',
+            startTime: appointment.start_time,
+            endTime: appointment.end_time,
+            status: appointment.status,
+            statusLabel: getAppointmentStatusLabel(appointment.status),
+            modality: appointment.type === 'video' ? 'online' : 'presencial',
+            location: appointment.type === 'video' ? null : 'Consulta presencial',
         }))
     } else if (userRole === 'patient') {
-        const { data } = await (supabase
+        const { data: appointmentsData } = await (supabase
             .from('appointments') as any)
             .select(`
                 id, start_time, end_time, status, type, notes, meeting_link,
                 psychologist:psychologist_id(full_name)
             `)
             .eq('patient_id', profile.id)
-            .gte('start_time', new Date(today.getFullYear(), today.getMonth(), today.getDate()).toISOString())
+            .gte('end_time', monthStart)
             .neq('status', 'cancelled')
             .order('start_time', { ascending: true })
-            .limit(50)
+            .limit(200)
 
-        appointments = (data || []).map((apt: any) => ({
-            ...apt,
+        const appointments: AppointmentWithDetails[] = (appointmentsData || []).map((appointment: any) => ({
+            ...appointment,
             patient: null,
-            psychologist: apt.psychologist
+            psychologist: appointment.psychologist,
+        }))
+
+        scheduleItems = appointments.map((appointment) => ({
+            id: appointment.id,
+            kind: 'appointment',
+            title: appointment.psychologist?.full_name || 'Psicologo',
+            subtitle: appointment.type === 'video' ? 'Sesion online' : 'Sesion presencial',
+            startTime: appointment.start_time,
+            endTime: appointment.end_time,
+            status: appointment.status,
+            statusLabel: getAppointmentStatusLabel(appointment.status),
+            modality: appointment.type === 'video' ? 'online' : 'presencial',
+            location: appointment.type === 'video' ? null : 'Consulta presencial',
         }))
     } else if (userRole === 'admin') {
-        const { data } = await (supabase
+        const { data: appointmentsData } = await (supabase
             .from('appointments') as any)
             .select(`
                 id, start_time, end_time, status, type, notes, meeting_link,
                 patient:patient_id(full_name),
                 psychologist:psychologist_id(full_name)
             `)
-            .gte('start_time', new Date(today.getFullYear(), today.getMonth(), today.getDate()).toISOString())
+            .gte('end_time', monthStart)
             .order('start_time', { ascending: true })
-            .limit(50)
+            .limit(200)
 
-        appointments = data || []
-    }
+        const appointments: AppointmentWithDetails[] = appointmentsData || []
 
-    // Group appointments by day
-    const groupedByDay = appointments.reduce((acc, apt) => {
-        const dayKey = new Date(apt.start_time).toLocaleDateString('es-MX', {
-            weekday: 'long',
-            day: 'numeric',
-            month: 'long',
-            year: 'numeric'
-        })
-        if (!acc[dayKey]) acc[dayKey] = []
-        acc[dayKey].push(apt)
-        return acc
-    }, {} as Record<string, AppointmentWithDetails[]>)
+        scheduleItems = appointments.map((appointment) => ({
+            id: appointment.id,
+            kind: 'appointment',
+            title: `${appointment.patient?.full_name || 'Paciente'} -> ${appointment.psychologist?.full_name || 'Psicologo'}`,
+            subtitle: appointment.type === 'video' ? 'Sesion online' : 'Sesion presencial',
+            startTime: appointment.start_time,
+            endTime: appointment.end_time,
+            status: appointment.status,
+            statusLabel: getAppointmentStatusLabel(appointment.status),
+            modality: appointment.type === 'video' ? 'online' : 'presencial',
+            location: appointment.type === 'video' ? null : 'Consulta presencial',
+        }))
+    } else if (userRole === 'ponente') {
+        const { data: createdEvents } = await (supabase
+            .from('events') as any)
+            .select('id, title, start_time, end_time, status, event_type, location')
+            .eq('created_by', profile.id)
+            .gte('end_time', monthStart)
+            .neq('status', 'cancelled')
+            .order('start_time', { ascending: true })
+            .limit(200)
 
-    // Format time
-    const formatTime = (dateStr: string) => {
-        return new Date(dateStr).toLocaleTimeString('es-MX', {
-            hour: '2-digit',
-            minute: '2-digit',
-            hour12: true
-        })
-    }
+        const { data: speakerLinks } = await (supabase
+            .from('event_speakers') as any)
+            .select('event_id')
+            .eq('speaker_id', profile.id)
 
-    // Status config
-    const getStatusConfig = (status: string) => {
-        switch (status) {
-            case 'pending':
-                return {
-                    label: 'Pendiente',
-                    color: 'bg-brand-yellow text-brand-yellow dark:bg-brand-yellow/30 dark:text-brand-yellow',
-                    icon: <Timer className="h-3 w-3" />,
-                    dot: 'bg-brand-yellow'
-                }
-            case 'confirmed':
-                return {
-                    label: 'Confirmada',
-                    color: 'bg-brand-brown text-brand-brown dark:bg-brand-brown/30 dark:text-brand-brown',
-                    icon: <CheckCircle2 className="h-3 w-3" />,
-                    dot: 'bg-brand-brown'
-                }
-            case 'completed':
-                return {
-                    label: 'Completada',
-                    color: 'bg-neutral-100 text-neutral-600 dark:bg-neutral-800 dark:text-neutral-400',
-                    icon: <CheckCircle2 className="h-3 w-3" />,
-                    dot: 'bg-neutral-400'
-                }
-            case 'cancelled':
-                return {
-                    label: 'Cancelada',
-                    color: 'surface-alert-error dark:bg-red-900/30 dark:text-red-300',
-                    icon: <XCircle className="h-3 w-3" />,
-                    dot: 'bg-red-500'
-                }
-            default:
-                return {
-                    label: status,
-                    color: 'bg-gray-100 text-gray-800',
-                    icon: null,
-                    dot: 'bg-gray-400'
-                }
+        const relatedEventIds = Array.from(new Set(
+            (speakerLinks || []).map((link: any) => link.event_id).filter(Boolean)
+        ))
+
+        let assignedEvents: any[] = []
+
+        if (relatedEventIds.length > 0) {
+            const { data } = await (supabase
+                .from('events') as any)
+                .select('id, title, start_time, end_time, status, event_type, location')
+                .in('id', relatedEventIds)
+                .gte('end_time', monthStart)
+                .neq('status', 'cancelled')
+                .order('start_time', { ascending: true })
+                .limit(200)
+
+            assignedEvents = data || []
         }
+
+        const mergedEvents = new Map<string, any>()
+
+        for (const event of createdEvents || []) {
+            mergedEvents.set(event.id, {
+                ...event,
+                subtitle: 'Curso o evento creado por ti',
+            })
+        }
+
+        for (const event of assignedEvents) {
+            const existingEvent = mergedEvents.get(event.id)
+
+            if (existingEvent) {
+                mergedEvents.set(event.id, {
+                    ...existingEvent,
+                    subtitle: 'Curso a tu cargo dentro de la plataforma',
+                })
+                continue
+            }
+
+            mergedEvents.set(event.id, {
+                ...event,
+                subtitle: 'Participas como ponente en este evento',
+            })
+        }
+
+        scheduleItems = Array.from(mergedEvents.values())
+            .sort((a, b) => new Date(a.start_time).getTime() - new Date(b.start_time).getTime())
+            .map((event) => ({
+                id: event.id,
+                kind: 'event',
+                title: event.title || 'Evento',
+                subtitle: event.subtitle,
+                startTime: event.start_time,
+                endTime: event.end_time,
+                status: event.status,
+                statusLabel: getEventStatusLabel(event.status),
+                modality: event.event_type === 'presencial' ? 'presencial' : 'online',
+                location: event.event_type === 'presencial' ? (event.location || 'Presencial') : null,
+                href: `/dashboard/events/${event.id}`,
+            }))
     }
 
-    // Calculate stats
-    const totalAppointments = appointments.length
-    const confirmedCount = appointments.filter(a => a.status === 'confirmed').length
-    const pendingCount = appointments.filter(a => a.status === 'pending').length
+    if (googleSyncAvailable) {
+        const externalEvents = await getGoogleCalendarEventsForUser(profile.id, monthStart, scheduleWindowEnd)
 
-    // Get today's appointments
-    const todayStr = today.toDateString()
-    const todayAppointments = appointments.filter(a => new Date(a.start_time).toDateString() === todayStr)
+        externalItems = externalEvents.map((event) => ({
+            id: event.id,
+            kind: 'external',
+            title: event.title,
+            subtitle: event.calendarSummary,
+            startTime: event.startTime,
+            endTime: event.endTime,
+            status: 'busy',
+            statusLabel: 'Ocupado',
+            modality: event.location ? 'presencial' : null,
+            location: event.location,
+            isAllDay: event.isAllDay,
+            sourceLabel: 'Google Calendar',
+        }))
+    }
+
+    if (externalItems.length > 0) {
+        scheduleItems = [...scheduleItems, ...externalItems].sort(
+            (a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime()
+        )
+    }
+
+    const totalItems = scheduleItems.length
+    const externalItemCount = externalItems.length
+    const todayItems = scheduleItems.filter((item) => {
+        const itemDate = new Date(item.startTime)
+        return itemDate.toDateString() === today.toDateString()
+    }).length
+    const upcomingItems = scheduleItems.filter((item) => new Date(item.startTime) >= today).length
 
     return (
         <div className="space-y-6">
-            {/* Header */}
+            {calendarNotice && (
+                <Card className={calendarNotice.tone === 'success'
+                    ? 'border-green-200 bg-green-50/70 dark:border-green-900/50 dark:bg-green-950/20'
+                    : 'border-red-200 bg-red-50/70 dark:border-red-900/50 dark:bg-red-950/20'}>
+                    <CardContent className="pt-6">
+                        <p className="text-sm font-medium">
+                            {calendarNotice.text}
+                        </p>
+                    </CardContent>
+                </Card>
+            )}
+
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                    <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
+                    <h1 className="flex items-center gap-2 text-2xl font-bold tracking-tight">
                         <CalendarDays className="h-7 w-7 text-primary" />
                         {userRole === 'psychologist' && 'Mi Agenda'}
                         {userRole === 'patient' && 'Mis Citas'}
                         {userRole === 'admin' && 'Todas las Citas'}
+                        {userRole === 'ponente' && 'Mi Calendario'}
                     </h1>
-                    <p className="text-sm text-muted-foreground mt-1">
-                        {userRole === 'psychologist' && 'Gestiona tus citas y sesiones con pacientes'}
-                        {userRole === 'patient' && 'Revisa tus próximas citas programadas'}
-                        {userRole === 'admin' && 'Vista general de todas las citas del sistema'}
+                    <p className="mt-1 text-sm text-muted-foreground">
+                        {userRole === 'psychologist' && 'Gestiona tus sesiones y revisa que dias ya estan ocupados.'}
+                        {userRole === 'patient' && 'Consulta tus citas y visualiza facilmente tu disponibilidad.'}
+                        {userRole === 'admin' && 'Vista operativa de las citas registradas dentro de la plataforma.'}
+                        {userRole === 'ponente' && 'Revisa tus cursos, eventos y bloqueos externos para evitar dobles reservas.'}
                     </p>
                 </div>
+
                 <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
                     {userRole === 'patient' && (
                         <Button asChild>
@@ -216,172 +377,124 @@ export default async function CalendarPage() {
                             </Link>
                         </Button>
                     )}
+
                     {userRole === 'psychologist' && (
                         <NewAppointmentButton patients={patients} />
+                    )}
+
+                    {userRole === 'ponente' && (
+                        <>
+                            <Button variant="outline" asChild>
+                                <Link href="/dashboard/events">
+                                    <Calendar className="mr-2 h-4 w-4" />
+                                    Ver Eventos
+                                </Link>
+                            </Button>
+                            <Button asChild>
+                                <Link href="/dashboard/events/new">
+                                    <Plus className="mr-2 h-4 w-4" />
+                                    Crear Evento
+                                </Link>
+                            </Button>
+                        </>
                     )}
                 </div>
             </div>
 
-            {/* Stats Cards */}
-            <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="grid gap-4 md:grid-cols-3">
                 <Card>
-                    <CardContent className="pt-5 pb-4">
-                        <div className="flex items-center gap-3">
-                            <div className="p-2 rounded-lg bg-primary/10">
-                                <CalendarDays className="h-5 w-5 text-primary" />
-                            </div>
-                            <div>
-                                <p className="text-2xl font-bold">{todayAppointments.length}</p>
-                                <p className="text-xs text-muted-foreground">Hoy</p>
-                            </div>
-                        </div>
+                    <CardContent className="pt-5">
+                        <p className="text-2xl font-semibold">{todayItems}</p>
+                        <p className="text-sm text-muted-foreground">Bloques de hoy</p>
                     </CardContent>
                 </Card>
                 <Card>
-                    <CardContent className="pt-5 pb-4">
-                        <div className="flex items-center gap-3">
-                            <div className="p-2 rounded-lg bg-brand-brown dark:bg-brand-brown/30">
-                                <CheckCircle2 className="h-5 w-5 text-brand-brown" />
-                            </div>
-                            <div>
-                                <p className="text-2xl font-bold">{confirmedCount}</p>
-                                <p className="text-xs text-muted-foreground">Confirmadas</p>
-                            </div>
-                        </div>
+                    <CardContent className="pt-5">
+                        <p className="text-2xl font-semibold">{upcomingItems}</p>
+                        <p className="text-sm text-muted-foreground">Proximos elementos</p>
                     </CardContent>
                 </Card>
                 <Card>
-                    <CardContent className="pt-5 pb-4">
-                        <div className="flex items-center gap-3">
-                            <div className="p-2 rounded-lg bg-brand-yellow dark:bg-brand-yellow/30">
-                                <Timer className="h-5 w-5 text-brand-yellow" />
-                            </div>
-                            <div>
-                                <p className="text-2xl font-bold">{pendingCount}</p>
-                                <p className="text-xs text-muted-foreground">Pendientes</p>
-                            </div>
-                        </div>
-                    </CardContent>
-                </Card>
-                <Card>
-                    <CardContent className="pt-5 pb-4">
-                        <div className="flex items-center gap-3">
-                            <div className="p-2 rounded-lg bg-brand-yellow dark:bg-brand-yellow/30">
-                                <Calendar className="h-5 w-5 text-brand-yellow" />
-                            </div>
-                            <div>
-                                <p className="text-2xl font-bold">{totalAppointments}</p>
-                                <p className="text-xs text-muted-foreground">Total próximas</p>
-                            </div>
-                        </div>
+                    <CardContent className="pt-5">
+                        <p className="text-2xl font-semibold">{totalItems}</p>
+                        <p className="text-sm text-muted-foreground">
+                            {externalItemCount > 0 ? `Total cargado en agenda (${externalItemCount} externos)` : 'Total cargado en agenda'}
+                        </p>
                     </CardContent>
                 </Card>
             </div>
 
-            {/* Appointments List */}
-            <Card>
+            <Card className="border-primary/20 bg-primary/5">
                 <CardHeader className="pb-3">
-                    <CardTitle className="text-lg">Próximas Citas</CardTitle>
+                    <CardTitle className="flex items-center gap-2 text-base">
+                        <ShieldCheck className="h-4 w-4 text-primary" />
+                        Disponibilidad protegida
+                    </CardTitle>
                     <CardDescription>
-                        {totalAppointments === 0
-                            ? 'No hay citas programadas'
-                            : `${totalAppointments} cita${totalAppointments > 1 ? 's' : ''} en tu agenda`
-                        }
+                        Las citas y eventos creados aqui bloquean ese horario dentro de la plataforma para ayudar a evitar cruces.
+                        {externalItemCount > 0 ? ` Google Calendar tambien suma ${externalItemCount} bloque${externalItemCount === 1 ? '' : 's'} externo${externalItemCount === 1 ? '' : 's'} a esta vista.` : ''}
                     </CardDescription>
                 </CardHeader>
-                <CardContent>
-                    {appointments.length === 0 ? (
-                        <div className="text-center py-16">
-                            <div className="mx-auto w-16 h-16 bg-muted rounded-full flex items-center justify-center mb-4">
-                                <Calendar className="h-8 w-8 text-muted-foreground" />
-                            </div>
-                            <h3 className="font-medium text-lg mb-1">Sin citas programadas</h3>
-                            <p className="text-sm text-muted-foreground max-w-sm mx-auto">
-                                {userRole === 'psychologist'
-                                    ? 'Usa el botón "Nueva Cita" para agendar una sesión con un paciente.'
-                                    : 'Agenda una cita con tu psicólogo para comenzar.'
-                                }
+            </Card>
+
+            {googleSyncAvailable && (
+                <Card id="google-sync" className="border-primary/20 bg-gradient-to-br from-card via-card to-primary/5">
+                    <CardHeader className="pb-3">
+                        <CardTitle className="text-base">Sincronizar con Google Calendar</CardTitle>
+                        <CardDescription>
+                            {googleIntegration
+                                ? 'Tu cuenta ya esta conectada. La plataforma lee tu disponibilidad externa y la refleja en esta agenda para evitar dobles reservas.'
+                                : 'Conecta tu cuenta de Google aqui mismo, como en Calendly: inicias sesion una vez y la plataforma empieza a respetar tu agenda externa.'}
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                        <div className="space-y-2">
+                            {googleIntegration?.provider_account_label && (
+                                <p className="text-sm font-medium text-foreground">
+                                    Cuenta vinculada: {googleIntegration.provider_account_label}
+                                </p>
+                            )}
+                            <p className="text-sm text-muted-foreground">
+                                {googleIntegration
+                                    ? 'Si bloqueas una hora en Google, la plataforma la toma en cuenta aqui tambien.'
+                                    : 'Despues de conectar, los horarios ocupados de Google apareceran aqui y se usaran para bloquear cruces automaticamente.'}
                             </p>
                         </div>
-                    ) : (
-                        <div className="space-y-6">
-                            {Object.entries(groupedByDay).map(([dayLabel, dayAppointments]) => {
-                                const isToday = new Date(dayAppointments[0].start_time).toDateString() === todayStr
-                                return (
-                                    <div key={dayLabel}>
-                                        {/* Day Header */}
-                                        <div className="flex items-center gap-2 mb-3">
-                                            <div className={`h-2 w-2 rounded-full ${isToday ? 'bg-primary animate-pulse' : 'bg-muted-foreground/40'}`} />
-                                            <h3 className={`text-sm font-semibold capitalize ${isToday ? 'text-primary' : 'text-muted-foreground'}`}>
-                                                {isToday ? '📅 Hoy — ' : ''}{dayLabel}
-                                            </h3>
-                                        </div>
 
-                                        {/* Day Appointments */}
-                                        <div className="space-y-2 ml-3 border-l-2 border-muted pl-4">
-                                            {dayAppointments.map((apt) => {
-                                                const statusConfig = getStatusConfig(apt.status)
-                                                return (
-                                                    <div
-                                                        key={apt.id}
-                                                        className="group relative p-4 rounded-lg border bg-card hover:bg-accent/50 transition-colors"
-                                                    >
-                                                        {/* Status dot */}
-                                                        <div className={`absolute left-[-1.35rem] top-5 w-2.5 h-2.5 rounded-full border-2 border-background ${statusConfig.dot}`} />
+                        {googleIntegration ? (
+                            <div className="flex flex-col gap-2 sm:flex-row">
+                                <Button asChild variant="outline">
+                                    <a href={googleConnectHref}>
+                                        <RefreshCcw className="mr-2 h-4 w-4" />
+                                        Reconectar Google
+                                    </a>
+                                </Button>
+                                <Button asChild>
+                                    <Link href="/dashboard/settings?section=calendar#calendar-sync">
+                                        <ShieldCheck className="mr-2 h-4 w-4" />
+                                        Elegir calendarios
+                                    </Link>
+                                </Button>
+                            </div>
+                        ) : (
+                            <Button asChild>
+                                <a href={googleConnectHref}>
+                                    <CalendarCheck2 className="mr-2 h-4 w-4" />
+                                    Conectar Google Calendar
+                                </a>
+                            </Button>
+                        )}
+                    </CardContent>
+                </Card>
+            )}
 
-                                                        <div className="flex items-start justify-between gap-3">
-                                                            <div className="flex-1 min-w-0">
-                                                                {/* Name & Status */}
-                                                                <div className="flex items-center gap-2 flex-wrap mb-1.5">
-                                                                    <span className="font-medium truncate">
-                                                                        {userRole === 'psychologist' && (apt.patient?.full_name || 'Paciente')}
-                                                                        {userRole === 'patient' && (apt.psychologist?.full_name || 'Psicólogo')}
-                                                                        {userRole === 'admin' && `${apt.patient?.full_name || '?'} → ${apt.psychologist?.full_name || '?'}`}
-                                                                    </span>
-                                                                    <span className={`inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full font-medium ${statusConfig.color}`}>
-                                                                        {statusConfig.icon}
-                                                                        {statusConfig.label}
-                                                                    </span>
-                                                                </div>
-
-                                                                {/* Time & Type */}
-                                                                <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                                                                    <span className="inline-flex items-center gap-1">
-                                                                        <Clock className="h-3.5 w-3.5" />
-                                                                        {formatTime(apt.start_time)} — {formatTime(apt.end_time)}
-                                                                    </span>
-                                                                    <span className="inline-flex items-center gap-1">
-                                                                        {apt.type === 'video' ? (
-                                                                            <><Video className="h-3.5 w-3.5" /> Online</>
-                                                                        ) : (
-                                                                            <><MapPin className="h-3.5 w-3.5" /> Presencial</>
-                                                                        )}
-                                                                    </span>
-                                                                </div>
-
-                                                                {/* Notes */}
-                                                                {apt.notes && (
-                                                                    <p className="text-xs text-muted-foreground mt-2 italic line-clamp-1">
-                                                                        {apt.notes}
-                                                                    </p>
-                                                                )}
-
-                                                                {/* Actions */}
-                                                                <AppointmentActions appointment={apt} userRole={userRole} />
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                )
-                                            })}
-                                        </div>
-                                    </div>
-                                )
-                            })}
-                        </div>
-                    )}
-                </CardContent>
-            </Card>
+            <ScheduleCalendar
+                items={scheduleItems}
+                title={userRole === 'ponente' ? 'Calendario de eventos' : 'Calendario de citas'}
+                description={userRole === 'ponente'
+                    ? 'Tus dias ocupados se marcan para que puedas detectar huecos libres rapidamente, incluyendo bloqueos externos de Google si esta conectado.'
+                    : 'Tus citas confirmadas, pendientes y los bloqueos externos de Google se muestran directamente sobre el calendario.'}
+            />
         </div>
     )
 }
-

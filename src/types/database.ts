@@ -56,6 +56,7 @@ export interface Profile {
     full_name: string | null
     avatar_url: string | null
     email: string | null
+    calendar_feed_token?: string | null
     subscription_status: SubscriptionStatus | null
     membership_level: number
     ai_minutes_available: number
@@ -92,6 +93,7 @@ export interface ProfileInsert {
     full_name?: string | null
     avatar_url?: string | null
     email?: string | null
+    calendar_feed_token?: string | null
     subscription_status?: SubscriptionStatus | null
     membership_level?: number
     ai_minutes_available?: number
@@ -105,6 +107,7 @@ export interface ProfileUpdate {
     full_name?: string | null
     avatar_url?: string | null
     email?: string | null
+    calendar_feed_token?: string | null
     subscription_status?: SubscriptionStatus | null
     membership_level?: number
     phone?: string | null
@@ -231,6 +234,59 @@ export interface AppointmentUpdate {
     meeting_link?: string | null
     price?: number | null
     notes?: string | null
+}
+
+// ============================================
+// TABLE: calendar_integrations
+// ============================================
+export type CalendarIntegrationProvider = 'google'
+
+export type CalendarIntegrationStatus = 'connected' | 'error' | 'disconnected'
+
+export interface CalendarIntegration {
+    id: string
+    user_id: string
+    provider: CalendarIntegrationProvider
+    status: CalendarIntegrationStatus
+    access_token: string | null
+    refresh_token: string | null
+    expires_at: string | null
+    scopes: string[]
+    selected_calendar_ids: string[]
+    provider_account_email: string | null
+    provider_account_label: string | null
+    last_sync_at: string | null
+    last_error: string | null
+    created_at: string
+    updated_at: string
+}
+
+export interface CalendarIntegrationInsert {
+    user_id: string
+    provider: CalendarIntegrationProvider
+    status?: CalendarIntegrationStatus
+    access_token?: string | null
+    refresh_token?: string | null
+    expires_at?: string | null
+    scopes?: string[]
+    selected_calendar_ids?: string[]
+    provider_account_email?: string | null
+    provider_account_label?: string | null
+    last_sync_at?: string | null
+    last_error?: string | null
+}
+
+export interface CalendarIntegrationUpdate {
+    status?: CalendarIntegrationStatus
+    access_token?: string | null
+    refresh_token?: string | null
+    expires_at?: string | null
+    scopes?: string[]
+    selected_calendar_ids?: string[]
+    provider_account_email?: string | null
+    provider_account_label?: string | null
+    last_sync_at?: string | null
+    last_error?: string | null
 }
 
 // ============================================
@@ -1334,6 +1390,11 @@ export interface Database {
                 Row: Appointment
                 Insert: AppointmentInsert
                 Update: AppointmentUpdate
+            }
+            calendar_integrations: {
+                Row: CalendarIntegration
+                Insert: CalendarIntegrationInsert
+                Update: CalendarIntegrationUpdate
             }
             patient_documents: {
                 Row: ClinicalDocument

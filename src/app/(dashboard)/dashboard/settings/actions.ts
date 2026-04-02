@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { revokeGoogleToken } from '@/lib/calendar-sync'
 import { revalidatePath } from 'next/cache'
 
 export async function updateProfile(formData: FormData) {
@@ -161,5 +162,72 @@ export async function changePassword(formData: FormData) {
         return { error: error.message }
     }
 
+    return { success: true }
+}
+
+export async function updateGoogleCalendarSelection(formData: FormData) {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) {
+        return { error: 'No autenticado' }
+    }
+
+    const selectedCalendarIds = formData
+        .getAll('calendarIds')
+        .map((value) => String(value))
+        .filter(Boolean)
+
+    const { error } = await ((supabase.from('calendar_integrations' as any) as any)
+        .update({
+            selected_calendar_ids: selectedCalendarIds.length > 0 ? selectedCalendarIds : ['primary'],
+            status: 'connected',
+            last_error: null,
+            updated_at: new Date().toISOString(),
+        })
+        .eq('user_id', user.id)
+        .eq('provider', 'google'))
+
+    if (error) {
+        return { error: error.message }
+    }
+
+    revalidatePath('/dashboard/settings')
+    revalidatePath('/dashboard/calendar')
+    revalidatePath('/dashboard/booking')
+    return { success: true }
+}
+
+export async function disconnectGoogleCalendar() {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) {
+        return { error: 'No autenticado' }
+    }
+
+    const { data: integration } = await ((supabase.from('calendar_integrations' as any) as any)
+        .select('id, access_token, refresh_token')
+        .eq('user_id', user.id)
+        .eq('provider', 'google')
+        .maybeSingle())
+
+    if (!integration) {
+        return { success: true }
+    }
+
+    await revokeGoogleToken(integration.refresh_token || integration.access_token || '')
+
+    const { error } = await ((supabase.from('calendar_integrations' as any) as any)
+        .delete()
+        .eq('id', integration.id))
+
+    if (error) {
+        return { error: error.message }
+    }
+
+    revalidatePath('/dashboard/settings')
+    revalidatePath('/dashboard/calendar')
+    revalidatePath('/dashboard/booking')
     return { success: true }
 }

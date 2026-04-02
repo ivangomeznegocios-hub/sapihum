@@ -209,6 +209,9 @@ export const stripeAdapter: PaymentProviderAdapter = {
     // ---- One-time Checkout (AI credits, events) ----
     async createOneTimeCheckout(params: CreateOneTimeCheckoutParams): Promise<OneTimeCheckoutResult> {
         const stripe = getStripeInstance()
+        const checkoutExpiresAt = params.checkoutExpiresAt
+            ? Math.floor(new Date(params.checkoutExpiresAt).getTime() / 1000)
+            : undefined
 
         const sessionParams: Stripe.Checkout.SessionCreateParams = {
             mode: 'payment',
@@ -237,6 +240,7 @@ export const stripeAdapter: PaymentProviderAdapter = {
                 ...(params.metadata || {}),
             },
             locale: 'es',
+            ...(checkoutExpiresAt ? { expires_at: checkoutExpiresAt } : {}),
         }
 
         const session = await stripe.checkout.sessions.create(sessionParams)
@@ -245,6 +249,9 @@ export const stripeAdapter: PaymentProviderAdapter = {
             checkoutUrl: session.url!,
             sessionId: session.id,
             provider: 'stripe',
+            expiresAt: session.expires_at
+                ? new Date(session.expires_at * 1000).toISOString()
+                : undefined,
         }
     },
 

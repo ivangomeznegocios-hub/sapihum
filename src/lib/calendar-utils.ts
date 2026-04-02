@@ -1,3 +1,4 @@
+import { buildIcsCalendar } from "@/lib/calendar-feed";
 import { Event } from "@/types/database";
 
 function formatDate(date: Date): string {
@@ -46,22 +47,21 @@ export function downloadIcsFile(event: Event) {
         ? new Date(event.end_time)
         : new Date(start.getTime() + 60 * 60 * 1000);
 
-    const icsContent = [
-        "BEGIN:VCALENDAR",
-        "VERSION:2.0",
-        "PRODID:-//SAPIHUM//Events//EN",
-        "BEGIN:VEVENT",
-        `components:VEVENT`,
-        `UID:${event.id}@comunidadpsicologia.com`,
-        `DTSTAMP:${formatDate(new Date())}`,
-        `DTSTART:${formatDate(start)}`,
-        `DTEND:${formatDate(end)}`,
-        `SUMMARY:${event.title}`,
-        `DESCRIPTION:${(event.description || "").replace(/\n/g, "\\n")}`,
-        `LOCATION:${event.location || event.meeting_link || "Online"}`,
-        "END:VEVENT",
-        "END:VCALENDAR",
-    ].join("\r\n");
+    const icsContent = buildIcsCalendar({
+        name: event.title,
+        prodId: "-//SAPIHUM//Single Event//ES",
+        events: [
+            {
+                uid: `${event.id}@comunidadpsicologia.com`,
+                title: event.title,
+                start,
+                end,
+                description: event.description || "",
+                location: event.location || event.meeting_link || "Online",
+                url: event.meeting_link || undefined,
+            },
+        ],
+    });
 
     const blob = new Blob([icsContent], { type: "text/calendar;charset=utf-8" });
     const url = window.URL.createObjectURL(blob);

@@ -18,6 +18,9 @@ import { getEventGrantAccessKinds } from '@/lib/events/entitlements'
 import { audienceAllowsAccess, getCommercialAccessContext } from '@/lib/access/commercial'
 import { getFormationCommercialState } from '@/lib/formations/pricing'
 import { createConfirmedFormationPurchaseAndGrantAccess } from '@/lib/formations/service'
+import { createServiceClient } from '@/lib/supabase/service'
+
+const EVENT_CHECKOUT_RESERVATION_MINUTES = 30
 
 function isUuid(value: string | null | undefined): value is string {
     return Boolean(value && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value))
@@ -27,6 +30,181 @@ function guestCanAccessEventCheckout(event: any) {
     const audience = Array.isArray(event.target_audience) ? event.target_audience : ['public']
     const isRecordedProduct = isPurchasableRecordingEvent(event)
     return audience.includes('public') || isRecordedProduct
+}
+
+function normalizeCheckoutEmail(email: string) {
+    return email.trim().toLowerCase()
+}
+
+function isFutureIsoDate(value: string | null | undefined) {
+    if (!value) return false
+    const timestamp = new Date(value).getTime()
+    return Number.isFinite(timestamp) && timestamp > Date.now()
+}
+
+function isInvalidStripeCustomerMessage(message: string) {
+    return message.includes('No such customer') || message.includes('customer')
+}
+
+type ReservedEventCheckoutPurchase = {
+    purchaseId: string
+    reservationState: 'created' | 'reused'
+    checkoutSessionId: string | null
+    checkoutSessionExpiresAt: string | null
+    checkoutUrl: string | null
+}
+
+async function reserveEventCheckoutPurchase(params: {
+    eventId: string
+    email: string
+    userId?: string | null
+    fullName?: string | null
+    amount: number
+    analyticsContext?: any
+    attributionSnapshot?: any
+    enforceCapacity: boolean
+}) {
+    const db = createServiceClient()
+    const analyticsVisitorId = isUuid(params.analyticsContext?.visitorId) ? params.analyticsContext.visitorId : null
+    const analyticsSessionId = isUuid(params.analyticsContext?.sessionId) ? params.analyticsContext.sessionId : null
+
+    const { data, error } = await (db as any).rpc('reserve_event_checkout_purchase', {
+        p_event_id: params.eventId,
+        p_email: normalizeCheckoutEmail(params.email),
+        p_user_id: params.userId ?? null,
+        p_full_name: params.fullName ?? null,
+        p_amount_paid: params.amount,
+        p_currency: 'MXN',
+        p_payment_method: 'card',
+        p_analytics_visitor_id: analyticsVisitorId,
+        p_analytics_session_id: analyticsSessionId,
+        p_attribution_snapshot: params.attributionSnapshot ?? {},
+        p_metadata: {
+            analytics: params.analyticsContext ?? null,
+            attribution_snapshot: params.attributionSnapshot ?? null,
+        },
+        p_enforce_capacity: params.enforceCapacity,
+    })
+
+    if (error) {
+        if (error.message.includes('EVENT_CAPACITY_REACHED')) {
+            return { error: 'El evento ya alcanzo su cupo' as const }
+        }
+
+        throw new Error(`No fue posible reservar la compra del evento: ${error.message}`)
+    }
+
+    const row = Array.isArray(data) ? data[0] : data
+    if (!row?.purchase_id) {
+        throw new Error('No fue posible reservar la compra del evento')
+    }
+
+    return {
+        purchase: {
+            purchaseId: row.purchase_id as string,
+            reservationState: row.reservation_state as 'created' | 'reused',
+            checkoutSessionId: (row.checkout_session_id as string | null) ?? null,
+            checkoutSessionExpiresAt: (row.checkout_session_expires_at as string | null) ?? null,
+            checkoutUrl: (row.checkout_url as string | null) ?? null,
+        } satisfies ReservedEventCheckoutPurchase,
+    }
+}
+
+async function syncPendingEventCheckoutPurchase(params: {
+    purchaseId: string
+    userId?: string | null
+    email: string
+    fullName?: string | null
+    amount: number
+    sessionId: string
+    checkoutUrl: string
+    checkoutExpiresAt?: string
+    analyticsContext?: any
+    attributionSnapshot?: any
+}) {
+    const db = createServiceClient()
+    const normalizedEmail = normalizeCheckoutEmail(params.email)
+    const analyticsVisitorId = isUuid(params.analyticsContext?.visitorId) ? params.analyticsContext.visitorId : null
+    const analyticsSessionId = isUuid(params.analyticsContext?.sessionId) ? params.analyticsContext.sessionId : null
+
+    const { data: existingPurchase, error: existingPurchaseError } = await (db
+        .from('event_purchases') as any)
+        .select('metadata')
+        .eq('id', params.purchaseId)
+        .single()
+
+    if (existingPurchaseError) {
+        throw new Error(`No fue posible leer la compra pendiente: ${existingPurchaseError.message}`)
+    }
+
+    const mergedMetadata = {
+        ...(existingPurchase?.metadata ?? {}),
+        analytics: params.analyticsContext ?? existingPurchase?.metadata?.analytics ?? null,
+        attribution_snapshot: params.attributionSnapshot ?? existingPurchase?.metadata?.attribution_snapshot ?? null,
+        checkout_url: params.checkoutUrl,
+        checkout_session_id: params.sessionId,
+        checkout_session_expires_at: params.checkoutExpiresAt ?? null,
+        checkout_prepared_at: new Date().toISOString(),
+    }
+
+    const { error } = await (db
+        .from('event_purchases') as any)
+        .update({
+            user_id: params.userId ?? null,
+            email: normalizedEmail,
+            full_name: params.fullName ?? null,
+            amount_paid: params.amount,
+            currency: 'MXN',
+            payment_method: 'card',
+            provider_session_id: params.sessionId,
+            checkout_session_expires_at: params.checkoutExpiresAt ?? null,
+            analytics_visitor_id: analyticsVisitorId,
+            analytics_session_id: analyticsSessionId,
+            attribution_snapshot: params.attributionSnapshot ?? {},
+            metadata: mergedMetadata,
+            purchased_at: new Date().toISOString(),
+            status: 'pending',
+        })
+        .eq('id', params.purchaseId)
+
+    if (error) {
+        throw new Error(`No fue posible sincronizar la compra pendiente: ${error.message}`)
+    }
+}
+
+async function cancelPendingEventCheckoutPurchase(params: {
+    purchaseId: string
+    reason: string
+}) {
+    const db = createServiceClient()
+
+    const { data: existingPurchase } = await (db
+        .from('event_purchases') as any)
+        .select('metadata, status')
+        .eq('id', params.purchaseId)
+        .maybeSingle()
+
+    if (!existingPurchase || existingPurchase.status !== 'pending') {
+        return
+    }
+
+    const { error } = await (db
+        .from('event_purchases') as any)
+        .update({
+            status: 'cancelled',
+            checkout_session_expires_at: null,
+            metadata: {
+                ...(existingPurchase.metadata ?? {}),
+                cancelled_reason: params.reason,
+                cancelled_at: new Date().toISOString(),
+            },
+        })
+        .eq('id', params.purchaseId)
+        .eq('status', 'pending')
+
+    if (error) {
+        console.error('[API] Failed to cancel pending event purchase:', error)
+    }
 }
 
 async function resolveEventPurchaseDetails(
@@ -179,49 +357,6 @@ async function resolveEventPurchaseDetails(
         referenceId: event.id,
         event,
     }
-}
-
-async function createPendingEventPurchase(params: {
-    supabase: any
-    eventId: string
-    userId?: string | null
-    email: string
-    fullName?: string | null
-    amount: number
-    analyticsContext?: any
-    attributionSnapshot?: any
-}) {
-    const purchaseId = crypto.randomUUID()
-    const normalizedEmail = params.email.trim().toLowerCase()
-    const analyticsVisitorId = isUuid(params.analyticsContext?.visitorId) ? params.analyticsContext.visitorId : null
-    const analyticsSessionId = isUuid(params.analyticsContext?.sessionId) ? params.analyticsContext.sessionId : null
-
-    const { error } = await (params.supabase
-        .from('event_purchases') as any)
-        .insert({
-            id: purchaseId,
-            event_id: params.eventId,
-            user_id: params.userId ?? null,
-            email: normalizedEmail,
-            full_name: params.fullName ?? null,
-            amount_paid: params.amount,
-            currency: 'MXN',
-            payment_method: 'card',
-            status: 'pending',
-            analytics_visitor_id: analyticsVisitorId,
-            analytics_session_id: analyticsSessionId,
-            attribution_snapshot: params.attributionSnapshot ?? {},
-            metadata: {
-                analytics: params.analyticsContext ?? null,
-                attribution_snapshot: params.attributionSnapshot ?? null,
-            },
-        })
-
-    if (error) {
-        throw new Error(error.message)
-    }
-
-    return purchaseId
 }
 
 async function resolveFormationPurchaseDetails(
@@ -417,6 +552,7 @@ export async function POST(request: NextRequest) {
         const customerEmail = user?.email || profile.data?.email || email || ''
         let customerId = profile.data?.stripe_customer_id || undefined
         let pendingEventPurchaseId = ''
+        let checkoutExpiresAt: string | undefined
 
         if (purchaseType === 'ai_credits') {
             const pkg = AI_CREDIT_PACKAGES[packageKey as AICreditPackageKey]
@@ -460,24 +596,38 @@ export async function POST(request: NextRequest) {
                 )
             }
 
-            try {
-                pendingEventPurchaseId = await createPendingEventPurchase({
-                    supabase,
-                    eventId,
-                    userId: user?.id ?? null,
-                    email: customerEmail,
-                    fullName: fullName || profile.data?.full_name || null,
-                    amount: checkoutAmount,
-                    analyticsContext,
-                    attributionSnapshot,
-                })
-            } catch (purchaseError) {
-                console.error('[API] Failed to create pending event purchase:', purchaseError)
+            const reservation = await reserveEventCheckoutPurchase({
+                eventId,
+                userId: user?.id ?? null,
+                email: customerEmail,
+                fullName: fullName || profile.data?.full_name || null,
+                amount: checkoutAmount,
+                analyticsContext,
+                attributionSnapshot,
+                enforceCapacity: !isPurchasableRecordingEvent(resolvedEventPurchase.event),
+            })
+
+            if ('error' in reservation) {
                 return NextResponse.json(
-                    { error: 'No fue posible iniciar la compra. Intenta de nuevo.' },
-                    { status: 500 }
+                    { error: reservation.error },
+                    { status: 409 }
                 )
             }
+
+            if (
+                reservation.purchase.reservationState === 'reused'
+                && reservation.purchase.checkoutUrl
+                && isFutureIsoDate(reservation.purchase.checkoutSessionExpiresAt)
+            ) {
+                return NextResponse.json({
+                    checkoutUrl: reservation.purchase.checkoutUrl,
+                    sessionId: reservation.purchase.checkoutSessionId,
+                    reused: true,
+                })
+            }
+
+            pendingEventPurchaseId = reservation.purchase.purchaseId
+            checkoutExpiresAt = new Date(Date.now() + EVENT_CHECKOUT_RESERVATION_MINUTES * 60_000).toISOString()
 
             metadata = {
                 event_purchase_id: pendingEventPurchaseId,
@@ -624,63 +774,94 @@ export async function POST(request: NextRequest) {
             },
         })
 
+        const checkoutMetadata = {
+            ...metadata,
+            analytics_visitor_id: analyticsContext?.visitorId ?? '',
+            analytics_session_id: analyticsContext?.sessionId ?? '',
+            attribution_snapshot: JSON.stringify(attributionSnapshot),
+            guest_checkout: user ? 'false' : 'true',
+            guest_email: user ? '' : customerEmail,
+        }
+
         // Attempt Stripe checkout, retry without customerId if customer is invalid
         let result
         try {
-            result = await provider.createOneTimeCheckout({
-                purchaseType: purchaseType as 'ai_credits' | 'event_purchase' | 'formation_purchase',
-                amount: checkoutAmount,
-                customerEmail,
-                customerId,
-                userId: user?.id,
-                profileId: profile.data?.id,
-                description: checkoutDescription,
-                referenceId,
-                metadata: {
-                    ...metadata,
-                    analytics_visitor_id: analyticsContext?.visitorId ?? '',
-                    analytics_session_id: analyticsContext?.sessionId ?? '',
-                    attribution_snapshot: JSON.stringify(attributionSnapshot),
-                    guest_checkout: user ? 'false' : 'true',
-                    guest_email: user ? '' : customerEmail,
-                },
-                successUrl,
-                cancelUrl,
-            })
-        } catch (stripeError: any) {
-            // If the error is about an invalid customer, clear it and retry
-            const msg = stripeError?.message || ''
-            if (customerId && (msg.includes('No such customer') || msg.includes('customer'))) {
-                console.warn('[API] Invalid stripe_customer_id, clearing and retrying:', customerId)
-                // Clear the invalid customer ID from profile
-                if (profile.data?.id) {
-                    await (supabase as any)
-                        .from('profiles')
-                        .update({ stripe_customer_id: null })
-                        .eq('id', profile.data.id)
-                }
+            try {
                 result = await provider.createOneTimeCheckout({
                     purchaseType: purchaseType as 'ai_credits' | 'event_purchase' | 'formation_purchase',
                     amount: checkoutAmount,
                     customerEmail,
-                    customerId: undefined,
+                    customerId,
                     userId: user?.id,
                     profileId: profile.data?.id,
                     description: checkoutDescription,
                     referenceId,
-                    metadata: {
-                        ...metadata,
-                        analytics_visitor_id: analyticsContext?.visitorId ?? '',
-                        analytics_session_id: analyticsContext?.sessionId ?? '',
-                        attribution_snapshot: JSON.stringify(attributionSnapshot),
-                        guest_checkout: user ? 'false' : 'true',
-                        guest_email: user ? '' : customerEmail,
-                    },
+                    metadata: checkoutMetadata,
                     successUrl,
                     cancelUrl,
+                    checkoutExpiresAt,
                 })
-            } else {
-                throw stripeError
+            } catch (stripeError: any) {
+                const msg = stripeError?.message || ''
+                if (customerId && isInvalidStripeCustomerMessage(msg)) {
+                    console.warn('[API] Invalid stripe_customer_id, clearing and retrying:', customerId)
+                    if (profile.data?.id) {
+                        await (supabase as any)
+                            .from('profiles')
+                            .update({ stripe_customer_id: null })
+                            .eq('id', profile.data.id)
+                    }
+
+                    result = await provider.createOneTimeCheckout({
+                        purchaseType: purchaseType as 'ai_credits' | 'event_purchase' | 'formation_purchase',
+                        amount: checkoutAmount,
+                        customerEmail,
+                        customerId: undefined,
+                        userId: user?.id,
+                        profileId: profile.data?.id,
+                        description: checkoutDescription,
+                        referenceId,
+                        metadata: checkoutMetadata,
+                        successUrl,
+                        cancelUrl,
+                        checkoutExpiresAt,
+                    })
+                } else {
+                    throw stripeError
+                }
+            }
+        } catch (stripeError: any) {
+            if (pendingEventPurchaseId) {
+                await cancelPendingEventCheckoutPurchase({
+                    purchaseId: pendingEventPurchaseId,
+                    reason: 'checkout_session_creation_failed',
+                })
+            }
+
+            throw stripeError
+        }
+
+        if (purchaseType === 'event_purchase' && pendingEventPurchaseId) {
+            try {
+                await syncPendingEventCheckoutPurchase({
+                    purchaseId: pendingEventPurchaseId,
+                    userId: user?.id ?? null,
+                    email: customerEmail,
+                    fullName: fullName || profile.data?.full_name || null,
+                    amount: checkoutAmount,
+                    sessionId: result.sessionId,
+                    checkoutUrl: result.checkoutUrl,
+                    checkoutExpiresAt: result.expiresAt ?? checkoutExpiresAt,
+                    analyticsContext,
+                    attributionSnapshot,
+                })
+            } catch (syncError) {
+                await cancelPendingEventCheckoutPurchase({
+                    purchaseId: pendingEventPurchaseId,
+                    reason: 'checkout_session_sync_failed',
+                })
+
+                throw syncError
             }
         }
 

@@ -4,8 +4,9 @@ import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
 import { createClient as createSupabaseClient } from '@supabase/supabase-js'
 import { getAppUrl } from '@/lib/config/app-url'
-import { requireOperationsAction } from '@/lib/admin/guard'
+import { requireAdminAction, requireOperationsAction } from '@/lib/admin/guard'
 import { logAdminOperation } from '@/lib/admin/operations'
+import { GOOGLE_CALENDAR_FEATURE_KEY } from '@/lib/calendar-sync'
 import { createServiceClient } from '@/lib/supabase/service'
 import { grantEventEntitlements } from '@/lib/events/entitlements'
 import { fulfillOneTimePayment } from '@/lib/payments'
@@ -39,6 +40,46 @@ function ensureConfirmation(formData: FormData) {
 async function redirectAfter(action: () => Promise<string>) {
     const destination = await action()
     redirect(destination)
+}
+
+export async function toggleGoogleCalendarSyncFeature(enable: boolean) {
+    try {
+        const { profile: actor } = await requireAdminAction()
+        const admin = createServiceClient()
+
+        const { error } = await (admin
+            .from('platform_settings') as any)
+            .upsert({
+                key: GOOGLE_CALENDAR_FEATURE_KEY,
+                value: enable,
+                description: 'When true, psychologists and speakers can connect Google Calendar and use external busy blocks inside the platform.',
+                updated_by: actor.id,
+                updated_at: new Date().toISOString(),
+            }, { onConflict: 'key' })
+
+        if (error) {
+            return { error: error.message }
+        }
+
+        await logAdminOperation({
+            actorUserId: actor.id,
+            actionType: 'calendar_sync_feature_toggled',
+            entityType: 'platform_settings',
+            entityId: GOOGLE_CALENDAR_FEATURE_KEY,
+            details: {
+                enabled: enable,
+            },
+        })
+
+        revalidatePath('/dashboard/admin/operations')
+        revalidatePath('/dashboard/calendar')
+        revalidatePath('/dashboard/settings')
+        return { success: true }
+    } catch (error) {
+        return {
+            error: error instanceof Error ? error.message : 'No fue posible actualizar la bandera de sincronizacion',
+        }
+    }
 }
 
 export async function sendAccessMagicLinkAction(formData: FormData) {

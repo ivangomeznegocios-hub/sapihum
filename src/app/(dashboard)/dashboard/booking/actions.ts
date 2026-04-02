@@ -1,5 +1,6 @@
 'use server'
 
+import { findExternalCalendarConflictForUsers } from '@/lib/calendar-sync'
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 
@@ -55,6 +56,42 @@ export async function bookAppointment(data: {
     }
 
     // Generate meeting link for video appointments
+    const { data: patientConflicts } = await (supabase
+        .from('appointments') as any)
+        .select('id')
+        .eq('patient_id', user.id)
+        .neq('status', 'cancelled')
+        .lt('start_time', endTime.toISOString())
+        .gt('end_time', startTime.toISOString())
+        .limit(1)
+
+    if (patientConflicts && patientConflicts.length > 0) {
+        return { error: 'Ya tienes otra cita en ese horario. Elige otro espacio.' }
+    }
+
+    try {
+        const externalConflict = await findExternalCalendarConflictForUsers(
+            [data.psychologistId],
+            startTime.toISOString(),
+            endTime.toISOString()
+        )
+
+        if (externalConflict) {
+            const accountLabel = externalConflict.providerAccountLabel
+                ? ` (${externalConflict.providerAccountLabel})`
+                : ''
+
+            return {
+                error: `Ese horario ya aparece ocupado en Google Calendar${accountLabel}. Elige otro espacio.`,
+            }
+        }
+    } catch (error) {
+        console.error('[Booking] Error al validar disponibilidad externa:', error)
+        return {
+            error: 'No pudimos verificar la disponibilidad externa del profesional. Pidele reconectar Google Calendar e intenta de nuevo.',
+        }
+    }
+
     const meetingId = `cp-${user.id.slice(0, 6)}-${Date.now()}`
     const meetingLink = data.type === 'video' ? `https://meet.jit.si/${meetingId}` : null
 

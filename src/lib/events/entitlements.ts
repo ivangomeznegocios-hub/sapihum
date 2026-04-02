@@ -10,7 +10,7 @@ export function getEventAccessKinds(event: Pick<Event, 'event_type'>): EventEnti
 export function getEventGrantAccessKinds(event: Pick<Event, 'event_type'>): EventEntitlementAccessKind[] {
     if (event.event_type === 'course') return ['course_access']
     if (event.event_type === 'on_demand') return ['replay_access']
-    return ['live_access']
+    return ['live_access', 'replay_access']
 }
 
 function normalizeEmail(email: string) {

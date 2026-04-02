@@ -460,24 +460,44 @@ export default async function DashboardPage() {
 
     // ===== PONENTE DASHBOARD =====
     if (userRole === 'ponente') {
-        // Speaker profile
-        const { data: speaker } = await (supabase
-            .from('speakers') as any)
-            .select('*')
-            .eq('id', profile.id)
-            .single()
+        const [{ data: speaker }, { data: createdEvents }, { data: assignedLinks }] = await Promise.all([
+            (supabase
+                .from('speakers') as any)
+                .select('*')
+                .eq('id', profile.id)
+                .single(),
+            (supabase
+                .from('events') as any)
+                .select('id, title, status, start_time')
+                .eq('created_by', profile.id)
+                .order('start_time', { ascending: false }),
+            (supabase
+                .from('event_speakers') as any)
+                .select('event_id')
+                .eq('speaker_id', profile.id),
+        ])
 
         const profileCompleteness = calculateSpeakerCompleteness(speaker)
+        const createdEventIds = new Set((createdEvents || []).map((event: any) => event.id))
+        const assignedEventIds = Array.from(new Set(
+            (assignedLinks || [])
+                .map((link: any) => link.event_id)
+                .filter((eventId: string | null): eventId is string => typeof eventId === 'string' && !createdEventIds.has(eventId))
+        ))
 
-        // Events created by ponente
-        const { data: ponenteEvents } = await (supabase
-            .from('events') as any)
-            .select('id, title, status, start_time')
-            .eq('created_by', profile.id)
-            .order('start_time', { ascending: false })
-            .limit(10)
+        let assignedEvents: any[] = []
+        if (assignedEventIds.length > 0) {
+            const { data } = await (supabase
+                .from('events') as any)
+                .select('id, title, status, start_time')
+                .in('id', assignedEventIds)
+                .order('start_time', { ascending: false })
 
-        const allEvents = ponenteEvents || []
+            assignedEvents = data || []
+        }
+
+        const allEvents = [...(createdEvents || []), ...assignedEvents]
+            .sort((a: any, b: any) => new Date(b.start_time).getTime() - new Date(a.start_time).getTime())
         const totalEvents = allEvents.length
         const upcomingEvents = allEvents.filter((e: any) => e.status === 'upcoming' || e.status === 'live').length
 

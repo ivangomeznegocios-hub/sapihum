@@ -91,12 +91,20 @@ export function PonenteDashboard({
                             Tu panel de ponente. Gestiona tus eventos y perfil profesional.
                         </p>
                     </div>
-                    <Button asChild className="min-h-11 w-full sm:min-h-9 sm:w-auto">
-                        <Link href="/dashboard/events/new" className="sm:flex-shrink-0">
-                            <CalendarDays className="mr-2 h-4 w-4" />
-                            Crear Evento
-                        </Link>
-                    </Button>
+                    <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
+                        <Button asChild variant="outline" className="min-h-11 w-full sm:min-h-9 sm:w-auto">
+                            <Link href="/dashboard/calendar" className="sm:flex-shrink-0">
+                                Ver Agenda
+                                <ArrowRight className="ml-2 h-4 w-4" />
+                            </Link>
+                        </Button>
+                        <Button asChild className="min-h-11 w-full sm:min-h-9 sm:w-auto">
+                            <Link href="/dashboard/events/new" className="sm:flex-shrink-0">
+                                <CalendarDays className="mr-2 h-4 w-4" />
+                                Crear Evento
+                            </Link>
+                        </Button>
+                    </div>
                 </div>
             </div>
 

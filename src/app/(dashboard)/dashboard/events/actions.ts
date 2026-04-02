@@ -15,6 +15,7 @@ import { audienceAllowsAccess, getCommercialAccessContext } from '@/lib/access/c
 import { sendEmail } from '@/lib/email/index'
 import { buildEventRegistrationEmail } from '@/lib/email/templates'
 import { DEFAULT_TIMEZONE, zonedDateTimeToUtcIso } from '@/lib/timezone'
+import { findExternalCalendarConflictForUsers } from '@/lib/calendar-sync'
 import {
     DEFAULT_SPEAKER_COMPENSATION_TYPE,
     DEFAULT_SPEAKER_PERCENTAGE_RATE,
@@ -268,6 +269,146 @@ function buildEventDateRange(dateValue: string, timeValue: string, durationMinut
         endTimeIso: endTime.toISOString(),
         safeDuration,
     }
+}
+
+function formatConflictDateLabel(dateValue: string) {
+    return new Date(dateValue).toLocaleString('es-MX', {
+        day: 'numeric',
+        month: 'short',
+        hour: '2-digit',
+        minute: '2-digit',
+    })
+}
+
+type EventScheduleConflict = {
+    id: string
+    title: string | null
+    start_time: string
+    source: 'creator' | 'speaker'
+}
+
+async function findEventScheduleConflict({
+    supabase,
+    ownerId,
+    speakerIds,
+    startTimeIso,
+    endTimeIso,
+    excludeEventId,
+}: {
+    supabase: any
+    ownerId?: string | null
+    speakerIds?: string[]
+    startTimeIso: string
+    endTimeIso: string
+    excludeEventId?: string
+}): Promise<EventScheduleConflict | null> {
+    const conflicts = new Map<string, EventScheduleConflict>()
+
+    if (ownerId) {
+        let creatorQuery = (supabase
+            .from('events') as any)
+            .select('id, title, start_time')
+            .eq('created_by', ownerId)
+            .neq('status', 'cancelled')
+            .lt('start_time', endTimeIso)
+            .gt('end_time', startTimeIso)
+            .limit(5)
+
+        if (excludeEventId) {
+            creatorQuery = creatorQuery.neq('id', excludeEventId)
+        }
+
+        const { data: creatorConflicts } = await creatorQuery
+
+        for (const conflict of creatorConflicts || []) {
+            conflicts.set(conflict.id, {
+                id: conflict.id,
+                title: conflict.title || null,
+                start_time: conflict.start_time,
+                source: 'creator',
+            })
+        }
+    }
+
+    const normalizedSpeakerIds = Array.from(new Set((speakerIds || []).filter(Boolean)))
+    if (normalizedSpeakerIds.length > 0) {
+        const { data: speakerLinks } = await (supabase
+            .from('event_speakers') as any)
+            .select('event_id')
+            .in('speaker_id', normalizedSpeakerIds)
+
+        const relatedEventIds = Array.from(new Set(
+            (speakerLinks || [])
+                .map((speakerLink: any) => speakerLink.event_id)
+                .filter((eventId: string) => eventId && eventId !== excludeEventId)
+        ))
+
+        if (relatedEventIds.length > 0) {
+            const { data: speakerConflicts } = await (supabase
+                .from('events') as any)
+                .select('id, title, start_time')
+                .in('id', relatedEventIds)
+                .neq('status', 'cancelled')
+                .lt('start_time', endTimeIso)
+                .gt('end_time', startTimeIso)
+                .limit(5)
+
+            for (const conflict of speakerConflicts || []) {
+                if (!conflicts.has(conflict.id)) {
+                    conflicts.set(conflict.id, {
+                        id: conflict.id,
+                        title: conflict.title || null,
+                        start_time: conflict.start_time,
+                        source: 'speaker',
+                    })
+                }
+            }
+        }
+    }
+
+    const orderedConflicts = Array.from(conflicts.values()).sort(
+        (a, b) => new Date(a.start_time).getTime() - new Date(b.start_time).getTime()
+    )
+
+    return orderedConflicts[0] || null
+}
+
+function buildEventScheduleConflictMessage(conflict: EventScheduleConflict) {
+    const dateLabel = formatConflictDateLabel(conflict.start_time)
+    const eventLabel = conflict.title ? `"${conflict.title}"` : 'otro evento'
+
+    if (conflict.source === 'speaker') {
+        return `Uno de los ponentes ya esta ocupado con ${eventLabel} (${dateLabel}). Cambia el horario para evitar doble reserva.`
+    }
+
+    return `Ese horario se cruza con ${eventLabel} (${dateLabel}). Cambia la fecha u hora para evitar doble reserva.`
+}
+
+function buildExternalEventConflictMessage(
+    conflict: { providerAccountLabel: string | null; busyStart: string },
+    kind: 'owner' | 'speaker' = 'owner'
+) {
+    const dateLabel = formatConflictDateLabel(conflict.busyStart)
+    const accountLabel = conflict.providerAccountLabel ? ` (${conflict.providerAccountLabel})` : ''
+
+    if (kind === 'speaker') {
+        return `Uno de los ponentes ya aparece ocupado en Google Calendar${accountLabel} (${dateLabel}). Cambia el horario para evitar doble reserva.`
+    }
+
+    return `Ese horario ya aparece ocupado en Google Calendar${accountLabel} (${dateLabel}). Cambia la fecha u hora para evitar doble reserva.`
+}
+
+async function getEventSpeakerIds(supabase: any, eventId: string): Promise<string[]> {
+    const { data } = await (supabase
+        .from('event_speakers') as any)
+        .select('speaker_id')
+        .eq('event_id', eventId)
+
+    return Array.from(new Set(
+        (data || [])
+            .map((assignment: any) => assignment.speaker_id)
+            .filter((speakerId: string | null): speakerId is string => typeof speakerId === 'string')
+    ))
 }
 
 export async function registerForEvent(eventId: string, registrationData: Record<string, string> = {}) {
@@ -535,6 +676,46 @@ export async function createEvent(formData: FormData) {
         return { error: 'La fecha u hora del evento no son validas' }
     }
 
+    const speakerAssignments = parseSpeakerAssignments(formData)
+    const speakerAssignmentError = validateSpeakerAssignments(speakerAssignments)
+    if (speakerAssignmentError) {
+        return { error: speakerAssignmentError }
+    }
+
+    const scheduleConflict = await findEventScheduleConflict({
+        supabase,
+        ownerId: profile.role === 'ponente' ? user.id : null,
+        speakerIds: speakerAssignments.map((assignment) => assignment.speakerId),
+        startTimeIso: dateRange.startTimeIso,
+        endTimeIso: dateRange.endTimeIso,
+    })
+
+    if (scheduleConflict) {
+        return { error: buildEventScheduleConflictMessage(scheduleConflict) }
+    }
+
+    try {
+        const externalConflictUserIds = Array.from(new Set([
+            ...(profile.role === 'ponente' ? [user.id] : []),
+            ...speakerAssignments.map((assignment) => assignment.speakerId),
+        ]))
+        const externalConflict = await findExternalCalendarConflictForUsers(
+            externalConflictUserIds,
+            dateRange.startTimeIso,
+            dateRange.endTimeIso
+        )
+
+        if (externalConflict) {
+            const conflictKind = externalConflict.userId === user.id ? 'owner' : 'speaker'
+            return { error: buildExternalEventConflictMessage(externalConflict, conflictKind) }
+        }
+    } catch (externalError) {
+        console.error('[CreateEvent] Error al validar Google Calendar:', externalError)
+        return {
+            error: 'No pudimos verificar la disponibilidad externa de los participantes. Pideles reconectar Google Calendar e intenta de nuevo.',
+        }
+    }
+
     const sessionConfig = parseSessionConfig(formData, eventType, location)
     const idealFor = parseListField(formData, 'idealFor') ?? null
     const learningOutcomes = parseListField(formData, 'learningOutcomes') ?? null
@@ -606,13 +787,6 @@ export async function createEvent(formData: FormData) {
         return { error: error.message }
     }
 
-    // Handle speaker assignments
-    const speakerAssignments = parseSpeakerAssignments(formData)
-    const speakerAssignmentError = validateSpeakerAssignments(speakerAssignments)
-    if (speakerAssignmentError) {
-        return { error: speakerAssignmentError }
-    }
-
     if (speakerAssignments.length > 0 && newEvent) {
         for (let i = 0; i < speakerAssignments.length; i++) {
             await (supabase.from('event_speakers') as any)
@@ -642,7 +816,7 @@ export async function updateEvent(eventId: string, formData: FormData) {
     // Verify user is admin or event creator
     const { data: event } = await (supabase
         .from('events') as any)
-        .select('created_by, status, formation_id')
+        .select('created_by, status, formation_id, start_time, end_time')
         .eq('id', eventId)
         .single()
 
@@ -719,6 +893,21 @@ export async function updateEvent(eventId: string, formData: FormData) {
         return { error: 'Ingresa un precio preferencial para miembros o cambia el tipo de acceso' }
     }
 
+    const speakerAssignments: SpeakerAssignmentInput[] = formData.has('speakerIds') || formData.has('speakerAssignments')
+        ? parseSpeakerAssignments(formData)
+        : (await getEventSpeakerIds(supabase, eventId)).map((speakerId) => ({
+            speakerId,
+            compensationType: DEFAULT_SPEAKER_COMPENSATION_TYPE as SpeakerCompensationType,
+            compensationValue: DEFAULT_SPEAKER_PERCENTAGE_RATE,
+        }))
+    const speakerAssignmentError = validateSpeakerAssignments(speakerAssignments)
+    if (speakerAssignmentError) {
+        return { error: speakerAssignmentError }
+    }
+
+    let nextStartTimeIso = event.start_time
+    let nextEndTimeIso = event.end_time
+
     const updates: Record<string, any> = {}
 
     if (title) updates.title = title
@@ -731,8 +920,45 @@ export async function updateEvent(eventId: string, formData: FormData) {
             return { error: 'La fecha u hora del evento no son validas' }
         }
 
-        updates.start_time = dateRange.startTimeIso
-        updates.end_time = dateRange.endTimeIso
+        nextStartTimeIso = dateRange.startTimeIso
+        nextEndTimeIso = dateRange.endTimeIso
+        updates.start_time = nextStartTimeIso
+        updates.end_time = nextEndTimeIso
+    }
+
+    const scheduleConflict = await findEventScheduleConflict({
+        supabase,
+        ownerId: profile?.role === 'ponente' ? user.id : null,
+        speakerIds: speakerAssignments.map((assignment) => assignment.speakerId),
+        startTimeIso: nextStartTimeIso,
+        endTimeIso: nextEndTimeIso,
+        excludeEventId: eventId,
+    })
+
+    if (scheduleConflict) {
+        return { error: buildEventScheduleConflictMessage(scheduleConflict) }
+    }
+
+    try {
+        const externalConflictUserIds = Array.from(new Set([
+            ...(profile?.role === 'ponente' ? [user.id] : []),
+            ...speakerAssignments.map((assignment) => assignment.speakerId),
+        ]))
+        const externalConflict = await findExternalCalendarConflictForUsers(
+            externalConflictUserIds,
+            nextStartTimeIso,
+            nextEndTimeIso
+        )
+
+        if (externalConflict) {
+            const conflictKind = externalConflict.userId === user.id ? 'owner' : 'speaker'
+            return { error: buildExternalEventConflictMessage(externalConflict, conflictKind) }
+        }
+    } catch (externalError) {
+        console.error('[UpdateEvent] Error al validar Google Calendar:', externalError)
+        return {
+            error: 'No pudimos verificar la disponibilidad externa de los participantes. Pideles reconectar Google Calendar e intenta de nuevo.',
+        }
     }
 
     if (eventType) updates.event_type = eventType
@@ -807,12 +1033,6 @@ export async function updateEvent(eventId: string, formData: FormData) {
 
     // Handle speaker assignments on update
     if (formData.has('speakerIds') || formData.has('speakerAssignments')) {
-        const speakerAssignments = parseSpeakerAssignments(formData)
-        const speakerAssignmentError = validateSpeakerAssignments(speakerAssignments)
-        if (speakerAssignmentError) {
-            return { error: speakerAssignmentError }
-        }
-
         await (supabase.from('event_speakers') as any)
             .delete()
             .eq('event_id', eventId)
@@ -1047,12 +1267,43 @@ export async function addSpeakerToEvent(eventId: string, speakerId: string, role
     if (!user) return { error: 'No autenticado' }
 
     const [{ data: event }, { data: profile }] = await Promise.all([
-        (supabase.from('events') as any).select('created_by').eq('id', eventId).single(),
+        (supabase.from('events') as any).select('created_by, start_time, end_time').eq('id', eventId).single(),
         (supabase.from('profiles') as any).select('role').eq('id', user.id).single()
     ])
 
     if (!event || (event.created_by !== user.id && profile?.role !== 'admin')) {
         return { error: 'No tienes permisos para modificar este evento' }
+    }
+
+    if (event.start_time && event.end_time) {
+        const scheduleConflict = await findEventScheduleConflict({
+            supabase,
+            speakerIds: [speakerId],
+            startTimeIso: event.start_time,
+            endTimeIso: event.end_time,
+            excludeEventId: eventId,
+        })
+
+        if (scheduleConflict) {
+            return { error: buildEventScheduleConflictMessage(scheduleConflict) }
+        }
+
+        try {
+            const externalConflict = await findExternalCalendarConflictForUsers(
+                [speakerId],
+                event.start_time,
+                event.end_time
+            )
+
+            if (externalConflict) {
+                return { error: buildExternalEventConflictMessage(externalConflict, 'speaker') }
+            }
+        } catch (externalError) {
+            console.error('[AddSpeakerToEvent] Error al validar Google Calendar:', externalError)
+            return {
+                error: 'No pudimos verificar la disponibilidad externa del ponente. Pidele reconectar Google Calendar e intenta de nuevo.',
+            }
+        }
     }
 
     const { error } = await (supabase.from('event_speakers') as any)

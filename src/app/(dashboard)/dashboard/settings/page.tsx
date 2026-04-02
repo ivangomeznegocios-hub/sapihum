@@ -5,6 +5,8 @@ import { redirect } from 'next/navigation'
 import { ProfileForm, PasswordForm, PsychologistProfileForm } from './settings-forms'
 import { NotificationSettings } from './notification-settings'
 import { SpeakerProfileForm } from './speaker-profile-form'
+import { CalendarConnectionsCard } from '@/components/calendar/calendar-connections-card'
+import { isGoogleCalendarSyncAvailable } from '@/lib/calendar-sync'
 import { ThemeSwitcher } from './theme-switcher'
 import { TimezoneSelector } from '@/components/timezone-selector'
 import { getMembershipLabel, getMembershipTier } from '@/lib/membership'
@@ -16,9 +18,52 @@ import {
     ShieldAlert
 } from 'lucide-react'
 
-export default async function SettingsPage() {
-    const supabase = await createClient()
+type SearchParams = Promise<Record<string, string | string[] | undefined>>
+
+function readSingleParam(value: string | string[] | undefined) {
+    return Array.isArray(value) ? value[0] : value
+}
+
+function getCalendarNoticeMessage(notice: string | undefined) {
+    switch (notice) {
+        case 'google_connected':
+            return {
+                tone: 'success',
+                text: 'Google Calendar quedó conectado. La plataforma ya puede revisar tu ocupación externa antes de nuevas reservas.',
+            }
+        case 'google_denied':
+            return {
+                tone: 'error',
+                text: 'Cancelaste la conexión con Google Calendar antes de completarla.',
+            }
+        case 'google_state_error':
+            return {
+                tone: 'error',
+                text: 'La conexión con Google Calendar no pudo validarse. Intenta de nuevo.',
+            }
+        case 'google_not_configured':
+            return {
+                tone: 'error',
+                text: 'La conexion con Google Calendar todavia no esta disponible en este entorno.',
+            }
+        case 'google_error':
+            return {
+                tone: 'error',
+                text: 'No fue posible completar la conexión con Google Calendar. Revisa la configuración e inténtalo de nuevo.',
+            }
+        case 'google_unavailable':
+            return {
+                tone: 'error',
+                text: 'La sincronizacion de Google Calendar todavia no esta habilitada para usuarios.',
+            }
+        default:
+            return null
+    }
+}
+
+export default async function SettingsPage({ searchParams }: { searchParams: SearchParams }) {
     const profile = await getUserProfile()
+    const params = await searchParams
 
     if (!profile) {
         redirect('/auth/login')
@@ -26,6 +71,9 @@ export default async function SettingsPage() {
 
     const membershipLevel = profile.membership_level ?? 0
     const membershipSpecialization = (profile as any).membership_specialization_code as string | null
+    const calendarSyncAvailable = (profile.role === 'psychologist' || profile.role === 'ponente')
+        ? await isGoogleCalendarSyncAvailable()
+        : false
 
     // Get speaker profile for ponentes/admins
     let speakerProfile = null
@@ -37,6 +85,8 @@ export default async function SettingsPage() {
             .single()
         speakerProfile = data
     }
+
+    const calendarNotice = getCalendarNoticeMessage(readSingleParam(params.calendar_notice))
 
     return (
         <div className="space-y-8">
@@ -50,6 +100,18 @@ export default async function SettingsPage() {
                     Administra tu cuenta y preferencias
                 </p>
             </div>
+
+            {calendarNotice && (
+                <Card className={calendarNotice.tone === 'success'
+                    ? 'border-green-200 bg-green-50/70 dark:border-green-900/50 dark:bg-green-950/20'
+                    : 'border-red-200 bg-red-50/70 dark:border-red-900/50 dark:bg-red-950/20'}>
+                    <CardContent className="pt-6">
+                        <p className="text-sm font-medium">
+                            {calendarNotice.text}
+                        </p>
+                    </CardContent>
+                </Card>
+            )}
 
             <div className="grid gap-6 lg:grid-cols-3">
                 {/* Settings Sections */}
@@ -66,6 +128,14 @@ export default async function SettingsPage() {
 
                     {/* Notification Settings */}
                     <NotificationSettings />
+
+                    {calendarSyncAvailable && (
+                        <CalendarConnectionsCard
+                            userId={profile.id}
+                            role={profile.role}
+                            calendarFeedToken={profile.calendar_feed_token || null}
+                        />
+                    )}
 
                     {/* Speaker Profile (for ponentes & admins) */}
                     {(profile.role === 'ponente' || profile.role === 'admin') && (

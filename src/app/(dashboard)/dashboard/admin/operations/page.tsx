@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import { createServiceClient } from '@/lib/supabase/service'
 import { requireOperationsPage } from '@/lib/admin/guard'
 import { getProfileOperationsView, getPurchaseOperationsView, searchBackoffice } from '@/lib/admin/operations'
+import { GOOGLE_CALENDAR_FEATURE_KEY, isGoogleCalendarConfigured } from '@/lib/calendar-sync'
 import { getMembershipOperationsSnapshot } from '@/lib/membership-entitlements'
 import {
     addAdminNoteAction,
@@ -15,6 +16,7 @@ import {
     revokeEntitlementAction,
     sendAccessMagicLinkAction,
 } from './actions'
+import { GoogleCalendarSyncToggle } from './calendar-sync-toggle'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -105,6 +107,11 @@ export default async function AdminOperationsPage({ searchParams }: { searchPara
         .not('status', 'eq', 'draft')
         .order('start_time', { ascending: false })
         .limit(50)
+    const { data: googleCalendarSyncSetting } = await (admin
+        .from('platform_settings') as any)
+        .select('value')
+        .eq('key', GOOGLE_CALENDAR_FEATURE_KEY)
+        .maybeSingle()
 
     const searchResults = query ? await searchBackoffice(query) : { profiles: [], purchases: [] }
     const profileView = selectedUserId ? await getProfileOperationsView(selectedUserId) : null
@@ -118,6 +125,9 @@ export default async function AdminOperationsPage({ searchParams }: { searchPara
     if (selectedPurchaseId && !purchaseView) {
         redirect('/dashboard/admin/operations?error=Compra+no+encontrada')
     }
+
+    const googleCalendarSyncEnabled = googleCalendarSyncSetting?.value === true || googleCalendarSyncSetting?.value === 'true'
+    const googleCalendarOauthConfigured = isGoogleCalendarConfigured()
 
     return (
         <div className="space-y-8">
@@ -152,6 +162,13 @@ export default async function AdminOperationsPage({ searchParams }: { searchPara
                 <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-900">
                     {error}
                 </div>
+            ) : null}
+
+            {viewer.profile.role === 'admin' ? (
+                <GoogleCalendarSyncToggle
+                    currentValue={googleCalendarSyncEnabled}
+                    oauthConfigured={googleCalendarOauthConfigured}
+                />
             ) : null}
 
             <Card>

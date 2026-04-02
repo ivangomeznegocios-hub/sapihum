@@ -1,8 +1,9 @@
 'use server'
 
-import { createClient, createAdminClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/server'
 import { getCurrentInternalAccessContext } from '@/lib/access/internal-server'
 import { canAccessClinicalWorkspace } from '@/lib/access/internal-modules'
+import { findExternalCalendarConflictForUsers } from '@/lib/calendar-sync'
 import { revalidatePath } from 'next/cache'
 import { sendAppointmentConfirmationEmail, sendWelcomeEmail } from '@/lib/email'
 import { sendPushNotification } from '@/lib/onesignal'
@@ -86,6 +87,43 @@ export async function createAppointment(formData: FormData) {
 
     if (!relationship) {
         return { error: 'No tienes una relacion activa con este paciente' }
+    }
+
+    const { data: overlappingAppointment } = await (supabase
+        .from('appointments') as any)
+        .select('id')
+        .eq('psychologist_id', profile.id)
+        .neq('status', 'cancelled')
+        .lt('start_time', endTime.toISOString())
+        .gt('end_time', startTime.toISOString())
+        .limit(1)
+        .maybeSingle()
+
+    if (overlappingAppointment) {
+        return { error: 'Ya tienes otra cita ocupando ese horario' }
+    }
+
+    try {
+        const externalConflict = await findExternalCalendarConflictForUsers(
+            [profile.id],
+            startTime.toISOString(),
+            endTime.toISOString()
+        )
+
+        if (externalConflict) {
+            const accountLabel = externalConflict.providerAccountLabel
+                ? ` (${externalConflict.providerAccountLabel})`
+                : ''
+
+            return {
+                error: `Ese horario ya aparece ocupado en Google Calendar${accountLabel}. Cambia la hora para evitar doble reserva.`,
+            }
+        }
+    } catch (externalError) {
+        console.error('[CreateAppointment] Error al validar Google Calendar:', externalError)
+        return {
+            error: 'No pudimos confirmar tu disponibilidad externa. Reconecta Google Calendar e intenta de nuevo.',
+        }
     }
 
     // Generate meeting link for video appointments

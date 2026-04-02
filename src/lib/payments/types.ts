@@ -38,6 +38,7 @@ export interface CreateOneTimeCheckoutParams {
     purchaseType: 'ai_credits' | 'event_purchase' | 'formation_purchase'
     amount: number                // In smallest currency unit or decimal
     currency?: string
+    checkoutExpiresAt?: string
     customerEmail: string
     customerId?: string
     userId?: string
@@ -53,6 +54,7 @@ export interface OneTimeCheckoutResult {
     checkoutUrl: string
     sessionId: string
     provider: PaymentProvider
+    expiresAt?: string
 }
 
 // ---- Webhook Events ----
