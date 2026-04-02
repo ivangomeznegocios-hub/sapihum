@@ -172,6 +172,32 @@ export default async function AdminAnalyticsPage() {
                         ))}
                     </div>
                 </div>
+
+                <div className="rounded-2xl border bg-card p-5">
+                    <div className="mb-4 flex items-center gap-2">
+                        <ShieldCheck className="h-5 w-5 text-primary" />
+                        <h2 className="text-lg font-semibold">Salud operativa</h2>
+                    </div>
+                    <div className="space-y-3 text-sm">
+                        {[
+                            ['Webhooks procesados 24h', dashboard.operationalHealth.webhooksProcessed24h],
+                            ['Webhooks fallidos 24h', dashboard.operationalHealth.webhooksFailed24h],
+                            ['Webhooks en proceso', dashboard.operationalHealth.webhooksProcessing],
+                            ['Compras evento pendientes', dashboard.operationalHealth.pendingEventPurchases],
+                            ['Compras formacion pendientes', dashboard.operationalHealth.pendingFormationPurchases],
+                            ['Refunds 30d', dashboard.operationalHealth.refundedTransactions30d],
+                            ['Emails fallidos 30d', dashboard.operationalHealth.commerceEmailFailures30d],
+                            ['Magic links fallidos 30d', dashboard.operationalHealth.magicLinkFailures30d],
+                            ['Refund manual review 30d', dashboard.operationalHealth.refundManualReviewOpen30d],
+                            ['Refunds conciliados 30d', dashboard.operationalHealth.successfulRefunds30d],
+                        ].map(([label, value]) => (
+                            <div key={label} className="flex items-center justify-between rounded-xl border bg-muted/20 px-4 py-3">
+                                <span className="text-muted-foreground">{label}</span>
+                                <span className="font-semibold">{String(value)}</span>
+                            </div>
+                        ))}
+                    </div>
+                </div>
             </section>
 
             <section className="rounded-2xl border bg-card p-5">

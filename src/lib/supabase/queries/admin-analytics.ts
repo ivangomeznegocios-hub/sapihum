@@ -93,6 +93,7 @@ export async function getAdminAnalyticsDashboard(model: AttributionModel = 'last
     const windowStart = daysAgo(30)
     const windowEnd = new Date()
     const monthStart = startOfDay(new Date(new Date().getFullYear(), new Date().getMonth(), 1))
+    const last24Hours = new Date(Date.now() - 24 * 60 * 60 * 1000)
 
     const [
         profilesResult,
@@ -106,6 +107,8 @@ export async function getAdminAnalyticsDashboard(model: AttributionModel = 'last
         waitlistResult,
         eventPurchasesResult,
         formationPurchasesResult,
+        webhookEventsResult,
+        adminOperationLogsResult,
     ] = await Promise.all([
         (admin.from('profiles') as any).select('id, is_test'),
         (admin.from('analytics_visitors') as any).select('id, user_id, first_seen_at'),
@@ -118,6 +121,8 @@ export async function getAdminAnalyticsDashboard(model: AttributionModel = 'last
         (admin.from('specialization_waitlist') as any).select('id, user_id, created_at, metadata'),
         (admin.from('event_purchases') as any).select('id, user_id, amount_paid, status, purchased_at, confirmed_at, attribution_snapshot, provider_session_id, provider_payment_id'),
         (admin.from('formation_purchases') as any).select('id, user_id, amount_paid, status, purchased_at, confirmed_at, metadata, provider_session_id, provider_payment_id'),
+        (admin.from('payment_webhook_events') as any).select('id, status, attempts, created_at, failed_at, processed_at'),
+        (admin.from('admin_operation_logs') as any).select('id, action_type, created_at'),
     ])
 
     const testUserIds = new Set(
@@ -131,8 +136,14 @@ export async function getAdminAnalyticsDashboard(model: AttributionModel = 'last
     const waitlist = ((waitlistResult.data || []) as any[]).filter((row) => !row.user_id || !testUserIds.has(row.user_id))
     const costs = (costsResult.data || []) as any[]
     const manualDeals = ((manualDealsResult.data || []) as any[]).filter((row) => !row.user_id || !testUserIds.has(row.user_id))
+    const webhookEvents = (webhookEventsResult.data || []) as any[]
+    const adminOperationLogs = (adminOperationLogsResult.data || []) as any[]
 
-    const transactions = ((transactionsResult.data || []) as any[]).filter(
+    const allTransactions = ((transactionsResult.data || []) as any[]).filter(
+        (row) => (!row.user_id || !testUserIds.has(row.user_id)) && (!row.profile_id || !testUserIds.has(row.profile_id))
+    )
+
+    const transactions = allTransactions.filter(
         (row) =>
             row.status === 'completed' &&
             (!row.user_id || !testUserIds.has(row.user_id)) &&
@@ -140,10 +151,12 @@ export async function getAdminAnalyticsDashboard(model: AttributionModel = 'last
     )
 
     const subscriptions = ((subscriptionsResult.data || []) as any[]).filter((row) => !row.user_id || !testUserIds.has(row.user_id))
-    const eventPurchases = ((eventPurchasesResult.data || []) as any[]).filter(
+    const eventPurchasesAll = ((eventPurchasesResult.data || []) as any[]).filter((row) => !row.user_id || !testUserIds.has(row.user_id))
+    const formationPurchasesAll = ((formationPurchasesResult.data || []) as any[]).filter((row) => !row.user_id || !testUserIds.has(row.user_id))
+    const eventPurchases = eventPurchasesAll.filter(
         (row) => row.status === 'confirmed' && (!row.user_id || !testUserIds.has(row.user_id))
     )
-    const formationPurchases = ((formationPurchasesResult.data || []) as any[]).filter(
+    const formationPurchases = formationPurchasesAll.filter(
         (row) => row.status === 'confirmed' && (!row.user_id || !testUserIds.has(row.user_id))
     )
     const transactionRefs = {
@@ -438,6 +451,19 @@ export async function getAdminAnalyticsDashboard(model: AttributionModel = 'last
         manualDeals: manualDeals.length,
     }
 
+    const operationalHealth = {
+        webhooksProcessed24h: webhookEvents.filter((row) => row.status === 'processed' && new Date(row.created_at) >= last24Hours).length,
+        webhooksFailed24h: webhookEvents.filter((row) => row.status === 'failed' && new Date(row.created_at) >= last24Hours).length,
+        webhooksProcessing: webhookEvents.filter((row) => row.status === 'processing').length,
+        pendingEventPurchases: eventPurchasesAll.filter((row) => row.status === 'pending').length,
+        pendingFormationPurchases: formationPurchasesAll.filter((row) => row.status === 'pending').length,
+        refundedTransactions30d: allTransactions.filter((row) => row.status === 'refunded' && new Date(row.created_at) >= windowStart).length,
+        commerceEmailFailures30d: adminOperationLogs.filter((row) => row.action_type === 'commerce_email_failed' && new Date(row.created_at) >= windowStart).length,
+        magicLinkFailures30d: adminOperationLogs.filter((row) => row.action_type === 'commerce_magic_link_failed' && new Date(row.created_at) >= windowStart).length,
+        refundManualReviewOpen30d: adminOperationLogs.filter((row) => row.action_type === 'payment_refund_manual_review_required' && new Date(row.created_at) >= windowStart).length,
+        successfulRefunds30d: adminOperationLogs.filter((row) => row.action_type === 'payment_refunded' && new Date(row.created_at) >= windowStart).length,
+    }
+
     return {
         attributionModel: model,
         executive: {
@@ -478,6 +504,7 @@ export async function getAdminAnalyticsDashboard(model: AttributionModel = 'last
         },
         comparisonByModel,
         trackingHealth,
+        operationalHealth,
         manualInputs: {
             costs: costs.slice(0, 12),
             deals: manualDeals.slice(0, 12),

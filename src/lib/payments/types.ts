@@ -93,6 +93,31 @@ export interface PaymentWebhookData {
     referenceId?: string
 }
 
+export interface RefundWebhookData {
+    refundId: string
+    chargeId?: string
+    paymentIntentId?: string
+    sessionId?: string
+    amountRefunded: number
+    originalAmount?: number
+    currency: string
+    customerEmail?: string
+    metadata?: Record<string, string>
+    purchaseType?: PurchaseType
+    referenceId?: string
+    isFullRefund: boolean
+    refundReason?: string | null
+}
+
+export interface CheckoutSessionWebhookData {
+    sessionId: string
+    purchaseType?: PurchaseType
+    referenceId?: string
+    customerEmail?: string
+    metadata?: Record<string, string>
+    expiresAt?: string
+}
+
 export type WebhookEvent =
     | { type: 'subscription.created'; providerEventId: string; data: SubscriptionWebhookData }
     | { type: 'subscription.updated'; providerEventId: string; data: SubscriptionWebhookData }
@@ -102,6 +127,8 @@ export type WebhookEvent =
     | { type: 'subscription.deleted'; providerEventId: string; data: SubscriptionWebhookData }
     | { type: 'payment.completed'; providerEventId: string; data: PaymentWebhookData }
     | { type: 'payment.failed'; providerEventId: string; data: PaymentWebhookData }
+    | { type: 'payment.refunded'; providerEventId: string; data: RefundWebhookData }
+    | { type: 'checkout.expired'; providerEventId: string; data: CheckoutSessionWebhookData }
     | { type: 'unknown'; providerEventId: string; data: null }
 
 // ---- Provider Interface ----

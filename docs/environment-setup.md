@@ -12,6 +12,10 @@ Server-only secrets must never be sent to the client:
 - `ONESIGNAL_REST_API_KEY`
 - `AI_API_KEY`
 
+## Launch Note
+
+For a public go-live, read this first: [go-live-comercio.md](./go-live-comercio.md).
+
 ## Staging
 
 Set staging-specific values for:
@@ -28,6 +32,7 @@ Set staging-specific values for:
 - `STRIPE_PRICE_LEVEL_3_MONTHLY`
 - `STRIPE_PRICE_LEVEL_3_ANNUAL`
 - `RESEND_API_KEY`
+- `RESEND_FROM_EMAIL`
 - `NEXT_PUBLIC_ONESIGNAL_APP_ID`
 - `ONESIGNAL_REST_API_KEY`
 - `AI_PROVIDER`
@@ -52,6 +57,7 @@ Set production-specific values for the same variables:
 - `STRIPE_PRICE_LEVEL_3_MONTHLY`
 - `STRIPE_PRICE_LEVEL_3_ANNUAL`
 - `RESEND_API_KEY`
+- `RESEND_FROM_EMAIL`
 - `NEXT_PUBLIC_ONESIGNAL_APP_ID`
 - `ONESIGNAL_REST_API_KEY`
 - `AI_PROVIDER`
@@ -77,11 +83,12 @@ Before the first billing test:
 - `STRIPE_PRICE_LEVEL_2_ANNUAL`
 - `STRIPE_PRICE_LEVEL_3_MONTHLY`
 - `STRIPE_PRICE_LEVEL_3_ANNUAL`
+- `RESEND_API_KEY`
+- `RESEND_FROM_EMAIL`
 
 ## Can Wait To Phase 2
 
 These can stay unset until the related feature is intentionally enabled:
-- `RESEND_API_KEY`
 - `NEXT_PUBLIC_ONESIGNAL_APP_ID`
 - `ONESIGNAL_REST_API_KEY`
 - `AI_PROVIDER`

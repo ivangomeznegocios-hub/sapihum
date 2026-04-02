@@ -38,6 +38,7 @@ export type AnalyticsEventName =
     | 'checkout_started'
     | 'payment_completed'
     | 'payment_failed'
+    | 'payment_refunded'
     | 'subscription_created'
     | 'subscription_renewed'
     | 'subscription_cancelled'

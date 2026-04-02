@@ -6,10 +6,10 @@ import { createClient as createServiceClient } from '@supabase/supabase-js'
 import { recordAnalyticsServerEvent } from '@/lib/analytics/server'
 import type { AttributionSnapshot } from '@/lib/analytics/types'
 import { getAppUrl } from '@/lib/config/app-url'
-import { grantEventEntitlements } from '@/lib/events/entitlements'
-import { sendEmail } from '@/lib/email/index'
-import { buildEventPurchaseEmail } from '@/lib/email/templates'
+import { getActiveEntitlementForEvent } from '@/lib/events/access'
+import { grantEventEntitlements, revokeEventEntitlementsBySourceReference } from '@/lib/events/entitlements'
 import { upsertAutomaticEventSpeakerEarnings } from '@/lib/earnings/compensation'
+import { logCommerceOperationalEvent, sendEventPurchaseConfirmation, sendFormationPurchaseConfirmation } from '@/lib/payments/commerce'
 import { syncMembershipEntitlementsForUser } from '@/lib/membership-entitlements'
 import { getPlanByPriceId } from './config'
 import {
@@ -20,6 +20,8 @@ import {
 import type {
     PaymentProvider,
     PaymentProviderAdapter,
+    RefundWebhookData,
+    CheckoutSessionWebhookData,
     PaymentWebhookData,
     SubscriptionWebhookData,
 } from './types'
@@ -266,6 +268,286 @@ async function upsertPremiumCommission(params: {
     })
 }
 
+async function hasRemainingEventEntitlement(params: {
+    supabase: any
+    eventId: string
+    eventType: string | null | undefined
+    userId?: string | null
+    email?: string | null
+}) {
+    if (!params.userId && !params.email) {
+        return false
+    }
+
+    const entitlement = await getActiveEntitlementForEvent({
+        supabase: params.supabase,
+        eventId: params.eventId,
+        userId: params.userId ?? null,
+        email: params.email ?? null,
+        eventType: (params.eventType as any) ?? null,
+    })
+
+    return Boolean(entitlement)
+}
+
+async function cancelEventRegistrationsIfAccessRemoved(params: {
+    supabase: any
+    eventId: string
+    eventType: string | null | undefined
+    userId?: string | null
+    email?: string | null
+    reason: string
+    details?: Record<string, unknown>
+}) {
+    if (!params.userId) {
+        return 0
+    }
+
+    const hasRemainingAccess = await hasRemainingEventEntitlement(params)
+    if (hasRemainingAccess) {
+        return 0
+    }
+
+    const { data: registrations, error } = await (params.supabase
+        .from('event_registrations') as any)
+        .select('id, registration_data')
+        .eq('event_id', params.eventId)
+        .eq('user_id', params.userId)
+        .eq('status', 'registered')
+
+    if (error) {
+        throw error
+    }
+
+    for (const registration of registrations ?? []) {
+        const { error: updateError } = await (params.supabase
+            .from('event_registrations') as any)
+            .update({
+                status: 'cancelled',
+                registration_data: {
+                    ...(registration.registration_data ?? {}),
+                    cancelled_reason: params.reason,
+                    cancelled_at: new Date().toISOString(),
+                    ...(params.details ?? {}),
+                },
+            })
+            .eq('id', registration.id)
+
+        if (updateError) {
+            throw updateError
+        }
+    }
+
+    return (registrations ?? []).length
+}
+
+async function cancelFormationRegistrationsIfAccessRemoved(params: {
+    supabase: any
+    formationId: string
+    userId?: string | null
+    email?: string | null
+    linkedEvents: Array<{ id: string; event_type?: string | null }>
+    reason: string
+    details?: Record<string, unknown>
+}) {
+    if (!params.userId || params.linkedEvents.length === 0) {
+        return 0
+    }
+
+    let cancelledCount = 0
+
+    for (const linkedEvent of params.linkedEvents) {
+        const hasRemainingAccess = await hasRemainingEventEntitlement({
+            supabase: params.supabase,
+            eventId: linkedEvent.id,
+            eventType: linkedEvent.event_type ?? null,
+            userId: params.userId,
+            email: params.email ?? null,
+        })
+
+        if (hasRemainingAccess) {
+            continue
+        }
+
+        const { data: registrations, error } = await (params.supabase
+            .from('event_registrations') as any)
+            .select('id, registration_data')
+            .eq('event_id', linkedEvent.id)
+            .eq('user_id', params.userId)
+            .eq('status', 'registered')
+
+        if (error) {
+            throw error
+        }
+
+        for (const registration of registrations ?? []) {
+            const registrationFormationId = registration.registration_data?.formation_id
+            const registrationSource = registration.registration_data?.source
+            if (
+                registrationFormationId !== params.formationId
+                && registrationSource !== 'formation_purchase'
+                && registrationSource !== 'formation_free_access'
+            ) {
+                continue
+            }
+
+            const { error: updateError } = await (params.supabase
+                .from('event_registrations') as any)
+                .update({
+                    status: 'cancelled',
+                    registration_data: {
+                        ...(registration.registration_data ?? {}),
+                        cancelled_reason: params.reason,
+                        cancelled_at: new Date().toISOString(),
+                        ...(params.details ?? {}),
+                    },
+                })
+                .eq('id', registration.id)
+
+            if (updateError) {
+                throw updateError
+            }
+
+            cancelledCount += 1
+        }
+    }
+
+    return cancelledCount
+}
+
+async function voidSpeakerEarningsForTransaction(params: {
+    supabase: any
+    transactionId: string | null
+    reason: string
+}) {
+    if (!params.transactionId) {
+        return 0
+    }
+
+    const { data, error } = await (params.supabase
+        .from('speaker_earnings') as any)
+        .update({
+            status: 'voided',
+            voided_at: new Date().toISOString(),
+            void_reason: params.reason,
+            updated_at: new Date().toISOString(),
+        })
+        .eq('source_transaction_id', params.transactionId)
+        .neq('status', 'voided')
+        .select('id')
+
+    if (error) {
+        throw error
+    }
+
+    return (data ?? []).length
+}
+
+async function cancelPendingEventPurchaseRecord(params: {
+    supabase: any
+    purchaseId?: string | null
+    sessionId?: string | null
+    reason: string
+    details?: Record<string, unknown>
+}) {
+    if (!params.purchaseId && !params.sessionId) {
+        return null
+    }
+
+    let query = (params.supabase
+        .from('event_purchases') as any)
+        .select('id, email, user_id, status, metadata')
+        .eq('status', 'pending')
+
+    if (params.purchaseId) {
+        query = query.eq('id', params.purchaseId)
+    } else if (params.sessionId) {
+        query = query.eq('provider_session_id', params.sessionId)
+    }
+
+    const { data: purchase, error } = await query.maybeSingle()
+
+    if (error) {
+        throw error
+    }
+
+    if (!purchase) {
+        return null
+    }
+
+    const { error: updateError } = await (params.supabase
+        .from('event_purchases') as any)
+        .update({
+            status: 'cancelled',
+            checkout_session_expires_at: null,
+            metadata: {
+                ...(purchase.metadata ?? {}),
+                cancelled_reason: params.reason,
+                cancelled_at: new Date().toISOString(),
+                ...(params.details ?? {}),
+            },
+        })
+        .eq('id', purchase.id)
+
+    if (updateError) {
+        throw updateError
+    }
+
+    return purchase
+}
+
+async function cancelPendingFormationPurchaseRecord(params: {
+    supabase: any
+    purchaseId?: string | null
+    sessionId?: string | null
+    reason: string
+    details?: Record<string, unknown>
+}) {
+    if (!params.purchaseId && !params.sessionId) {
+        return null
+    }
+
+    let query = (params.supabase
+        .from('formation_purchases') as any)
+        .select('id, email, user_id, status, metadata')
+        .eq('status', 'pending')
+
+    if (params.purchaseId) {
+        query = query.eq('id', params.purchaseId)
+    } else if (params.sessionId) {
+        query = query.eq('provider_session_id', params.sessionId)
+    }
+
+    const { data: purchase, error } = await query.maybeSingle()
+
+    if (error) {
+        throw error
+    }
+
+    if (!purchase) {
+        return null
+    }
+
+    const { error: updateError } = await (params.supabase
+        .from('formation_purchases') as any)
+        .update({
+            status: 'cancelled',
+            metadata: {
+                ...(purchase.metadata ?? {}),
+                cancelled_reason: params.reason,
+                cancelled_at: new Date().toISOString(),
+                ...(params.details ?? {}),
+            },
+        })
+        .eq('id', purchase.id)
+
+    if (updateError) {
+        throw updateError
+    }
+
+    return purchase
+}
+
 async function fulfillEventPurchase(params: {
     supabase: any
     data: PaymentWebhookData
@@ -459,37 +741,24 @@ async function fulfillEventPurchase(params: {
 
     if (!wasAlreadyConfirmed) {
         try {
-        const { getAppUrl } = await import('@/lib/config/app-url')
-        const appUrl = getAppUrl()
-        const isGuest = !params.userId && params.data.metadata?.guest_checkout === 'true'
-        const buyerName = purchaseRow?.full_name
-            || normalizeWebhookValue(params.data.metadata?.buyer_full_name)
-            || customerEmail.split('@')[0]
-        const hubPath = event.slug ? `/hub/${event.slug}` : '/mi-acceso'
-        const recoveryUrl = `${appUrl}/compras/recuperar?email=${encodeURIComponent(customerEmail)}&next=${encodeURIComponent(hubPath)}`
-        const eventDate = event.start_time
-            ? new Intl.DateTimeFormat('es-MX', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', hour: 'numeric', minute: '2-digit' }).format(new Date(event.start_time))
-            : 'Por confirmar'
-
-        const emailContent = buildEventPurchaseEmail({
-            userName: buyerName,
-            eventTitle: event.title,
-            eventDate,
-            amount: params.data.amount,
-            eventUrl: isGuest ? recoveryUrl : `${appUrl}${hubPath}`,
-            isGuest,
-            recoveryUrl,
-        })
-
-        await sendEmail({
-            to: customerEmail,
-            subject: emailContent.subject,
-            html: emailContent.html,
-        })
-    } catch (emailError) {
+            await sendEventPurchaseConfirmation({
+                email: customerEmail,
+                eventTitle: event.title,
+                eventSlug: event.slug,
+                eventStartTime: event.start_time,
+                amount: params.data.amount,
+                isGuest: params.data.metadata?.guest_checkout === 'true',
+                purchaseId,
+                userId: resolvedUserId,
+                userName:
+                    purchaseRow?.full_name
+                    || normalizeWebhookValue(params.data.metadata?.buyer_full_name)
+                    || customerEmail.split('@')[0],
+            })
+        } catch (emailError) {
         // Non-blocking — purchase is already confirmed
-        console.error('[Payment] Failed to send purchase confirmation email:', emailError)
-    }
+            console.error('[Payment] Failed to send purchase confirmation email:', emailError)
+        }
 
     }
 
@@ -551,6 +820,7 @@ async function fulfillFormationPurchase(params: {
         .maybeSingle()
 
     const resolvedUserId = purchaseRow?.user_id || params.userId || params.profileId || matchedProfile?.id || null
+    const wasAlreadyConfirmed = purchaseRow?.status === 'confirmed'
     const paymentReference = params.data.paymentIntentId || params.data.sessionId
     const mergedMetadata = {
         ...(purchaseRow?.metadata ?? {}),
@@ -660,6 +930,27 @@ async function fulfillFormationPurchase(params: {
     }
 
     console.log(`[Payment] Formation purchase confirmed, access granted for ${linkedEvents?.length || 0} courses.`)
+
+    if (!wasAlreadyConfirmed) {
+        try {
+            await sendFormationPurchaseConfirmation({
+                email: customerEmail,
+                formationTitle: formation.title,
+                amount: params.data.amount,
+                isGuest: params.data.metadata?.guest_checkout === 'true',
+                purchaseId,
+                userId: resolvedUserId,
+                userName:
+                    purchaseRow?.full_name
+                    || normalizeWebhookValue(params.data.metadata?.buyer_full_name)
+                    || customerEmail.split('@')[0],
+                linkedCoursesCount: linkedEvents?.length ?? 0,
+            })
+        } catch (emailError) {
+            console.error('[Payment] Failed to send formation purchase confirmation email:', emailError)
+        }
+    }
+
     return { resolvedUserId }
 }
 
@@ -740,8 +1031,31 @@ export async function fulfillSubscriptionCreated(data: SubscriptionWebhookData):
                 identity.normalizedEmail,
                 normalizeWebhookValue(data.metadata?.post_checkout_path) || '/dashboard/subscription'
             )
+            await logCommerceOperationalEvent({
+                actionType: 'commerce_magic_link_sent',
+                entityType: 'subscription',
+                entityId: existingSubscription?.id ?? null,
+                targetUserId: userId,
+                targetEmail: identity.normalizedEmail,
+                details: {
+                    providerSubscriptionId: data.providerSubscriptionId,
+                    nextPath: normalizeWebhookValue(data.metadata?.post_checkout_path) || '/dashboard/subscription',
+                },
+            })
         } catch (magicLinkError) {
             console.error('[Payment] Failed to send guest subscription access link:', magicLinkError)
+            await logCommerceOperationalEvent({
+                actionType: 'commerce_magic_link_failed',
+                entityType: 'subscription',
+                entityId: existingSubscription?.id ?? null,
+                targetUserId: userId,
+                targetEmail: identity.normalizedEmail,
+                reason: magicLinkError instanceof Error ? magicLinkError.message : 'magic_link_failed',
+                details: {
+                    providerSubscriptionId: data.providerSubscriptionId,
+                    nextPath: normalizeWebhookValue(data.metadata?.post_checkout_path) || '/dashboard/subscription',
+                },
+            })
         }
     }
 
@@ -1154,6 +1468,382 @@ export async function fulfillOneTimePayment(data: PaymentWebhookData): Promise<v
             })
         }
     }
+}
+
+export async function expireCheckoutSession(data: CheckoutSessionWebhookData): Promise<void> {
+    const supabase = getServiceSupabase()
+    const purchaseType = (data.purchaseType || data.metadata?.purchase_type) as any
+
+    if (purchaseType === 'event_purchase') {
+        const cancelledPurchase = await cancelPendingEventPurchaseRecord({
+            supabase,
+            purchaseId: normalizeWebhookValue(data.metadata?.event_purchase_id),
+            sessionId: data.sessionId,
+            reason: 'stripe_checkout_session_expired',
+            details: {
+                provider_event: 'checkout.session.expired',
+                expired_at: data.expiresAt ?? new Date().toISOString(),
+            },
+        })
+
+        if (cancelledPurchase) {
+            await logCommerceOperationalEvent({
+                actionType: 'checkout_expired',
+                entityType: 'event_purchase',
+                entityId: cancelledPurchase.id,
+                targetUserId: cancelledPurchase.user_id ?? null,
+                targetEmail: cancelledPurchase.email ?? null,
+                details: {
+                    sessionId: data.sessionId,
+                    purchaseType,
+                    referenceId: data.referenceId ?? null,
+                },
+            })
+        }
+
+        return
+    }
+
+    if (purchaseType === 'formation_purchase') {
+        const cancelledPurchase = await cancelPendingFormationPurchaseRecord({
+            supabase,
+            purchaseId: normalizeWebhookValue(data.metadata?.formation_purchase_id),
+            sessionId: data.sessionId,
+            reason: 'stripe_checkout_session_expired',
+            details: {
+                provider_event: 'checkout.session.expired',
+                expired_at: data.expiresAt ?? new Date().toISOString(),
+            },
+        })
+
+        if (cancelledPurchase) {
+            await logCommerceOperationalEvent({
+                actionType: 'checkout_expired',
+                entityType: 'formation_purchase',
+                entityId: cancelledPurchase.id,
+                targetUserId: cancelledPurchase.user_id ?? null,
+                targetEmail: cancelledPurchase.email ?? null,
+                details: {
+                    sessionId: data.sessionId,
+                    purchaseType,
+                    referenceId: data.referenceId ?? null,
+                },
+            })
+        }
+    }
+}
+
+export async function refundOneTimePayment(data: RefundWebhookData): Promise<void> {
+    const supabase = getServiceSupabase()
+    const purchaseType = (data.purchaseType || data.metadata?.purchase_type) as any
+    const referenceId = data.referenceId || data.metadata?.reference_id || null
+    const lookupFilters = [
+        data.paymentIntentId ? `provider_payment_id.eq.${data.paymentIntentId}` : null,
+        data.sessionId ? `provider_session_id.eq.${data.sessionId}` : null,
+    ].filter(Boolean) as string[]
+
+    if (lookupFilters.length === 0) {
+        await logCommerceOperationalEvent({
+            actionType: 'payment_refund_manual_review_required',
+            entityType: 'payment_transaction',
+            targetEmail: data.customerEmail ?? null,
+            reason: 'refund_missing_provider_references',
+            details: {
+                refundId: data.refundId,
+                purchaseType: purchaseType ?? null,
+                referenceId,
+            },
+        })
+        return
+    }
+
+    const { data: transaction } = await (supabase
+        .from('payment_transactions') as any)
+        .select('id, user_id, profile_id, email, purchase_type, purchase_reference_id, status, metadata, analytics_visitor_id, analytics_session_id, attribution_snapshot, provider_payment_id, provider_session_id')
+        .or(lookupFilters.join(','))
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle()
+
+    if (!transaction) {
+        await logCommerceOperationalEvent({
+            actionType: 'payment_refund_manual_review_required',
+            entityType: 'payment_transaction',
+            targetEmail: data.customerEmail ?? null,
+            reason: 'refund_transaction_not_found',
+            details: {
+                refundId: data.refundId,
+                paymentIntentId: data.paymentIntentId ?? null,
+                sessionId: data.sessionId ?? null,
+                purchaseType: purchaseType ?? null,
+                referenceId,
+            },
+        })
+        return
+    }
+
+    const refundMetadata = {
+        ...(transaction.metadata ?? {}),
+        refund: {
+            refund_id: data.refundId,
+            charge_id: data.chargeId ?? null,
+            payment_intent_id: data.paymentIntentId ?? null,
+            session_id: data.sessionId ?? null,
+            refunded_amount: data.amountRefunded,
+            original_amount: data.originalAmount ?? null,
+            refund_reason: data.refundReason ?? null,
+            is_full_refund: data.isFullRefund,
+            processed_at: new Date().toISOString(),
+        },
+    }
+
+    if (!data.isFullRefund) {
+        await (supabase
+            .from('payment_transactions') as any)
+            .update({
+                metadata: refundMetadata,
+            })
+            .eq('id', transaction.id)
+
+        await logCommerceOperationalEvent({
+            actionType: 'payment_refund_manual_review_required',
+            entityType: 'payment_transaction',
+            entityId: transaction.id,
+            targetUserId: transaction.user_id || transaction.profile_id || null,
+            targetEmail: transaction.email,
+            reason: 'partial_refund_detected',
+            details: {
+                refundId: data.refundId,
+                refundedAmount: data.amountRefunded,
+                originalAmount: data.originalAmount ?? null,
+                purchaseType: transaction.purchase_type,
+                referenceId: transaction.purchase_reference_id ?? referenceId,
+            },
+        })
+        return
+    }
+
+    await (supabase
+        .from('payment_transactions') as any)
+        .update({
+            status: 'refunded',
+            metadata: refundMetadata,
+        })
+        .eq('id', transaction.id)
+
+    let entityType = transaction.purchase_type
+    let entityId: string | null = null
+    let autoResolved = false
+    let cancelledRegistrations = 0
+    let voidedEarnings = 0
+
+    if (transaction.purchase_type === 'event_purchase') {
+        const eventPurchaseLookupFilters = [
+            data.paymentIntentId ? `provider_payment_id.eq.${data.paymentIntentId}` : null,
+            data.sessionId ? `provider_session_id.eq.${data.sessionId}` : null,
+        ].filter(Boolean) as string[]
+        let purchase: any = null
+
+        const purchaseIdFromMetadata = normalizeWebhookValue(data.metadata?.event_purchase_id)
+        if (purchaseIdFromMetadata) {
+            const { data: byId } = await (supabase
+                .from('event_purchases') as any)
+                .select('id, event_id, user_id, email, status, metadata')
+                .eq('id', purchaseIdFromMetadata)
+                .maybeSingle()
+            purchase = byId ?? null
+        }
+
+        if (!purchase && eventPurchaseLookupFilters.length > 0) {
+            const { data: byProviderRefs } = await (supabase
+                .from('event_purchases') as any)
+                .select('id, event_id, user_id, email, status, metadata')
+                .or(eventPurchaseLookupFilters.join(','))
+                .order('purchased_at', { ascending: false })
+                .limit(1)
+                .maybeSingle()
+            purchase = byProviderRefs ?? null
+        }
+
+        if (purchase) {
+            entityId = purchase.id
+            await (supabase
+                .from('event_purchases') as any)
+                .update({
+                    status: 'refunded',
+                    metadata: {
+                        ...(purchase.metadata ?? {}),
+                        refund: refundMetadata.refund,
+                    },
+                })
+                .eq('id', purchase.id)
+
+            const { data: event } = await (supabase
+                .from('events') as any)
+                .select('id, event_type')
+                .eq('id', purchase.event_id)
+                .maybeSingle()
+
+            await revokeEventEntitlementsBySourceReference({
+                sourceReference: purchase.id,
+                sourceType: 'purchase',
+                reason: 'stripe_refund',
+                metadata: {
+                    refund_id: data.refundId,
+                    payment_transaction_id: transaction.id,
+                },
+            })
+
+            if (event) {
+                cancelledRegistrations = await cancelEventRegistrationsIfAccessRemoved({
+                    supabase,
+                    eventId: event.id,
+                    eventType: event.event_type,
+                    userId: purchase.user_id ?? transaction.user_id ?? transaction.profile_id ?? null,
+                    email: purchase.email ?? transaction.email,
+                    reason: 'stripe_refund',
+                    details: {
+                        payment_transaction_id: transaction.id,
+                        refund_id: data.refundId,
+                    },
+                })
+            }
+
+            voidedEarnings = await voidSpeakerEarningsForTransaction({
+                supabase,
+                transactionId: transaction.id,
+                reason: 'stripe_refund',
+            })
+            autoResolved = true
+        }
+    } else if (transaction.purchase_type === 'formation_purchase') {
+        const formationPurchaseLookupFilters = [
+            data.paymentIntentId ? `provider_payment_id.eq.${data.paymentIntentId}` : null,
+            data.sessionId ? `provider_session_id.eq.${data.sessionId}` : null,
+        ].filter(Boolean) as string[]
+        let purchase: any = null
+
+        const purchaseIdFromMetadata = normalizeWebhookValue(data.metadata?.formation_purchase_id)
+        if (purchaseIdFromMetadata) {
+            const { data: byId } = await (supabase
+                .from('formation_purchases') as any)
+                .select('id, formation_id, user_id, email, status, metadata')
+                .eq('id', purchaseIdFromMetadata)
+                .maybeSingle()
+            purchase = byId ?? null
+        }
+
+        if (!purchase && formationPurchaseLookupFilters.length > 0) {
+            const { data: byProviderRefs } = await (supabase
+                .from('formation_purchases') as any)
+                .select('id, formation_id, user_id, email, status, metadata')
+                .or(formationPurchaseLookupFilters.join(','))
+                .order('purchased_at', { ascending: false })
+                .limit(1)
+                .maybeSingle()
+            purchase = byProviderRefs ?? null
+        }
+
+        if (purchase) {
+            entityId = purchase.id
+            entityType = 'formation_purchase'
+
+            await (supabase
+                .from('formation_purchases') as any)
+                .update({
+                    status: 'refunded',
+                    metadata: {
+                        ...(purchase.metadata ?? {}),
+                        refund: refundMetadata.refund,
+                    },
+                })
+                .eq('id', purchase.id)
+
+            const { data: linkedEvents } = await (supabase
+                .from('events') as any)
+                .select('id, event_type')
+                .eq('formation_id', purchase.formation_id)
+
+            await revokeEventEntitlementsBySourceReference({
+                sourceReference: purchase.id,
+                sourceType: 'purchase',
+                reason: 'stripe_refund',
+                metadata: {
+                    refund_id: data.refundId,
+                    payment_transaction_id: transaction.id,
+                },
+            })
+
+            cancelledRegistrations = await cancelFormationRegistrationsIfAccessRemoved({
+                supabase,
+                formationId: purchase.formation_id,
+                userId: purchase.user_id ?? transaction.user_id ?? transaction.profile_id ?? null,
+                email: purchase.email ?? transaction.email,
+                linkedEvents: (linkedEvents ?? []) as Array<{ id: string; event_type?: string | null }>,
+                reason: 'stripe_refund',
+                details: {
+                    payment_transaction_id: transaction.id,
+                    refund_id: data.refundId,
+                },
+            })
+
+            autoResolved = true
+        }
+    } else {
+        entityType = transaction.purchase_type
+    }
+
+    const transactionSnapshot =
+        typeof transaction.attribution_snapshot === 'string'
+            ? parseAttributionSnapshot(transaction.attribution_snapshot)
+            : ((transaction.attribution_snapshot ?? emptySnapshot()) as AttributionSnapshot)
+
+    await recordAnalyticsServerEvent({
+        eventName: 'payment_refunded',
+        eventSource: 'webhook',
+        visitorId: transaction.analytics_visitor_id ?? null,
+        sessionId: transaction.analytics_session_id ?? null,
+        userId: transaction.user_id || transaction.profile_id || null,
+        touch: getPrimaryTouch(transactionSnapshot),
+        properties: {
+            purchaseType: transaction.purchase_type,
+            referenceId: transaction.purchase_reference_id ?? referenceId,
+            refundId: data.refundId,
+            refundedAmount: data.amountRefunded,
+        },
+    })
+
+    if (!autoResolved) {
+        await logCommerceOperationalEvent({
+            actionType: 'payment_refund_manual_review_required',
+            entityType,
+            entityId: entityId ?? transaction.id,
+            targetUserId: transaction.user_id || transaction.profile_id || null,
+            targetEmail: transaction.email,
+            reason: 'refund_not_auto_reconciled',
+            details: {
+                refundId: data.refundId,
+                purchaseType: transaction.purchase_type,
+                referenceId: transaction.purchase_reference_id ?? referenceId,
+            },
+        })
+        return
+    }
+
+    await logCommerceOperationalEvent({
+        actionType: 'payment_refunded',
+        entityType,
+        entityId: entityId ?? transaction.id,
+        targetUserId: transaction.user_id || transaction.profile_id || null,
+        targetEmail: transaction.email,
+        details: {
+            refundId: data.refundId,
+            purchaseType: transaction.purchase_type,
+            referenceId: transaction.purchase_reference_id ?? referenceId,
+            cancelledRegistrations,
+            voidedEarnings,
+        },
+    })
 }
 
 export async function reconcileCompletedCheckoutSession(sessionId: string): Promise<boolean> {

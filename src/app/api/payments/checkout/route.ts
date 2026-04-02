@@ -18,6 +18,7 @@ import { getEventGrantAccessKinds } from '@/lib/events/entitlements'
 import { audienceAllowsAccess, getCommercialAccessContext } from '@/lib/access/commercial'
 import { getFormationCommercialState } from '@/lib/formations/pricing'
 import { createConfirmedFormationPurchaseAndGrantAccess } from '@/lib/formations/service'
+import { sendFormationPurchaseConfirmation } from '@/lib/payments/commerce'
 import { createServiceClient } from '@/lib/supabase/service'
 
 const EVENT_CHECKOUT_RESERVATION_MINUTES = 30
@@ -503,6 +504,93 @@ async function createPendingFormationPurchase(params: {
     return purchaseId
 }
 
+async function syncPendingFormationPurchase(params: {
+    supabase: any
+    purchaseId: string
+    userId?: string | null
+    email: string
+    fullName?: string | null
+    amount: number
+    sessionId: string
+    checkoutUrl: string
+    analyticsContext?: any
+    attributionSnapshot?: any
+}) {
+    const normalizedEmail = params.email.trim().toLowerCase()
+
+    const { data: existingPurchase, error: existingPurchaseError } = await (params.supabase
+        .from('formation_purchases') as any)
+        .select('metadata')
+        .eq('id', params.purchaseId)
+        .single()
+
+    if (existingPurchaseError) {
+        throw new Error(`No fue posible leer la compra pendiente: ${existingPurchaseError.message}`)
+    }
+
+    const mergedMetadata = {
+        ...(existingPurchase?.metadata ?? {}),
+        analytics: params.analyticsContext ?? existingPurchase?.metadata?.analytics ?? null,
+        attribution_snapshot: params.attributionSnapshot ?? existingPurchase?.metadata?.attribution_snapshot ?? null,
+        checkout_url: params.checkoutUrl,
+        checkout_session_id: params.sessionId,
+        checkout_prepared_at: new Date().toISOString(),
+    }
+
+    const { error } = await (params.supabase
+        .from('formation_purchases') as any)
+        .update({
+            user_id: params.userId ?? null,
+            email: normalizedEmail,
+            full_name: params.fullName ?? null,
+            amount_paid: params.amount,
+            currency: 'MXN',
+            provider_session_id: params.sessionId,
+            metadata: mergedMetadata,
+            purchased_at: new Date().toISOString(),
+            status: 'pending',
+        })
+        .eq('id', params.purchaseId)
+
+    if (error) {
+        throw new Error(`No fue posible sincronizar la compra pendiente: ${error.message}`)
+    }
+}
+
+async function cancelPendingFormationPurchase(params: {
+    purchaseId: string
+    reason: string
+}) {
+    const db = createServiceClient()
+
+    const { data: existingPurchase } = await (db
+        .from('formation_purchases') as any)
+        .select('metadata, status')
+        .eq('id', params.purchaseId)
+        .maybeSingle()
+
+    if (!existingPurchase || existingPurchase.status !== 'pending') {
+        return
+    }
+
+    const { error } = await (db
+        .from('formation_purchases') as any)
+        .update({
+            status: 'cancelled',
+            metadata: {
+                ...(existingPurchase.metadata ?? {}),
+                cancelled_reason: params.reason,
+                cancelled_at: new Date().toISOString(),
+            },
+        })
+        .eq('id', params.purchaseId)
+        .eq('status', 'pending')
+
+    if (error) {
+        console.error('[API] Failed to cancel pending formation purchase:', error)
+    }
+}
+
 export async function POST(request: NextRequest) {
     try {
         const supabase = await createClient()
@@ -552,6 +640,7 @@ export async function POST(request: NextRequest) {
         const customerEmail = user?.email || profile.data?.email || email || ''
         let customerId = profile.data?.stripe_customer_id || undefined
         let pendingEventPurchaseId = ''
+        let pendingFormationPurchaseId = ''
         let checkoutExpiresAt: string | undefined
 
         if (purchaseType === 'ai_credits') {
@@ -674,7 +763,7 @@ export async function POST(request: NextRequest) {
 
             if (!resolvedFormationPurchase.requiresPayment) {
                 try {
-                    await createConfirmedFormationPurchaseAndGrantAccess({
+                    const purchaseId = await createConfirmedFormationPurchaseAndGrantAccess({
                         supabase,
                         formationId,
                         userId: user?.id ?? null,
@@ -691,6 +780,20 @@ export async function POST(request: NextRequest) {
                         },
                         source: 'formation_free_access',
                     })
+
+                    try {
+                        await sendFormationPurchaseConfirmation({
+                            email: customerEmail,
+                            formationTitle: resolvedFormationPurchase.formation.title,
+                            amount: 0,
+                            isGuest: !user,
+                            purchaseId,
+                            userId: user?.id ?? null,
+                            userName: fullName || profile.data?.full_name || null,
+                        })
+                    } catch (emailError) {
+                        console.error('[API] Failed to send formation access confirmation email:', emailError)
+                    }
                 } catch (purchaseError) {
                     console.error('[API] Failed to grant direct formation access:', purchaseError)
                     return NextResponse.json(
@@ -706,7 +809,6 @@ export async function POST(request: NextRequest) {
                 return NextResponse.json({ redirectTo })
             }
 
-            let pendingFormationPurchaseId = ''
             try {
                 pendingFormationPurchaseId = await createPendingFormationPurchase({
                     supabase,
@@ -838,6 +940,13 @@ export async function POST(request: NextRequest) {
                 })
             }
 
+            if (pendingFormationPurchaseId) {
+                await cancelPendingFormationPurchase({
+                    purchaseId: pendingFormationPurchaseId,
+                    reason: 'checkout_session_creation_failed',
+                })
+            }
+
             throw stripeError
         }
 
@@ -858,6 +967,30 @@ export async function POST(request: NextRequest) {
             } catch (syncError) {
                 await cancelPendingEventCheckoutPurchase({
                     purchaseId: pendingEventPurchaseId,
+                    reason: 'checkout_session_sync_failed',
+                })
+
+                throw syncError
+            }
+        }
+
+        if (purchaseType === 'formation_purchase' && pendingFormationPurchaseId) {
+            try {
+                await syncPendingFormationPurchase({
+                    supabase,
+                    purchaseId: pendingFormationPurchaseId,
+                    userId: user?.id ?? null,
+                    email: customerEmail,
+                    fullName: fullName || profile.data?.full_name || null,
+                    amount: checkoutAmount,
+                    sessionId: result.sessionId,
+                    checkoutUrl: result.checkoutUrl,
+                    analyticsContext,
+                    attributionSnapshot,
+                })
+            } catch (syncError) {
+                await cancelPendingFormationPurchase({
+                    purchaseId: pendingFormationPurchaseId,
                     reason: 'checkout_session_sync_failed',
                 })
 

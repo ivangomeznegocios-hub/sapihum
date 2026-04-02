@@ -239,6 +239,15 @@ export const stripeAdapter: PaymentProviderAdapter = {
                 reference_id: params.referenceId || '',
                 ...(params.metadata || {}),
             },
+            payment_intent_data: {
+                metadata: {
+                    user_id: params.userId || '',
+                    profile_id: params.profileId || '',
+                    purchase_type: params.purchaseType,
+                    reference_id: params.referenceId || '',
+                    ...(params.metadata || {}),
+                },
+            },
             locale: 'es',
             ...(checkoutExpiresAt ? { expires_at: checkoutExpiresAt } : {}),
         }
@@ -276,7 +285,7 @@ export const stripeAdapter: PaymentProviderAdapter = {
             throw new Error(`Webhook signature verification failed: ${(err as Error).message}`)
         }
 
-        return mapStripeEvent(event)
+        return await mapStripeEvent(stripe, event)
     },
 
     // ---- Customer Portal ----
@@ -294,7 +303,7 @@ export const stripeAdapter: PaymentProviderAdapter = {
 
 // ---- Map Stripe events to our normalized WebhookEvent ----
 
-function mapStripeEvent(event: Stripe.Event): WebhookEvent {
+async function mapStripeEvent(stripe: Stripe, event: Stripe.Event): Promise<WebhookEvent> {
     switch (event.type) {
         case 'checkout.session.completed': {
             const session = event.data.object as Stripe.Checkout.Session
@@ -375,6 +384,63 @@ function mapStripeEvent(event: Stripe.Event): WebhookEvent {
                 }
             }
             return { type: 'unknown', providerEventId: event.id, data: null }
+        }
+
+        case 'checkout.session.expired': {
+            const session = event.data.object as Stripe.Checkout.Session
+            if (session.mode !== 'payment') {
+                return { type: 'unknown', providerEventId: event.id, data: null }
+            }
+
+            return {
+                type: 'checkout.expired',
+                providerEventId: event.id,
+                data: {
+                    sessionId: session.id,
+                    purchaseType: session.metadata?.purchase_type as any,
+                    referenceId: session.metadata?.reference_id,
+                    customerEmail: session.customer_email || session.customer_details?.email || undefined,
+                    metadata: (session.metadata ?? {}) as Record<string, string>,
+                    expiresAt: session.expires_at
+                        ? new Date(session.expires_at * 1000).toISOString()
+                        : undefined,
+                },
+            }
+        }
+
+        case 'charge.refunded': {
+            const charge = event.data.object as Stripe.Charge
+            const paymentIntentId =
+                typeof charge.payment_intent === 'string'
+                    ? charge.payment_intent
+                    : charge.payment_intent?.id
+            const paymentIntent = paymentIntentId
+                ? await stripe.paymentIntents.retrieve(paymentIntentId)
+                : null
+            const refundEntry = charge.refunds?.data?.[0]
+            const metadata = {
+                ...((paymentIntent?.metadata ?? {}) as Record<string, string>),
+                ...((charge.metadata ?? {}) as Record<string, string>),
+            }
+
+            return {
+                type: 'payment.refunded',
+                providerEventId: event.id,
+                data: {
+                    refundId: refundEntry?.id || `charge_refunded:${charge.id}`,
+                    chargeId: charge.id,
+                    paymentIntentId: paymentIntentId || undefined,
+                    amountRefunded: (charge.amount_refunded || 0) / 100,
+                    originalAmount: (charge.amount || 0) / 100,
+                    currency: charge.currency || 'mxn',
+                    customerEmail: charge.billing_details?.email || undefined,
+                    metadata,
+                    purchaseType: metadata.purchase_type as any,
+                    referenceId: metadata.reference_id,
+                    isFullRefund: (charge.amount_refunded || 0) >= (charge.amount || 0),
+                    refundReason: refundEntry?.reason || null,
+                },
+            }
         }
 
         case 'customer.subscription.updated': {

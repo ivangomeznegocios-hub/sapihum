@@ -151,6 +151,59 @@ export function buildEventPurchaseEmail(params: {
 
 // ─── GUEST ACCESS (free event) ───
 
+export function buildFormationPurchaseEmail(params: {
+    userName: string
+    formationTitle: string
+    amount: number
+    accessUrl: string
+    isGuest: boolean
+    recoveryUrl: string
+    linkedCoursesCount?: number
+}) {
+    const subject = `Compra confirmada: ${params.formationTitle}`
+    const linkedCoursesLabel = params.linkedCoursesCount && params.linkedCoursesCount > 0
+        ? `${params.linkedCoursesCount} curso${params.linkedCoursesCount === 1 ? '' : 's'}`
+        : 'Acceso incluido'
+    const html = baseLayout(`
+        <h1 style="margin:0 0 8px;font-size:24px;color:${TEXT_COLOR};">Compra exitosa</h1>
+        <p style="margin:0 0 24px;font-size:15px;color:${MUTED_COLOR};line-height:1.6;">
+            Hola ${params.userName}, tu acceso a <strong style="color:${TEXT_COLOR};">${params.formationTitle}</strong> ha sido confirmado.
+        </p>
+        <table width="100%" cellpadding="0" cellspacing="0" style="background:${BG_COLOR};border-radius:12px;padding:20px;margin:0 0 8px;">
+            <tr>
+                <td style="padding:8px 0;font-size:13px;color:${MUTED_COLOR};">Formacion</td>
+                <td style="padding:8px 0;font-size:14px;font-weight:600;color:${TEXT_COLOR};text-align:right;">${params.formationTitle}</td>
+            </tr>
+            <tr>
+                <td style="padding:8px 0;font-size:13px;color:${MUTED_COLOR};">Monto pagado</td>
+                <td style="padding:8px 0;font-size:14px;font-weight:600;color:${TEXT_COLOR};text-align:right;">$${params.amount.toFixed(2)} MXN</td>
+            </tr>
+            <tr>
+                <td style="padding:8px 0;font-size:13px;color:${MUTED_COLOR};">Contenido</td>
+                <td style="padding:8px 0;font-size:14px;font-weight:600;color:${TEXT_COLOR};text-align:right;">${linkedCoursesLabel}</td>
+            </tr>
+            <tr>
+                <td style="padding:8px 0;font-size:13px;color:${MUTED_COLOR};">Acceso</td>
+                <td style="padding:8px 0;font-size:14px;font-weight:600;color:#7a5602;text-align:right;">Activo</td>
+            </tr>
+        </table>
+        ${ctaButton(params.accessUrl, 'Ir a mi acceso ->')}
+        ${params.isGuest ? `
+        <div style="margin:24px 0 0;padding:16px 20px;background:#f0fdf4;border-radius:10px;border:1px solid #bbf7d0;">
+            <p style="margin:0;font-size:13px;color:#166534;line-height:1.5;">
+                <strong>Acceso rapido:</strong> Compraste sin cuenta. Puedes recuperar tu acceso en cualquier momento desde
+                <a href="${params.recoveryUrl}" style="color:${BRAND_COLOR};font-weight:600;">${params.recoveryUrl}</a>
+                usando este correo electronico.
+            </p>
+        </div>
+        ` : ''}
+        <p style="margin:16px 0 0;font-size:12px;color:${MUTED_COLOR};text-align:center;">
+            Conserva este correo como comprobante de tu compra.
+        </p>
+    `)
+    return { subject, html }
+}
+
 export function buildGuestAccessEmail(params: {
     userName: string
     eventTitle: string

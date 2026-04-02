@@ -5,10 +5,12 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient as createServiceClient } from '@supabase/supabase-js'
 import { getPaymentProvider } from '@/lib/payments'
 import {
+    expireCheckoutSession,
     fulfillSubscriptionCreated,
     fulfillSubscriptionRenewed,
     fulfillSubscriptionUpdated,
     fulfillOneTimePayment,
+    refundOneTimePayment,
 } from '@/lib/payments'
 
 // Disable body parsing - Stripe needs raw body for signature verification
@@ -70,6 +72,14 @@ export async function POST(request: NextRequest) {
 
                 case 'payment.completed':
                     await fulfillOneTimePayment(event.data)
+                    break
+
+                case 'payment.refunded':
+                    await refundOneTimePayment(event.data)
+                    break
+
+                case 'checkout.expired':
+                    await expireCheckoutSession(event.data)
                     break
 
                 case 'payment.failed':

@@ -94,6 +94,49 @@ export async function revokeEventEntitlements(params: {
     }
 }
 
+export async function revokeEventEntitlementsBySourceReference(params: {
+    sourceReference: string
+    sourceType?: EventEntitlementSourceType
+    metadata?: Record<string, unknown>
+    reason?: string | null
+}) {
+    const admin = createServiceClient()
+    let query = (admin
+        .from('event_entitlements') as any)
+        .select('id, metadata')
+        .eq('source_reference', params.sourceReference)
+        .eq('status', 'active')
+
+    if (params.sourceType) {
+        query = query.eq('source_type', params.sourceType)
+    }
+
+    const { data: entitlements, error } = await query
+
+    if (error) {
+        throw new Error(`Failed to load entitlements for source reference: ${error.message}`)
+    }
+
+    for (const entitlement of entitlements ?? []) {
+        const { error: updateError } = await (admin
+            .from('event_entitlements') as any)
+            .update({
+                status: 'revoked',
+                revoked_at: new Date().toISOString(),
+                metadata: {
+                    ...(entitlement.metadata ?? {}),
+                    ...(params.metadata ?? {}),
+                    revoked_reason: params.reason ?? null,
+                },
+            })
+            .eq('id', entitlement.id)
+
+        if (updateError) {
+            throw new Error(`Failed to revoke entitlement ${entitlement.id}: ${updateError.message}`)
+        }
+    }
+}
+
 export function isEventEntitlementActive(
     entitlement: Pick<EventEntitlement, 'status' | 'starts_at' | 'ends_at'>,
     now = new Date()
