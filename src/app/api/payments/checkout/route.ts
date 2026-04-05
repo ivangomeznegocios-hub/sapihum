@@ -242,7 +242,7 @@ async function resolveEventPurchaseDetails(
     if (params.userId) {
         const { data: profile } = await (supabase
             .from('profiles') as any)
-            .select('role, membership_level, subscription_status, email')
+            .select('role, membership_level, subscription_status, email, membership_specialization_code')
             .eq('id', params.userId)
             .single()
 
@@ -416,7 +416,11 @@ async function resolveFormationPurchaseDetails(
         if (!commercialAccess) {
             return { error: 'No fue posible resolver el acceso comercial de esta cuenta' as const }
         }
-        const pricing = getFormationCommercialState(formation, Boolean(commercialAccess?.hasActiveMembership))
+        const pricing = getFormationCommercialState(formation, {
+            membershipLevel: commercialAccess?.membershipLevel ?? 0,
+            hasActiveMembership: commercialAccess?.hasActiveMembership ?? false,
+            membershipSpecializationCode: commercialAccess?.membershipSpecializationCode ?? null,
+        })
 
         return {
             amount: pricing.effectivePrice,

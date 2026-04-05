@@ -8,6 +8,7 @@ import { Loader2, AlertCircle, Plus, Trash2, Check } from 'lucide-react'
 import { createFormation, updateFormation } from '@/app/(dashboard)/dashboard/events/formation-actions'
 import { MaterialLinksEditor, type EditableMaterialLink } from '@/components/materials/material-links-editor'
 import { isValidMaterialLinkUrl } from '@/lib/material-links'
+import { getMembershipSpecializations } from '@/lib/specializations'
 
 interface FormationFormProps {
     initialData?: any
@@ -34,6 +35,11 @@ const CERTIFICATE_OPTIONS = [
     { value: 'specialized', label: 'Acreditacion especializada' },
 ]
 
+const MEMBERSHIP_SPECIALIZATION_OPTIONS = getMembershipSpecializations().map((specialization) => ({
+    value: specialization.code,
+    label: specialization.name,
+}))
+
 export function FormationForm({ initialData, availableEvents, canPublish = true }: FormationFormProps) {
     const router = useRouter()
     const isEdit = Boolean(initialData)
@@ -46,6 +52,7 @@ export function FormationForm({ initialData, availableEvents, canPublish = true 
     const [description, setDescription] = useState(initialData?.description || '')
     const [imageUrl, setImageUrl] = useState(initialData?.image_url || '')
     const [status, setStatus] = useState(initialData?.status || 'draft')
+    const [selectedSpecializationCode, setSelectedSpecializationCode] = useState(initialData?.specialization_code || '')
     const [bundlePrice, setBundlePrice] = useState(initialData?.bundle_price?.toString() || '0')
     const [bundleMemberPrice, setBundleMemberPrice] = useState(initialData?.bundle_member_price?.toString() || '0')
     const [bundleMemberAccessType, setBundleMemberAccessType] = useState(initialData?.bundle_member_access_type || 'full_price')
@@ -74,11 +81,17 @@ export function FormationForm({ initialData, availableEvents, canPublish = true 
     }, 0)
 
     const memberPricingNote =
-        bundleMemberAccessType === 'free'
-            ? 'La membresia activa activara este diplomado sin costo.'
-            : bundleMemberAccessType === 'discounted'
-                ? 'Define aqui el precio exclusivo para miembros. Debe ser menor al precio publico.'
-                : 'Los miembros pagaran el mismo precio publico; el campo preferencial se ignora.'
+        selectedSpecializationCode
+            ? bundleMemberAccessType === 'free'
+                ? 'Los miembros activos Nivel 2+ de esta especialidad entran sin costo. El resto de miembros activos tambien entra sin costo.'
+                : bundleMemberAccessType === 'discounted'
+                    ? 'Los miembros activos Nivel 2+ de esta especialidad entran sin costo. El resto de miembros activos paga el precio preferencial que definas aqui.'
+                    : 'Los miembros activos Nivel 2+ de esta especialidad entran sin costo. El resto de miembros paga precio publico.'
+            : bundleMemberAccessType === 'free'
+                ? 'La membresia activa activara este diplomado sin costo.'
+                : bundleMemberAccessType === 'discounted'
+                    ? 'Define aqui el precio exclusivo para miembros. Debe ser menor al precio publico.'
+                    : 'Los miembros pagaran el mismo precio publico; el campo preferencial se ignora.'
 
     const draftNote = isEdit
         ? 'Como ponente, cualquier cambio se guardara en borrador hasta que un admin lo publique.'
@@ -174,6 +187,7 @@ export function FormationForm({ initialData, availableEvents, canPublish = true 
             description: description || null,
             image_url: imageUrl || null,
             status,
+            specialization_code: selectedSpecializationCode || null,
             bundle_price: publicBundlePrice,
             bundle_member_price: bundleMemberAccessType === 'discounted' ? preferredMemberPrice : 0,
             bundle_member_access_type: bundleMemberAccessType,
@@ -355,6 +369,25 @@ export function FormationForm({ initialData, availableEvents, canPublish = true 
                         </div>
 
                         <div>
+                            <label className="text-sm font-medium">Especialidad incluida</label>
+                            <select
+                                value={selectedSpecializationCode}
+                                onChange={(event) => setSelectedSpecializationCode(event.target.value)}
+                                className="mt-1 w-full rounded-md border bg-background px-3 py-2 text-sm"
+                            >
+                                <option value="">Sin especialidad asignada</option>
+                                {MEMBERSHIP_SPECIALIZATION_OPTIONS.map((option) => (
+                                    <option key={option.value} value={option.value}>
+                                        {option.label}
+                                    </option>
+                                ))}
+                            </select>
+                            <p className="mt-1 text-xs text-muted-foreground">
+                                Si eliges una especialidad, los miembros activos Nivel 2 o superior de esa especialidad activan la formacion sin costo. Los demas miembros siguen el beneficio configurado arriba.
+                            </p>
+                        </div>
+
+                        <div>
                             <label className="text-sm font-medium">Precio Bundle Miembros SAPIHUM</label>
                             <div className="mt-1 flex items-center">
                                 <span className="flex items-center justify-center rounded-l-md border border-r-0 bg-muted px-3 py-2 text-muted-foreground">$</span>
@@ -472,20 +505,20 @@ export function FormationForm({ initialData, availableEvents, canPublish = true 
                 <Card className="md:col-span-2">
                     <CardHeader className="flex flex-row items-center justify-between pb-2">
                         <div>
-                            <CardTitle>Ruta Formativa (Cursos Incluidos)</CardTitle>
+                            <CardTitle>Ruta Formativa (Eventos o Cursos Incluidos)</CardTitle>
                             <CardDescription>
                                 Agrega los eventos existentes que componen este diplomado o paquete completo.
                             </CardDescription>
                         </div>
                         <Button type="button" variant="outline" size="sm" onClick={handleAddCourse}>
                             <Plus className="mr-2 h-4 w-4" />
-                            Agregar Curso
+                            Agregar Evento
                         </Button>
                     </CardHeader>
                     <CardContent>
                         {selectedCourses.length === 0 ? (
                             <div className="rounded-lg border border-dashed bg-muted/20 py-8 text-center">
-                                <p className="text-sm text-muted-foreground">La formacion todavia no tiene cursos vinculados.</p>
+                                <p className="text-sm text-muted-foreground">La formacion todavia no tiene eventos vinculados.</p>
                             </div>
                         ) : (
                             <div className="space-y-3">
@@ -501,7 +534,7 @@ export function FormationForm({ initialData, availableEvents, canPublish = true 
                                                 className="w-full rounded-md border bg-background px-3 py-2 text-sm"
                                             >
                                                 <option value="" disabled>
-                                                    -- Selecciona un evento/curso --
+                                                    -- Selecciona un evento o curso --
                                                 </option>
                                                 {availableEvents.map((availableEvent) => (
                                                     <option key={availableEvent.id} value={availableEvent.id}>
@@ -525,7 +558,7 @@ export function FormationForm({ initialData, availableEvents, canPublish = true 
                         )}
 
                         <p className="mt-4 text-xs text-muted-foreground">
-                            Los alumnos que compren la formacion completa tendran acceso directo a estos {selectedCourses.length} cursos.
+                            Los alumnos que compren la formacion completa tendran acceso directo a estos {selectedCourses.length} eventos o cursos vinculados.
                             El orden de visualizacion y el avance se basaran en este listado.
                         </p>
                     </CardContent>

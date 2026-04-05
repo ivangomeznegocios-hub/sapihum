@@ -2100,6 +2100,7 @@ export interface Formation {
     subtitle: string | null
     description: string | null
     image_url: string | null
+    specialization_code: SpecializationCode | null
     bundle_price: number
     bundle_member_price: number
     bundle_member_access_type: FormationMemberAccessType
@@ -2120,6 +2121,7 @@ export interface FormationInsert {
     subtitle?: string | null
     description?: string | null
     image_url?: string | null
+    specialization_code?: SpecializationCode | null
     bundle_price: number
     bundle_member_price?: number
     bundle_member_access_type?: FormationMemberAccessType
@@ -2138,6 +2140,7 @@ export interface FormationUpdate {
     subtitle?: string | null
     description?: string | null
     image_url?: string | null
+    specialization_code?: SpecializationCode | null
     bundle_price?: number
     bundle_member_price?: number
     bundle_member_access_type?: FormationMemberAccessType

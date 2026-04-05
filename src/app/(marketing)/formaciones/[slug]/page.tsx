@@ -14,6 +14,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { getPublicFormationBySlug } from '../actions'
 import { CheckoutButton } from '@/components/payments/CheckoutButton'
+import { getSpecializationByCode } from '@/lib/specializations'
 
 export const metadata = {
     title: 'Formacion Completa | SAPIHUM',
@@ -42,6 +43,7 @@ export default async function FormationLandingPage({ params }: { params: Promise
     const savings = totalIndividualValue - pricing.effectivePrice
     const totalHoursLabel = formatHours(data.total_hours)
     const showsFullCertificate = data.full_certificate_type && data.full_certificate_type !== 'none'
+    const specialization = getSpecializationByCode(data.specialization_code)
     const materialLinks = Array.isArray(data.material_links)
         ? data.material_links.filter((item: any) => item?.title && item?.url)
         : []
@@ -85,8 +87,14 @@ export default async function FormationLandingPage({ params }: { params: Promise
                                 </div>
                             )}
 
+                            {specialization && (
+                                <div className="rounded-full border border-brand-yellow/30 bg-brand-yellow/10 px-4 py-2 text-sm font-medium text-brand-yellow">
+                                    {specialization.name}
+                                </div>
+                            )}
+
                             <div className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-neutral-200">
-                                {courses.length} cursos especializados
+                                {courses.length} eventos o cursos incluidos
                             </div>
 
                             {totalHoursLabel && (
@@ -130,6 +138,12 @@ export default async function FormationLandingPage({ params }: { params: Promise
                                         <span className="text-lg font-bold text-neutral-500">MXN</span>
                                     </div>
 
+                                    {specialization && (
+                                        <Badge variant="outline" className="mb-3 border-brand-brown/20 bg-brand-brown/10 text-brand-brown">
+                                            Incluida en {specialization.name} Nivel 2+
+                                        </Badge>
+                                    )}
+
                                     {pricing.discountedByMembership && (
                                         <Badge variant="outline" className="mb-3 border-brand-yellow/30 bg-brand-yellow/10 text-brand-yellow">
                                             <Sparkles className="mr-1 h-3.5 w-3.5" />
@@ -169,7 +183,7 @@ export default async function FormationLandingPage({ params }: { params: Promise
                                     />
 
                                     <p className="mt-4 text-xs leading-relaxed text-neutral-400">
-                                        Obtienes acceso inmediato a los {courses.length} cursos
+                                        Obtienes acceso inmediato a los {courses.length} eventos o cursos vinculados
                                         {totalHoursLabel ? ` y a ${totalHoursLabel} de contenido` : ''}.
                                     </p>
                                 </>
@@ -195,7 +209,7 @@ export default async function FormationLandingPage({ params }: { params: Promise
                             const event = course.event
                             if (!event) return null
 
-                            const hasAccess = userState.purchasedCourses.includes(event.id) || userState.hasPurchasedBundle
+                            const hasAccess = userState.accessibleEventIds.includes(event.id) || userState.hasPurchasedBundle
 
                             return (
                                 <div
@@ -220,15 +234,21 @@ export default async function FormationLandingPage({ params }: { params: Promise
                                                 </div>
 
                                                 <div className="flex-1 space-y-2">
-                                                    <div className="flex flex-wrap items-center gap-2">
-                                                        {event.hero_badge && (
-                                                            <Badge variant="outline" className="bg-brand-yellow/10 text-xs text-brand-yellow">
-                                                                {event.hero_badge}
-                                                            </Badge>
-                                                        )}
+                                                <div className="flex flex-wrap items-center gap-2">
+                                                    {event.hero_badge && (
+                                                        <Badge variant="outline" className="bg-brand-yellow/10 text-xs text-brand-yellow">
+                                                            {event.hero_badge}
+                                                        </Badge>
+                                                    )}
 
-                                                        {hasAccess ? (
-                                                            <Badge className="border-none bg-brand-yellow/20 text-brand-yellow hover:bg-brand-brown">
+                                                    {event.event_type && event.event_type !== 'course' && (
+                                                        <Badge variant="outline" className="text-xs">
+                                                            {event.event_type === 'on_demand' ? 'Grabacion' : 'Evento'}
+                                                        </Badge>
+                                                    )}
+
+                                                    {hasAccess ? (
+                                                        <Badge className="border-none bg-brand-yellow/20 text-brand-yellow hover:bg-brand-brown">
                                                                 <CheckCircle2 className="mr-1 h-3 w-3" />
                                                                 Tienes acceso
                                                             </Badge>
@@ -255,7 +275,7 @@ export default async function FormationLandingPage({ params }: { params: Promise
                                                 <div className="mt-4 flex justify-end border-t pt-4">
                                                     <Button variant="ghost" size="sm" asChild className="text-neutral-600 hover:text-primary">
                                                         <Link href={`/eventos/${event.slug}`}>
-                                                            Ver curso individual
+                                                            Ver detalle individual
                                                             <ArrowRight className="ml-2 h-4 w-4" />
                                                         </Link>
                                                     </Button>

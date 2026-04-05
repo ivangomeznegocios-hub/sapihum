@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import { getCommercialAccessContext } from '@/lib/access/commercial'
 import { claimFormationRecordsByEmail } from '@/lib/formations/service'
 import { getFormationCommercialState, getFormationMemberAccessMessage } from '@/lib/formations/pricing'
+import { claimEventEntitlementsByEmail } from '@/lib/events/access'
 
 export async function getPublicFormations() {
     const supabase = await createClient()
@@ -51,7 +52,7 @@ export async function getPublicFormationBySlug(slug: string) {
         .order('display_order', { ascending: true })
 
     let hasPurchasedBundle = false
-    let purchasedCourses: string[] = []
+    let accessibleEventIds: string[] = []
     let hasActiveMembership = false
 
     const pricingState = {
@@ -67,15 +68,21 @@ export async function getPublicFormationBySlug(slug: string) {
     if (user) {
         const { data: profile } = await (supabase
             .from('profiles') as any)
-            .select('id, role, email, membership_level, subscription_status')
+            .select('id, role, email, membership_level, subscription_status, membership_specialization_code')
             .eq('id', user.id)
             .maybeSingle()
 
         if (profile?.email) {
-            await claimFormationRecordsByEmail({
-                userId: user.id,
-                email: profile.email,
-            })
+            await Promise.all([
+                claimFormationRecordsByEmail({
+                    userId: user.id,
+                    email: profile.email,
+                }),
+                claimEventEntitlementsByEmail({
+                    userId: user.id,
+                    email: profile.email,
+                }),
+            ])
         }
 
         const commercialAccess = profile
@@ -89,7 +96,11 @@ export async function getPublicFormationBySlug(slug: string) {
         hasActiveMembership = Boolean(commercialAccess?.hasActiveMembership)
 
         if (commercialAccess) {
-            Object.assign(pricingState, getFormationCommercialState(formation, commercialAccess.hasActiveMembership))
+            Object.assign(pricingState, getFormationCommercialState(formation, {
+                membershipLevel: commercialAccess.membershipLevel,
+                hasActiveMembership: commercialAccess.hasActiveMembership,
+                membershipSpecializationCode: commercialAccess.membershipSpecializationCode,
+            }))
         }
 
         const bundlePurchaseQuery = (supabase
@@ -109,12 +120,17 @@ export async function getPublicFormationBySlug(slug: string) {
             if (courseEventIds.length > 0) {
                 const { data: accessData } = await (supabase
                     .from('event_entitlements') as any)
-                    .select('event_id')
+                    .select('event_id, ends_at')
+                    .eq('status', 'active')
                     .eq('user_id', user.id)
                     .in('event_id', courseEventIds)
-                    .eq('access_kind', 'course_access')
+                    .order('starts_at', { ascending: false })
 
-                purchasedCourses = accessData?.map((item: any) => item.event_id) || []
+                accessibleEventIds = Array.from(new Set(
+                    (accessData ?? [])
+                        .filter((item: any) => !item.ends_at || new Date(item.ends_at) > new Date())
+                        .map((item: any) => item.event_id)
+                ))
             }
         }
     }
@@ -130,7 +146,7 @@ export async function getPublicFormationBySlug(slug: string) {
             isLoggedIn: !!user,
             hasActiveMembership,
             hasPurchasedBundle,
-            purchasedCourses,
+            accessibleEventIds,
         },
     }
 }
