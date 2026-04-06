@@ -1,108 +1,20 @@
-import { redirect } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
+import { requireActionRoles, requirePageRoles } from '@/lib/access/role-guard'
 
-const OPERATIONS_ROLES = new Set(['admin', 'support'])
-
-async function loadCurrentProfile() {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-
-    if (!user) {
-        return { supabase, user: null, profile: null }
-    }
-
-    const { data: profile } = await (supabase
-        .from('profiles') as any)
-        .select('id, role, email, full_name')
-        .eq('id', user.id)
-        .maybeSingle()
-
-    return {
-        supabase,
-        user,
-        profile: profile as {
-            id: string
-            role: string
-            email: string | null
-            full_name: string | null
-        } | null,
-    }
-}
+const ADMIN_ROLES = ['admin'] as const
+const OPERATIONS_ROLES = ['admin', 'support'] as const
 
 export async function requireAdminPage() {
-    const { user, profile } = await loadCurrentProfile()
-
-    if (!user) {
-        redirect('/auth/login')
-    }
-
-    if (!profile || profile.role !== 'admin') {
-        redirect('/dashboard')
-    }
-
-    return {
-        user,
-        profile: profile as {
-            id: string
-            role: string
-            email: string | null
-            full_name: string | null
-        },
-    }
+    return requirePageRoles(ADMIN_ROLES)
 }
 
 export async function requireAdminAction() {
-    const { user, profile } = await loadCurrentProfile()
-
-    if (!user) {
-        throw new Error('No autenticado')
-    }
-
-    if (!profile || profile.role !== 'admin') {
-        throw new Error('No tienes permisos de administrador')
-    }
-
-    return {
-        user,
-        profile: profile as {
-            id: string
-            role: string
-            email: string | null
-            full_name: string | null
-        },
-    }
+    return requireActionRoles(ADMIN_ROLES, 'No tienes permisos de administrador')
 }
 
 export async function requireOperationsPage() {
-    const { user, profile } = await loadCurrentProfile()
-
-    if (!user) {
-        redirect('/auth/login')
-    }
-
-    if (!profile || !OPERATIONS_ROLES.has(profile.role)) {
-        redirect('/dashboard')
-    }
-
-    return {
-        user,
-        profile,
-    }
+    return requirePageRoles(OPERATIONS_ROLES)
 }
 
 export async function requireOperationsAction() {
-    const { user, profile } = await loadCurrentProfile()
-
-    if (!user) {
-        throw new Error('No autenticado')
-    }
-
-    if (!profile || !OPERATIONS_ROLES.has(profile.role)) {
-        throw new Error('No tienes permisos para operar accesos')
-    }
-
-    return {
-        user,
-        profile,
-    }
+    return requireActionRoles(OPERATIONS_ROLES, 'No tienes permisos para operar accesos')
 }

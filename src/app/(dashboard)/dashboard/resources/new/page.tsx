@@ -1,15 +1,12 @@
 import { ResourceForm } from '../resource-form'
 import { getEventsForLinking } from '@/lib/supabase/queries/resources'
-import { getUserRole } from '@/lib/supabase/server'
+import { requirePageRoles } from '@/lib/access/role-guard'
 
 export default async function NewResourcePage() {
-    const role = await getUserRole()
-    const canCreate = role === 'admin' || role === 'ponente'
+    const { profile } = await requirePageRoles(['admin', 'ponente'], '/dashboard/resources')
+    const role = profile.role
 
-    let events: { id: string; title: string; start_time: string }[] = []
-    if (canCreate) {
-        events = await getEventsForLinking()
-    }
+    const events = await getEventsForLinking()
 
     return (
         <div className="max-w-2xl mx-auto space-y-6">
@@ -21,7 +18,7 @@ export default async function NewResourcePage() {
             </div>
 
             <div className="p-6 border rounded-xl bg-card">
-                <ResourceForm isEmbedded={true} events={events} userRole={role || 'psychologist'} />
+                <ResourceForm isEmbedded={true} events={events} userRole={role} />
             </div>
         </div>
     )

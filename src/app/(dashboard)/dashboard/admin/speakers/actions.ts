@@ -2,22 +2,13 @@
 
 import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
+import { requireAdminAction } from '@/lib/admin/guard'
 
 export async function adminCreateSpeaker(formData: FormData) {
-    const supabase = await createClient()
-
-    // 1. Verify caller is admin
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return { error: 'No autenticado' }
-
-    const { data: profile } = await supabase
-        .from('profiles' as any)
-        .select('role')
-        .eq('id', user.id)
-        .single()
-
-    if ((profile as any)?.role !== 'admin') {
-        return { error: 'No tienes permisos de administrador' }
+    try {
+        await requireAdminAction()
+    } catch (error) {
+        return { error: error instanceof Error ? error.message : 'No autenticado' }
     }
 
     const email = formData.get('email') as string

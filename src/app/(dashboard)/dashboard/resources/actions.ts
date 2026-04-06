@@ -2,20 +2,20 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
-import { getUserRole } from '@/lib/supabase/server'
+import { requireActionRoles } from '@/lib/access/role-guard'
 
 export async function createResource(formData: FormData) {
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    let viewer: Awaited<ReturnType<typeof requireActionRoles>>
 
-    if (!user) {
-        return { error: 'No autorizado' }
+    try {
+        viewer = await requireActionRoles(['admin', 'ponente'], 'No tienes permisos para crear recursos')
+    } catch (error) {
+        return { error: error instanceof Error ? error.message : 'No autorizado' }
     }
 
-    const role = await getUserRole()
-    if (role !== 'admin' && role !== 'ponente') {
-        return { error: 'No tienes permisos para crear recursos' }
-    }
+    const { user, profile } = viewer
+    const role = profile.role
 
     const title = formData.get('title') as string
     const description = formData.get('description') as string
@@ -96,13 +96,16 @@ export async function createResource(formData: FormData) {
 
 export async function updateResource(resourceId: string, formData: FormData) {
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    let viewer: Awaited<ReturnType<typeof requireActionRoles>>
 
-    if (!user) {
-        return { error: 'No autorizado' }
+    try {
+        viewer = await requireActionRoles(['admin', 'ponente'], 'No tienes permisos para editar recursos')
+    } catch (error) {
+        return { error: error instanceof Error ? error.message : 'No autorizado' }
     }
 
-    const role = await getUserRole()
+    const { user, profile } = viewer
+    const role = profile.role
 
     // Admin can edit all. Ponente can edit only their own.
     if (role === 'ponente') {
@@ -116,8 +119,6 @@ export async function updateResource(resourceId: string, formData: FormData) {
         if (!existing || existing.created_by !== user.id) {
             return { error: 'Solo puedes editar tus propios recursos' }
         }
-    } else if (role !== 'admin') {
-        return { error: 'No tienes permisos para editar recursos' }
     }
 
     const title = formData.get('title') as string
@@ -178,16 +179,10 @@ export async function updateResource(resourceId: string, formData: FormData) {
 
 export async function deleteResource(resourceId: string) {
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-
-    if (!user) {
-        return { error: 'No autorizado' }
-    }
-
-    // Only admin can delete resources
-    const role = await getUserRole()
-    if (role !== 'admin') {
-        return { error: 'Solo los administradores pueden eliminar recursos' }
+    try {
+        await requireActionRoles(['admin'], 'Solo los administradores pueden eliminar recursos')
+    } catch (error) {
+        return { error: error instanceof Error ? error.message : 'No autorizado' }
     }
 
     const { error } = await (supabase
@@ -210,16 +205,16 @@ export async function deleteResource(resourceId: string) {
 
 export async function linkResourceToEventAction(formData: FormData) {
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    let viewer: Awaited<ReturnType<typeof requireActionRoles>>
 
-    if (!user) {
-        return { error: 'No autorizado' }
+    try {
+        viewer = await requireActionRoles(['admin', 'ponente'], 'No tienes permisos')
+    } catch (error) {
+        return { error: error instanceof Error ? error.message : 'No autorizado' }
     }
 
-    const role = await getUserRole()
-    if (role !== 'admin' && role !== 'ponente') {
-        return { error: 'No tienes permisos' }
-    }
+    const { user, profile } = viewer
+    const role = profile.role
 
     const eventId = formData.get('event_id') as string
     const resourceId = formData.get('resource_id') as string
@@ -262,15 +257,10 @@ export async function linkResourceToEventAction(formData: FormData) {
 
 export async function unlinkResourceFromEventAction(eventResourceId: string) {
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-
-    if (!user) {
-        return { error: 'No autorizado' }
-    }
-
-    const role = await getUserRole()
-    if (role !== 'admin' && role !== 'ponente') {
-        return { error: 'No tienes permisos' }
+    try {
+        await requireActionRoles(['admin', 'ponente'], 'No tienes permisos')
+    } catch (error) {
+        return { error: error instanceof Error ? error.message : 'No autorizado' }
     }
 
     const { error } = await (supabase
