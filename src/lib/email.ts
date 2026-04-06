@@ -2,11 +2,23 @@ import { Resend } from 'resend'
 import WelcomeEmail from '@/emails/WelcomeEmail'
 import AppointmentConfirmationEmail from '@/emails/AppointmentConfirmation'
 import { emailFromName } from '@/lib/brand'
+import { getResendFromEmail } from '@/lib/email/config'
 
-const resend = new Resend(process.env.RESEND_API_KEY)
+let resendInstance: Resend | null = null
 
-// Set this to your verified domain in Resend
-const FROM_EMAIL = `${emailFromName} <notificaciones@comunidaddepsicologia.com>`
+function getResend(): Resend | null {
+    const key = process.env.RESEND_API_KEY?.trim()
+    if (!key) {
+        return null
+    }
+
+    if (!resendInstance) {
+        resendInstance = new Resend(key)
+    }
+
+    return resendInstance
+}
+
 const DEFAULT_REPLY_TO = 'soporte@comunidaddepsicologia.com'
 
 export async function sendWelcomeEmail({
@@ -16,14 +28,16 @@ export async function sendWelcomeEmail({
     to: string
     name: string
 }) {
-    if (!process.env.RESEND_API_KEY) {
+    const resend = getResend()
+    if (!resend) {
         console.warn('RESEND_API_KEY is not set. Skipping email send.')
         return { success: false, error: 'Email service inactive' }
     }
 
     try {
+        const from = getResendFromEmail()
         const { data, error } = await resend.emails.send({
-            from: FROM_EMAIL,
+            from,
             to,
             subject: `Bienvenido(a) a ${emailFromName}`,
             react: WelcomeEmail({ name }),
@@ -57,14 +71,16 @@ export async function sendAppointmentConfirmationEmail({
     time: string
     meetingLink?: string
 }) {
-    if (!process.env.RESEND_API_KEY) {
+    const resend = getResend()
+    if (!resend) {
         console.warn('RESEND_API_KEY is not set. Skipping email send.')
         return { success: false, error: 'Email service inactive' }
     }
 
     try {
+        const from = getResendFromEmail()
         const { data, error } = await resend.emails.send({
-            from: FROM_EMAIL,
+            from,
             to,
             subject: 'Confirmacion de Cita',
             react: AppointmentConfirmationEmail({

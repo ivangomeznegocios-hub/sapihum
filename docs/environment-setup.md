@@ -65,6 +65,7 @@ Set production-specific values for the same variables:
 - `AI_MODEL_NAME`
 
 Use production-only integrations and production-only secrets.
+For Resend, make sure `RESEND_FROM_EMAIL` is a verified sender in the target environment.
 
 ## Required Before First Deploy
 

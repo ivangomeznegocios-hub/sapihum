@@ -1,4 +1,5 @@
 import { Resend } from 'resend'
+import { getResendFromEmail } from './config'
 
 let resendInstance: Resend | null = null
 
@@ -13,8 +14,6 @@ function getResend(): Resend {
     return resendInstance
 }
 
-const FROM_EMAIL = process.env.RESEND_FROM_EMAIL || 'SAPIHUM <onboarding@resend.dev>'
-
 export interface SendEmailParams {
     to: string
     subject: string
@@ -25,8 +24,9 @@ export interface SendEmailParams {
 export async function sendEmail({ to, subject, html, replyTo }: SendEmailParams): Promise<{ success: boolean; id?: string; error?: string }> {
     try {
         const resend = getResend()
+        const from = getResendFromEmail()
         const { data, error } = await resend.emails.send({
-            from: FROM_EMAIL,
+            from,
             to,
             subject,
             html,

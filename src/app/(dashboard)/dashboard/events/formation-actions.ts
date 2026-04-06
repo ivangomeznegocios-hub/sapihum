@@ -346,6 +346,7 @@ export async function getFormationLearnerProgress(formationId: string) {
             .select('id, user_id, email, full_name, purchased_at, confirmed_at, amount_paid, status')
             .eq('formation_id', formationId)
             .eq('status', 'confirmed')
+            .not('confirmed_at', 'is', null)
             .order('confirmed_at', { ascending: false }),
         (supabase
             .from('formation_progress') as any)

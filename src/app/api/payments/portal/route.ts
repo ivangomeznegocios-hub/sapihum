@@ -1,12 +1,12 @@
 // POST /api/payments/portal
 // Creates a Stripe Customer Portal session for subscription self-service
 
-import { NextRequest, NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 import { getAppUrl } from '@/lib/config/app-url'
 import { createClient } from '@/lib/supabase/server'
 import { getPaymentProvider } from '@/lib/payments'
 
-export async function POST(request: NextRequest) {
+export async function POST() {
     try {
         const supabase = await createClient()
         const { data: { user } } = await supabase.auth.getUser()
@@ -15,13 +15,16 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'No autenticado' }, { status: 401 })
         }
 
-        const { data: profile } = await supabase
-            .from('profiles')
-            .select('stripe_customer_id')
-            .eq('id', user.id)
-            .single()
+        const { data: subscription } = await (supabase as any)
+            .from('subscriptions')
+            .select('provider_customer_id')
+            .eq('user_id', user.id)
+            .in('status', ['trialing', 'active', 'past_due'])
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .maybeSingle()
 
-        const customerId = (profile as any)?.stripe_customer_id
+        const customerId = subscription?.provider_customer_id
         if (!customerId) {
             return NextResponse.json(
                 { error: 'No tienes una suscripción activa' },

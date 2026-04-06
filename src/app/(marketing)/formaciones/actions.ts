@@ -108,6 +108,7 @@ export async function getPublicFormationBySlug(slug: string) {
             .select('id')
             .eq('formation_id', formation.id)
             .eq('status', 'confirmed')
+            .not('confirmed_at', 'is', null)
 
         const { data: bundlePurchase } = profile?.email
             ? await bundlePurchaseQuery.or(`user_id.eq.${user.id},email.eq.${profile.email}`).maybeSingle()

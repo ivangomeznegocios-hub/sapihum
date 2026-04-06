@@ -70,7 +70,7 @@ Documento operativo para decidir si la plataforma puede salir al publico con pag
 ### Inicio
 
 - Revisar Stripe live, webhook activo y ultimos pagos procesados.
-- Revisar Resend y/o Auth email delivery.
+- Revisar Resend, `RESEND_FROM_EMAIL` verificado y/o Auth email delivery.
 - Revisar tablero interno de analytics y queue de compras pendientes.
 - Confirmar que `NEXT_PUBLIC_APP_URL` apunta al dominio live.
 

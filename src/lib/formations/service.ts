@@ -85,6 +85,7 @@ export async function issueFormationFullCertificateRecord(params: {
             .eq('formation_id', params.formationId)
             .eq('email', normalizedEmail)
             .eq('status', 'confirmed')
+            .not('confirmed_at', 'is', null)
             .maybeSingle(),
     ])
 
@@ -409,6 +410,7 @@ export async function markFormationCourseCompletedRecord(params: {
                 .eq('formation_id', params.formationId)
                 .eq('email', normalizedEmail)
                 .eq('status', 'confirmed')
+                .not('confirmed_at', 'is', null)
                 .maybeSingle()
 
             if (confirmedBundlePurchase) {

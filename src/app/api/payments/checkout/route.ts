@@ -399,6 +399,7 @@ async function resolveFormationPurchaseDetails(
             .select('id')
             .eq('formation_id', params.formationId)
             .eq('status', 'confirmed')
+            .not('confirmed_at', 'is', null)
 
         const { data: existingPurchase } = normalizedEmail
             ? await purchaseQuery.or(`user_id.eq.${params.userId},email.eq.${normalizedEmail}`).maybeSingle()
@@ -443,6 +444,7 @@ async function resolveFormationPurchaseDetails(
         .eq('formation_id', params.formationId)
         .eq('email', normalizedGuestEmail)
         .eq('status', 'confirmed')
+        .not('confirmed_at', 'is', null)
         .maybeSingle()
 
     if (existingGuestPurchase) {
@@ -471,7 +473,6 @@ async function resolveFormationPurchaseDetails(
 }
 
 async function createPendingFormationPurchase(params: {
-    supabase: any
     formationId: string
     userId?: string | null
     email: string
@@ -480,10 +481,11 @@ async function createPendingFormationPurchase(params: {
     analyticsContext?: any
     attributionSnapshot?: any
 }) {
+    const db = createServiceClient()
     const purchaseId = crypto.randomUUID()
     const normalizedEmail = params.email.trim().toLowerCase()
 
-    const { error } = await (params.supabase
+    const { error } = await (db
         .from('formation_purchases') as any)
         .insert({
             id: purchaseId,
@@ -509,7 +511,6 @@ async function createPendingFormationPurchase(params: {
 }
 
 async function syncPendingFormationPurchase(params: {
-    supabase: any
     purchaseId: string
     userId?: string | null
     email: string
@@ -520,9 +521,10 @@ async function syncPendingFormationPurchase(params: {
     analyticsContext?: any
     attributionSnapshot?: any
 }) {
+    const db = createServiceClient()
     const normalizedEmail = params.email.trim().toLowerCase()
 
-    const { data: existingPurchase, error: existingPurchaseError } = await (params.supabase
+    const { data: existingPurchase, error: existingPurchaseError } = await (db
         .from('formation_purchases') as any)
         .select('metadata')
         .eq('id', params.purchaseId)
@@ -541,7 +543,7 @@ async function syncPendingFormationPurchase(params: {
         checkout_prepared_at: new Date().toISOString(),
     }
 
-    const { error } = await (params.supabase
+    const { error } = await (db
         .from('formation_purchases') as any)
         .update({
             user_id: params.userId ?? null,
@@ -768,7 +770,7 @@ export async function POST(request: NextRequest) {
             if (!resolvedFormationPurchase.requiresPayment) {
                 try {
                     const purchaseId = await createConfirmedFormationPurchaseAndGrantAccess({
-                        supabase,
+                        supabase: createServiceClient(),
                         formationId,
                         userId: user?.id ?? null,
                         email: customerEmail,
@@ -815,7 +817,6 @@ export async function POST(request: NextRequest) {
 
             try {
                 pendingFormationPurchaseId = await createPendingFormationPurchase({
-                    supabase,
                     formationId,
                     userId: user?.id ?? null,
                     email: customerEmail,
@@ -912,7 +913,7 @@ export async function POST(request: NextRequest) {
                 if (customerId && isInvalidStripeCustomerMessage(msg)) {
                     console.warn('[API] Invalid stripe_customer_id, clearing and retrying:', customerId)
                     if (profile.data?.id) {
-                        await (supabase as any)
+                        await (createServiceClient() as any)
                             .from('profiles')
                             .update({ stripe_customer_id: null })
                             .eq('id', profile.data.id)
@@ -981,7 +982,6 @@ export async function POST(request: NextRequest) {
         if (purchaseType === 'formation_purchase' && pendingFormationPurchaseId) {
             try {
                 await syncPendingFormationPurchase({
-                    supabase,
                     purchaseId: pendingFormationPurchaseId,
                     userId: user?.id ?? null,
                     email: customerEmail,

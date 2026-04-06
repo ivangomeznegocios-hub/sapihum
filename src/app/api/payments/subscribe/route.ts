@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/server'
 import { recordAnalyticsServerEvent, resolveAttributionSnapshot } from '@/lib/analytics/server'
 import { getAppUrl } from '@/lib/config/app-url'
 import { getPaymentProvider } from '@/lib/payments'
+import { createServiceClient } from '@/lib/supabase/service'
 import {
     getSubscriptionPlan,
     getStripePriceId,
@@ -213,7 +214,7 @@ export async function POST(request: NextRequest) {
             const message = stripeError?.message || ''
             if (customerId && (message.includes('No such customer') || message.includes('customer'))) {
                 if (profile.data?.id) {
-                    await (supabase as any)
+                    await (createServiceClient() as any)
                         .from('profiles')
                         .update({ stripe_customer_id: null })
                         .eq('id', profile.data.id)

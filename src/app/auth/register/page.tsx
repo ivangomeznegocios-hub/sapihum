@@ -11,6 +11,7 @@ import { Label } from '@/components/ui/label'
 import { buildRegistrationConsentMetadata, CONSENT_POLICY_VERSION } from '@/lib/consent'
 import { collectAnalyticsEvent, getClientAnalyticsContext } from '@/lib/analytics/client'
 import { brandCommunityLabel } from '@/lib/brand'
+import { buildAuthCallbackUrl } from '@/lib/config/app-url'
 
 function normalizeRegistrationValue(value: string | null): string {
     return (value || '').trim().toLowerCase()
@@ -196,7 +197,7 @@ function RegisterForm() {
             email,
             password,
             options: {
-                emailRedirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(nextPath)}`,
+                emailRedirectTo: buildAuthCallbackUrl({ nextPath }),
                 data: {
                     ...signUpMetadata,
                 },

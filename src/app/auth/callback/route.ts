@@ -5,6 +5,7 @@ import { recordRegistrationConsents } from '@/actions/consent'
 import { hasRegistrationConsentMetadata } from '@/lib/consent'
 import { recordAnalyticsServerEvent } from '@/lib/analytics/server'
 import { claimCurrentUserEventEntitlements } from '@/lib/supabase/queries/event-entitlements'
+import { getAppUrl } from '@/lib/config/app-url'
 
 function resolveCallbackNext(requestedNext: string | null, type: string | null) {
     if (requestedNext?.startsWith('/')) {
@@ -23,7 +24,7 @@ function resolveCallbackNext(requestedNext: string | null, type: string | null) 
 }
 
 export async function GET(request: Request) {
-    const { searchParams, origin } = new URL(request.url)
+    const { searchParams } = new URL(request.url)
     const code = searchParams.get('code')
     const tokenHash = searchParams.get('token_hash')
     const type = searchParams.get('type')
@@ -83,10 +84,10 @@ export async function GET(request: Request) {
                 console.error('Error processing invite referral on callback:', err)
             }
 
-            return NextResponse.redirect(`${origin}${next}`)
+            return NextResponse.redirect(new URL(next, getAppUrl()))
         }
     }
 
     // Return the user to an error page with instructions
-    return NextResponse.redirect(`${origin}/auth/login?error=auth_callback_error`)
+    return NextResponse.redirect(new URL('/auth/login?error=auth_callback_error', getAppUrl()))
 }
