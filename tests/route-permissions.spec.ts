@@ -1,6 +1,7 @@
 import dotenv from 'dotenv'
 import { expect, test, type Page } from '@playwright/test'
 import { createServerClient } from '@supabase/ssr'
+import { createClient } from '@supabase/supabase-js'
 
 dotenv.config({ path: '.env.local', quiet: true })
 
@@ -25,6 +26,22 @@ function createSessionSupabase(
       setAll(cookiesToSet) {
         setCookies(cookiesToSet)
       },
+    },
+  })
+}
+
+function createAdminSupabase() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY
+
+  if (!url || !key) {
+    throw new Error('Missing Supabase service role credentials for permission audit.')
+  }
+
+  return createClient(url, key, {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false,
     },
   })
 }
@@ -72,7 +89,32 @@ async function signInAs(page: Page, email: string) {
   await page.waitForLoadState('networkidle').catch(() => null)
 }
 
+async function findAuthUserIdByEmail(email: string) {
+  const admin = createAdminSupabase()
+  const normalizedEmail = email.trim().toLowerCase()
+
+  for (let page = 1; page <= 10; page += 1) {
+    const { data, error } = await admin.auth.admin.listUsers({ page, perPage: 200 })
+    if (error) {
+      throw new Error(`Unable to list auth users: ${error.message}`)
+    }
+
+    const match = (data?.users ?? []).find((entry) => entry.email?.trim().toLowerCase() === normalizedEmail)
+    if (match) {
+      return match.id
+    }
+
+    if ((data?.users ?? []).length < 200) {
+      break
+    }
+  }
+
+  throw new Error(`Unable to find auth user for ${email}`)
+}
+
 test.describe('server route permissions', () => {
+  test.describe.configure({ mode: 'serial' })
+
   test('psychologist level 2 is redirected away from forbidden create routes', async ({ page }) => {
     test.setTimeout(120_000)
     await signInAs(page, 'psicologo2@test.com')
@@ -107,5 +149,97 @@ test.describe('server route permissions', () => {
     await page.waitForLoadState('networkidle').catch(() => null)
 
     expect(new URL(page.url()).pathname).toBe('/dashboard/resources/new')
+  })
+
+  test('cancelled psychologist loses gated access and keeps subscription management visible', async ({ page }) => {
+    test.setTimeout(180_000)
+
+    const admin = createAdminSupabase()
+    const userId = await findAuthUserIdByEmail('psicologo2@test.com')
+
+    const { data: originalProfile, error: profileError } = await admin
+      .from('profiles')
+      .select('membership_level, subscription_status, membership_specialization_code')
+      .eq('id', userId)
+      .single()
+
+    if (profileError || !originalProfile) {
+      throw new Error(`Unable to load original profile for cancellation audit: ${profileError?.message ?? 'missing profile'}`)
+    }
+
+    const { data: originalSubscription, error: subscriptionError } = await admin
+      .from('subscriptions')
+      .select('id, status, cancel_at_period_end, current_period_end, cancelled_at')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+
+    if (subscriptionError) {
+      throw new Error(`Unable to load subscription snapshot for cancellation audit: ${subscriptionError.message}`)
+    }
+
+    try {
+      const { error: updateProfileError } = await admin
+        .from('profiles')
+        .update({
+          membership_level: 0,
+          subscription_status: 'cancelled',
+          membership_specialization_code: null,
+        })
+        .eq('id', userId)
+
+      if (updateProfileError) {
+        throw new Error(`Unable to set cancelled profile state: ${updateProfileError.message}`)
+      }
+
+      if (originalSubscription?.id) {
+        const { error: updateSubscriptionError } = await admin
+          .from('subscriptions')
+          .update({
+            status: 'expired',
+            cancel_at_period_end: false,
+            current_period_end: new Date().toISOString(),
+            cancelled_at: new Date().toISOString(),
+          })
+          .eq('id', originalSubscription.id)
+
+        if (updateSubscriptionError) {
+          throw new Error(`Unable to set cancelled subscription state: ${updateSubscriptionError.message}`)
+        }
+      }
+
+      await signInAs(page, 'psicologo2@test.com')
+
+      await page.goto('/dashboard/calendar', { waitUntil: 'domcontentloaded', timeout: 60_000 })
+      await page.waitForLoadState('networkidle').catch(() => null)
+      expect(new URL(page.url()).pathname).toBe('/dashboard/subscription')
+
+      await page.goto('/dashboard/subscription', { waitUntil: 'domcontentloaded', timeout: 60_000 })
+      await page.waitForLoadState('networkidle').catch(() => null)
+
+      await expect(page.getByText('Gestionar suscripcion y facturacion')).toBeVisible()
+    } finally {
+      await admin
+        .from('profiles')
+        .update({
+          membership_level: originalProfile.membership_level,
+          subscription_status: originalProfile.subscription_status,
+          membership_specialization_code: originalProfile.membership_specialization_code,
+        })
+        .eq('id', userId)
+
+      if (originalSubscription?.id) {
+        await admin
+          .from('subscriptions')
+          .update({
+            status: originalSubscription.status,
+            cancel_at_period_end: originalSubscription.cancel_at_period_end,
+            current_period_end: originalSubscription.current_period_end,
+            cancelled_at: originalSubscription.cancelled_at,
+          })
+          .eq('id', originalSubscription.id)
+      }
+    }
   })
 })

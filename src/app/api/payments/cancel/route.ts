@@ -2,10 +2,11 @@
 // Cancels a subscription at end of billing period
 
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
 import { getPaymentProvider } from '@/lib/payments'
+import { getSubscriptionManagementSnapshot } from '@/lib/payments/subscription-management'
 import { syncMembershipEntitlementsForUser } from '@/lib/membership-entitlements'
 import { createServiceClient } from '@/lib/supabase/service'
+import { createClient, getUserProfile } from '@/lib/supabase/server'
 
 export async function POST(request: NextRequest) {
     try {
@@ -18,32 +19,36 @@ export async function POST(request: NextRequest) {
 
         const body = await request.json()
         const { immediately = false } = body
-
-        const { data: subscription, error: subscriptionError } = await (supabase as any)
-            .from('subscriptions')
-            .select('provider_subscription_id, payment_provider')
-            .eq('user_id', user.id)
-            .in('status', ['active', 'trialing'])
-            .order('created_at', { ascending: false })
-            .limit(1)
-            .single()
-
-        if (subscriptionError) {
-            console.error('[API] Cancel subscription lookup error:', subscriptionError)
-            return NextResponse.json(
-                { error: 'No fue posible consultar tu suscripcion actual' },
-                { status: 500 }
-            )
-        }
+        const profile = await getUserProfile()
+        const billingSnapshot = await getSubscriptionManagementSnapshot({
+            supabase,
+            userId: user.id,
+            fallbackCustomerId: profile?.stripe_customer_id ?? null,
+        })
+        const subscription = billingSnapshot.activeSubscription
 
         if (!subscription) {
             return NextResponse.json(
-                { error: 'No tienes una suscripcion activa' },
+                { error: 'No tienes una suscripcion activa para cancelar' },
                 { status: 400 }
             )
         }
 
-        const provider = getPaymentProvider(subscription.payment_provider)
+        if (!subscription.provider_subscription_id) {
+            return NextResponse.json(
+                { error: 'No encontramos el identificador de Stripe para esta suscripcion' },
+                { status: 400 }
+            )
+        }
+
+        if (subscription.cancel_at_period_end && !immediately) {
+            return NextResponse.json({
+                success: true,
+                message: 'Tu cancelacion ya estaba programada para el final del periodo actual',
+            })
+        }
+
+        const provider = getPaymentProvider(subscription.payment_provider as 'stripe')
         await provider.cancelSubscription(subscription.provider_subscription_id, immediately)
 
         const { error: subscriptionUpdateError } = await (supabase as any)

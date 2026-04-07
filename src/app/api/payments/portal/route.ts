@@ -3,8 +3,9 @@
 
 import { NextResponse } from 'next/server'
 import { getAppUrl } from '@/lib/config/app-url'
-import { createClient } from '@/lib/supabase/server'
 import { getPaymentProvider } from '@/lib/payments'
+import { getSubscriptionManagementSnapshot } from '@/lib/payments/subscription-management'
+import { createClient, getUserProfile } from '@/lib/supabase/server'
 
 export async function POST() {
     try {
@@ -15,25 +16,25 @@ export async function POST() {
             return NextResponse.json({ error: 'No autenticado' }, { status: 401 })
         }
 
-        const { data: subscription } = await (supabase as any)
-            .from('subscriptions')
-            .select('provider_customer_id')
-            .eq('user_id', user.id)
-            .in('status', ['trialing', 'active', 'past_due'])
-            .order('created_at', { ascending: false })
-            .limit(1)
-            .maybeSingle()
+        const profile = await getUserProfile()
+        const billingSnapshot = await getSubscriptionManagementSnapshot({
+            supabase,
+            userId: user.id,
+            fallbackCustomerId: profile?.stripe_customer_id ?? null,
+        })
 
-        const customerId = subscription?.provider_customer_id
-        if (!customerId) {
+        if (!billingSnapshot.customerId) {
             return NextResponse.json(
-                { error: 'No tienes una suscripción activa' },
+                { error: 'No encontramos un portal de facturacion disponible para tu cuenta' },
                 { status: 400 }
             )
         }
 
         const appUrl = getAppUrl()
-        const provider = getPaymentProvider('stripe')
+        const paymentProvider = billingSnapshot.activeSubscription?.payment_provider
+            || billingSnapshot.latestSubscription?.payment_provider
+            || 'stripe'
+        const provider = getPaymentProvider(paymentProvider as 'stripe')
 
         if (!provider.createPortalSession) {
             return NextResponse.json(
@@ -43,7 +44,7 @@ export async function POST() {
         }
 
         const portalUrl = await provider.createPortalSession(
-            customerId,
+            billingSnapshot.customerId,
             `${appUrl}/dashboard/subscription`
         )
 
@@ -51,7 +52,7 @@ export async function POST() {
     } catch (error) {
         console.error('[API] Portal error:', error)
         return NextResponse.json(
-            { error: 'Error al crear sesión del portal' },
+            { error: 'Error al crear sesion del portal' },
             { status: 500 }
         )
     }
