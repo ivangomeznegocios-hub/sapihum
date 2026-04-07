@@ -84,15 +84,15 @@ export default async function PaymentSuccessPage({ searchParams }: PageProps) {
                     <div className="mx-auto w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mb-4">
                         <CheckCircle className="h-8 w-8 text-green-600" />
                     </div>
-                    <CardTitle className="text-2xl">Â¡Pago exitoso!</CardTitle>
+                    <CardTitle className="text-2xl">&iexcl;Pago exitoso!</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                     <p className="text-muted-foreground">
                         {event
                             ? `Tu acceso a "${event.title}" ha sido confirmado.`
                             : formation
-                                ? `Tu acceso al diplomado "${formation.title}" ya quedÃ³ activo.`
-                                : 'Tu pago ha sido procesado correctamente. Tu cuenta serÃ¡ actualizada en unos momentos.'}
+                                ? `Tu acceso al diplomado "${formation.title}" ya qued\u00f3 activo.`
+                                : 'Tu pago ha sido procesado correctamente. Tu cuenta ser\u00e1 actualizada en unos momentos.'}
                     </p>
                     <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground bg-muted p-3 rounded-lg">
                         <Clock className="h-4 w-4" />
@@ -124,7 +124,7 @@ export default async function PaymentSuccessPage({ searchParams }: PageProps) {
                             </Button>
                             <Button asChild variant="outline" className="w-full">
                                 <Link href={`/formaciones/${formation.slug}`}>
-                                    Ver pÃ¡gina del diplomado
+                                    Ver p\u00e1gina del diplomado
                                 </Link>
                             </Button>
                         </div>
@@ -138,7 +138,7 @@ export default async function PaymentSuccessPage({ searchParams }: PageProps) {
                     ) : (
                         <Button asChild className="w-full">
                             <Link href="/dashboard/subscription">
-                                Ir a mi membresÃ­a
+                                Ir a mi membres\u00eda
                                 <ArrowRight className="ml-2 h-4 w-4" />
                             </Link>
                         </Button>
