@@ -24,6 +24,58 @@ function getStripeInstance(): Stripe {
     return new Stripe(key)
 }
 
+export async function findStripeCustomerIdByEmail(email: string): Promise<string | null> {
+    const normalizedEmail = email.trim().toLowerCase()
+    if (!normalizedEmail) {
+        return null
+    }
+
+    const stripe = getStripeInstance()
+    const customers = await stripe.customers.list({
+        email: normalizedEmail,
+        limit: 10,
+    })
+
+    if (customers.data.length === 0) {
+        return null
+    }
+
+    const summaries = await Promise.all(
+        customers.data.map(async (customer) => {
+            const subscriptions = await stripe.subscriptions.list({
+                customer: customer.id,
+                status: 'all',
+                limit: 10,
+            })
+
+            const hasPreferredSubscription = subscriptions.data.some((subscription) =>
+                ['trialing', 'active', 'past_due', 'unpaid'].includes(subscription.status)
+            )
+
+            return {
+                customerId: customer.id,
+                created: customer.created ?? 0,
+                hasPreferredSubscription,
+                hasAnySubscription: subscriptions.data.length > 0,
+            }
+        })
+    )
+
+    summaries.sort((left, right) => {
+        if (left.hasPreferredSubscription !== right.hasPreferredSubscription) {
+            return left.hasPreferredSubscription ? -1 : 1
+        }
+
+        if (left.hasAnySubscription !== right.hasAnySubscription) {
+            return left.hasAnySubscription ? -1 : 1
+        }
+
+        return right.created - left.created
+    })
+
+    return summaries[0]?.customerId ?? customers.data[0]?.id ?? null
+}
+
 export async function retrieveCompletedCheckoutPayment(sessionId: string): Promise<PaymentWebhookData | null> {
     const stripe = getStripeInstance()
     const session = await stripe.checkout.sessions.retrieve(sessionId)

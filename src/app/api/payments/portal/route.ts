@@ -4,7 +4,9 @@
 import { NextResponse } from 'next/server'
 import { getAppUrl } from '@/lib/config/app-url'
 import { getPaymentProvider } from '@/lib/payments'
+import { findStripeCustomerIdByEmail } from '@/lib/payments/stripe'
 import { getSubscriptionManagementSnapshot } from '@/lib/payments/subscription-management'
+import { createServiceClient } from '@/lib/supabase/service'
 import { createClient, getUserProfile } from '@/lib/supabase/server'
 
 export async function POST() {
@@ -23,7 +25,34 @@ export async function POST() {
             fallbackCustomerId: profile?.stripe_customer_id ?? null,
         })
 
-        if (!billingSnapshot.customerId) {
+        let customerId = billingSnapshot.customerId
+
+        if (!customerId && profile?.email) {
+            customerId = await findStripeCustomerIdByEmail(profile.email)
+
+            if (customerId) {
+                const admin = createServiceClient()
+
+                await (admin as any)
+                    .from('profiles')
+                    .update({
+                        stripe_customer_id: customerId,
+                    })
+                    .eq('id', user.id)
+
+                if (billingSnapshot.latestSubscription?.id) {
+                    await (admin as any)
+                        .from('subscriptions')
+                        .update({
+                            provider_customer_id: customerId,
+                            updated_at: new Date().toISOString(),
+                        })
+                        .eq('id', billingSnapshot.latestSubscription.id)
+                }
+            }
+        }
+
+        if (!customerId) {
             return NextResponse.json(
                 { error: 'No encontramos un portal de facturacion disponible para tu cuenta' },
                 { status: 400 }
@@ -44,7 +73,7 @@ export async function POST() {
         }
 
         const portalUrl = await provider.createPortalSession(
-            billingSnapshot.customerId,
+            customerId,
             `${appUrl}/dashboard/subscription`
         )
 

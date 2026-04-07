@@ -19,7 +19,7 @@ import type { Subscription } from '@/types/database'
 
 interface SubscriptionStatusProps {
     subscription: Subscription | null
-    hasPortalAccess: boolean
+    showPortalButton: boolean
     hasPaidMembership: boolean
 }
 
@@ -35,7 +35,7 @@ const STATUS_LABELS: Record<Subscription['status'], string> = {
 
 export function SubscriptionStatus({
     subscription,
-    hasPortalAccess,
+    showPortalButton,
     hasPaidMembership,
 }: SubscriptionStatusProps) {
     const router = useRouter()
@@ -190,13 +190,13 @@ export function SubscriptionStatus({
                 ) : (
                     <div className="rounded-lg border bg-muted/30 p-4 text-sm text-muted-foreground">
                         {hasPaidMembership
-                            ? 'Tu acceso esta activo, pero aun no vemos el detalle de suscripcion en esta vista. Si necesitas revisar cobros o cancelar, usa el portal de Stripe.'
+                            ? 'Tu acceso esta activo, pero aun no vemos el detalle de suscripcion en esta vista. Usa el boton de abajo para abrir el portal de Stripe y gestionar cobros o cancelacion.'
                             : 'Aun no tienes una suscripcion activa. Cuando contrates una membresia, aqui veras tu facturacion y opciones de gestion.'}
                     </div>
                 )}
 
                 <div className="flex flex-wrap gap-2">
-                    {hasPortalAccess && (
+                    {showPortalButton && (
                         <Button
                             variant="outline"
                             onClick={handlePortal}

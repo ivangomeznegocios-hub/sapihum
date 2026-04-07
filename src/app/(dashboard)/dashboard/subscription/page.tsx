@@ -23,6 +23,7 @@ export default async function SubscriptionPage() {
 
     const isAdmin = profile.role === 'admin'
     const currentLevel = profile.membership_level ?? 0
+    const hasPaidMembership = currentLevel >= 1 || ['active', 'trial', 'past_due'].includes(profile.subscription_status ?? '')
     const currentSpecializationCode = (profile as any).membership_specialization_code || null
     const billingSnapshot = !isAdmin
         ? await getSubscriptionManagementSnapshot({
@@ -78,8 +79,8 @@ export default async function SubscriptionPage() {
             {!isAdmin && billingSnapshot && (
                 <SubscriptionStatus
                     subscription={billingSnapshot.displaySubscription}
-                    hasPortalAccess={billingSnapshot.hasPortalAccess}
-                    hasPaidMembership={currentLevel >= 1 || ['active', 'trial', 'past_due'].includes(profile.subscription_status ?? '')}
+                    showPortalButton={billingSnapshot.hasPortalAccess || hasPaidMembership}
+                    hasPaidMembership={hasPaidMembership}
                 />
             )}
 

@@ -151,6 +151,97 @@ test.describe('server route permissions', () => {
     expect(new URL(page.url()).pathname).toBe('/dashboard/resources/new')
   })
 
+  test('paid member without local subscription detail still sees the Stripe portal CTA', async ({ page }) => {
+    test.setTimeout(180_000)
+
+    const admin = createAdminSupabase()
+    const userId = await findAuthUserIdByEmail('psicologo2@test.com')
+
+    const { data: originalProfile, error: profileError } = await admin
+      .from('profiles')
+      .select('membership_level, subscription_status, membership_specialization_code, stripe_customer_id')
+      .eq('id', userId)
+      .single()
+
+    if (profileError || !originalProfile) {
+      throw new Error(`Unable to load original profile for billing CTA audit: ${profileError?.message ?? 'missing profile'}`)
+    }
+
+    const { data: originalSubscription, error: subscriptionError } = await admin
+      .from('subscriptions')
+      .select('id, status, provider_customer_id, current_period_end, cancel_at_period_end, cancelled_at')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+
+    if (subscriptionError) {
+      throw new Error(`Unable to load subscription snapshot for billing CTA audit: ${subscriptionError.message}`)
+    }
+
+    try {
+      const { error: updateProfileError } = await admin
+        .from('profiles')
+        .update({
+          membership_level: 2,
+          subscription_status: 'active',
+          stripe_customer_id: null,
+        })
+        .eq('id', userId)
+
+      if (updateProfileError) {
+        throw new Error(`Unable to prepare billing CTA profile state: ${updateProfileError.message}`)
+      }
+
+      if (originalSubscription?.id) {
+        const { error: updateSubscriptionError } = await admin
+          .from('subscriptions')
+          .update({
+            status: 'expired',
+            provider_customer_id: null,
+            current_period_end: new Date().toISOString(),
+            cancel_at_period_end: false,
+            cancelled_at: new Date().toISOString(),
+          })
+          .eq('id', originalSubscription.id)
+
+        if (updateSubscriptionError) {
+          throw new Error(`Unable to prepare billing CTA subscription state: ${updateSubscriptionError.message}`)
+        }
+      }
+
+      await signInAs(page, 'psicologo2@test.com')
+      await page.goto('/dashboard/subscription', { waitUntil: 'domcontentloaded', timeout: 60_000 })
+      await page.waitForLoadState('networkidle').catch(() => null)
+
+      await expect(page.getByText('Tu acceso esta activo, pero aun no vemos el detalle de suscripcion en esta vista.')).toBeVisible()
+      await expect(page.getByRole('button', { name: 'Abrir portal de Stripe' })).toBeVisible()
+    } finally {
+      await admin
+        .from('profiles')
+        .update({
+          membership_level: originalProfile.membership_level,
+          subscription_status: originalProfile.subscription_status,
+          membership_specialization_code: originalProfile.membership_specialization_code,
+          stripe_customer_id: originalProfile.stripe_customer_id,
+        })
+        .eq('id', userId)
+
+      if (originalSubscription?.id) {
+        await admin
+          .from('subscriptions')
+          .update({
+            status: originalSubscription.status,
+            provider_customer_id: originalSubscription.provider_customer_id,
+            current_period_end: originalSubscription.current_period_end,
+            cancel_at_period_end: originalSubscription.cancel_at_period_end,
+            cancelled_at: originalSubscription.cancelled_at,
+          })
+          .eq('id', originalSubscription.id)
+      }
+    }
+  })
+
   test('cancelled psychologist loses gated access and keeps subscription management visible', async ({ page }) => {
     test.setTimeout(180_000)
 
