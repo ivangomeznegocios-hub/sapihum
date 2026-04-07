@@ -14,6 +14,7 @@ import type {
     WebhookEvent,
 } from './types'
 import { getSubscriptionPlan, isStripePriceIdConfigured } from './config'
+import { sanitizeStripeMetadata } from './stripe-metadata'
 
 // Initialize Stripe with the secret key
 function getStripeInstance(): Stripe {
@@ -203,6 +204,24 @@ export const stripeAdapter: PaymentProviderAdapter = {
                 quantity: 1,
             }
 
+        const checkoutMetadata = sanitizeStripeMetadata({
+            user_id: params.userId,
+            profile_id: params.profileId,
+            membership_level: String(params.membershipLevel),
+            specialization_code: params.specializationCode || '',
+            price_id: resolvedPriceId,
+            purchase_type: 'subscription_payment',
+            ...(params.metadata || {}),
+        })
+        const subscriptionMetadata = sanitizeStripeMetadata({
+            user_id: params.userId,
+            profile_id: params.profileId,
+            membership_level: String(params.membershipLevel),
+            specialization_code: params.specializationCode || '',
+            price_id: resolvedPriceId,
+            ...(params.metadata || {}),
+        })
+
         const sessionParams: Stripe.Checkout.SessionCreateParams = {
             mode: 'subscription',
             payment_method_types: ['card'],
@@ -211,24 +230,9 @@ export const stripeAdapter: PaymentProviderAdapter = {
             cancel_url: params.cancelUrl,
             customer_email: params.customerId ? undefined : (params.customerEmail || undefined),
             customer: params.customerId || undefined,
-            metadata: {
-                user_id: params.userId,
-                profile_id: params.profileId,
-                membership_level: String(params.membershipLevel),
-                specialization_code: params.specializationCode || '',
-                price_id: resolvedPriceId,
-                purchase_type: 'subscription_payment',
-                ...(params.metadata || {}),
-            },
+            metadata: checkoutMetadata,
             subscription_data: {
-                metadata: {
-                    user_id: params.userId,
-                    profile_id: params.profileId,
-                    membership_level: String(params.membershipLevel),
-                    specialization_code: params.specializationCode || '',
-                    price_id: resolvedPriceId,
-                    ...(params.metadata || {}),
-                },
+                metadata: subscriptionMetadata,
                 ...(plan.trialDays > 0 ? { trial_period_days: plan.trialDays } : {}),
             },
             locale: 'es',
@@ -264,6 +268,13 @@ export const stripeAdapter: PaymentProviderAdapter = {
         const checkoutExpiresAt = params.checkoutExpiresAt
             ? Math.floor(new Date(params.checkoutExpiresAt).getTime() / 1000)
             : undefined
+        const checkoutMetadata = sanitizeStripeMetadata({
+            user_id: params.userId || '',
+            profile_id: params.profileId || '',
+            purchase_type: params.purchaseType,
+            reference_id: params.referenceId || '',
+            ...(params.metadata || {}),
+        })
 
         const sessionParams: Stripe.Checkout.SessionCreateParams = {
             mode: 'payment',
@@ -284,21 +295,9 @@ export const stripeAdapter: PaymentProviderAdapter = {
             cancel_url: params.cancelUrl,
             customer_email: params.customerId ? undefined : (params.customerEmail || undefined),
             customer: params.customerId || undefined,
-            metadata: {
-                user_id: params.userId || '',
-                profile_id: params.profileId || '',
-                purchase_type: params.purchaseType,
-                reference_id: params.referenceId || '',
-                ...(params.metadata || {}),
-            },
+            metadata: checkoutMetadata,
             payment_intent_data: {
-                metadata: {
-                    user_id: params.userId || '',
-                    profile_id: params.profileId || '',
-                    purchase_type: params.purchaseType,
-                    reference_id: params.referenceId || '',
-                    ...(params.metadata || {}),
-                },
+                metadata: checkoutMetadata,
             },
             locale: 'es',
             ...(checkoutExpiresAt ? { expires_at: checkoutExpiresAt } : {}),

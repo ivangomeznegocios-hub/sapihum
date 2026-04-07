@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/server'
 import { recordAnalyticsServerEvent, resolveAttributionSnapshot } from '@/lib/analytics/server'
 import { getAppUrl } from '@/lib/config/app-url'
 import { getPaymentProvider } from '@/lib/payments'
+import { compactAttributionSnapshotForStripe } from '@/lib/payments/stripe-metadata'
 import { createServiceClient } from '@/lib/supabase/service'
 import {
     getSubscriptionPlan,
@@ -188,7 +189,7 @@ export async function POST(request: NextRequest) {
         const checkoutMetadata = {
             analytics_visitor_id: analyticsContext?.visitorId ?? '',
             analytics_session_id: analyticsContext?.sessionId ?? '',
-            attribution_snapshot: JSON.stringify(attributionSnapshot),
+            attribution_snapshot: compactAttributionSnapshotForStripe(attributionSnapshot),
             guest_checkout: user ? 'false' : 'true',
             buyer_full_name: fullName?.trim() || '',
             post_checkout_path: nextPath,

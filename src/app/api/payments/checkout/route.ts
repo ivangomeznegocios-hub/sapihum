@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/server'
 import { recordAnalyticsServerEvent, resolveAttributionSnapshot } from '@/lib/analytics/server'
 import { getAppUrl } from '@/lib/config/app-url'
 import { getPaymentProvider } from '@/lib/payments'
+import { compactAttributionSnapshotForStripe } from '@/lib/payments/stripe-metadata'
 import { AI_CREDIT_PACKAGES, type AICreditPackageKey } from '@/lib/payments/config'
 import {
     getEffectiveEventPriceForProfile,
@@ -885,7 +886,7 @@ export async function POST(request: NextRequest) {
             ...metadata,
             analytics_visitor_id: analyticsContext?.visitorId ?? '',
             analytics_session_id: analyticsContext?.sessionId ?? '',
-            attribution_snapshot: JSON.stringify(attributionSnapshot),
+            attribution_snapshot: compactAttributionSnapshotForStripe(attributionSnapshot),
             guest_checkout: user ? 'false' : 'true',
             guest_email: user ? '' : customerEmail,
         }
