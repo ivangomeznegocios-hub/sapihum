@@ -365,7 +365,7 @@ function FeaturedEventCard({ event }: { event: any }) {
 
                 <div className="flex items-center gap-3 text-xs text-neutral-500">
                     <span>{dateStr}</span>
-                    <span className="text-neutral-600">Â·</span>
+                    <span className="text-neutral-600">&middot;</span>
                     <span>{timeStr}</span>
                 </div>
 

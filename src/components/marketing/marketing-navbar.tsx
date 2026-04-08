@@ -9,27 +9,27 @@ const NAV_ITEMS = [
     label: "Especialidades",
     children: [
       {
-        label: "PsicologÃ­a ClÃ­nica",
+        label: "Psicolog\u00EDa Cl\u00EDnica",
         href: "/especialidades/psicologia-clinica",
         description: "Ciencia aplicada al cuidado de la salud mental",
       },
       {
-        label: "NeuropsicologÃ­a",
+        label: "Neuropsicolog\u00EDa",
         href: "/especialidades/neuropsicologia",
-        description: "Donde la neurociencia y la clÃ­nica convergen",
+        description: "Donde la neurociencia y la cl\u00EDnica convergen",
       },
       {
-        label: "PsicologÃ­a Forense",
+        label: "Psicolog\u00EDa Forense",
         href: "/especialidades/psicologia-forense",
-        description: "Rigor cientÃ­fico al servicio de la justicia",
+        description: "Rigor cient\u00EDfico al servicio de la justicia",
       },
       {
-        label: "PsicologÃ­a Organizacional",
+        label: "Psicolog\u00EDa Organizacional",
         href: "/especialidades/psicologia-organizacional",
         description: "Potencia el capital humano con ciencia",
       },
       {
-        label: "PsicologÃ­a Infantojuvenil",
+        label: "Psicolog\u00EDa Infantojuvenil",
         href: "/especialidades/psicologia-infantojuvenil",
         description: "Desarrollo saludable desde la infancia",
       },
@@ -43,20 +43,20 @@ const NAV_ITEMS = [
   {
     label: "Academia",
     children: [
-      { label: "PrÃ³ximos Encuentros", href: "/academia", description: "Talleres, formaciones y sesiones en vivo" },
+      { label: "Pr\u00F3ximos Encuentros", href: "/academia", description: "Talleres, formaciones y sesiones en vivo" },
       { label: "Formaciones", href: "/formaciones", description: "Programas completos con ruta, horas y compra directa" },
-      { label: "Nuestros Ponentes", href: "/speakers", description: "Directorio pÃºblico de expertos y facilitadores" },
+      { label: "Nuestros Ponentes", href: "/speakers", description: "Directorio p\u00FAblico de expertos y facilitadores" },
     ],
   },
   {
     label: "Recursos",
     children: [
-      { label: "Blog", href: "/blog", description: "ArtÃ­culos sobre psicologÃ­a profesional" },
-      { label: "Recursos Gratuitos", href: "/recursos", description: "Herramientas, guÃ­as y plantillas descargables" },
-      { label: "Casos de Estudio", href: "/casos-de-exito", description: "Profesionales que transformaron su prÃ¡ctica" },
+      { label: "Blog", href: "/blog", description: "Art\u00EDculos sobre psicolog\u00EDa profesional" },
+      { label: "Recursos Gratuitos", href: "/recursos", description: "Herramientas, gu\u00EDas y plantillas descargables" },
+      { label: "Casos de Estudio", href: "/casos-de-exito", description: "Profesionales que transformaron su pr\u00E1ctica" },
     ],
   },
-  { label: "InvestigaciÃ³n", href: "/nosotros" },
+  { label: "Investigaci\u00F3n", href: "/nosotros" },
   { label: "Precios", href: "/precios" },
 ]
 
@@ -70,26 +70,26 @@ export function MarketingNavbar({ isLoggedIn }: MarketingNavbarProps) {
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur-lg supports-[backdrop-filter]:bg-background/60">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-        <Link href="/" className="flex items-center gap-2.5 shrink-0">
+        <Link href="/" className="flex shrink-0 items-center gap-2.5">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-black dark:bg-white">
-            <span className="text-[#f6ae02] dark:text-black font-bold text-[10px] tracking-tighter">SH</span>
+            <span className="text-[10px] font-bold tracking-tighter text-[#f6ae02] dark:text-black">SH</span>
           </div>
-          <span className="font-bold text-lg tracking-[0.15em] uppercase hidden sm:inline-block">
+          <span className="hidden text-lg font-bold uppercase tracking-[0.15em] sm:inline-block">
             SAPIHUM
           </span>
         </Link>
 
-        <nav className="hidden lg:flex items-center gap-1">
+        <nav className="hidden items-center gap-1 lg:flex">
           {NAV_ITEMS.map((item) =>
             item.children ? (
-              <div key={item.label} className="relative group">
-                <button className="flex items-center gap-1 px-3 py-2 text-sm font-semibold text-muted-foreground hover:text-foreground transition-colors rounded-sm">
+              <div key={item.label} className="group relative">
+                <button className="flex items-center gap-1 rounded-sm px-3 py-2 text-sm font-semibold text-muted-foreground transition-colors hover:text-foreground">
                   {item.label}
-                  <svg className="h-3.5 w-3.5 ml-0.5 transition-transform group-hover:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <svg className="ml-0.5 h-3.5 w-3.5 transition-transform group-hover:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
                   </svg>
                 </button>
-                <div className="invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all duration-200 absolute top-full left-0 pt-2 w-72">
+                <div className="invisible absolute left-0 top-full w-72 pt-2 opacity-0 transition-all duration-200 group-hover:visible group-hover:opacity-100">
                   <div className="rounded-sm border bg-popover p-2 shadow-xl shadow-black/5 ring-1 ring-black/5">
                     {item.children.map((child) => (
                       <Link
@@ -99,10 +99,10 @@ export function MarketingNavbar({ isLoggedIn }: MarketingNavbarProps) {
                         data-analytics-label={child.label}
                         data-analytics-surface="marketing_nav_dropdown"
                         data-analytics-funnel="landing"
-                        className="flex flex-col gap-0.5 rounded-sm px-3 py-2.5 hover:bg-accent transition-colors"
+                        className="flex flex-col gap-0.5 rounded-sm px-3 py-2.5 transition-colors hover:bg-accent"
                       >
                         <span className="text-sm font-semibold text-foreground">{child.label}</span>
-                        <span className="text-xs text-muted-foreground leading-snug">{child.description}</span>
+                        <span className="text-xs leading-snug text-muted-foreground">{child.description}</span>
                       </Link>
                     ))}
                   </div>
@@ -116,7 +116,7 @@ export function MarketingNavbar({ isLoggedIn }: MarketingNavbarProps) {
                 data-analytics-label={item.label}
                 data-analytics-surface="marketing_nav"
                 data-analytics-funnel="landing"
-                className="px-3 py-2 text-sm font-semibold text-muted-foreground hover:text-foreground transition-colors rounded-sm"
+                className="rounded-sm px-3 py-2 text-sm font-semibold text-muted-foreground transition-colors hover:text-foreground"
               >
                 {item.label}
               </Link>
@@ -134,8 +134,8 @@ export function MarketingNavbar({ isLoggedIn }: MarketingNavbarProps) {
           ) : (
             <>
               <Link href="/auth/login" className="hidden sm:inline-flex">
-                <Button variant="outline" size="sm" className="font-semibold" data-analytics-cta data-analytics-label="Iniciar SesiÃ³n" data-analytics-surface="marketing_nav" data-analytics-funnel="registration">
-                  Iniciar SesiÃ³n
+                <Button variant="outline" size="sm" className="font-semibold" data-analytics-cta data-analytics-label="Iniciar Sesi\u00F3n" data-analytics-surface="marketing_nav" data-analytics-funnel="registration">
+                  {"Iniciar Sesi\u00F3n"}
                 </Button>
               </Link>
               <Link href="/auth/register" className="hidden sm:inline-flex">
@@ -153,8 +153,8 @@ export function MarketingNavbar({ isLoggedIn }: MarketingNavbarProps) {
 
           <button
             onClick={() => setMobileOpen(!mobileOpen)}
-            className="lg:hidden flex flex-col gap-1.5 p-2 rounded-md hover:bg-accent transition-colors"
-            aria-label="Abrir menÃº"
+            className="flex flex-col gap-1.5 rounded-md p-2 transition-colors hover:bg-accent lg:hidden"
+            aria-label="Abrir men\u00FA"
           >
             <span className={`block h-0.5 w-5 bg-foreground transition-all duration-300 ${mobileOpen ? "translate-y-2 rotate-45" : ""}`} />
             <span className={`block h-0.5 w-5 bg-foreground transition-all duration-300 ${mobileOpen ? "opacity-0" : ""}`} />
@@ -163,12 +163,12 @@ export function MarketingNavbar({ isLoggedIn }: MarketingNavbarProps) {
         </div>
       </div>
 
-      <div className={`lg:hidden overflow-hidden transition-all duration-300 ease-in-out ${mobileOpen ? "max-h-[calc(100dvh-4rem)] border-t" : "max-h-0"}`}>
+      <div className={`overflow-hidden transition-all duration-300 ease-in-out lg:hidden ${mobileOpen ? "max-h-[calc(100dvh-4rem)] border-t" : "max-h-0"}`}>
         <nav className="mx-auto max-w-7xl space-y-1 overflow-y-auto px-4 py-4 pb-6">
           {NAV_ITEMS.map((item) =>
             item.children ? (
               <div key={item.label} className="space-y-1">
-                <p className="px-3 py-2 text-xs font-bold text-muted-foreground uppercase tracking-wider">
+                <p className="px-3 py-2 text-xs font-bold uppercase tracking-wider text-muted-foreground">
                   {item.label}
                 </p>
                 {item.children.map((child) => (
@@ -180,7 +180,7 @@ export function MarketingNavbar({ isLoggedIn }: MarketingNavbarProps) {
                     data-analytics-label={child.label}
                     data-analytics-surface="marketing_nav_mobile"
                     data-analytics-funnel="landing"
-                    className="block rounded-lg px-3 py-2 text-sm font-semibold text-foreground hover:bg-accent transition-colors"
+                    className="block rounded-lg px-3 py-2 text-sm font-semibold text-foreground transition-colors hover:bg-accent"
                   >
                     {child.label}
                   </Link>
@@ -195,7 +195,7 @@ export function MarketingNavbar({ isLoggedIn }: MarketingNavbarProps) {
                 data-analytics-label={item.label}
                 data-analytics-surface="marketing_nav_mobile"
                 data-analytics-funnel="landing"
-                className="block rounded-lg px-3 py-2 text-sm font-semibold text-foreground hover:bg-accent transition-colors"
+                className="block rounded-lg px-3 py-2 text-sm font-semibold text-foreground transition-colors hover:bg-accent"
               >
                 {item.label}
               </Link>
@@ -203,12 +203,16 @@ export function MarketingNavbar({ isLoggedIn }: MarketingNavbarProps) {
           )}
 
           {!isLoggedIn && (
-            <div className="pt-3 border-t mt-3">
+            <div className="mt-3 border-t pt-3">
               <Link href="/auth/login" onClick={() => setMobileOpen(false)}>
-                <Button variant="outline" className="w-full mb-2 font-semibold" data-analytics-cta data-analytics-label="Iniciar SesiÃ³n" data-analytics-surface="marketing_nav_mobile" data-analytics-funnel="registration">Iniciar SesiÃ³n</Button>
+                <Button variant="outline" className="mb-2 w-full font-semibold" data-analytics-cta data-analytics-label="Iniciar Sesi\u00F3n" data-analytics-surface="marketing_nav_mobile" data-analytics-funnel="registration">
+                  {"Iniciar Sesi\u00F3n"}
+                </Button>
               </Link>
               <Link href="/auth/register" onClick={() => setMobileOpen(false)}>
-                <Button className="w-full font-semibold" data-analytics-cta data-analytics-label="Comenzar" data-analytics-surface="marketing_nav_mobile" data-analytics-funnel="registration">Comenzar</Button>
+                <Button className="w-full font-semibold" data-analytics-cta data-analytics-label="Comenzar" data-analytics-surface="marketing_nav_mobile" data-analytics-funnel="registration">
+                  Comenzar
+                </Button>
               </Link>
             </div>
           )}

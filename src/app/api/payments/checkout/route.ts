@@ -449,7 +449,7 @@ async function resolveFormationPurchaseDetails(
         .maybeSingle()
 
     if (existingGuestPurchase) {
-        return { error: 'Este correo ya tiene acceso a la formaciÃ³n completa' as const }
+        return { error: 'Este correo ya tiene acceso a la formaci\u00F3n completa' as const }
     }
 
     const amount = Number(formation.bundle_price || 0)
@@ -804,7 +804,7 @@ export async function POST(request: NextRequest) {
                 } catch (purchaseError) {
                     console.error('[API] Failed to grant direct formation access:', purchaseError)
                     return NextResponse.json(
-                        { error: 'No fue posible activar la formaciÃ³n. Intenta de nuevo.' },
+                        { error: 'No fue posible activar la formaci\u00F3n. Intenta de nuevo.' },
                         { status: 500 }
                     )
                 }

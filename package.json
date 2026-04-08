@@ -6,7 +6,8 @@
     "dev": "next dev --webpack",
     "build": "next build --webpack",
     "start": "next start",
-    "lint": "eslint ."
+    "check:encoding": "node scripts/check-mojibake.js",
+    "lint": "npm run check:encoding && eslint ."
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",

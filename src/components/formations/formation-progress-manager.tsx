@@ -77,7 +77,7 @@ export function FormationProgressManager({ formationId, learners }: FormationPro
     return (
         <Card>
             <CardHeader>
-                <CardTitle>Seguimiento y CertificaciÃ³n</CardTitle>
+                <CardTitle>{"Seguimiento y Certificaci\u00F3n"}</CardTitle>
                 <CardDescription>
                     Administra el avance de cada alumno del diplomado y emite el certificado final cuando complete toda la ruta.
                 </CardDescription>
@@ -85,7 +85,7 @@ export function FormationProgressManager({ formationId, learners }: FormationPro
             <CardContent className="space-y-6">
                 {learners.length === 0 ? (
                     <div className="rounded-xl border border-dashed p-6 text-sm text-muted-foreground">
-                        TodavÃ­a no hay compras confirmadas de esta formaciÃ³n.
+                        {"Todav\u00EDa no hay compras confirmadas de esta formaci\u00F3n."}
                     </div>
                 ) : (
                     learners.map((learner) => {
