@@ -5,8 +5,9 @@ import { getCommercialAccessContext } from '@/lib/access/commercial'
 import { claimFormationRecordsByEmail } from '@/lib/formations/service'
 import { getFormationCommercialState, getFormationMemberAccessMessage } from '@/lib/formations/pricing'
 import { claimEventEntitlementsByEmail } from '@/lib/events/access'
+import type { Formation } from '@/types/database'
 
-export async function getPublicFormations() {
+export async function getPublicFormations(): Promise<Formation[]> {
     const supabase = await createClient()
 
     const { data: formations, error } = await (supabase
@@ -20,7 +21,7 @@ export async function getPublicFormations() {
         return []
     }
 
-    return formations || []
+    return (formations ?? []) as Formation[]
 }
 
 export async function getPublicFormationBySlug(slug: string) {

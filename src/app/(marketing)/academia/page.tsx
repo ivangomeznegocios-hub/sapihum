@@ -127,10 +127,8 @@ export default async function AcademiaPage() {
                         </div>
 
                         <div className="grid gap-6 lg:grid-cols-2">
-                            {formations.map((formation: any) => {
-                                const specialization = formation.specialization_code
-                                    ? getSpecializationByCode(formation.specialization_code)
-                                    : null
+                            {formations.map((formation) => {
+                                const specialization = getSpecializationByCode(formation.specialization_code)
                                 const totalHours = formatHours(formation.total_hours)
 
                                 return (

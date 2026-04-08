@@ -58,10 +58,8 @@ export default async function FormationsCatalogPage() {
                         </div>
                     ) : (
                         <div className="flex flex-col gap-10">
-                            {formations.map((formation: any) => {
-                                const specialization = formation.specialization_code
-                                    ? getSpecializationByCode(formation.specialization_code)
-                                    : null
+                            {formations.map((formation) => {
+                                const specialization = getSpecializationByCode(formation.specialization_code)
                                 const totalHours = formatHours(formation.total_hours)
 
                                 return (

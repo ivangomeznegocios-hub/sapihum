@@ -1,7 +1,7 @@
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { splitPublicCatalogEvents } from "@/lib/events/public"
-import { SPECIALIZATION_CATALOG } from "@/lib/specializations"
+import { getSpecializationByCode, SPECIALIZATION_CATALOG } from "@/lib/specializations"
 import { getUnifiedCatalogEvents } from "@/lib/supabase/queries/events"
 import { getPublicEventPath } from "@/lib/events/public"
 import { getPublicFormations } from "@/app/(marketing)/formaciones/actions"
@@ -472,10 +472,8 @@ export default async function LandingPage() {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {featuredFormations.map((formation: any) => {
-                const specialization = formation.specialization_code
-                  ? SPECIALIZATION_CATALOG[formation.specialization_code]
-                  : null
+              {featuredFormations.map((formation) => {
+                const specialization = getSpecializationByCode(formation.specialization_code)
                 const totalHours = formatHours(formation.total_hours)
 
                 return (
