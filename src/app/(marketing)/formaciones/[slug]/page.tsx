@@ -9,6 +9,7 @@ import {
     ShieldCheck,
     Clock3,
     Sparkles,
+    CalendarDays,
 } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -28,6 +29,23 @@ function formatHours(hours: number | null | undefined) {
 
 function formatCurrency(value: number | null | undefined) {
     return `$${Number(value || 0)} MXN`
+}
+
+function formatEventDate(value: string | null | undefined) {
+    if (!value) return null
+
+    return new Date(value).toLocaleDateString('es-MX', {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric',
+    })
+}
+
+function getEventTypeLabel(value: string | null | undefined) {
+    if (value === 'on_demand') return 'Grabacion'
+    if (value === 'presencial') return 'Presencial'
+    if (value === 'live') return 'En vivo'
+    return 'Modulo'
 }
 
 export default async function FormationLandingPage({ params }: { params: Promise<{ slug: string }> }) {
@@ -193,100 +211,155 @@ export default async function FormationLandingPage({ params }: { params: Promise
                 </div>
             </section>
 
-            <section className="py-20 sm:py-24">
-                <div className="mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8">
-                    <div className="mb-14 text-center">
-                        <h2 className="text-3xl font-black tracking-tight text-black sm:text-4xl">
-                            Ruta de Formacion
-                        </h2>
-                        <p className="mx-auto mt-4 max-w-2xl text-lg leading-relaxed text-neutral-500">
-                            Completa paso a paso cada uno de estos modulos para obtener tu certificacion final.
-                        </p>
+            <section className="relative overflow-hidden bg-[#050505] py-20 sm:py-24">
+                <div className="sapihum-grid-bg pointer-events-none absolute inset-0 opacity-10" />
+                <div className="pointer-events-none absolute left-0 top-0 h-[320px] w-[320px] rounded-full bg-brand-yellow/8 blur-[110px]" />
+                <div className="pointer-events-none absolute bottom-0 right-0 h-[340px] w-[340px] rounded-full bg-brand-brown/10 blur-[120px]" />
+
+                <div className="relative mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8">
+                    <div className="mb-12 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+                        <div className="max-w-3xl">
+                            <p className="mb-3 text-[10px] font-bold uppercase tracking-[0.2em] text-brand-yellow">
+                                Ruta de Formacion
+                            </p>
+                            <h2 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">
+                                Tu recorrido completo dentro del programa
+                            </h2>
+                            <p className="mt-4 max-w-2xl text-base leading-relaxed text-neutral-400 sm:text-lg">
+                                Avanza modulo por modulo con una secuencia clara. Cada paso mantiene el contexto del programa y te acerca a la certificacion final.
+                            </p>
+                        </div>
+
+                        <div className="grid gap-3 sm:grid-cols-3">
+                            <div className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-4">
+                                <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-neutral-500">Modulos</p>
+                                <p className="mt-2 text-2xl font-black text-white">{courses.length}</p>
+                            </div>
+                            <div className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-4">
+                                <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-neutral-500">Duracion</p>
+                                <p className="mt-2 text-sm font-semibold text-white">{totalHoursLabel || 'Ruta guiada'}</p>
+                            </div>
+                            <div className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-4">
+                                <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-neutral-500">Resultado</p>
+                                <p className="mt-2 text-sm font-semibold text-white">
+                                    {showsFullCertificate ? (data.full_certificate_label || 'Certificado final') : 'Acceso por modulo'}
+                                </p>
+                            </div>
+                        </div>
                     </div>
 
-                    <div className="relative space-y-8 before:absolute before:bottom-0 before:left-7 before:top-0 before:w-px before:bg-gradient-to-b before:from-transparent before:via-neutral-200 before:to-transparent md:before:left-1/2 md:before:-translate-x-1/2">
+                    <div className="relative space-y-5 before:absolute before:bottom-0 before:left-6 before:top-0 before:w-px before:bg-gradient-to-b before:from-transparent before:via-white/15 before:to-transparent md:before:left-8">
                         {courses.map((course: any, index: number) => {
                             const event = course.event
                             if (!event) return null
 
                             const hasAccess = userState.accessibleEventIds.includes(event.id) || userState.hasPurchasedBundle
+                            const eventDate = formatEventDate(event.start_time)
 
                             return (
-                                <div
-                                    key={course.id}
-                                    className="relative flex items-start gap-4 md:grid md:grid-cols-[1fr_72px_1fr] md:gap-6"
-                                >
-                                    <div className={`md:${index % 2 === 0 ? 'col-start-1' : 'col-start-3'} ${index % 2 === 0 ? '' : 'md:text-left'}`}>
-                                        <div className="rounded-2xl border bg-white p-4 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md">
-                                            <div className="flex flex-col gap-4 sm:flex-row">
-                                                <div className="relative aspect-video w-full overflow-hidden rounded-xl bg-neutral-100 sm:w-36 shrink-0">
-                                                    {event.image_url ? (
-                                                        <img
-                                                            src={event.image_url}
-                                                            alt={event.title}
-                                                            className="absolute inset-0 h-full w-full object-cover"
-                                                        />
-                                                    ) : (
-                                                        <div className="absolute inset-0 flex items-center justify-center">
-                                                            <PlayCircle className="h-8 w-8 text-neutral-300" />
-                                                        </div>
-                                                    )}
-                                                </div>
+                                <div key={course.id} className="relative grid gap-4 pl-16 md:grid-cols-[72px_minmax(0,1fr)] md:pl-0">
+                                    <div className="relative z-10 flex h-12 w-12 items-center justify-center rounded-full border border-brand-yellow/30 bg-black text-sm font-bold text-brand-yellow shadow-[0_0_30px_rgba(246,174,2,0.12)] md:mt-6 md:h-16 md:w-16">
+                                        {index + 1}
+                                    </div>
 
-                                                <div className="flex-1 space-y-2">
+                                    <article className={`overflow-hidden rounded-[28px] border transition-all duration-300 ${hasAccess ? 'border-brand-yellow/25 bg-white/[0.04]' : 'border-white/10 bg-white/[0.03]'} hover:-translate-y-0.5 hover:border-brand-yellow/20`}>
+                                        <div className="grid gap-0 lg:grid-cols-[260px_minmax(0,1fr)]">
+                                            <div className="relative min-h-[220px] overflow-hidden border-b border-white/10 bg-gradient-to-br from-brand-yellow/20 via-black to-brand-brown/30 lg:border-b-0 lg:border-r">
+                                                {event.image_url ? (
+                                                    <img
+                                                        src={event.image_url}
+                                                        alt={event.title}
+                                                        className="absolute inset-0 h-full w-full object-cover"
+                                                    />
+                                                ) : (
+                                                    <div className="absolute inset-0 flex items-center justify-center">
+                                                        <PlayCircle className="h-10 w-10 text-white/20" />
+                                                    </div>
+                                                )}
+                                                <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent" />
+                                                <div className="absolute left-4 top-4">
+                                                    <span className="inline-flex rounded-full bg-brand-yellow px-3 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-black">
+                                                        Modulo {index + 1}
+                                                    </span>
+                                                </div>
+                                            </div>
+
+                                            <div className="flex flex-col gap-5 p-5 md:p-6">
                                                 <div className="flex flex-wrap items-center gap-2">
                                                     {event.hero_badge && (
-                                                        <Badge variant="outline" className="bg-brand-yellow/10 text-xs text-brand-yellow">
+                                                        <Badge variant="outline" className="border-brand-yellow/30 bg-brand-yellow/10 text-xs text-brand-yellow">
                                                             {event.hero_badge}
                                                         </Badge>
                                                     )}
-
-                                                    {event.event_type && event.event_type !== 'course' && (
-                                                        <Badge variant="outline" className="text-xs">
-                                                            {event.event_type === 'on_demand' ? 'Grabacion' : 'Evento'}
+                                                    <Badge variant="outline" className="border-white/10 bg-white/5 text-xs text-neutral-200">
+                                                        {getEventTypeLabel(event.event_type)}
+                                                    </Badge>
+                                                    {eventDate && (
+                                                        <Badge variant="outline" className="border-white/10 bg-white/5 text-xs text-neutral-200">
+                                                            <CalendarDays className="mr-1 h-3 w-3" />
+                                                            {eventDate}
                                                         </Badge>
                                                     )}
-
                                                     {hasAccess ? (
-                                                        <Badge className="border-none bg-brand-yellow/20 text-brand-yellow hover:bg-brand-brown">
-                                                                <CheckCircle2 className="mr-1 h-3 w-3" />
-                                                                Tienes acceso
-                                                            </Badge>
-                                                        ) : (
-                                                            <Badge variant="secondary" className="text-xs font-mono">
-                                                                {formatCurrency(event.price)}
-                                                            </Badge>
-                                                        )}
-                                                    </div>
+                                                        <Badge className="border-none bg-brand-yellow/20 text-brand-yellow hover:bg-brand-yellow/20">
+                                                            <CheckCircle2 className="mr-1 h-3 w-3" />
+                                                            Tienes acceso
+                                                        </Badge>
+                                                    ) : (
+                                                        <Badge variant="secondary" className="bg-white/10 font-mono text-xs text-white">
+                                                            {formatCurrency(event.price)}
+                                                        </Badge>
+                                                    )}
+                                                </div>
 
-                                                    <h3 className="text-lg font-bold leading-tight text-black hover:underline">
-                                                        <Link href={`/eventos/${event.slug}`}>{event.title}</Link>
+                                                <div className="space-y-3">
+                                                    <h3 className="text-2xl font-bold leading-tight text-white">
+                                                        <Link href={`/eventos/${event.slug}`} className="transition-colors hover:text-brand-yellow">
+                                                            {event.title}
+                                                        </Link>
                                                     </h3>
 
                                                     {event.subtitle && (
-                                                        <p className="line-clamp-2 text-sm leading-relaxed text-neutral-500">
+                                                        <p className="line-clamp-2 text-sm leading-relaxed text-neutral-400">
                                                             {event.subtitle}
                                                         </p>
                                                     )}
                                                 </div>
-                                            </div>
 
-                                            {!hasAccess && !userState.hasPurchasedBundle && (
-                                                <div className="mt-4 flex justify-end border-t pt-4">
-                                                    <Button variant="ghost" size="sm" asChild className="text-neutral-600 hover:text-primary">
-                                                        <Link href={`/eventos/${event.slug}`}>
-                                                            Ver detalle individual
-                                                            <ArrowRight className="ml-2 h-4 w-4" />
-                                                        </Link>
-                                                    </Button>
+                                                <div className="grid gap-3 sm:grid-cols-2">
+                                                    <div className="rounded-2xl border border-white/10 bg-black/25 p-4">
+                                                        <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-neutral-500">Estado dentro de tu ruta</p>
+                                                        <p className="mt-2 text-sm font-medium text-white">
+                                                            {hasAccess ? 'Incluido en tu acceso actual' : 'Disponible por separado o dentro del bundle'}
+                                                        </p>
+                                                    </div>
+                                                    <div className="rounded-2xl border border-white/10 bg-black/25 p-4">
+                                                        <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-neutral-500">Tipo de avance</p>
+                                                        <p className="mt-2 text-sm font-medium text-white">
+                                                            {course.is_required ? 'Modulo requerido para completar la ruta' : 'Modulo complementario'}
+                                                        </p>
+                                                    </div>
                                                 </div>
-                                            )}
-                                        </div>
-                                    </div>
 
-                                    <div className="relative z-10 flex h-14 w-14 shrink-0 items-center justify-center rounded-full border-4 border-white bg-white shadow md:col-start-2 md:mx-auto">
-                                        <span className="font-bold text-neutral-400">{index + 1}</span>
-                                    </div>
+                                                <div className="flex flex-col gap-3 border-t border-white/10 pt-4 sm:flex-row sm:items-center sm:justify-between">
+                                                    <p className="text-sm leading-relaxed text-neutral-400">
+                                                        {hasAccess
+                                                            ? 'Ya puedes entrar a este modulo desde tu acceso o desde el bundle completo.'
+                                                            : 'Puedes revisar este modulo por separado o activarlo junto con toda la formacion.'}
+                                                    </p>
+
+                                                    {!hasAccess && !userState.hasPurchasedBundle && (
+                                                        <Button variant="outline" size="sm" asChild className="shrink-0">
+                                                            <Link href={`/eventos/${event.slug}`}>
+                                                                Ver detalle individual
+                                                                <ArrowRight className="ml-2 h-4 w-4" />
+                                                            </Link>
+                                                        </Button>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </article>
                                 </div>
                             )
                         })}
