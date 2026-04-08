@@ -7,6 +7,7 @@ import { AnalyticsProvider } from '@/components/providers/analytics-provider'
 import { CookieConsentBanner } from '@/components/gdpr/cookie-consent-banner'
 import { DataLayerProvider } from '@/components/providers/data-layer-provider'
 import { brandFullName, brandName, brandShortDescription } from '@/lib/brand'
+import { getAppUrl } from '@/lib/config/app-url'
 import './globals.css'
 
 const manrope = Manrope({
@@ -27,6 +28,7 @@ export const viewport: Viewport = {
 }
 
 export const metadata: Metadata = {
+    metadataBase: new URL(getAppUrl()),
     title: brandFullName,
     description: brandShortDescription,
     appleWebApp: {

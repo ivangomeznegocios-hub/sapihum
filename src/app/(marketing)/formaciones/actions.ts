@@ -7,6 +7,53 @@ import { getFormationCommercialState, getFormationMemberAccessMessage } from '@/
 import { claimEventEntitlementsByEmail } from '@/lib/events/access'
 import type { Formation } from '@/types/database'
 
+async function getFormationRecord(supabase: any, slug: string) {
+    const { data: formation, error } = await (supabase
+        .from('formations') as any)
+        .select('*')
+        .eq('slug', slug)
+        .eq('status', 'active')
+        .single()
+
+    if (error || !formation) {
+        return null
+    }
+
+    return formation as Formation
+}
+
+async function getFormationCourses(supabase: any, formationId: string) {
+    const { data: courses } = await (supabase
+        .from('formation_courses') as any)
+        .select(`
+            id,
+            display_order,
+            event_id,
+            is_required,
+            event:events(
+                id, slug, title, subtitle, image_url, status, price, member_price, start_time, category, event_type, hero_badge
+            )
+        `)
+        .eq('formation_id', formationId)
+        .order('display_order', { ascending: true })
+
+    return courses || []
+}
+
+async function getPublicFormationSeoData(supabase: any, slug: string) {
+    const formation = await getFormationRecord(supabase, slug)
+    if (!formation) {
+        return null
+    }
+
+    const courses = await getFormationCourses(supabase, formation.id)
+
+    return {
+        ...formation,
+        courses,
+    }
+}
+
 export async function getPublicFormations(): Promise<Formation[]> {
     const supabase = await createClient()
 
@@ -24,34 +71,20 @@ export async function getPublicFormations(): Promise<Formation[]> {
     return (formations ?? []) as Formation[]
 }
 
+export async function getPublicFormationSeoBySlug(slug: string) {
+    const supabase = await createClient()
+    return getPublicFormationSeoData(supabase, slug)
+}
+
 export async function getPublicFormationBySlug(slug: string) {
     const supabase = await createClient()
+    const data = await getPublicFormationSeoData(supabase, slug)
 
-    const { data: formation, error } = await (supabase
-        .from('formations') as any)
-        .select('*')
-        .eq('slug', slug)
-        .eq('status', 'active')
-        .single()
-
-    if (error || !formation) {
+    if (!data) {
         return null
     }
 
-    const { data: courses } = await (supabase
-        .from('formation_courses') as any)
-        .select(`
-            id,
-            display_order,
-            event_id,
-            is_required,
-            event:events(
-                id, slug, title, subtitle, image_url, status, price, member_price, start_time, category, event_type, hero_badge
-            )
-        `)
-        .eq('formation_id', formation.id)
-        .order('display_order', { ascending: true })
-
+    const { courses, ...formation } = data
     let hasPurchasedBundle = false
     let accessibleEventIds: string[] = []
     let hasActiveMembership = false
@@ -118,7 +151,7 @@ export async function getPublicFormationBySlug(slug: string) {
         hasPurchasedBundle = Boolean(bundlePurchase)
 
         if (!hasPurchasedBundle) {
-            const courseEventIds = (courses ?? []).map((course: any) => course.event?.id).filter(Boolean)
+            const courseEventIds = courses.map((course: any) => course.event?.id).filter(Boolean)
             if (courseEventIds.length > 0) {
                 const { data: accessData } = await (supabase
                     .from('event_entitlements') as any)
@@ -139,7 +172,7 @@ export async function getPublicFormationBySlug(slug: string) {
 
     return {
         ...formation,
-        courses: courses || [],
+        courses,
         pricing: {
             ...pricingState,
             memberMessage: getFormationMemberAccessMessage(formation),

@@ -6,8 +6,11 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { getEffectiveEventPriceForProfile, getEventMemberAccessMessage, isEventIncludedForMatchingSpecialization } from '@/lib/events/pricing'
 import { getDefaultPublicCtaLabel, getEventTypeLabel, getPublicEventPath } from '@/lib/events/public'
+import { brandName } from '@/lib/brand'
 import { getSpecializationByCode } from '@/lib/specializations'
 import { PublicAccessCta } from './public-access-cta'
+
+const publicAppUrl = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/+$/, '') ?? ''
 
 function formatEventDate(date: string) {
     return new Intl.DateTimeFormat('es-MX', {
@@ -53,10 +56,58 @@ function buildFaq(event: any) {
     return items
 }
 
-function buildStructuredData(event: any) {
+function buildAbsoluteUrl(pathname: string) {
+    return publicAppUrl ? `${publicAppUrl}${pathname}` : pathname
+}
+
+function getEventStatusUrl(status: string | null | undefined) {
+    if (status === 'live') return 'https://schema.org/EventScheduled'
+    if (status === 'completed') return 'https://schema.org/EventCompleted'
+    if (status === 'cancelled') return 'https://schema.org/EventCancelled'
+    return 'https://schema.org/EventScheduled'
+}
+
+function buildEventLocation(event: any, eventUrl: string) {
+    if (event.location && event.meeting_link) {
+        return [
+            {
+                '@type': 'Place',
+                name: event.location,
+                address: event.location,
+            },
+            {
+                '@type': 'VirtualLocation',
+                url: event.meeting_link,
+            },
+        ]
+    }
+
+    if (event.location) {
+        return {
+            '@type': 'Place',
+            name: event.location,
+            address: event.location,
+        }
+    }
+
+    return {
+        '@type': 'VirtualLocation',
+        url: event.meeting_link || eventUrl,
+    }
+}
+
+function buildStructuredData(event: any, faqItems: { question: string; answer: string }[]) {
     const schemaType = event.event_type === 'course'
         ? 'Course'
         : 'Event'
+    const eventPath = getPublicEventPath(event)
+    const eventUrl = buildAbsoluteUrl(eventPath)
+    const isFull = event.max_attendees ? (event.attendee_count || 0) >= event.max_attendees : false
+    const speakers = Array.isArray(event.speakers)
+        ? event.speakers
+            .map((item: any) => item?.speaker?.profile?.full_name || item?.speaker?.headline)
+            .filter(Boolean)
+        : []
 
     const base: Record<string, any> = {
         '@context': 'https://schema.org',
@@ -64,22 +115,109 @@ function buildStructuredData(event: any) {
         name: event.seo_title || event.title,
         description: event.seo_description || event.og_description || event.description || event.title,
         image: event.image_url ? [event.image_url] : undefined,
+        url: eventUrl,
+        organizer: {
+            '@type': 'Organization',
+            name: brandName,
+            url: buildAbsoluteUrl('/'),
+        },
     }
 
     if (schemaType === 'Event') {
         base.startDate = event.start_time
         base.endDate = event.end_time || undefined
-        base.eventAttendanceMode = event.location ? 'https://schema.org/MixedEventAttendanceMode' : 'https://schema.org/OnlineEventAttendanceMode'
-        base.location = event.location || 'Online'
-        base.offers = { '@type': 'Offer', price: Number(event.price || 0), priceCurrency: 'MXN', availability: 'https://schema.org/InStock' }
+        base.eventAttendanceMode = event.location && event.meeting_link
+            ? 'https://schema.org/MixedEventAttendanceMode'
+            : event.location
+                ? 'https://schema.org/OfflineEventAttendanceMode'
+                : 'https://schema.org/OnlineEventAttendanceMode'
+        base.eventStatus = getEventStatusUrl(event.status)
+        base.location = buildEventLocation(event, eventUrl)
+        base.offers = {
+            '@type': 'Offer',
+            url: eventUrl,
+            price: Number(event.price || 0),
+            priceCurrency: 'MXN',
+            availability: isFull ? 'https://schema.org/SoldOut' : 'https://schema.org/InStock',
+        }
+        base.isAccessibleForFree = Number(event.price || 0) <= 0
+        if (speakers.length > 0) {
+            base.performer = speakers.map((name: string) => ({
+                '@type': 'Person',
+                name,
+            }))
+        }
     }
 
     if (schemaType === 'Course') {
-        base.provider = { '@type': 'Organization', name: 'SAPIHUM' }
-        base.educationalCredentialAwarded = 'Formacion continua'
+        base.provider = {
+            '@type': 'Organization',
+            name: brandName,
+            url: buildAbsoluteUrl('/'),
+        }
+        base.educationalCredentialAwarded = event.certificate_type || 'Formacion continua'
+        base.courseMode = event.location ? 'blended' : 'online'
+        base.hasCourseInstance = [{
+            '@type': 'CourseInstance',
+            courseMode: event.location ? 'blended' : 'online',
+            startDate: event.start_time,
+            endDate: event.end_time || undefined,
+            location: buildEventLocation(event, eventUrl),
+            instructor: speakers.map((name: string) => ({
+                '@type': 'Person',
+                name,
+            })),
+            offers: {
+                '@type': 'Offer',
+                url: eventUrl,
+                price: Number(event.price || 0),
+                priceCurrency: 'MXN',
+                availability: isFull ? 'https://schema.org/SoldOut' : 'https://schema.org/InStock',
+            },
+        }]
     }
 
-    return JSON.stringify(base)
+    const breadcrumb = {
+        '@context': 'https://schema.org',
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+            {
+                '@type': 'ListItem',
+                position: 1,
+                name: 'Academia',
+                item: buildAbsoluteUrl('/academia'),
+            },
+            {
+                '@type': 'ListItem',
+                position: 2,
+                name: 'Eventos',
+                item: buildAbsoluteUrl('/eventos'),
+            },
+            {
+                '@type': 'ListItem',
+                position: 3,
+                name: event.title,
+                item: eventUrl,
+            },
+        ],
+    }
+
+    const faq = faqItems.length > 0
+        ? {
+            '@context': 'https://schema.org',
+            '@type': 'FAQPage',
+            mainEntity: faqItems.map((item) => ({
+                '@type': 'Question',
+                name: item.question,
+                acceptedAnswer: {
+                    '@type': 'Answer',
+                    text: item.answer,
+                },
+            })),
+        }
+        : null
+
+    return JSON.stringify([base, breadcrumb, faq].filter(Boolean)).replace(/</g, '\\u003c')
 }
 
 function getSpeakerImage(speaker: any) {
@@ -194,7 +332,7 @@ export function PublicEventLanding({
 
     return (
         <div className="space-y-14 pb-20">
-            <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: buildStructuredData(event) }} />
+            <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: buildStructuredData(event, faqItems) }} />
 
             {/* -- HERO -- */}
             <section className="relative overflow-hidden rounded-3xl">

@@ -12,7 +12,17 @@ import { getPublicFormations } from '@/app/(marketing)/formaciones/actions'
 export const metadata: Metadata = {
     title: 'Academia SAPIHUM | Formacion Continua en Psicologia',
     description: 'Explora el catalogo completo de formacion continua: encuentros en vivo, talleres y supervision clinica para profesionales de la psicologia.',
+    alternates: {
+        canonical: '/academia',
+    },
     openGraph: {
+        title: 'Academia SAPIHUM | Formacion Continua en Psicologia',
+        description: 'Encuentros en vivo, talleres y supervision clinica. Desarrollo profesional con respaldo cientifico.',
+        url: '/academia',
+        type: 'website',
+    },
+    twitter: {
+        card: 'summary_large_image',
         title: 'Academia SAPIHUM | Formacion Continua en Psicologia',
         description: 'Encuentros en vivo, talleres y supervision clinica. Desarrollo profesional con respaldo cientifico.',
     },

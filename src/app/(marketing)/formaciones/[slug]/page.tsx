@@ -1,3 +1,4 @@
+import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -14,13 +15,13 @@ import {
 } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { getPublicFormationBySlug } from '../actions'
+import { getPublicFormationBySlug, getPublicFormationSeoBySlug } from '../actions'
 import { CheckoutButton } from '@/components/payments/CheckoutButton'
+import { brandFullName, brandName } from '@/lib/brand'
+import { getAppUrl } from '@/lib/config/app-url'
 import { getSpecializationByCode } from '@/lib/specializations'
 
-export const metadata = {
-    title: 'Formacion Completa | SAPIHUM',
-}
+const appUrl = getAppUrl()
 
 function formatHours(hours: number | null | undefined) {
     const resolved = Number(hours || 0)
@@ -49,6 +50,187 @@ function getEventTypeLabel(value: string | null | undefined) {
     return 'Modulo'
 }
 
+function truncateText(value: string, maxLength = 160) {
+    const normalized = value.trim().replace(/\s+/g, ' ')
+    if (normalized.length <= maxLength) return normalized
+
+    const truncated = normalized.slice(0, maxLength - 1)
+    const lastSpace = truncated.lastIndexOf(' ')
+    return `${(lastSpace > 0 ? truncated.slice(0, lastSpace) : truncated).trim()}...`
+}
+
+function buildFormationPath(slug: string) {
+    return `/formaciones/${slug}`
+}
+
+function buildFormationDescription(data: any, specializationName: string | null) {
+    const summary = data.subtitle || data.description || 'Formacion profesional en psicologia.'
+    const modules = data.courses?.length ? `${data.courses.length} modulos` : null
+    const totalHours = formatHours(data.total_hours)
+    const specialization = specializationName ? `enfocada en ${specializationName}` : null
+
+    return truncateText(
+        [summary, [modules, totalHours, specialization].filter(Boolean).join(', ')]
+            .filter(Boolean)
+            .join('. ')
+    )
+}
+
+function buildFormationSeoTitle(data: any) {
+    return `${data.title} | SAPIHUM`
+}
+
+function buildIsoDuration(hours: number | null | undefined) {
+    const resolved = Number(hours || 0)
+    if (!resolved) return undefined
+
+    if (Number.isInteger(resolved)) {
+        return `PT${resolved}H`
+    }
+
+    const wholeHours = Math.floor(resolved)
+    const minutes = Math.round((resolved - wholeHours) * 60)
+
+    if (!wholeHours) {
+        return `PT${minutes}M`
+    }
+
+    if (!minutes) {
+        return `PT${wholeHours}H`
+    }
+
+    return `PT${wholeHours}H${minutes}M`
+}
+
+function buildFormationStructuredData({
+    data,
+    description,
+    specializationName,
+}: {
+    data: any
+    description: string
+    specializationName: string | null
+}) {
+    const formationUrl = `${appUrl}${buildFormationPath(data.slug)}`
+    const modules = Array.isArray(data.courses)
+        ? data.courses.filter((course: any) => course?.event?.slug)
+        : []
+
+    const courseSchema = {
+        '@context': 'https://schema.org',
+        '@type': 'Course',
+        name: data.title,
+        description,
+        url: formationUrl,
+        image: data.image_url ? [data.image_url] : undefined,
+        provider: {
+            '@type': 'Organization',
+            name: brandName,
+            url: appUrl,
+        },
+        courseMode: 'online',
+        inLanguage: 'es-MX',
+        timeRequired: buildIsoDuration(data.total_hours),
+        educationalCredentialAwarded:
+            data.full_certificate_type && data.full_certificate_type !== 'none'
+                ? data.full_certificate_label || 'Certificado final'
+                : undefined,
+        offers: {
+            '@type': 'Offer',
+            url: formationUrl,
+            price: Number(data.bundle_price || 0),
+            priceCurrency: 'MXN',
+            availability: 'https://schema.org/InStock',
+        },
+        isAccessibleForFree: Number(data.bundle_price || 0) <= 0,
+        about: specializationName || undefined,
+    }
+
+    const breadcrumbSchema = {
+        '@context': 'https://schema.org',
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+            {
+                '@type': 'ListItem',
+                position: 1,
+                name: 'Academia',
+                item: `${appUrl}/academia`,
+            },
+            {
+                '@type': 'ListItem',
+                position: 2,
+                name: 'Formaciones',
+                item: `${appUrl}/formaciones`,
+            },
+            {
+                '@type': 'ListItem',
+                position: 3,
+                name: data.title,
+                item: formationUrl,
+            },
+        ],
+    }
+
+    const moduleListSchema = modules.length > 0
+        ? {
+            '@context': 'https://schema.org',
+            '@type': 'ItemList',
+            name: `Modulos de ${data.title}`,
+            itemListElement: modules.map((course: any, index: number) => ({
+                '@type': 'ListItem',
+                position: index + 1,
+                name: course.event.title,
+                url: `${appUrl}/eventos/${course.event.slug}`,
+            })),
+        }
+        : null
+
+    return JSON.stringify(
+        [courseSchema, breadcrumbSchema, moduleListSchema].filter(Boolean)
+    ).replace(/</g, '\\u003c')
+}
+
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+    const { slug } = await params
+    const data = await getPublicFormationSeoBySlug(slug)
+
+    if (!data) {
+        return { title: 'Formacion no encontrada | SAPIHUM' }
+    }
+
+    const specialization = getSpecializationByCode(data.specialization_code)
+    const description = buildFormationDescription(data, specialization?.name ?? null)
+    const title = buildFormationSeoTitle(data)
+    const canonical = buildFormationPath(data.slug)
+
+    return {
+        title,
+        description,
+        openGraph: {
+            title,
+            description,
+            url: canonical,
+            siteName: brandFullName,
+            type: 'website',
+            images: data.image_url ? [{
+                url: data.image_url,
+                width: 1200,
+                height: 630,
+                alt: data.title,
+            }] : undefined,
+        },
+        twitter: {
+            card: 'summary_large_image',
+            title,
+            description,
+            images: data.image_url ? [data.image_url] : undefined,
+        },
+        alternates: {
+            canonical,
+        },
+    }
+}
+
 export default async function FormationLandingPage({ params }: { params: Promise<{ slug: string }> }) {
     const { slug } = await params
     const data = await getPublicFormationBySlug(slug)
@@ -63,12 +245,19 @@ export default async function FormationLandingPage({ params }: { params: Promise
     const totalHoursLabel = formatHours(data.total_hours)
     const showsFullCertificate = data.full_certificate_type && data.full_certificate_type !== 'none'
     const specialization = getSpecializationByCode(data.specialization_code)
+    const seoDescription = buildFormationDescription(data, specialization?.name ?? null)
+    const structuredData = buildFormationStructuredData({
+        data,
+        description: seoDescription,
+        specializationName: specialization?.name ?? null,
+    })
     const materialLinks = Array.isArray(data.material_links)
         ? data.material_links.filter((item: any) => item?.title && item?.url)
         : []
 
     return (
         <div className="min-h-screen bg-white">
+            <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: structuredData }} />
             <section className="relative overflow-hidden bg-black py-24 sm:py-28">
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(246,174,2,0.16),_transparent_34%),radial-gradient(circle_at_bottom_right,_rgba(122,86,2,0.22),_transparent_28%)]" />
                 <div className="absolute inset-0 bg-[linear-gradient(120deg,rgba(10,10,10,0.94),rgba(0,0,0,0.82))]" />

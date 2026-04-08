@@ -1,3 +1,4 @@
+import type { Metadata } from 'next'
 import Link from 'next/link'
 import Image from 'next/image'
 import type { Formation } from '@/types/database'
@@ -7,9 +8,25 @@ import { Badge } from '@/components/ui/badge'
 import { getPublicFormations } from './actions'
 import { getSpecializationByCode } from '@/lib/specializations'
 
-export const metadata = {
+const formacionesDescription = 'Rutas de formacion profesional integral en psicologia clinica.'
+
+export const metadata: Metadata = {
     title: 'Formaciones Completas | SAPIHUM',
-    description: 'Rutas de formacion profesional integral en psicologia clinica.',
+    description: formacionesDescription,
+    alternates: {
+        canonical: '/formaciones',
+    },
+    openGraph: {
+        title: 'Formaciones Completas | SAPIHUM',
+        description: formacionesDescription,
+        url: '/formaciones',
+        type: 'website',
+    },
+    twitter: {
+        card: 'summary_large_image',
+        title: 'Formaciones Completas | SAPIHUM',
+        description: formacionesDescription,
+    },
 }
 
 function formatCurrency(value: number | null | undefined) {

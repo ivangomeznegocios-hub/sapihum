@@ -8,9 +8,13 @@ export default function robots(): MetadataRoute.Robots {
     rules: {
       userAgent: '*',
       allow: [
+        '/',
+        '/academia/',
+        '/eventos/',
+        '/formaciones/',
         '/blog/',
         '/recursos/',
-        '/casos-de-exito/'
+        '/casos-de-exito/',
       ],
       disallow: [
         '/auth/',
@@ -18,9 +22,12 @@ export default function robots(): MetadataRoute.Robots {
         '/lp/',
         '/legal/',
         '/gracias',
-        '/api/' // Added to prevent indexing of internal APIs
+        '/api/',
+        '/eventos/*/embed',
+        '/compras/',
       ],
     },
+    host: appUrl,
     sitemap: `${appUrl}/sitemap.xml`,
   }
 }
