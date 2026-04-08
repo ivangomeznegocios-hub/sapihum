@@ -388,7 +388,7 @@ export function PricingContent({
             <CardHeader className="pb-4">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div className="flex items-center gap-3">
-                  <div className="flex items-center justify-center h-12 w-12 rounded-xl bg-brand-yellow/15 sapihum-glow-cta">
+                  <div className="flex items-center justify-center h-12 w-12 rounded-xl bg-brand-yellow/15">
                     <Crown className="h-6 w-6 text-brand-yellow dark:text-brand-yellow" />
                   </div>
                   <div>

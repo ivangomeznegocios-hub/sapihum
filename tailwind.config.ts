@@ -11,6 +11,7 @@ const config: Config = {
         extend: {
             fontFamily: {
                 sans: ['var(--font-manrope)', 'Manrope', 'system-ui', '-apple-system', 'sans-serif'],
+                serif: ['var(--font-playfair)', 'Playfair Display', 'Georgia', 'serif'],
             },
             colors: {
                 border: 'var(--border)',
@@ -73,7 +74,8 @@ const config: Config = {
             boxShadow: {
                 'brand-base': '0 4px 12px rgba(0, 0, 0, 0.08)',
                 'brand-hover': '0 4px 12px rgba(0, 0, 0, 0.15)',
-                'brand-glow': '0 4px 12px rgba(246, 174, 2, 0.15)',
+                'brand-glow': '0 2px 8px rgba(246, 174, 2, 0.08)',
+                'brand-luxury': '0 32px 80px rgba(0, 0, 0, 0.4)',
             },
             keyframes: {
                 'accordion-down': {

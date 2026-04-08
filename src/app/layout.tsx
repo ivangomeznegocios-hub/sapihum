@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next'
-import { Manrope } from 'next/font/google'
+import { Manrope, Playfair_Display } from 'next/font/google'
 import { Suspense } from 'react'
 import { ThemeProvider } from '@/components/theme-provider'
 import { OneSignalSetup } from '@/components/providers/onesignal-provider'
@@ -13,6 +13,13 @@ const manrope = Manrope({
     variable: '--font-manrope',
     subsets: ['latin'],
     weight: ['400', '500', '600', '700', '800'],
+})
+
+const playfair = Playfair_Display({
+    variable: '--font-playfair',
+    subsets: ['latin'],
+    weight: ['400', '700'],
+    style: ['normal', 'italic'],
 })
 
 export const viewport: Viewport = {
@@ -39,7 +46,7 @@ export default function RootLayout({
 }>) {
     return (
         <html lang="es" suppressHydrationWarning>
-            <body className={`${manrope.variable} antialiased`}>
+            <body className={`${manrope.variable} ${playfair.variable} antialiased`}>
                 <DataLayerProvider />
                 <ThemeProvider
                     attribute="class"

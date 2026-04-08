@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Prueba de Colores Neutros - SAPIHUM Home</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'neutro-base': '#F7F6F3', // Blanco roto/cálido (Fondo principal)
+            'neutro-dark': '#1C1B1A', // Negro suave/carbón (Secciones oscuras)
+            'neutro-text': '#2A2927', // Texto principal (Gris muy oscuro, no negro puro)
+            'neutro-muted': '#7B7A77', // Texto secundario/descriptivo
+            'neutro-accent': '#CBA76B', // Oro/Mostaza sutil (En lugar del amarillo brillante)
+            'neutro-border': '#E4E2DC', // Bordes suaves
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* Estilos limpios y neutros, sin resplandores exagerados ni efectos "IA" */
+    body {
+      background-color: theme('colors.neutro-base');
+      color: theme('colors.neutro-text');
+      font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+    
+    .bg-dark-section {
+      background-color: theme('colors.neutro-dark');
+      color: theme('colors.neutro-base');
+    }
+    
+    .text-title-dark {
+      color: theme('colors.neutro-base');
+    }
+
+    .btn-primary {
+      background-color: theme('colors.neutro-dark');
+      color: theme('colors.neutro-base');
+      border: 1px solid theme('colors.neutro-dark');
+      transition: all 0.2s ease-in-out;
+    }
+    .btn-primary:hover {
+      background-color: theme('colors.neutro-text');
+      transform: translateY(-1px);
+    }
+    
+    .btn-outline {
+      background-color: transparent;
+      border: 1px solid theme('colors.neutro-text');
+      color: theme('colors.neutro-text');
+      transition: all 0.2s ease-in-out;
+    }
+    .btn-outline:hover {
+      background-color: theme('colors.neutro-border');
+    }
+
+    .badge-soft {
+      background-color: rgba(203, 167, 107, 0.15); /* Accent al 15% */
+      border: 1px solid rgba(203, 167, 107, 0.3);
+      color: #A38048; /* Accent oscurecido para texto */
+    }
+
+    .card-clean {
+      background-color: #FFFFFF;
+      border: 1px solid theme('colors.neutro-border');
+      border-radius: 8px;
+      transition: all 0.2s ease;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+    }
+    .card-clean:hover {
+      box-shadow: 0 10px 30px rgba(0,0,0,0.06);
+      border-color: rgba(203, 167, 107, 0.4);
+    }
+
+    /* Fondo muy sutil y orgánico para el Hero, sin gradientes fuertes */
+    .hero-bg {
+      background: radial-gradient(circle at 50% 0%, #FFFFFF 0%, theme('colors.neutro-base') 70%);
+    }
+  </style>
+</head>
+<body class="flex flex-col items-center flex-1 w-full m-0 p-0">
+
+  <!-- 1. HERO LIMPIO Y NEUTRO -->
+  <section class="relative w-full overflow-hidden hero-bg border-b border-neutro-border">
+    <div class="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-24 md:py-32 lg:py-40 text-center flex flex-col items-center">
+      
+      <!-- Badge Sobrio -->
+      <div class="inline-flex items-center gap-2 rounded-full badge-soft px-4 py-1.5 text-xs font-semibold uppercase tracking-wider mb-8">
+        Sistemas Avanzados de Psicología e Investigación Humana
+      </div>
+
+      <!-- H1 -->
+      <h1 class="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight leading-[1.1] text-neutro-text">
+        La comunidad profesional para <br/>
+        psicólogos que quieren
+        <span class="relative whitespace-nowrap text-neutro-accent ml-2">
+          elevar su nivel.
+        </span>
+      </h1>
+
+      <!-- Subtitle -->
+      <p class="mt-8 text-lg font-medium text-neutro-muted max-w-3xl leading-relaxed">
+        Especializaciones, formación continua, investigación aplicada, herramientas profesionales y una red de colegas que entienden hacia dónde debe evolucionar la psicología.
+      </p>
+
+      <!-- CTA -->
+      <div class="mt-12 flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
+        <button class="btn-primary w-full sm:w-auto h-12 px-8 text-sm font-semibold rounded-md shadow-sm">
+          Explorar Especialidades
+        </button>
+        <button class="btn-outline w-full sm:w-auto h-12 px-8 text-sm font-semibold rounded-md">
+          Conocer SAPIHUM
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2. CREDIBILIDAD BÁSICA -->
+  <section class="w-full border-b border-neutro-border bg-white py-6">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex flex-wrap items-center justify-center gap-x-12 gap-y-4">
+      <div class="flex items-center text-sm font-medium text-neutro-muted"><span class="text-neutro-accent mr-2 font-bold">✓</span> Especializaciones</div>
+      <div class="flex items-center text-sm font-medium text-neutro-muted"><span class="text-neutro-accent mr-2 font-bold">✓</span> Formación continua</div>
+      <div class="flex items-center text-sm font-medium text-neutro-muted"><span class="text-neutro-accent mr-2 font-bold">✓</span> Comunidad</div>
+      <div class="flex items-center text-sm font-medium text-neutro-muted"><span class="text-neutro-accent mr-2 font-bold">✓</span> Herramientas</div>
+    </div>
+  </section>
+
+  <!-- 3. QUE ES SAPIHUM -->
+  <section class="w-full py-24 bg-neutro-base">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-center max-w-3xl mx-auto">
+      <p class="text-xs font-bold text-neutro-accent uppercase tracking-widest mb-3">El Ecosistema</p>
+      <h2 class="text-3xl md:text-4xl font-bold tracking-tight text-neutro-text mb-6">Qué es SAPIHUM</h2>
+      <p class="text-lg text-neutro-muted leading-relaxed">
+        SAPIHUM es un ecosistema profesional en línea para psicólogos que buscan crecer con <strong class="text-neutro-text font-semibold">mayor profundidad, estructura y respaldo</strong>. Integramos todas las piezas del rompecabezas profesional en un solo lugar.
+      </p>
+    </div>
+  </section>
+
+  <!-- 4. QUE OBTIENES DENTRO (Sección Oscura Neutra) -->
+  <section class="w-full py-24 bg-dark-section">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-16">
+        <h2 class="text-3xl md:text-4xl font-bold tracking-tight text-title-dark mb-4">Qué obtienes dentro de tu membresía</h2>
+        <p class="text-[#A3A19E] text-lg">Más allá de la teoría, construimos el entorno completo para tu práctica.</p>
+      </div>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+        <!-- Item 1 -->
+        <div class="flex gap-5">
+          <div class="shrink-0 h-10 w-10 mt-1 flex items-center justify-center text-neutro-accent">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+          </div>
+          <div>
+            <h3 class="text-lg font-semibold mb-2 text-title-dark">Actualización Constante</h3>
+            <p class="text-[#A3A19E] text-sm leading-relaxed">Conocimiento vigente y respaldado científicamente para tomar mejores decisiones clínicas.</p>
+          </div>
+        </div>
+        <!-- Item 2 -->
+        <div class="flex gap-5">
+          <div class="shrink-0 h-10 w-10 mt-1 flex items-center justify-center text-neutro-accent">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+          </div>
+          <div>
+            <h3 class="text-lg font-semibold mb-2 text-title-dark">Especialización con Criterio</h3>
+            <p class="text-[#A3A19E] text-sm leading-relaxed">12 ramas de la psicología estructuradas para llevarte al nivel experto y destacar.</p>
+          </div>
+        </div>
+        <!-- Item 3 -->
+        <div class="flex gap-5">
+          <div class="shrink-0 h-10 w-10 mt-1 flex items-center justify-center text-neutro-accent">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+          </div>
+          <div>
+            <h3 class="text-lg font-semibold mb-2 text-title-dark">Comunidad Activa</h3>
+            <p class="text-[#A3A19E] text-sm leading-relaxed">Intercambio, supervisión y apoyo entre colegas de alto nivel profesional.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5. ESPECIALIDADES (Cards sobrias) -->
+  <section class="w-full py-24 bg-white">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="max-w-3xl mb-14">
+        <h2 class="text-3xl font-bold tracking-tight mb-4 text-neutro-text">
+          Áreas de <span class="text-neutro-accent">especialización</span>
+        </h2>
+        <p class="text-neutro-muted text-lg">Catálogo diseñado con rigor institucional.</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <!-- Card 1 -->
+        <div class="card-clean p-8 flex flex-col items-start cursor-pointer group">
+          <div class="flex items-center justify-center w-12 h-12 rounded-full bg-neutro-base mb-6 text-xl">🧠</div>
+          <h3 class="text-lg font-semibold mb-2 text-neutro-text group-hover:text-neutro-accent transition-colors">Psicología Clínica</h3>
+          <p class="text-sm text-neutro-muted mb-6 leading-relaxed flex-1">Intervención y abordaje terapéutico basado en evidencia actual.</p>
+          <div class="text-xs font-semibold uppercase tracking-wider text-neutro-muted group-hover:text-neutro-text transition-colors">Ver Detalles &rarr;</div>
+        </div>
+        <!-- Card 2 -->
+        <div class="card-clean p-8 flex flex-col items-start cursor-pointer group">
+          <div class="flex items-center justify-center w-12 h-12 rounded-full bg-neutro-base mb-6 text-xl">👥</div>
+          <h3 class="text-lg font-semibold mb-2 text-neutro-text group-hover:text-neutro-accent transition-colors">Organizacional</h3>
+          <p class="text-sm text-neutro-muted mb-6 leading-relaxed flex-1">Capital humano, clima y desarrollo de talento corporativo.</p>
+          <div class="text-xs font-semibold uppercase tracking-wider text-neutro-muted group-hover:text-neutro-text transition-colors">Ver Detalles &rarr;</div>
+        </div>
+        <!-- Card 3 -->
+        <div class="card-clean p-8 flex flex-col items-start cursor-pointer group">
+          <div class="flex items-center justify-center w-12 h-12 rounded-full bg-neutro-base mb-6 text-xl">⚡</div>
+          <h3 class="text-lg font-semibold mb-2 text-neutro-text group-hover:text-neutro-accent transition-colors">Neuropsicología</h3>
+          <p class="text-sm text-neutro-muted mb-6 leading-relaxed flex-1">Evaluación y rehabilitación de funciones cognitivas complejas.</p>
+          <div class="text-xs font-semibold uppercase tracking-wider text-neutro-muted group-hover:text-neutro-text transition-colors">Ver Detalles &rarr;</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6. FINAL CTA (Diseño estructurado y minimalista) -->
+  <section class="w-full py-24 bg-neutro-base border-t border-neutro-border text-center">
+    <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
+      <h2 class="text-3xl md:text-4xl font-bold tracking-tight leading-tight text-neutro-text mb-6">
+        El perfil profesional necesita <br/> <span class="text-neutro-accent">cada vez más preparación.</span>
+      </h2>
+      <p class="text-neutro-muted text-lg mb-10">Únete a la red que te entregará las herramientas, la estructura y el crecimiento continuo.</p>
+      
+      <div class="flex flex-col sm:flex-row gap-4 justify-center">
+        <button class="btn-primary h-12 px-10 text-sm font-semibold rounded-md shadow-sm">
+          Unirme a SAPIHUM
+        </button>
+        <button class="btn-outline h-12 px-10 text-sm font-semibold rounded-md bg-white">
+          Saber Más
+        </button>
+      </div>
+    </div>
+  </section>
+
+</body>
+</html>

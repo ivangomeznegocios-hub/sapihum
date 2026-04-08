@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Prueba de Colores - SAPIHUM Home</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'p1': '#3A1112', // Oscuro
+            'p2': '#74332C', // Medio Oscuro
+            'p3': '#8FA4D2', // Azul Claro
+            'p4': '#9BC69D', // Verde/Naranja Claro
+            'p5': '#EEDCC2', // Beige Claro (Fondo)
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      background-color: #EEDCC2; /* p5 */
+      color: #3A1112; /* p1 */
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+    .text-primary { color: #3A1112; }
+    .text-secondary { color: #74332C; }
+    .text-accent-blue { color: #8FA4D2; }
+    .text-accent-green { color: #9BC69D; }
+    .bg-primary { background-color: #3A1112; color: #EEDCC2; }
+    .bg-secondary { background-color: #74332C; color: #EEDCC2; }
+    
+    .btn-primary {
+      background-color: #74332C;
+      color: #EEDCC2;
+      transition: all 0.2s;
+    }
+    .btn-primary:hover {
+      background-color: #8FA4D2;
+      color: #3A1112;
+    }
+    .btn-outline {
+      border: 2px solid #3A1112;
+      color: #3A1112;
+      transition: all 0.2s;
+    }
+    .btn-outline:hover {
+      background-color: #3A1112;
+      color: #EEDCC2;
+    }
+    .badge-custom {
+      background-color: rgba(116, 51, 44, 0.1);
+      border: 1px solid rgba(116, 51, 44, 0.3);
+      color: #74332C;
+    }
+    .hero-gradient {
+      background: linear-gradient(135deg, rgba(238,220,194,1) 0%, rgba(155,198,157,0.2) 100%);
+    }
+  </style>
+</head>
+<body class="flex flex-col items-center flex-1 w-full m-0 p-0">
+
+  <!-- 1. HERO -->
+  <section class="relative w-full overflow-hidden hero-gradient border-b border-p3/30">
+    <div class="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-28 md:py-36 lg:py-48 text-center flex flex-col items-center">
+      
+      <!-- Badge -->
+      <div class="inline-flex items-center gap-2 rounded-lg badge-custom backdrop-blur-sm px-4 py-1.5 text-xs font-bold uppercase tracking-[1px] mb-8">
+        <span class="relative flex h-2 w-2">
+          <span class="relative inline-flex rounded-full h-2 w-2 bg-p2"></span>
+        </span>
+        Sistemas Avanzados de Psicología e Investigación Humana
+      </div>
+
+      <!-- H1 -->
+      <h1 class="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.08] text-p1">
+        La comunidad profesional para psicólogos que quieren <br/>
+        <span class="relative whitespace-nowrap text-p2">
+          elevar su nivel.
+          <svg class="absolute -bottom-2 w-full h-3 text-p3" viewBox="0 0 100 10" preserveAspectRatio="none">
+            <path d="M0 5 Q 50 10 100 5" stroke="currentColor" stroke-width="3" fill="transparent"/>
+          </svg>
+        </span>
+      </h1>
+
+      <!-- Subtitle -->
+      <p class="mt-7 text-lg md:text-xl text-p1/80 max-w-3xl leading-relaxed">
+        Especializaciones, formación continua, investigación aplicada, herramientas profesionales y una red de colegas que entienden hacia dónde debe evolucionar la psicología.
+      </p>
+
+      <!-- CTA -->
+      <div class="mt-10 flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
+        <button class="btn-primary w-full sm:w-auto h-14 px-8 text-base font-semibold rounded-md flex items-center justify-center gap-2">
+          Explorar Especialidades <span class="font-bold">→</span>
+        </button>
+        <button class="btn-outline w-full sm:w-auto h-14 px-8 text-base font-semibold rounded-md">
+          Conocer SAPIHUM →
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2. CREDIBILIDAD -->
+  <section class="w-full border-b border-p3/30 bg-p5/50 py-5">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex flex-wrap items-center justify-center gap-x-8 gap-y-3">
+      <div class="flex items-center text-sm font-semibold text-p1/80"><span class="text-p3 mr-2">✓</span> Especializaciones por área</div>
+      <div class="flex items-center text-sm font-semibold text-p1/80"><span class="text-p3 mr-2">✓</span> Formación continua</div>
+      <div class="flex items-center text-sm font-semibold text-p1/80"><span class="text-p3 mr-2">✓</span> Comunidad profesional</div>
+      <div class="flex items-center text-sm font-semibold text-p1/80"><span class="text-p3 mr-2">✓</span> Investigación aplicada</div>
+    </div>
+  </section>
+
+  <!-- 3. QUE ES SAPIHUM -->
+  <section class="w-full py-20 md:py-28">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-center max-w-4xl mx-auto">
+      <p class="text-sm font-bold text-p2 uppercase tracking-[1px] mb-3">Ecosistema</p>
+      <h2 class="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight text-p1">Qué es SAPIHUM</h2>
+      <p class="mt-6 text-xl text-p1/70 leading-relaxed">
+        SAPIHUM es un ecosistema profesional en línea para psicólogos que buscan crecer con <strong class="text-p2">mayor profundidad, estructura y respaldo</strong>. Integramos todas las piezas del rompecabezas profesional en un solo lugar.
+      </p>
+    </div>
+  </section>
+
+  <!-- 4. QUE OBTIENES DENTRO (Dark mode to show p1) -->
+  <section class="w-full py-20 md:py-28 bg-primary">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-16">
+        <h2 class="text-3xl md:text-4xl font-bold tracking-tight text-p5 mb-4">Qué obtienes dentro de tu membresía</h2>
+        <p class="text-p4 text-lg">Más allá de la teoría, construimos el entorno completo.</p>
+      </div>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <!-- Item 1 -->
+        <div class="flex gap-4">
+          <div class="shrink-0 h-12 w-12 rounded-lg flex items-center justify-center bg-p3/20 text-p3 border border-p3/40">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+          </div>
+          <div>
+            <h3 class="text-lg font-bold mb-2 text-p5">Actualización constante</h3>
+            <p class="text-p5/70 text-sm leading-relaxed">Conocimiento vigente y respaldado científicamente para tomar mejores decisiones.</p>
+          </div>
+        </div>
+        <!-- Item 2 -->
+        <div class="flex gap-4">
+          <div class="shrink-0 h-12 w-12 rounded-lg flex items-center justify-center bg-p4/20 text-p4 border border-p4/40">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+          </div>
+          <div>
+            <h3 class="text-lg font-bold mb-2 text-p5">Especialización con criterio</h3>
+            <p class="text-p5/70 text-sm leading-relaxed">12 ramas de la psicología estructuradas para llevarte al nivel experto.</p>
+          </div>
+        </div>
+        <!-- Item 3 -->
+        <div class="flex gap-4">
+          <div class="shrink-0 h-12 w-12 rounded-lg flex items-center justify-center bg-p2/40 text-p2 border border-p2/60">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+          </div>
+          <div>
+            <h3 class="text-lg font-bold mb-2 text-p5">Comunidad activa</h3>
+            <p class="text-p5/70 text-sm leading-relaxed">Intercambio, supervisión y apoyo entre colegas de alto nivel.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5. ESPECIALIDADES -->
+  <section class="w-full py-20 md:py-28">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="max-w-4xl mx-auto text-center mb-16">
+        <h2 class="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight mb-4 text-p1">
+          Explora nuestras áreas de <span class="text-p2">especialización en psicología</span>
+        </h2>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <!-- Card 1 -->
+        <div class="relative rounded-lg border border-p3/40 bg-white p-6 shadow-sm hover:shadow-md transition-shadow">
+          <div class="text-3xl mb-4 bg-p5 w-14 h-14 rounded-lg flex items-center justify-center text-p2">🧠</div>
+          <h3 class="text-base font-bold mb-1.5 text-p1">Psicología Clínica</h3>
+          <p class="text-sm text-p1/70 mb-4">Intervención y abordaje terapéutico basado en evidencia actual.</p>
+          <div class="text-sm font-bold text-p3 flex items-center">Ver especialidad →</div>
+        </div>
+        <!-- Card 2 -->
+        <div class="relative rounded-lg border border-p3/40 bg-white p-6 shadow-sm hover:shadow-md transition-shadow">
+          <div class="text-3xl mb-4 bg-p5 w-14 h-14 rounded-lg flex items-center justify-center text-p2">👥</div>
+          <h3 class="text-base font-bold mb-1.5 text-p1">Organizacional</h3>
+          <p class="text-sm text-p1/70 mb-4">Capital humano, clima y desarrollo de talento corporativo.</p>
+          <div class="text-sm font-bold text-p3 flex items-center">Ver especialidad →</div>
+        </div>
+        <!-- Card 3 -->
+        <div class="relative rounded-lg border border-p3/40 bg-white p-6 shadow-sm hover:shadow-md transition-shadow">
+          <div class="text-3xl mb-4 bg-p5 w-14 h-14 rounded-lg flex items-center justify-center text-p2">⚡</div>
+          <h3 class="text-base font-bold mb-1.5 text-p1">Neuropsicología</h3>
+          <p class="text-sm text-p1/70 mb-4">Evaluación y rehabilitación de funciones cognitivas complejas.</p>
+          <div class="text-sm font-bold text-p3 flex items-center">Ver especialidad →</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6. FINAL CTA -->
+  <section class="w-full py-20 md:py-32 bg-p5 border-t border-p3/30">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="relative rounded-2xl bg-white text-p1 px-6 py-16 md:px-16 md:py-20 text-center overflow-hidden border border-p3 shadow-xl">
+        <div class="relative z-10 max-w-4xl mx-auto">
+          <h2 class="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight leading-tight">
+            No se trata solo de estudiar más. <br />
+            <span class="text-p2 mt-2 block">
+              Se trata de convertirte en un profesional con más nivel, más criterio y más valor.
+            </span>
+          </h2>
+          
+          <div class="mt-12 flex flex-col sm:flex-row gap-5 justify-center items-center">
+            <button class="btn-primary w-full sm:w-auto h-14 px-10 text-base font-bold rounded-lg shadow-md">
+              Unirme a SAPIHUM
+            </button>
+            <button class="w-full sm:w-auto h-14 px-10 text-base font-bold rounded-lg border-2 border-p1 text-p1 hover:bg-p1 hover:text-p5 transition-colors">
+              Conocer la comunidad
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</body>
+</html>

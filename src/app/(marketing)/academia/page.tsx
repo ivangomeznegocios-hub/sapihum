@@ -24,16 +24,15 @@ export default async function AcademiaPage() {
     return (
         <div className="relative flex w-full flex-1 flex-col items-center bg-background">
             <section className="relative w-full overflow-hidden bg-gradient-to-b from-[#0a0a0a] via-[#111111] to-background">
-                <div className="sapihum-grid-bg pointer-events-none absolute inset-0 opacity-20" />
-                <div className="pointer-events-none absolute left-1/4 top-0 h-[600px] w-[600px] rounded-full bg-brand-yellow/8 blur-[150px]" />
-                <div className="pointer-events-none absolute bottom-0 right-0 h-[400px] w-[400px] rounded-full bg-brand-brown/6 blur-[120px]" />
+                <div className="sapihum-grid-bg pointer-events-none absolute inset-0 opacity-10" />
+                <div className="pointer-events-none absolute left-1/4 top-0 h-[600px] w-[600px] rounded-full bg-brand-yellow/3 blur-[150px]" />
+                <div className="pointer-events-none absolute bottom-0 right-0 h-[400px] w-[400px] rounded-full bg-brand-brown/3 blur-[120px]" />
 
                 <div className="relative z-10 mx-auto max-w-7xl px-4 py-20 sm:px-6 md:py-28 lg:px-8">
                     <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-2">
                         <div className="flex flex-col">
-                            <div className="sapihum-fade-up mb-6 inline-flex w-fit items-center gap-2 rounded-full border border-brand-yellow/30 bg-brand-yellow/10 px-4 py-2 text-sm font-semibold text-brand-yellow backdrop-blur-sm">
+                            <div className="sapihum-fade-up mb-8 inline-flex w-fit items-center gap-2 rounded-sm border border-brand-yellow/20 bg-brand-yellow/5 px-4 py-2 text-[10px] font-bold text-brand-yellow uppercase tracking-[0.2em] backdrop-blur-sm">
                                 <span className="relative flex h-2 w-2">
-                                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-brand-yellow opacity-75" />
                                     <span className="relative inline-flex h-2 w-2 rounded-full bg-brand-yellow" />
                                 </span>
                                 {upcoming.length > 0
@@ -47,8 +46,7 @@ export default async function AcademiaPage() {
                             >
                                 Donde se forman los{' '}
                                 <span className="relative inline-block">
-                                    <span className="pointer-events-none absolute inset-x-1 bottom-1 h-4 rounded-full bg-brand-yellow/20 blur-xl" />
-                                    <span className="relative bg-gradient-to-r from-[#f6ae02] via-[#ffd36a] to-[#fff3cf] bg-clip-text text-transparent drop-shadow-[0_10px_30px_rgba(246,174,2,0.28)]">
+                                    <span className="relative font-serif italic font-normal text-[#c0bfbc]">
                                         mejores psicologos
                                     </span>
                                 </span>
@@ -63,7 +61,7 @@ export default async function AcademiaPage() {
 
                             <div className="sapihum-fade-up flex flex-wrap gap-3" style={{ animationDelay: '0.3s' }}>
                                 <a href="#catalogo">
-                                    <Button size="lg" className="sapihum-glow-cta h-12 px-7 text-sm font-bold shadow-xl">
+                                    <Button size="lg" className="h-12 px-7 font-bold uppercase text-xs tracking-[0.1em]">
                                         Explorar catalogo
                                     </Button>
                                 </a>
@@ -110,12 +108,12 @@ export default async function AcademiaPage() {
             <section className="w-full px-4 py-16">
                 <div className="relative mx-auto max-w-4xl overflow-hidden rounded-3xl shadow-2xl">
                     <div className="absolute inset-0 bg-gradient-to-br from-[#0a0a0a] via-[#111111] to-[#0a0a0a]" />
-                    <div className="sapihum-grid-bg absolute inset-0 opacity-20" />
-                    <div className="absolute -right-20 -top-20 h-48 w-48 rounded-full bg-brand-yellow/15 blur-3xl" />
-                    <div className="absolute -bottom-20 -left-20 h-48 w-48 rounded-full bg-brand-brown/10 blur-3xl" />
+                     <div className="sapihum-grid-bg absolute inset-0 opacity-10" />
+                    <div className="absolute -right-20 -top-20 h-48 w-48 rounded-full bg-brand-yellow/5 blur-3xl" />
+                    <div className="absolute -bottom-20 -left-20 h-48 w-48 rounded-full bg-brand-brown/3 blur-3xl" />
 
                     <div className="relative z-10 p-8 text-center text-white md:p-14">
-                        <div className="mb-3 inline-flex items-center gap-1 rounded-full border border-brand-yellow/20 bg-brand-yellow/10 px-3 py-1 text-xs font-semibold text-brand-yellow">
+                        <div className="mb-3 inline-flex items-center gap-1 rounded-sm border border-brand-yellow/20 bg-brand-yellow/5 px-3 py-1 text-[10px] font-bold text-brand-yellow uppercase tracking-[0.15em]">
                             Beneficio de membresia
                         </div>
                         <h3 className="mb-4 text-2xl font-bold md:text-3xl">La Academia esta incluida en tu membresia</h3>
@@ -123,7 +121,7 @@ export default async function AcademiaPage() {
                             Al suscribirte a SAPIHUM, obtienes acceso a encuentros exclusivos, precios preferenciales y una comunidad de aprendizaje continuo.
                         </p>
                         <Link href="/precios">
-                            <Button size="lg" className="h-13 px-8 text-base font-bold shadow-xl">
+                            <Button size="lg" className="h-13 px-8 font-bold uppercase text-xs tracking-[0.1em]">
                                 Ver planes y precios
                             </Button>
                         </Link>

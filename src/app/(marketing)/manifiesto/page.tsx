@@ -33,11 +33,11 @@ export default function ManifiestoPage() {
   return (
     <div className="flex flex-col items-center flex-1 w-full relative bg-background">
       <section className="w-full py-20 md:py-32 flex flex-col items-center text-center px-4 bg-[#0a0a0a] text-white relative overflow-hidden">
-         <div className="absolute inset-0 sapihum-grid-bg opacity-30" />
-        <div className="absolute left-1/2 top-0 -translate-x-1/2 h-[500px] w-[500px] rounded-full bg-brand-yellow/10 blur-[150px] pointer-events-none" />
+         <div className="absolute inset-0 sapihum-grid-bg opacity-20" />
+        <div className="absolute left-1/2 top-0 -translate-x-1/2 h-[500px] w-[500px] rounded-full bg-brand-yellow/3 blur-[120px] pointer-events-none" />
         
         <div className="relative z-10 max-w-4xl flex flex-col items-center">
-          <div className="sapihum-fade-up mb-6 inline-flex items-center gap-2 rounded-full border border-brand-yellow/30 bg-brand-yellow/40 px-4 py-1.5 text-sm font-semibold text-brand-yellow">
+          <div className="sapihum-fade-up mb-8 inline-flex items-center gap-2 rounded-sm border border-brand-yellow/20 bg-brand-yellow/5 px-4 py-1.5 text-[10px] font-bold text-brand-yellow uppercase tracking-[0.2em]">
             Nuestros Pilares
           </div>
           <h1 className="sapihum-fade-up text-4xl md:text-5xl lg:text-7xl font-bold tracking-tight mb-6 leading-tight" style={{ animationDelay: '0.1s' }}>
@@ -68,14 +68,14 @@ export default function ManifiestoPage() {
       </section>
 
       <section className="w-full py-24 bg-gradient-to-br from-[#0a0a0a] to-[#0a0a0a] text-center text-white relative">
-        <div className="absolute inset-0 sapihum-grid-bg opacity-20" />
+        <div className="absolute inset-0 sapihum-grid-bg opacity-10" />
         <div className="relative z-10 max-w-3xl mx-auto px-4">
           <h2 className="text-3xl font-bold mb-6">Si compartes estos valores, estás en casa.</h2>
           <p className="text-lg text-neutral-400 mb-8 max-w-2xl mx-auto">
             SAPIHUM es la trinchera de los profesionales que se toman el cuidado mental humano con el mayor nivel de responsabilidad posible.
           </p>
           <Link href="/auth/register">
-            <Button size="lg" className="h-14 px-8 text-base font-bold shadow-lg sapihum-glow-cta">
+            <Button size="lg" className="h-14 px-8 font-bold uppercase text-xs tracking-[0.1em]">
               Unete a la revolucion
             </Button>
           </Link>

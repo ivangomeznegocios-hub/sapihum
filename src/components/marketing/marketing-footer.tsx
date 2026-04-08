@@ -32,7 +32,7 @@ const FOOTER_LINKS = {
 
 export function MarketingFooter() {
   return (
-    <footer className="border-t bg-muted/30 dark:bg-[#050505]">
+    <footer className="border-t bg-[#030303]">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-2 gap-8 py-12 sm:grid-cols-3 md:grid-cols-6">
           <div className="col-span-2 sm:col-span-3 md:col-span-1">
@@ -40,7 +40,7 @@ export function MarketingFooter() {
               <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-black dark:bg-white">
                 <span className="text-[#f6ae02] dark:text-black font-bold text-[10px] tracking-tighter">SH</span>
               </div>
-              <span className="text-base font-bold tracking-[1px] uppercase">
+              <span className="text-base font-bold tracking-[0.15em] uppercase">
                 SAPIHUM
               </span>
             </Link>
@@ -51,7 +51,7 @@ export function MarketingFooter() {
 
           {Object.entries(FOOTER_LINKS).map(([category, links]) => (
             <div key={category}>
-              <h4 className="mb-3 text-sm font-bold text-foreground uppercase tracking-wider">{category}</h4>
+              <h4 className="mb-3 text-[10px] font-bold text-foreground uppercase tracking-[0.2em]">{category}</h4>
               <ul className="space-y-2.5">
                 {links.map((link) => (
                   <li key={link.href + link.label}>

@@ -53,11 +53,11 @@ export default async function SpecializationPage(props: Props) {
       {/* Hero Section */}
       <section className="relative flex w-full flex-col items-center overflow-hidden bg-gradient-to-b from-[#0a0a0a] to-background px-4 py-20 text-center md:py-32">
         {/* Background effects */}
-        <div className="absolute inset-0 top-0 h-[600px] sapihum-grid-bg opacity-30" />
-        <div className="absolute left-1/2 top-0 -translate-x-1/2 h-[500px] w-[500px] rounded-full bg-brand-yellow/10 blur-[120px] pointer-events-none" />
+        <div className="absolute inset-0 top-0 h-[600px] sapihum-grid-bg opacity-10" />
+        <div className="absolute left-1/2 top-0 -translate-x-1/2 h-[500px] w-[500px] rounded-full bg-brand-yellow/3 blur-[120px] pointer-events-none" />
 
         <div className="relative z-10 max-w-4xl flex flex-col items-center">
-          <div className="sapihum-fade-up mb-6 inline-flex max-w-full flex-wrap items-center justify-center gap-2 rounded-full border border-brand-yellow/30 bg-brand-yellow/40 px-4 py-1.5 text-center text-sm font-semibold text-brand-yellow">
+          <div className="sapihum-fade-up mb-8 inline-flex max-w-full flex-wrap items-center justify-center gap-2 rounded-sm border border-brand-yellow/20 bg-brand-yellow/5 px-4 py-1.5 text-center text-[10px] font-bold text-brand-yellow uppercase tracking-[0.2em]">
             <span className="text-xl leading-none">{spec.icon}</span>
             Especialidad: {spec.name}
           </div>
@@ -72,7 +72,7 @@ export default async function SpecializationPage(props: Props) {
           
           <div className="sapihum-fade-up" style={{ animationDelay: '0.3s' }}>
             <Link href={`/auth/register?plan=${isLevel2Active ? 'level2' : 'level1'}&specialization=${spec.code}`}>
-              <Button size="lg" className="h-auto max-w-full whitespace-normal px-8 py-4 text-center text-base font-bold shadow-lg sapihum-glow-cta">
+              <Button size="lg" className="h-auto max-w-full whitespace-normal px-8 py-4 text-center font-bold uppercase text-xs tracking-[0.1em]">
                 {isLevel2Active ? 'Comenzar Especialización' : 'Comenzar con Nivel 1'}
               </Button>
             </Link>
@@ -111,7 +111,7 @@ export default async function SpecializationPage(props: Props) {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
             <div>
-              <p className="text-sm font-semibold text-brand-yellow dark:text-brand-yellow uppercase tracking-wider mb-3">
+              <p className="text-[10px] font-bold text-brand-yellow uppercase tracking-[0.2em] mb-3">
                 Beneficios Exclusivos
               </p>
               <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-6">
@@ -148,7 +148,7 @@ export default async function SpecializationPage(props: Props) {
 
       {/* Pricing / Final CTA */}
       <section className="w-full py-20 md:py-28 bg-[#0a0a0a] text-white relative overflow-hidden">
-        <div className="absolute inset-0 sapihum-grid-bg opacity-20" />
+        <div className="absolute inset-0 sapihum-grid-bg opacity-10" />
         <div className="relative z-10 max-w-4xl mx-auto text-center px-4">
           <h2 className="text-3xl md:text-5xl font-bold mb-6">
             Eleva tu estándar profesional hoy
@@ -158,7 +158,7 @@ export default async function SpecializationPage(props: Props) {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href={`/auth/register?plan=${isLevel2Active ? 'level2' : 'level1'}&specialization=${spec.code}`}>
-              <Button size="lg" className="h-auto max-w-full whitespace-normal px-10 py-4 text-center text-base font-bold shadow-xl sapihum-glow-cta">
+              <Button size="lg" className="h-auto max-w-full whitespace-normal px-10 py-4 text-center font-bold uppercase text-xs tracking-[0.1em]">
                 {isLevel2Active ? `Activar Membresía ${spec.name}` : 'Unirme al Nivel 1'}
               </Button>
             </Link>

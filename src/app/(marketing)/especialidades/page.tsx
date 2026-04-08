@@ -14,16 +14,16 @@ export default function EspecialidadesIndexPage() {
     <div className="flex flex-col items-center flex-1 w-full">
       {/* Hero */}
       <section className="relative w-full py-20 md:py-28 overflow-hidden bg-[#0a0a0a]">
-        <div className="absolute inset-0 sapihum-grid-bg" />
-        <div className="absolute left-1/2 top-0 -translate-x-1/2 h-[500px] w-[500px] rounded-full bg-brand-yellow/10 blur-[120px]" />
+        <div className="absolute inset-0 sapihum-grid-bg opacity-10" />
+        <div className="absolute left-1/2 top-0 -translate-x-1/2 h-[500px] w-[500px] rounded-full bg-brand-yellow/3 blur-[120px]" />
 
         <div className="relative z-10 w-full max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <p className="text-sm font-semibold text-brand-yellow uppercase tracking-wider mb-4">
+          <p className="text-[10px] font-bold text-brand-yellow uppercase tracking-[0.2em] mb-4">
             12 Ramas de la Psicología
           </p>
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-white mb-6 leading-tight">
             Encuentra tu{' '}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-yellow to-white">
+            <span className="font-serif italic font-normal text-[#c0bfbc]">
               especialización
             </span>
           </h1>
@@ -43,17 +43,17 @@ export default function EspecialidadesIndexPage() {
               className="group relative rounded-2xl border bg-card p-7 sapihum-card-glow overflow-hidden"
             >
               {/* Left accent bar on hover */}
-              <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-brand-yellow to-white opacity-0 group-hover:opacity-100 transition-opacity rounded-l-2xl" />
+              <div className="absolute left-0 top-0 bottom-0 w-px bg-brand-yellow opacity-0 group-hover:opacity-100 transition-opacity" />
 
-              <div className="text-4xl mb-5 bg-gradient-to-br from-brand-yellow to-white dark:from-brand-yellow/30 dark:to-white/30 w-16 h-16 rounded-xl flex items-center justify-center">
+              <div className="text-3xl mb-5 bg-brand-yellow/5 w-14 h-14 rounded-sm flex items-center justify-center">
                 {spec.icon}
               </div>
 
-              <h2 className="text-xl font-bold mb-2 group-hover:text-brand-yellow dark:group-hover:text-brand-yellow transition-colors">
+              <h2 className="text-lg font-bold mb-2 group-hover:text-brand-yellow transition-colors">
                 {spec.name}
               </h2>
 
-              <p className="text-sm text-brand-yellow dark:text-brand-yellow font-medium mb-3">
+              <p className="text-xs text-brand-yellow font-medium mb-3 uppercase tracking-wider">
                 {spec.tagline}
               </p>
 
@@ -76,7 +76,7 @@ export default function EspecialidadesIndexPage() {
                 )}
               </div>
 
-              <div className="text-sm font-semibold text-brand-yellow dark:text-brand-yellow flex items-center">
+              <div className="text-[10px] font-bold text-brand-yellow uppercase tracking-[0.15em] flex items-center">
                 Explorar especialidad <span className="ml-1 transition-transform group-hover:translate-x-1">→</span>
               </div>
             </Link>
@@ -92,7 +92,7 @@ export default function EspecialidadesIndexPage() {
             SAPIHUM está en constante expansión. Contáctanos si tu rama de la psicología aún no está representada.
           </p>
           <Link href="/auth/register">
-            <Button size="lg" className="h-12 px-8 font-bold shadow-lg">
+            <Button size="lg" className="h-12 px-8 font-bold uppercase text-xs tracking-[0.1em]">
               Crear mi cuenta
             </Button>
           </Link>
