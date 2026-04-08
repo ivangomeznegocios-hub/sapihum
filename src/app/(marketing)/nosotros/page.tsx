@@ -34,7 +34,7 @@ export default function NosotrosPage() {
       <section className="w-full py-20 md:py-28 px-4 max-w-7xl mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12 lg:gap-20">
           <div className="p-8 md:p-12 rounded-3xl border bg-card sapihum-card-glow relative overflow-hidden">
-            <div className="absolute -right-10 -top-10 text-9xl text-brand-yellow/5 select-none font-serif">"</div>
+            <div className="absolute -right-10 -top-10 text-9xl text-brand-yellow/5 select-none font-serif">&ldquo;</div>
             <h2 className="text-[10px] font-bold uppercase tracking-[0.2em] text-brand-yellow mb-4">Misión</h2>
             <p className="text-xl md:text-2xl font-medium leading-relaxed">
               Dignificar la práctica psicológica dotando a los profesionales de herramientas tecnológicas de primer nivel, formación basada en evidencia empírica y respaldada por investigación rigurosa.
@@ -42,7 +42,7 @@ export default function NosotrosPage() {
           </div>
 
           <div className="p-8 md:p-12 rounded-3xl border bg-card sapihum-card-glow relative overflow-hidden">
-             <div className="absolute -right-10 -top-10 text-9xl text-brand-yellow/5 select-none font-serif">"</div>
+             <div className="absolute -right-10 -top-10 text-9xl text-brand-yellow/5 select-none font-serif">&ldquo;</div>
             <h2 className="text-[10px] font-bold uppercase tracking-[0.2em] text-brand-yellow mb-4">Visión</h2>
             <p className="text-xl md:text-2xl font-medium leading-relaxed">
               Convertirnos en el estándar de oro (Gold Standard) operativo, académico e investigativo para el profesional de la psicología y ciencias del comportamiento.

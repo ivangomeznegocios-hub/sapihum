@@ -5,13 +5,13 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import {
-    ArrowLeft, ArrowRight, CheckCircle, Brain,
+    ArrowLeft, CheckCircle,
     ChevronLeft, ChevronRight, Loader2
 } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { calculateProgress, calculateScores, isComplete, getTotalQuestions } from '@/lib/tools/tool-schema'
-import type { ToolSchema, ToolQuestion, ToolSection } from '@/types/database'
+import type { ToolSchema, ToolQuestion } from '@/types/database'
 
 interface ToolRendererProps {
     assignment: any

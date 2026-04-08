@@ -1,13 +1,13 @@
 'use client'
 
 import { useState } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import {
     Search, Plus, Eye, EyeOff, Trash2, Clock,
-    CheckCircle, AlertCircle, Brain, X, Send,
+    CheckCircle, Brain, X, Send,
     ChevronRight, BarChart3, Timer
 } from 'lucide-react'
 import { assignToolAction, toggleVisibilityAction, deleteAssignmentAction } from './tools-actions'

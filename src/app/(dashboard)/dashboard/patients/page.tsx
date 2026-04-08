@@ -9,22 +9,8 @@ import {
     Users,
     UserPlus,
     Calendar,
-    FileText,
     ArrowRight
 } from 'lucide-react'
-
-interface Patient {
-    id: string
-    full_name: string | null
-    created_at: string
-    subscription_status: string | null
-}
-
-interface Relationship {
-    patient_id: string
-    created_at: string
-    patient: Patient
-}
 
 export default async function PatientsPage() {
     const { supabase, profile, viewer } = await getCurrentInternalAccessContext()
@@ -160,7 +146,7 @@ export default async function PatientsPage() {
                             <Users className="h-12 w-12 mx-auto mb-4 opacity-50" />
                             <p>No tienes pacientes asignados</p>
                             <p className="text-sm mt-2">
-                                Usa el botón "Agregar Paciente" para comenzar
+                                {'Usa el botón "Agregar Paciente" para comenzar'}
                             </p>
                         </div>
                     ) : (

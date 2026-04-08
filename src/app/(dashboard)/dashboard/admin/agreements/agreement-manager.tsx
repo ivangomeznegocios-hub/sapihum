@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -119,7 +120,14 @@ export function AgreementManager({ agreements }: { agreements: any[] }) {
                         <CardContent className="flex flex-col gap-4 py-4 sm:flex-row sm:items-center sm:justify-between">
                             <div className="flex min-w-0 flex-col gap-3 sm:flex-row sm:items-center">
                                 {ag.company_logo_url && (
-                                    <img src={ag.company_logo_url} alt="" className="w-16 h-10 object-contain rounded" />
+                                    <Image
+                                        src={ag.company_logo_url}
+                                        alt={ag.company_name ? `Logo de ${ag.company_name}` : 'Logo del convenio'}
+                                        width={64}
+                                        height={40}
+                                        unoptimized
+                                        className="h-10 w-16 object-contain rounded"
+                                    />
                                 )}
                                 <div className="min-w-0">
                                     <div className="flex flex-wrap items-center gap-2">

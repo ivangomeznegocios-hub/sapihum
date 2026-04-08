@@ -1,6 +1,7 @@
 import { getUserProfile } from '@/lib/supabase/server'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import Image from 'next/image'
 import { RecordingCountdown, RecordingCardWrapper } from './recording-countdown'
 import { getMyReplayAccessibleEvents } from '@/lib/supabase/queries/event-entitlements'
 import Link from 'next/link'
@@ -104,10 +105,12 @@ export default async function RecordingsPage() {
                                     {/* Thumbnail */}
                                     <div className="relative aspect-video bg-gradient-to-br from-brand-brown/20 to-primary/20">
                                         {event.image_url ? (
-                                            <img
+                                            <Image
                                                 src={event.image_url}
                                                 alt={event.title}
-                                                className="w-full h-full object-cover"
+                                                fill
+                                                className="object-cover"
+                                                sizes="(max-width: 768px) 100vw, 33vw"
                                             />
                                         ) : (
                                             <div className="absolute inset-0 flex items-center justify-center">

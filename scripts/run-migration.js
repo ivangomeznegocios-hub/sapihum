@@ -1,18 +1,10 @@
-const https = require('https')
 const fs = require('fs')
 require('dotenv').config({ path: '.env.local' })
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL
 const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY
 
-// Extract project ref from URL
-const projectRef = SUPABASE_URL.replace('https://', '').split('.')[0]
-
 const sql = fs.readFileSync('supabase/migrations/018_resource_audience.sql', 'utf8')
-
-const postData = JSON.stringify({ query: sql })
-
-const url = new URL(`${SUPABASE_URL}/rest/v1/rpc/`)
 
 // Use the SQL endpoint via PostgREST function
 // Since we can't run raw SQL via REST, let's use pg_net or a different approach
@@ -29,7 +21,7 @@ async function runMigration() {
         // If columns don't exist, we need to run the SQL in Supabase dashboard
 
         // First, check if we can use the database functions
-        const { data, error } = await supabase.rpc('exec_sql', {
+        const { error } = await supabase.rpc('exec_sql', {
             sql_query: sql
         })
 

@@ -1,6 +1,5 @@
 'use client'
 
-import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 
@@ -21,12 +20,6 @@ const SUBCATEGORY_LABELS: Record<string, string> = {
     congreso: 'Congreso',
     meetup: 'Meetup',
     otro: 'Otro',
-}
-
-interface EventsFilterProps {
-    events: any[]
-    onFilter: (filtered: any[]) => void
-    showSubcategories?: boolean
 }
 
 export function EventsCategoryNav() {

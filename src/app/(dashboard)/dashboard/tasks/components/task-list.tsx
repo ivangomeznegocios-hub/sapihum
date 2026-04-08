@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
 import { Badge } from '@/components/ui/badge'
@@ -29,7 +29,7 @@ interface TaskListProps {
     type: 'pending' | 'completed'
 }
 
-export function TaskList({ tasks, type }: TaskListProps) {
+export function TaskList({ tasks }: TaskListProps) {
     if (tasks.length === 0) return null
 
     return (

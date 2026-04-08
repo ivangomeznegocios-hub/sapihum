@@ -1,3 +1,4 @@
+import Image from 'next/image'
 import { createClient, getUserProfile } from '@/lib/supabase/server'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -289,11 +290,13 @@ export default async function EventDetailPage({ params }: PageProps) {
                 <div className="lg:col-span-2 space-y-6">
                     {/* Event Image */}
                     {event.image_url && (
-                        <div className="aspect-video rounded-xl overflow-hidden bg-muted">
-                            <img
+                        <div className="relative aspect-video rounded-xl overflow-hidden bg-muted">
+                            <Image
                                 src={event.image_url}
                                 alt={event.title}
-                                className="w-full h-full object-cover"
+                                fill
+                                className="object-cover"
+                                sizes="(max-width: 1024px) 100vw, 66vw"
                             />
                         </div>
                     )}
@@ -476,9 +479,15 @@ export default async function EventDetailPage({ params }: PageProps) {
                                     <div className="space-y-3">
                                         {eventSpeakers.map((es) => (
                                             <Link key={es.id} href={`/dashboard/speakers/${es.speaker_id}`} className="flex items-center gap-3 p-3 rounded-lg border hover:bg-muted/50 transition-colors">
-                                                <div className="w-10 h-10 rounded-full bg-primary/10 overflow-hidden flex-shrink-0">
+                                                <div className="relative w-10 h-10 rounded-full bg-primary/10 overflow-hidden flex-shrink-0">
                                                     {(es.speaker as any)?.photo_url ? (
-                                                        <img src={(es.speaker as any).photo_url} alt="" className="w-full h-full object-cover" />
+                                                        <Image
+                                                            src={(es.speaker as any).photo_url}
+                                                            alt=""
+                                                            fill
+                                                            className="object-cover"
+                                                            sizes="40px"
+                                                        />
                                                     ) : (
                                                         <div className="w-full h-full flex items-center justify-center text-xs font-bold text-primary/50">
                                                             {(es.speaker as any)?.profile?.full_name?.charAt(0) || 'P'}
@@ -772,11 +781,15 @@ export default async function EventDetailPage({ params }: PageProps) {
                                             <td className="py-2 px-3">
                                                 <div className="flex items-center gap-2">
                                                     {reg.profiles?.avatar_url ? (
-                                                        <img
-                                                            src={reg.profiles.avatar_url}
-                                                            alt=""
-                                                            className="w-6 h-6 rounded-full object-cover"
-                                                        />
+                                                        <div className="relative h-6 w-6 overflow-hidden rounded-full">
+                                                            <Image
+                                                                src={reg.profiles.avatar_url}
+                                                                alt=""
+                                                                fill
+                                                                className="object-cover"
+                                                                sizes="24px"
+                                                            />
+                                                        </div>
                                                     ) : (
                                                         <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-xs">
                                                             {reg.profiles?.full_name?.charAt(0) || '?'}

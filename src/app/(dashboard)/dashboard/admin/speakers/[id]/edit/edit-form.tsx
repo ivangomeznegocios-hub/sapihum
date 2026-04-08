@@ -6,7 +6,7 @@ import Link from 'next/link'
 import { adminUpdateSpeaker } from '../../actions'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { ArrowLeft, Save, Shield, Mic2, Globe, Trash2, Plus } from 'lucide-react'
+import { ArrowLeft, Save, Shield, Mic2, Globe, Trash2 } from 'lucide-react'
 
 // Social network definitions (same as speaker-profile-form)
 const SOCIAL_NETWORKS: Record<string, { label: string; prefix: string; placeholder: string; icon: string; buildUrl: (username: string) => string }> = {

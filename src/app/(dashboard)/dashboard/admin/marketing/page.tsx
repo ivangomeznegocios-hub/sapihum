@@ -1,4 +1,5 @@
 import { redirect } from 'next/navigation'
+import Image from 'next/image'
 import { createClient } from '@/lib/supabase/server'
 import {
     Megaphone, PenTool, Target, Headphones, MapPin,
@@ -115,9 +116,15 @@ export default async function AdminMarketingPage() {
                                 {/* Client Header */}
                                 <div className="flex flex-col gap-4 border-b bg-muted/20 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
                                     <div className="flex min-w-0 items-center gap-3">
-                                        <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center shrink-0 overflow-hidden">
+                                        <div className="relative h-10 w-10 rounded-full bg-muted flex items-center justify-center shrink-0 overflow-hidden">
                                             {client.avatar_url ? (
-                                                <img src={client.avatar_url} alt="" className="h-full w-full object-cover" />
+                                                <Image
+                                                    src={client.avatar_url}
+                                                    alt=""
+                                                    fill
+                                                    className="object-cover"
+                                                    sizes="40px"
+                                                />
                                             ) : (
                                                 <span className="text-sm font-bold text-muted-foreground">
                                                     {(client.full_name || '?').charAt(0)}

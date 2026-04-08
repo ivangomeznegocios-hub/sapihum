@@ -1,8 +1,7 @@
 import { getUserProfile } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import { adminGetAllSpeakerEarnings, adminReleaseEarnings, adminCloseMonth, adminGetAllSpeakers } from './actions'
+import { adminGetAllSpeakerEarnings, adminGetAllSpeakers } from './actions'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
 import { DollarSign, Users, Clock, CheckCircle2, TrendingUp, Ban, Shield } from 'lucide-react'
 import { AdminEarningsActions } from './admin-earnings-client'
 
@@ -113,7 +112,7 @@ export default async function AdminEarningsPage() {
                         </div>
                     ) : (
                         <div className="space-y-3">
-                            {data.speakers.map((entry: any) => (
+                            {data.speakers.map((entry) => (
                                 <div key={entry.speaker?.id} className="flex flex-col gap-4 rounded-lg bg-muted/50 p-4 sm:flex-row sm:items-center sm:justify-between">
                                     <div className="flex-1 min-w-0">
                                         <p className="font-medium">{entry.speaker?.full_name || 'Sin nombre'}</p>

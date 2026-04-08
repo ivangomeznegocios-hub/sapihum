@@ -3,8 +3,12 @@ const path = require('path');
 
 function walk(dir, callback) {
     fs.readdirSync(dir).forEach(f => {
-        let dirPath = path.join(dir, f);
-        fs.statSync(dirPath).isDirectory() ? walk(dirPath, callback) : callback(dirPath);
+        const dirPath = path.join(dir, f);
+        if (fs.statSync(dirPath).isDirectory()) {
+            walk(dirPath, callback);
+        } else {
+            callback(dirPath);
+        }
     });
 }
 
@@ -47,7 +51,7 @@ pathsToScan.forEach(dir => {
         walk(dir, filePath => {
             if (filePath.endsWith('.tsx') || filePath.endsWith('.ts')) {
                 let content = fs.readFileSync(filePath, 'utf8');
-                let originalContent = content;
+                const originalContent = content;
                 
                 fixPatterns.forEach(pattern => {
                     content = content.replace(pattern.from, pattern.to);

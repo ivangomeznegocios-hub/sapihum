@@ -16,7 +16,7 @@ export function slugifyEventTitle(title: string) {
 /**
  * All events are in the 'eventos' section. No more cursos/grabaciones split.
  */
-export function getPublicCatalogSection(_event: Pick<EventRouteLike, 'event_type'>): PublicCatalogSection {
+export function getPublicCatalogSection(): PublicCatalogSection {
     return 'eventos'
 }
 
@@ -41,10 +41,10 @@ export function getBlogArticlePath(slug: string) {
     return `/blog/${slug}`
 }
 
-export function getCatalogSectionTitle(_section: PublicCatalogSection) {
+export function getCatalogSectionTitle() {
     return 'Eventos'
 }
 
-export function getCatalogSectionDescription(_section: PublicCatalogSection) {
+export function getCatalogSectionDescription() {
     return 'Eventos, formaciones y experiencias en vivo diseñadas para la comunidad profesional de SAPIHUM.'
 }

@@ -3,9 +3,13 @@ const path = require('path');
 
 function walkDir(dir, callback) {
   fs.readdirSync(dir).forEach(f => {
-    let dirPath = path.join(dir, f);
-    let isDirectory = fs.statSync(dirPath).isDirectory();
-    isDirectory ? walkDir(dirPath, callback) : callback(path.join(dir, f));
+    const dirPath = path.join(dir, f);
+    const isDirectory = fs.statSync(dirPath).isDirectory();
+    if (isDirectory) {
+      walkDir(dirPath, callback);
+    } else {
+      callback(path.join(dir, f));
+    }
   });
 }
 
@@ -15,7 +19,7 @@ let count = 0;
   if (fs.existsSync(fullDir)) {
     walkDir(fullDir, filePath => {
       if (filePath.endsWith('.tsx') || filePath.endsWith('.ts')) {
-        let c = fs.readFileSync(filePath, 'utf8');
+        const c = fs.readFileSync(filePath, 'utf8');
         let n = c;
 
         // Replace color prop values passed to ProgressRing and StatCard

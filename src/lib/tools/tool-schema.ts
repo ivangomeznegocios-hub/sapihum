@@ -15,7 +15,6 @@ export function calculateScores(
 
     if (scoring.method === 'sum') {
         let total = 0
-        let answeredCount = 0
 
         for (const section of schema.sections) {
             for (const question of section.questions) {
@@ -24,8 +23,6 @@ export function calculateScores(
 
                 const numValue = typeof rawValue === 'string' ? parseFloat(rawValue) : rawValue
                 if (isNaN(numValue)) continue
-
-                answeredCount++
 
                 // Check if this is a reverse-scored item
                 if (scoring.reverse_items.includes(question.id)) {

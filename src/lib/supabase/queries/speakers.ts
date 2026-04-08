@@ -3,7 +3,6 @@ import type {
     Speaker,
     SpeakerWithProfile,
     EventSpeaker,
-    EventWithSpeakers,
     EventPurchase,
 } from '@/types/database'
 

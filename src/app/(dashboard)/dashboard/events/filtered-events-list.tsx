@@ -6,18 +6,6 @@ import { EventCard } from './event-card'
 import type { EventWithRegistration } from '@/types/database'
 import { isEventPast } from '@/lib/timezone'
 
-const SUBCATEGORY_LABELS: Record<string, string> = {
-    curso: 'Curso',
-    diplomado: 'Diplomado',
-    clase: 'Clase',
-    taller: 'Taller',
-    conferencia: 'Conferencia',
-    seminario: 'Seminario',
-    congreso: 'Congreso',
-    meetup: 'Meetup',
-    otro: 'Otro',
-}
-
 export function FilteredEventsList({
     events,
     isActiveMember,

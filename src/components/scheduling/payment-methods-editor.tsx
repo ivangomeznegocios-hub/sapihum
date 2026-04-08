@@ -1,6 +1,5 @@
 'use client'
 
-import { useState } from 'react'
 import { CreditCard, Banknote, Wallet } from 'lucide-react'
 
 interface PaymentMethods {

@@ -1,3 +1,4 @@
+import Image from 'next/image'
 import Link from 'next/link'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -87,7 +88,13 @@ export function EventCard({
                 {/* Event Image — not clickable */}
                 <div className="block relative aspect-[16/9] bg-gradient-to-br from-primary/20 to-primary/5">
                     {event.image_url ? (
-                        <img src={event.image_url} alt={event.title} className="w-full h-full object-cover" />
+                        <Image
+                            src={event.image_url}
+                            alt={event.title}
+                            fill
+                            className="object-cover"
+                            sizes="(max-width: 768px) 100vw, 33vw"
+                        />
                     ) : (
                         <div className="absolute inset-0 flex items-center justify-center">
                             <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="text-primary/30">
@@ -170,7 +177,13 @@ export function EventCard({
             {/* Event Image */}
             <Link href={`/dashboard/events/${event.id}`} className="block relative aspect-[16/9] min-w-0 bg-gradient-to-br from-primary/20 to-primary/5">
                 {event.image_url ? (
-                    <img src={event.image_url} alt={event.title} className="w-full h-full object-cover" />
+                    <Image
+                        src={event.image_url}
+                        alt={event.title}
+                        fill
+                        className="object-cover"
+                        sizes="(max-width: 768px) 100vw, 33vw"
+                    />
                 ) : (
                     <div className="absolute inset-0 flex items-center justify-center">
                         <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" className="text-primary/30">

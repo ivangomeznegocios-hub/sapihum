@@ -64,7 +64,7 @@ export function ManualEarningModal({ speakers, currentMonth }: ManualEarningModa
                 setNotes('')
                 router.refresh()
             }
-        } catch (error) {
+        } catch {
             toast.error('Error inesperado al procesar')
         } finally {
             setLoading(false)
@@ -128,7 +128,7 @@ export function ManualEarningModal({ speakers, currentMonth }: ManualEarningModa
                             rows={3}
                         />
                         <p className="text-[10px] text-muted-foreground">
-                            Este ingreso aparecerá como "Pendiente" y se liberará en 30 días automáticamente (o manualmente por admin).
+                            {'Este ingreso aparecerá como "Pendiente" y se liberará en 30 días automáticamente (o manualmente por admin).'}
                         </p>
                     </div>
 

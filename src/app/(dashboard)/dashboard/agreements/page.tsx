@@ -1,7 +1,7 @@
+import Image from 'next/image'
 import { createClient } from '@/lib/supabase/server'
 import { getUserProfile } from '@/lib/supabase/server'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import type { ExclusiveAgreement } from '@/types/database'
@@ -72,10 +72,12 @@ export default async function AgreementsPage() {
                             {/* Company Logo */}
                             <div className="relative h-40 bg-gradient-to-br from-muted to-muted/50 flex items-center justify-center p-6">
                                 {agreement.company_logo_url ? (
-                                    <img
+                                    <Image
                                         src={agreement.company_logo_url}
                                         alt={agreement.company_name}
-                                        className="max-h-full max-w-full object-contain"
+                                        fill
+                                        className="object-contain p-6"
+                                        sizes="(max-width: 768px) 100vw, 33vw"
                                     />
                                 ) : (
                                     <div className="flex items-center justify-center">

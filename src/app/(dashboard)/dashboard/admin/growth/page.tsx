@@ -1,4 +1,5 @@
 import { redirect } from 'next/navigation'
+import Image from 'next/image'
 import {
     Award,
     BarChart3,
@@ -426,9 +427,15 @@ export default async function AdminGrowthPage() {
                                     <span className="w-6 shrink-0 text-center text-xs font-bold text-muted-foreground">
                                         {index + 1}
                                     </span>
-                                    <div className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-muted">
+                                    <div className="relative flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-muted">
                                         {referrer.avatar_url ? (
-                                            <img src={referrer.avatar_url} alt="" className="h-full w-full object-cover" />
+                                            <Image
+                                                src={referrer.avatar_url}
+                                                alt=""
+                                                fill
+                                                className="object-cover"
+                                                sizes="32px"
+                                            />
                                         ) : (
                                             <span className="text-xs font-semibold text-muted-foreground">
                                                 {(referrer.full_name || '?').charAt(0).toUpperCase()}

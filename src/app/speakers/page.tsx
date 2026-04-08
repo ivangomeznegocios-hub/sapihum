@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import { getPublicSpeakers } from '@/lib/supabase/queries/speakers'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -44,12 +45,15 @@ export default async function PonentesPage() {
                         <Card key={speaker.id} className="group flex h-full flex-col overflow-hidden bg-card transition-colors hover:bg-muted/50 hover:shadow-md">
                             <Link href={`/speakers/${speaker.id}`} className="flex h-full flex-col">
                                 <CardHeader className="pb-4 text-center">
-                                    <div className="mx-auto mb-4 h-24 w-24 overflow-hidden rounded-full border-4 border-primary/10 shadow-sm">
+                                    <div className="relative mx-auto mb-4 h-24 w-24 overflow-hidden rounded-full border-4 border-primary/10 shadow-sm">
                                         {speaker.photo_url || speaker.profile?.avatar_url ? (
-                                            <img
+                                            <Image
                                                 src={speaker.photo_url || speaker.profile?.avatar_url}
                                                 alt={speaker.profile.full_name || 'Ponente'}
-                                                className="h-full w-full object-cover"
+                                                fill
+                                                unoptimized
+                                                sizes="96px"
+                                                className="object-cover"
                                             />
                                         ) : (
                                             <div className="flex h-full w-full items-center justify-center bg-primary/5 text-2xl font-semibold text-primary/40">

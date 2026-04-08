@@ -32,7 +32,7 @@ const DEFAULT_SERVICES: Service[] = [
     { name: 'Consulta Psicológica', duration: 60, price: 0, modality: 'both' }
 ]
 
-export function BookingWizard({ psychologist, patient, existingAppointments }: BookingWizardProps) {
+export function BookingWizard({ psychologist, existingAppointments }: BookingWizardProps) {
     const services: Service[] = (psychologist?.services && psychologist.services.length > 0)
         ? psychologist.services
         : DEFAULT_SERVICES
@@ -49,14 +49,6 @@ export function BookingWizard({ psychologist, patient, existingAppointments }: B
     // Calendar navigation
     const [calendarMonth, setCalendarMonth] = useState(new Date())
 
-    // Determine the modality based on the selected service
-    const getModality = (): string => {
-        if (!selectedService) return 'video'
-        if (selectedService.modality === 'video' || selectedService.modality === 'in_person') {
-            return selectedService.modality
-        }
-        return 'video' // default for 'both' - can be overridden in step 2
-    }
     const [bookingType, setBookingType] = useState('video')
 
     // Generate available time slots
@@ -72,7 +64,7 @@ export function BookingWizard({ psychologist, patient, existingAppointments }: B
         const dayKey = dayNames[date.getDay()]
         const dayAvailability = psychologist?.availability?.[dayKey]
 
-        let slots: string[] = []
+        const slots: string[] = []
 
         if (dayAvailability && dayAvailability.length > 0) {
             // Use psychologist's configured availability

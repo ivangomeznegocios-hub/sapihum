@@ -3,12 +3,9 @@
 import { useState, useTransition } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
 import {
     Mic2,
     Save,
-    Plus,
-    X,
     Globe,
     Trash2,
 } from 'lucide-react'
@@ -122,7 +119,7 @@ interface SpeakerProfileFormProps {
     showSocialLinks?: boolean // Controlled by admin flag
 }
 
-export function SpeakerProfileForm({ speaker, userId, showSocialLinks = false }: SpeakerProfileFormProps) {
+export function SpeakerProfileForm({ speaker, showSocialLinks = false }: SpeakerProfileFormProps) {
     const [isPending, startTransition] = useTransition()
     const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
 

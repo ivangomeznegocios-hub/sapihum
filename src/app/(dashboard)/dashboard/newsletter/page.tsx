@@ -1,8 +1,8 @@
+import Image from 'next/image'
 import { createClient } from '@/lib/supabase/server'
 import { getUserProfile } from '@/lib/supabase/server'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import Link from 'next/link'
-import type { Newsletter } from '@/types/database'
 
 const MONTH_NAMES = [
     'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
@@ -48,10 +48,12 @@ export default async function NewsletterPage() {
                 <Card className="overflow-hidden">
                     {newsletter.cover_image_url && (
                         <div className="relative w-full aspect-[21/9] bg-gradient-to-br from-primary/20 to-primary/5">
-                            <img
+                            <Image
                                 src={newsletter.cover_image_url}
                                 alt={newsletter.title}
-                                className="w-full h-full object-cover"
+                                fill
+                                className="object-cover"
+                                sizes="100vw"
                             />
                         </div>
                     )}
@@ -102,10 +104,12 @@ export default async function NewsletterPage() {
                             <Card key={nl.id} className="hover:shadow-md transition-shadow">
                                 {nl.cover_image_url && (
                                     <div className="relative aspect-[16/9] bg-gradient-to-br from-muted to-muted/50">
-                                        <img
+                                        <Image
                                             src={nl.cover_image_url}
                                             alt={nl.title}
-                                            className="w-full h-full object-cover rounded-t-lg"
+                                            fill
+                                            className="object-cover rounded-t-lg"
+                                            sizes="(max-width: 768px) 100vw, 33vw"
                                         />
                                     </div>
                                 )}

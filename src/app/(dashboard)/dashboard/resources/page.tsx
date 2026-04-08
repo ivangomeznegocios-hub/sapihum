@@ -248,7 +248,7 @@ export default async function ResourcesPage({
 
     // Fetch creator names
     const creatorIds = [...new Set(resources.map(r => (r as any).created_by).filter(Boolean))]
-    let creatorMap: Record<string, string> = {}
+    const creatorMap: Record<string, string> = {}
 
     if (creatorIds.length > 0) {
         const supabase = await createClient()

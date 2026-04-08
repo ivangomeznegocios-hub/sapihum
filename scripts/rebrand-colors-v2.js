@@ -3,15 +3,18 @@ const path = require('path');
 
 function walkDir(dir, callback) {
   fs.readdirSync(dir).forEach(f => {
-    let dirPath = path.join(dir, f);
-    let isDirectory = fs.statSync(dirPath).isDirectory();
-    isDirectory ? walkDir(dirPath, callback) : callback(path.join(dir, f));
+    const dirPath = path.join(dir, f);
+    const isDirectory = fs.statSync(dirPath).isDirectory();
+    if (isDirectory) {
+      walkDir(dirPath, callback);
+    } else {
+      callback(path.join(dir, f));
+    }
   });
 }
 
 function replaceColors(content, filePath) {
   let c = content;
-  const isMarketing = filePath.includes('(marketing)') || filePath.includes('catalog') || filePath.includes('pricing');
 
   // ═══════════════════════════════════════════════════════
   // 1. HARDCODED HEX VALUES (navy blues from old design)
@@ -155,15 +158,14 @@ const targetDirs = [
 ];
 
 let filesModified = 0;
-let totalReplacements = 0;
 
 targetDirs.forEach(dir => {
   const fullDir = path.join(process.cwd(), dir);
   if (fs.existsSync(fullDir)) {
     walkDir(fullDir, filePath => {
       if (filePath.endsWith('.tsx') || filePath.endsWith('.ts')) {
-        let originalContent = fs.readFileSync(filePath, 'utf8');
-        let newContent = replaceColors(originalContent, filePath);
+        const originalContent = fs.readFileSync(filePath, 'utf8');
+        const newContent = replaceColors(originalContent, filePath);
         
         if (newContent !== originalContent) {
           fs.writeFileSync(filePath, newContent, 'utf8');

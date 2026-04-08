@@ -12,7 +12,6 @@ interface PurchaseAIButtonProps {
 
 export function PurchaseAIButton({
     minutes,
-    priceMXN,
     label = 'Comprar Paquete',
     packageKey,
 }: PurchaseAIButtonProps) {

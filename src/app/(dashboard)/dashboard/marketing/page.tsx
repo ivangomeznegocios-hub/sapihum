@@ -75,13 +75,6 @@ export default async function MarketingHubPage() {
     const inProgressCount = services.filter(s => s.status === 'in_progress').length
     const totalServices = services.length || 6
 
-    // Determine next step for the user
-    const nextStep = !hasBrief
-        ? { number: 1, label: 'Completa tu Brief de Marca', done: false }
-        : brief.status === 'submitted'
-            ? { number: 2, label: 'Brief en revisión por tu equipo', done: false }
-            : { number: 3, label: 'Seguimiento activo de servicios', done: false }
-
     return (
         <div className="space-y-8 max-w-6xl mx-auto pb-10">
             {/* Service Initializer (client component, invisible) */}

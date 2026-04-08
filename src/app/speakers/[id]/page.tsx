@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import { notFound } from 'next/navigation'
 import { getPublicEventPath } from '@/lib/events/public'
 import { getSpeakerById, getSpeakerEvents } from '@/lib/supabase/queries/speakers'
@@ -97,12 +98,15 @@ export default async function PublicSpeakerDetailPage({ params, searchParams }: 
             <div className="relative overflow-hidden rounded-2xl border bg-gradient-to-br from-primary/20 via-primary/5 to-background">
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(var(--primary-rgb),0.1),transparent_70%)]" />
                 <div className="relative flex flex-col items-center gap-6 p-6 sm:p-8 md:flex-row md:items-start md:gap-8 md:p-12">
-                    <div className="h-36 w-36 flex-shrink-0 overflow-hidden rounded-2xl border-4 border-background shadow-xl sm:h-40 sm:w-40 md:h-48 md:w-48">
+                    <div className="relative h-36 w-36 flex-shrink-0 overflow-hidden rounded-2xl border-4 border-background shadow-xl sm:h-40 sm:w-40 md:h-48 md:w-48">
                         {speakerImage ? (
-                            <img
+                            <Image
                                 src={speakerImage}
                                 alt={speaker.profile?.full_name || 'Ponente'}
-                                className="h-full w-full object-cover"
+                                fill
+                                unoptimized
+                                sizes="(min-width: 768px) 192px, 144px"
+                                className="object-cover"
                             />
                         ) : (
                             <div className="flex h-full w-full items-center justify-center bg-primary/10">
@@ -195,8 +199,15 @@ export default async function PublicSpeakerDetailPage({ params, searchParams }: 
                                     <Link key={event.id} href={getPublicEventPath(event)}>
                                         <Card className="flex h-full cursor-pointer flex-col transition-colors hover:border-primary/50">
                                             {event.image_url ? (
-                                                <div className="aspect-video w-full overflow-hidden rounded-t-xl border-b">
-                                                    <img src={event.image_url} alt={event.title} className="h-full w-full object-cover" />
+                                                <div className="relative aspect-video w-full overflow-hidden rounded-t-xl border-b">
+                                                    <Image
+                                                        src={event.image_url}
+                                                        alt={event.title}
+                                                        fill
+                                                        unoptimized
+                                                        sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+                                                        className="object-cover"
+                                                    />
                                                 </div>
                                             ) : (
                                                 <div className="flex aspect-video w-full items-center justify-center rounded-t-xl border-b bg-muted">

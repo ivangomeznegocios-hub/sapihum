@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import { notFound, redirect } from 'next/navigation'
 import {
     ArrowLeft,
@@ -142,8 +143,15 @@ export default async function EventHubPage({ params }: PageProps) {
             <div className="grid gap-6 lg:grid-cols-[1.5fr,0.9fr]">
                 <div className="space-y-6">
                     {event.image_url && (
-                        <div className="overflow-hidden rounded-2xl border bg-muted">
-                            <img src={event.image_url} alt={event.title} className="aspect-[16/9] w-full object-cover" />
+                        <div className="relative aspect-[16/9] overflow-hidden rounded-2xl border bg-muted">
+                            <Image
+                                src={event.image_url}
+                                alt={event.title}
+                                fill
+                                unoptimized
+                                sizes="(min-width: 1024px) 66vw, 100vw"
+                                className="object-cover"
+                            />
                         </div>
                     )}
 

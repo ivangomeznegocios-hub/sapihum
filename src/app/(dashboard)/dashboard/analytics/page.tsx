@@ -1,4 +1,4 @@
-import { createClient, getUserProfile } from '@/lib/supabase/server'
+import { getUserProfile } from '@/lib/supabase/server'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { redirect } from 'next/navigation'
 import {
@@ -6,13 +6,10 @@ import {
     Users,
     Calendar,
     TrendingUp,
-    Activity,
     Clock,
     DollarSign,
     HeartPulse,
-    Percent,
     PieChart,
-    Target
 } from 'lucide-react'
 import { getAnalytics } from '@/lib/supabase/queries/analytics'
 import { getAdminSettings } from './actions'
@@ -28,7 +25,6 @@ export const dynamic = 'force-dynamic'
 export const revalidate = 0
 
 export default async function AnalyticsPage() {
-    const supabase = await createClient()
     const profile = await getUserProfile()
 
     if (!profile) {

@@ -1,8 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import {
     AddNoteButton, EditNoteButton, DeleteNoteButton, PinNoteButton,
@@ -12,8 +11,8 @@ import {
 import { ToolsTabContent } from './tool-components-enhanced'
 import {
     FileText, Paperclip, Calendar, LayoutDashboard, Search,
-    Pin, Tag, Clock, File, AlertCircle, Star, BookOpen,
-    TrendingUp, Brain, ClipboardList, Activity
+    Pin, Tag, Clock, File, Star,
+    Brain, ClipboardList, Activity
 } from 'lucide-react'
 
 interface ClinicalTabsProps {
@@ -32,13 +31,6 @@ function formatDateTime(dateString: string) {
     return new Date(dateString).toLocaleString('es-ES', {
         day: 'numeric', month: 'short', year: 'numeric',
         hour: '2-digit', minute: '2-digit'
-    })
-}
-
-function formatDate(dateString: string) {
-    if (!dateString) return ''
-    return new Date(dateString).toLocaleDateString('es-ES', {
-        day: 'numeric', month: 'long', year: 'numeric'
     })
 }
 
@@ -114,7 +106,7 @@ const tabs = [
     { id: 'sesiones', label: 'Sesiones', icon: Calendar },
 ]
 
-export function ClinicalTabs({ patient, notes, documents, appointments, sessionSummaries, patientId, toolAssignments = [], tools = [] }: ClinicalTabsProps) {
+export function ClinicalTabs({ notes, documents, appointments, sessionSummaries, patientId, toolAssignments = [], tools = [] }: ClinicalTabsProps) {
     const [activeTab, setActiveTab] = useState('resumen')
     const [searchQuery, setSearchQuery] = useState('')
     const [filterTag, setFilterTag] = useState<string | null>(null)
@@ -373,7 +365,7 @@ export function ClinicalTabs({ patient, notes, documents, appointments, sessionS
                                     {searchQuery || filterTag ? 'No se encontraron notas con esos filtros' : 'No hay notas clínicas'}
                                 </p>
                                 <p className="text-sm text-muted-foreground mt-1">
-                                    Usa el botón "Nueva Nota" para agregar la primera
+                                    {'Usa el botón "Nueva Nota" para agregar la primera'}
                                 </p>
                             </CardContent>
                         </Card>

@@ -1,7 +1,7 @@
 'use client'
 
 import { Button } from '@/components/ui/button'
-import { Share2, Check, Copy } from 'lucide-react'
+import { Check, Copy } from 'lucide-react'
 import { useState } from 'react'
 
 export function ShareButton() {

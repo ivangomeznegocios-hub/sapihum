@@ -127,7 +127,14 @@ export function PublicEventEmbed({ event }: { event: any }) {
                 />
                 <div className="card">
                     <div className="image-container">
-                        {event.image_url && <img src={event.image_url} alt={event.title} />}
+                        {event.image_url && (
+                            <div
+                                role="img"
+                                aria-label={event.title}
+                                className="absolute inset-0 bg-cover bg-center"
+                                style={{ backgroundImage: `url("${event.image_url}")` }}
+                            />
+                        )}
                         <div className="status-badge">
                             {isPast ? 'Finalizado' : event.status === 'live' ? 'En Vivo' : 'Próximo'}
                         </div>

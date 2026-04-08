@@ -1,3 +1,4 @@
+import Image from 'next/image'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { getSpeakerById, getSpeakerEvents } from '@/lib/supabase/queries/speakers'
@@ -17,7 +18,6 @@ import {
     Award,
     Sparkles,
     Calendar,
-    ExternalLink,
     Edit
 } from 'lucide-react'
 
@@ -75,12 +75,14 @@ export default async function SpeakerDetailPage({ params }: PageProps) {
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(var(--primary-rgb),0.1),transparent_70%)]" />
                 <div className="relative p-8 md:p-12 flex flex-col md:flex-row gap-8 items-center md:items-start">
                     {/* Photo */}
-                    <div className="w-40 h-40 md:w-48 md:h-48 rounded-2xl overflow-hidden border-4 border-background shadow-xl flex-shrink-0">
+                    <div className="relative w-40 h-40 md:w-48 md:h-48 rounded-2xl overflow-hidden border-4 border-background shadow-xl flex-shrink-0">
                         {speaker.photo_url ? (
-                            <img
+                            <Image
                                 src={speaker.photo_url}
                                 alt={speaker.profile?.full_name || 'Ponente'}
-                                className="w-full h-full object-cover"
+                                fill
+                                className="object-cover"
+                                sizes="(max-width: 768px) 160px, 192px"
                             />
                         ) : (
                             <div className="w-full h-full bg-primary/10 flex items-center justify-center">
@@ -175,7 +177,13 @@ export default async function SpeakerDetailPage({ params }: PageProps) {
                                     <Link key={event.id} href={`/dashboard/events/${event.id}`} className="block">
                                         <div className="flex items-center gap-4 p-3 rounded-lg border hover:bg-muted/50 transition-colors">
                                             {event.image_url && (
-                                                <img src={event.image_url} alt={event.title} className="w-16 h-12 rounded-md object-cover" />
+                                                <Image
+                                                    src={event.image_url}
+                                                    alt={event.title}
+                                                    width={64}
+                                                    height={48}
+                                                    className="rounded-md object-cover"
+                                                />
                                             )}
                                             <div className="flex-1 min-w-0">
                                                 <h4 className="font-medium text-sm truncate">{event.title}</h4>
@@ -207,7 +215,13 @@ export default async function SpeakerDetailPage({ params }: PageProps) {
                                     <Link key={event.id} href={`/dashboard/events/${event.id}`} className="block">
                                         <div className="flex items-center gap-4 p-3 rounded-lg border hover:bg-muted/50 transition-colors">
                                             {event.image_url && (
-                                                <img src={event.image_url} alt={event.title} className="w-16 h-12 rounded-md object-cover" />
+                                                <Image
+                                                    src={event.image_url}
+                                                    alt={event.title}
+                                                    width={64}
+                                                    height={48}
+                                                    className="rounded-md object-cover"
+                                                />
                                             )}
                                             <div className="flex-1 min-w-0">
                                                 <h4 className="font-medium text-sm truncate">{event.title}</h4>

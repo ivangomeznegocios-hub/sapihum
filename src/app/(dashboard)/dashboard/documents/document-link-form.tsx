@@ -32,7 +32,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select'
-import { Loader2, Plus, Link as LinkIcon } from 'lucide-react'
+import { Loader2, Link as LinkIcon } from 'lucide-react'
 
 const DocumentSchema = z.object({
     patient_id: z.string().min(1, 'Debe seleccionar un paciente'),
@@ -84,7 +84,7 @@ export function DocumentLinkForm({ patients }: DocumentLinkFormProps) {
             } else {
                 setServerError(result.message || 'Error al guardar el enlace')
             }
-        } catch (error) {
+        } catch {
             setServerError('Error inesperado al guardar el enlace')
         } finally {
             setIsPending(false)

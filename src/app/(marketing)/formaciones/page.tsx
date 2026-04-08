@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import type { Formation } from '@/types/database'
 import { GraduationCap, ArrowRight, PlayCircle, Award, Clock3, Sparkles, Layers3, LibraryBig } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -133,10 +134,13 @@ export default async function FormationsCatalogPage() {
                                     >
                                         <div className="relative aspect-[16/10] overflow-hidden border-b border-white/10 bg-gradient-to-br from-brand-yellow/20 via-black to-brand-brown/30">
                                             {formation.image_url ? (
-                                                <img
+                                                <Image
                                                     src={formation.image_url}
                                                     alt={formation.title}
-                                                    className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                                                    fill
+                                                    unoptimized
+                                                    sizes="(min-width: 1024px) 50vw, 100vw"
+                                                    className="object-cover transition-transform duration-700 group-hover:scale-105"
                                                 />
                                             ) : (
                                                 <div className="absolute inset-0 flex items-center justify-center">

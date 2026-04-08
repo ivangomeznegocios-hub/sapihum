@@ -9,7 +9,6 @@ import {
     ArrowLeft,
     ArrowRight,
     Brain,
-    CheckCircle2,
     ClipboardList,
     RotateCcw,
     Timer,

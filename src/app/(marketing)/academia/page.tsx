@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import Image from 'next/image'
 import { AcademiaCatalog } from '@/components/catalog/academia-catalog'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -151,10 +152,13 @@ export default async function AcademiaPage() {
                                         <div className="grid h-full gap-0 md:grid-cols-[220px_minmax(0,1fr)]">
                                             <div className="relative min-h-[220px] overflow-hidden bg-gradient-to-br from-brand-yellow/20 via-black to-brand-brown/40">
                                                 {formation.image_url ? (
-                                                    <img
+                                                    <Image
                                                         src={formation.image_url}
                                                         alt={formation.title}
-                                                        className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                                        fill
+                                                        unoptimized
+                                                        sizes="(min-width: 1024px) 50vw, 100vw"
+                                                        className="object-cover transition-transform duration-500 group-hover:scale-105"
                                                     />
                                                 ) : (
                                                     <div className="absolute inset-0 flex items-center justify-center text-5xl font-black text-white/10">
@@ -304,10 +308,13 @@ function FeaturedEventCard({ event }: { event: any }) {
         <div className="group relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] shadow-2xl backdrop-blur-sm transition-all duration-500 hover:border-brand-yellow/20">
             <div className="relative aspect-[16/9] overflow-hidden">
                 {event.image_url ? (
-                    <img
+                    <Image
                         src={event.image_url}
                         alt={event.title}
-                        className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                        fill
+                        unoptimized
+                        sizes="(min-width: 1024px) 50vw, 100vw"
+                        className="object-cover transition-transform duration-700 group-hover:scale-105"
                     />
                 ) : (
                     <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-brand-yellow/60 to-white/40">
@@ -353,7 +360,14 @@ function FeaturedEventCard({ event }: { event: any }) {
                 {speakerName && (
                     <div className="flex items-center gap-2">
                         {speakerAvatar ? (
-                            <img src={speakerAvatar} alt="" className="h-6 w-6 rounded-full object-cover ring-1 ring-white/20" />
+                            <Image
+                                src={speakerAvatar}
+                                alt=""
+                                width={24}
+                                height={24}
+                                unoptimized
+                                className="h-6 w-6 rounded-full object-cover ring-1 ring-white/20"
+                            />
                         ) : (
                             <div className="flex h-6 w-6 items-center justify-center rounded-full bg-brand-yellow/30 text-[10px] font-bold text-brand-yellow">
                                 {speakerName.charAt(0)}

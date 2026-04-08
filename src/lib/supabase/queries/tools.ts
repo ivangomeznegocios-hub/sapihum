@@ -8,7 +8,6 @@ import type {
     ToolAssignmentWithTool,
     ToolResponse,
     ToolResponseInsert,
-    ToolResponseUpdate,
     ToolCategory
 } from '@/types/database'
 

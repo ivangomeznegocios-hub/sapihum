@@ -15,7 +15,6 @@ import {
     deleteDocument,
     getDocumentUrl,
     saveSessionSummary,
-    deleteSessionSummary
 } from './actions'
 import {
     Plus, X, Loader2, UserPlus, FileText, Trash2, Edit2,
@@ -49,7 +48,7 @@ export function AddPatientForm({ onClose }: AddPatientFormProps) {
                 setSuccess(typeof result.success === 'string' ? result.success : 'Operación exitosa')
                 setTimeout(() => onClose(), 2000)
             }
-        } catch (e) {
+        } catch {
             setError('Ocurrió un error inesperado')
         } finally {
             setIsLoading(false)
@@ -770,7 +769,7 @@ export function DeleteDocumentButton({ documentId }: { documentId: string }) {
     )
 }
 
-export function DownloadDocumentButton({ filePath, fileName }: { filePath: string; fileName: string }) {
+export function DownloadDocumentButton({ filePath }: { filePath: string; fileName: string }) {
     const [isLoading, setIsLoading] = useState(false)
 
     async function handleDownload() {

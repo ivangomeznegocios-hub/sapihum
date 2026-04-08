@@ -226,7 +226,7 @@ export default async function TasksPage() {
                                 <CheckSquare className="h-10 w-10 text-muted-foreground mb-4 opacity-50" />
                                 <h3 className="text-lg font-medium">No hay tareas pendientes</h3>
                                 <p className="text-sm text-muted-foreground max-w-xs mt-1">
-                                    Usa el botón "Asignar Tarea" para enviar actividades a tus pacientes.
+                                    {'Usa el botón "Asignar Tarea" para enviar actividades a tus pacientes.'}
                                 </p>
                             </CardContent>
                         </Card>

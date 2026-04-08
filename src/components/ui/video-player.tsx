@@ -1,7 +1,8 @@
 'use client'
 
+import Image from 'next/image'
 import { useState, useRef, useEffect, useCallback } from 'react'
-import { Play, Pause, Volume2, VolumeX, Maximize, Minimize, Loader2, Settings } from 'lucide-react'
+import { Play, Pause, Volume2, VolumeX, Maximize, Minimize, Loader2 } from 'lucide-react'
 
 interface VideoPlayerProps {
     /** YouTube URL or video ID */
@@ -101,6 +102,33 @@ export function VideoPlayer({
 
     const videoId = extractYouTubeId(src)
     const vimeoId = extractVimeoId(src)
+    const primaryThumbnailUrl = poster || (videoId ? `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg` : '')
+    const fallbackThumbnailUrl = videoId ? `https://img.youtube.com/vi/${videoId}/hqdefault.jpg` : ''
+    const [thumbnailSrc, setThumbnailSrc] = useState(primaryThumbnailUrl)
+
+    const stopProgressTracking = useCallback(() => {
+        if (progressIntervalRef.current) {
+            clearInterval(progressIntervalRef.current)
+            progressIntervalRef.current = null
+        }
+    }, [])
+
+    const startProgressTracking = useCallback(() => {
+        stopProgressTracking()
+        progressIntervalRef.current = setInterval(() => {
+            if (playerRef.current && playerRef.current.getCurrentTime) {
+                const time = playerRef.current.getCurrentTime()
+                const dur = playerRef.current.getDuration()
+                setCurrentTime(time)
+                setDuration(dur)
+                setProgress((time / dur) * 100)
+            }
+        }, 250)
+    }, [stopProgressTracking])
+
+    useEffect(() => {
+        setThumbnailSrc(primaryThumbnailUrl)
+    }, [primaryThumbnailUrl])
 
     // Load YouTube IFrame API
     useEffect(() => {
@@ -176,28 +204,7 @@ export function VideoPlayer({
                 playerRef.current = null
             }
         }
-    }, [hasStarted, videoId])
-
-    // Progress tracking
-    const startProgressTracking = useCallback(() => {
-        stopProgressTracking()
-        progressIntervalRef.current = setInterval(() => {
-            if (playerRef.current && playerRef.current.getCurrentTime) {
-                const time = playerRef.current.getCurrentTime()
-                const dur = playerRef.current.getDuration()
-                setCurrentTime(time)
-                setDuration(dur)
-                setProgress((time / dur) * 100)
-            }
-        }, 250)
-    }, [])
-
-    const stopProgressTracking = useCallback(() => {
-        if (progressIntervalRef.current) {
-            clearInterval(progressIntervalRef.current)
-            progressIntervalRef.current = null
-        }
-    }, [])
+    }, [hasStarted, videoId, startProgressTracking, stopProgressTracking])
 
     // Fullscreen change listener
     useEffect(() => {
@@ -245,7 +252,7 @@ export function VideoPlayer({
                 className="flex items-center justify-center bg-gray-900 text-gray-400 rounded-xl"
                 style={{ aspectRatio }}
             >
-                <p className="text-sm">URL de video no válida (Solo YouTube o Vimeo)</p>
+                <p className="text-sm">URL de video no valida (solo YouTube o Vimeo)</p>
             </div>
         )
     }
@@ -307,9 +314,6 @@ export function VideoPlayer({
         }
     }
 
-    // Generate thumbnail URL if not provided
-    const thumbnailUrl = poster || `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`
-
     return (
         <div
             ref={containerRef}
@@ -323,12 +327,17 @@ export function VideoPlayer({
             {!hasStarted && (
                 <div className="absolute inset-0 z-10">
                     {/* Thumbnail Image */}
-                    <img
-                        src={thumbnailUrl}
+                    <Image
+                        src={thumbnailSrc}
                         alt={title}
-                        className="w-full h-full object-cover"
-                        onError={(e) => {
-                            (e.target as HTMLImageElement).src = `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`
+                        fill
+                        unoptimized
+                        sizes="100vw"
+                        className="object-cover"
+                        onError={() => {
+                            if (thumbnailSrc !== fallbackThumbnailUrl) {
+                                setThumbnailSrc(fallbackThumbnailUrl)
+                            }
                         }}
                     />
 

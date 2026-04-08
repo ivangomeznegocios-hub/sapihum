@@ -1,8 +1,7 @@
 'use client'
 
-import { useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { Plus, Trash2, Video, MapPin } from 'lucide-react'
+import { Plus, Trash2 } from 'lucide-react'
 
 interface Service {
     name: string

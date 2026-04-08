@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import {
@@ -402,12 +403,14 @@ export function LeaderboardTable({
                             )}
                         </div>
 
-                        <div className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-muted">
+                        <div className="relative flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-muted">
                             {referrer.avatar_url ? (
-                                <img
+                                <Image
                                     src={referrer.avatar_url}
                                     alt={referrer.full_name || ''}
-                                    className="h-full w-full object-cover"
+                                    fill
+                                    className="object-cover"
+                                    sizes="32px"
                                 />
                             ) : (
                                 <span className="text-xs font-semibold text-muted-foreground">

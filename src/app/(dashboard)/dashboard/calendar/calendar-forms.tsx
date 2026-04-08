@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { createAppointment, cancelAppointment, confirmAppointment, completeAppointment, quickCreatePatient } from './actions'
-import { Plus, X, Check, Loader2, Calendar, Clock, Video, MapPin, CheckCircle2, AlertCircle, UserPlus, Phone, Mail, User } from 'lucide-react'
+import { Plus, X, Check, Loader2, Calendar, Clock, Video, CheckCircle2, AlertCircle, UserPlus, Phone, Mail, User } from 'lucide-react'
 import { Textarea } from '@/components/ui/textarea'
 
 interface Patient {
@@ -181,7 +181,7 @@ export function CreateAppointmentForm({ patients: initialPatients, onClose }: Cr
                 setSuccess(result.success || 'Cita creada')
                 setTimeout(() => onClose(), 1500)
             }
-        } catch (e) {
+        } catch {
             setError('Error inesperado al crear la cita')
         } finally {
             setIsLoading(false)

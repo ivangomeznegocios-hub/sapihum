@@ -201,7 +201,12 @@ export function PublicEventLanding({
                 {/* Background image or gradient */}
                 <div className="absolute inset-0 bg-gradient-to-br from-neutral-900 via-neutral-800 to-brand-brown/80">
                     {event.image_url && (
-                        <img src={event.image_url} alt="" className="absolute inset-0 h-full w-full object-cover opacity-20 blur-sm" />
+                        <div
+                            role="img"
+                            aria-label={event.title}
+                            className="absolute inset-0 h-full w-full bg-cover bg-center opacity-20 blur-sm"
+                            style={{ backgroundImage: `url("${event.image_url}")` }}
+                        />
                     )}
                     <div className="absolute inset-0 bg-gradient-to-t from-neutral-900/95 via-neutral-900/70 to-neutral-900/50" />
                     {/* Decorative */}
@@ -268,7 +273,12 @@ export function PublicEventLanding({
                                     const speakerPreview = (
                                         <>
                                             {avatar ? (
-                                                <img src={avatar} alt={name} className="h-8 w-8 rounded-full object-cover ring-2 ring-white/20" />
+                                                <div
+                                                    role="img"
+                                                    aria-label={name}
+                                                    className="h-8 w-8 rounded-full bg-cover bg-center ring-2 ring-white/20"
+                                                    style={{ backgroundImage: `url("${avatar}")` }}
+                                                />
                                             ) : (
                                                 <div className="flex h-8 w-8 items-center justify-center rounded-full bg-brand-yellow/30 text-xs font-bold text-brand-yellow">
                                                     {name.charAt(0)}
@@ -598,7 +608,12 @@ export function PublicEventLanding({
                                     const speakerCard = (
                                         <>
                                             {avatar ? (
-                                                <img src={avatar} alt={name} className="h-12 w-12 rounded-full object-cover ring-2 ring-border" />
+                                                <div
+                                                    role="img"
+                                                    aria-label={name}
+                                                    className="h-12 w-12 rounded-full bg-cover bg-center ring-2 ring-border"
+                                                    style={{ backgroundImage: `url("${avatar}")` }}
+                                                />
                                             ) : (
                                                 <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-brand-yellow text-sm font-bold text-brand-yellow">
                                                     {name.charAt(0)}
@@ -728,7 +743,12 @@ export function PublicEventLanding({
                                         className="group flex items-start gap-3 rounded-xl border border-border/40 p-3 transition-colors hover:bg-muted/50"
                                     >
                                         {item.image_url ? (
-                                            <img src={item.image_url} alt={item.title} className="h-12 w-12 shrink-0 rounded-lg object-cover" />
+                                            <div
+                                                role="img"
+                                                aria-label={item.title}
+                                                className="h-12 w-12 shrink-0 rounded-lg bg-cover bg-center"
+                                                style={{ backgroundImage: `url("${item.image_url}")` }}
+                                            />
                                         ) : (
                                             <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-muted">
                                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-muted-foreground"><rect width="18" height="18" x="3" y="4" rx="2" ry="2" /><line x1="16" x2="16" y1="2" y2="6" /><line x1="8" x2="8" y1="2" y2="6" /><line x1="3" x2="21" y1="10" y2="10" /></svg>

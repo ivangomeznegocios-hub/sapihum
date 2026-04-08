@@ -1,7 +1,7 @@
 'use client'
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { DollarSign, Clock, CheckCircle2, TrendingUp, Calendar, Ban } from 'lucide-react'
+import { Clock, CheckCircle2, TrendingUp, Calendar, Ban } from 'lucide-react'
 import type { SpeakerFinancialSummary } from '@/types/database'
 
 interface EarningsSummaryProps {

@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 import {
     GraduationCap,
     CheckCircle2,
@@ -266,10 +267,13 @@ export default async function FormationLandingPage({ params }: { params: Promise
                                         <div className="grid gap-0 lg:grid-cols-[260px_minmax(0,1fr)]">
                                             <div className="relative min-h-[220px] overflow-hidden border-b border-white/10 bg-gradient-to-br from-brand-yellow/20 via-black to-brand-brown/30 lg:border-b-0 lg:border-r">
                                                 {event.image_url ? (
-                                                    <img
+                                                    <Image
                                                         src={event.image_url}
                                                         alt={event.title}
-                                                        className="absolute inset-0 h-full w-full object-cover"
+                                                        fill
+                                                        unoptimized
+                                                        sizes="144px"
+                                                        className="object-cover"
                                                     />
                                                 ) : (
                                                     <div className="absolute inset-0 flex items-center justify-center">

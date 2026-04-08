@@ -1,4 +1,4 @@
-import { createClient, getUserProfile } from '@/lib/supabase/server'
+import { getUserProfile } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { EarningsSummary } from '@/components/dashboard/earnings-summary'
 import { EarningsTable } from '@/components/dashboard/earnings-table'
@@ -7,7 +7,7 @@ import { getSpeakerFinancialSummary, getSpeakerEarningsHistory, getSpeakerCourse
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
-import { ArrowRight, CalendarDays, ExternalLink, Video, Link2, Users, FileSpreadsheet } from 'lucide-react'
+import { ArrowRight, CalendarDays, Video, Link2, Users } from 'lucide-react'
 
 export default async function EarningsDashboardPage() {
     const profile = await getUserProfile()

@@ -3,7 +3,7 @@
 import { useRouter, useSearchParams, usePathname } from 'next/navigation'
 import { useCallback } from 'react'
 import { Button } from '@/components/ui/button'
-import { Search, Filter, X } from 'lucide-react'
+import { Search, X } from 'lucide-react'
 
 const TYPE_FILTERS = [
     { value: 'all', label: 'Todos' },

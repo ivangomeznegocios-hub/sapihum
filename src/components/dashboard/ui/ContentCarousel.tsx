@@ -1,5 +1,4 @@
 import Link from 'next/link'
-import { Badge } from '@/components/ui/badge'
 import { ArrowRight, Calendar, FileText, Newspaper } from 'lucide-react'
 
 export interface ContentItem {
@@ -73,10 +72,11 @@ export function ContentCarousel({
                             {/* Image or placeholder */}
                             <div className="relative h-32 bg-gradient-to-br from-muted to-muted/50 overflow-hidden">
                                 {item.imageUrl ? (
-                                    <img
-                                        src={item.imageUrl}
-                                        alt={item.title}
-                                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                    <div
+                                        role="img"
+                                        aria-label={item.title}
+                                        className="h-full w-full bg-cover bg-center transition-transform duration-500 group-hover:scale-105"
+                                        style={{ backgroundImage: `url("${item.imageUrl}")` }}
                                     />
                                 ) : (
                                     <div className="absolute inset-0 flex items-center justify-center">

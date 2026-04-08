@@ -14,7 +14,6 @@ import {
     Send,
     CheckCircle2,
     FileEdit,
-    Sparkles,
 } from 'lucide-react'
 import type { MarketingBrief } from '@/lib/supabase/queries/marketing-services'
 
@@ -241,7 +240,7 @@ export function BriefButton({ existingBrief, variant = 'default' }: BriefButtonP
 // SERVICE INITIALIZER (client trigger)
 // ============================================
 export function ServiceInitializer() {
-    const [isPending, startTransition] = useTransition()
+    const [, startTransition] = useTransition()
 
     // Auto-initialize on mount
     useEffect(() => {

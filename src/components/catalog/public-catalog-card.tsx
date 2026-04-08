@@ -73,10 +73,11 @@ export function PublicCatalogCard({
             {/* Image Section */}
             <div className="relative aspect-[16/9] overflow-hidden bg-gradient-to-br from-neutral-900 via-neutral-800 to-brand-brown/40">
                 {event.image_url ? (
-                    <img
-                        src={event.image_url}
-                        alt={event.title}
-                        className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    <div
+                        role="img"
+                        aria-label={event.title}
+                        className="absolute inset-0 h-full w-full bg-cover bg-center transition-transform duration-500 group-hover:scale-105"
+                        style={{ backgroundImage: `url("${event.image_url}")` }}
                     />
                 ) : (
                     <div className="absolute inset-0 flex items-center justify-center">
@@ -160,7 +161,12 @@ export function PublicCatalogCard({
                     {speakerName && (
                         <div className="flex items-center gap-2">
                             {speakerAvatar ? (
-                                <img src={speakerAvatar} alt={speakerName} className="h-5 w-5 rounded-full object-cover ring-1 ring-border" />
+                                <div
+                                    role="img"
+                                    aria-label={speakerName}
+                                    className="h-5 w-5 rounded-full bg-cover bg-center ring-1 ring-border"
+                                    style={{ backgroundImage: `url("${speakerAvatar}")` }}
+                                />
                             ) : (
                                 <div className="flex h-5 w-5 items-center justify-center rounded-full bg-brand-yellow text-[9px] font-bold text-brand-yellow">
                                     {speakerName.charAt(0)}

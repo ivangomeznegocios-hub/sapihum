@@ -1,3 +1,4 @@
+import Image from 'next/image'
 import Link from 'next/link'
 import { getPublicSpeakers } from '@/lib/supabase/queries/speakers'
 import { Card, CardContent } from '@/components/ui/card'
@@ -40,12 +41,14 @@ export default async function SpeakersPage() {
                         <Link key={speaker.id} href={`/dashboard/speakers/${speaker.id}`}>
                             <Card className="overflow-hidden group hover:shadow-lg transition-all duration-300 hover:-translate-y-1 cursor-pointer h-full">
                                 {/* Photo */}
-                                <div className="aspect-[4/3] bg-gradient-to-br from-primary/20 via-primary/10 to-background relative overflow-hidden">
+                                <div className="relative aspect-[4/3] bg-gradient-to-br from-primary/20 via-primary/10 to-background overflow-hidden">
                                     {speaker.photo_url ? (
-                                        <img
+                                        <Image
                                             src={speaker.photo_url}
                                             alt={speaker.profile?.full_name || 'Ponente'}
-                                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                            fill
+                                            className="object-cover group-hover:scale-105 transition-transform duration-500"
+                                            sizes="(max-width: 1024px) 100vw, 33vw"
                                         />
                                     ) : (
                                         <div className="absolute inset-0 flex items-center justify-center">

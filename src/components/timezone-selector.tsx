@@ -12,7 +12,7 @@ interface TimezoneSelectorProps {
     userId: string
 }
 
-export function TimezoneSelector({ currentTimezone, userId }: TimezoneSelectorProps) {
+export function TimezoneSelector({ currentTimezone }: TimezoneSelectorProps) {
     const router = useRouter()
     const [timezone, setTimezone] = useState(currentTimezone || DEFAULT_TIMEZONE)
     const [saving, setSaving] = useState(false)
