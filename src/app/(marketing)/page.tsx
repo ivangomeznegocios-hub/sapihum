@@ -520,11 +520,11 @@ export default async function LandingPage() {
                       <div className="mt-4 flex items-center justify-between border-t border-white/[0.06] pt-3">
                         <div>
                           <span className="block text-[10px] font-bold text-[#c0bfbc]/50 uppercase tracking-[0.15em]">
-                            Bundle
+                            Programa completo
                           </span>
                           <span className="text-base font-bold">{formatCurrency(formation.bundle_price)}</span>
                         </div>
-                        <span className="text-[10px] font-bold text-[#f6ae02] uppercase tracking-wider">Ver programa completo →</span>
+                        <span className="text-[10px] font-bold text-[#f6ae02] uppercase tracking-wider">Ver programa completo</span>
                       </div>
                     </div>
                   </Link>

@@ -45,7 +45,7 @@ export default async function FormationsAdminPage() {
         <div className="space-y-6">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                    <h1 className="text-3xl font-bold tracking-tight">Formaciones y Bundles</h1>
+                    <h1 className="text-3xl font-bold tracking-tight">Formaciones y Programas Completos</h1>
                     <p className="mt-1 text-muted-foreground">
                         Agrupa eventos y cursos para crear programas formativos completos.
                     </p>
@@ -100,10 +100,10 @@ export default async function FormationsAdminPage() {
                                     </div>
                                     <div className="flex flex-col">
                                         <span className="mb-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Ventas completas</span>
-                                        <span className="font-medium">{formation.total_purchases || 0} bundles</span>
+                                        <span className="font-medium">{formation.total_purchases || 0} programas completos</span>
                                     </div>
                                     <div className="col-span-2 mt-1 flex flex-col">
-                                        <span className="mb-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Precio Bundle</span>
+                                        <span className="mb-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Precio Programa Completo</span>
                                         <span className="font-semibold text-primary">${formation.bundle_price} MXN</span>
                                     </div>
                                 </div>

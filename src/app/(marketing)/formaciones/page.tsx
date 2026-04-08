@@ -91,7 +91,7 @@ export default async function FormationsCatalogPage() {
                             <div className="grid gap-3">
                                 <div className="rounded-2xl border border-white/10 bg-black/40 p-4">
                                     <p className="text-xs font-semibold uppercase tracking-[0.15em] text-neutral-500">Compra</p>
-                                    <p className="mt-2 text-sm text-neutral-200">Un solo bundle por programa, sin perder el detalle de cada modulo.</p>
+                                    <p className="mt-2 text-sm text-neutral-200">Un solo pago por programa completo, sin perder el detalle de cada modulo.</p>
                                 </div>
                                 <div className="rounded-2xl border border-white/10 bg-black/40 p-4">
                                     <p className="text-xs font-semibold uppercase tracking-[0.15em] text-neutral-500">Ruta</p>
@@ -231,7 +231,7 @@ export default async function FormationsCatalogPage() {
                                             <div className="flex flex-col gap-4 border-t border-white/10 pt-5 sm:flex-row sm:items-end sm:justify-between">
                                                 <div>
                                                     <p className="text-xs font-semibold uppercase tracking-[0.15em] text-neutral-500">
-                                                        Inversion bundle
+                                                        Inversion completa
                                                     </p>
                                                     <p className="mt-2 text-3xl font-black text-white">
                                                         {formatCurrency(formation.bundle_price)}

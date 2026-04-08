@@ -207,7 +207,7 @@ export default async function AcademiaPage() {
                                                 <div className="mt-6 flex flex-col gap-4 border-t border-white/10 pt-5 sm:flex-row sm:items-center sm:justify-between">
                                                     <div>
                                                         <p className="text-xs font-semibold uppercase tracking-[0.15em] text-neutral-500">
-                                                            Inversion bundle
+                                                            Inversion completa
                                                         </p>
                                                         <p className="mt-1 text-2xl font-black text-white">
                                                             {formatCurrency(formation.bundle_price)}

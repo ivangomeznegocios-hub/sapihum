@@ -330,7 +330,7 @@ export default async function FormationLandingPage({ params }: { params: Promise
                                                     <div className="rounded-2xl border border-white/10 bg-black/25 p-4">
                                                         <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-neutral-500">Estado dentro de tu ruta</p>
                                                         <p className="mt-2 text-sm font-medium text-white">
-                                                            {hasAccess ? 'Incluido en tu acceso actual' : 'Disponible por separado o dentro del bundle'}
+                                                            {hasAccess ? 'Incluido en tu acceso actual' : 'Disponible por separado o dentro del programa completo'}
                                                         </p>
                                                     </div>
                                                     <div className="rounded-2xl border border-white/10 bg-black/25 p-4">
@@ -344,7 +344,7 @@ export default async function FormationLandingPage({ params }: { params: Promise
                                                 <div className="flex flex-col gap-3 border-t border-white/10 pt-4 sm:flex-row sm:items-center sm:justify-between">
                                                     <p className="text-sm leading-relaxed text-neutral-400">
                                                         {hasAccess
-                                                            ? 'Ya puedes entrar a este modulo desde tu acceso o desde el bundle completo.'
+                                                            ? 'Ya puedes entrar a este modulo desde tu acceso o desde la formacion completa.'
                                                             : 'Puedes revisar este modulo por separado o activarlo junto con toda la formacion.'}
                                                     </p>
 

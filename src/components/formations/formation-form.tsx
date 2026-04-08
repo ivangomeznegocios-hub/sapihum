@@ -160,7 +160,7 @@ export function FormationForm({ initialData, availableEvents, canPublish = true 
         const preferredMemberPrice = Number(bundleMemberPrice) || 0
 
         if (bundleMemberAccessType === 'discounted' && publicBundlePrice > 0 && preferredMemberPrice >= publicBundlePrice) {
-            setError('El precio preferencial para miembros debe ser menor al precio publico del bundle')
+            setError('El precio preferencial para miembros debe ser menor al precio publico del programa completo')
             setIsLoading(false)
             return
         }
@@ -340,7 +340,7 @@ export function FormationForm({ initialData, availableEvents, canPublish = true 
                         </div>
 
                         <div>
-                            <label className="text-sm font-medium">Precio Bundle Completo (Publico General)</label>
+                            <label className="text-sm font-medium">Precio Programa Completo (Publico General)</label>
                             <div className="mt-1 flex items-center">
                                 <span className="flex items-center justify-center rounded-l-md border border-r-0 bg-muted px-3 py-2 text-muted-foreground">$</span>
                                 <input
@@ -388,7 +388,7 @@ export function FormationForm({ initialData, availableEvents, canPublish = true 
                         </div>
 
                         <div>
-                            <label className="text-sm font-medium">Precio Bundle Miembros SAPIHUM</label>
+                            <label className="text-sm font-medium">Precio Programa Completo Miembros SAPIHUM</label>
                             <div className="mt-1 flex items-center">
                                 <span className="flex items-center justify-center rounded-l-md border border-r-0 bg-muted px-3 py-2 text-muted-foreground">$</span>
                                 <input
