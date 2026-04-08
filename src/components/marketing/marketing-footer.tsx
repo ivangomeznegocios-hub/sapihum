@@ -2,15 +2,16 @@ import Link from "next/link"
 
 const FOOTER_LINKS = {
   Especialidades: [
-    { label: "Psicología Clínica", href: "/especialidades/psicologia-clinica" },
-    { label: "Neuropsicología", href: "/especialidades/neuropsicologia" },
-    { label: "Psicología Forense", href: "/especialidades/psicologia-forense" },
+    { label: "PsicologÃ­a ClÃ­nica", href: "/especialidades/psicologia-clinica" },
+    { label: "NeuropsicologÃ­a", href: "/especialidades/neuropsicologia" },
+    { label: "PsicologÃ­a Forense", href: "/especialidades/psicologia-forense" },
     { label: "Organizacional", href: "/especialidades/psicologia-organizacional" },
     { label: "Infantojuvenil", href: "/especialidades/psicologia-infantojuvenil" },
     { label: "Ver las 12", href: "/especialidades" },
   ],
   Academia: [
-    { label: "Próximos Encuentros", href: "/academia" },
+    { label: "PrÃ³ximos Encuentros", href: "/academia" },
+    { label: "Formaciones", href: "/formaciones" },
     { label: "Ponentes", href: "/speakers" },
   ],
   Recursos: [
@@ -21,11 +22,11 @@ const FOOTER_LINKS = {
   Empresa: [
     { label: "Nosotros", href: "/nosotros" },
     { label: "Manifiesto", href: "/manifiesto" },
-    { label: "Investigación", href: "/nosotros" },
+    { label: "InvestigaciÃ³n", href: "/nosotros" },
     { label: "Comunidad", href: "/comunidad" },
   ],
   Legal: [
-    { label: "Términos de Servicio", href: "/terminos" },
+    { label: "TÃ©rminos de Servicio", href: "/terminos" },
     { label: "Aviso de Privacidad", href: "/aviso-privacidad" },
   ],
 }
@@ -45,7 +46,7 @@ export function MarketingFooter() {
               </span>
             </Link>
             <p className="text-sm leading-relaxed text-muted-foreground">
-              Psicología Avanzada e Investigación Humana. La plataforma integral para profesionales de la psicología.
+              PsicologÃ­a Avanzada e InvestigaciÃ³n Humana. La plataforma integral para profesionales de la psicologÃ­a.
             </p>
           </div>
 
@@ -70,7 +71,7 @@ export function MarketingFooter() {
 
         <div className="flex flex-col items-center justify-between gap-3 border-t py-6 text-center sm:flex-row sm:text-left">
           <p className="text-xs text-muted-foreground font-semibold">
-            &copy; {new Date().getFullYear()} SAPIHUM — Psicología Avanzada e Investigación Humana. Todos los derechos reservados.
+            &copy; {new Date().getFullYear()} SAPIHUM â€” PsicologÃ­a Avanzada e InvestigaciÃ³n Humana. Todos los derechos reservados.
           </p>
           <p className="text-xs text-muted-foreground">
             Construido con ciencia para la comunidad de salud mental

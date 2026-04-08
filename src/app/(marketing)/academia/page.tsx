@@ -2,9 +2,11 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { AcademiaCatalog } from '@/components/catalog/academia-catalog'
 import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
 import { splitPublicCatalogEvents } from '@/lib/events/public'
 import { getSpecializationByCode } from '@/lib/specializations'
 import { getUnifiedCatalogEvents } from '@/lib/supabase/queries/events'
+import { getPublicFormations } from '@/app/(marketing)/formaciones/actions'
 
 export const metadata: Metadata = {
     title: 'Academia SAPIHUM | Formacion Continua en Psicologia',
@@ -15,8 +17,21 @@ export const metadata: Metadata = {
     },
 }
 
+function formatCurrency(value: number | null | undefined) {
+    return `$${Number(value || 0)} MXN`
+}
+
+function formatHours(value: number | null | undefined) {
+    const hours = Number(value || 0)
+    if (!hours) return null
+    return Number.isInteger(hours) ? `${hours} horas` : `${hours.toFixed(1)} horas`
+}
+
 export default async function AcademiaPage() {
-    const allEvents = await getUnifiedCatalogEvents()
+    const [allEvents, formations] = await Promise.all([
+        getUnifiedCatalogEvents(),
+        getPublicFormations(),
+    ])
     const { upcoming, past } = splitPublicCatalogEvents(allEvents)
 
     const featuredEvent = upcoming.find((event: any) => event.image_url) || upcoming[0]
@@ -60,8 +75,13 @@ export default async function AcademiaPage() {
                             </p>
 
                             <div className="sapihum-fade-up flex flex-wrap gap-3" style={{ animationDelay: '0.3s' }}>
-                                <a href="#catalogo">
+                                <Link href="/formaciones">
                                     <Button size="lg" className="h-12 px-7 font-bold uppercase text-xs tracking-[0.1em]">
+                                        Ver formaciones
+                                    </Button>
+                                </Link>
+                                <a href="#catalogo">
+                                    <Button size="lg" variant="outline" className="h-12 px-7 font-bold uppercase text-xs tracking-[0.1em]">
                                         Explorar catalogo
                                     </Button>
                                 </a>
@@ -83,6 +103,121 @@ export default async function AcademiaPage() {
 
                 <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-background to-transparent" />
             </section>
+
+            {formations.length > 0 && (
+                <section className="w-full border-b border-border/60 bg-[#050505] px-4 py-16 sm:px-6 md:py-20 lg:px-8">
+                    <div className="mx-auto max-w-7xl">
+                        <div className="mb-10 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+                            <div>
+                                <p className="mb-3 text-[10px] font-bold uppercase tracking-[0.2em] text-brand-yellow">
+                                    Formaciones Completas
+                                </p>
+                                <h2 className="text-2xl font-bold tracking-tight text-white md:text-3xl">
+                                    Programas listos para comprar y cursar por ruta
+                                </h2>
+                                <p className="mt-2 max-w-2xl text-sm leading-relaxed text-neutral-400 md:text-base">
+                                    Aqui viven los programas completos de SAPIHUM: una sola compra, una ruta clara y acceso a todos los eventos vinculados.
+                                </p>
+                            </div>
+                            <Link href="/formaciones" className="shrink-0">
+                                <Button variant="outline" className="font-bold uppercase text-[10px] tracking-[0.1em]">
+                                    Ver todas las formaciones
+                                </Button>
+                            </Link>
+                        </div>
+
+                        <div className="grid gap-6 lg:grid-cols-2">
+                            {formations.map((formation: any) => {
+                                const specialization = formation.specialization_code
+                                    ? getSpecializationByCode(formation.specialization_code)
+                                    : null
+                                const totalHours = formatHours(formation.total_hours)
+
+                                return (
+                                    <article
+                                        key={formation.id}
+                                        className="group overflow-hidden rounded-3xl border border-white/10 bg-white/[0.03] transition-all duration-300 hover:-translate-y-1 hover:border-brand-yellow/30 hover:shadow-2xl hover:shadow-black/20"
+                                    >
+                                        <div className="grid h-full gap-0 md:grid-cols-[220px_minmax(0,1fr)]">
+                                            <div className="relative min-h-[220px] overflow-hidden bg-gradient-to-br from-brand-yellow/20 via-black to-brand-brown/40">
+                                                {formation.image_url ? (
+                                                    <img
+                                                        src={formation.image_url}
+                                                        alt={formation.title}
+                                                        className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                                    />
+                                                ) : (
+                                                    <div className="absolute inset-0 flex items-center justify-center text-5xl font-black text-white/10">
+                                                        SH
+                                                    </div>
+                                                )}
+                                                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+                                                <div className="absolute left-4 top-4">
+                                                    <span className="inline-flex rounded-full bg-brand-yellow px-3 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-black">
+                                                        Formacion
+                                                    </span>
+                                                </div>
+                                            </div>
+
+                                            <div className="flex h-full flex-col p-6 md:p-7">
+                                                <div className="mb-4 flex flex-wrap gap-2">
+                                                    {specialization && (
+                                                        <Badge variant="outline" className="border-brand-yellow/30 bg-brand-yellow/10 text-brand-yellow">
+                                                            {specialization.name}
+                                                        </Badge>
+                                                    )}
+                                                    {totalHours && (
+                                                        <Badge variant="outline" className="border-white/10 bg-white/5 text-neutral-200">
+                                                            {totalHours}
+                                                        </Badge>
+                                                    )}
+                                                    <Badge variant="outline" className="border-white/10 bg-white/5 text-neutral-200">
+                                                        Programa completo
+                                                    </Badge>
+                                                </div>
+
+                                                <h3 className="text-2xl font-bold leading-tight text-white">
+                                                    {formation.title}
+                                                </h3>
+
+                                                {formation.subtitle && (
+                                                    <p className="mt-2 text-base font-medium text-neutral-300">
+                                                        {formation.subtitle}
+                                                    </p>
+                                                )}
+
+                                                {formation.description && (
+                                                    <p className="mt-4 line-clamp-3 text-sm leading-relaxed text-neutral-400">
+                                                        {formation.description}
+                                                    </p>
+                                                )}
+
+                                                <div className="flex-1" />
+
+                                                <div className="mt-6 flex flex-col gap-4 border-t border-white/10 pt-5 sm:flex-row sm:items-center sm:justify-between">
+                                                    <div>
+                                                        <p className="text-xs font-semibold uppercase tracking-[0.15em] text-neutral-500">
+                                                            Inversion bundle
+                                                        </p>
+                                                        <p className="mt-1 text-2xl font-black text-white">
+                                                            {formatCurrency(formation.bundle_price)}
+                                                        </p>
+                                                    </div>
+                                                    <Link href={`/formaciones/${formation.slug}`}>
+                                                        <Button className="w-full font-bold uppercase text-xs tracking-[0.1em] sm:w-auto">
+                                                            Ver programa completo
+                                                        </Button>
+                                                    </Link>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </article>
+                                )
+                            })}
+                        </div>
+                    </div>
+                </section>
+            )}
 
             <section id="catalogo" className="scroll-mt-8 w-full px-4 py-16 sm:px-6 md:py-20 lg:px-8">
                 <div className="mx-auto max-w-7xl">
@@ -108,7 +243,7 @@ export default async function AcademiaPage() {
             <section className="w-full px-4 py-16">
                 <div className="relative mx-auto max-w-4xl overflow-hidden rounded-3xl shadow-2xl">
                     <div className="absolute inset-0 bg-gradient-to-br from-[#0a0a0a] via-[#111111] to-[#0a0a0a]" />
-                     <div className="sapihum-grid-bg absolute inset-0 opacity-10" />
+                    <div className="sapihum-grid-bg absolute inset-0 opacity-10" />
                     <div className="absolute -right-20 -top-20 h-48 w-48 rounded-full bg-brand-yellow/5 blur-3xl" />
                     <div className="absolute -bottom-20 -left-20 h-48 w-48 rounded-full bg-brand-brown/3 blur-3xl" />
 
@@ -232,7 +367,7 @@ function FeaturedEventCard({ event }: { event: any }) {
 
                 <div className="flex items-center gap-3 text-xs text-neutral-500">
                     <span>{dateStr}</span>
-                    <span className="text-neutral-600">·</span>
+                    <span className="text-neutral-600">Â·</span>
                     <span>{timeStr}</span>
                 </div>
 

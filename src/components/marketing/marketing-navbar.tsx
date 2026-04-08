@@ -9,27 +9,27 @@ const NAV_ITEMS = [
     label: "Especialidades",
     children: [
       {
-        label: "Psicología Clínica",
+        label: "PsicologÃ­a ClÃ­nica",
         href: "/especialidades/psicologia-clinica",
         description: "Ciencia aplicada al cuidado de la salud mental",
       },
       {
-        label: "Neuropsicología",
+        label: "NeuropsicologÃ­a",
         href: "/especialidades/neuropsicologia",
-        description: "Donde la neurociencia y la clínica convergen",
+        description: "Donde la neurociencia y la clÃ­nica convergen",
       },
       {
-        label: "Psicología Forense",
+        label: "PsicologÃ­a Forense",
         href: "/especialidades/psicologia-forense",
-        description: "Rigor científico al servicio de la justicia",
+        description: "Rigor cientÃ­fico al servicio de la justicia",
       },
       {
-        label: "Psicología Organizacional",
+        label: "PsicologÃ­a Organizacional",
         href: "/especialidades/psicologia-organizacional",
         description: "Potencia el capital humano con ciencia",
       },
       {
-        label: "Psicología Infantojuvenil",
+        label: "PsicologÃ­a Infantojuvenil",
         href: "/especialidades/psicologia-infantojuvenil",
         description: "Desarrollo saludable desde la infancia",
       },
@@ -43,19 +43,20 @@ const NAV_ITEMS = [
   {
     label: "Academia",
     children: [
-      { label: "Próximos Encuentros", href: "/academia", description: "Talleres, formaciones y sesiones en vivo" },
-      { label: "Nuestros Ponentes", href: "/speakers", description: "Directorio público de expertos y facilitadores" },
+      { label: "PrÃ³ximos Encuentros", href: "/academia", description: "Talleres, formaciones y sesiones en vivo" },
+      { label: "Formaciones", href: "/formaciones", description: "Programas completos con ruta, horas y compra directa" },
+      { label: "Nuestros Ponentes", href: "/speakers", description: "Directorio pÃºblico de expertos y facilitadores" },
     ],
   },
   {
     label: "Recursos",
     children: [
-      { label: "Blog", href: "/blog", description: "Artículos sobre psicología profesional" },
-      { label: "Recursos Gratuitos", href: "/recursos", description: "Herramientas, guías y plantillas descargables" },
-      { label: "Casos de Estudio", href: "/casos-de-exito", description: "Profesionales que transformaron su práctica" },
+      { label: "Blog", href: "/blog", description: "ArtÃ­culos sobre psicologÃ­a profesional" },
+      { label: "Recursos Gratuitos", href: "/recursos", description: "Herramientas, guÃ­as y plantillas descargables" },
+      { label: "Casos de Estudio", href: "/casos-de-exito", description: "Profesionales que transformaron su prÃ¡ctica" },
     ],
   },
-  { label: "Investigación", href: "/nosotros" },
+  { label: "InvestigaciÃ³n", href: "/nosotros" },
   { label: "Precios", href: "/precios" },
 ]
 
@@ -133,8 +134,8 @@ export function MarketingNavbar({ isLoggedIn }: MarketingNavbarProps) {
           ) : (
             <>
               <Link href="/auth/login" className="hidden sm:inline-flex">
-                <Button variant="outline" size="sm" className="font-semibold" data-analytics-cta data-analytics-label="Iniciar Sesión" data-analytics-surface="marketing_nav" data-analytics-funnel="registration">
-                  Iniciar Sesión
+                <Button variant="outline" size="sm" className="font-semibold" data-analytics-cta data-analytics-label="Iniciar SesiÃ³n" data-analytics-surface="marketing_nav" data-analytics-funnel="registration">
+                  Iniciar SesiÃ³n
                 </Button>
               </Link>
               <Link href="/auth/register" className="hidden sm:inline-flex">
@@ -153,7 +154,7 @@ export function MarketingNavbar({ isLoggedIn }: MarketingNavbarProps) {
           <button
             onClick={() => setMobileOpen(!mobileOpen)}
             className="lg:hidden flex flex-col gap-1.5 p-2 rounded-md hover:bg-accent transition-colors"
-            aria-label="Abrir menú"
+            aria-label="Abrir menÃº"
           >
             <span className={`block h-0.5 w-5 bg-foreground transition-all duration-300 ${mobileOpen ? "translate-y-2 rotate-45" : ""}`} />
             <span className={`block h-0.5 w-5 bg-foreground transition-all duration-300 ${mobileOpen ? "opacity-0" : ""}`} />
@@ -204,7 +205,7 @@ export function MarketingNavbar({ isLoggedIn }: MarketingNavbarProps) {
           {!isLoggedIn && (
             <div className="pt-3 border-t mt-3">
               <Link href="/auth/login" onClick={() => setMobileOpen(false)}>
-                <Button variant="outline" className="w-full mb-2 font-semibold" data-analytics-cta data-analytics-label="Iniciar Sesión" data-analytics-surface="marketing_nav_mobile" data-analytics-funnel="registration">Iniciar Sesión</Button>
+                <Button variant="outline" className="w-full mb-2 font-semibold" data-analytics-cta data-analytics-label="Iniciar SesiÃ³n" data-analytics-surface="marketing_nav_mobile" data-analytics-funnel="registration">Iniciar SesiÃ³n</Button>
               </Link>
               <Link href="/auth/register" onClick={() => setMobileOpen(false)}>
                 <Button className="w-full font-semibold" data-analytics-cta data-analytics-label="Comenzar" data-analytics-surface="marketing_nav_mobile" data-analytics-funnel="registration">Comenzar</Button>

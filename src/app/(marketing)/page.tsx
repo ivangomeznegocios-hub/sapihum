@@ -4,7 +4,8 @@ import { splitPublicCatalogEvents } from "@/lib/events/public"
 import { SPECIALIZATION_CATALOG } from "@/lib/specializations"
 import { getUnifiedCatalogEvents } from "@/lib/supabase/queries/events"
 import { getPublicEventPath } from "@/lib/events/public"
-import { CheckCircle2, ChevronDown, Shield, Users, BookOpen, Scaling, Beaker, FileText, Smartphone, CalendarDays, ArrowRight } from "lucide-react"
+import { getPublicFormations } from "@/app/(marketing)/formaciones/actions"
+import { Shield, Users, BookOpen, Scaling, Beaker, FileText, Smartphone, CalendarDays, ArrowRight } from "lucide-react"
 
 export const metadata = {
   title: "SAPIHUM | Comunidad Profesional de Psicología Avanzada",
@@ -146,8 +147,23 @@ const FAQS = [
   }
 ]
 
+function formatCurrency(value: number | null | undefined) {
+  return `$${Number(value || 0)} MXN`
+}
+
+function formatHours(value: number | null | undefined) {
+  const hours = Number(value || 0)
+  if (!hours) return null
+  return Number.isInteger(hours) ? `${hours} horas` : `${hours.toFixed(1)} horas`
+}
+
 export default async function LandingPage() {
-  const upcomingEvents = splitPublicCatalogEvents(await getUnifiedCatalogEvents()).upcoming.slice(0, 3)
+  const [allEvents, formations] = await Promise.all([
+    getUnifiedCatalogEvents(),
+    getPublicFormations(),
+  ])
+  const upcomingEvents = splitPublicCatalogEvents(allEvents).upcoming.slice(0, 3)
+  const featuredFormations = formations.slice(0, 2)
 
   return (
     <div className="flex flex-col items-center flex-1 w-full">
@@ -182,8 +198,13 @@ export default async function LandingPage() {
 
             {/* CTA Buttons — Luxury style */}
             <div className="sapihum-fade-up mt-12 flex flex-col sm:flex-row gap-5 w-full sm:w-auto uppercase text-xs tracking-[0.1em]" style={{ animationDelay: '0.3s' }}>
-              <Link href="/especialidades" className="w-full sm:w-auto">
+              <Link href="/formaciones" className="w-full sm:w-auto">
                 <Button size="lg" className="w-full h-13 px-10 font-bold">
+                  Ver Formaciones
+                </Button>
+              </Link>
+              <Link href="/especialidades" className="w-full sm:w-auto">
+                <Button size="lg" variant="outline" className="w-full h-13 px-10 font-bold">
                   Explorar Especialidades
                 </Button>
               </Link>
@@ -427,6 +448,95 @@ export default async function LandingPage() {
       {/* ══════════════════════════════════════════════════
           8.5. PRÓXIMOS EVENTOS
       ══════════════════════════════════════════════════ */}
+      {featuredFormations.length > 0 && (
+        <section className="w-full py-24 bg-[#050505] border-b border-white/[0.06]">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between mb-12">
+              <div className="max-w-3xl">
+                <p className="text-[10px] font-bold text-[#f6ae02] uppercase tracking-[0.2em] mb-4">
+                  Formaciones Completas
+                </p>
+                <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-white">
+                  Ya puedes explorar programas completos de compra directa
+                </h2>
+                <p className="mt-3 text-muted-foreground font-light">
+                  Si buscas una ruta estructurada, aqui no compras una sola clase: compras el programa completo con horas, contenido y acceso unificado.
+                </p>
+              </div>
+              <Link href="/formaciones" className="shrink-0">
+                <Button variant="outline" className="gap-2 font-bold uppercase text-[10px] tracking-[0.1em]">
+                  Ver todas las formaciones
+                  <ArrowRight className="h-4 w-4" />
+                </Button>
+              </Link>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {featuredFormations.map((formation: any) => {
+                const specialization = formation.specialization_code
+                  ? SPECIALIZATION_CATALOG[formation.specialization_code]
+                  : null
+                const totalHours = formatHours(formation.total_hours)
+
+                return (
+                  <Link
+                    key={formation.id}
+                    href={`/formaciones/${formation.slug}`}
+                    className="group flex flex-col overflow-hidden border border-white/[0.08] bg-black transition-all duration-500 hover:border-[#f6ae02]/20"
+                  >
+                    <div className="relative aspect-[16/9] overflow-hidden bg-gradient-to-br from-black via-[#2c2c2b] to-[#7a5602]/40">
+                      {formation.image_url ? (
+                        <img src={formation.image_url} alt={formation.title} className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" />
+                      ) : (
+                        <div className="absolute inset-0 flex items-center justify-center text-5xl font-black text-white/10">
+                          SH
+                        </div>
+                      )}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                      <span className="absolute top-3 left-3 inline-flex items-center rounded-sm px-2.5 py-1 text-[10px] font-bold text-black uppercase tracking-wider bg-[#f6ae02]">
+                        Formacion
+                      </span>
+                    </div>
+                    <div className="flex flex-1 flex-col p-5">
+                      <div className="mb-3 flex flex-wrap gap-2">
+                        {specialization && (
+                          <span className="inline-flex items-center rounded-full bg-white/5 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-white/80">
+                            {specialization.name}
+                          </span>
+                        )}
+                        {totalHours && (
+                          <span className="inline-flex items-center rounded-full bg-white/5 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-white/80">
+                            {totalHours}
+                          </span>
+                        )}
+                      </div>
+                      <h3 className="line-clamp-2 text-2xl font-semibold leading-snug group-hover:text-[#f6ae02] transition-colors duration-500">
+                        {formation.title}
+                      </h3>
+                      {formation.subtitle && (
+                        <p className="mt-2 line-clamp-2 text-sm text-muted-foreground">
+                          {formation.subtitle}
+                        </p>
+                      )}
+                      <div className="flex-1" />
+                      <div className="mt-4 flex items-center justify-between border-t border-white/[0.06] pt-3">
+                        <div>
+                          <span className="block text-[10px] font-bold text-[#c0bfbc]/50 uppercase tracking-[0.15em]">
+                            Bundle
+                          </span>
+                          <span className="text-base font-bold">{formatCurrency(formation.bundle_price)}</span>
+                        </div>
+                        <span className="text-[10px] font-bold text-[#f6ae02] uppercase tracking-wider">Ver programa completo →</span>
+                      </div>
+                    </div>
+                  </Link>
+                )
+              })}
+            </div>
+          </div>
+        </section>
+      )}
+
       {upcomingEvents.length > 0 && (
         <section className="w-full py-32 bg-background border-b border-white/[0.06]">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">

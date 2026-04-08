@@ -14,6 +14,12 @@ function formatCurrency(value: number | null | undefined) {
     return `$${Number(value || 0)} MXN`
 }
 
+function formatHours(value: number | null | undefined) {
+    const hours = Number(value || 0)
+    if (!hours) return null
+    return Number.isInteger(hours) ? `${hours} horas` : `${hours.toFixed(1)} horas`
+}
+
 export default async function FormationsCatalogPage() {
     const formations = await getPublicFormations()
 
@@ -53,7 +59,10 @@ export default async function FormationsCatalogPage() {
                     ) : (
                         <div className="flex flex-col gap-10">
                             {formations.map((formation: any) => {
-                                const specialization = getSpecializationByCode(formation.specialization_code)
+                                const specialization = formation.specialization_code
+                                    ? getSpecializationByCode(formation.specialization_code)
+                                    : null
+                                const totalHours = formatHours(formation.total_hours)
 
                                 return (
                                     <article
@@ -76,6 +85,22 @@ export default async function FormationsCatalogPage() {
                                                         {formation.subtitle}
                                                     </p>
                                                 )}
+                                            </div>
+
+                                            <div className="flex flex-wrap gap-2">
+                                                {specialization && (
+                                                    <Badge variant="secondary" className="rounded-full">
+                                                        {specialization.name}
+                                                    </Badge>
+                                                )}
+                                                {totalHours && (
+                                                    <Badge variant="secondary" className="rounded-full">
+                                                        {totalHours}
+                                                    </Badge>
+                                                )}
+                                                <Badge variant="secondary" className="rounded-full">
+                                                    Programa completo
+                                                </Badge>
                                             </div>
 
                                             {formation.description && (
