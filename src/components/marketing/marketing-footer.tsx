@@ -1,15 +1,14 @@
 import Link from "next/link"
 import { BrandWordmark } from "@/components/brand/brand-wordmark"
+import { getMarketingSpecializations } from "@/lib/specializations"
+
+const SPECIALIZATION_LINKS = getMarketingSpecializations().map((spec) => ({
+  label: spec.name,
+  href: `/especialidades/${spec.slug}`,
+}))
 
 const FOOTER_LINKS = {
-  Especialidades: [
-    { label: "Psicolog\u00EDa Cl\u00EDnica", href: "/especialidades/psicologia-clinica" },
-    { label: "Neuropsicolog\u00EDa", href: "/especialidades/neuropsicologia" },
-    { label: "Psicolog\u00EDa Forense", href: "/especialidades/psicologia-forense" },
-    { label: "Organizacional", href: "/especialidades/psicologia-organizacional" },
-    { label: "Infantojuvenil", href: "/especialidades/psicologia-infantojuvenil" },
-    { label: "Ver las 12", href: "/especialidades" },
-  ],
+  Especialidades: SPECIALIZATION_LINKS,
   Academia: [
     { label: "Pr\u00F3ximos Encuentros", href: "/academia" },
     { label: "Formaciones", href: "/formaciones" },

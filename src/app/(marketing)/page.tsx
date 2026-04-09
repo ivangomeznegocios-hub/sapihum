@@ -3,7 +3,7 @@ import Image from "next/image"
 import { BrandWordmark } from "@/components/brand/brand-wordmark"
 import { Button } from "@/components/ui/button"
 import { splitPublicCatalogEvents } from "@/lib/events/public"
-import { getSpecializationByCode, SPECIALIZATION_CATALOG } from "@/lib/specializations"
+import { getMarketingSpecializations, getSpecializationByCode } from "@/lib/specializations"
 import { getUnifiedCatalogEvents } from "@/lib/supabase/queries/events"
 import { getPublicEventPath } from "@/lib/events/public"
 import { getPublicFormations } from "@/app/(marketing)/formaciones/actions"
@@ -11,54 +11,54 @@ import { Shield, Users, BookOpen, Scaling, Beaker, FileText, Smartphone, Calenda
 
 export const metadata = {
   title: "SAPIHUM | Comunidad Profesional de Psicología Avanzada",
-  description: "La comunidad profesional para psicólogos que quieren elevar su nivel. Especializaciones, formación continua, investigación y herramientas clínicas integradas.",
+  description: "Cursos y formaciones especializadas para psicólogos que buscan crecer con más estructura, criterio y respaldo profesional.",
   openGraph: {
     title: "SAPIHUM | Comunidad Profesional de Psicología Avanzada",
-    description: "SAPIHUM reúne especializaciones, formación continua, investigación aplicada, herramientas profesionales y una red de colegas con visión de crecimiento.",
+    description: "Academia SAPIHUM: cursos, formaciones, membresía profesional y herramientas para fortalecer la práctica psicológica.",
     type: "website",
   },
 }
 
-const SPECIALTIES = Object.values(SPECIALIZATION_CATALOG).filter(s => s.status === 'active')
+const SPECIALTIES = getMarketingSpecializations()
 
 const CREDIBILITY_PILLS = [
-  "Especializaciones por área",
-  "Formación continua",
-  "Comunidad profesional",
+  "Academia especializada",
+  "Cursos y formaciones",
+  "Membresía profesional",
   "Investigación aplicada",
-  "Recursos y herramientas"
+  "Herramientas clínicas"
 ]
 
 const WHAT_YOU_GET = [
   {
     icon: <BookOpen className="w-6 h-6" />,
-    title: "Actualización Constante",
-    description: "Conocimiento vigente y respaldado científicamente para tomar mejores decisiones."
+    title: "Acceso continuo a contenidos y recursos",
+    description: "Mantente cerca de nuevos materiales, sesiones y recursos que complementan tu formación."
   },
   {
     icon: <Scaling className="w-6 h-6" />,
-    title: "Especialización con Criterio",
-    description: "12 ramas de la psicología estructuradas para llevarte al nivel experto."
+    title: "Comunidad profesional especializada",
+    description: "Comparte espacio con colegas que también buscan crecer con más estructura y criterio."
   },
   {
     icon: <Users className="w-6 h-6" />,
-    title: "Comunidad Activa",
-    description: "Intercambio, supervisión y apoyo entre colegas de alto nivel."
+    title: "Mayor cercanía con el ecosistema SAPIHUM",
+    description: "Tu experiencia se vuelve más continua al conectar academia, recursos y comunidad en un solo lugar."
   },
   {
     icon: <Smartphone className="w-6 h-6" />,
-    title: "Herramientas Integradas",
-    description: "Expediente NOM-004, agenda e IA clínica para simplificar tu trabajo administrativo."
+    title: "Herramientas complementarias para tu práctica",
+    description: "Accede a funcionalidades que te ayudan a trabajar con mejor orden y soporte operativo."
   },
   {
     icon: <Shield className="w-6 h-6" />,
-    title: "Estructura Profesional",
-    description: "Práctica sólida, organizada y segura basada en estándares internacionales."
+    title: "Entorno de actualización constante",
+    description: "Sigue en contacto con experiencias de aprendizaje y mejora profesional de forma sostenida."
   },
   {
     icon: <FileText className="w-6 h-6" />,
-    title: "Visibilidad y Posicionamiento",
-    description: "Destaca en tu perfil público como un profesional certificado en la red SAPIHUM."
+    title: "Beneficios adicionales para miembros",
+    description: "La membresía funciona como una extensión natural para quienes quieren una experiencia más amplia."
   }
 ]
 
@@ -70,7 +70,7 @@ const PLATFORM_FEATURES = [
       </svg>
     ),
     title: "Expedientes Clínicos NOM-004",
-    description: "Historias clínicas digitales con firma electrónica y trazabilidad completa.",
+    description: "Historias clínicas digitales con mejor orden, trazabilidad, respaldo documental y alineación con NOM-004 y marcos complementarios de resguardo.",
   },
   {
     icon: (
@@ -79,7 +79,7 @@ const PLATFORM_FEATURES = [
       </svg>
     ),
     title: "Agenda Inteligente",
-    description: "Agendamiento online, recordatorios automáticos, lista de espera inteligente.",
+    description: "Agendamiento, recordatorios y mejor organización del seguimiento profesional.",
   },
   {
     icon: (
@@ -88,7 +88,7 @@ const PLATFORM_FEATURES = [
       </svg>
     ),
     title: "Cobros e Integraciones",
-    description: "Stripe, transferencias y efectivo. Facturación automática incluida.",
+    description: "Opciones para facilitar cobros, seguimiento y administración operativa.",
   },
   {
     icon: (
@@ -97,31 +97,47 @@ const PLATFORM_FEATURES = [
       </svg>
     ),
     title: "IA Clínica Segura",
-    description: "Transcripción de sesiones, sugerencias de notas y análisis de evolución.",
+    description: "Apoyo para documentación, notas y procesos clínicos con mayor eficiencia.",
   },
 ]
 
-const TESTIMONIALS = [
-  {
-    quote: "SAPIHUM transformó mi práctica. Es increíble encontrar una comunidad en la que se respira tanto nivel profesional, estructura y respaldo, sin perder de vista las herramientas que me ahorran tiempo.",
-    name: "Mtra. Daniela Herrera",
-    role: "Psicóloga Clínica",
-    location: "CDMX",
-  },
-  {
-    quote: "Como neuropsicólogo, necesitaba pertenecer a una red que entendiera mis protocolos. SAPIHUM eleva el estándar de lo que debe ser la psicología moderna y eso se nota inmediatamente en la calidad de su ecosistema.",
-    name: "Dr. Roberto Medina",
-    role: "Neuropsicólogo",
-    location: "Guadalajara",
-  },
-  {
-    quote: "La sección de investigación es lo que más valoro. Es raro encontrar una comunidad profesional que combine la práctica del día a día con generación real de conocimiento avanzado.",
-    name: "Dra. Fernanda Ruiz",
-    role: "Psicóloga de la Salud",
-    location: "Monterrey",
-  },
+const CLINICAL_LEVEL2_BENEFITS = [
+  "Expedientes clínicos digitales con firma electrónica y trazabilidad.",
+  "Protocolos de evaluación estandarizados para una práctica mejor estructurada.",
+  "Supervisión clínica grupal para fortalecer criterio y toma de decisiones.",
+  "Red de derivación clínica verificada dentro del ecosistema.",
+  "Agenda online con recordatorios automáticos y mejor seguimiento.",
+  "Transcripción de sesiones con apoyo de IA clínica segura.",
+  "Seguimiento de evolución clínica con mayor orden documental.",
+  "Integraciones operativas para facilitar administración y comunicación.",
 ]
 
+const FEATURED_TEACHERS = [
+  {
+    name: "Dra. Mariana López",
+    specialty: "Neuropsicología Clínica",
+    credential: "Doctora en Neuropsicología · Docente universitaria",
+    approach: "Enfoque en evaluación e intervención aplicada"
+  },
+  {
+    name: "Dr. Alejandro Ramos",
+    specialty: "Psicología Organizacional",
+    credential: "Ph.D. en Comportamiento Organizacional",
+    approach: "Estrategias sistémicas y desarrollo de liderazgo"
+  },
+  {
+    name: "Mtra. Elena Gómez",
+    specialty: "Terapia Cognitivo-Conductual",
+    credential: "Maestría en TCC · Investigadora clínica",
+    approach: "Práctica basada en evidencia y protocolos estructurados"
+  },
+  {
+    name: "Dr. Carlos Orozco",
+    specialty: "Psicología Forense",
+    credential: "Doctor en Ciencias Forenses · Perito Oficial",
+    approach: "Evaluación pericial y perfilación criminal"
+  }
+]
 const FAQS = [
   {
     q: "¿Qué es SAPIHUM?",
@@ -133,7 +149,7 @@ const FAQS = [
   },
   {
     q: "¿Qué especialidades incluye?",
-    a: "SAPIHUM abarca 12 ramas principales de especialización en psicología, incluyendo Psicología Clínica, Neuropsicología, Psicología Organizacional, Psicología Infantil y del Adolescente, Forense, del Deporte, y más."
+    a: "Actualmente la experiencia pública destaca 8 áreas activas de especialización: Psicología Clínica, Neuropsicología, Psicología Forense, Psicología Organizacional, Psicología Educativa, Psicogerontología, Psicología Deportiva y Sexología Clínica."
   },
   {
     q: "¿SAPIHUM incluye herramientas para la práctica profesional?",
@@ -182,20 +198,20 @@ export default async function LandingPage() {
           <div className="max-w-4xl mx-auto text-center flex flex-col items-center">
             {/* Badge — minimal editorial */}
             <div className="sapihum-fade-up inline-flex items-center gap-2 rounded-sm border border-[#f6ae02]/20 bg-[#f6ae02]/5 backdrop-blur-sm px-4 py-1.5 text-[10px] font-bold text-[#f6ae02] uppercase tracking-[0.2em] mb-10">
-              Sistemas Avanzados de Psicología e Investigación Humana
+              Academia SAPIHUM | Formación especializada para psicólogos
             </div>
 
             {/* H1 — Editorial serif/sans mix */}
             <h1 className="sapihum-fade-up text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.08] text-white" style={{ animationDelay: '0.1s' }}>
-              La comunidad profesional para psicólogos que quieren{" "}
+              Cursos y formaciones especializadas para psicólogos que quieren{" "}
               <span className="font-serif italic font-normal text-[#c0bfbc]">
-                elevar su nivel.
+                crecer con más nivel, criterio y respaldo profesional.
               </span>
             </h1>
 
             {/* Subtitle */}
             <p className="sapihum-fade-up mt-8 text-lg md:text-xl text-[#c0bfbc]/70 max-w-3xl leading-relaxed font-light" style={{ animationDelay: '0.2s' }}>
-              Especializaciones, formación continua, investigación aplicada, herramientas profesionales y una red de colegas que entienden hacia dónde debe evolucionar la psicología.
+              Accede a programas completos, formación continua y rutas de especialización diseñadas para fortalecer tu práctica, actualizarte con seriedad y diferenciarte en un entorno cada vez más exigente.
             </p>
 
             {/* CTA Buttons — Luxury style */}
@@ -205,14 +221,9 @@ export default async function LandingPage() {
                   Ver Formaciones
                 </Button>
               </Link>
-              <Link href="/especialidades" className="w-full sm:w-auto">
+              <Link href="/membresia" className="w-full sm:w-auto">
                 <Button size="lg" variant="outline" className="w-full h-13 px-10 font-bold">
-                  Explorar Especialidades
-                </Button>
-              </Link>
-              <Link href="/nosotros" className="w-full sm:w-auto">
-                <Button size="lg" variant="outline" className="w-full h-13 px-10 font-bold">
-                  Conocer SAPIHUM
+                  Conocer Membresía
                 </Button>
               </Link>
             </div>
@@ -262,18 +273,18 @@ export default async function LandingPage() {
             {/* Contexto y Pertenencia */}
             <div>
               <p className="text-[10px] font-bold text-[#f6ae02] uppercase tracking-[0.2em] mb-4">
-                Identidad
+                Perfil profesional
               </p>
               <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-10 text-white leading-tight">
-                El profesional que entra a SAPIHUM no busca solo cursos.
+                Para psicólogos que quieren ir más allá de lo básico
               </h2>
               <ul className="space-y-6">
                 {[
-                  "Busca diferenciarse del promedio y elevar su estándar.",
-                  "Busca especializarse con criterio y sustento científico.",
-                  "Busca mantenerse vigente con las mejores prácticas.",
-                  "Busca pertenecer a una red seria, exigente y colaborativa.",
-                  "Busca acceder a herramientas y conocimiento que normalmente están fragmentados."
+                  "Profundizar en un área con más estructura y criterio.",
+                  "Actualizar su práctica con formación mejor organizada.",
+                  "Fortalecer su perfil profesional con mayor claridad.",
+                  "Acceder a programas completos, no solo clases aisladas.",
+                  "Seguir creciendo dentro de una comunidad especializada."
                 ].map((item, idx) => (
                   <li key={idx} className="flex items-start gap-4">
                     <span className="text-[#f6ae02] mt-1 text-xl font-light">/</span>
@@ -286,14 +297,14 @@ export default async function LandingPage() {
             {/* Tarjeta Por qué Pertenecer */}
             <div className="p-10 md:p-12 border border-white/[0.08] bg-black relative overflow-hidden">
               <div className="absolute top-0 right-0 w-32 h-32 bg-[#f6ae02]/5 blur-3xl" />
-              <h3 className="text-2xl font-bold mb-8 font-serif italic text-[#c0bfbc]">¿Por qué pertenecer?</h3>
+              <h3 className="text-2xl font-bold mb-8 font-serif italic text-[#c0bfbc]">¿Por qué estudiar en SAPIHUM?</h3>
               <div className="space-y-5">
                 {[
-                  "Porque el conocimiento aislado ya no alcanza para destacar.",
-                  "Porque especializarte aumenta automáticamente tu valor profesional.",
-                  "Porque necesitas una comunidad activa, no solo contenido estático.",
-                  "Porque tu práctica merece estructura y actualización constante.",
-                  "Porque el futuro del psicólogo profesional exige más nivel, no más improvisación."
+                  "Porque una mejor formación mejora tu criterio profesional.",
+                  "Porque especializarte te ayuda a diferenciarte en el mercado.",
+                  "Porque no basta con consumir contenido suelto.",
+                  "Porque crecer con estructura vale más que improvisar.",
+                  "Porque la práctica actual exige actualización, profundidad y respaldo."
                 ].map((reason, idx) => (
                   <div key={idx} className="flex gap-4">
                     <span className="text-[#f6ae02] font-light">—</span>
@@ -350,36 +361,7 @@ export default async function LandingPage() {
       </section>
 
       {/* ══════════════════════════════════════════════════
-          6. QUÉ OBTIENES DENTRO
-      ══════════════════════════════════════════════════ */}
-      <section className="w-full py-32 bg-black text-white border-t border-b border-white/[0.06]">
-        <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-24">
-            <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-white mb-4">
-              Tu membresía, <span className="font-serif italic font-normal text-[#c0bfbc]">completa.</span>
-            </h2>
-            <p className="text-[#c0bfbc]/50 text-lg font-light">Más allá de la teoría, construimos el entorno completo.</p>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-px bg-white/[0.06]">
-            {WHAT_YOU_GET.map((item, i) => (
-              <div key={i} className="bg-black p-10 flex gap-5">
-                <div className="shrink-0 mt-1 text-[#f6ae02]">
-                  {item.icon}
-                </div>
-                <div>
-                  <h4 className="text-[#f6ae02] text-[10px] font-bold tracking-[0.2em] mb-3 uppercase">/ {String(i + 1).padStart(2, '0')}</h4>
-                  <h3 className="text-lg font-semibold mb-3 text-white">{item.title}</h3>
-                  <p className="text-[#c0bfbc]/50 text-sm leading-relaxed font-light">{item.description}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ══════════════════════════════════════════════════
-          7. INVESTIGACIÓN APLICADA
+          6. INVESTIGACIÓN APLICADA
       ══════════════════════════════════════════════════ */}
       <section className="relative w-full py-32 bg-background overflow-hidden">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative z-10">
@@ -407,9 +389,9 @@ export default async function LandingPage() {
                 <p className="text-sm text-muted-foreground mb-8 font-light italic">
                   &ldquo;Nuestros hallazgos alimentan directamente los protocolos ofrecidos en el ecosistema.&rdquo;
                 </p>
-                <Link href="/nosotros" className="text-[10px] font-bold text-[#f6ae02] hover:text-white transition-colors uppercase tracking-[0.15em]">
-                  Explorar ciencia SAPIHUM →
-                </Link>
+                <span className="text-[10px] font-bold text-[#f6ae02] uppercase tracking-[0.15em]">
+                  Explorar ciencia SAPIHUM
+                </span>
               </div>
             </div>
           </div>
@@ -426,8 +408,11 @@ export default async function LandingPage() {
               Herramientas de Plataforma
             </p>
             <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-white">
-              Infraestructura digital que acelera tu trabajo
+              Además de formarte, accede a un ecosistema profesional más completo
             </h2>
+            <p className="mt-4 text-muted-foreground font-light">
+              SAPIHUM no solo busca ayudarte a aprender más, sino a trabajar con más orden, estructura y apoyo tecnológico.
+            </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-px bg-white/[0.06] border border-white/[0.06]">
@@ -444,6 +429,37 @@ export default async function LandingPage() {
               </div>
             ))}
           </div>
+
+          <div className="mt-12 grid grid-cols-1 gap-8 border border-white/[0.06] bg-black p-8 md:grid-cols-[1.1fr_0.9fr] md:p-10">
+            <div>
+              <p className="text-[10px] font-bold text-[#f6ae02] uppercase tracking-[0.2em] mb-4">
+                Membresía Clínica Nivel 2
+              </p>
+              <h3 className="text-2xl md:text-3xl font-bold tracking-tight text-white">
+                Beneficios concretos para una práctica clínica más ordenada y respaldada
+              </h3>
+              <p className="mt-4 text-muted-foreground font-light leading-relaxed">
+                Si quieres una experiencia más completa dentro del ecosistema clínico, estos beneficios amplían tu operación diaria y se conectan con la membresía.
+              </p>
+            </div>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              {CLINICAL_LEVEL2_BENEFITS.map((benefit) => (
+                <div key={benefit} className="flex items-start gap-3 border border-white/[0.06] bg-[#050505] px-4 py-3">
+                  <span className="mt-1 text-[#f6ae02]">•</span>
+                  <span className="text-sm text-[#c0bfbc]/80">{benefit}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="mt-8 text-center">
+            <Link href="/membresia">
+              <Button variant="outline" className="gap-2 font-bold uppercase text-[10px] tracking-[0.1em]">
+                Conocer membresía
+                <ArrowRight className="h-4 w-4" />
+              </Button>
+            </Link>
+          </div>
         </div>
       </section>
 
@@ -456,18 +472,18 @@ export default async function LandingPage() {
             <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between mb-12">
               <div className="max-w-3xl">
                 <p className="text-[10px] font-bold text-[#f6ae02] uppercase tracking-[0.2em] mb-4">
-                  Formaciones Completas
+                  Academia SAPIHUM
                 </p>
                 <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-white">
-                  Ya puedes explorar programas completos de compra directa
+                  Cursos y formaciones para psicólogos que quieren avanzar con más estructura, criterio y aplicación real
                 </h2>
                 <p className="mt-3 text-muted-foreground font-light">
-                  Si buscas una ruta estructurada, aqui no compras una sola clase: compras el programa completo con horas, contenido y acceso unificado.
+                  Explora la oferta académica de SAPIHUM: desde cursos especializados hasta formaciones completas, diseñadas para ayudarte a profundizar, actualizarte y fortalecer tu práctica profesional.
                 </p>
               </div>
-              <Link href="/formaciones" className="shrink-0">
+              <Link href="/academia" className="shrink-0">
                 <Button variant="outline" className="gap-2 font-bold uppercase text-[10px] tracking-[0.1em]">
-                  Ver todas las formaciones
+                  Ver cursos y formaciones
                   <ArrowRight className="h-4 w-4" />
                 </Button>
               </Link>
@@ -501,7 +517,7 @@ export default async function LandingPage() {
                       )}
                       <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
                       <span className="absolute top-3 left-3 inline-flex items-center rounded-sm px-2.5 py-1 text-[10px] font-bold text-black uppercase tracking-wider bg-[#f6ae02]">
-                        Formacion
+                        Academia
                       </span>
                     </div>
                     <div className="flex flex-1 flex-col p-5">
@@ -529,11 +545,11 @@ export default async function LandingPage() {
                       <div className="mt-4 flex items-center justify-between border-t border-white/[0.06] pt-3">
                         <div>
                           <span className="block text-[10px] font-bold text-[#c0bfbc]/50 uppercase tracking-[0.15em]">
-                            Programa completo
+                            Disponible en Academia
                           </span>
                           <span className="text-base font-bold">{formatCurrency(formation.bundle_price)}</span>
                         </div>
-                        <span className="text-[10px] font-bold text-[#f6ae02] uppercase tracking-wider">Ver programa completo</span>
+                        <span className="text-[10px] font-bold text-[#f6ae02] uppercase tracking-wider">Ver detalles</span>
                       </div>
                     </div>
                   </Link>
@@ -561,7 +577,7 @@ export default async function LandingPage() {
               </div>
               <Link href="/academia" className="shrink-0">
                 <Button variant="outline" className="gap-2 font-bold uppercase text-[10px] tracking-[0.1em]">
-                  Ver catálogo completo
+                  Explorar Academia
                   <ArrowRight className="h-4 w-4" />
                 </Button>
               </Link>
@@ -638,44 +654,108 @@ export default async function LandingPage() {
       )}
 
       {/* ══════════════════════════════════════════════════
-          9. TESTIMONIOS / RESPALDO
+          9. MEMBRESÍA
       ══════════════════════════════════════════════════ */}
-      <section className="w-full py-32 bg-background">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="max-w-2xl mx-auto text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-white">
-              El respaldo de la{" "}
-              <span className="font-serif italic font-normal text-[#c0bfbc]">
-                red SAPIHUM
-              </span>
+      <section className="w-full py-32 bg-black text-white border-b border-white/[0.06]">
+        <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="mx-auto max-w-3xl text-center mb-20">
+            <p className="text-[10px] font-bold text-[#f6ae02] uppercase tracking-[0.2em] mb-4">
+              Membresía SAPIHUM
+            </p>
+            <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-white mb-4">
+              La membresía: <span className="font-serif italic font-normal text-[#c0bfbc]">el siguiente nivel de continuidad</span>
             </h2>
+            <p className="text-[#c0bfbc]/60 text-lg font-light leading-relaxed">
+              Si además de formarte quieres mantener acceso continuo a recursos, comunidad y herramientas profesionales, la membresía amplía tu experiencia dentro de SAPIHUM.
+            </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-px bg-white/[0.06]">
-            {TESTIMONIALS.map((t, idx) => (
-              <div key={idx} className="relative bg-black p-10">
-                <blockquote className="text-[#c0bfbc]/60 text-sm leading-relaxed mb-8 font-light italic">
-                  &ldquo;{t.quote}&rdquo;
-                </blockquote>
-                <div className="flex items-center gap-3 mt-auto">
-                  <div className="w-10 h-10 rounded-sm bg-[#f6ae02]/10 flex items-center justify-center text-[#f6ae02] font-bold text-sm shrink-0">
-                    {t.name.split(' ').slice(-1)[0][0]}
-                  </div>
-                  <div>
-                    <div className="font-bold text-sm text-foreground">{t.name}</div>
-                    <div className="text-[10px] text-[#f6ae02] uppercase tracking-widest">
-                      {t.role}
-                    </div>
-                  </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-px bg-white/[0.06] border border-white/[0.06]">
+            {WHAT_YOU_GET.map((item, i) => (
+              <div key={item.title} className="bg-black p-10 flex gap-5">
+                <div className="shrink-0 mt-1 text-[#f6ae02]">
+                  {item.icon}
+                </div>
+                <div>
+                  <h4 className="text-[#f6ae02] text-[10px] font-bold tracking-[0.2em] mb-3 uppercase">/ {String(i + 1).padStart(2, '0')}</h4>
+                  <h3 className="text-lg font-semibold mb-3 text-white">{item.title}</h3>
+                  <p className="text-[#c0bfbc]/50 text-sm leading-relaxed font-light">{item.description}</p>
                 </div>
               </div>
             ))}
+          </div>
+
+          <div className="mt-10 text-center">
+            <Link href="/membresia">
+              <Button variant="outline" className="gap-2 font-bold uppercase text-[10px] tracking-[0.1em]">
+                Conocer Membresía
+                <ArrowRight className="h-4 w-4" />
+              </Button>
+            </Link>
           </div>
         </div>
       </section>
 
       {/* ══════════════════════════════════════════════════
-          10. FAQ SEO
+          10. DOCENTES DESTACADOS
+      ══════════════════════════════════════════════════ */}
+      <section className="w-full py-32 bg-background">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="max-w-3xl mx-auto text-center mb-16">
+            <p className="text-[10px] font-bold text-[#f6ae02] uppercase tracking-[0.2em] mb-4">
+              Docentes destacados
+            </p>
+            <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-white mb-6">
+              Aprende con docentes de {" "}
+              <span className="font-serif italic font-normal text-[#c0bfbc]">
+                alto nivel académico
+              </span> {" "}
+              y reconocimiento real
+            </h2>
+            <p className="text-[#c0bfbc]/70 text-lg font-light leading-relaxed">
+              En SAPIHUM reunimos docentes con trayectoria sólida, formación avanzada y experiencia académica, para construir programas con mayor profundidad, claridad y aplicación real.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-px bg-white/[0.06] border border-white/[0.06]">
+            {FEATURED_TEACHERS.map((teacher, idx) => (
+              <div key={idx} className="group relative bg-[#030303] p-8 hover:bg-black transition-all duration-500 overflow-hidden text-left">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-[#f6ae02]/5 blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+                
+                <div className="w-20 h-20 rounded-sm bg-[#2c2c2b] flex items-center justify-center text-[#c0bfbc] font-serif italic text-3xl mb-6 border border-white/[0.08] relative overflow-hidden">
+                  <span className="relative z-10">{teacher.name.split(' ')[1]?.[0] || teacher.name[0]}</span>
+                  <div className="absolute inset-0 bg-gradient-to-br from-white/[0.05] to-transparent z-0"></div>
+                </div>
+
+                <div className="text-[10px] text-[#f6ae02] font-bold uppercase tracking-[0.15em] mb-3">
+                  {teacher.specialty}
+                </div>
+                
+                <h3 className="font-bold text-lg text-white mb-2">{teacher.name}</h3>
+                
+                <div className="text-xs text-[#c0bfbc] font-semibold mb-5 bg-white/5 inline-block px-2.5 py-1 rounded-sm border border-white/10">
+                  {teacher.credential}
+                </div>
+                
+                <p className="text-xs text-[#c0bfbc]/50 leading-relaxed font-light mt-auto">
+                  {teacher.approach}
+                </p>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-16 text-center">
+            <Link href="/nosotros">
+              <Button variant="outline" className="gap-2 font-bold uppercase text-[10px] tracking-[0.1em] h-12 px-8 border-white/20 hover:bg-white/5 text-[#c0bfbc] hover:text-white transition-colors">
+                Conocer cuerpo docente
+                <ArrowRight className="h-4 w-4" />
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </section>
+      {/* ══════════════════════════════════════════════════
+          11. FAQ SEO
       ══════════════════════════════════════════════════ */}
       <section className="w-full py-32 bg-[#030303] border-y border-white/[0.06]">
         <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
@@ -699,33 +779,33 @@ export default async function LandingPage() {
       </section>
 
       {/* ══════════════════════════════════════════════════
-          11. FINAL CTA
+          12. FINAL CTA
       ══════════════════════════════════════════════════ */}
       <section className="w-full py-40 bg-black">
         <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 text-center relative">
           <div className="absolute inset-0 bg-[#f6ae02]/3 blur-[120px] rounded-full pointer-events-none" />
           <div className="relative z-10">
             <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight leading-tight text-white mb-6">
-              No se trata solo de estudiar más. <br />
-              <span className="font-serif italic font-normal text-[#c0bfbc]">
-                Se trata de convertirte en un profesional con más nivel, más criterio y más valor.
-              </span>
+              Empieza por la formación que mejor encaje con tu siguiente etapa profesional
             </h2>
+            <p className="mx-auto max-w-3xl text-lg text-[#c0bfbc]/60 font-light leading-relaxed">
+              Explora cursos, programas y formaciones completas dentro de la Academia SAPIHUM. Y si buscas una experiencia más amplia, conoce también la membresía.
+            </p>
             
             <div className="mt-16 flex flex-col sm:flex-row gap-6 justify-center items-center uppercase text-xs tracking-[0.1em]">
-              <Link href="/precios" className="w-full sm:w-auto">
+              <Link href="/formaciones" className="w-full sm:w-auto">
                 <Button size="lg" className="w-full h-14 px-12 font-bold">
-                  Unirme a SAPIHUM
+                  Ver Formaciones
                 </Button>
               </Link>
-              <Link href="/nosotros" className="w-full sm:w-auto">
+              <Link href="/membresia" className="w-full sm:w-auto">
                 <Button size="lg" variant="outline" className="w-full h-14 px-12 font-bold">
-                  Conocer la comunidad
+                  Conocer Membresía
                 </Button>
               </Link>
             </div>
-            <p className="mt-10 text-[9px] text-[#c0bfbc]/30 uppercase tracking-[0.3em]">
-              Acceso profesional sujeto a verificación de perfil
+            <p className="mt-10 text-[11px] text-[#c0bfbc]/40">
+              Formación especializada para psicólogos. Acceso y beneficios sujetos al tipo de programa o membresía.
             </p>
           </div>
         </div>

@@ -4,42 +4,18 @@ import Link from "next/link"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { BrandWordmark } from "@/components/brand/brand-wordmark"
+import { getMarketingSpecializations } from "@/lib/specializations"
+
+const SPECIALIZATION_ITEMS = getMarketingSpecializations().map((spec) => ({
+  label: spec.name,
+  href: `/especialidades/${spec.slug}`,
+  description: spec.tagline,
+}))
 
 const NAV_ITEMS = [
   {
     label: "Especialidades",
-    children: [
-      {
-        label: "Psicolog\u00EDa Cl\u00EDnica",
-        href: "/especialidades/psicologia-clinica",
-        description: "Ciencia aplicada al cuidado de la salud mental",
-      },
-      {
-        label: "Neuropsicolog\u00EDa",
-        href: "/especialidades/neuropsicologia",
-        description: "Donde la neurociencia y la cl\u00EDnica convergen",
-      },
-      {
-        label: "Psicolog\u00EDa Forense",
-        href: "/especialidades/psicologia-forense",
-        description: "Rigor cient\u00EDfico al servicio de la justicia",
-      },
-      {
-        label: "Psicolog\u00EDa Organizacional",
-        href: "/especialidades/psicologia-organizacional",
-        description: "Potencia el capital humano con ciencia",
-      },
-      {
-        label: "Psicolog\u00EDa Infantojuvenil",
-        href: "/especialidades/psicologia-infantojuvenil",
-        description: "Desarrollo saludable desde la infancia",
-      },
-      {
-        label: "Ver las 12 especialidades",
-        href: "/especialidades",
-        description: "Explora todas las ramas disponibles en SAPIHUM",
-      },
-    ],
+    children: SPECIALIZATION_ITEMS,
   },
   {
     label: "Academia",
@@ -85,8 +61,8 @@ export function MarketingNavbar({ isLoggedIn }: MarketingNavbarProps) {
                     <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
                   </svg>
                 </button>
-                <div className="invisible absolute left-0 top-full w-72 pt-2 opacity-0 transition-all duration-200 group-hover:visible group-hover:opacity-100">
-                  <div className="rounded-sm border bg-popover p-2 shadow-xl shadow-black/5 ring-1 ring-black/5">
+                <div className={`invisible absolute left-0 top-full pt-2 opacity-0 transition-all duration-200 group-hover:visible group-hover:opacity-100 ${item.label === "Especialidades" ? "w-[38rem]" : "w-72"}`}>
+                  <div className={`${item.label === "Especialidades" ? "grid grid-cols-2 gap-1" : "flex flex-col"} rounded-sm border bg-popover p-2 shadow-xl shadow-black/5 ring-1 ring-black/5`}>
                     {item.children.map((child) => (
                       <Link
                         key={child.href + child.label}
@@ -95,7 +71,7 @@ export function MarketingNavbar({ isLoggedIn }: MarketingNavbarProps) {
                         data-analytics-label={child.label}
                         data-analytics-surface="marketing_nav_dropdown"
                         data-analytics-funnel="landing"
-                        className="flex flex-col gap-0.5 rounded-sm px-3 py-2.5 transition-colors hover:bg-accent"
+                        className={`flex flex-col gap-1 rounded-sm px-3 py-3 transition-colors hover:bg-accent ${item.label === "Especialidades" ? "min-h-[5rem]" : ""}`}
                       >
                         <span className="text-sm font-semibold text-foreground">{child.label}</span>
                         <span className="text-xs leading-snug text-muted-foreground">{child.description}</span>

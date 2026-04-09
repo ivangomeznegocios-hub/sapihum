@@ -367,6 +367,17 @@ export const SPECIALIZATION_CATALOG: Record<SpecializationCode, SpecializationCo
 
 export const LEVEL_2_DEFAULT_SPECIALIZATION: SpecializationCode = 'clinica'
 
+export const MARKETING_SPECIALIZATION_CODES = [
+    'clinica',
+    'neuropsicologia',
+    'forense',
+    'organizacional',
+    'educacion',
+    'psicogerontologia',
+    'deportiva',
+    'sexologia_clinica',
+] as const
+
 export const MEMBERSHIP_SPECIALIZATION_CODES = [
     'clinica',
     'forense',
@@ -394,6 +405,12 @@ export function getActiveSpecializations(): SpecializationConfig[] {
 
 export function getMembershipSpecializations(): SpecializationConfig[] {
     return MEMBERSHIP_SPECIALIZATION_CODES
+        .map((code) => SPECIALIZATION_CATALOG[code])
+        .filter(Boolean)
+}
+
+export function getMarketingSpecializations(): SpecializationConfig[] {
+    return MARKETING_SPECIALIZATION_CODES
         .map((code) => SPECIALIZATION_CATALOG[code])
         .filter(Boolean)
 }

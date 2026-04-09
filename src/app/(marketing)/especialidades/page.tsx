@@ -1,14 +1,17 @@
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-import { getActiveSpecializations } from '@/lib/specializations'
+import { getMarketingSpecializations } from '@/lib/specializations'
+
+const SPECIALIZATIONS = getMarketingSpecializations()
+const SPECIALIZATION_COUNT = SPECIALIZATIONS.length
 
 export const metadata = {
   title: 'Especialidades | SAPIHUM — Psicología Avanzada e Investigación Humana',
-  description: '12 especialidades psicológicas con formación, herramientas y comunidad profesional. Psicología clínica, neuropsicología, forense, organizacional y más.',
+  description: '8 áreas activas de especialización con formación, herramientas y comunidad profesional para psicólogos.',
 }
 
 export default function EspecialidadesIndexPage() {
-  const specializations = getActiveSpecializations()
+  const specializations = SPECIALIZATIONS
 
   return (
     <div className="flex flex-col items-center flex-1 w-full">
@@ -19,7 +22,7 @@ export default function EspecialidadesIndexPage() {
 
         <div className="relative z-10 w-full max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <p className="text-[10px] font-bold text-brand-yellow uppercase tracking-[0.2em] mb-4">
-            12 Ramas de la Psicología
+            {SPECIALIZATION_COUNT} áreas activas de especialización
           </p>
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-white mb-6 leading-tight">
             Encuentra tu{' '}
