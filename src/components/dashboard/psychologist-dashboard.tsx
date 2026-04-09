@@ -182,21 +182,21 @@ export function PsychologistDashboard({
                         </CardHeader>
                         <CardContent className="space-y-4">
                             <p className="text-sm text-foreground/80">
-                                El plan <strong>Consultorio Digital</strong> te permite gestionar pacientes,
-                                programar citas, crear expedientes clínicos y asignar tareas.
+                                El plan <strong>Consultorio Digital</strong> te da una capa operativa más completa:
+                                web profesional, agenda, plataforma con pacientes, pagos y soporte para tu consulta.
                             </p>
                             <ul className="space-y-1.5 text-xs text-muted-foreground">
                                 <li className="flex items-center gap-2">
                                     <CheckCircle2 className="h-3.5 w-3.5 text-brand-brown" />
-                                    Gestión de pacientes
+                                    Página web profesional
                                 </li>
                                 <li className="flex items-center gap-2">
                                     <CheckCircle2 className="h-3.5 w-3.5 text-brand-brown" />
-                                    Agenda inteligente 24/7
+                                    Agenda online 24/7
                                 </li>
                                 <li className="flex items-center gap-2">
                                     <CheckCircle2 className="h-3.5 w-3.5 text-brand-brown" />
-                                    Expedientes clínicos
+                                    Pagos y dashboard financiero
                                 </li>
                             </ul>
                             <Link href="/dashboard/subscription" className="block">

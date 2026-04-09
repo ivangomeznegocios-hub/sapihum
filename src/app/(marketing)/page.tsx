@@ -7,6 +7,7 @@ import { getMarketingSpecializations, getSpecializationByCode } from "@/lib/spec
 import { getUnifiedCatalogEvents } from "@/lib/supabase/queries/events"
 import { getPublicEventPath } from "@/lib/events/public"
 import { getPublicFormations } from "@/app/(marketing)/formaciones/actions"
+import { LEVEL_2_CARD_FEATURE_IDS, PRICING_PLAN_COPY, getPricingFeatureTitles } from "@/lib/pricing-catalog"
 import { Shield, Users, BookOpen, Scaling, Beaker, FileText, Smartphone, CalendarDays, ArrowRight } from "lucide-react"
 
 export const metadata = {
@@ -101,16 +102,7 @@ const PLATFORM_FEATURES = [
   },
 ]
 
-const CLINICAL_LEVEL2_BENEFITS = [
-  "Expedientes clínicos digitales con firma electrónica y trazabilidad.",
-  "Protocolos de evaluación estandarizados para una práctica mejor estructurada.",
-  "Supervisión clínica grupal para fortalecer criterio y toma de decisiones.",
-  "Red de derivación clínica verificada dentro del ecosistema.",
-  "Agenda online con recordatorios automáticos y mejor seguimiento.",
-  "Transcripción de sesiones con apoyo de IA clínica segura.",
-  "Seguimiento de evolución clínica con mayor orden documental.",
-  "Integraciones operativas para facilitar administración y comunicación.",
-]
+const CLINICAL_LEVEL2_BENEFITS = getPricingFeatureTitles(LEVEL_2_CARD_FEATURE_IDS)
 
 const FEATURED_TEACHERS = [
   {
@@ -433,13 +425,13 @@ export default async function LandingPage() {
           <div className="mt-12 grid grid-cols-1 gap-8 border border-white/[0.06] bg-black p-8 md:grid-cols-[1.1fr_0.9fr] md:p-10">
             <div>
               <p className="text-[10px] font-bold text-[#f6ae02] uppercase tracking-[0.2em] mb-4">
-                Membresía Clínica Nivel 2
+                {PRICING_PLAN_COPY.level2.title}
               </p>
               <h3 className="text-2xl md:text-3xl font-bold tracking-tight text-white">
                 Beneficios concretos para una práctica clínica más ordenada y respaldada
               </h3>
               <p className="mt-4 text-muted-foreground font-light leading-relaxed">
-                Si quieres una experiencia más completa dentro del ecosistema clínico, estos beneficios amplían tu operación diaria y se conectan con la membresía.
+                El bloque clínico de Nivel 2 ahora refleja el mismo paquete comercial que aparece en precios: comunidad, operación clínica, automatización y soporte en una sola capa.
               </p>
             </div>
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
