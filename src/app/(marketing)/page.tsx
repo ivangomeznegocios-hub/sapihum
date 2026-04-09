@@ -28,8 +28,8 @@ type SpecialtyBackground = {
 }
 
 const PLATFORM_SECTION_BACKGROUND: SpecialtyBackground = {
-  image: "https://unsplash.com/photos/Rsf-yqmn3zI/download?force=true&w=1600&q=80",
-  position: "center 38%",
+  image: "https://images.unsplash.com/photo-1758273241086-f3585ef8c2f8?auto=format&fit=crop&w=2400&q=80",
+  position: "center 34%",
 }
 
 const SPECIALTY_BACKGROUNDS: Record<string, SpecialtyBackground> = {
