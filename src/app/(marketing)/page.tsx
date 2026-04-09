@@ -308,59 +308,6 @@ export default async function LandingPage() {
       </section>
 
       {/* ══════════════════════════════════════════════════
-          4. POR QUÉ PERTENECER (Aspiracional)
-      ══════════════════════════════════════════════════ */}
-      <section className="w-full py-32 bg-[#030303]">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-24 items-center">
-            {/* Contexto y Pertenencia */}
-            <div>
-              <p className="text-[10px] font-bold text-[#f6ae02] uppercase tracking-[0.2em] mb-4">
-                Perfil profesional
-              </p>
-              <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-10 text-white leading-tight">
-                Para psicólogos que quieren ir más allá de lo básico
-              </h2>
-              <ul className="space-y-6">
-                {[
-                  "Profundizar en un área con más estructura y criterio.",
-                  "Actualizar su práctica con formación mejor organizada.",
-                  "Fortalecer su perfil profesional con mayor claridad.",
-                  "Acceder a programas completos, no solo clases aisladas.",
-                  "Seguir creciendo dentro de una comunidad especializada."
-                ].map((item, idx) => (
-                  <li key={idx} className="flex items-start gap-4">
-                    <span className="text-[#f6ae02] mt-1 text-xl font-light">/</span>
-                    <p className="text-lg text-[#c0bfbc]/80 font-light">{item}</p>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* Tarjeta Por qué Pertenecer */}
-            <div className="p-10 md:p-12 border border-white/[0.08] bg-black relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-[#f6ae02]/5 blur-3xl" />
-              <h3 className="text-2xl font-bold mb-8 font-serif italic text-[#c0bfbc]">¿Por qué estudiar en SAPIHUM?</h3>
-              <div className="space-y-5">
-                {[
-                  "Porque una mejor formación mejora tu criterio profesional.",
-                  "Porque especializarte te ayuda a diferenciarte en el mercado.",
-                  "Porque no basta con consumir contenido suelto.",
-                  "Porque crecer con estructura vale más que improvisar.",
-                  "Porque la práctica actual exige actualización, profundidad y respaldo."
-                ].map((reason, idx) => (
-                  <div key={idx} className="flex gap-4">
-                    <span className="text-[#f6ae02] font-light">—</span>
-                    <span className="text-[#c0bfbc]/60 font-light">{reason}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ══════════════════════════════════════════════════
           5. ESPECIALIDADES (SEO-friendly grid)
       ══════════════════════════════════════════════════ */}
       <section className="w-full py-32 bg-black">
