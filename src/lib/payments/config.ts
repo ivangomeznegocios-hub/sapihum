@@ -64,7 +64,7 @@ function buildLevel2Plan(code: SpecializationCode): SubscriptionPlanConfig | nul
     )
 
     return {
-        name: `Especializacion ${specialization.name}`,
+        name: code === LEVEL_2_DEFAULT_SPECIALIZATION ? 'Consultorio Digital' : `Especializacion ${specialization.name}`,
         membershipLevel: 2,
         specializationCode: specialization.code,
         trialDays: 0,
@@ -82,23 +82,23 @@ function buildLevel2Plan(code: SpecializationCode): SubscriptionPlanConfig | nul
 }
 
 const LEVEL_1_PLAN: SubscriptionPlanConfig = {
-    name: 'Membresia Nivel 1 - Comunidad',
+    name: 'Comunidad y Crecimiento',
     membershipLevel: 1,
     trialDays: 0,
     monthly: {
         stripePriceId: process.env.STRIPE_PRICE_LEVEL_1_MONTHLY || 'price_level1_monthly_placeholder',
-        amount: 190,
+        amount: 290,
     },
     annual: {
         stripePriceId: process.env.STRIPE_PRICE_LEVEL_1_ANNUAL || 'price_level1_annual_placeholder',
-        amount: 1900,
-        monthlyEquivalent: 158,
+        amount: 2900,
+        monthlyEquivalent: 242,
         savingsPercent: 17,
     },
 }
 
 const LEVEL_3_PLAN: SubscriptionPlanConfig = {
-    name: 'Membresia Nivel 3 - Avanzado',
+    name: 'Gestion y Marketing Premium',
     membershipLevel: 3,
     trialDays: 0,
     monthly: {
@@ -127,7 +127,7 @@ const level2PlansBySpecialization = getActiveSpecializations().reduce(
 const DEFAULT_LEVEL_2_PLAN =
     level2PlansBySpecialization[LEVEL_2_DEFAULT_SPECIALIZATION] ??
     ({
-        name: 'Membresia Nivel 2 - Especializacion',
+        name: 'Consultorio Digital',
         membershipLevel: 2,
         specializationCode: LEVEL_2_DEFAULT_SPECIALIZATION,
         trialDays: 0,

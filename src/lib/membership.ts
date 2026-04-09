@@ -1,3 +1,10 @@
+import {
+    LEVEL_1_FEATURE_IDS,
+    LEVEL_2_EXCLUSIVE_FEATURE_IDS,
+    LEVEL_3_EXCLUSIVE_FEATURE_IDS,
+    getPricingFeatureTitles,
+} from '@/lib/pricing-catalog'
+
 // ============================================
 // MEMBERSHIP LEVELS - Single Source of Truth
 // ============================================
@@ -35,58 +42,33 @@ export const MEMBERSHIP_TIERS: Record<number, MembershipTierConfig> = {
     },
     1: {
         level: 1,
-        label: 'Nivel 1 - Comunidad',
-        description: 'Acceso base a comunidad, cursos y educacion continua.',
-        price: 190,
-        priceLabel: '$190/mes',
+        label: 'Nivel 1 - Comunidad y Crecimiento',
+        description: 'Conexion con colegas, aprendizaje continuo y acceso a recursos base para la practica.',
+        price: 290,
+        priceLabel: '$290/mes',
         trialDays: 0,
-        tagline: 'Comunidad y Educacion',
-        features: [
-            'Acceso a la comunidad',
-            'Educacion continua',
-            'Materiales psicoterapeuticos',
-            'Sesiones en vivo y grabadas',
-            'Eventos de negocio para psicologos',
-            'Newsletter mensual',
-            'Convenios exclusivos en eventos',
-            'Certificaciones curriculares',
-        ],
+        tagline: 'Educacion y comunidad',
+        features: getPricingFeatureTitles(LEVEL_1_FEATURE_IDS),
     },
     2: {
         level: 2,
-        label: 'Nivel 2 - Especializacion',
-        description: 'Upgrade por especializacion. Hoy disponible: Clinica.',
+        label: 'Nivel 2 - Consultorio Digital',
+        description: 'Digitalizacion completa, automatizacion de procesos y optimizacion de la gestion clinica.',
         price: 680,
         priceLabel: '$680/mes',
         trialDays: 0,
-        tagline: 'Especializacion',
-        features: [
-            'Supervision clinica grupal',
-            'Red de derivacion clinica',
-            'Agenda online 24/7',
-            'Plataforma de interaccion con pacientes',
-            'Integracion con WhatsApp y redes sociales',
-            'Transcripcion de sesiones con IA',
-        ],
+        tagline: 'Psicologia clinica',
+        features: getPricingFeatureTitles(LEVEL_2_EXCLUSIVE_FEATURE_IDS),
     },
     3: {
         level: 3,
-        label: 'Nivel 3 - Avanzado',
-        description: 'Nivel premium desbloqueado despues del Nivel 2 segun especializacion.',
+        label: 'Nivel 3 - Gestion y Marketing Premium',
+        description: 'Crecimiento acelerado, delegacion de tareas y posicionamiento de marca de alto impacto.',
         price: 3800,
         priceLabel: '$3,800/mes',
         trialDays: 0,
         tagline: 'Escala y delegacion',
-        features: [
-            'Community Manager personal',
-            'Creacion y edicion de contenido',
-            'Campanas en Ads (FB/IG)',
-            'Presupuesto para publicidad incluido',
-            'Auditoria mensual de rendimiento',
-            'Asistente personal',
-            'Optimizacion de Google My Business',
-            'SEO y posicionamiento local',
-        ],
+        features: getPricingFeatureTitles(LEVEL_3_EXCLUSIVE_FEATURE_IDS),
     },
 }
 
@@ -140,4 +122,3 @@ export function hasTrial(level: number): boolean {
 export function getTrialDays(level: number): number {
     return MEMBERSHIP_TIERS[level]?.trialDays ?? 0
 }
-
