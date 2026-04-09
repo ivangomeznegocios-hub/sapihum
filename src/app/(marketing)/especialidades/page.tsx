@@ -30,7 +30,7 @@ export default function EspecialidadesIndexPage() {
             </span>
           </h1>
           <p className="mx-auto max-w-2xl text-lg text-neutral-400">
-            Cada landing funciona como un hub SEO: posiciona la especialidad, conecta con eventos y formaciones de esa rama, y empuja tanto la membresia para pertenecer como el Nivel 2 para profundizar.
+            Encuentra la rama que mejor se ajusta a tu práctica profesional. Cada especialidad ofrece eventos, cursos, formaciones y una ruta de Nivel 2 para quienes buscan mayor profundidad.
           </p>
         </div>
       </section>

@@ -8,6 +8,7 @@ import { getUnifiedCatalogEvents } from "@/lib/supabase/queries/events"
 import { getPublicEventPath } from "@/lib/events/public"
 import { getPublicFormations } from "@/app/(marketing)/formaciones/actions"
 import { LEVEL_2_CARD_FEATURE_IDS, PRICING_PLAN_COPY, getPricingFeatureTitles } from "@/lib/pricing-catalog"
+import { getSpeakersByIds } from "@/lib/supabase/queries/speakers"
 import { Shield, Users, BookOpen, Scaling, Beaker, FileText, Smartphone, CalendarDays, ArrowRight } from "lucide-react"
 
 export const metadata = {
@@ -152,31 +153,15 @@ const LEVEL_2_SHOWCASE_BENEFITS = CLINICAL_LEVEL2_BENEFITS
   .filter((benefit) => benefit !== "Todo de Comunidad y Crecimiento")
   .slice(0, 8)
 
-const FEATURED_TEACHERS = [
-  {
-    name: "Dra. Mariana López",
-    specialty: "Neuropsicología Clínica",
-    credential: "Doctora en Neuropsicología · Docente universitaria",
-    approach: "Enfoque en evaluación e intervención aplicada"
-  },
-  {
-    name: "Dr. Alejandro Ramos",
-    specialty: "Psicología Organizacional",
-    credential: "Ph.D. en Comportamiento Organizacional",
-    approach: "Estrategias sistémicas y desarrollo de liderazgo"
-  },
-  {
-    name: "Mtra. Elena Gómez",
-    specialty: "Terapia Cognitivo-Conductual",
-    credential: "Maestría en TCC · Investigadora clínica",
-    approach: "Práctica basada en evidencia y protocolos estructurados"
-  },
-  {
-    name: "Dr. Carlos Orozco",
-    specialty: "Psicología Forense",
-    credential: "Doctor en Ciencias Forenses · Perito Oficial",
-    approach: "Evaluación pericial y perfilación criminal"
-  }
+// ═══════════════════════════════════════════════════════════════
+// FEATURED SPEAKERS — Change these IDs to control which 4 speakers
+// appear on the homepage. Use the speaker UUID from the database.
+// ═══════════════════════════════════════════════════════════════
+const FEATURED_SPEAKER_IDS: string[] = [
+  'e203db02-1f27-4f67-8899-dae599540310',
+  'ec2b91b7-5819-4e1e-bda1-69ba22c19033',
+  'bcc0b008-439c-47b1-90a9-f0ad5c8260fe',
+  'a32480a5-baa8-4b7e-aaa8-48ad429760f8',
 ]
 const FAQS = [
   {
@@ -216,9 +201,10 @@ function formatHours(value: number | null | undefined) {
 }
 
 export default async function LandingPage() {
-  const [allEvents, formations] = await Promise.all([
+  const [allEvents, formations, featuredSpeakers] = await Promise.all([
     getUnifiedCatalogEvents(),
     getPublicFormations(),
+    getSpeakersByIds(FEATURED_SPEAKER_IDS),
   ])
   const upcomingEvents = splitPublicCatalogEvents(allEvents).upcoming.slice(0, 3)
   const featuredFormations = formations.slice(0, 2)
@@ -758,6 +744,7 @@ export default async function LandingPage() {
       {/* ══════════════════════════════════════════════════
           10. DOCENTES DESTACADOS
       ══════════════════════════════════════════════════ */}
+      {featuredSpeakers.length > 0 && (
       <section className="w-full py-32 bg-background">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="max-w-3xl mx-auto text-center mb-16">
@@ -777,34 +764,64 @@ export default async function LandingPage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-px bg-white/[0.06] border border-white/[0.06]">
-            {FEATURED_TEACHERS.map((teacher, idx) => (
-              <div key={idx} className="group relative bg-[#030303] p-8 hover:bg-black transition-all duration-500 overflow-hidden text-left">
-                <div className="absolute top-0 right-0 w-32 h-32 bg-[#f6ae02]/5 blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
-                
-                <div className="w-20 h-20 rounded-sm bg-[#2c2c2b] flex items-center justify-center text-[#c0bfbc] font-serif italic text-3xl mb-6 border border-white/[0.08] relative overflow-hidden">
-                  <span className="relative z-10">{teacher.name.split(' ')[1]?.[0] || teacher.name[0]}</span>
-                  <div className="absolute inset-0 bg-gradient-to-br from-white/[0.05] to-transparent z-0"></div>
-                </div>
+            {featuredSpeakers.map((speaker) => {
+              const name = speaker.profile?.full_name || 'Ponente'
+              const photoUrl = speaker.photo_url || speaker.profile?.avatar_url
+              const mainSpecialty = speaker.specialties?.[0]
+              const credential = speaker.credentials?.length > 0 ? speaker.credentials.join(' · ') : speaker.headline
 
-                <div className="text-[10px] text-[#f6ae02] font-bold uppercase tracking-[0.15em] mb-3">
-                  {teacher.specialty}
-                </div>
-                
-                <h3 className="font-bold text-lg text-white mb-2">{teacher.name}</h3>
-                
-                <div className="text-xs text-[#c0bfbc] font-semibold mb-5 bg-white/5 inline-block px-2.5 py-1 rounded-sm border border-white/10">
-                  {teacher.credential}
-                </div>
-                
-                <p className="text-xs text-[#c0bfbc]/50 leading-relaxed font-light mt-auto">
-                  {teacher.approach}
-                </p>
-              </div>
-            ))}
+              return (
+                <Link
+                  key={speaker.id}
+                  href={`/speakers/${speaker.id}`}
+                  className="group relative bg-[#030303] p-8 hover:bg-black transition-all duration-500 overflow-hidden text-left"
+                >
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-[#f6ae02]/5 blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+
+                  <div className="w-20 h-20 rounded-sm bg-[#2c2c2b] flex items-center justify-center mb-6 border border-white/[0.08] relative overflow-hidden">
+                    {photoUrl ? (
+                      <Image
+                        src={photoUrl}
+                        alt={name}
+                        fill
+                        unoptimized
+                        sizes="80px"
+                        className="object-cover"
+                      />
+                    ) : (
+                      <span className="relative z-10 text-[#c0bfbc] font-serif italic text-3xl">
+                        {name.split(' ')[1]?.[0] || name[0]}
+                      </span>
+                    )}
+                    <div className="absolute inset-0 bg-gradient-to-br from-white/[0.05] to-transparent z-0" />
+                  </div>
+
+                  {mainSpecialty && (
+                    <div className="text-[10px] text-[#f6ae02] font-bold uppercase tracking-[0.15em] mb-3">
+                      {mainSpecialty}
+                    </div>
+                  )}
+
+                  <h3 className="font-bold text-lg text-white mb-2 group-hover:text-[#f6ae02] transition-colors duration-500">{name}</h3>
+
+                  {credential && (
+                    <div className="text-xs text-[#c0bfbc] font-semibold mb-5 bg-white/5 inline-block px-2.5 py-1 rounded-sm border border-white/10 line-clamp-2">
+                      {credential}
+                    </div>
+                  )}
+
+                  {speaker.headline && speaker.credentials?.length > 0 && (
+                    <p className="text-xs text-[#c0bfbc]/50 leading-relaxed font-light mt-auto">
+                      {speaker.headline}
+                    </p>
+                  )}
+                </Link>
+              )
+            })}
           </div>
 
           <div className="mt-16 text-center">
-            <Link href="/nosotros">
+            <Link href="/speakers">
               <Button variant="outline" className="gap-2 font-bold uppercase text-[10px] tracking-[0.1em] h-12 px-8 border-white/20 hover:bg-white/5 text-[#c0bfbc] hover:text-white transition-colors">
                 Conocer cuerpo docente
                 <ArrowRight className="h-4 w-4" />
@@ -813,6 +830,7 @@ export default async function LandingPage() {
           </div>
         </div>
       </section>
+      )}
       {/* ══════════════════════════════════════════════════
           11. FAQ SEO
       ══════════════════════════════════════════════════ */}

@@ -342,10 +342,7 @@ export default async function SpecializationPage(props: Props) {
               )}
             </div>
 
-            <p className="text-sm leading-relaxed text-neutral-400">
-              Esta landing prioriza primero los contenidos de {spec.name} y despues suma eventos o formaciones generales
-              cuando aplican a toda la comunidad.
-            </p>
+
           </div>
 
           <aside className="lg:justify-self-end">
@@ -361,8 +358,8 @@ export default async function SpecializationPage(props: Props) {
                       </>
                     ) : (
                       <>
-                        <p className="mt-2 text-lg font-bold text-white">Curaduria activa</p>
-                        <p className="mt-1 text-sm text-neutral-400">Esta rama ya se apoya en contenido transversal mientras abrimos agenda propia.</p>
+                        <p className="mt-2 text-lg font-bold text-white">Próximamente</p>
+                        <p className="mt-1 text-sm text-neutral-400">Estamos preparando nuevos eventos para esta especialidad.</p>
                       </>
                     )}
                   </div>
@@ -376,8 +373,8 @@ export default async function SpecializationPage(props: Props) {
                       </>
                     ) : (
                       <>
-                        <p className="mt-2 text-lg font-bold text-white">Ruta editorial</p>
-                        <p className="mt-1 text-sm text-neutral-400">La especialidad ya se presenta como producto aunque todavia no tenga formaciones propias publicadas.</p>
+                        <p className="mt-2 text-lg font-bold text-white">En preparación</p>
+                        <p className="mt-1 text-sm text-neutral-400">Próximamente publicaremos formaciones diseñadas para esta especialidad.</p>
                       </>
                     )}
                   </div>
@@ -393,17 +390,17 @@ export default async function SpecializationPage(props: Props) {
                   <div className="rounded-2xl border border-brand-yellow/20 bg-brand-yellow/10 p-4">
                     <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-brand-yellow">{level2OfferName}</p>
                     <p className="mt-2 text-lg font-bold text-white">
-                      {level2Plan ? `Desde ${formatCurrency(level2Plan.monthly.amount)}/mes` : 'Activa tu interes'}
+                      {level2Plan ? `Desde ${formatCurrency(level2Plan.monthly.amount)}/mes` : 'Próximamente'}
                     </p>
                     <p className="mt-1 text-sm text-neutral-300">
-                      {level2Plan ? 'Ruta de profundidad para crecer dentro de la especialidad.' : 'Empujamos el interes aunque el precio aun no este publicado.'}
+                      {level2Plan ? 'Formación avanzada para crecer dentro de la especialidad.' : 'Regístrate para recibir aviso cuando esté disponible.'}
                     </p>
                   </div>
 
                   <p className="text-xs leading-relaxed text-neutral-500">
                     {transversalContentSummary
-                      ? `Tambien puede aparecer ${transversalContentSummary} cuando sirve a toda la comunidad.`
-                      : 'Esta especialidad puede heredar contenido transversal cuando sea util para la comunidad.'}
+                      ? `También encontrarás ${transversalContentSummary} relevantes para tu práctica.`
+                      : 'Además, tendrás acceso a contenido general que complementa tu formación.'}
                   </p>
                 </>
               ) : (
@@ -423,28 +420,28 @@ export default async function SpecializationPage(props: Props) {
                   </div>
 
                   <div className="rounded-2xl border border-white/10 bg-black/30 p-4">
-                    <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-neutral-500">Acceso actual por membresia</p>
+                    <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-neutral-500">Membresía</p>
                     <p className="mt-2 text-lg font-bold text-white">
                       {level1Plan ? `Desde ${formatCurrency(level1Plan.monthly.amount)}/mes` : 'Acceso general'}
                     </p>
-                    <p className="mt-1 text-sm text-neutral-400">La membresia ya sirve para entrar, pertenecer y empezar a consumir contenido transversal.</p>
+                    <p className="mt-1 text-sm text-neutral-400">Accede a la comunidad y a todos los contenidos disponibles.</p>
                   </div>
 
                   <div className="rounded-2xl border border-white/10 bg-black/30 p-4">
-                    <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-neutral-500">Contenido transversal disponible</p>
+                    <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-neutral-500">Contenido disponible</p>
                     <p className="mt-2 text-lg font-bold text-white">
-                      {transversalContentSummary || 'Catalogo general activo'}
+                      {transversalContentSummary || 'Catálogo general activo'}
                     </p>
-                    <p className="mt-1 text-sm text-neutral-400">Mientras abrimos contenido propio de esta rama, esta pagina puede empujar eventos y formaciones generales que si aplican.</p>
+                    <p className="mt-1 text-sm text-neutral-400">Explora eventos y formaciones relevantes para tu desarrollo profesional.</p>
                   </div>
 
                   <div className="rounded-2xl border border-brand-yellow/20 bg-brand-yellow/10 p-4">
-                    <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-brand-yellow">Activa tu interes / Nivel 2</p>
+                    <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-brand-yellow">{level2OfferName}</p>
                     <p className="mt-2 text-lg font-bold text-white">
-                      {level2Plan ? `Desde ${formatCurrency(level2Plan.monthly.amount)}/mes` : level2OfferName}
+                      {level2Plan ? `Desde ${formatCurrency(level2Plan.monthly.amount)}/mes` : 'Próximamente'}
                     </p>
                     <p className="mt-1 text-sm text-neutral-300">
-                      {level2Plan ? 'La ruta de especialidad ya esta lista para activarse aunque la agenda propia siga creciendo.' : 'Si esta rama todavia no tiene plan publico, empujamos el interes para priorizar su apertura.'}
+                      {level2Plan ? 'Formación avanzada diseñada para profundizar en la especialidad.' : 'Déjanos tu interés y te avisamos cuando esté disponible.'}
                     </p>
                   </div>
                 </>
@@ -458,16 +455,15 @@ export default async function SpecializationPage(props: Props) {
         <div className="mx-auto grid w-full max-w-7xl gap-10 px-4 sm:px-6 lg:grid-cols-[minmax(0,1fr)_380px] lg:px-8">
           <div className="space-y-6">
             <div>
-              <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-brand-yellow">Enfoque SEO</p>
+              <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-brand-yellow">Áreas de enfoque</p>
               <h2 className="mt-3 text-3xl font-bold tracking-tight text-foreground md:text-4xl">
-                Una pagina que mezcla descubrimiento, catalogo y conversion
+                Temas clave en {spec.name}
               </h2>
             </div>
 
             <p className="max-w-3xl text-lg leading-relaxed text-muted-foreground">
-              En lugar de dejar la especialidad como una ficha estatica, esta landing funciona como hub. Posiciona
-              busquedas de {spec.name.toLowerCase()}, distribuye trafico interno hacia eventos y formaciones, y empuja
-              tanto la membresia para pertenecer como el Nivel 2 de la especialidad.
+              Nuestra oferta en {spec.name.toLowerCase()} abarca las áreas más demandadas de la práctica profesional.
+              Encuentra eventos, cursos y formaciones diseñados para fortalecer tu ejercicio.
             </p>
 
             <div className="grid gap-4 md:grid-cols-2">
@@ -502,7 +498,7 @@ export default async function SpecializationPage(props: Props) {
             <div className="rounded-[28px] border bg-card p-6 shadow-sm shadow-black/5">
               <div className="flex items-center gap-3">
                 <Layers3 className="h-5 w-5 text-brand-yellow" />
-                <h3 className="text-lg font-bold">Lo que se empuja aqui</h3>
+                <h3 className="text-lg font-bold">Lo que encontrarás aquí</h3>
               </div>
               <div className="mt-5 space-y-3">
                 <div className="rounded-2xl border bg-background/60 p-4 text-sm text-muted-foreground">
@@ -512,7 +508,7 @@ export default async function SpecializationPage(props: Props) {
                   Formaciones completas y rutas de aprendizaje.
                 </div>
                 <div className="rounded-2xl border bg-background/60 p-4 text-sm text-muted-foreground">
-                  Membresia Nivel 1 para pertenecer y {level2OfferName} para profundizar.
+                  Membresía para pertenecer y {level2OfferName} para profundizar.
                 </div>
               </div>
             </div>
@@ -525,12 +521,12 @@ export default async function SpecializationPage(props: Props) {
           <div className="mb-8 max-w-3xl">
             <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-brand-yellow">Eventos y cursos</p>
             <h2 className="mt-3 text-3xl font-bold tracking-tight text-foreground md:text-4xl">
-              {hasSpecificEvents ? `Lo mas relevante de ${spec.name}` : `Contenido transversal disponible para ${spec.name}`}
+              {hasSpecificEvents ? `Próximos eventos de ${spec.name}` : `Eventos recomendados para ${spec.name}`}
             </h2>
             <p className="mt-4 text-base leading-relaxed text-muted-foreground md:text-lg">
               {hasSpecificEvents
-                ? 'Priorizamos primero los contenidos etiquetados con esta especialidad y despues completamos con eventos generales cuando tambien tienen sentido para tu practica.'
-                : 'Todavia no hay agenda especifica publicada para esta rama. Mientras tanto, la landing puede empujar eventos generales que si conectan con la especialidad.'}
+                ? `Explora los eventos, talleres y cursos más relevantes de ${spec.name.toLowerCase()} disponibles en nuestra comunidad.`
+                : `Descubre eventos y cursos que complementan tu formación en ${spec.name.toLowerCase()}.`}
             </p>
           </div>
 
@@ -544,12 +540,12 @@ export default async function SpecializationPage(props: Props) {
             <div className="rounded-[28px] border bg-card px-6 py-16 text-center shadow-sm shadow-black/5">
               <CalendarDays className="mx-auto mb-4 h-10 w-10 text-brand-yellow" />
               <h3 className="text-2xl font-bold text-foreground">
-                {hasSpecificCatalogContent ? 'Agenda en curaduria activa' : 'Sin agenda publica en este momento'}
+                {hasSpecificCatalogContent ? 'Nuevos eventos próximamente' : 'Próximamente'}
               </h3>
               <p className="mx-auto mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground">
                 {hasSpecificCatalogContent
-                  ? `Cuando publiquemos nuevos eventos, cursos o talleres de ${spec.name}, apareceran aqui junto con los contenidos generales que apliquen a toda la comunidad.`
-                  : `Esta especialidad ya se presenta como producto, temas cubiertos y ruta comercial; la agenda publica aparecera aqui cuando publiquemos el siguiente bloque de contenidos.`}
+                  ? `Estamos preparando nuevos eventos, cursos y talleres de ${spec.name}. Únete a la comunidad para enterarte cuando se publiquen.`
+                  : `Estamos trabajando en la agenda de ${spec.name}. Únete a la comunidad para ser de los primeros en enterarte.`}
               </p>
             </div>
           )}
@@ -561,12 +557,12 @@ export default async function SpecializationPage(props: Props) {
           <div className="mb-8 max-w-3xl">
             <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-brand-yellow">Formaciones</p>
             <h2 className="mt-3 text-3xl font-bold tracking-tight text-foreground md:text-4xl">
-              {hasSpecificFormations ? `Formaciones y rutas completas para ${spec.name}` : `Rutas transversales mientras madura ${spec.name}`}
+              {hasSpecificFormations ? `Formaciones de ${spec.name}` : `Formaciones recomendadas para ${spec.name}`}
             </h2>
             <p className="mt-4 text-base leading-relaxed text-muted-foreground md:text-lg">
               {hasSpecificFormations
-                ? 'Cuando una formacion pertenece a la especialidad, se prioriza aqui. Si no, mantenemos visibles las rutas generales que siguen siendo utiles para la rama.'
-                : 'Todavia no hay formaciones propias publicadas para esta especialidad, asi que la pagina puede sostenerse con rutas generales y una salida comercial clara hacia membresia o Nivel 2.'}
+                ? `Rutas de aprendizaje completas diseñadas para tu crecimiento profesional en ${spec.name.toLowerCase()}.`
+                : `Formaciones que complementan y fortalecen tu práctica en ${spec.name.toLowerCase()}.`}
             </p>
           </div>
 
@@ -638,12 +634,12 @@ export default async function SpecializationPage(props: Props) {
             <div className="rounded-[28px] border bg-card px-6 py-16 text-center shadow-sm shadow-black/5">
               <GraduationCap className="mx-auto mb-4 h-10 w-10 text-brand-yellow" />
               <h3 className="text-2xl font-bold text-foreground">
-                {hasSpecificCatalogContent ? 'Ruta formativa en curaduria' : 'Sin ruta publica en este momento'}
+                {hasSpecificCatalogContent ? 'Nuevas formaciones próximamente' : 'Próximamente'}
               </h3>
               <p className="mx-auto mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground">
                 {hasSpecificCatalogContent
-                  ? `Cuando publiquemos nuevas rutas de ${spec.name}, apareceran aqui junto con formaciones generales que tambien aporten a la especialidad.`
-                  : `La landing ya puede vender la especialidad desde temas, membresia, contenido transversal e interes por Nivel 2; las formaciones propias apareceran aqui cuando abramos la siguiente etapa editorial.`}
+                  ? `Estamos diseñando nuevas rutas formativas de ${spec.name}. Únete a la comunidad para acceder a ellas cuando se publiquen.`
+                  : `Estamos preparando formaciones especializadas en ${spec.name}. Únete a la comunidad para ser de los primeros en acceder.`}
               </p>
             </div>
           )}
@@ -653,9 +649,9 @@ export default async function SpecializationPage(props: Props) {
       <section className="w-full border-y bg-[#050505] py-16 text-white md:py-20">
         <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mb-8 max-w-3xl">
-            <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-brand-yellow">Membresia y Nivel 2</p>
+            <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-brand-yellow">Membresía y Nivel 2</p>
             <h2 className="mt-3 text-3xl font-bold tracking-tight md:text-4xl">
-              Dos caminos de conversion dentro de {spec.name}
+              Tu ruta de crecimiento en {spec.name}
             </h2>
           </div>
 
@@ -666,8 +662,7 @@ export default async function SpecializationPage(props: Props) {
               </Badge>
               <h3 className="mt-5 text-3xl font-bold">{PRICING_PLAN_COPY.level1.title}</h3>
               <p className="mt-3 text-base leading-relaxed text-neutral-300">
-                Membresia para pertenecer a la comunidad, descubrir eventos generales y preparar el salto a una ruta mas
-                especializada.
+                Accede a la comunidad, participa en eventos y descubre todas las especialidades disponibles.
               </p>
               <div className="mt-6 rounded-2xl border border-white/10 bg-black/25 p-5">
                 <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-neutral-500">Desde</p>
@@ -696,13 +691,13 @@ export default async function SpecializationPage(props: Props) {
               </Badge>
               <h3 className="mt-5 text-3xl font-bold text-white">{level2OfferName}</h3>
               <p className="mt-3 text-base leading-relaxed text-neutral-200">
-                La capa que empuja mejor la especialidad: mas foco, mas oferta y una propuesta mas clara para quienes
-                quieren profundizar dentro de {spec.name}.
+                Formación avanzada con mayor profundidad, contenido exclusivo y una ruta diseñada para quienes
+                quieren especializarse en {spec.name}.
               </p>
               <div className="mt-6 rounded-2xl border border-brand-yellow/20 bg-black/20 p-5">
-                <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-brand-yellow">Estado actual</p>
+                <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-brand-yellow">Inversión</p>
                 <p className="mt-2 text-3xl font-black text-white">
-                  {level2Plan ? `${formatCurrency(level2Plan.monthly.amount)}/mes` : 'Lista prioritaria'}
+                  {level2Plan ? `${formatCurrency(level2Plan.monthly.amount)}/mes` : 'Próximamente'}
                 </p>
               </div>
               <div className="mt-6 flex flex-col gap-3 sm:flex-row">
@@ -737,11 +732,11 @@ export default async function SpecializationPage(props: Props) {
         <div className="sapihum-grid-bg absolute inset-0 opacity-10" />
         <div className="relative mx-auto w-full max-w-5xl px-4 text-center sm:px-6 lg:px-8">
           <h2 className="text-3xl font-bold tracking-tight md:text-5xl">
-            {spec.name}, comunidad, eventos y formaciones en un solo flujo
+            Todo lo que necesitas en {spec.name}, en un solo lugar
           </h2>
           <p className="mx-auto mt-5 max-w-3xl text-lg leading-relaxed text-neutral-400">
-            Entra por membresia para pertenecer, descubre contenidos de la especialidad y escala hacia {level2OfferName}
-            cuando quieras una capa mas profunda.
+            Únete a la comunidad, accede a eventos y formaciones de la especialidad, y avanza hacia {level2OfferName}
+            cuando estés listo para profundizar.
           </p>
           <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
             <Link href={membershipHref}>
@@ -772,17 +767,17 @@ export default async function SpecializationPage(props: Props) {
             <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-5">
               <Users className="mb-3 h-5 w-5 text-brand-yellow" />
               <h3 className="font-bold">Membresia</h3>
-              <p className="mt-2 text-sm leading-relaxed text-neutral-400">Para pertenecer y empezar a moverte dentro de la comunidad.</p>
+              <p className="mt-2 text-sm leading-relaxed text-neutral-400">Accede a la comunidad y a todos los recursos generales disponibles.</p>
             </div>
             <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-5">
               <CalendarDays className="mb-3 h-5 w-5 text-brand-yellow" />
               <h3 className="font-bold">Eventos y cursos</h3>
-              <p className="mt-2 text-sm leading-relaxed text-neutral-400">Para captar intencion de busqueda y llevarla a consumo real de catalogo.</p>
+              <p className="mt-2 text-sm leading-relaxed text-neutral-400">Talleres, cursos y eventos en vivo con profesionales de primer nivel.</p>
             </div>
             <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-5">
               <BookOpenCheck className="mb-3 h-5 w-5 text-brand-yellow" />
               <h3 className="font-bold">{level2OfferName}</h3>
-              <p className="mt-2 text-sm leading-relaxed text-neutral-400">Para profundizar cuando ya quieres una ruta mas seria dentro de la especialidad.</p>
+              <p className="mt-2 text-sm leading-relaxed text-neutral-400">Formación avanzada para quienes buscan una ruta completa de especialización.</p>
             </div>
           </div>
         </div>

@@ -35,6 +35,39 @@ export async function getPublicSpeakers(): Promise<SpeakerWithProfile[]> {
 }
 
 /**
+ * Get specific speakers by their IDs (for featured sections).
+ * Returns speakers in the same order as the input IDs array.
+ */
+export async function getSpeakersByIds(speakerIds: string[]): Promise<SpeakerWithProfile[]> {
+    if (speakerIds.length === 0) return []
+
+    const supabase = await createClient()
+
+    const { data, error } = await (supabase
+        .from('speakers') as any)
+        .select(`
+            *,
+            profile:profiles (
+                id,
+                full_name,
+                avatar_url,
+                role
+            )
+        `)
+        .in('id', speakerIds)
+        .eq('is_public', true)
+
+    if (error) {
+        console.error('Error fetching speakers by ids:', error)
+        return []
+    }
+
+    // Preserve the order from the input IDs array
+    const speakerMap = new Map((data ?? []).map((s: SpeakerWithProfile) => [s.id, s]))
+    return speakerIds.map(id => speakerMap.get(id)).filter(Boolean) as SpeakerWithProfile[]
+}
+
+/**
  * Get a single speaker by ID with profile
  */
 export async function getSpeakerById(speakerId: string): Promise<SpeakerWithProfile | null> {
