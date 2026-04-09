@@ -418,14 +418,14 @@ export default async function LandingPage() {
       ══════════════════════════════════════════════════ */}
       <section className="relative w-full overflow-hidden border-b border-white/[0.06] bg-[#030303] py-28 md:py-32">
         <div
-          className="absolute inset-0 bg-cover bg-center opacity-[0.14]"
+          className="absolute inset-0 bg-cover bg-center opacity-[0.24]"
           style={{
             backgroundImage: `url('${PLATFORM_SECTION_BACKGROUND.image}')`,
             backgroundPosition: PLATFORM_SECTION_BACKGROUND.position,
           }}
         />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(246,174,2,0.08),transparent_42%)]" />
-        <div className="absolute inset-0 bg-gradient-to-b from-black via-black/88 to-[#030303]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(246,174,2,0.1),transparent_42%)]" />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/76 via-black/72 to-[#030303]/88" />
 
         <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           {/* Section header */}

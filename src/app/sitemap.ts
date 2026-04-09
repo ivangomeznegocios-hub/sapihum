@@ -1,6 +1,7 @@
 import { createClient } from '@supabase/supabase-js'
 import type { MetadataRoute } from 'next'
 import { getAppUrl } from '@/lib/config/app-url'
+import { getMarketingSpecializations } from '@/lib/specializations'
 import type { Database } from '@/types/database'
 
 function createPublicSupabaseClient() {
@@ -58,6 +59,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
             priority: 0.9,
         },
         {
+            url: toAbsoluteUrl(appUrl, '/especialidades'),
+            lastModified: new Date(),
+            changeFrequency: 'weekly',
+            priority: 0.85,
+        },
+        {
             url: toAbsoluteUrl(appUrl, '/precios'),
             lastModified: new Date(),
             changeFrequency: 'weekly',
@@ -91,8 +98,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         priority: 0.85,
     }))
 
+    const specializationRoutes: MetadataRoute.Sitemap = getMarketingSpecializations().map((specialization) => ({
+        url: toAbsoluteUrl(appUrl, `/especialidades/${specialization.slug}`),
+        lastModified: new Date(),
+        changeFrequency: 'weekly',
+        priority: 0.8,
+    }))
+
     return [
         ...staticRoutes,
+        ...specializationRoutes,
         ...eventRoutes,
         ...formationRoutes,
     ]
