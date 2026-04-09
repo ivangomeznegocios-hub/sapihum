@@ -3,6 +3,7 @@
 import Link from "next/link"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
+import { BrandWordmark } from "@/components/brand/brand-wordmark"
 
 const NAV_ITEMS = [
   {
@@ -70,13 +71,8 @@ export function MarketingNavbar({ isLoggedIn }: MarketingNavbarProps) {
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur-lg supports-[backdrop-filter]:bg-background/60">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-        <Link href="/" className="flex shrink-0 items-center gap-2.5">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-black dark:bg-white">
-            <span className="text-[10px] font-bold tracking-tighter text-[#f6ae02] dark:text-black">SH</span>
-          </div>
-          <span className="hidden text-lg font-bold uppercase tracking-[0.15em] sm:inline-block">
-            SAPIHUM
-          </span>
+        <Link href="/" className="flex shrink-0 items-center" aria-label="SAPIHUM">
+          <BrandWordmark className="text-sm text-[#f6ae02] sm:text-base lg:text-lg lg:tracking-[0.16em]" />
         </Link>
 
         <nav className="hidden items-center gap-1 lg:flex">

@@ -1,4 +1,5 @@
 import Link from "next/link"
+import { BrandWordmark } from "@/components/brand/brand-wordmark"
 
 const FOOTER_LINKS = {
   Especialidades: [
@@ -37,13 +38,8 @@ export function MarketingFooter() {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-2 gap-8 py-12 sm:grid-cols-3 md:grid-cols-6">
           <div className="col-span-2 sm:col-span-3 md:col-span-1">
-            <Link href="/" className="mb-4 flex items-center gap-2.5">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-black dark:bg-white">
-                <span className="text-[10px] font-bold tracking-tighter text-[#f6ae02] dark:text-black">SH</span>
-              </div>
-              <span className="text-base font-bold uppercase tracking-[0.15em]">
-                SAPIHUM
-              </span>
+            <Link href="/" className="mb-4 inline-flex items-center" aria-label="SAPIHUM">
+              <BrandWordmark className="text-sm text-[#f6ae02] sm:text-base lg:tracking-[0.16em]" />
             </Link>
             <p className="text-sm leading-relaxed text-muted-foreground">
               {"Psicolog\u00EDa Avanzada e Investigaci\u00F3n Humana. La plataforma integral para profesionales de la psicolog\u00EDa."}

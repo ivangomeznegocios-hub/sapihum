@@ -1,5 +1,6 @@
 import Link from "next/link"
 import Image from "next/image"
+import { BrandWordmark } from "@/components/brand/brand-wordmark"
 import { Button } from "@/components/ui/button"
 import { splitPublicCatalogEvents } from "@/lib/events/public"
 import { getSpecializationByCode, SPECIALIZATION_CATALOG } from "@/lib/specializations"
@@ -494,8 +495,8 @@ export default async function LandingPage() {
                           className="object-cover transition-transform duration-700 group-hover:scale-105"
                         />
                       ) : (
-                        <div className="absolute inset-0 flex items-center justify-center text-5xl font-black text-white/10">
-                          SH
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <BrandWordmark className="text-2xl text-white/10 sm:text-3xl lg:text-4xl lg:tracking-[0.18em]" />
                         </div>
                       )}
                       <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />

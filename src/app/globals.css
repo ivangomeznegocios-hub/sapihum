@@ -92,36 +92,6 @@ option {
   color: var(--popover-foreground);
 }
 
-.brand-shell {
-  position: relative;
-  isolation: isolate;
-}
-
-.brand-shell::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background-image:
-    linear-gradient(to right, rgba(246, 174, 2, 0.035) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(246, 174, 2, 0.03) 1px, transparent 1px);
-  background-size: 36px 36px;
-  mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.5), transparent 92%);
-  opacity: 0.15;
-}
-
-.brand-shell::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background:
-    radial-gradient(circle at 15% 12%, rgba(246, 174, 2, 0.04), transparent 22%),
-    radial-gradient(circle at 82% 0%, rgba(122, 86, 2, 0.05), transparent 20%),
-    radial-gradient(circle at 50% 100%, rgba(255, 255, 255, 0.02), transparent 18%);
-  opacity: 0.8;
-}
-
 .brand-panel {
   border: 1px solid rgba(192, 191, 188, 0.14);
   background:
@@ -146,14 +116,6 @@ option {
   font-weight: 700;
   letter-spacing: 0.28em;
   text-transform: uppercase;
-}
-
-.sapihum-dot {
-  height: 0.5rem;
-  width: 0.5rem;
-  border-radius: 999px;
-  background: var(--primary);
-  box-shadow: 0 0 0 0.32rem rgba(246, 174, 2, 0.14);
 }
 
 .brand-grid-bg {

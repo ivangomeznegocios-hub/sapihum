@@ -21,9 +21,8 @@ function baseLayout(content: string) {
             <table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;">
                 <!-- Header -->
                 <tr><td style="padding:0 0 24px;">
-                    <a href="${appUrl}" style="text-decoration:none;display:inline-flex;align-items:center;gap:8px;">
-                        <span style="display:inline-block;width:32px;height:32px;background:linear-gradient(135deg,${BRAND_COLOR},#7a5602);border-radius:8px;text-align:center;line-height:32px;color:white;font-size:10px;font-weight:800;">SH</span>
-                        <span style="font-size:18px;font-weight:700;color:${TEXT_COLOR};letter-spacing:-0.5px;">SAPIHUM</span>
+                    <a href="${appUrl}" style="text-decoration:none;display:inline-block;">
+                        <span style="display:inline-block;font-size:18px;font-weight:800;color:${BRAND_COLOR};letter-spacing:3px;text-transform:uppercase;">SAPIHUM</span>
                     </a>
                 </td></tr>
                 <!-- Content Card -->

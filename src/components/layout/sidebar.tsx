@@ -40,7 +40,7 @@ import { cn } from '@/lib/utils'
 import { getMembershipTier } from '@/lib/membership'
 import type { UserRole } from '@/types/database'
 import { canSeeSidebarItem } from '@/lib/access/internal-modules'
-import { brandName } from '@/lib/brand'
+import { BrandWordmark } from '@/components/brand/brand-wordmark'
 
 interface NavItem {
     name: string
@@ -307,13 +307,8 @@ export function Sidebar({
                 : 'hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-64'
         )}>
             <div className="flex h-full min-h-0 grow flex-col overflow-y-auto overscroll-contain bg-sidebar px-4 pb-4">
-                <div className="flex h-14 shrink-0 items-center gap-2 px-1">
-                    <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-black text-[9px] font-bold tracking-[0.14em] text-[#f6ae02]">
-                        SH
-                    </div>
-                    <span className="text-sm font-bold tracking-tight text-sidebar-foreground">
-                        {brandName}
-                    </span>
+                <div className="flex h-14 shrink-0 items-center px-1">
+                    <BrandWordmark className="text-sm text-[#f6ae02] tracking-[0.14em]" />
                 </div>
 
                 {userRole === 'psychologist' && (

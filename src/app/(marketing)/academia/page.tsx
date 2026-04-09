@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import Image from 'next/image'
+import { BrandWordmark } from '@/components/brand/brand-wordmark'
 import { AcademiaCatalog } from '@/components/catalog/academia-catalog'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -171,8 +172,8 @@ export default async function AcademiaPage() {
                                                         className="object-cover transition-transform duration-500 group-hover:scale-105"
                                                     />
                                                 ) : (
-                                                    <div className="absolute inset-0 flex items-center justify-center text-5xl font-black text-white/10">
-                                                        SH
+                                                    <div className="absolute inset-0 flex items-center justify-center">
+                                                        <BrandWordmark className="text-2xl text-white/10 sm:text-3xl lg:text-4xl lg:tracking-[0.18em]" />
                                                     </div>
                                                 )}
                                                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
