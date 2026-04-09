@@ -48,7 +48,7 @@ export function MarketingNavbar({ isLoggedIn }: MarketingNavbarProps) {
     <header className="sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur-lg supports-[backdrop-filter]:bg-background/60">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         <Link href="/" className="flex shrink-0 items-center" aria-label="SAPIHUM">
-          <BrandWordmark className="text-sm text-[#f6ae02] sm:text-base lg:text-lg lg:tracking-[0.16em]" />
+          <BrandWordmark className="text-sm sm:text-base lg:text-lg lg:tracking-[0.16em]" />
         </Link>
 
         <nav className="hidden items-center gap-1 lg:flex">

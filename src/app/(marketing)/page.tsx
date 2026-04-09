@@ -103,6 +103,9 @@ const PLATFORM_FEATURES = [
 ]
 
 const CLINICAL_LEVEL2_BENEFITS = getPricingFeatureTitles(LEVEL_2_CARD_FEATURE_IDS)
+const LEVEL_2_SHOWCASE_BENEFITS = CLINICAL_LEVEL2_BENEFITS
+  .filter((benefit) => benefit !== "Todo de Comunidad y Crecimiento")
+  .slice(0, 8)
 
 const FEATURED_TEACHERS = [
   {
@@ -393,64 +396,133 @@ export default async function LandingPage() {
       {/* ══════════════════════════════════════════════════
           8. RECURSOS Y HERRAMIENTAS (Software)
       ══════════════════════════════════════════════════ */}
-      <section className="w-full py-32 bg-[#030303] border-b border-white/[0.06]">
+      <section className="w-full border-b border-white/[0.06] bg-[#030303] py-32">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="max-w-2xl mx-auto text-center mb-20">
-            <p className="text-[10px] font-bold text-[#f6ae02] uppercase tracking-[0.2em] mb-4">
-              Herramientas de Plataforma
+          <div className="mx-auto mb-16 max-w-4xl text-center">
+            <p className="mb-4 text-[10px] font-bold uppercase tracking-[0.2em] text-[#f6ae02]">
+              Mucho mas que formacion
             </p>
-            <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-white">
-              Además de formarte, accede a un ecosistema profesional más completo
+            <h2 className="text-3xl font-bold leading-tight tracking-tight text-white md:text-4xl lg:text-5xl">
+              SAPIHUM tambien conecta formacion, software clinico y membresia en una misma experiencia
             </h2>
-            <p className="mt-4 text-muted-foreground font-light">
-              SAPIHUM no solo busca ayudarte a aprender más, sino a trabajar con más orden, estructura y apoyo tecnológico.
+            <p className="mt-6 text-lg font-light leading-relaxed text-[#c0bfbc]/70">
+              La idea no es mostrar piezas separadas. Ademas de la academia, existe un ecosistema que tambien puede ayudarte a operar con mas orden, seguimiento y respaldo profesional. El Nivel 2 aparece aqui solo como ejemplo de esa capa mas amplia.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-px bg-white/[0.06] border border-white/[0.06]">
-            {PLATFORM_FEATURES.map((feature) => (
-              <div
-                key={feature.title}
-                className="group bg-[#030303] p-8 hover:bg-black transition-all duration-500"
-              >
-                <div className="text-[#c0bfbc] mb-6 group-hover:text-[#f6ae02] transition-colors duration-500">
-                  {feature.icon}
+          <div className="relative overflow-hidden border border-white/[0.08] bg-black">
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(246,174,2,0.10),transparent_38%)]" />
+            <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#f6ae02]/40 to-transparent" />
+
+            <div className="relative grid grid-cols-1 lg:grid-cols-[1.2fr_0.92fr]">
+              <div className="border-b border-white/[0.08] p-8 md:p-10 lg:border-b-0 lg:border-r">
+                <div className="max-w-2xl">
+                  <p className="mb-4 text-[10px] font-bold uppercase tracking-[0.2em] text-[#f6ae02]">
+                    Infraestructura profesional conectada
+                  </p>
+                  <h3 className="text-2xl font-bold leading-tight tracking-tight text-white md:text-3xl">
+                    No solo aprendes: tambien puedes organizar tu consulta y trabajar con mejor soporte clinico.
+                  </h3>
+                  <p className="mt-4 text-sm font-light leading-relaxed text-[#c0bfbc]/70 md:text-base">
+                    SAPIHUM no solo busca ayudarte a aprender mas, sino a trabajar con mas continuidad, estructura y apoyo tecnologico. Por eso conviene presentar herramientas y membresia dentro de una sola historia, no como bloques desconectados.
+                  </p>
                 </div>
-                <h3 className="text-sm font-bold mb-3 uppercase tracking-wider">{feature.title}</h3>
-                <p className="text-xs text-muted-foreground leading-relaxed font-light">{feature.description}</p>
+
+                <div className="mt-8 flex flex-wrap gap-3">
+                  {[
+                    "Academia especializada",
+                    "Software clinico",
+                    "Operacion diaria mas ordenada",
+                  ].map((pill) => (
+                    <span
+                      key={pill}
+                      className="inline-flex items-center rounded-full border border-white/[0.08] bg-white/[0.03] px-3 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-white/75"
+                    >
+                      {pill}
+                    </span>
+                  ))}
+                </div>
+
+                <div className="mt-10 grid grid-cols-1 gap-4 md:grid-cols-2">
+                  {PLATFORM_FEATURES.map((feature) => (
+                    <div
+                      key={feature.title}
+                      className="group rounded-2xl border border-white/[0.06] bg-white/[0.02] p-5 transition-all duration-500 hover:border-[#f6ae02]/20 hover:bg-white/[0.04]"
+                    >
+                      <div className="mb-4 inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-white/[0.08] bg-black text-[#c0bfbc] transition-colors duration-500 group-hover:text-[#f6ae02]">
+                        {feature.icon}
+                      </div>
+                      <h4 className="text-sm font-bold uppercase tracking-[0.12em] text-white">
+                        {feature.title}
+                      </h4>
+                      <p className="mt-3 text-sm font-light leading-relaxed text-[#c0bfbc]/65">
+                        {feature.description}
+                      </p>
+                    </div>
+                  ))}
+                </div>
               </div>
-            ))}
-          </div>
 
-          <div className="mt-12 grid grid-cols-1 gap-8 border border-white/[0.06] bg-black p-8 md:grid-cols-[1.1fr_0.9fr] md:p-10">
-            <div>
-              <p className="text-[10px] font-bold text-[#f6ae02] uppercase tracking-[0.2em] mb-4">
-                {PRICING_PLAN_COPY.level2.title}
-              </p>
-              <h3 className="text-2xl md:text-3xl font-bold tracking-tight text-white">
-                Beneficios concretos para una práctica clínica más ordenada y respaldada
-              </h3>
-              <p className="mt-4 text-muted-foreground font-light leading-relaxed">
-                El bloque clínico de Nivel 2 ahora refleja el mismo paquete comercial que aparece en precios: comunidad, operación clínica, automatización y soporte en una sola capa.
-              </p>
-            </div>
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-              {CLINICAL_LEVEL2_BENEFITS.map((benefit) => (
-                <div key={benefit} className="flex items-start gap-3 border border-white/[0.06] bg-[#050505] px-4 py-3">
-                  <span className="mt-1 text-[#f6ae02]">•</span>
-                  <span className="text-sm text-[#c0bfbc]/80">{benefit}</span>
+              <div className="p-8 md:p-10">
+                <div className="inline-flex items-center gap-2 rounded-full border border-[#f6ae02]/20 bg-[#f6ae02]/10 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-[#f6ae02]">
+                  Ejemplo de membresia Nivel 2
                 </div>
-              ))}
-            </div>
-          </div>
 
-          <div className="mt-8 text-center">
-            <Link href="/membresia">
-              <Button variant="outline" className="gap-2 font-bold uppercase text-[10px] tracking-[0.1em]">
-                Conocer membresía
-                <ArrowRight className="h-4 w-4" />
-              </Button>
-            </Link>
+                <div className="mt-6 rounded-[1.75rem] border border-white/[0.08] bg-[#050505] p-6 md:p-7">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="inline-flex items-center rounded-full bg-white/5 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-white/80">
+                      {PRICING_PLAN_COPY.level2.levelLabel}
+                    </span>
+                    {PRICING_PLAN_COPY.level2.badge && (
+                      <span className="inline-flex items-center rounded-full border border-[#f6ae02]/20 bg-[#f6ae02]/10 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-[#f6ae02]">
+                        {PRICING_PLAN_COPY.level2.badge}
+                      </span>
+                    )}
+                  </div>
+
+                  <h3 className="mt-5 text-2xl font-bold tracking-tight text-white md:text-3xl">
+                    {PRICING_PLAN_COPY.level2.title}
+                  </h3>
+                  <p className="mt-4 text-sm font-light leading-relaxed text-[#c0bfbc]/70 md:text-base">
+                    Si alguien quiere algo mas completo que solo cursos, este nivel ayuda a visualizar como la membresia puede sumar comunidad, expedientes, agenda, pagos y apoyo clinico dentro del mismo ecosistema.
+                  </p>
+
+                  <div className="mt-6 rounded-2xl border border-white/[0.06] bg-black/80 p-4">
+                    <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#f6ae02]">
+                      Lo que hace visible esta experiencia
+                    </p>
+                    <p className="mt-2 text-sm leading-relaxed text-[#c0bfbc]/70">
+                      {PRICING_PLAN_COPY.level2.note}
+                    </p>
+                  </div>
+
+                  <div className="mt-6 grid gap-3 sm:grid-cols-2">
+                    {LEVEL_2_SHOWCASE_BENEFITS.map((benefit) => (
+                      <div
+                        key={benefit}
+                        className="flex items-start gap-3 rounded-2xl border border-white/[0.06] bg-white/[0.02] px-4 py-3"
+                      >
+                        <span className="mt-1 text-[#f6ae02]">+</span>
+                        <span className="text-sm text-[#c0bfbc]/80">{benefit}</span>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="mt-8">
+                    <Link href="/membresia">
+                      <Button variant="outline" className="w-full gap-2 font-bold uppercase text-[10px] tracking-[0.1em] sm:w-auto">
+                        Conocer membresia
+                        <ArrowRight className="h-4 w-4" />
+                      </Button>
+                    </Link>
+                  </div>
+                </div>
+
+                <p className="mt-4 text-xs font-light leading-relaxed text-[#c0bfbc]/45">
+                  Nivel 2 aparece aqui como ejemplo de una capa mas completa dentro del ecosistema SAPIHUM, donde la formacion puede convivir con software y soporte operativo.
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       </section>

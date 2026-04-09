@@ -8,7 +8,7 @@ export function BrandWordmark({ className, ...props }: BrandWordmarkProps) {
     return (
         <span
             className={cn(
-                'inline-block whitespace-nowrap font-black uppercase leading-none tracking-[0.12em]',
+                'inline-block whitespace-nowrap font-black uppercase leading-none tracking-[0.12em] text-white',
                 className
             )}
             {...props}

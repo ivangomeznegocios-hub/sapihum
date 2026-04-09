@@ -12,7 +12,7 @@ export default function AuthLayout({
             <div className="w-full max-w-md">
                 <div className="mb-6 text-center sm:mb-8">
                     <Link href="/" className="inline-flex flex-col items-start gap-2" aria-label={brandName}>
-                        <BrandWordmark className="text-base text-[#f6ae02] sm:text-lg sm:tracking-[0.18em]" />
+                        <BrandWordmark className="text-base sm:text-lg sm:tracking-[0.18em]" />
                         <p className="text-left text-sm text-muted-foreground">{brandAuthSubtitle}</p>
                     </Link>
                 </div>

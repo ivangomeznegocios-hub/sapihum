@@ -308,7 +308,7 @@ export function Sidebar({
         )}>
             <div className="flex h-full min-h-0 grow flex-col overflow-y-auto overscroll-contain bg-sidebar px-4 pb-4">
                 <div className="flex h-14 shrink-0 items-center px-1">
-                    <BrandWordmark className="text-sm text-[#f6ae02] tracking-[0.14em]" />
+                    <BrandWordmark className="text-sm tracking-[0.14em]" />
                 </div>
 
                 {userRole === 'psychologist' && (

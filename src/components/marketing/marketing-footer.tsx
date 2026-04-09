@@ -38,7 +38,7 @@ export function MarketingFooter() {
         <div className="grid grid-cols-2 gap-8 py-12 sm:grid-cols-3 md:grid-cols-6">
           <div className="col-span-2 sm:col-span-3 md:col-span-1">
             <Link href="/" className="mb-4 inline-flex items-center" aria-label="SAPIHUM">
-              <BrandWordmark className="text-sm text-[#f6ae02] sm:text-base lg:tracking-[0.16em]" />
+              <BrandWordmark className="text-sm sm:text-base lg:tracking-[0.16em]" />
             </Link>
             <p className="text-sm leading-relaxed text-muted-foreground">
               {"Psicolog\u00EDa Avanzada e Investigaci\u00F3n Humana. La plataforma integral para profesionales de la psicolog\u00EDa."}
