@@ -379,26 +379,46 @@ export default async function LandingPage() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-px bg-white/[0.06] border border-white/[0.06] sapihum-stagger">
-            {SPECIALTIES.map((spec, idx) => (
-              <Link
-                key={spec.code}
-                href={`/especialidades/${spec.slug}`}
-                className="group bg-black p-10 hover:bg-[#0a0a0a] transition-all duration-500"
-              >
-                <div className="text-[#f6ae02] mb-6 font-serif text-2xl">
-                  {String(idx + 1).padStart(2, '0')}.
-                </div>
-                <h3 className="text-sm font-bold mb-3 uppercase tracking-[0.1em] group-hover:text-[#f6ae02] transition-colors duration-500">
-                  {spec.name}
-                </h3>
-                <p className="text-xs text-[#c0bfbc]/40 leading-relaxed mb-6">
-                  {spec.tagline}
-                </p>
-                <div className="text-[10px] font-bold text-[#f6ae02] uppercase tracking-[0.15em] flex items-center">
-                  Descubrir <span className="ml-1 transition-transform group-hover:translate-x-2 duration-500">→</span>
-                </div>
-              </Link>
-            ))}
+            {SPECIALTIES.map((spec, idx) => {
+              const background = SPECIALTY_BACKGROUNDS[spec.code]
+
+              return (
+                <Link
+                  key={spec.code}
+                  href={`/especialidades/${spec.slug}`}
+                  className="group relative isolate min-h-[320px] overflow-hidden bg-black"
+                >
+                  <div
+                    className="absolute inset-0 bg-cover bg-center transition-transform duration-700 ease-out group-hover:scale-105"
+                    style={{
+                      backgroundImage: `url('${background?.image ?? SPECIALTY_BACKGROUNDS.clinica.image}')`,
+                      backgroundPosition: background?.position ?? "center",
+                    }}
+                  />
+                  <div className="absolute inset-0 bg-black/55 transition-colors duration-500 group-hover:bg-black/45" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black via-black/80 to-black/25" />
+                  <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-[#f6ae02]/60 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+
+                  <div className="relative z-10 flex h-full flex-col justify-between p-10">
+                    <div>
+                      <div className="mb-6 font-serif text-2xl text-[#f6ae02] drop-shadow-[0_2px_12px_rgba(0,0,0,0.55)]">
+                        {String(idx + 1).padStart(2, '0')}.
+                      </div>
+                      <h3 className="mb-3 text-sm font-bold uppercase tracking-[0.1em] text-white transition-colors duration-500 group-hover:text-[#f6ae02]">
+                        {spec.name}
+                      </h3>
+                      <p className="max-w-[18rem] text-xs leading-relaxed text-white/78">
+                        {spec.tagline}
+                      </p>
+                    </div>
+                    <div className="flex items-center text-[10px] font-bold uppercase tracking-[0.15em] text-[#f6ae02]">
+                      Descubrir <span className="ml-1 transition-transform duration-500 group-hover:translate-x-2">→</span>
+                    </div>
+                  </div>
+                </Link>
+              )
+            })}
+
           </div>
         </div>
       </section>
