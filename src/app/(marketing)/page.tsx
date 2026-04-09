@@ -27,6 +27,11 @@ type SpecialtyBackground = {
   position?: string
 }
 
+const PLATFORM_SECTION_BACKGROUND: SpecialtyBackground = {
+  image: "https://unsplash.com/photos/Rsf-yqmn3zI/download?force=true&w=1600&q=80",
+  position: "center 38%",
+}
+
 const SPECIALTY_BACKGROUNDS: Record<string, SpecialtyBackground> = {
   clinica: {
     image: "https://unsplash.com/photos/K_MSe-zglGI/download?force=true&w=1400&q=80",
@@ -411,8 +416,18 @@ export default async function LandingPage() {
       {/* ══════════════════════════════════════════════════
           8. RECURSOS Y HERRAMIENTAS (Software) — Minimalista
       ══════════════════════════════════════════════════ */}
-      <section className="w-full border-b border-white/[0.06] bg-[#030303] py-28 md:py-32">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <section className="relative w-full overflow-hidden border-b border-white/[0.06] bg-[#030303] py-28 md:py-32">
+        <div
+          className="absolute inset-0 bg-cover bg-center opacity-[0.14]"
+          style={{
+            backgroundImage: `url('${PLATFORM_SECTION_BACKGROUND.image}')`,
+            backgroundPosition: PLATFORM_SECTION_BACKGROUND.position,
+          }}
+        />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(246,174,2,0.08),transparent_42%)]" />
+        <div className="absolute inset-0 bg-gradient-to-b from-black via-black/88 to-[#030303]" />
+
+        <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           {/* Section header */}
           <div className="mx-auto mb-16 max-w-3xl text-center">
             <p className="mb-4 text-[10px] font-bold uppercase tracking-[0.2em] text-[#f6ae02]">
