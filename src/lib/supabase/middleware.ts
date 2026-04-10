@@ -1,5 +1,6 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
+import { ensureProfileForAuthUser } from '@/lib/supabase/profile-provisioning'
 
 const AUTH_CALLBACK_QUERY_KEYS = new Set([
     'code',
@@ -88,7 +89,7 @@ export async function updateSession(request: NextRequest) {
         data: { user },
     } = await supabase.auth.getUser()
     const needsProfileGuard = pathname.startsWith('/dashboard') || pathname.startsWith('/auth')
-    const { data: profile } =
+    const { data: existingProfile } =
         user && needsProfileGuard
             ? await (supabase
                 .from('profiles') as any)
@@ -96,6 +97,19 @@ export async function updateSession(request: NextRequest) {
                 .eq('id', user.id)
                 .maybeSingle()
             : { data: null }
+    let profile = existingProfile
+
+    if (user && needsProfileGuard && !profile) {
+        const provisioned = await ensureProfileForAuthUser(user)
+
+        if (provisioned) {
+            profile = { id: user.id }
+            console.info('Provisioned missing profile for authenticated user during middleware guard', {
+                userId: user.id,
+                pathname,
+            })
+        }
+    }
 
     // Protected routes - redirect to login if no user
     if (
