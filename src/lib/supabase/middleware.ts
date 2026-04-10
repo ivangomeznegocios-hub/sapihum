@@ -87,6 +87,15 @@ export async function updateSession(request: NextRequest) {
     const {
         data: { user },
     } = await supabase.auth.getUser()
+    const needsProfileGuard = pathname.startsWith('/dashboard') || pathname.startsWith('/auth')
+    const { data: profile } =
+        user && needsProfileGuard
+            ? await (supabase
+                .from('profiles') as any)
+                .select('id')
+                .eq('id', user.id)
+                .maybeSingle()
+            : { data: null }
 
     // Protected routes - redirect to login if no user
     if (
@@ -99,9 +108,22 @@ export async function updateSession(request: NextRequest) {
         return NextResponse.redirect(url)
     }
 
+    if (
+        user &&
+        !profile &&
+        pathname.startsWith('/dashboard')
+    ) {
+        const url = request.nextUrl.clone()
+        url.pathname = '/auth/login'
+        url.searchParams.set('next', pathname)
+        url.searchParams.set('error', 'profile_not_found')
+        return NextResponse.redirect(url)
+    }
+
     // Redirect authenticated users away from auth pages
     if (
         user &&
+        profile &&
         pathname.startsWith('/auth') &&
         pathname !== '/auth/callback' &&
         pathname !== '/auth/update-password'

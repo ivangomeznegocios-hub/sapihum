@@ -10,6 +10,18 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Label } from '@/components/ui/label'
 import { brandName } from '@/lib/brand'
 
+function getAuthErrorMessage(errorCode: string | null) {
+    if (errorCode === 'profile_not_found') {
+        return 'Tu sesión existe, pero no encontramos tu perfil en la base de datos. Cierra sesión o completa la creación del perfil antes de entrar al dashboard.'
+    }
+
+    if (errorCode === 'auth_callback_error') {
+        return 'No pudimos completar el callback de autenticación. Intenta iniciar sesión otra vez.'
+    }
+
+    return null
+}
+
 export default function LoginPage() {
     return (
         <Suspense
@@ -36,6 +48,8 @@ function LoginForm() {
     const supabase = createClient()
     const next = searchParams.get('next')
     const nextPath = next?.startsWith('/') ? next : '/dashboard'
+    const queryError = getAuthErrorMessage(searchParams.get('error'))
+    const displayError = error ?? queryError
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault()
@@ -84,9 +98,9 @@ function LoginForm() {
             </CardHeader>
             <form onSubmit={handleLogin}>
                 <CardContent className="space-y-4">
-                    {error && (
+                    {displayError && (
                         <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
-                            {error}
+                            {displayError}
                         </div>
                     )}
                     <div className="space-y-2">

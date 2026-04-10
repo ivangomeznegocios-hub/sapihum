@@ -81,10 +81,15 @@ function DashboardAccessShortcut() {
 
 export default async function DashboardPage() {
     const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
     const profile = await getUserProfile()
 
+    if (!user) {
+        redirect('/auth/login?next=/dashboard')
+    }
+
     if (!profile) {
-        redirect('/auth/login')
+        redirect('/auth/login?error=profile_not_found&next=/dashboard')
     }
 
     const userName = profile.full_name?.trim().split(/\s+/)[0] || ''
