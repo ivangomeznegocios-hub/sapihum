@@ -9,7 +9,6 @@ import {
   ChevronDown,
   ChevronUp,
   Crown,
-  Info,
   PlusCircle,
   Sparkles,
   Users,
@@ -43,7 +42,6 @@ import {
   PRICING_FEATURES_BY_ID,
   PRICING_GROUP_LABELS,
   PRICING_PLAN_COPY,
-  type PricingFeatureDefinition,
   type PricingPlanKey,
 } from '@/lib/pricing-catalog'
 import { LEVEL_2_DEFAULT_SPECIALIZATION } from '@/lib/specializations'
@@ -177,12 +175,6 @@ export function PricingContent({
       })),
     []
   )
-
-  const plansByKey: Record<PricingPlanKey, SerializedPlan | null> = {
-    level1: level1Plan,
-    level2: level2Plan,
-    level3: level3Plan,
-  }
 
   const cardConfigs = [
     {

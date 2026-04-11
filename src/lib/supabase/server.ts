@@ -79,7 +79,7 @@ export async function getUserProfile(): Promise<Profile | null> {
         .from('profiles')
         .select('*')
         .eq('id', user.id)
-        .single()
+        .maybeSingle()
 
     if (error) {
         console.error('Error fetching user profile:', {
@@ -89,7 +89,11 @@ export async function getUserProfile(): Promise<Profile | null> {
             hint: error.hint,
             userId: user.id
         })
-        return null
+
+        throw new Error(
+            `Failed to fetch current user profile (code: ${error.code ?? 'unknown'})`,
+            { cause: error }
+        )
     }
 
     return data as Profile | null
