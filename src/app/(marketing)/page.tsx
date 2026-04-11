@@ -699,49 +699,6 @@ export default async function LandingPage() {
       )}
 
       {/* ══════════════════════════════════════════════════
-          9. MEMBRESÍA
-      ══════════════════════════════════════════════════ */}
-      <section className="w-full py-32 bg-black text-white border-b border-white/[0.06]">
-        <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="mx-auto max-w-3xl text-center mb-20">
-            <p className="text-[10px] font-bold text-[#f6ae02] uppercase tracking-[0.2em] mb-4">
-              Membresía SAPIHUM
-            </p>
-            <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-white mb-4">
-              La membresía: <span className="font-serif italic font-normal text-[#c0bfbc]">el siguiente nivel de continuidad</span>
-            </h2>
-            <p className="text-[#c0bfbc]/60 text-lg font-light leading-relaxed">
-              Si además de formarte quieres mantener acceso continuo a recursos, comunidad y herramientas profesionales, la membresía amplía tu experiencia dentro de SAPIHUM.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-px bg-white/[0.06] border border-white/[0.06]">
-            {WHAT_YOU_GET.map((item, i) => (
-              <div key={item.title} className="bg-black p-10 flex gap-5">
-                <div className="shrink-0 mt-1 text-[#f6ae02]">
-                  {item.icon}
-                </div>
-                <div>
-                  <h4 className="text-[#f6ae02] text-[10px] font-bold tracking-[0.2em] mb-3 uppercase">/ {String(i + 1).padStart(2, '0')}</h4>
-                  <h3 className="text-lg font-semibold mb-3 text-white">{item.title}</h3>
-                  <p className="text-[#c0bfbc]/50 text-sm leading-relaxed font-light">{item.description}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <div className="mt-10 text-center">
-            <Link href="/membresia">
-              <Button variant="outline" className="gap-2 font-bold uppercase text-[10px] tracking-[0.1em]">
-                Conocer Membresía
-                <ArrowRight className="h-4 w-4" />
-              </Button>
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* ══════════════════════════════════════════════════
           10. DOCENTES DESTACADOS
       ══════════════════════════════════════════════════ */}
       {featuredSpeakers.length > 0 && (
