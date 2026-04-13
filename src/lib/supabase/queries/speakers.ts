@@ -15,6 +15,71 @@ type SpeakerProfileSummary = {
     role: string | null
 }
 
+function normalizeText(value?: string | null) {
+    const text = value?.trim()
+    return text ? text : null
+}
+
+function pickMetadataText(metadata: Record<string, unknown> | undefined | null, key: string) {
+    const value = metadata?.[key]
+    return typeof value === 'string' && value.trim().length > 0 ? value.trim() : null
+}
+
+async function loadAuthProfileFallbacks(speakerIds: string[]) {
+    const uniqueIds = Array.from(new Set(speakerIds.filter(Boolean)))
+    if (uniqueIds.length === 0 || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+        return new Map<string, SpeakerProfileSummary>()
+    }
+
+    try {
+        const supabase = await createAdminClient()
+        const authProfiles = await Promise.all(
+            uniqueIds.map(async (speakerId) => {
+                const { data, error } = await supabase.auth.admin.getUserById(speakerId)
+
+                if (error) {
+                    console.error('Error fetching auth user fallback for speaker:', {
+                        speakerId,
+                        code: error.code,
+                        message: error.message,
+                    })
+                    return null
+                }
+
+                const authUser = data.user
+                if (!authUser) return null
+
+                const fullName =
+                    pickMetadataText(authUser.user_metadata, 'full_name')
+                    ?? pickMetadataText(authUser.user_metadata, 'name')
+                const avatarUrl =
+                    pickMetadataText(authUser.user_metadata, 'avatar_url')
+                    ?? pickMetadataText(authUser.user_metadata, 'picture')
+
+                if (!fullName && !avatarUrl) {
+                    return null
+                }
+
+                return {
+                    id: speakerId,
+                    full_name: fullName,
+                    avatar_url: avatarUrl,
+                    role: null,
+                } satisfies SpeakerProfileSummary
+            })
+        )
+
+        return new Map(
+            authProfiles
+                .filter((profile): profile is SpeakerProfileSummary => profile !== null)
+                .map((profile) => [profile.id, profile])
+        )
+    } catch (error) {
+        console.error('Error loading auth user fallbacks for speakers:', error)
+        return new Map<string, SpeakerProfileSummary>()
+    }
+}
+
 async function createSpeakerProfileClient() {
     if (process.env.SUPABASE_SERVICE_ROLE_KEY) {
         try {
@@ -42,9 +107,41 @@ async function loadSpeakerProfiles(speakerIds: string[]) {
         return new Map<string, SpeakerProfileSummary>()
     }
 
-    return new Map(
-        ((data ?? []) as SpeakerProfileSummary[]).map((profile) => [profile.id, profile])
+    const profileMap = new Map(
+        ((data ?? []) as SpeakerProfileSummary[]).map((profile) => [
+            profile.id,
+            {
+                ...profile,
+                full_name: normalizeText(profile.full_name),
+                avatar_url: normalizeText(profile.avatar_url),
+                role: normalizeText(profile.role),
+            },
+        ])
     )
+
+    const incompleteIds = uniqueIds.filter((speakerId) => {
+        const profile = profileMap.get(speakerId)
+        return !profile || !profile.full_name
+    })
+
+    if (incompleteIds.length > 0) {
+        const authFallbackMap = await loadAuthProfileFallbacks(incompleteIds)
+
+        for (const speakerId of incompleteIds) {
+            const authFallback = authFallbackMap.get(speakerId)
+            if (!authFallback) continue
+
+            const currentProfile = profileMap.get(speakerId)
+            profileMap.set(speakerId, {
+                id: speakerId,
+                full_name: currentProfile?.full_name ?? authFallback.full_name ?? null,
+                avatar_url: currentProfile?.avatar_url ?? authFallback.avatar_url ?? null,
+                role: currentProfile?.role ?? authFallback.role ?? null,
+            })
+        }
+    }
+
+    return profileMap
 }
 
 function attachProfilesToSpeakers<T extends { id: string }>(

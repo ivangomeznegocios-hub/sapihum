@@ -4,7 +4,7 @@ import { getPublicSpeakers } from '@/lib/supabase/queries/speakers'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { formatPageTitle } from '@/lib/brand'
-import { getSpeakerImage, getSpeakerName } from '@/lib/speakers/display'
+import { getSpeakerHeadline, getSpeakerImage, getSpeakerName } from '@/lib/speakers/display'
 
 export const metadata = {
     title: formatPageTitle('Nuestros Ponentes'),
@@ -44,6 +44,7 @@ export default async function PonentesPage() {
                 <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
                     {speakers.map((speaker: any) => {
                         const speakerName = getSpeakerName(speaker)
+                        const speakerHeadline = getSpeakerHeadline(speaker)
                         const speakerImage = getSpeakerImage(speaker)
 
                         return (
@@ -67,9 +68,9 @@ export default async function PonentesPage() {
                                             )}
                                         </div>
                                         <CardTitle className="text-xl leading-tight">{speakerName}</CardTitle>
-                                        {speaker.headline && (
+                                        {speakerHeadline && (
                                             <CardDescription className="mt-1 text-base font-medium text-primary">
-                                                {speaker.headline}
+                                                {speakerHeadline}
                                             </CardDescription>
                                         )}
                                     </CardHeader>

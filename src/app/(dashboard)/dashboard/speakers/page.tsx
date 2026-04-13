@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge'
 import { Mic2, Globe, ExternalLink, Plus } from 'lucide-react'
 import { getUserProfile } from '@/lib/supabase/server'
 import { Button } from '@/components/ui/button'
-import { getSpeakerImage, getSpeakerName } from '@/lib/speakers/display'
+import { getSpeakerHeadline, getSpeakerImage, getSpeakerName } from '@/lib/speakers/display'
 
 export default async function SpeakersPage() {
     const profile = await getUserProfile()
@@ -39,6 +39,7 @@ export default async function SpeakersPage() {
                     {speakers.map((speaker) => {
                         const speakerImage = getSpeakerImage(speaker)
                         const speakerName = getSpeakerName(speaker)
+                        const speakerHeadline = getSpeakerHeadline(speaker)
 
                         return (
                             <Link key={speaker.id} href={`/dashboard/speakers/${speaker.id}`}>
@@ -65,9 +66,9 @@ export default async function SpeakersPage() {
                                             <h3 className="text-lg font-bold text-white">
                                                 {speakerName}
                                             </h3>
-                                            {speaker.headline && (
+                                            {speakerHeadline && (
                                                 <p className="text-sm text-white/80 line-clamp-1">
-                                                    {speaker.headline}
+                                                    {speakerHeadline}
                                                 </p>
                                             )}
                                         </div>

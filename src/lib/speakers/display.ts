@@ -47,6 +47,13 @@ export function getSpeakerName(speaker?: SpeakerLike | null) {
     return normalizeText(speaker?.profile?.full_name) ?? normalizeText(speaker?.headline) ?? 'Ponente'
 }
 
+export function getSpeakerHeadline(speaker?: SpeakerLike | null) {
+    const headline = normalizeText(speaker?.headline)
+    if (!headline) return null
+
+    return headline === getSpeakerName(speaker) ? null : headline
+}
+
 export function getSpeakerFirstName(speaker?: SpeakerLike | null) {
     const fullName = normalizeText(speaker?.profile?.full_name)
     return fullName ? fullName.split(/\s+/)[0] : null

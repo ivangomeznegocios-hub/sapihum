@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { isEventPast } from '@/lib/timezone'
-import { getSpeakerFirstName, getSpeakerImage, getSpeakerName } from '@/lib/speakers/display'
+import { getSpeakerFirstName, getSpeakerHeadline, getSpeakerImage, getSpeakerName } from '@/lib/speakers/display'
 import {
     ArrowLeft,
     Mic2,
@@ -49,6 +49,7 @@ export default async function SpeakerDetailPage({ params }: PageProps) {
 
     const socialLinks = speaker.social_links || {}
     const speakerName = getSpeakerName(speaker)
+    const speakerHeadline = getSpeakerHeadline(speaker)
     const speakerFirstName = getSpeakerFirstName(speaker)
     const speakerImage = getSpeakerImage(speaker)
 
@@ -97,9 +98,9 @@ export default async function SpeakerDetailPage({ params }: PageProps) {
                             <h1 className="text-3xl md:text-4xl font-bold tracking-tight">
                                 {speakerName}
                             </h1>
-                            {speaker.headline && (
+                            {speakerHeadline && (
                                 <p className="text-lg text-primary font-medium mt-1">
-                                    {speaker.headline}
+                                    {speakerHeadline}
                                 </p>
                             )}
                         </div>

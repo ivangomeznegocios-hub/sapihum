@@ -7,7 +7,7 @@ import { isEventPast } from '@/lib/timezone'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { getSpeakerFirstName, getSpeakerImage, getSpeakerName } from '@/lib/speakers/display'
+import { getSpeakerFirstName, getSpeakerHeadline, getSpeakerImage, getSpeakerName } from '@/lib/speakers/display'
 import {
     ArrowLeft,
     Award,
@@ -73,6 +73,7 @@ export default async function PublicSpeakerDetailPage({ params, searchParams }: 
 
     const socialLinks = speaker.social_links || {}
     const speakerName = getSpeakerName(speaker)
+    const speakerHeadline = getSpeakerHeadline(speaker)
     const speakerFirstName = getSpeakerFirstName(speaker)
     const speakerImage = getSpeakerImage(speaker)
     const safeReturnTo = getSafeReturnTo(returnTo)
@@ -120,9 +121,9 @@ export default async function PublicSpeakerDetailPage({ params, searchParams }: 
                             <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">
                                 {speakerName}
                             </h1>
-                            {speaker.headline && (
+                            {speakerHeadline && (
                                 <p className="mt-1 text-base font-medium text-primary sm:text-lg">
-                                    {speaker.headline}
+                                    {speakerHeadline}
                                 </p>
                             )}
                         </div>
