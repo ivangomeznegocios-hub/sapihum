@@ -209,12 +209,12 @@ export default async function LandingPage() {
       {/* ══════════════════════════════════════════════════
           1. HERO
       ══════════════════════════════════════════════════ */}
-      <section className="relative w-full overflow-hidden bg-black min-h-[90vh] flex items-center">
+      <section className="relative flex w-full items-center overflow-hidden bg-black min-h-[68svh] md:min-h-[72svh]">
         {/* Subtle background */}
         <div className="absolute inset-0 -z-0 sapihum-grid-bg opacity-30" />
         <div className="absolute left-1/2 top-0 -translate-x-1/2 h-[500px] w-[500px] rounded-full bg-gradient-to-br from-[#f6ae02]/5 to-[#7a5602]/3 blur-[120px]" />
         
-        <div className="relative z-10 mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-28 md:py-36 lg:py-48">
+        <div className="relative z-10 mx-auto max-w-5xl px-4 py-20 sm:px-6 md:py-24 lg:px-8 lg:py-28">
           <div className="max-w-4xl mx-auto text-center flex flex-col items-center">
             {/* Badge — minimal editorial */}
             <div className="sapihum-fade-up inline-flex items-center gap-2 rounded-sm border border-[#f6ae02]/20 bg-[#f6ae02]/5 backdrop-blur-sm px-4 py-1.5 text-[10px] font-bold text-[#f6ae02] uppercase tracking-[0.2em] mb-10">
@@ -714,7 +714,7 @@ export default async function LandingPage() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-px bg-white/[0.06] border border-white/[0.06]">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {featuredSpeakers.map((speaker) => {
               const name = speaker.profile?.full_name || 'Ponente'
               const photoUrl = speaker.photo_url || speaker.profile?.avatar_url
@@ -725,47 +725,60 @@ export default async function LandingPage() {
                 <Link
                   key={speaker.id}
                   href={`/speakers/${speaker.id}`}
-                  className="group relative bg-[#030303] p-8 hover:bg-black transition-all duration-500 overflow-hidden text-left"
+                  className="group cursor-pointer block"
                 >
-                  <div className="absolute top-0 right-0 w-32 h-32 bg-[#f6ae02]/5 blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
-
-                  <div className="w-20 h-20 rounded-sm bg-[#2c2c2b] flex items-center justify-center mb-6 border border-white/[0.08] relative overflow-hidden">
+                  {/* Portrait photo with duotone warm hover */}
+                  <div className="relative w-full aspect-[4/5] bg-[#0a0a0a] mb-5 overflow-hidden rounded-md border border-white/[0.06]">
                     {photoUrl ? (
                       <Image
                         src={photoUrl}
                         alt={name}
                         fill
                         unoptimized
-                        sizes="80px"
-                        className="object-cover"
+                        sizes="(min-width: 1024px) 25vw, (min-width: 768px) 50vw, 100vw"
+                        className="object-cover transition-all duration-700 opacity-70 group-hover:opacity-100 group-hover:scale-105"
                       />
                     ) : (
-                      <span className="relative z-10 text-[#c0bfbc] font-serif italic text-3xl">
-                        {name.split(' ')[1]?.[0] || name[0]}
-                      </span>
+                      <div className="absolute inset-0 flex items-center justify-center bg-[#111]">
+                        <span className="text-[#c0bfbc]/30 font-serif italic text-6xl">
+                          {name.split(' ')[1]?.[0] || name[0]}
+                        </span>
+                      </div>
                     )}
-                    <div className="absolute inset-0 bg-gradient-to-br from-white/[0.05] to-transparent z-0" />
+
+                    {/* Warm duotone tint on hover */}
+                    <div
+                      className="absolute inset-0 opacity-0 group-hover:opacity-[0.55] transition-opacity duration-500 pointer-events-none"
+                      style={{ backgroundColor: '#f6ae02', mixBlendMode: 'multiply' as any }}
+                    />
+
+                    {/* Bottom gradient for text legibility */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent" />
+
+                    {/* Name and specialty overlay */}
+                    <div className="absolute bottom-4 left-4 right-4 z-10">
+                      {mainSpecialty && (
+                        <p className="text-[10px] text-[#f6ae02] uppercase tracking-widest font-semibold mb-1 group-hover:text-[#fcd34d] transition-colors">
+                          {mainSpecialty}
+                        </p>
+                      )}
+                      <h3 className="text-xl font-serif text-white leading-tight">{name}</h3>
+                    </div>
                   </div>
 
-                  {mainSpecialty && (
-                    <div className="text-[10px] text-[#f6ae02] font-bold uppercase tracking-[0.15em] mb-3">
-                      {mainSpecialty}
-                    </div>
-                  )}
-
-                  <h3 className="font-bold text-lg text-white mb-2 group-hover:text-[#f6ae02] transition-colors duration-500">{name}</h3>
-
-                  {credential && (
-                    <div className="text-xs text-[#c0bfbc] font-semibold mb-5 bg-white/5 inline-block px-2.5 py-1 rounded-sm border border-white/10 line-clamp-2">
-                      {credential}
-                    </div>
-                  )}
-
-                  {speaker.headline && speaker.credentials?.length > 0 && (
-                    <p className="text-xs text-[#c0bfbc]/50 leading-relaxed font-light mt-auto">
-                      {speaker.headline}
-                    </p>
-                  )}
+                  {/* Credentials below the photo */}
+                  <div className="pl-4 border-l border-white/[0.08] group-hover:border-[#f6ae02] transition-colors duration-300">
+                    {credential && (
+                      <p className="text-xs text-[#c0bfbc] mb-2 leading-relaxed line-clamp-2">
+                        {credential}
+                      </p>
+                    )}
+                    {speaker.headline && speaker.credentials?.length > 0 && (
+                      <p className="text-[10px] uppercase tracking-wide text-[#c0bfbc]/50">
+                        {speaker.headline}
+                      </p>
+                    )}
+                  </div>
                 </Link>
               )
             })}
@@ -782,9 +795,6 @@ export default async function LandingPage() {
         </div>
       </section>
       )}
-      {/* ══════════════════════════════════════════════════
-          11. FAQ SEO
-      ══════════════════════════════════════════════════ */}
       <section className="w-full py-32 bg-[#030303] border-y border-white/[0.06]">
         <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
