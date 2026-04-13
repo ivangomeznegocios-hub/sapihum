@@ -32,7 +32,7 @@ const NAV_ITEMS = [
       { label: "Herramientas y Recursos", href: "/recursos", description: "Guias y materiales disponibles con tu membresia" },
     ],
   },
-  { label: "Investigaci\u00F3n", href: "/nosotros" },
+  { label: "Investigaci\u00F3n", href: "/investigacion" },
   { label: "Planes", href: "/precios" },
 ]
 

@@ -28,7 +28,7 @@ const FOOTER_LINKS = {
   Empresa: [
     { label: "Nosotros", href: "/nosotros" },
     { label: "Manifiesto", href: "/manifiesto" },
-    { label: "Investigaci\u00F3n", href: "/nosotros" },
+    { label: "Investigaci\u00F3n", href: "/investigacion" },
     { label: "Comunidad", href: "/comunidad" },
   ],
   Legal: [
