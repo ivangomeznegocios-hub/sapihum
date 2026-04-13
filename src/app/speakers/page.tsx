@@ -4,18 +4,11 @@ import { getPublicSpeakers } from '@/lib/supabase/queries/speakers'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { formatPageTitle } from '@/lib/brand'
+import { getSpeakerImage, getSpeakerName } from '@/lib/speakers/display'
 
 export const metadata = {
     title: formatPageTitle('Nuestros Ponentes'),
     description: 'Conoce a los expertos y ponentes que imparten nuestros eventos y talleres.',
-}
-
-function getSpeakerName(speaker: any) {
-    return speaker?.profile?.full_name || speaker?.headline || 'Ponente Anonimo'
-}
-
-function getSpeakerImage(speaker: any) {
-    return speaker?.photo_url || speaker?.profile?.avatar_url || null
 }
 
 export default async function PonentesPage() {
@@ -56,69 +49,69 @@ export default async function PonentesPage() {
                         return (
                             <Card key={speaker.id} className="group flex h-full flex-col overflow-hidden bg-card transition-colors hover:bg-muted/50 hover:shadow-md">
                                 <Link href={`/speakers/${speaker.id}`} className="flex h-full flex-col">
-                                <CardHeader className="pb-4 text-center">
-                                    <div className="relative mx-auto mb-4 h-24 w-24 overflow-hidden rounded-full border-4 border-primary/10 shadow-sm">
-                                        {speakerImage ? (
-                                            <Image
-                                                src={speakerImage}
-                                                alt={speakerName}
-                                                fill
-                                                unoptimized
-                                                sizes="96px"
-                                                className="object-cover"
-                                            />
-                                        ) : (
-                                            <div className="flex h-full w-full items-center justify-center bg-primary/5 text-2xl font-semibold text-primary/40">
-                                                {speakerName.charAt(0).toUpperCase()}
-                                            </div>
-                                        )}
-                                    </div>
-                                    <CardTitle className="text-xl leading-tight">{speakerName}</CardTitle>
-                                    {speaker.headline && (
-                                        <CardDescription className="mt-1 text-base font-medium text-primary">
-                                            {speaker.headline}
-                                        </CardDescription>
-                                    )}
-                                </CardHeader>
-                                <CardContent className="flex flex-1 flex-col pt-0 text-center">
-                                    {speaker.bio ? (
-                                        <p className="mb-4 line-clamp-3 text-sm text-muted-foreground">
-                                            {speaker.bio}
-                                        </p>
-                                    ) : (
-                                        <div className="mb-4" />
-                                    )}
-
-                                    {speaker.credentials && speaker.credentials.length > 0 && (
-                                        <p className="mb-4 line-clamp-3 px-2 text-xs text-muted-foreground">
-                                            {speaker.credentials.join(' · ')}
-                                        </p>
-                                    )}
-
-                                    {speaker.specialties && speaker.specialties.length > 0 && (
-                                        <div className="mt-auto flex flex-wrap justify-center gap-2 pb-4">
-                                            {speaker.specialties.slice(0, 3).map((spec: string, i: number) => (
-                                                <Badge key={i} variant="secondary" className="text-xs">
-                                                    {spec}
-                                                </Badge>
-                                            ))}
-                                            {speaker.specialties.length > 3 && (
-                                                <Badge variant="outline" className="text-xs">
-                                                    +{speaker.specialties.length - 3} mas
-                                                </Badge>
+                                    <CardHeader className="pb-4 text-center">
+                                        <div className="relative mx-auto mb-4 h-24 w-24 overflow-hidden rounded-full border-4 border-primary/10 shadow-sm">
+                                            {speakerImage ? (
+                                                <Image
+                                                    src={speakerImage}
+                                                    alt={speakerName}
+                                                    fill
+                                                    unoptimized
+                                                    sizes="96px"
+                                                    className="object-cover"
+                                                />
+                                            ) : (
+                                                <div className="flex h-full w-full items-center justify-center bg-primary/5 text-2xl font-semibold text-primary/40">
+                                                    {speakerName.charAt(0).toUpperCase()}
+                                                </div>
                                             )}
                                         </div>
-                                    )}
-                                    <div className="mt-auto w-full border-t pt-4 text-center">
-                                        <span className="flex items-center justify-center gap-1 text-sm font-medium text-primary">
-                                            Ver perfil y eventos
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="ml-1">
-                                                <path d="M5 12h14" />
-                                                <path d="m12 5 7 7-7 7" />
-                                            </svg>
-                                        </span>
-                                    </div>
-                                </CardContent>
+                                        <CardTitle className="text-xl leading-tight">{speakerName}</CardTitle>
+                                        {speaker.headline && (
+                                            <CardDescription className="mt-1 text-base font-medium text-primary">
+                                                {speaker.headline}
+                                            </CardDescription>
+                                        )}
+                                    </CardHeader>
+                                    <CardContent className="flex flex-1 flex-col pt-0 text-center">
+                                        {speaker.bio ? (
+                                            <p className="mb-4 line-clamp-3 text-sm text-muted-foreground">
+                                                {speaker.bio}
+                                            </p>
+                                        ) : (
+                                            <div className="mb-4" />
+                                        )}
+
+                                        {speaker.credentials && speaker.credentials.length > 0 && (
+                                            <p className="mb-4 line-clamp-3 px-2 text-xs text-muted-foreground">
+                                                {speaker.credentials.join(' | ')}
+                                            </p>
+                                        )}
+
+                                        {speaker.specialties && speaker.specialties.length > 0 && (
+                                            <div className="mt-auto flex flex-wrap justify-center gap-2 pb-4">
+                                                {speaker.specialties.slice(0, 3).map((spec: string, i: number) => (
+                                                    <Badge key={i} variant="secondary" className="text-xs">
+                                                        {spec}
+                                                    </Badge>
+                                                ))}
+                                                {speaker.specialties.length > 3 && (
+                                                    <Badge variant="outline" className="text-xs">
+                                                        +{speaker.specialties.length - 3} mas
+                                                    </Badge>
+                                                )}
+                                            </div>
+                                        )}
+                                        <div className="mt-auto w-full border-t pt-4 text-center">
+                                            <span className="flex items-center justify-center gap-1 text-sm font-medium text-primary">
+                                                Ver perfil y eventos
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="ml-1">
+                                                    <path d="M5 12h14" />
+                                                    <path d="m12 5 7 7-7 7" />
+                                                </svg>
+                                            </span>
+                                        </div>
+                                    </CardContent>
                                 </Link>
                             </Card>
                         )

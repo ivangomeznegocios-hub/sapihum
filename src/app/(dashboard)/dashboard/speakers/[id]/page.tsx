@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { isEventPast } from '@/lib/timezone'
+import { getSpeakerFirstName, getSpeakerImage, getSpeakerName } from '@/lib/speakers/display'
 import {
     ArrowLeft,
     Mic2,
@@ -35,7 +36,6 @@ export default async function SpeakerDetailPage({ params }: PageProps) {
     }
 
     const events = await getSpeakerEvents(id)
-    // Use date-based split: events with past dates go to pastEvents even if status is 'upcoming'
     const upcomingEvents = events.filter((e: any) => {
         if (e.status === 'completed' || e.status === 'cancelled') return false
         if (e.status === 'live') return true
@@ -48,10 +48,12 @@ export default async function SpeakerDetailPage({ params }: PageProps) {
     })
 
     const socialLinks = speaker.social_links || {}
+    const speakerName = getSpeakerName(speaker)
+    const speakerFirstName = getSpeakerFirstName(speaker)
+    const speakerImage = getSpeakerImage(speaker)
 
     return (
         <div className="space-y-8">
-            {/* Nav area */}
             <div className="flex items-center justify-between">
                 <Button variant="ghost" size="sm" asChild>
                     <Link href="/dashboard/speakers">
@@ -70,17 +72,16 @@ export default async function SpeakerDetailPage({ params }: PageProps) {
                 )}
             </div>
 
-            {/* Hero Section */}
             <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/20 via-primary/5 to-background border">
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(var(--primary-rgb),0.1),transparent_70%)]" />
                 <div className="relative p-8 md:p-12 flex flex-col md:flex-row gap-8 items-center md:items-start">
-                    {/* Photo */}
                     <div className="relative w-40 h-40 md:w-48 md:h-48 rounded-2xl overflow-hidden border-4 border-background shadow-xl flex-shrink-0">
-                        {speaker.photo_url ? (
+                        {speakerImage ? (
                             <Image
-                                src={speaker.photo_url}
-                                alt={speaker.profile?.full_name || 'Ponente'}
+                                src={speakerImage}
+                                alt={speakerName}
                                 fill
+                                unoptimized
                                 className="object-cover"
                                 sizes="(max-width: 768px) 160px, 192px"
                             />
@@ -91,11 +92,10 @@ export default async function SpeakerDetailPage({ params }: PageProps) {
                         )}
                     </div>
 
-                    {/* Info */}
                     <div className="flex-1 text-center md:text-left space-y-4">
                         <div>
                             <h1 className="text-3xl md:text-4xl font-bold tracking-tight">
-                                {speaker.profile?.full_name || 'Ponente'}
+                                {speakerName}
                             </h1>
                             {speaker.headline && (
                                 <p className="text-lg text-primary font-medium mt-1">
@@ -104,7 +104,6 @@ export default async function SpeakerDetailPage({ params }: PageProps) {
                             )}
                         </div>
 
-                        {/* Specialties */}
                         {speaker.specialties && speaker.specialties.length > 0 && (
                             <div className="flex flex-wrap gap-2 justify-center md:justify-start">
                                 {speaker.specialties.map((spec, i) => (
@@ -116,7 +115,6 @@ export default async function SpeakerDetailPage({ params }: PageProps) {
                             </div>
                         )}
 
-                        {/* Social Links */}
                         <div className="flex gap-3 justify-center md:justify-start pt-2">
                             {socialLinks.website && (
                                 <a href={socialLinks.website} target="_blank" rel="noopener noreferrer" className="p-2 rounded-lg border bg-background hover:bg-muted transition-colors" title="Sitio Web">
@@ -143,15 +141,12 @@ export default async function SpeakerDetailPage({ params }: PageProps) {
                 </div>
             </div>
 
-            {/* Content Grid */}
             <div className="grid gap-8 lg:grid-cols-3">
-                {/* Main Content */}
                 <div className="lg:col-span-2 space-y-6">
-                    {/* Bio */}
                     {speaker.bio && (
                         <Card>
                             <CardHeader>
-                                <CardTitle className="text-lg">Sobre {speaker.profile?.full_name?.split(' ')[0] || 'el Ponente'}</CardTitle>
+                                <CardTitle className="text-lg">Sobre {speakerFirstName || 'el Ponente'}</CardTitle>
                             </CardHeader>
                             <CardContent>
                                 <div className="prose prose-sm dark:prose-invert max-w-none">
@@ -163,13 +158,12 @@ export default async function SpeakerDetailPage({ params }: PageProps) {
                         </Card>
                     )}
 
-                    {/* Upcoming Events */}
                     {upcomingEvents.length > 0 && (
                         <Card>
                             <CardHeader>
                                 <CardTitle className="text-lg flex items-center gap-2">
                                     <Calendar className="h-5 w-5 text-primary" />
-                                    Próximos Eventos
+                                    Proximos Eventos
                                 </CardTitle>
                             </CardHeader>
                             <CardContent className="space-y-3">
@@ -182,6 +176,7 @@ export default async function SpeakerDetailPage({ params }: PageProps) {
                                                     alt={event.title}
                                                     width={64}
                                                     height={48}
+                                                    unoptimized
                                                     className="rounded-md object-cover"
                                                 />
                                             )}
@@ -193,7 +188,7 @@ export default async function SpeakerDetailPage({ params }: PageProps) {
                                                     })}
                                                 </p>
                                             </div>
-                                            <Badge variant="default" className="text-xs shrink-0">Próximo</Badge>
+                                            <Badge variant="default" className="text-xs shrink-0">Proximo</Badge>
                                         </div>
                                     </Link>
                                 ))}
@@ -201,7 +196,6 @@ export default async function SpeakerDetailPage({ params }: PageProps) {
                         </Card>
                     )}
 
-                    {/* Past Events */}
                     {pastEvents.length > 0 && (
                         <Card>
                             <CardHeader>
@@ -220,6 +214,7 @@ export default async function SpeakerDetailPage({ params }: PageProps) {
                                                     alt={event.title}
                                                     width={64}
                                                     height={48}
+                                                    unoptimized
                                                     className="rounded-md object-cover"
                                                 />
                                             )}
@@ -232,7 +227,7 @@ export default async function SpeakerDetailPage({ params }: PageProps) {
                                                 </p>
                                             </div>
                                             {event.recording_url && (
-                                                <Badge variant="secondary" className="text-xs shrink-0">Grabación</Badge>
+                                                <Badge variant="secondary" className="text-xs shrink-0">Grabacion</Badge>
                                             )}
                                         </div>
                                     </Link>
@@ -242,9 +237,7 @@ export default async function SpeakerDetailPage({ params }: PageProps) {
                     )}
                 </div>
 
-                {/* Sidebar Info */}
                 <div className="space-y-6">
-                    {/* Credentials */}
                     {speaker.credentials && speaker.credentials.length > 0 && (
                         <Card>
                             <CardHeader>
@@ -266,7 +259,6 @@ export default async function SpeakerDetailPage({ params }: PageProps) {
                         </Card>
                     )}
 
-                    {/* Formations */}
                     {speaker.formations && speaker.formations.length > 0 && (
                         <Card>
                             <CardHeader>

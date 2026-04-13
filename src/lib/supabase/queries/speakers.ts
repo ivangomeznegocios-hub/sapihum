@@ -1,10 +1,59 @@
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient, createClient } from '@/lib/supabase/server'
 import type {
     Speaker,
     SpeakerWithProfile,
     EventSpeaker,
     EventPurchase,
 } from '@/types/database'
+
+type SpeakerProfileSummary = {
+    id: string
+    full_name: string | null
+    avatar_url: string | null
+    role: string | null
+}
+
+async function createSpeakerProfileClient() {
+    if (process.env.SUPABASE_SERVICE_ROLE_KEY) {
+        try {
+            return await createAdminClient()
+        } catch {
+            // Fall back to the request-scoped client if the admin client is unavailable.
+        }
+    }
+
+    return await createClient()
+}
+
+async function loadSpeakerProfiles(speakerIds: string[]) {
+    const uniqueIds = Array.from(new Set(speakerIds.filter(Boolean)))
+    if (uniqueIds.length === 0) return new Map<string, SpeakerProfileSummary>()
+
+    const supabase = await createSpeakerProfileClient()
+    const { data, error } = await (supabase
+        .from('profiles') as any)
+        .select('id, full_name, avatar_url, role')
+        .in('id', uniqueIds)
+
+    if (error) {
+        console.error('Error fetching speaker profiles:', error)
+        return new Map<string, SpeakerProfileSummary>()
+    }
+
+    return new Map(
+        ((data ?? []) as SpeakerProfileSummary[]).map((profile) => [profile.id, profile])
+    )
+}
+
+function attachProfilesToSpeakers<T extends { id: string }>(
+    speakers: T[],
+    profileMap: Map<string, SpeakerProfileSummary>
+) {
+    return speakers.map((speaker) => ({
+        ...speaker,
+        profile: profileMap.get(speaker.id) ?? null,
+    }))
+}
 
 /**
  * Get all public speakers with their profile info
@@ -14,15 +63,7 @@ export async function getPublicSpeakers(): Promise<SpeakerWithProfile[]> {
 
     const { data, error } = await (supabase
         .from('speakers') as any)
-        .select(`
-            *,
-            profile:profiles (
-                id,
-                full_name,
-                avatar_url,
-                role
-            )
-        `)
+        .select('*')
         .eq('is_public', true)
         .order('created_at', { ascending: false })
 
@@ -31,7 +72,9 @@ export async function getPublicSpeakers(): Promise<SpeakerWithProfile[]> {
         return []
     }
 
-    return (data ?? []) as SpeakerWithProfile[]
+    const speakers = (data ?? []) as Speaker[]
+    const profileMap = await loadSpeakerProfiles(speakers.map((speaker) => speaker.id))
+    return attachProfilesToSpeakers(speakers, profileMap) as SpeakerWithProfile[]
 }
 
 /**
@@ -45,15 +88,7 @@ export async function getSpeakersByIds(speakerIds: string[]): Promise<SpeakerWit
 
     const { data, error } = await (supabase
         .from('speakers') as any)
-        .select(`
-            *,
-            profile:profiles (
-                id,
-                full_name,
-                avatar_url,
-                role
-            )
-        `)
+        .select('*')
         .in('id', speakerIds)
         .eq('is_public', true)
 
@@ -62,9 +97,13 @@ export async function getSpeakersByIds(speakerIds: string[]): Promise<SpeakerWit
         return []
     }
 
+    const speakers = (data ?? []) as Speaker[]
+    const profileMap = await loadSpeakerProfiles(speakers.map((speaker) => speaker.id))
+    const speakersWithProfiles = attachProfilesToSpeakers(speakers, profileMap) as SpeakerWithProfile[]
+
     // Preserve the order from the input IDs array
-    const speakerMap = new Map((data ?? []).map((s: SpeakerWithProfile) => [s.id, s]))
-    return speakerIds.map(id => speakerMap.get(id)).filter(Boolean) as SpeakerWithProfile[]
+    const speakerMap = new Map(speakersWithProfiles.map((speaker) => [speaker.id, speaker]))
+    return speakerIds.map((id) => speakerMap.get(id)).filter(Boolean) as SpeakerWithProfile[]
 }
 
 /**
@@ -75,25 +114,23 @@ export async function getSpeakerById(speakerId: string): Promise<SpeakerWithProf
 
     const { data, error } = await (supabase
         .from('speakers') as any)
-        .select(`
-            *,
-            profile:profiles (
-                id,
-                full_name,
-                avatar_url,
-                email,
-                role
-            )
-        `)
+        .select('*')
         .eq('id', speakerId)
-        .single()
+        .maybeSingle()
 
     if (error) {
         console.error('Error fetching speaker:', error)
         return null
     }
 
-    return data as SpeakerWithProfile
+    if (!data) return null
+
+    const profileMap = await loadSpeakerProfiles([speakerId])
+
+    return {
+        ...(data as Speaker),
+        profile: profileMap.get(speakerId) ?? null,
+    } as SpeakerWithProfile
 }
 
 /**
@@ -129,14 +166,7 @@ export async function getEventSpeakers(eventId: string): Promise<(EventSpeaker &
         .from('event_speakers') as any)
         .select(`
             *,
-            speaker:speakers (
-                *,
-                profile:profiles (
-                    id,
-                    full_name,
-                    avatar_url
-                )
-            )
+            speaker:speakers (*)
         `)
         .eq('event_id', eventId)
         .order('display_order', { ascending: true })
@@ -146,7 +176,20 @@ export async function getEventSpeakers(eventId: string): Promise<(EventSpeaker &
         return []
     }
 
-    return (data ?? []) as (EventSpeaker & { speaker: SpeakerWithProfile })[]
+    const rows = (data ?? []) as Array<EventSpeaker & { speaker: Speaker | null }>
+    const profileMap = await loadSpeakerProfiles(
+        rows.map((row) => row.speaker?.id).filter(Boolean) as string[]
+    )
+
+    return rows.map((row) => ({
+        ...row,
+        speaker: row.speaker
+            ? {
+                ...row.speaker,
+                profile: profileMap.get(row.speaker.id) ?? null,
+            }
+            : row.speaker,
+    })) as (EventSpeaker & { speaker: SpeakerWithProfile })[]
 }
 
 /**
@@ -157,14 +200,7 @@ export async function getAllSpeakers(): Promise<SpeakerWithProfile[]> {
 
     const { data, error } = await (supabase
         .from('speakers') as any)
-        .select(`
-            *,
-            profile:profiles (
-                id,
-                full_name,
-                avatar_url
-            )
-        `)
+        .select('*')
         .order('created_at', { ascending: false })
 
     if (error) {
@@ -172,7 +208,9 @@ export async function getAllSpeakers(): Promise<SpeakerWithProfile[]> {
         return []
     }
 
-    return (data ?? []) as SpeakerWithProfile[]
+    const speakers = (data ?? []) as Speaker[]
+    const profileMap = await loadSpeakerProfiles(speakers.map((speaker) => speaker.id))
+    return attachProfilesToSpeakers(speakers, profileMap) as SpeakerWithProfile[]
 }
 
 /**
@@ -195,8 +233,6 @@ export async function updateSpeakerProfile(speakerId: string, updates: Partial<S
 
     return data as Speaker
 }
-
-
 
 /**
  * Get event purchases for admin/ponente

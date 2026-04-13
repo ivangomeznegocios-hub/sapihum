@@ -7,6 +7,7 @@ import { isEventPast } from '@/lib/timezone'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { getSpeakerFirstName, getSpeakerImage, getSpeakerName } from '@/lib/speakers/display'
 import {
     ArrowLeft,
     Award,
@@ -34,10 +35,6 @@ function formatEventDate(dateStr: string) {
         month: 'long',
         year: 'numeric',
     }).format(date)
-}
-
-function getSpeakerImage(speaker: any) {
-    return speaker?.photo_url || speaker?.profile?.avatar_url || null
 }
 
 function getSafeReturnTo(value?: string) {
@@ -73,7 +70,10 @@ export default async function PublicSpeakerDetailPage({ params, searchParams }: 
             return isEventPast(event.start_time)
         })
         .sort((a: any, b: any) => new Date(b.start_time).getTime() - new Date(a.start_time).getTime())
+
     const socialLinks = speaker.social_links || {}
+    const speakerName = getSpeakerName(speaker)
+    const speakerFirstName = getSpeakerFirstName(speaker)
     const speakerImage = getSpeakerImage(speaker)
     const safeReturnTo = getSafeReturnTo(returnTo)
     const backHref = safeReturnTo || '/speakers'
@@ -102,7 +102,7 @@ export default async function PublicSpeakerDetailPage({ params, searchParams }: 
                         {speakerImage ? (
                             <Image
                                 src={speakerImage}
-                                alt={speaker.profile?.full_name || 'Ponente'}
+                                alt={speakerName}
                                 fill
                                 unoptimized
                                 sizes="(min-width: 768px) 192px, 144px"
@@ -118,7 +118,7 @@ export default async function PublicSpeakerDetailPage({ params, searchParams }: 
                     <div className="flex-1 space-y-4 text-center md:text-left">
                         <div>
                             <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">
-                                {speaker.profile?.full_name || 'Ponente'}
+                                {speakerName}
                             </h1>
                             {speaker.headline && (
                                 <p className="mt-1 text-base font-medium text-primary sm:text-lg">
@@ -179,7 +179,9 @@ export default async function PublicSpeakerDetailPage({ params, searchParams }: 
                 <div className="space-y-8">
                     {speaker.bio && (
                         <section className="space-y-4">
-                            <h2 className="text-2xl font-bold">Acerca de</h2>
+                            <h2 className="text-2xl font-bold">
+                                {speakerFirstName ? `Acerca de ${speakerFirstName}` : 'Acerca del ponente'}
+                            </h2>
                             <div className="prose max-w-none text-muted-foreground dark:prose-invert">
                                 {speaker.bio.split('\n').map((paragraph, i) => (
                                     <p key={i}>{paragraph}</p>
