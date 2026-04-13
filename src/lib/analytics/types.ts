@@ -50,6 +50,7 @@ export type AnalyticsEventName =
     | 'marketing_service_updated'
     | 'marketing_brief_updated'
     | 'marketing_services_initialized'
+    | 'home_featured_speakers_updated'
     | 'growth_campaign_created'
     | 'growth_campaign_updated'
     | 'growth_campaign_toggled'

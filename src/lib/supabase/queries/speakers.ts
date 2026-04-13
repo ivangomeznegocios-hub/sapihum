@@ -1,4 +1,6 @@
 import { createAdminClient, createClient } from '@/lib/supabase/server'
+import { getHomeFeaturedSpeakersSettings } from '@/lib/home/featured-speakers'
+import { selectFeaturedSpeakers, selectRotatingFeaturedSpeakers, sortSpeakersByMerit } from '@/lib/speakers/ranking'
 import type {
     Speaker,
     SpeakerWithProfile,
@@ -74,7 +76,40 @@ export async function getPublicSpeakers(): Promise<SpeakerWithProfile[]> {
 
     const speakers = (data ?? []) as Speaker[]
     const profileMap = await loadSpeakerProfiles(speakers.map((speaker) => speaker.id))
-    return attachProfilesToSpeakers(speakers, profileMap) as SpeakerWithProfile[]
+    return sortSpeakersByMerit(
+        attachProfilesToSpeakers(speakers, profileMap) as SpeakerWithProfile[]
+    )
+}
+
+export async function getFeaturedPublicSpeakers(limit = 4): Promise<SpeakerWithProfile[]> {
+    const speakers = await getPublicSpeakers()
+    const settings = await getHomeFeaturedSpeakersSettings()
+    const effectiveLimit = Math.min(limit, settings.limit)
+
+    if (settings.mode === 'manual' && settings.manualSpeakerIds.length > 0) {
+        const manualMap = new Map(speakers.map((speaker) => [speaker.id, speaker]))
+        const manualSelection = settings.manualSpeakerIds
+            .map((speakerId) => manualMap.get(speakerId))
+            .filter(Boolean) as SpeakerWithProfile[]
+
+        if (manualSelection.length >= effectiveLimit) {
+            return manualSelection.slice(0, effectiveLimit)
+        }
+
+        const selectedIds = new Set(manualSelection.map((speaker) => speaker.id))
+        const fallback = selectFeaturedSpeakers(
+            speakers.filter((speaker) => !selectedIds.has(speaker.id)),
+            effectiveLimit - manualSelection.length
+        )
+
+        return [...manualSelection, ...fallback].slice(0, effectiveLimit)
+    }
+
+    if (settings.mode === 'rotating') {
+        return selectRotatingFeaturedSpeakers(speakers, effectiveLimit, settings.rotationPoolSize)
+    }
+
+    return selectFeaturedSpeakers(speakers, effectiveLimit)
 }
 
 /**

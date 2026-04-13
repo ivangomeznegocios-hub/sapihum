@@ -6,13 +6,18 @@ import {
     Search as SearchIcon, Users, FileEdit, BarChart3,
     Sparkles,
 } from 'lucide-react'
+import { getHomeFeaturedSpeakersSettings } from '@/lib/home/featured-speakers'
+import { getSpeakerImage, getSpeakerName } from '@/lib/speakers/display'
+import { getSpeakerMeritScore } from '@/lib/speakers/ranking'
 import {
     getMarketingOverview,
     SERVICE_LABELS,
     STATUS_CONFIG,
     type MarketingServiceKey,
 } from '@/lib/supabase/queries/marketing-services'
+import { getPublicSpeakers } from '@/lib/supabase/queries/speakers'
 import { UpdateServiceForm, BriefStatusButtons, InitServicesButton } from './admin-marketing-forms'
+import { HomeSpeakersSettings } from './home-speakers-settings'
 import { cn } from '@/lib/utils'
 
 const SERVICE_ICONS: Record<string, React.ElementType> = {
@@ -38,7 +43,11 @@ export default async function AdminMarketingPage() {
 
     if ((profile as any)?.role !== 'admin') redirect('/dashboard')
 
-    const { users } = await getMarketingOverview()
+    const [{ users }, homeFeaturedSettings, publicSpeakers] = await Promise.all([
+        getMarketingOverview(),
+        getHomeFeaturedSpeakersSettings(),
+        getPublicSpeakers(),
+    ])
 
     // Stats
     const totalUsers = users.length
@@ -48,6 +57,16 @@ export default async function AdminMarketingPage() {
         0
     )
     const totalServices = users.reduce((acc, u) => acc + u.services.length, 0)
+    const speakerOptions = publicSpeakers.map((speaker) => ({
+        id: speaker.id,
+        name: getSpeakerName(speaker),
+        headline: speaker.headline,
+        meritScore: getSpeakerMeritScore(speaker),
+        credentialsCount: speaker.credentials?.length ?? 0,
+        formationsCount: speaker.formations?.length ?? 0,
+        specialtiesCount: speaker.specialties?.length ?? 0,
+        hasPhoto: Boolean(getSpeakerImage(speaker)),
+    }))
 
     return (
         <div className="w-full max-w-6xl space-y-8">
@@ -63,6 +82,12 @@ export default async function AdminMarketingPage() {
                     </p>
                 </div>
             </div>
+
+            <HomeSpeakersSettings
+                initialMode={homeFeaturedSettings.mode}
+                initialManualSpeakerIds={homeFeaturedSettings.manualSpeakerIds}
+                speakerOptions={speakerOptions}
+            />
 
             {/* Stats */}
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-4">

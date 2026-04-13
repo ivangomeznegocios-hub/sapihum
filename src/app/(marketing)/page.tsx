@@ -8,7 +8,7 @@ import { getUnifiedCatalogEvents } from "@/lib/supabase/queries/events"
 import { getPublicEventPath } from "@/lib/events/public"
 import { getPublicFormations } from "@/app/(marketing)/formaciones/actions"
 import { LEVEL_2_CARD_FEATURE_IDS, PRICING_PLAN_COPY, getPricingFeatureTitles } from "@/lib/pricing-catalog"
-import { getSpeakersByIds } from "@/lib/supabase/queries/speakers"
+import { getFeaturedPublicSpeakers } from "@/lib/supabase/queries/speakers"
 import { Shield, Users, BookOpen, Scaling, Beaker, FileText, Smartphone, CalendarDays, ArrowRight } from "lucide-react"
 
 export const metadata = {
@@ -157,12 +157,6 @@ const LEVEL_2_SHOWCASE_BENEFITS = CLINICAL_LEVEL2_BENEFITS
 // FEATURED SPEAKERS — Change these IDs to control which 4 speakers
 // appear on the homepage. Use the speaker UUID from the database.
 // ═══════════════════════════════════════════════════════════════
-const FEATURED_SPEAKER_IDS: string[] = [
-  'e203db02-1f27-4f67-8899-dae599540310',
-  'ec2b91b7-5819-4e1e-bda1-69ba22c19033',
-  'bcc0b008-439c-47b1-90a9-f0ad5c8260fe',
-  'a32480a5-baa8-4b7e-aaa8-48ad429760f8',
-]
 const FAQS = [
   {
     q: "¿Qué es SAPIHUM?",
@@ -204,7 +198,7 @@ export default async function LandingPage() {
   const [allEvents, formations, featuredSpeakers] = await Promise.all([
     getUnifiedCatalogEvents(),
     getPublicFormations(),
-    getSpeakersByIds(FEATURED_SPEAKER_IDS),
+    getFeaturedPublicSpeakers(4),
   ])
   const upcomingEvents = splitPublicCatalogEvents(allEvents).upcoming.slice(0, 3)
   const featuredFormations = formations.slice(0, 2)
