@@ -23,8 +23,7 @@ const FOOTER_LINKS = {
   ],
   Recursos: [
     { label: "Blog", href: "/blog" },
-    { label: "Recursos Gratuitos", href: "/recursos" },
-    { label: "Casos de Estudio", href: "/casos-de-exito" },
+    { label: "Herramientas y Recursos", href: "/recursos" },
   ],
   Empresa: [
     { label: "Nosotros", href: "/nosotros" },
@@ -49,27 +48,27 @@ function TikTokIcon(props: ComponentPropsWithoutRef<"svg">) {
 const SOCIAL_LINKS = [
   {
     label: "YouTube",
-    href: null,
+    href: "https://www.youtube.com/@Sapihum",
     icon: Youtube,
   },
   {
     label: "Instagram",
-    href: null,
+    href: "https://www.instagram.com/sapihum/",
     icon: Instagram,
   },
   {
     label: "Facebook",
-    href: null,
+    href: "https://www.facebook.com/sapihum/",
     icon: Facebook,
   },
   {
     label: "TikTok",
-    href: null,
+    href: "https://www.tiktok.com/@_sapihum",
     icon: TikTokIcon,
   },
   {
     label: "LinkedIn",
-    href: null,
+    href: "https://www.linkedin.com/company/sapihum/",
     icon: Linkedin,
   },
 ] as const
@@ -100,25 +99,14 @@ export function MarketingFooter() {
                     "group inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-white/[0.03] text-muted-foreground transition-all duration-300 hover:-translate-y-1 hover:border-[#f6ae02]/50 hover:bg-[#f6ae02]/10 hover:text-[#f6ae02]"
 
                   return (
-                    socialLink.href ? (
-                      <Link
-                        key={socialLink.label}
-                        href={socialLink.href}
-                        aria-label={socialLink.label}
-                        className={buttonClassName}
-                      >
-                        <Icon className={iconClassName} strokeWidth={1.9} />
-                      </Link>
-                    ) : (
-                      <span
-                        key={socialLink.label}
-                        aria-label={`${socialLink.label} pendiente de enlace`}
-                        className={`${buttonClassName} cursor-default`}
-                        title={`${socialLink.label} pendiente de enlace`}
-                      >
-                        <Icon className={iconClassName} strokeWidth={1.9} />
-                      </span>
-                    )
+                    <Link
+                      key={socialLink.label}
+                      href={socialLink.href}
+                      aria-label={socialLink.label}
+                      className={buttonClassName}
+                    >
+                      <Icon className={iconClassName} strokeWidth={1.9} />
+                    </Link>
                   )
                 })}
               </div>

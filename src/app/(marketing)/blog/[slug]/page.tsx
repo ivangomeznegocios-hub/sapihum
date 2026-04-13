@@ -19,7 +19,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   if (!post) {
     return {
-      title: formatPageTitle('Artículo no encontrado'),
+      title: formatPageTitle('Articulo no encontrado'),
     }
   }
 
@@ -123,12 +123,12 @@ export default async function BlogPostPage({ params }: PageProps) {
           </section>
 
           <section className="rounded-3xl border bg-gradient-to-br from-muted/50 to-background p-6 shadow-sm">
-            <p className="text-sm font-medium text-muted-foreground">Punto editorial</p>
+            <p className="text-sm font-medium text-muted-foreground">En resumen</p>
             <p className="mt-3 text-lg font-medium leading-7">
-              El blog explica. El catalogo vende. El hub entrega.
+              Contenido claro para entender mejor cada tema y descubrir opciones que acompanen tu siguiente paso profesional.
             </p>
             <p className="mt-3 text-sm leading-6 text-muted-foreground">
-              Usa esta pieza para descubrir el problema y moverte hacia una pagina canónica del activo.
+              Si este tema conecta contigo, puedes profundizar con la opcion relacionada que mejor se ajuste a tu momento actual.
             </p>
             <div className="mt-5 flex flex-wrap gap-2">
               {post.tags.map((tag) => (

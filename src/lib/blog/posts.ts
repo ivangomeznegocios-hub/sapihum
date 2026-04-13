@@ -17,150 +17,150 @@ const canonicalAssetLinks = {
 const blogPosts: BlogPost[] = [
   {
     slug: 'evento-como-activo-comercial',
-    title: 'Por que cada evento debe vender como un activo comercial, no como una agenda',
+    title: 'Por que un evento bien presentado genera mas interes y mejores resultados',
     description:
-      'Una landing canonica, un hub privado y una pieza editorial de apoyo convierten cada evento en un activo de promocion, exposicion y ventas.',
+      'Una presentacion clara, contenido util y un acceso sencillo ayudan a que cada evento conecte mejor con las personas adecuadas.',
     excerpt:
-      'El evento deja de ser un simple ticket cuando lo disenas como producto: la pagina vende, el blog atrae y el hub entrega acceso.',
+      'Cuando un evento comunica bien su valor, resulta mas facil despertar interes, orientar la decision y ofrecer una mejor experiencia.',
     publishedAt: '2026-03-24',
     updatedAt: '2026-03-24',
     readTime: '6 min',
-    category: 'Arquitectura de producto',
+    category: 'Eventos y crecimiento profesional',
     featured: true,
-    tags: ['eventos', 'landing', 'SEO', 'membresias'],
+    tags: ['eventos', 'formacion', 'experiencia', 'membresia'],
     canonicalFocus: ['eventos', 'academia'],
     assetLinks: [
       canonicalAssetLinks.eventos,
       canonicalAssetLinks.academia,
     ],
     intro:
-      'La mejor manera de pensar un evento no es como un calendario, sino como una pieza de negocio con vida propia: capta trafico, convierte intencion y abre la puerta a una relacion mas larga.',
+      'Un evento no solo se valora por la fecha en la que ocurre, sino por la forma en que presenta su propuesta, acompana al participante y deja abierta la puerta para seguir creciendo.',
     sections: [
       {
-        heading: 'La pagina del activo es la vendedora',
+        heading: 'Una presentacion clara inspira confianza',
         paragraphs: [
-          'Cuando alguien llega por SEO, aliado, campana o link directo, necesita una sola verdad: que es el activo, para quien sirve, por que importa y como acceder.',
-          'Por eso la landing no debe parecer una ficha vacia. Tiene que responder como una venta editorial, con contexto, promesa, prueba social y una llamada a la accion clara.',
+          'Cuando una persona conoce un evento, necesita entender rapidamente de que trata, para quien esta pensado y que puede esperar de la experiencia.',
+          'Una pagina clara, bien estructurada y facil de recorrer transmite profesionalismo y facilita la decision de participar.',
         ],
         points: [
-          'Promesa clara y especifica.',
-          'A quien va dirigido.',
-          'Que aprende o resuelve.',
-          'CTA unico por oferta.',
+          'Beneficio principal bien explicado.',
+          'Perfil de asistente definido.',
+          'Aprendizajes o resultados esperados.',
+          'Proceso de acceso simple.',
         ],
       },
       {
-        heading: 'El blog no compite con la landing',
+        heading: 'El contenido previo ayuda a tomar una mejor decision',
         paragraphs: [
-          'El blog cumple otra funcion: captar demanda, explicar el problema y posicionar la idea antes de la conversion.',
-          'Cada articulo puede empujar a un evento o formacion, pero no debe intentar hacer todo en una sola pagina.',
+          'Los articulos, guias o recomendaciones relacionadas permiten ampliar el contexto y responder dudas antes de inscribirse.',
+          'Eso hace que la invitacion al evento se sienta mas util, mas cercana y mejor alineada con la necesidad real del lector.',
         ],
       },
       {
-        heading: 'El hub privado cierra el circuito',
+        heading: 'Una experiencia de acceso simple mejora el recuerdo del evento',
         paragraphs: [
-          'Una vez pagado o registrado, el usuario no deberia perderse en la plataforma. El acceso vive en un hub privado con enlace de entrada, materiales y soporte.',
-          'Eso reduce friccion, mejora la experiencia y hace mucho mas facil reactivar o vender de nuevo.',
+          'Despues del registro, lo ideal es que todo sea intuitivo: acceso, materiales y seguimiento en un mismo lugar.',
+          'Cuando la experiencia es ordenada y amable, aumenta la satisfaccion y tambien la probabilidad de volver a participar.',
         ],
       },
     ],
-    ctaLabel: 'Ver eventos',
+    ctaLabel: 'Explorar eventos',
   },
   {
     slug: 'cuando-cobrar-un-evento-y-cuando-regalarlo',
-    title: 'Cuando conviene cobrar un evento y cuando usarlo como captacion',
+    title: 'Cuando conviene cobrar un evento y cuando ofrecerlo sin costo',
     description:
-      'Una regla practica para decidir entre evento gratuito y evento pagado segun el objetivo comercial.',
+      'Una guia practica para elegir entre evento gratuito y evento pagado segun la experiencia que quieres ofrecer y el objetivo que buscas.',
     excerpt:
-      'No todo evento debe monetizarse igual. Algunos estan hechos para atraer audiencia; otros para filtrar intencion y recuperar inversion.',
+      'No todos los eventos cumplen la misma funcion: algunos ayudan a abrir comunidad y otros funcionan mejor como experiencias de mayor profundidad.',
     publishedAt: '2026-03-24',
     updatedAt: '2026-03-24',
     readTime: '5 min',
-    category: 'Estrategia comercial',
-    tags: ['pricing', 'captacion', 'conversion', 'campanas'],
+    category: 'Eventos y decisiones de acceso',
+    tags: ['eventos', 'comunidad', 'valor', 'acceso'],
     canonicalFocus: ['eventos', 'academia'],
     assetLinks: [canonicalAssetLinks.eventos, canonicalAssetLinks.academia],
     intro:
-      'El criterio no deberia ser solamente cuanto tiempo te toma organizar el evento. La pregunta correcta es que papel cumple dentro de la escalera de valor.',
+      'La decision no depende solo del esfuerzo de organizacion. Tambien importa el momento de tu comunidad, el objetivo del encuentro y el tipo de experiencia que deseas construir.',
     sections: [
       {
-        heading: 'Gratis si necesitas alcance',
+        heading: 'Sin costo cuando quieres abrir la puerta',
         paragraphs: [
-          'Un evento gratuito funciona muy bien cuando quieres mover audiencia nueva, crecer lista, abrir conversacion o alimentar alianzas.',
-          'En esa etapa, la conversion no ocurre por el ticket, sino por la captura de contacto y el seguimiento posterior.',
+          'Un evento sin costo puede ser ideal para acercar personas nuevas, presentar un tema relevante y generar una primera experiencia positiva con tu propuesta.',
+          'Suele funcionar muy bien cuando el objetivo es dar visibilidad, construir confianza y facilitar que mas personas se animen a conocerte.',
         ],
       },
       {
-        heading: 'Pagado si necesitas filtro y valor percibido',
+        heading: 'Pagado cuando la experiencia ofrece mayor profundidad',
         paragraphs: [
-          'Cobrar tiene sentido cuando el tema es especifico, el resultado es fuerte y existe una expectativa clara de transformacion o especializacion.',
-          'Tambien ayuda a ordenar la demanda: quien paga suele estar mas cerca de consumir, asistir y volver a comprar.',
+          'Cobrar tiene sentido cuando el tema es especifico, el acompanamiento es mas cercano o el resultado esperado requiere un mayor nivel de compromiso.',
+          'Tambien ayuda a convocar a personas que ya identifican con claridad el valor de lo que van a recibir.',
         ],
         points: [
-          'Tema de alta intencion.',
-          'Audiencia con problema definido.',
-          'Oferta con continuidad clara.',
+          'Tema concreto y relevante.',
+          'Necesidad profesional bien definida.',
+          'Propuesta con continuidad o seguimiento.',
         ],
       },
       {
-        heading: 'La continuidad como beneficio del evento',
+        heading: 'La continuidad puede dar mas valor a la experiencia',
         paragraphs: [
-          'Si el evento ya demostro demanda, la continuidad del acceso puede reforzar el valor para quienes asistieron o compraron.',
-          'Eso aumenta el valor percibido del evento original sin fragmentar el catalogo.',
+          'Cuando un encuentro funciona bien, ofrecer materiales, seguimiento o beneficios posteriores puede enriquecer mucho la experiencia.',
+          'Eso ayuda a que el evento no termine al cerrar la sesion, sino que se convierta en un paso dentro de un proceso mas amplio.',
         ],
       },
     ],
-    ctaLabel: 'Ver eventos',
+    ctaLabel: 'Explorar eventos',
   },
   {
     slug: 'membresia-que-retiene-y-no-cannibaliza',
-    title: 'La membresia correcta no compite con tu catalogo: lo vuelve mas rentable',
+    title: 'Una membresia bien disenada acompana tu crecimiento profesional',
     description:
-      'Como disenar beneficios, descuentos y accesos para que la membresia retenga sin reemplazar eventos o formaciones.',
+      'Como reunir beneficios, acceso y acompanamiento para que una membresia aporte continuidad real a tu desarrollo profesional.',
     excerpt:
-      'La membresia funciona mejor cuando es continuidad, no atajo: acceso preferencial, ahorro y comunidad sin borrar el valor del catalogo individual.',
+      'La membresia funciona mejor cuando suma continuidad, acompanamiento y beneficios utiles para seguir aprendiendo en el tiempo.',
     publishedAt: '2026-03-24',
     updatedAt: '2026-03-24',
     readTime: '7 min',
     category: 'Membresias',
     featured: true,
-    tags: ['membresia', 'retencion', 'LTV', 'beneficios'],
+    tags: ['membresia', 'continuidad', 'beneficios', 'comunidad'],
     canonicalFocus: ['academia', 'eventos'],
     assetLinks: [
       canonicalAssetLinks.academia,
       canonicalAssetLinks.eventos,
     ],
     intro:
-      'La membresia debe resolver una pregunta simple: por que quedarse aqui cuando el usuario ya recibio valor de un evento o formacion?',
+      'Una buena membresia acompana el recorrido de aprendizaje y hace mas sencillo seguir avanzando con beneficios que realmente se usan.',
     sections: [
       {
-        heading: 'No la uses como sustituto',
+        heading: 'Debe sumar valor, no generar confusion',
         paragraphs: [
-          'Si la membresia intenta incluirlo todo sin limites, se vuelve un descuento permanente y termina debilitando la percepcion del catalogo.',
-          'En cambio, si ofrece continuidad, beneficios y acceso preferente, eleva el valor de todo lo demas.',
+          'Cuando una membresia esta bien pensada, ayuda a ordenar la experiencia y deja claro que beneficios acompanaran al miembro en el tiempo.',
+          'Eso permite aprovechar mejor eventos, cursos y formaciones sin perder claridad sobre lo que incluye cada opcion.',
         ],
       },
       {
-        heading: 'Si debe crear habitos de consumo',
+        heading: 'La continuidad es parte central de su valor',
         paragraphs: [
-          'Los mejores programas de membresia invitan a volver: nuevos eventos, nuevas formaciones y ventajas practicas.',
-          'El usuario paga por seguir avanzando, no solo por "tener acceso".',
+          'Las mejores membresias invitan a volver con regularidad gracias a beneficios practicos, acceso preferente y nuevas oportunidades para aprender.',
+          'La sensacion no es simplemente "tener acceso", sino contar con una base de apoyo para seguir creciendo.',
         ],
         points: [
-          'Continuidad de acceso.',
-          'Preventa o prioridad.',
-          'Ahorro frente a compra individual.',
+          'Acceso continuo a recursos y actividades.',
+          'Prioridad o beneficios especiales para miembros.',
+          'Ahorro frente a compras individuales.',
         ],
       },
       {
-        heading: 'El catalogo conserva el margen',
+        heading: 'Cada propuesta puede conservar su valor propio',
         paragraphs: [
-          'Si cada pieza conserva su landing y su logica de valor, puedes vender por separado, agrupar o incluir sin destruir el resto de tu arquitectura comercial.',
-          'Ese equilibrio es el que hace escalable el sistema.',
+          'Una membresia bien estructurada convive de forma natural con otras propuestas y ayuda a que cada una tenga un lugar claro dentro del recorrido del usuario.',
+          'Ese equilibrio facilita que la experiencia completa sea mas ordenada, comprensible y valiosa.',
         ],
       },
     ],
-    ctaLabel: 'Explorar catalogo',
+    ctaLabel: 'Conocer la academia',
   },
 ]
 

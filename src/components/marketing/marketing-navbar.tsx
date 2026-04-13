@@ -29,12 +29,11 @@ const NAV_ITEMS = [
     label: "Recursos",
     children: [
       { label: "Blog", href: "/blog", description: "Art\u00EDculos sobre psicolog\u00EDa profesional" },
-      { label: "Recursos Gratuitos", href: "/recursos", description: "Herramientas, gu\u00EDas y plantillas descargables" },
-      { label: "Casos de Estudio", href: "/casos-de-exito", description: "Profesionales que transformaron su pr\u00E1ctica" },
+      { label: "Herramientas y Recursos", href: "/recursos", description: "Guias y materiales disponibles con tu membresia" },
     ],
   },
   { label: "Investigaci\u00F3n", href: "/nosotros" },
-  { label: "Precios", href: "/precios" },
+  { label: "Planes", href: "/precios" },
 ]
 
 interface MarketingNavbarProps {

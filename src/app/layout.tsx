@@ -31,6 +31,16 @@ export const metadata: Metadata = {
     metadataBase: new URL(getAppUrl()),
     title: brandFullName,
     description: brandShortDescription,
+    icons: {
+        icon: [
+            {
+                url: '/favicon-32x32.png',
+                type: 'image/png',
+                sizes: '32x32',
+            },
+        ],
+        shortcut: '/favicon-32x32.png',
+    },
     appleWebApp: {
         capable: true,
         statusBarStyle: 'black-translucent',

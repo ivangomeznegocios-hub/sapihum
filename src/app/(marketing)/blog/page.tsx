@@ -2,13 +2,12 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { ArrowRight, BookOpen, CalendarDays, Sparkles } from 'lucide-react'
 import { getBlogPosts, getFeaturedBlogPosts } from '@/lib/blog/posts'
-import { getPublicCatalogDescription } from '@/lib/events/public'
 import { formatPageTitle } from '@/lib/brand'
 
 export const metadata: Metadata = {
   title: formatPageTitle('Blog'),
   description:
-    'Articulos editoriales que conectan eventos, cursos y formaciones con una arquitectura comercial pensada para posicionar y convertir.',
+    'Articulos, guias y reflexiones para profesionales de la psicologia que buscan seguir aprendiendo y fortalecer su practica.',
 }
 
 export default function BlogPage() {
@@ -21,16 +20,15 @@ export default function BlogPage() {
         <section className="overflow-hidden rounded-3xl border bg-gradient-to-br from-background via-background to-muted/30 p-8 shadow-sm">
           <div className="flex flex-wrap items-center gap-2 text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
             <Sparkles className="h-4 w-4" />
-            Contenido editorial
+            Blog y articulos
           </div>
           <div className="mt-5 grid gap-8 lg:grid-cols-[1.4fr_0.9fr] lg:items-end">
             <div className="space-y-5">
               <h1 className="max-w-3xl text-4xl font-semibold tracking-tight sm:text-5xl">
-                Blog para posicionar eventos, cursos y formaciones como activos comerciales
+                Ideas, guias y contenido util para profesionales de la psicologia
               </h1>
               <p className="max-w-2xl text-base text-muted-foreground sm:text-lg">
-                El blog atrae, explica y deriva a las paginas canónicas del catálogo.
-                La venta vive en el activo; la narrativa vive aquí.
+                Aqui reunimos articulos claros sobre practica profesional, formacion y crecimiento para ayudarte a tomar mejores decisiones en cada etapa.
               </p>
               <div className="flex flex-wrap gap-3">
                 <Link
@@ -51,12 +49,12 @@ export default function BlogPage() {
             </div>
 
             <div className="rounded-2xl border bg-card p-5">
-              <p className="text-sm font-medium text-muted-foreground">Principio editorial</p>
+              <p className="text-sm font-medium text-muted-foreground">Sobre esta seccion</p>
               <p className="mt-3 text-lg font-medium leading-7">
-                {getPublicCatalogDescription('eventos')}
+                Encontraras contenido pensado para orientar tu siguiente paso en eventos, cursos y formaciones.
               </p>
               <p className="mt-4 text-sm text-muted-foreground">
-                Cada articulo termina en una accion clara hacia el catalogo, no en una lectura sin salida.
+                Cada articulo busca aportar contexto, claridad y opciones concretas para seguir avanzando.
               </p>
             </div>
           </div>
@@ -76,7 +74,7 @@ export default function BlogPage() {
                       {post.category}
                     </span>
                     <span>{post.readTime}</span>
-                    <span>•</span>
+                    <span>&bull;</span>
                     <span>{new Intl.DateTimeFormat('es-MX', { dateStyle: 'medium' }).format(new Date(post.publishedAt))}</span>
                   </div>
                   <h2 className="mt-4 text-2xl font-semibold tracking-tight">{post.title}</h2>
@@ -106,20 +104,20 @@ export default function BlogPage() {
             <div className="rounded-3xl border bg-card p-6 shadow-sm">
               <h2 className="text-lg font-semibold">Que encontraras aqui</h2>
               <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                {posts.length} articulos editoriales conectados con el catalogo publico.
+                {posts.length} articulos con ideas, recomendaciones y recursos para tu desarrollo profesional.
               </p>
               <div className="mt-5 grid gap-3 text-sm">
                 <div className="rounded-2xl bg-muted/40 p-4">
                   <p className="font-medium">Eventos</p>
-                  <p className="mt-1 text-muted-foreground">Paginas canónicas para captar demanda y convertir.</p>
+                  <p className="mt-1 text-muted-foreground">Novedades, recomendaciones y contexto para elegir mejor cada encuentro.</p>
                 </div>
                 <div className="rounded-2xl bg-muted/40 p-4">
                   <p className="font-medium">Cursos</p>
-                  <p className="mt-1 text-muted-foreground">Landing pages con promesa, temario y acceso privado.</p>
+                  <p className="mt-1 text-muted-foreground">Contenido para profundizar en habilidades y encontrar opciones de aprendizaje utiles.</p>
                 </div>
                 <div className="rounded-2xl bg-muted/40 p-4">
                   <p className="font-medium">Formaciones</p>
-                  <p className="mt-1 text-muted-foreground">Experiencias educativas con estructura, promesa y acceso claro.</p>
+                  <p className="mt-1 text-muted-foreground">Guias para dar continuidad a tu crecimiento con propuestas mas completas.</p>
                 </div>
               </div>
             </div>

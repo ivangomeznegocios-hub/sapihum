@@ -76,12 +76,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
             changeFrequency: 'weekly',
             priority: 0.7,
         },
-        {
-            url: toAbsoluteUrl(appUrl, '/casos-de-exito'),
-            lastModified: new Date(),
-            changeFrequency: 'weekly',
-            priority: 0.65,
-        },
     ]
 
     const eventRoutes: MetadataRoute.Sitemap = (eventsResponse.data ?? []).map((event: { slug: string; updated_at: string }) => ({

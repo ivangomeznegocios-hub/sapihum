@@ -15,7 +15,6 @@ export default function robots(): MetadataRoute.Robots {
         '/formaciones/',
         '/blog/',
         '/recursos/',
-        '/casos-de-exito/',
       ],
       disallow: [
         '/auth/',
