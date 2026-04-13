@@ -33,8 +33,8 @@ async function loadAuthProfileFallbacks(speakerIds: string[]) {
 
     try {
         const supabase = await createAdminClient()
-        const authProfiles = await Promise.all(
-            uniqueIds.map(async (speakerId) => {
+        const authProfiles: Array<SpeakerProfileSummary | null> = await Promise.all(
+            uniqueIds.map(async (speakerId): Promise<SpeakerProfileSummary | null> => {
                 const { data, error } = await supabase.auth.admin.getUserById(speakerId)
 
                 if (error) {
@@ -65,7 +65,7 @@ async function loadAuthProfileFallbacks(speakerIds: string[]) {
                     full_name: fullName,
                     avatar_url: avatarUrl,
                     role: null,
-                } satisfies SpeakerProfileSummary
+                }
             })
         )
 
