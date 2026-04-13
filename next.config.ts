@@ -22,16 +22,6 @@ const nextConfig: NextConfig = {
                 destination: '/especialidades/psicogerontologia',
                 permanent: true,
             },
-            {
-                source: '/eventos',
-                destination: '/academia',
-                permanent: true,
-            },
-            {
-                source: '/eventos/:path*',
-                destination: '/academia/:path*',
-                permanent: true,
-            },
         ]
     },
     async headers() {

@@ -10,6 +10,14 @@ export const metadata = {
     description: 'Conoce a los expertos y ponentes que imparten nuestros eventos y talleres.',
 }
 
+function getSpeakerName(speaker: any) {
+    return speaker?.profile?.full_name || speaker?.headline || 'Ponente Anonimo'
+}
+
+function getSpeakerImage(speaker: any) {
+    return speaker?.photo_url || speaker?.profile?.avatar_url || null
+}
+
 export default async function PonentesPage() {
     const speakers = await getPublicSpeakers()
 
@@ -41,15 +49,19 @@ export default async function PonentesPage() {
                 </Card>
             ) : (
                 <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-                    {speakers.map((speaker: any) => (
-                        <Card key={speaker.id} className="group flex h-full flex-col overflow-hidden bg-card transition-colors hover:bg-muted/50 hover:shadow-md">
-                            <Link href={`/speakers/${speaker.id}`} className="flex h-full flex-col">
+                    {speakers.map((speaker: any) => {
+                        const speakerName = getSpeakerName(speaker)
+                        const speakerImage = getSpeakerImage(speaker)
+
+                        return (
+                            <Card key={speaker.id} className="group flex h-full flex-col overflow-hidden bg-card transition-colors hover:bg-muted/50 hover:shadow-md">
+                                <Link href={`/speakers/${speaker.id}`} className="flex h-full flex-col">
                                 <CardHeader className="pb-4 text-center">
                                     <div className="relative mx-auto mb-4 h-24 w-24 overflow-hidden rounded-full border-4 border-primary/10 shadow-sm">
-                                        {speaker.photo_url || speaker.profile?.avatar_url ? (
+                                        {speakerImage ? (
                                             <Image
-                                                src={speaker.photo_url || speaker.profile?.avatar_url}
-                                                alt={speaker.profile.full_name || 'Ponente'}
+                                                src={speakerImage}
+                                                alt={speakerName}
                                                 fill
                                                 unoptimized
                                                 sizes="96px"
@@ -57,11 +69,11 @@ export default async function PonentesPage() {
                                             />
                                         ) : (
                                             <div className="flex h-full w-full items-center justify-center bg-primary/5 text-2xl font-semibold text-primary/40">
-                                                {(speaker.profile?.full_name || 'P')?.charAt(0).toUpperCase()}
+                                                {speakerName.charAt(0).toUpperCase()}
                                             </div>
                                         )}
                                     </div>
-                                    <CardTitle className="text-xl leading-tight">{speaker.profile?.full_name || 'Ponente Anonimo'}</CardTitle>
+                                    <CardTitle className="text-xl leading-tight">{speakerName}</CardTitle>
                                     {speaker.headline && (
                                         <CardDescription className="mt-1 text-base font-medium text-primary">
                                             {speaker.headline}
@@ -107,9 +119,10 @@ export default async function PonentesPage() {
                                         </span>
                                     </div>
                                 </CardContent>
-                            </Link>
-                        </Card>
-                    ))}
+                                </Link>
+                            </Card>
+                        )
+                    })}
                 </div>
             )}
         </div>
