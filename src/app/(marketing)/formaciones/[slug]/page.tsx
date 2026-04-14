@@ -20,6 +20,7 @@ import { CheckoutButton } from '@/components/payments/CheckoutButton'
 import { brandFullName, brandName } from '@/lib/brand'
 import { getAppUrl } from '@/lib/config/app-url'
 import { getSpecializationByCode } from '@/lib/specializations'
+import { DEFAULT_TIMEZONE } from '@/lib/timezone'
 
 const appUrl = getAppUrl()
 
@@ -40,6 +41,7 @@ function formatEventDate(value: string | null | undefined) {
         day: 'numeric',
         month: 'short',
         year: 'numeric',
+        timeZone: DEFAULT_TIMEZONE,
     })
 }
 

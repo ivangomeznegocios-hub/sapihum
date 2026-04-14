@@ -1,14 +1,15 @@
 import Link from 'next/link'
 import { getPublicEventPath, isPastPublicCatalogEvent } from '@/lib/events/public'
 import { getSpecializationByCode } from '@/lib/specializations'
+import { DEFAULT_TIMEZONE } from '@/lib/timezone'
 
 function formatEventDate(date: string) {
     const d = new Date(date)
     return {
-        day: d.toLocaleDateString('es-MX', { day: 'numeric' }),
-        month: d.toLocaleDateString('es-MX', { month: 'short' }).replace('.', ''),
-        year: d.toLocaleDateString('es-MX', { year: 'numeric' }),
-        time: d.toLocaleTimeString('es-MX', { hour: 'numeric', minute: '2-digit' }),
+        day: d.toLocaleDateString('es-MX', { day: 'numeric', timeZone: DEFAULT_TIMEZONE }),
+        month: d.toLocaleDateString('es-MX', { month: 'short', timeZone: DEFAULT_TIMEZONE }).replace('.', ''),
+        year: d.toLocaleDateString('es-MX', { year: 'numeric', timeZone: DEFAULT_TIMEZONE }),
+        time: d.toLocaleTimeString('es-MX', { hour: 'numeric', minute: '2-digit', timeZone: DEFAULT_TIMEZONE }),
     }
 }
 

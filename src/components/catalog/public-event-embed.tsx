@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation'
 import { getAppUrl } from '@/lib/config/app-url'
 import { getPublicEventPath } from '@/lib/events/public'
 import { getSpecializationByCode } from '@/lib/specializations'
+import { DEFAULT_TIMEZONE } from '@/lib/timezone'
 
 function formatDate(dateStr: string) {
     return new Intl.DateTimeFormat('es-MX', {
@@ -10,6 +11,7 @@ function formatDate(dateStr: string) {
         year: 'numeric',
         hour: 'numeric',
         minute: '2-digit',
+        timeZone: DEFAULT_TIMEZONE,
     }).format(new Date(dateStr))
 }
 

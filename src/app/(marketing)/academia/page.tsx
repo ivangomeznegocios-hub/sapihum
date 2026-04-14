@@ -9,6 +9,7 @@ import { getPublicEventPath, splitPublicCatalogEvents } from '@/lib/events/publi
 import { getSpecializationByCode } from '@/lib/specializations'
 import { getUnifiedCatalogEvents } from '@/lib/supabase/queries/events'
 import { getPublicFormations } from '@/app/(marketing)/formaciones/actions'
+import { DEFAULT_TIMEZONE, formatEventDate, formatEventTime } from '@/lib/timezone'
 
 export const metadata: Metadata = {
     title: 'Academia SAPIHUM | Formacion Continua en Psicologia',
@@ -284,15 +285,8 @@ export default async function AcademiaPage() {
 
 function FeaturedEventCard({ event }: { event: any }) {
     const price = Number(event.price || 0)
-    const dateStr = new Date(event.start_time).toLocaleDateString('es-MX', {
-        weekday: 'long',
-        day: 'numeric',
-        month: 'long',
-    })
-    const timeStr = new Date(event.start_time).toLocaleTimeString('es-MX', {
-        hour: 'numeric',
-        minute: '2-digit',
-    })
+    const dateStr = formatEventDate(event.start_time, DEFAULT_TIMEZONE)
+    const timeStr = formatEventTime(event.start_time, DEFAULT_TIMEZONE)
     const speakerName = event.speakers?.[0]?.speaker?.profile?.full_name
     const speakerAvatar = event.speakers?.[0]?.speaker?.profile?.avatar_url
     const isLive = event.status === 'live'

@@ -8,6 +8,7 @@ import { getEffectiveEventPriceForProfile, getEventMemberAccessMessage, isEventI
 import { getDefaultPublicCtaLabel, getEventTypeLabel, getPublicEventPath } from '@/lib/events/public'
 import { brandName } from '@/lib/brand'
 import { getSpecializationByCode } from '@/lib/specializations'
+import { DEFAULT_TIMEZONE } from '@/lib/timezone'
 import { PublicAccessCta } from './public-access-cta'
 
 const publicAppUrl = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/+$/, '') ?? ''
@@ -20,6 +21,7 @@ function formatEventDate(date: string) {
         year: 'numeric',
         hour: 'numeric',
         minute: '2-digit',
+        timeZone: DEFAULT_TIMEZONE,
     }).format(new Date(date))
 }
 

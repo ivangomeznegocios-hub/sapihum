@@ -9,6 +9,7 @@ import { getPublicEventPath } from "@/lib/events/public"
 import { getPublicFormations } from "@/app/(marketing)/formaciones/actions"
 import { LEVEL_2_CARD_FEATURE_IDS, PRICING_PLAN_COPY, getPricingFeatureTitles } from "@/lib/pricing-catalog"
 import { getFeaturedPublicSpeakers } from "@/lib/supabase/queries/speakers"
+import { DEFAULT_TIMEZONE } from "@/lib/timezone"
 import { Shield, Users, BookOpen, Scaling, Beaker, FileText, Smartphone, CalendarDays, ArrowRight } from "lucide-react"
 
 export const metadata = {
@@ -626,8 +627,9 @@ export default async function LandingPage() {
               {upcomingEvents.map((event: any) => {
                 const publicPath = getPublicEventPath(event)
                 const price = Number(event.price || 0)
-                const dateStr = new Date(event.start_time).toLocaleDateString('es-MX', { day: 'numeric', month: 'short' })
-                const timeStr = new Date(event.start_time).toLocaleTimeString('es-MX', { hour: 'numeric', minute: '2-digit' })
+                const eventDate = new Date(event.start_time)
+                const dateStr = eventDate.toLocaleDateString('es-MX', { day: 'numeric', month: 'short', timeZone: DEFAULT_TIMEZONE })
+                const timeStr = eventDate.toLocaleTimeString('es-MX', { hour: 'numeric', minute: '2-digit', timeZone: DEFAULT_TIMEZONE })
                 const speakerName = event.speakers?.[0]?.speaker?.profile?.full_name
                 const typeLabels: Record<string, { label: string; color: string }> = {
                   live: { label: 'En Vivo', color: 'bg-[#f6ae02]' },

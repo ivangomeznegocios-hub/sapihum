@@ -23,6 +23,7 @@ import { userHasEventHubAccess } from '@/lib/supabase/queries/event-entitlements
 import { getPublicEventBySlug } from '@/lib/supabase/queries/events'
 import { getResourcesByEvent } from '@/lib/supabase/queries/resources'
 import { formatPageTitle } from '@/lib/brand'
+import { DEFAULT_TIMEZONE } from '@/lib/timezone'
 
 export const metadata = {
     title: formatPageTitle('Hub privado'),
@@ -42,6 +43,7 @@ function formatDate(dateStr: string) {
         day: 'numeric',
         month: 'long',
         year: 'numeric',
+        timeZone: DEFAULT_TIMEZONE,
     })
 }
 
@@ -49,6 +51,7 @@ function formatTime(dateStr: string) {
     return new Date(dateStr).toLocaleTimeString('es-MX', {
         hour: '2-digit',
         minute: '2-digit',
+        timeZone: DEFAULT_TIMEZONE,
     })
 }
 
