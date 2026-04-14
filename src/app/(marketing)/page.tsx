@@ -626,7 +626,6 @@ export default async function LandingPage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {upcomingEvents.map((event: any) => {
                 const publicPath = getPublicEventPath(event)
-                const price = Number(event.price || 0)
                 const eventDate = new Date(event.start_time)
                 const dateStr = eventDate.toLocaleDateString('es-MX', { day: 'numeric', month: 'short', timeZone: DEFAULT_TIMEZONE })
                 const timeStr = eventDate.toLocaleTimeString('es-MX', { hour: 'numeric', minute: '2-digit', timeZone: DEFAULT_TIMEZONE })
@@ -677,12 +676,7 @@ export default async function LandingPage() {
                         {event.title}
                       </h3>
                       <div className="flex-1" />
-                      <div className="mt-4 flex items-center justify-between border-t border-white/[0.06] pt-3">
-                        {price > 0 ? (
-                          <span className="text-base font-bold">${price.toFixed(0)} MXN</span>
-                        ) : (
-                          <span className="text-sm font-bold text-[#f6ae02]">Gratis</span>
-                        )}
+                      <div className="mt-4 flex items-center justify-end border-t border-white/[0.06] pt-3">
                         <span className="text-[10px] font-bold text-[#f6ae02] uppercase tracking-wider">Ver detalles →</span>
                       </div>
                     </div>
