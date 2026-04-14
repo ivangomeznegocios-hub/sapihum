@@ -109,6 +109,7 @@ export default async function RecordingsPage() {
                                                 src={event.image_url}
                                                 alt={event.title}
                                                 fill
+                                                unoptimized
                                                 className="object-cover"
                                                 sizes="(max-width: 768px) 100vw, 33vw"
                                             />

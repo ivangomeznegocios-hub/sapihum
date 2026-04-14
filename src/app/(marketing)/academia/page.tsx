@@ -5,7 +5,7 @@ import { BrandWordmark } from '@/components/brand/brand-wordmark'
 import { AcademiaCatalog } from '@/components/catalog/academia-catalog'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { splitPublicCatalogEvents } from '@/lib/events/public'
+import { getPublicEventPath, splitPublicCatalogEvents } from '@/lib/events/public'
 import { getSpecializationByCode } from '@/lib/specializations'
 import { getUnifiedCatalogEvents } from '@/lib/supabase/queries/events'
 import { getPublicFormations } from '@/app/(marketing)/formaciones/actions'
@@ -314,9 +314,14 @@ function FeaturedEventCard({ event }: { event: any }) {
         : event.subcategory
             ? subcategoryLabels[event.subcategory] || 'Encuentro'
             : 'Encuentro'
+    const publicPath = getPublicEventPath(event)
 
     return (
-        <div className="group relative overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] shadow-2xl backdrop-blur-sm transition-all duration-500 hover:border-brand-yellow/20">
+        <Link
+            href={publicPath}
+            aria-label={`Ver detalles de ${event.title}`}
+            className="group relative block overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] shadow-2xl backdrop-blur-sm transition-all duration-500 hover:border-brand-yellow/20"
+        >
             <div className="relative aspect-[16/9] overflow-hidden">
                 {event.image_url ? (
                     <Image
@@ -407,6 +412,6 @@ function FeaturedEventCard({ event }: { event: any }) {
                     </span>
                 </div>
             </div>
-        </div>
+        </Link>
     )
 }
