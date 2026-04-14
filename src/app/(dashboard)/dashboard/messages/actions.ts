@@ -3,6 +3,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { sendPushNotification } from '@/lib/onesignal'
+import { createUserNotification } from '@/lib/notifications'
 
 export async function sendMessage(receiverId: string, content: string) {
     const supabase = await createClient()
@@ -10,14 +11,14 @@ export async function sendMessage(receiverId: string, content: string) {
 
     if (!user) return { error: 'No autenticado' }
 
-    if (!content.trim()) return { error: 'Mensaje vacío' }
+    if (!content.trim()) return { error: 'Mensaje vacio' }
 
     const { error } = await (supabase
         .from('messages') as any)
         .insert({
             sender_id: user.id,
             receiver_id: receiverId,
-            content: content
+            content: content,
         } as any)
 
     if (error) {
@@ -33,10 +34,27 @@ export async function sendMessage(receiverId: string, content: string) {
 
     await sendPushNotification({
         title: 'Nuevo mensaje',
-        message: `${senderProfile?.full_name || 'Tu contacto'} te envió un mensaje.`,
+        message: `${senderProfile?.full_name || 'Tu contacto'} te envio un mensaje.`,
         targetExternalId: receiverId,
         url: '/dashboard/messages',
     })
+
+    try {
+        await createUserNotification({
+            userId: receiverId,
+            category: 'messages',
+            level: 'info',
+            kind: 'message_received',
+            title: 'Nuevo mensaje',
+            body: `${senderProfile?.full_name || 'Tu contacto'} te escribio por el chat interno.`,
+            actionUrl: '/dashboard/messages',
+            metadata: {
+                senderId: user.id,
+            },
+        })
+    } catch (notificationError) {
+        console.error('Error creating internal message notification:', notificationError)
+    }
 
     revalidatePath('/dashboard/messages')
     return { success: true }

@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { Bell, CreditCard, Library, LogOut, Menu, Search, User } from 'lucide-react'
+import { CreditCard, Library, LogOut, Menu, Search, User } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -18,11 +18,13 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog'
 import { getMembershipLabel } from '@/lib/membership'
+import { NotificationsBell } from './notifications-bell'
 import { Sidebar } from './sidebar'
 import type { UserRole } from '@/types/database'
 
 export interface HeaderProps {
     user?: {
+        id?: string
         email?: string
         user_metadata?: {
             full_name?: string
@@ -60,6 +62,7 @@ export function Header({
 
     const roleLabels: Record<string, string> = {
         admin: 'Administrador',
+        support: 'Soporte',
         psychologist: 'Psicologo',
         patient: 'Paciente',
         ponente: 'Ponente',
@@ -92,11 +95,7 @@ export function Header({
                     </div>
 
                     <div className="ml-auto flex shrink-0 items-center gap-x-2 sm:gap-x-3">
-                        <Button variant="ghost" size="icon" className="relative h-9 w-9 shrink-0">
-                            <Bell className="h-4 w-4" />
-                            <span className="sr-only">Ver notificaciones</span>
-                            <span className="absolute right-1.5 top-1.5 h-1.5 w-1.5 rounded-full bg-primary" />
-                        </Button>
+                        <NotificationsBell userId={user?.id ?? null} />
 
                         <div className="hidden lg:block lg:h-5 lg:w-px lg:bg-border" />
 

@@ -16,6 +16,7 @@ import { sendEmail } from '@/lib/email/index'
 import { buildEventRegistrationEmail } from '@/lib/email/templates'
 import { DEFAULT_TIMEZONE, zonedDateTimeToUtcIso } from '@/lib/timezone'
 import { findExternalCalendarConflictForUsers } from '@/lib/calendar-sync'
+import { createUserNotification } from '@/lib/notifications'
 import {
     DEFAULT_SPEAKER_COMPENSATION_TYPE,
     DEFAULT_SPEAKER_PERCENTAGE_RATE,
@@ -423,7 +424,7 @@ export async function registerForEvent(eventId: string, registrationData: Record
     // Get event to check audience requirements and pricing
     const { data: event } = await (supabase
         .from('events') as any)
-        .select('target_audience, required_subscription, max_attendees, price, member_access_type, member_price, specialization_code, event_type, recording_expires_at')
+        .select('title, slug, start_time, target_audience, required_subscription, max_attendees, price, member_access_type, member_price, specialization_code, event_type, recording_expires_at')
         .eq('id', eventId)
         .single()
 
@@ -434,7 +435,7 @@ export async function registerForEvent(eventId: string, registrationData: Record
     // Get user profile
     const { data: profile } = await (supabase
         .from('profiles') as any)
-        .select('role, membership_level, subscription_status, membership_specialization_code, email')
+        .select('full_name, role, membership_level, subscription_status, membership_specialization_code, email')
         .eq('id', user.id)
         .single()
 
@@ -576,6 +577,27 @@ export async function registerForEvent(eventId: string, registrationData: Record
         }
     } catch (emailError) {
         console.error('[Events] Failed to send registration email:', emailError)
+    }
+
+    try {
+        await createUserNotification({
+            userId: user.id,
+            category: 'events',
+            level: 'success',
+            kind: 'event_registered',
+            title: 'Registro confirmado',
+            body: eventData.title
+                ? `Ya quedaste registrado en "${eventData.title}".`
+                : 'Tu registro al evento fue confirmado.',
+            actionUrl: `/dashboard/events/${eventId}`,
+            metadata: {
+                eventId,
+                pricePaid: currentPrice,
+                registrationType: currentPrice === 0 ? 'free' : 'membership',
+            },
+        })
+    } catch (notificationError) {
+        console.error('[Events] Failed to create internal registration notification:', notificationError)
     }
 
     return { success: true }

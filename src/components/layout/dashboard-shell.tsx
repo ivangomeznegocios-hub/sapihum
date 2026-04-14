@@ -5,6 +5,7 @@ import type { UserRole } from '@/types/database'
 interface DashboardShellProps {
     children: React.ReactNode
     user?: {
+        id?: string
         email?: string
         user_metadata?: {
             full_name?: string

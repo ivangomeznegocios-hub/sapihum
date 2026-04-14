@@ -6,6 +6,7 @@ import { canAccessClinicalWorkspace } from '@/lib/access/internal-modules'
 import { findExternalCalendarConflictForUsers } from '@/lib/calendar-sync'
 import { revalidatePath } from 'next/cache'
 import { sendAppointmentConfirmationEmail, sendWelcomeEmail } from '@/lib/email'
+import { createUserNotification } from '@/lib/notifications'
 import { sendPushNotification } from '@/lib/onesignal'
 
 async function requireClinicalPsychologist() {
@@ -186,6 +187,26 @@ export async function createAppointment(formData: FormData) {
         targetExternalId: patientId,
         url: '/dashboard/calendar'
     })
+
+    try {
+        await createUserNotification({
+            userId: patientId,
+            category: 'calendar',
+            level: 'info',
+            kind: 'appointment_created',
+            title: 'Nueva cita confirmada',
+            body: `${profile.full_name || 'Tu psicologo'} agendo tu cita para el ${startTime.toLocaleDateString('es-MX', { weekday: 'long', day: 'numeric' })} a las ${startTime.toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' })}.`,
+            actionUrl: '/dashboard/calendar',
+            metadata: {
+                psychologistId: profile.id,
+                startTime: startTime.toISOString(),
+                endTime: endTime.toISOString(),
+                appointmentType: type,
+            },
+        })
+    } catch (notificationError) {
+        console.error('[CreateAppointment] Error creating internal notification:', notificationError)
+    }
 
     revalidatePath('/dashboard/calendar')
     return { success: 'Cita creada exitosamente' }

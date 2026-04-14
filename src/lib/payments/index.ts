@@ -11,6 +11,7 @@ import { grantEventEntitlements, revokeEventEntitlementsBySourceReference } from
 import { upsertAutomaticEventSpeakerEarnings } from '@/lib/earnings/compensation'
 import { logCommerceOperationalEvent, sendEventPurchaseConfirmation, sendFormationPurchaseConfirmation } from '@/lib/payments/commerce'
 import { syncMembershipEntitlementsForUser } from '@/lib/membership-entitlements'
+import { createUserNotification } from '@/lib/notifications'
 import { getPlanByPriceId } from './config'
 import {
     retrieveCompletedCheckoutPayment,
@@ -762,6 +763,32 @@ async function fulfillEventPurchase(params: {
 
     }
 
+    if (!wasAlreadyConfirmed && resolvedUserId) {
+        try {
+            await createUserNotification({
+                supabase: params.supabase,
+                userId: resolvedUserId,
+                category: 'payments',
+                level: 'success',
+                kind: 'event_purchase_confirmed',
+                title: 'Compra confirmada',
+                body: event.title
+                    ? `Tu acceso a "${event.title}" ya esta listo dentro de la app.`
+                    : 'Tu compra del evento fue confirmada y tu acceso ya esta activo.',
+                actionUrl: `/dashboard/events/${params.eventId}`,
+                dedupeKey: purchaseId ? `event-purchase:${purchaseId}` : null,
+                metadata: {
+                    eventId: params.eventId,
+                    purchaseId,
+                    amount: params.data.amount,
+                    currency: params.data.currency || 'mxn',
+                },
+            })
+        } catch (notificationError) {
+            console.error('[Payment] Failed to create internal event purchase notification:', notificationError)
+        }
+    }
+
     return { resolvedUserId }
 }
 
@@ -951,6 +978,33 @@ async function fulfillFormationPurchase(params: {
         }
     }
 
+    if (!wasAlreadyConfirmed && resolvedUserId) {
+        try {
+            await createUserNotification({
+                supabase: params.supabase,
+                userId: resolvedUserId,
+                category: 'payments',
+                level: 'success',
+                kind: 'formation_purchase_confirmed',
+                title: 'Compra confirmada',
+                body: formation.title
+                    ? `Tu acceso a la formacion "${formation.title}" ya esta activo.`
+                    : 'Tu compra de la formacion fue confirmada y tu acceso ya esta listo.',
+                actionUrl: `/dashboard/events/formations/${params.formationId}`,
+                dedupeKey: purchaseId ? `formation-purchase:${purchaseId}` : null,
+                metadata: {
+                    formationId: params.formationId,
+                    purchaseId,
+                    linkedCourses: linkedEvents?.length ?? 0,
+                    amount: params.data.amount,
+                    currency: params.data.currency || 'mxn',
+                },
+            })
+        } catch (notificationError) {
+            console.error('[Payment] Failed to create internal formation purchase notification:', notificationError)
+        }
+    }
+
     return { resolvedUserId }
 }
 
@@ -1060,6 +1114,27 @@ export async function fulfillSubscriptionCreated(data: SubscriptionWebhookData):
     }
 
     if (!existingSubscription) {
+        try {
+            await createUserNotification({
+                supabase,
+                userId,
+                category: 'payments',
+                level: 'success',
+                kind: 'subscription_activated',
+                title: 'Suscripcion activada',
+                body: 'Tu membresia ya esta activa y tu acceso premium quedo actualizado.',
+                actionUrl: '/dashboard/subscription',
+                dedupeKey: `subscription-created:${data.providerSubscriptionId}`,
+                metadata: {
+                    membershipLevel,
+                    specializationCode,
+                    providerSubscriptionId: data.providerSubscriptionId,
+                },
+            })
+        } catch (notificationError) {
+            console.error('[Payment] Failed to create internal subscription activation notification:', notificationError)
+        }
+
         await recordAnalyticsServerEvent({
             eventName: 'subscription_created',
             eventSource: 'webhook',
@@ -1149,6 +1224,34 @@ export async function fulfillSubscriptionRenewed(data: SubscriptionWebhookData):
     }
 
     console.log(`[Payment] Subscription renewed: sub=${sub.id}`)
+
+    if (!existingTransactionId) {
+        try {
+            await createUserNotification({
+                supabase,
+                userId: sub.profile_id,
+                category: 'payments',
+                level: 'success',
+                kind: 'subscription_renewed',
+                title: 'Suscripcion renovada',
+                body: 'Recibimos tu renovacion y tu acceso premium sigue activo.',
+                actionUrl: '/dashboard/subscription',
+                dedupeKey: data.invoiceId
+                    ? `subscription-renewed:${data.invoiceId}`
+                    : data.paymentIntentId
+                        ? `subscription-renewed:${data.paymentIntentId}`
+                        : null,
+                metadata: {
+                    subscriptionId: sub.id,
+                    membershipLevel: sub.membership_level,
+                    amount: data.amount ?? null,
+                    currency: data.currency ?? null,
+                },
+            })
+        } catch (notificationError) {
+            console.error('[Payment] Failed to create internal subscription renewal notification:', notificationError)
+        }
+    }
 
     const renewalSnapshot = ((subscriptionRow as any)?.attribution_snapshot ?? emptySnapshot()) as AttributionSnapshot
 
@@ -1256,6 +1359,31 @@ export async function fulfillSubscriptionUpdated(data: SubscriptionWebhookData):
             : data.status === 'past_due'
                 ? 'subscription_past_due'
                 : null
+
+    if (eventName && subscriptionRow?.user_id) {
+        try {
+            await createUserNotification({
+                supabase,
+                userId: subscriptionRow.user_id,
+                category: 'payments',
+                level: 'warning',
+                kind: data.status === 'past_due' ? 'subscription_past_due' : 'subscription_cancelled',
+                title: data.status === 'past_due' ? 'Pago pendiente de membresia' : 'Suscripcion actualizada',
+                body: data.status === 'past_due'
+                    ? 'No pudimos renovar tu membresia. Revisa tu metodo de pago para evitar perder acceso.'
+                    : 'Tu suscripcion dejo de estar activa. Puedes reactivarla cuando quieras desde tu panel.',
+                actionUrl: '/dashboard/subscription',
+                dedupeKey: `subscription-status:${data.providerSubscriptionId}:${data.status}:${data.currentPeriodEnd || data.cancelledAt || 'na'}`,
+                metadata: {
+                    subscriptionId: subscriptionRow.id,
+                    status: data.status,
+                    providerSubscriptionId: data.providerSubscriptionId,
+                },
+            })
+        } catch (notificationError) {
+            console.error('[Payment] Failed to create internal subscription status notification:', notificationError)
+        }
+    }
 
     if (eventName && subscriptionRow) {
         const snapshot = ((subscriptionRow as any).attribution_snapshot ?? emptySnapshot()) as AttributionSnapshot

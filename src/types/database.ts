@@ -47,6 +47,10 @@ export type SpecializationCode =
 
 export type WaitlistSource = 'landing' | 'app'
 
+export type NotificationCategory = 'system' | 'messages' | 'calendar' | 'events' | 'payments'
+
+export type NotificationLevel = 'info' | 'success' | 'warning' | 'error'
+
 // ============================================
 // TABLE: profiles
 // ============================================
@@ -1366,6 +1370,54 @@ export interface MessageInsert {
 }
 
 // ============================================
+// TABLE: user_notifications
+// ============================================
+export interface UserNotification {
+    id: string
+    user_id: string
+    category: NotificationCategory
+    level: NotificationLevel
+    kind: string
+    title: string
+    body: string
+    action_url: string | null
+    metadata: Record<string, any>
+    dedupe_key: string | null
+    is_read: boolean
+    read_at: string | null
+    created_at: string
+    updated_at: string
+}
+
+export interface UserNotificationInsert {
+    user_id: string
+    category?: NotificationCategory
+    level?: NotificationLevel
+    kind?: string
+    title: string
+    body: string
+    action_url?: string | null
+    metadata?: Record<string, any>
+    dedupe_key?: string | null
+    is_read?: boolean
+    read_at?: string | null
+}
+
+export interface UserNotificationUpdate {
+    category?: NotificationCategory
+    level?: NotificationLevel
+    kind?: string
+    title?: string
+    body?: string
+    action_url?: string | null
+    metadata?: Record<string, any>
+    dedupe_key?: string | null
+    is_read?: boolean
+    read_at?: string | null
+    updated_at?: string
+}
+
+// ============================================
 // DATABASE TYPE (for Supabase client typing)
 // ============================================
 export interface Database {
@@ -1455,6 +1507,11 @@ export interface Database {
                 Row: Message
                 Insert: MessageInsert
                 Update: never
+            }
+            user_notifications: {
+                Row: UserNotification
+                Insert: UserNotificationInsert
+                Update: UserNotificationUpdate
             }
             newsletters: {
                 Row: Newsletter

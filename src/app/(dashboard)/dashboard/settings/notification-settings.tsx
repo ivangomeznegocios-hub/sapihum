@@ -155,7 +155,8 @@ export function NotificationSettings() {
                     {loading && <Loader2 className="ml-2 h-4 w-4 animate-spin text-muted-foreground" />}
                 </CardTitle>
                 <CardDescription>
-                    Configura como recibes alertas
+                    La campanita del dashboard concentra mensajes, compras, eventos y recordatorios.
+                    Aqui decides si ademas quieres email o push en navegador.
                 </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -209,8 +210,8 @@ export function NotificationSettings() {
                         </p>
                         <p className="text-sm text-brand-yellow/80 dark:text-brand-yellow/70">
                             {isPushAvailable
-                                ? 'Alertas instantaneas en tu dispositivo'
-                                : 'Disponible cuando OneSignal este configurado'}
+                                ? 'Alertas instantaneas en tu dispositivo ademas de la campanita interna'
+                                : 'La campanita interna ya funciona; push quedara disponible cuando OneSignal este configurado'}
                         </p>
                     </div>
                     <button
