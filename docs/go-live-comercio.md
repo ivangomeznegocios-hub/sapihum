@@ -73,6 +73,8 @@ Documento operativo para decidir si la plataforma puede salir al publico con pag
 - Revisar Resend, `RESEND_FROM_EMAIL` verificado y/o Auth email delivery.
 - Revisar tablero interno de analytics y queue de compras pendientes.
 - Confirmar que `NEXT_PUBLIC_APP_URL` apunta al dominio live.
+- Confirmar que `NEXT_PUBLIC_COOKIEBOT_DOMAIN_GROUP_ID` y `NEXT_PUBLIC_GOOGLE_TAG_MANAGER_ID` son los de produccion.
+- Confirmar en el navegador que rutas sensibles (`/dashboard/patients`, `/dashboard/session`, `/dashboard/messages`, `/dashboard/documents`) no cargan GTM ni trackers de marketing.
 
 ### Cada Hora
 
@@ -81,6 +83,7 @@ Documento operativo para decidir si la plataforma puede salir al publico con pag
 - Revisar emails fallidos o rebotes.
 - Revisar compras pendientes > 30 min.
 - Revisar si hubo refunds o tickets de soporte.
+- Revisar que `generate_lead` y `purchase` sigan entrando al canonico first-party sin PII y, si aplica, a GA4 MP / Meta CAPI.
 
 ### Cierre
 
@@ -120,3 +123,4 @@ Documento operativo para decidir si la plataforma puede salir al publico con pag
 ## Referencias
 
 - Variables y entornos: [environment-setup.md](./environment-setup.md)
+- Arquitectura de tracking: [analytics-tracking-architecture.md](./analytics-tracking-architecture.md)

@@ -98,7 +98,7 @@ export default function ForgotPasswordPage() {
                     Ingresa tu correo electrónico y te enviaremos un enlace para restablecer tu contraseña
                 </CardDescription>
             </CardHeader>
-            <form onSubmit={handleReset}>
+            <form onSubmit={handleReset} data-analytics-form="password_recovery" data-analytics-surface="auth_recovery" data-analytics-funnel="registration">
                 <CardContent className="space-y-4">
                     {error && (
                         <div className="p-3 rounded-md bg-destructive/10 text-destructive text-sm">

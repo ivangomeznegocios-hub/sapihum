@@ -869,6 +869,7 @@ export async function POST(request: NextRequest) {
             visitorId: analyticsContext?.visitorId ?? null,
             sessionId: analyticsContext?.sessionId ?? null,
             userId: user?.id ?? null,
+            consent: analyticsContext?.consent ?? null,
             touch: (analyticsContext?.touch as any) ?? {
                 funnel: purchaseType === 'event_purchase' ? 'event' : purchaseType === 'formation_purchase' ? 'formation' : 'ai_credits',
             },
@@ -887,6 +888,10 @@ export async function POST(request: NextRequest) {
             analytics_visitor_id: analyticsContext?.visitorId ?? '',
             analytics_session_id: analyticsContext?.sessionId ?? '',
             attribution_snapshot: compactAttributionSnapshotForStripe(attributionSnapshot),
+            consent_analytics: analyticsContext?.consent?.analytics ? 'true' : 'false',
+            consent_marketing: analyticsContext?.consent?.marketing ? 'true' : 'false',
+            consent_source: analyticsContext?.consent?.source ?? '',
+            consent_version: analyticsContext?.consent?.version ?? '',
             guest_checkout: user ? 'false' : 'true',
             guest_email: user ? '' : customerEmail,
         }

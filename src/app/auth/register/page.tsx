@@ -152,6 +152,7 @@ function RegisterForm() {
         })
         if (analyticsContext?.visitorId) signUpMetadata.analytics_visitor_id = analyticsContext.visitorId
         if (analyticsContext?.sessionId) signUpMetadata.analytics_session_id = analyticsContext.sessionId
+        if (analyticsContext?.consent) signUpMetadata.analytics_consent = analyticsContext.consent
         if (analyticsContext?.touch) signUpMetadata.analytics_touch = analyticsContext.touch
 
         await collectAnalyticsEvent('registration_started', {
@@ -281,7 +282,14 @@ function RegisterForm() {
                 )}
             </CardHeader>
 
-            <form onSubmit={handleRegister}>
+            <form
+                onSubmit={handleRegister}
+                data-analytics-form="register"
+                data-analytics-surface="auth_register"
+                data-analytics-funnel="registration"
+                data-analytics-plan={preselectedPlan ?? ''}
+                data-analytics-specialization={preselectedSpecialization ?? ''}
+            >
                 <CardContent className="space-y-4">
                     {error && (
                         <div className="p-3 rounded-md bg-destructive/10 text-destructive text-sm">

@@ -111,28 +111,40 @@ export function WaitlistCTA({
                         </DialogDescription>
                     </DialogHeader>
 
-                    <div className="space-y-2">
-                        <Label htmlFor={`waitlist-email-${specializationCode}`}>Correo</Label>
-                        <Input
-                            id={`waitlist-email-${specializationCode}`}
-                            type="email"
-                            placeholder="tu@email.com"
-                            value={email}
-                            onChange={(event) => setEmail(event.target.value)}
-                        />
-                        <p className="text-xs text-muted-foreground">
-                            Si ya iniciaste sesion, tambien tomamos tu correo automaticamente.
-                        </p>
-                    </div>
+                    <form
+                        className="space-y-4"
+                        onSubmit={(event) => {
+                            event.preventDefault()
+                            void submit()
+                        }}
+                        data-analytics-form="waitlist"
+                        data-analytics-surface={source}
+                        data-analytics-funnel="waitlist"
+                        data-analytics-specialization={specializationCode}
+                    >
+                        <div className="space-y-2">
+                            <Label htmlFor={`waitlist-email-${specializationCode}`}>Correo</Label>
+                            <Input
+                                id={`waitlist-email-${specializationCode}`}
+                                type="email"
+                                placeholder="tu@email.com"
+                                value={email}
+                                onChange={(event) => setEmail(event.target.value)}
+                            />
+                            <p className="text-xs text-muted-foreground">
+                                Si ya iniciaste sesion, tambien tomamos tu correo automaticamente.
+                            </p>
+                        </div>
 
-                    <DialogFooter>
-                        <Button variant="outline" onClick={() => setOpen(false)} disabled={isLoading}>
-                            Cancelar
-                        </Button>
-                        <Button onClick={submit} disabled={isLoading}>
-                            {isLoading ? 'Guardando...' : 'Unirme a la lista'}
-                        </Button>
-                    </DialogFooter>
+                        <DialogFooter>
+                            <Button type="button" variant="outline" onClick={() => setOpen(false)} disabled={isLoading}>
+                                Cancelar
+                            </Button>
+                            <Button type="submit" disabled={isLoading}>
+                                {isLoading ? 'Guardando...' : 'Unirme a la lista'}
+                            </Button>
+                        </DialogFooter>
+                    </form>
                 </DialogContent>
             </Dialog>
 

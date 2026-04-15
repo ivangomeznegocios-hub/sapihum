@@ -31,6 +31,9 @@ export async function POST() {
         const inviteRefCode = userMetadata?.invite_ref_code
         const visitorId = typeof userMetadata?.analytics_visitor_id === 'string' ? userMetadata.analytics_visitor_id : null
         const sessionId = typeof userMetadata?.analytics_session_id === 'string' ? userMetadata.analytics_session_id : null
+        const consent = userMetadata?.analytics_consent && typeof userMetadata.analytics_consent === 'object'
+            ? userMetadata.analytics_consent
+            : null
         const touch = userMetadata?.analytics_touch && typeof userMetadata.analytics_touch === 'object'
             ? userMetadata.analytics_touch
             : null
@@ -47,6 +50,7 @@ export async function POST() {
             visitorId,
             sessionId,
             userId: user.id,
+            consent: consent as any,
             touch,
             properties: {
                 hasInviteCode: Boolean(inviteRefCode),

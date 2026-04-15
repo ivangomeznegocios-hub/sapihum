@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import { usePathname } from 'next/navigation'
 import OneSignal from 'react-onesignal'
 import { createClient } from '@/lib/supabase/client'
 import {
@@ -8,13 +9,17 @@ import {
     hasMarketingConsent,
     parseConsentCookieFromDocumentCookie,
 } from '@/lib/consent'
+import { resolveTrackingRouteContext } from '@/lib/tracking/policy'
 
 const oneSignalAppId = process.env.NEXT_PUBLIC_ONESIGNAL_APP_ID?.trim()
 
 export function OneSignalSetup() {
+    const pathname = usePathname() || '/'
     const isInitialized = useRef(false)
     const currentExternalId = useRef<string | null>(null)
     const [hasConsent, setHasConsent] = useState(false)
+    const routeContext = resolveTrackingRouteContext(pathname)
+    const canInitialize = routeContext.destinations.oneSignal
 
     useEffect(() => {
         const syncConsent = () => {
@@ -33,7 +38,7 @@ export function OneSignalSetup() {
     }, [])
 
     useEffect(() => {
-        if (!hasConsent || !oneSignalAppId) {
+        if (!hasConsent || !oneSignalAppId || !canInitialize) {
             return
         }
 
@@ -91,7 +96,7 @@ export function OneSignalSetup() {
             isActive = false
             subscription.unsubscribe()
         }
-    }, [hasConsent])
+    }, [canInitialize, hasConsent])
 
     return null
 }

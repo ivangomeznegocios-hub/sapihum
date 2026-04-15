@@ -149,7 +149,15 @@ export function SubscribeButton({
                         </DialogDescription>
                     </DialogHeader>
 
-                    <form className="space-y-4" onSubmit={handleGuestSubmit}>
+                    <form
+                        className="space-y-4"
+                        onSubmit={handleGuestSubmit}
+                        data-analytics-form="subscription_checkout_guest_details"
+                        data-analytics-surface="subscription_dialog"
+                        data-analytics-funnel="checkout"
+                        data-analytics-plan={`level_${membershipLevel}`}
+                        data-analytics-specialization={specializationCode ?? ''}
+                    >
                         <div className="space-y-2">
                             <Label htmlFor="subscribe-full-name">Nombre</Label>
                             <Input

@@ -40,6 +40,13 @@ export async function POST(request: NextRequest) {
             analyticsContext?: {
                 visitorId?: string | null
                 sessionId?: string | null
+                consent?: {
+                    necessary: true
+                    analytics: boolean
+                    marketing: boolean
+                    version?: string
+                    source?: string
+                } | null
                 touch?: Record<string, unknown> | null
             }
             successPath?: string
@@ -172,6 +179,7 @@ export async function POST(request: NextRequest) {
             visitorId: analyticsContext?.visitorId ?? null,
             sessionId: analyticsContext?.sessionId ?? null,
             userId: user?.id ?? null,
+            consent: analyticsContext?.consent ?? null,
             touch: (analyticsContext?.touch as any) ?? {
                 funnel: 'checkout',
                 targetPlan: `level_${membershipLevel}`,
@@ -190,6 +198,10 @@ export async function POST(request: NextRequest) {
             analytics_visitor_id: analyticsContext?.visitorId ?? '',
             analytics_session_id: analyticsContext?.sessionId ?? '',
             attribution_snapshot: compactAttributionSnapshotForStripe(attributionSnapshot),
+            consent_analytics: analyticsContext?.consent?.analytics ? 'true' : 'false',
+            consent_marketing: analyticsContext?.consent?.marketing ? 'true' : 'false',
+            consent_source: analyticsContext?.consent?.source ?? '',
+            consent_version: analyticsContext?.consent?.version ?? '',
             guest_checkout: user ? 'false' : 'true',
             buyer_full_name: fullName?.trim() || '',
             post_checkout_path: nextPath,

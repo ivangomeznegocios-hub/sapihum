@@ -150,7 +150,13 @@ export function CheckoutButton({
                         </DialogDescription>
                     </DialogHeader>
 
-                    <form className="space-y-4" onSubmit={handleGuestSubmit}>
+                    <form
+                        className="space-y-4"
+                        onSubmit={handleGuestSubmit}
+                        data-analytics-form="checkout_guest_details"
+                        data-analytics-surface="checkout_dialog"
+                        data-analytics-funnel={purchaseType === 'event_purchase' || purchaseType === 'formation_purchase' ? 'event' : 'ai_credits'}
+                    >
                         <div className="space-y-2">
                             <Label htmlFor="checkout-full-name">Nombre</Label>
                             <Input

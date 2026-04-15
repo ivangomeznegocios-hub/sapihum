@@ -95,6 +95,7 @@ export async function POST(request: NextRequest) {
             visitorId: analyticsContext?.visitorId ?? null,
             sessionId: analyticsContext?.sessionId ?? null,
             userId: user?.id ?? null,
+            consent: analyticsContext?.consent ?? null,
             touch: analyticsContext?.touch ?? {
                 funnel: 'waitlist',
                 targetSpecialization: specialization.code,

@@ -45,6 +45,8 @@ export function deriveAnalyticsChannel(input: {
     ref?: string | null
     gclid?: string | null
     fbclid?: string | null
+    ttclid?: string | null
+    liFatId?: string | null
     referrer?: string | null
     landingPath?: string | null
 }): AnalyticsChannel {
@@ -59,6 +61,8 @@ export function deriveAnalyticsChannel(input: {
     }
     if (
         input.fbclid ||
+        input.ttclid ||
+        input.liFatId ||
         medium === 'paid_social' ||
         medium === 'social_paid' ||
         (isSocialHost(referrerHost) && medium === 'cpc')
@@ -90,15 +94,18 @@ export function normalizeAttributionTouch(
     const ref = clean(touch?.ref)
     const gclid = clean(touch?.gclid)
     const fbclid = clean(touch?.fbclid)
+    const ttclid = clean(touch?.ttclid)
+    const liFatId = clean(touch?.liFatId)
     const referrer = clean(touch?.referrer)
     const landingPath = clean(touch?.landingPath) ?? defaults?.landingPath ?? null
     const funnel = touch?.funnel ?? defaults?.funnel ?? null
-    const channel = touch?.channel ?? deriveAnalyticsChannel({ source, medium, ref, gclid, fbclid, referrer, landingPath })
+    const channel = touch?.channel ?? deriveAnalyticsChannel({ source, medium, ref, gclid, fbclid, ttclid, liFatId, referrer, landingPath })
     const isDirect =
         touch?.isDirect ??
-        (channel === 'direct' || (channel === 'internal' && !source && !medium && !campaign && !ref && !gclid && !fbclid))
+        (channel === 'direct'
+            || (channel === 'internal' && !source && !medium && !campaign && !ref && !gclid && !fbclid && !ttclid && !liFatId))
 
-    const hasSignal = Boolean(source || medium || campaign || ref || gclid || fbclid || referrer || landingPath || funnel)
+    const hasSignal = Boolean(source || medium || campaign || ref || gclid || fbclid || ttclid || liFatId || referrer || landingPath || funnel)
     if (!hasSignal) return null
 
     return {
@@ -111,6 +118,8 @@ export function normalizeAttributionTouch(
         ref,
         gclid,
         fbclid,
+        ttclid,
+        liFatId,
         referrer,
         landingPath,
         targetPlan: clean(touch?.targetPlan),
@@ -132,6 +141,8 @@ export function hasMeaningfulTouch(touch: AttributionTouch | null | undefined): 
             touch.ref ||
             touch.gclid ||
             touch.fbclid ||
+            touch.ttclid ||
+            touch.liFatId ||
             touch.referrer ||
             touch.landingPath)
     )
@@ -185,6 +196,11 @@ export function touchToDbFields(touch: AttributionTouch | null | undefined) {
     }
 
     return {
+        metadata: {
+            ...(touch.metadata ?? {}),
+            ttclid: touch.ttclid ?? null,
+            li_fat_id: touch.liFatId ?? null,
+        },
         touch_source: touch.source,
         touch_medium: touch.medium,
         touch_campaign: touch.campaign,
@@ -200,7 +216,6 @@ export function touchToDbFields(touch: AttributionTouch | null | undefined) {
         target_plan: touch.targetPlan ?? null,
         target_specialization: touch.targetSpecialization ?? null,
         funnel: touch.funnel ?? null,
-        metadata: touch.metadata ?? {},
         event_name: touch.eventName ?? null,
         occurred_at: touch.occurredAt,
     }

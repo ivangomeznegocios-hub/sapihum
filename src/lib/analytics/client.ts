@@ -1,8 +1,23 @@
 'use client'
 
-import { hasAnalyticsConsent, parseConsentCookieFromDocumentCookie } from '@/lib/consent'
+import {
+    hasAnalyticsConsent,
+    hasMeasurementConsent,
+    parseConsentCookieFromDocumentCookie,
+    type StoredConsentState,
+} from '@/lib/consent'
+import { getAllowedTrackingDestinations, getCanonicalTrackingEventName } from '@/lib/tracking/catalog'
+import { resolveTrackingRouteContext, type TrackingRouteContext } from '@/lib/tracking/policy'
+import { sanitizeTrackingProperties } from '@/lib/tracking/sanitize'
 import { deriveAnalyticsChannel, normalizeAttributionTouch } from './attribution'
-import type { AnalyticsCollectRequest, AnalyticsContext, AnalyticsEventName, AnalyticsFunnel, AttributionTouch } from './types'
+import type {
+    AnalyticsCollectRequest,
+    AnalyticsConsentSnapshot,
+    AnalyticsContext,
+    AnalyticsEventName,
+    AnalyticsFunnel,
+    AttributionTouch,
+} from './types'
 
 export const ANALYTICS_VISITOR_KEY = 'cp_analytics_visitor_id'
 export const ANALYTICS_SESSION_KEY = 'cp_analytics_session_id'
@@ -15,6 +30,10 @@ type DataLayerEvent = {
 declare global {
     interface Window {
         dataLayer?: DataLayerEvent[]
+        gtag?: (...args: unknown[]) => void
+        __sapihumTracking?: {
+            gtmLoaded?: boolean
+        }
     }
 }
 
@@ -28,14 +47,72 @@ function setStoredValue(key: string, value: string) {
     window.localStorage.setItem(key, value)
 }
 
+function getCurrentPathname() {
+    if (typeof window === 'undefined') return '/'
+    return window.location.pathname || '/'
+}
+
+function getCurrentRouteContext() {
+    return resolveTrackingRouteContext(getCurrentPathname())
+}
+
+function getCurrentConsentState(): StoredConsentState | null {
+    if (typeof document === 'undefined') return null
+    return parseConsentCookieFromDocumentCookie(document.cookie)
+}
+
+function toConsentSnapshot(state: StoredConsentState | null | undefined): AnalyticsConsentSnapshot | null {
+    if (!state) return null
+
+    return {
+        necessary: true,
+        analytics: state.analytics,
+        marketing: state.marketing,
+        version: state.version,
+        source: state.source,
+    }
+}
+
+function buildTrackedProperties(
+    eventName: AnalyticsEventName,
+    routeContext: TrackingRouteContext,
+    eventId: string,
+    properties?: Record<string, unknown>
+) {
+    return sanitizeTrackingProperties({
+        ...(properties ?? {}),
+        event_id: eventId,
+        internal_event_name: eventName,
+        canonical_event_name: getCanonicalTrackingEventName(eventName),
+        tracking_zone: routeContext.zone,
+        page_type: routeContext.pageType,
+        content_type: routeContext.contentType,
+        path: routeContext.pathname,
+    })
+}
+
+function shouldPushToDataLayer(eventName: AnalyticsEventName, routeContext: TrackingRouteContext) {
+    if (!getBrowserMeasurementConsent()) {
+        return false
+    }
+
+    return getAllowedTrackingDestinations(eventName, routeContext).some((destination) => destination !== 'first_party_analytics')
+}
+
 export function getBrowserAnalyticsConsent(): boolean {
-    if (typeof document === 'undefined') return false
-    const consent = parseConsentCookieFromDocumentCookie(document.cookie)
-    return hasAnalyticsConsent(consent)
+    return hasAnalyticsConsent(getCurrentConsentState())
+}
+
+export function getBrowserMeasurementConsent(): boolean {
+    return hasMeasurementConsent(getCurrentConsentState())
+}
+
+export function getBrowserConsentSnapshot(): AnalyticsConsentSnapshot | null {
+    return toConsentSnapshot(getCurrentConsentState())
 }
 
 export function ensureAnalyticsIds() {
-    if (typeof window === 'undefined' || !getBrowserAnalyticsConsent()) return null
+    if (typeof window === 'undefined' || !getBrowserMeasurementConsent()) return null
 
     const visitorId = getStoredValue(ANALYTICS_VISITOR_KEY) ?? crypto.randomUUID()
     const sessionId = getStoredValue(ANALYTICS_SESSION_KEY) ?? crypto.randomUUID()
@@ -56,6 +133,8 @@ export function buildBrowserTouch(overrides?: Partial<AttributionTouch> | null):
     const ref = overrides?.ref ?? url.searchParams.get('ref')
     const gclid = overrides?.gclid ?? url.searchParams.get('gclid')
     const fbclid = overrides?.fbclid ?? url.searchParams.get('fbclid')
+    const ttclid = overrides?.ttclid ?? url.searchParams.get('ttclid')
+    const liFatId = overrides?.liFatId ?? url.searchParams.get('li_fat_id')
     const referrer = overrides?.referrer ?? document.referrer ?? null
     const landingPath = overrides?.landingPath ?? url.pathname
     const targetPlan = overrides?.targetPlan ?? url.searchParams.get('plan')
@@ -73,12 +152,24 @@ export function buildBrowserTouch(overrides?: Partial<AttributionTouch> | null):
             ref,
             gclid,
             fbclid,
+            ttclid,
+            liFatId,
             referrer,
             landingPath,
             targetPlan,
             targetSpecialization,
             funnel,
-            channel: overrides?.channel ?? deriveAnalyticsChannel({ source, medium, ref, gclid, fbclid, referrer, landingPath }),
+            channel: overrides?.channel ?? deriveAnalyticsChannel({
+                source,
+                medium,
+                ref,
+                gclid,
+                fbclid,
+                ttclid,
+                liFatId,
+                referrer,
+                landingPath,
+            }),
         },
         { landingPath, funnel }
     )
@@ -91,6 +182,7 @@ export function getClientAnalyticsContext(overrides?: Partial<AttributionTouch> 
     return {
         visitorId: ids.visitorId,
         sessionId: ids.sessionId,
+        consent: getBrowserConsentSnapshot(),
         touch: buildBrowserTouch(overrides),
     }
 }
@@ -108,10 +200,32 @@ export function inferFunnelFromPath(pathname: string): AnalyticsFunnel {
     return 'landing'
 }
 
-export function pushDataLayerEvent(eventName: AnalyticsEventName, payload: Record<string, unknown> = {}) {
-    if (typeof window === 'undefined' || !Array.isArray(window.dataLayer)) return
+export function pushTrackingContextToDataLayer(routeContext = getCurrentRouteContext()) {
+    if (typeof window === 'undefined' || !Array.isArray(window.dataLayer) || !getBrowserMeasurementConsent()) return
+
+    const consentSnapshot = getBrowserConsentSnapshot()
     window.dataLayer.push({
-        event: eventName,
+        event: 'tracking_context',
+        tracking_zone: routeContext.zone,
+        page_type: routeContext.pageType,
+        content_type: routeContext.contentType,
+        path: routeContext.pathname,
+        consent_analytics: Boolean(consentSnapshot?.analytics),
+        consent_marketing: Boolean(consentSnapshot?.marketing),
+    })
+}
+
+export function pushDataLayerEvent(
+    eventName: AnalyticsEventName,
+    payload: Record<string, unknown> = {},
+    routeContext = getCurrentRouteContext()
+) {
+    if (typeof window === 'undefined' || !Array.isArray(window.dataLayer) || !shouldPushToDataLayer(eventName, routeContext)) {
+        return
+    }
+
+    window.dataLayer.push({
+        event: getCanonicalTrackingEventName(eventName),
         ...payload,
     })
 }
@@ -124,7 +238,13 @@ export async function collectAnalyticsEvent(
         eventSource?: 'client' | 'server' | 'webhook'
     }
 ): Promise<{ skipped?: boolean; visitorId?: string; sessionId?: string }> {
-    if (!getBrowserAnalyticsConsent()) {
+    const routeContext = getCurrentRouteContext()
+    const eventId = crypto.randomUUID()
+    const properties = buildTrackedProperties(eventName, routeContext, eventId, input?.properties)
+
+    pushDataLayerEvent(eventName, properties, routeContext)
+
+    if (!getBrowserMeasurementConsent()) {
         return { skipped: true }
     }
 
@@ -135,18 +255,14 @@ export async function collectAnalyticsEvent(
 
     const payload: AnalyticsCollectRequest = {
         eventName,
+        eventId,
         eventSource: input?.eventSource ?? 'client',
-        properties: input?.properties ?? {},
+        properties,
         visitorId: ids.visitorId,
         sessionId: ids.sessionId,
+        consent: getBrowserConsentSnapshot(),
         touch: buildBrowserTouch(input?.touch),
     }
-
-    pushDataLayerEvent(eventName, {
-        ...payload.properties,
-        channel: payload.touch?.channel,
-        campaign: payload.touch?.campaign,
-    })
 
     const response = await fetch('/api/analytics/collect', {
         method: 'POST',

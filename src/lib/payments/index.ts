@@ -4,7 +4,7 @@
 
 import { createClient as createServiceClient } from '@supabase/supabase-js'
 import { recordAnalyticsServerEvent } from '@/lib/analytics/server'
-import type { AttributionSnapshot } from '@/lib/analytics/types'
+import type { AnalyticsConsentSnapshot, AttributionSnapshot } from '@/lib/analytics/types'
 import { getAppUrl } from '@/lib/config/app-url'
 import { getActiveEntitlementForEvent } from '@/lib/events/access'
 import { grantEventEntitlements, revokeEventEntitlementsBySourceReference } from '@/lib/events/entitlements'
@@ -73,6 +73,31 @@ function parseAttributionSnapshot(value: unknown): AttributionSnapshot {
 
 function getPrimaryTouch(snapshot: AttributionSnapshot) {
     return snapshot.lastNonDirectTouch ?? snapshot.lastTouch ?? snapshot.firstTouch
+}
+
+function parseTrackingConsentFromMetadata(metadata: Record<string, unknown> | null | undefined): AnalyticsConsentSnapshot | null {
+    if (!metadata || typeof metadata !== 'object') {
+        return null
+    }
+
+    const analytics = metadata.consent_analytics === 'true'
+    const marketing = metadata.consent_marketing === 'true'
+
+    if (!analytics && !marketing) {
+        return null
+    }
+
+    return {
+        necessary: true,
+        analytics,
+        marketing,
+        source: typeof metadata.consent_source === 'string' && metadata.consent_source.length > 0
+            ? metadata.consent_source
+            : undefined,
+        version: typeof metadata.consent_version === 'string' && metadata.consent_version.length > 0
+            ? metadata.consent_version
+            : undefined,
+    }
 }
 
 function normalizeWebhookValue(value: string | null | undefined) {
@@ -1141,6 +1166,7 @@ export async function fulfillSubscriptionCreated(data: SubscriptionWebhookData):
             visitorId: analyticsVisitorId,
             sessionId: analyticsSessionId,
             userId,
+            consent: parseTrackingConsentFromMetadata((data.metadata ?? {}) as Record<string, unknown>),
             touch: getPrimaryTouch(attributionSnapshot),
             properties: {
                 providerSubscriptionId: data.providerSubscriptionId,
@@ -1261,6 +1287,7 @@ export async function fulfillSubscriptionRenewed(data: SubscriptionWebhookData):
         visitorId: (subscriptionRow as any)?.analytics_visitor_id ?? null,
         sessionId: (subscriptionRow as any)?.analytics_session_id ?? null,
         userId: sub.profile_id,
+        consent: parseTrackingConsentFromMetadata((data.metadata ?? {}) as Record<string, unknown>),
         touch: getPrimaryTouch(renewalSnapshot),
         properties: {
             subscriptionId: sub.id,
@@ -1393,6 +1420,7 @@ export async function fulfillSubscriptionUpdated(data: SubscriptionWebhookData):
             visitorId: (subscriptionRow as any).analytics_visitor_id ?? null,
             sessionId: (subscriptionRow as any).analytics_session_id ?? null,
             userId: (subscriptionRow as any).user_id ?? null,
+            consent: parseTrackingConsentFromMetadata((data.metadata ?? {}) as Record<string, unknown>),
             touch: getPrimaryTouch(snapshot),
             properties: {
                 providerSubscriptionId: data.providerSubscriptionId,
@@ -1541,6 +1569,7 @@ export async function fulfillOneTimePayment(data: PaymentWebhookData): Promise<v
             visitorId: analyticsVisitorId,
             sessionId: analyticsSessionId,
             userId: resolvedFulfillmentUserId,
+            consent: parseTrackingConsentFromMetadata((data.metadata ?? {}) as Record<string, unknown>),
             touch: getPrimaryTouch(attributionSnapshot),
             properties: {
                 purchaseType,
@@ -1557,6 +1586,7 @@ export async function fulfillOneTimePayment(data: PaymentWebhookData): Promise<v
                 visitorId: analyticsVisitorId,
                 sessionId: analyticsSessionId,
                 userId: resolvedFulfillmentUserId,
+                consent: parseTrackingConsentFromMetadata((data.metadata ?? {}) as Record<string, unknown>),
                 touch: getPrimaryTouch(attributionSnapshot),
                 properties: {
                     eventId: referenceId || null,
@@ -1572,6 +1602,7 @@ export async function fulfillOneTimePayment(data: PaymentWebhookData): Promise<v
                 visitorId: analyticsVisitorId,
                 sessionId: analyticsSessionId,
                 userId: resolvedFulfillmentUserId,
+                consent: parseTrackingConsentFromMetadata((data.metadata ?? {}) as Record<string, unknown>),
                 touch: getPrimaryTouch(attributionSnapshot),
                 properties: {
                     packageKey: referenceId || null,
@@ -1588,6 +1619,7 @@ export async function fulfillOneTimePayment(data: PaymentWebhookData): Promise<v
                 visitorId: analyticsVisitorId,
                 sessionId: analyticsSessionId,
                 userId: resolvedFulfillmentUserId,
+                consent: parseTrackingConsentFromMetadata((data.metadata ?? {}) as Record<string, unknown>),
                 touch: getPrimaryTouch(attributionSnapshot),
                 properties: {
                     formationId: referenceId || null,
@@ -1932,6 +1964,7 @@ export async function refundOneTimePayment(data: RefundWebhookData): Promise<voi
         visitorId: transaction.analytics_visitor_id ?? null,
         sessionId: transaction.analytics_session_id ?? null,
         userId: transaction.user_id || transaction.profile_id || null,
+        consent: parseTrackingConsentFromMetadata((transaction.metadata ?? {}) as Record<string, unknown>),
         touch: getPrimaryTouch(transactionSnapshot),
         properties: {
             purchaseType: transaction.purchase_type,

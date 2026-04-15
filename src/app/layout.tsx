@@ -4,8 +4,9 @@ import { Suspense } from 'react'
 import { ThemeProvider } from '@/components/theme-provider'
 import { OneSignalSetup } from '@/components/providers/onesignal-provider'
 import { AnalyticsProvider } from '@/components/providers/analytics-provider'
+import { TrackingBootstrap } from '@/components/providers/tracking-bootstrap'
+import { CookiebotProvider } from '@/components/providers/cookiebot-provider'
 import { CookieConsentBanner } from '@/components/gdpr/cookie-consent-banner'
-import { DataLayerProvider } from '@/components/providers/data-layer-provider'
 import { brandFullName, brandName, brandShortDescription } from '@/lib/brand'
 import { getAppUrl } from '@/lib/config/app-url'
 import './globals.css'
@@ -31,6 +32,9 @@ export const metadata: Metadata = {
     metadataBase: new URL(getAppUrl()),
     title: brandFullName,
     description: brandShortDescription,
+    verification: {
+        google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION?.trim() || undefined,
+    },
     icons: {
         icon: [
             {
@@ -59,7 +63,8 @@ export default function RootLayout({
     return (
         <html lang="es" suppressHydrationWarning>
             <body className={`${manrope.variable} ${playfair.variable} antialiased`}>
-                <DataLayerProvider />
+                <TrackingBootstrap />
+                <CookiebotProvider />
                 <ThemeProvider
                     attribute="class"
                     defaultTheme="dark"

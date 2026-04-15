@@ -96,7 +96,7 @@ function LoginForm() {
                     Ingresa a tu cuenta de {brandName}
                 </CardDescription>
             </CardHeader>
-            <form onSubmit={handleLogin}>
+            <form onSubmit={handleLogin} data-analytics-form="login" data-analytics-surface="auth_login" data-analytics-funnel="registration">
                 <CardContent className="space-y-4">
                     {displayError && (
                         <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">

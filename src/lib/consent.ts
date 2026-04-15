@@ -12,7 +12,7 @@ export type ConsentType =
     | 'cookies_functional'
     | 'international_transfer'
 
-export type ConsentSource = 'registration' | 'cookie-banner' | 'telehealth-recorder' | 'system'
+export type ConsentSource = 'registration' | 'cookie-banner' | 'cookiebot' | 'telehealth-recorder' | 'system'
 
 export type StoredConsentState = {
     necessary: true
@@ -148,6 +148,38 @@ export function hasAnalyticsConsent(state: StoredConsentState | null | undefined
 
 export function hasMarketingConsent(state: StoredConsentState | null | undefined): boolean {
     return Boolean(state?.marketing)
+}
+
+export function hasMeasurementConsent(state: StoredConsentState | null | undefined): boolean {
+    return hasAnalyticsConsent(state) || hasMarketingConsent(state)
+}
+
+export function isSameConsentState(
+    left: StoredConsentState | null | undefined,
+    right: StoredConsentState | null | undefined
+): boolean {
+    return (
+        Boolean(left?.necessary) === Boolean(right?.necessary) &&
+        Boolean(left?.analytics) === Boolean(right?.analytics) &&
+        Boolean(left?.marketing) === Boolean(right?.marketing) &&
+        (left?.version ?? null) === (right?.version ?? null) &&
+        (left?.source ?? null) === (right?.source ?? null)
+    )
+}
+
+export function buildGoogleConsentModeState(state: StoredConsentState | null | undefined) {
+    const analyticsGranted = hasAnalyticsConsent(state) ? 'granted' : 'denied'
+    const marketingGranted = hasMarketingConsent(state) ? 'granted' : 'denied'
+
+    return {
+        ad_storage: marketingGranted,
+        ad_user_data: marketingGranted,
+        ad_personalization: marketingGranted,
+        analytics_storage: analyticsGranted,
+        functionality_storage: 'granted',
+        personalization_storage: 'denied',
+        security_storage: 'granted',
+    } as const
 }
 
 export function buildRegistrationConsentMetadata(

@@ -63,7 +63,7 @@ async function withRetry<T>(
     : new Error(`${operationName} failed after ${attempts} attempts.`)
 }
 
-const PUBLIC_DYNAMIC_ROUTES: RouteEntry[] = [
+const PUBLIC_DYNAMIC_ROUTES: Array<Extract<RouteEntry, { path: string; requires: SampleKey }>> = [
   { path: '/events/:publicEventId', requires: 'publicEventId' },
   { path: '/events/:publicEventId/embed', requires: 'publicEventId' },
   { path: '/speakers/:publicSpeakerId', requires: 'publicSpeakerId' },

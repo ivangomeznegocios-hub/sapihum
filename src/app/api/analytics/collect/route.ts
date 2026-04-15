@@ -1,11 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
-import { hasAnalyticsConsent, parseConsentCookieFromCookieHeader } from '@/lib/consent'
+import { hasMeasurementConsent, parseConsentCookieFromCookieHeader } from '@/lib/consent'
 import { ingestAnalyticsEvent } from '@/lib/analytics/server'
 import type { AnalyticsCollectRequest } from '@/lib/analytics/types'
 
 const AnalyticsEventNameSchema = z.enum([
     'page_view',
+    'view_content',
+    'click_whatsapp',
+    'click_phone',
+    'form_start',
+    'form_submit',
+    'generate_lead',
+    'book_appointment',
+    'begin_checkout',
+    'purchase',
+    'sign_up',
     'cta_clicked',
     'registration_started',
     'registration_completed',
@@ -38,9 +48,17 @@ const AnalyticsEventNameSchema = z.enum([
 
 const AnalyticsCollectSchema = z.object({
     eventName: AnalyticsEventNameSchema,
+    eventId: z.string().uuid().optional().nullable(),
     eventSource: z.enum(['client', 'server', 'webhook']).optional(),
     visitorId: z.string().uuid().optional().nullable(),
     sessionId: z.string().uuid().optional().nullable(),
+    consent: z.object({
+        necessary: z.literal(true),
+        analytics: z.boolean(),
+        marketing: z.boolean(),
+        version: z.string().optional(),
+        source: z.string().optional(),
+    }).optional().nullable(),
     properties: z.record(z.string(), z.unknown()).optional(),
     touch: z.record(z.string(), z.unknown()).optional().nullable(),
 })
@@ -48,7 +66,7 @@ const AnalyticsCollectSchema = z.object({
 export async function POST(request: NextRequest) {
     try {
         const consent = parseConsentCookieFromCookieHeader(request.headers.get('cookie'))
-        if (!hasAnalyticsConsent(consent)) {
+        if (!hasMeasurementConsent(consent)) {
             return NextResponse.json({ skipped: true }, { status: 200 })
         }
 
@@ -58,6 +76,7 @@ export async function POST(request: NextRequest) {
         }
 
         const payload = parsedPayload.data as AnalyticsCollectRequest
+        payload.consent = consent
         const result = await ingestAnalyticsEvent(payload)
         return NextResponse.json(result)
     } catch (error) {

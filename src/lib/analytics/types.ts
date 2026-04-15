@@ -1,5 +1,13 @@
 export type AttributionModel = 'last_non_direct' | 'first_touch' | 'last_touch'
 
+export interface AnalyticsConsentSnapshot {
+    necessary: true
+    analytics: boolean
+    marketing: boolean
+    version?: string
+    source?: string
+}
+
 export type AnalyticsChannel =
     | 'direct'
     | 'organic_search'
@@ -28,6 +36,16 @@ export type AnalyticsFunnel =
 
 export type AnalyticsEventName =
     | 'page_view'
+    | 'view_content'
+    | 'click_whatsapp'
+    | 'click_phone'
+    | 'form_start'
+    | 'form_submit'
+    | 'generate_lead'
+    | 'book_appointment'
+    | 'begin_checkout'
+    | 'purchase'
+    | 'sign_up'
     | 'cta_clicked'
     | 'registration_started'
     | 'registration_completed'
@@ -68,6 +86,8 @@ export interface AttributionTouch {
     ref?: string | null
     gclid?: string | null
     fbclid?: string | null
+    ttclid?: string | null
+    liFatId?: string | null
     referrer?: string | null
     landingPath?: string | null
     targetPlan?: string | null
@@ -121,11 +141,14 @@ export interface ManualDeal {
 export interface AnalyticsContext {
     visitorId?: string | null
     sessionId?: string | null
+    consent?: AnalyticsConsentSnapshot | null
     touch?: Partial<AttributionTouch> | null
 }
 
 export interface AnalyticsCollectRequest extends AnalyticsContext {
     eventName: AnalyticsEventName
+    eventId?: string | null
     eventSource?: 'client' | 'server' | 'webhook'
+    consent?: AnalyticsConsentSnapshot | null
     properties?: Record<string, unknown>
 }

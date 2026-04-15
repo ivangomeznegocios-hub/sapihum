@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Textarea } from '@/components/ui/textarea'
 import { bookAppointment } from './actions'
+import { collectAnalyticsEvent } from '@/lib/analytics/client'
 import { format, addDays, isSameDay } from 'date-fns'
 import { es } from 'date-fns/locale'
 import {
@@ -131,6 +132,19 @@ export function BookingWizard({ psychologist, existingAppointments }: BookingWiz
         if (result.error) {
             setError(result.error)
         } else {
+            await collectAnalyticsEvent('book_appointment', {
+                properties: {
+                    psychologist_id: psychologist.id,
+                    service_name: selectedService.name,
+                    duration_minutes: selectedService.duration,
+                    booking_type: bookingType,
+                    has_paid_service: selectedService.price > 0,
+                },
+                touch: {
+                    funnel: 'dashboard',
+                    landingPath: '/dashboard/booking',
+                },
+            })
             setIsSuccess(true)
         }
     }

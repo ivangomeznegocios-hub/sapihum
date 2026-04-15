@@ -67,7 +67,7 @@ export function RecoveryForm() {
     }
 
     return (
-        <form className="space-y-4" onSubmit={handleSubmit}>
+        <form className="space-y-4" onSubmit={handleSubmit} data-analytics-form="purchase_recovery" data-analytics-surface="purchase_recovery" data-analytics-funnel="checkout">
             <div className="space-y-2">
                 <Label htmlFor="recovery-email">Correo de compra o registro</Label>
                 <div className="relative">

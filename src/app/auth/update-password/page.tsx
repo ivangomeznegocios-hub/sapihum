@@ -108,7 +108,7 @@ export default function UpdatePasswordPage() {
                     Ingresa tu nueva contraseña para tu cuenta
                 </CardDescription>
             </CardHeader>
-            <form onSubmit={handleUpdatePassword}>
+            <form onSubmit={handleUpdatePassword} data-analytics-form="update_password" data-analytics-surface="auth_update_password" data-analytics-funnel="registration">
                 <CardContent className="space-y-4">
                     {error && (
                         <div className="p-3 rounded-md bg-destructive/10 text-destructive text-sm">
