@@ -4,6 +4,7 @@ import { Suspense } from 'react'
 import { ThemeProvider } from '@/components/theme-provider'
 import { OneSignalSetup } from '@/components/providers/onesignal-provider'
 import { AnalyticsProvider } from '@/components/providers/analytics-provider'
+import { PublicSafeGtmNoscript } from '@/components/providers/gtm-noscript'
 import { TrackingBootstrap } from '@/components/providers/tracking-bootstrap'
 import { CookiebotProvider } from '@/components/providers/cookiebot-provider'
 import { CookieConsentBanner } from '@/components/gdpr/cookie-consent-banner'
@@ -63,6 +64,7 @@ export default function RootLayout({
     return (
         <html lang="es" suppressHydrationWarning>
             <body className={`${manrope.variable} ${playfair.variable} antialiased`}>
+                <PublicSafeGtmNoscript />
                 <TrackingBootstrap />
                 <CookiebotProvider />
                 <ThemeProvider
