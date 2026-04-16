@@ -128,6 +128,18 @@ function hasEmbedSegment(pathname: string) {
     return pathname === '/embed' || pathname.endsWith('/embed') || pathname.includes('/embed/')
 }
 
+function isAcquisitionUtilityPageType(pageType: TrackingPageType) {
+    return (
+        pageType === 'auth_login'
+        || pageType === 'auth_register'
+        || pageType === 'auth_recovery'
+        || pageType === 'auth_update_password'
+        || pageType === 'purchase_success'
+        || pageType === 'purchase_cancelled'
+        || pageType === 'purchase_recovery'
+    )
+}
+
 function isDetailPage(pathname: string, prefix: string) {
     if (!matchesPrefix(pathname, prefix)) return false
     const remainder = pathname.slice(prefix.length).split('/').filter(Boolean)
@@ -200,6 +212,7 @@ export function inferTrackingPageType(pathname: string | null | undefined): Trac
     if (normalizedPath === '/auth/forgot-password') return 'auth_recovery'
     if (normalizedPath === '/auth/update-password') return 'auth_update_password'
     if (normalizedPath === '/auth/callback') return 'auth_callback'
+    if (normalizedPath === '/gracias') return 'purchase_success'
     if (normalizedPath === '/compras/exito' || normalizedPath === '/dashboard/payment-success') return 'purchase_success'
     if (normalizedPath === '/compras/cancelada' || normalizedPath === '/dashboard/payment-cancelled') return 'purchase_cancelled'
     if (normalizedPath === '/compras/recuperar') return 'purchase_recovery'
@@ -228,21 +241,21 @@ export function inferTrackingContentType(pathname: string | null | undefined): T
     return 'none'
 }
 
-function buildDestinationMatrix(zone: TrackingZone): TrackingDestinationMatrix {
-    const isPublicSafe = zone === 'public_safe'
+function buildDestinationMatrix(zone: TrackingZone, pageType: TrackingPageType): TrackingDestinationMatrix {
+    const allowExternalAcquisitionTracking = zone === 'public_safe' || isAcquisitionUtilityPageType(pageType)
 
     return {
         firstPartyAnalytics: zone !== 'unknown',
-        gtm: isPublicSafe,
-        ga4: isPublicSafe,
-        googleAds: isPublicSafe,
-        metaPixel: isPublicSafe,
-        metaCapi: isPublicSafe,
-        tiktokPixel: isPublicSafe,
-        tiktokEventsApi: isPublicSafe,
-        linkedinInsight: isPublicSafe,
-        clarity: isPublicSafe,
-        oneSignal: isPublicSafe,
+        gtm: allowExternalAcquisitionTracking,
+        ga4: allowExternalAcquisitionTracking,
+        googleAds: allowExternalAcquisitionTracking,
+        metaPixel: allowExternalAcquisitionTracking,
+        metaCapi: allowExternalAcquisitionTracking,
+        tiktokPixel: allowExternalAcquisitionTracking,
+        tiktokEventsApi: allowExternalAcquisitionTracking,
+        linkedinInsight: allowExternalAcquisitionTracking,
+        clarity: allowExternalAcquisitionTracking,
+        oneSignal: zone === 'public_safe',
     }
 }
 
@@ -273,7 +286,7 @@ export function resolveTrackingRouteContext(pathname: string | null | undefined)
     const zone = classifyTrackingZone(normalizedPath)
     const pageType = inferTrackingPageType(normalizedPath)
     const contentType = inferTrackingContentType(normalizedPath)
-    const destinations = buildDestinationMatrix(zone)
+    const destinations = buildDestinationMatrix(zone, pageType)
     const allowUtilityPageView =
         pageType === 'purchase_success'
         || pageType === 'purchase_cancelled'
@@ -287,7 +300,7 @@ export function resolveTrackingRouteContext(pathname: string | null | undefined)
         || allowUtilityPageView
         || (zone === 'public_restricted' && allowRestrictedPageView(normalizedPath))
     const allowAutoViewContent = zone === 'public_safe' && contentType !== 'none'
-    const allowAutoClickTracking = zone === 'public_safe'
+    const allowAutoClickTracking = zone === 'public_safe' || (zone === 'public_restricted' && isAcquisitionUtilityPageType(pageType))
     const allowAutoFormTracking = zone === 'public_safe' || (zone === 'public_restricted' && allowRestrictedFormTracking(normalizedPath))
 
     return {

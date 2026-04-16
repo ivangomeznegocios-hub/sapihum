@@ -39,6 +39,36 @@ function isWhatsAppHref(value: string | null) {
     return value.includes('wa.me') || value.includes('api.whatsapp.com')
 }
 
+function getInternalNavigationPath(value: string | null) {
+    if (!value || typeof window === 'undefined') return null
+    if (
+        value.startsWith('#')
+        || value.startsWith('mailto:')
+        || value.startsWith('tel:')
+        || value.startsWith('javascript:')
+    ) {
+        return null
+    }
+
+    try {
+        const resolved = new URL(value, window.location.origin)
+        if (resolved.origin !== window.location.origin) {
+            return null
+        }
+
+        const normalizedPath = resolved.pathname.replace(/\/+$/, '') || '/'
+        const currentPath = window.location.pathname.replace(/\/+$/, '') || '/'
+
+        if (normalizedPath === currentPath && !resolved.search && !resolved.hash) {
+            return null
+        }
+
+        return normalizedPath
+    } catch {
+        return null
+    }
+}
+
 function syncConsentState(): StoredConsentState | null {
     if (typeof document === 'undefined') return null
     return parseConsentCookieFromDocumentCookie(document.cookie)
@@ -104,7 +134,7 @@ export function AnalyticsProvider() {
     useEffect(() => {
         const canLoadGtm =
             Boolean(googleTagManagerId)
-            && routeContext.zone === 'public_safe'
+            && routeContext.destinations.gtm
 
         if (!canLoadGtm || typeof window === 'undefined') {
             return
@@ -127,7 +157,7 @@ export function AnalyticsProvider() {
         script.src = `https://www.googletagmanager.com/gtm.js?id=${encodeURIComponent(googleTagManagerId!)}`
         script.dataset.sapihumTracking = 'gtm'
         document.head.appendChild(script)
-    }, [routeContext.zone])
+    }, [routeContext.destinations.gtm])
 
     useEffect(() => {
         startedForms.current.clear()
@@ -188,7 +218,8 @@ export function AnalyticsProvider() {
                     : getDatasetValue(element, 'analyticsHref')
             const isPhoneClick = typeof href === 'string' && href.startsWith('tel:')
             const isWhatsAppClick = isWhatsAppHref(href)
-            const isCta = element.hasAttribute('data-analytics-cta')
+            const internalNavigationPath = getInternalNavigationPath(href)
+            const isCta = element.hasAttribute('data-analytics-cta') || Boolean(internalNavigationPath)
             const eventName =
                 explicitEvent
                 ?? (isWhatsAppClick ? 'click_whatsapp' : null)
@@ -203,7 +234,8 @@ export function AnalyticsProvider() {
                 properties: {
                     label: getDatasetValue(element, 'analyticsLabel') ?? element.textContent?.trim() ?? null,
                     href,
-                    surface: getDatasetValue(element, 'analyticsSurface'),
+                    target_path: internalNavigationPath,
+                    surface: getDatasetValue(element, 'analyticsSurface') ?? routeContext.pageType,
                 },
                 touch: {
                     landingPath: routeContext.pathname,

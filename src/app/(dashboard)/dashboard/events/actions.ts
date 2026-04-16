@@ -11,6 +11,7 @@ import {
 import { getUniqueEventAccessCount } from '@/lib/events/attendance'
 import { grantEventEntitlements } from '@/lib/events/entitlements'
 import { slugifyCatalogText } from '@/lib/events/public'
+import { getEventEditorAccessForUser } from '@/lib/events/permissions'
 import { audienceAllowsAccess, getCommercialAccessContext } from '@/lib/access/commercial'
 import { sendEmail } from '@/lib/email/index'
 import { buildEventRegistrationEmail } from '@/lib/email/templates'
@@ -835,20 +836,30 @@ export async function updateEvent(eventId: string, formData: FormData) {
         return { error: 'No autenticado' }
     }
 
-    // Verify user is admin or event creator
-    const { data: event } = await (supabase
-        .from('events') as any)
-        .select('created_by, status, formation_id, start_time, end_time')
-        .eq('id', eventId)
-        .single()
+    const [{ data: event }, { data: profile }] = await Promise.all([
+        (supabase
+            .from('events') as any)
+            .select('created_by, status, formation_id, start_time, end_time')
+            .eq('id', eventId)
+            .single(),
+        (supabase
+            .from('profiles') as any)
+            .select('role')
+            .eq('id', user.id)
+            .single(),
+    ])
 
-    const { data: profile } = await (supabase
-        .from('profiles') as any)
-        .select('role')
-        .eq('id', user.id)
-        .single()
+    const { canEditEvent } = event
+        ? await getEventEditorAccessForUser({
+            supabase,
+            eventId,
+            userId: user.id,
+            role: profile?.role,
+            createdBy: event.created_by,
+        })
+        : { canEditEvent: false }
 
-    if (!event || (event.created_by !== user.id && profile?.role !== 'admin')) {
+    if (!event || !canEditEvent) {
         return { error: 'No tienes permisos para editar este evento' }
     }
 

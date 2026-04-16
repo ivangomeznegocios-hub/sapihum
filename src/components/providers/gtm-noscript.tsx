@@ -10,7 +10,7 @@ export function PublicSafeGtmNoscript() {
     const pathname = usePathname() || '/'
     const routeContext = useMemo(() => resolveTrackingRouteContext(pathname), [pathname])
 
-    if (!googleTagManagerId || routeContext.zone !== 'public_safe') {
+    if (!googleTagManagerId || !routeContext.destinations.gtm) {
         return null
     }
 

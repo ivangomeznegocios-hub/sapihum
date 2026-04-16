@@ -110,6 +110,8 @@ const WHAT_YOU_GET = [
   }
 ]
 
+void WHAT_YOU_GET
+
 const PLATFORM_FEATURES = [
   {
     icon: (
@@ -237,12 +239,26 @@ export default async function LandingPage() {
 
             {/* CTA Buttons — Luxury style */}
             <div className="sapihum-fade-up mt-12 flex flex-col sm:flex-row gap-5 w-full sm:w-auto uppercase text-xs tracking-[0.1em]" style={{ animationDelay: '0.3s' }}>
-              <Link href="/formaciones" className="w-full sm:w-auto">
+              <Link
+                href="/formaciones"
+                className="w-full sm:w-auto"
+                data-analytics-cta
+                data-analytics-label="Hero Ver Formaciones"
+                data-analytics-surface="home_hero"
+                data-analytics-funnel="landing"
+              >
                 <Button size="lg" className="w-full h-13 px-10 font-bold">
                   Ver Formaciones
                 </Button>
               </Link>
-              <Link href="/membresia" className="w-full sm:w-auto">
+              <Link
+                href="/membresia"
+                className="w-full sm:w-auto"
+                data-analytics-cta
+                data-analytics-label="Hero Conocer Membresia"
+                data-analytics-surface="home_hero"
+                data-analytics-funnel="checkout"
+              >
                 <Button size="lg" variant="outline" className="w-full h-13 px-10 font-bold">
                   Conocer Membresía
                 </Button>
@@ -486,7 +502,13 @@ export default async function LandingPage() {
                 </ul>
 
                 <div className="mt-8">
-                  <Link href="/membresia">
+                  <Link
+                    href="/membresia"
+                    data-analytics-cta
+                    data-analytics-label="Nivel 2 Conocer Membresia"
+                    data-analytics-surface="home_membership_showcase"
+                    data-analytics-funnel="checkout"
+                  >
                     <Button variant="outline" className="gap-2 font-bold uppercase text-[10px] tracking-[0.1em]">
                       Conocer membresía
                       <ArrowRight className="h-4 w-4" />
@@ -827,12 +849,26 @@ export default async function LandingPage() {
             </p>
             
             <div className="mt-16 flex flex-col sm:flex-row gap-6 justify-center items-center uppercase text-xs tracking-[0.1em]">
-              <Link href="/formaciones" className="w-full sm:w-auto">
+              <Link
+                href="/formaciones"
+                className="w-full sm:w-auto"
+                data-analytics-cta
+                data-analytics-label="Final CTA Ver Formaciones"
+                data-analytics-surface="home_final_cta"
+                data-analytics-funnel="landing"
+              >
                 <Button size="lg" className="w-full h-14 px-12 font-bold">
                   Ver Formaciones
                 </Button>
               </Link>
-              <Link href="/membresia" className="w-full sm:w-auto">
+              <Link
+                href="/membresia"
+                className="w-full sm:w-auto"
+                data-analytics-cta
+                data-analytics-label="Final CTA Conocer Membresia"
+                data-analytics-surface="home_final_cta"
+                data-analytics-funnel="checkout"
+              >
                 <Button size="lg" variant="outline" className="w-full h-14 px-12 font-bold">
                   Conocer Membresía
                 </Button>

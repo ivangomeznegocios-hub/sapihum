@@ -15,6 +15,7 @@ import { AddToCalendarButton } from '@/components/add-to-calendar'
 import { InteractiveToolViewer } from '@/components/interactive-tool-viewer'
 import { getActiveEntitlementForEvent } from '@/lib/events/access'
 import { getUniqueEventAccessCount } from '@/lib/events/attendance'
+import { getEventEditorAccessForUser } from '@/lib/events/permissions'
 import {
     getEffectiveEventPriceForProfile,
     getEventMemberAccessMessage,
@@ -81,10 +82,15 @@ export default async function EventDetailPage({ params }: PageProps) {
 
     const isRegistered = registration?.status === 'registered'
 
-    // Check if user can manage this event (admin or creator)
-    const canManageEvent = profile.role === 'admin' || profile.id === event.created_by
+    const { canManageEvent, canEditEvent } = await getEventEditorAccessForUser({
+        supabase,
+        eventId: id,
+        userId: profile.id,
+        role: profile.role,
+        createdBy: event.created_by,
+    })
 
-    const accessEntitlement = canManageEvent
+    const accessEntitlement = canEditEvent
         ? null
         : await getActiveEntitlementForEvent({
             supabase,
@@ -94,7 +100,7 @@ export default async function EventDetailPage({ params }: PageProps) {
             eventType: event.event_type,
         })
 
-    const replayEntitlement = canManageEvent
+    const replayEntitlement = canEditEvent
         ? null
         : await getActiveEntitlementForEvent({
             supabase,
@@ -108,7 +114,7 @@ export default async function EventDetailPage({ params }: PageProps) {
         ? audienceAllowsAccess(event.target_audience, commercialAccess, { creatorId: event.created_by })
         : false
 
-    if (!canManageEvent && !canReachOffer && !isRegistered && !accessEntitlement) {
+    if (!canEditEvent && !canReachOffer && !isRegistered && !accessEntitlement) {
         return (
             <div className="space-y-8">
                 <Link
@@ -138,7 +144,7 @@ export default async function EventDetailPage({ params }: PageProps) {
     }
 
     const attendeeCount = await getUniqueEventAccessCount(supabase, id)
-    const hasEventAccess = canManageEvent || isRegistered || Boolean(accessEntitlement)
+    const hasEventAccess = canEditEvent || isRegistered || Boolean(accessEntitlement)
 
     // Get all registrations with user info (for admins/creators only)
     let allRegistrations: any[] = []
@@ -208,7 +214,7 @@ export default async function EventDetailPage({ params }: PageProps) {
     // Check if user can see recording while access is still active
     const canSeeRecording = Boolean(event.recording_url) && event.status === 'completed' && (
         (!event.recording_expires_at || new Date(event.recording_expires_at) > now) &&
-        (canManageEvent || Boolean(replayEntitlement) || (event.event_type === 'on_demand' && Boolean(accessEntitlement)))
+        (canEditEvent || Boolean(replayEntitlement) || (event.event_type === 'on_demand' && Boolean(accessEntitlement)))
     )
 
     const formatDate = (dateStr: string) => {
@@ -276,11 +282,11 @@ export default async function EventDetailPage({ params }: PageProps) {
                     Volver a eventos
                 </Link>
 
-                {(profile.role === 'admin' || profile.id === (event as any).created_by) && (
+                {canEditEvent && (
                     <div className="flex flex-wrap justify-end gap-2">
-                        <DuplicateEventButton eventId={event.id} />
                         <EditEventButton event={event} userRole={profile.role || ''} />
-                        <DeleteEventButton eventId={event.id} />
+                        {canManageEvent && <DuplicateEventButton eventId={event.id} />}
+                        {canManageEvent && <DeleteEventButton eventId={event.id} />}
                     </div>
                 )}
             </div>
