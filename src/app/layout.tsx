@@ -1,6 +1,8 @@
 import type { Metadata, Viewport } from 'next'
 import { Manrope, Playfair_Display } from 'next/font/google'
 import { Suspense } from 'react'
+import { Analytics as VercelAnalytics } from '@vercel/analytics/next'
+import { SpeedInsights } from '@vercel/speed-insights/next'
 import { ThemeProvider } from '@/components/theme-provider'
 import { OneSignalSetup } from '@/components/providers/onesignal-provider'
 import { AnalyticsProvider } from '@/components/providers/analytics-provider'
@@ -78,6 +80,8 @@ export default function RootLayout({
                     </Suspense>
                     {children}
                     <CookieConsentBanner />
+                    <VercelAnalytics />
+                    <SpeedInsights />
                 </ThemeProvider>
                 <OneSignalSetup />
             </body>

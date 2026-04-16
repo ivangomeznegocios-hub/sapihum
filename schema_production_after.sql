@@ -2321,7 +2321,7 @@ CREATE TABLE IF NOT EXISTS "public"."payment_webhook_events" (
     "payload" "jsonb" DEFAULT '{}'::"jsonb" NOT NULL,
     "status" "text" DEFAULT 'processing'::"text" NOT NULL,
     "attempts" integer DEFAULT 1 NOT NULL,
-    "locked_at" timestamp with time zone DEFAULT "now"() NOT NULL,
+    "locked_at" timestamp with time zone DEFAULT "now"(),
     "processed_at" timestamp with time zone,
     "failed_at" timestamp with time zone,
     "error_message" "text",
