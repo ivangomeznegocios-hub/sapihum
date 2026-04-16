@@ -300,6 +300,7 @@ export const stripeAdapter: PaymentProviderAdapter = {
                 metadata: checkoutMetadata,
             },
             locale: 'es',
+            allow_promotion_codes: true,
             ...(checkoutExpiresAt ? { expires_at: checkoutExpiresAt } : {}),
         }
 
