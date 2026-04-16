@@ -65,11 +65,13 @@ function EventStatusBadge({ status }: { status: string }) {
 function EventCard({
     event,
     userId,
+    canEditEvent = false,
     commercialAccess,
     isReadOnly = false,
 }: {
     event: EventWithRegistration
     userId?: string
+    canEditEvent?: boolean
     commercialAccess?: {
         role: string
         membershipLevel: number
@@ -310,7 +312,7 @@ function EventCard({
 
                 {/* Action Button */}
                 <div className="pt-2">
-                    {isCreator ? (
+                    {canEditEvent ? (
                         <Button asChild variant="outline" className="w-full justify-center whitespace-normal text-center leading-snug">
                             <Link href={`/dashboard/events/${event.id}`}>
                                 <svg
@@ -328,7 +330,7 @@ function EventCard({
                                     <path d="M12 20h9" />
                                     <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" />
                                 </svg>
-                                Gestionar Evento
+                                {isCreator ? 'Gestionar Evento' : 'Editar Evento'}
                             </Link>
                         </Button>
                     ) : hasRecording && isRegistered ? (
@@ -460,6 +462,26 @@ export default async function EventsPage() {
     const isReadOnly = commercialAccess
         ? isCommunityReadOnlyViewer(commercialAccess)
         : Boolean(isPsychologist)
+    let assignedEventIds = new Set<string>()
+
+    if (profile?.role === 'ponente' && supabase) {
+        const { data: speakerLinks } = await (supabase
+            .from('event_speakers') as any)
+            .select('event_id')
+            .eq('speaker_id', profile.id)
+
+        assignedEventIds = new Set(
+            (speakerLinks || [])
+                .map((link: any) => link.event_id)
+                .filter((eventId: string | null): eventId is string => typeof eventId === 'string')
+        )
+    }
+
+    const canEditListedEvent = (event: EventWithRegistration) => Boolean(
+        profile?.role === 'admin'
+        || profile?.id === event.created_by
+        || assignedEventIds.has(event.id)
+    )
 
     // Separate events by status AND date
     // Events with status 'upcoming' but start_time in the past should go to past section
@@ -606,6 +628,7 @@ export default async function EventsPage() {
                                 key={event.id}
                                 event={event}
                                 userId={profile?.id}
+                                canEditEvent={canEditListedEvent(event)}
                                 commercialAccess={commercialAccess ? {
                                     role: commercialAccess.role,
                                     membershipLevel: commercialAccess.membershipLevel,
@@ -648,6 +671,7 @@ export default async function EventsPage() {
                                 key={event.id}
                                 event={event}
                                 userId={profile?.id}
+                                canEditEvent={canEditListedEvent(event)}
                                 commercialAccess={commercialAccess ? {
                                     role: commercialAccess.role,
                                     membershipLevel: commercialAccess.membershipLevel,
@@ -693,6 +717,7 @@ export default async function EventsPage() {
                                 key={event.id}
                                 event={event}
                                 userId={profile?.id}
+                                canEditEvent={canEditListedEvent(event)}
                                 commercialAccess={commercialAccess ? {
                                     role: commercialAccess.role,
                                     membershipLevel: commercialAccess.membershipLevel,

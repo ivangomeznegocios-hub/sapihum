@@ -52,6 +52,8 @@ export default async function SpeakerDetailPage({ params }: PageProps) {
     const speakerHeadline = getSpeakerHeadline(speaker)
     const speakerFirstName = getSpeakerFirstName(speaker)
     const speakerImage = getSpeakerImage(speaker)
+    const canEditSpeakerProfile = currentUser?.role === 'admin' || currentUser?.id === speaker.id
+    const canEditSpeakerEvents = canEditSpeakerProfile
 
     return (
         <div className="space-y-8">
@@ -63,11 +65,11 @@ export default async function SpeakerDetailPage({ params }: PageProps) {
                     </Link>
                 </Button>
 
-                {(currentUser?.role === 'admin' || currentUser?.id === speaker.id) && (
+                {canEditSpeakerProfile && (
                     <Button variant="outline" size="sm" asChild>
                         <Link href={`/dashboard/admin/speakers/${id}/edit`}>
                             <Edit className="h-4 w-4 mr-2" />
-                            Editar Ponente
+                            {currentUser?.id === speaker.id ? 'Editar Mi Perfil' : 'Editar Ponente'}
                         </Link>
                     </Button>
                 )}
@@ -169,8 +171,8 @@ export default async function SpeakerDetailPage({ params }: PageProps) {
                             </CardHeader>
                             <CardContent className="space-y-3">
                                 {upcomingEvents.map((event: any) => (
-                                    <Link key={event.id} href={`/dashboard/events/${event.id}`} className="block">
-                                        <div className="flex items-center gap-4 p-3 rounded-lg border hover:bg-muted/50 transition-colors">
+                                    <div key={event.id} className="flex flex-col gap-3 rounded-lg border p-3 transition-colors hover:bg-muted/50 sm:flex-row sm:items-center">
+                                        <Link href={`/dashboard/events/${event.id}`} className="flex min-w-0 flex-1 items-center gap-4">
                                             {event.image_url && (
                                                 <Image
                                                     src={event.image_url}
@@ -190,8 +192,16 @@ export default async function SpeakerDetailPage({ params }: PageProps) {
                                                 </p>
                                             </div>
                                             <Badge variant="default" className="text-xs shrink-0">Proximo</Badge>
-                                        </div>
-                                    </Link>
+                                        </Link>
+                                        {canEditSpeakerEvents && (
+                                            <Button variant="outline" size="sm" asChild className="w-full sm:w-auto">
+                                                <Link href={`/dashboard/events/${event.id}`}>
+                                                    <Edit className="h-4 w-4 mr-2" />
+                                                    Editar evento
+                                                </Link>
+                                            </Button>
+                                        )}
+                                    </div>
                                 ))}
                             </CardContent>
                         </Card>
@@ -207,8 +217,8 @@ export default async function SpeakerDetailPage({ params }: PageProps) {
                             </CardHeader>
                             <CardContent className="space-y-3">
                                 {pastEvents.slice(0, 5).map((event: any) => (
-                                    <Link key={event.id} href={`/dashboard/events/${event.id}`} className="block">
-                                        <div className="flex items-center gap-4 p-3 rounded-lg border hover:bg-muted/50 transition-colors">
+                                    <div key={event.id} className="flex flex-col gap-3 rounded-lg border p-3 transition-colors hover:bg-muted/50 sm:flex-row sm:items-center">
+                                        <Link href={`/dashboard/events/${event.id}`} className="flex min-w-0 flex-1 items-center gap-4">
                                             {event.image_url && (
                                                 <Image
                                                     src={event.image_url}
@@ -230,8 +240,16 @@ export default async function SpeakerDetailPage({ params }: PageProps) {
                                             {event.recording_url && (
                                                 <Badge variant="secondary" className="text-xs shrink-0">Grabacion</Badge>
                                             )}
-                                        </div>
-                                    </Link>
+                                        </Link>
+                                        {canEditSpeakerEvents && (
+                                            <Button variant="outline" size="sm" asChild className="w-full sm:w-auto">
+                                                <Link href={`/dashboard/events/${event.id}`}>
+                                                    <Edit className="h-4 w-4 mr-2" />
+                                                    Editar evento
+                                                </Link>
+                                            </Button>
+                                        )}
+                                    </div>
                                 ))}
                             </CardContent>
                         </Card>

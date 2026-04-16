@@ -273,7 +273,7 @@ export default async function EventDetailPage({ params }: PageProps) {
     return (
         <div className="space-y-8">
             {/* Header Actions */}
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <Link
                     href="/dashboard/events"
                     className="inline-flex items-center text-muted-foreground hover:text-primary transition-colors"
@@ -283,7 +283,7 @@ export default async function EventDetailPage({ params }: PageProps) {
                 </Link>
 
                 {canEditEvent && (
-                    <div className="flex flex-wrap justify-end gap-2">
+                    <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:justify-end">
                         <EditEventButton event={event} userRole={profile.role || ''} />
                         {canManageEvent && <DuplicateEventButton eventId={event.id} />}
                         {canManageEvent && <DeleteEventButton eventId={event.id} />}
