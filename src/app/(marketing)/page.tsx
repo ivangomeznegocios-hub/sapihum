@@ -1,16 +1,16 @@
 import Link from "next/link"
 import Image from "next/image"
 import { BrandWordmark } from "@/components/brand/brand-wordmark"
+import { EventCampaignSpotlight } from "@/components/catalog/event-campaign-spotlight"
 import { Button } from "@/components/ui/button"
 import { splitPublicCatalogEvents } from "@/lib/events/public"
 import { getMarketingSpecializations, getSpecializationByCode } from "@/lib/specializations"
 import { getUnifiedCatalogEvents } from "@/lib/supabase/queries/events"
-import { getPublicEventPath } from "@/lib/events/public"
+import { applyEventCampaignCopy, getAllEventCampaigns, getCampaignEventsFromCatalog } from "@/lib/events/campaigns"
 import { getPublicFormations } from "@/app/(marketing)/formaciones/actions"
 import { LEVEL_2_CARD_FEATURE_IDS, PRICING_PLAN_COPY, getPricingFeatureTitles } from "@/lib/pricing-catalog"
 import { getFeaturedPublicSpeakers } from "@/lib/supabase/queries/speakers"
-import { DEFAULT_TIMEZONE } from "@/lib/timezone"
-import { Shield, Users, BookOpen, Scaling, Beaker, FileText, Smartphone, CalendarDays, ArrowRight } from "lucide-react"
+import { Shield, Users, BookOpen, Scaling, Beaker, FileText, Smartphone, ArrowRight } from "lucide-react"
 
 export const metadata = {
   title: "SAPIHUM | Comunidad Profesional de Psicología Avanzada",
@@ -203,7 +203,13 @@ export default async function LandingPage() {
     getPublicFormations(),
     getFeaturedPublicSpeakers(4),
   ])
-  const upcomingEvents = splitPublicCatalogEvents(allEvents).upcoming.slice(0, 3)
+  const normalizedEvents = allEvents.map((event: any) => applyEventCampaignCopy(event))
+  const upcomingEvents = splitPublicCatalogEvents(normalizedEvents).upcoming
+  const campaignSpotlights = getAllEventCampaigns()
+    .map((campaign) => ({
+      campaign,
+      events: getCampaignEventsFromCatalog(upcomingEvents, campaign),
+    }))
   const featuredFormations = formations.slice(0, 2)
 
   return (
@@ -622,7 +628,7 @@ export default async function LandingPage() {
         </section>
       )}
 
-      {upcomingEvents.length > 0 && (
+      {campaignSpotlights.length > 0 && (
         <section className="w-full py-32 bg-background border-b border-white/[0.06]">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between mb-16">
@@ -631,10 +637,10 @@ export default async function LandingPage() {
                   Academia SAPIHUM
                 </p>
                 <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-white">
-                  Próximos en la Academia
+                  Rutas activas ahora
                 </h2>
                 <p className="mt-3 text-muted-foreground font-light">
-                  Talleres, formaciones, conferencias y experiencias en vivo para la comunidad.
+                  Dos entradas curadas para llegar a la agenda con más sentido comercial, mejor narrativa y una derivación más clara hacia Academia.
                 </p>
               </div>
               <Link href="/academia" className="shrink-0">
@@ -645,66 +651,16 @@ export default async function LandingPage() {
               </Link>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {upcomingEvents.map((event: any) => {
-                const publicPath = getPublicEventPath(event)
-                const eventDate = new Date(event.start_time)
-                const dateStr = eventDate.toLocaleDateString('es-MX', { day: 'numeric', month: 'short', timeZone: DEFAULT_TIMEZONE })
-                const timeStr = eventDate.toLocaleTimeString('es-MX', { hour: 'numeric', minute: '2-digit', timeZone: DEFAULT_TIMEZONE })
-                const speakerName = event.speakers?.[0]?.speaker?.profile?.full_name
-                const typeLabels: Record<string, { label: string; color: string }> = {
-                  live: { label: 'En Vivo', color: 'bg-[#f6ae02]' },
-                  course: { label: 'Formación', color: 'bg-[#7a5602]' },
-                  presencial: { label: 'Presencial', color: 'bg-[#2c2c2b]' },
-                }
-                const typeBadge = typeLabels[event.event_type] || { label: 'Evento', color: 'bg-[#f6ae02]' }
-
-                return (
-                  <Link
-                    key={event.id}
-                    href={publicPath}
-                    className="group flex flex-col overflow-hidden border border-white/[0.08] bg-black transition-all duration-500 hover:border-[#f6ae02]/20"
-                  >
-                    <div className="relative aspect-[16/9] overflow-hidden bg-gradient-to-br from-black via-[#2c2c2b] to-[#7a5602]/40">
-                      {event.image_url ? (
-                        <Image
-                          src={event.image_url}
-                          alt={event.title}
-                          fill
-                          unoptimized
-                          sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
-                          className="object-cover transition-transform duration-700 group-hover:scale-105"
-                        />
-                      ) : (
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <CalendarDays className="h-12 w-12 text-white/10" />
-                        </div>
-                      )}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-                      <span className={`absolute top-3 left-3 inline-flex items-center rounded-sm px-2.5 py-1 text-[10px] font-bold text-white uppercase tracking-wider ${typeBadge.color}`}>
-                        {typeBadge.label}
-                      </span>
-                      <div className="absolute bottom-3 left-3 flex items-center gap-1.5 rounded-sm bg-black/80 px-2.5 py-1.5 backdrop-blur-sm">
-                        <CalendarDays className="h-3.5 w-3.5 text-[#f6ae02]" />
-                        <span className="text-xs font-semibold text-white">{dateStr}</span>
-                        <span className="text-[10px] text-[#c0bfbc]/60">{timeStr}</span>
-                      </div>
-                    </div>
-                    <div className="flex flex-1 flex-col p-5">
-                      {speakerName && (
-                        <p className="mb-1.5 text-xs font-medium text-muted-foreground">{speakerName}</p>
-                      )}
-                      <h3 className="line-clamp-2 text-lg font-semibold leading-snug group-hover:text-[#f6ae02] transition-colors duration-500">
-                        {event.title}
-                      </h3>
-                      <div className="flex-1" />
-                      <div className="mt-4 flex items-center justify-end border-t border-white/[0.06] pt-3">
-                        <span className="text-[10px] font-bold text-[#f6ae02] uppercase tracking-wider">Ver detalles →</span>
-                      </div>
-                    </div>
-                  </Link>
-                )
-              })}
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+              {campaignSpotlights.map(({ campaign, events }) => (
+                <EventCampaignSpotlight
+                  key={campaign.key}
+                  campaign={campaign}
+                  events={events}
+                  sourceSurface="home_academia_routes"
+                  variant="home"
+                />
+              ))}
             </div>
           </div>
         </section>

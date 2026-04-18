@@ -3,8 +3,16 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { BrandWordmark } from '@/components/brand/brand-wordmark'
 import { AcademiaCatalog } from '@/components/catalog/academia-catalog'
+import { EventCampaignSpotlight } from '@/components/catalog/event-campaign-spotlight'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import {
+    applyEventCampaignCopy,
+    getAllEventCampaigns,
+    getCampaignEventsFromCatalog,
+    getEventCampaignByKey,
+    getCampaignPrimaryEventPath,
+} from '@/lib/events/campaigns'
 import { getPublicEventPath, splitPublicCatalogEvents } from '@/lib/events/public'
 import { getSpecializationByCode } from '@/lib/specializations'
 import { getUnifiedCatalogEvents } from '@/lib/supabase/queries/events'
@@ -40,74 +48,106 @@ function formatHours(value: number | null | undefined) {
     return Number.isInteger(hours) ? `${hours} horas` : `${hours.toFixed(1)} horas`
 }
 
-export default async function AcademiaPage() {
+interface AcademiaPageProps {
+    searchParams?: Promise<{ track?: string }>
+}
+
+export default async function AcademiaPage({ searchParams }: AcademiaPageProps) {
+    const params = (await searchParams) ?? {}
     const [allEvents, formations] = await Promise.all([
         getUnifiedCatalogEvents(),
         getPublicFormations(),
     ])
-    const { upcoming, past } = splitPublicCatalogEvents(allEvents)
 
-    const featuredEvent = upcoming.find((event: any) => event.image_url) || upcoming[0]
+    const normalizedEvents = allEvents.map((event: any) => applyEventCampaignCopy(event))
+    const { upcoming, past } = splitPublicCatalogEvents(normalizedEvents)
+    const activeCampaign = getEventCampaignByKey(params.track)
+    const campaignBlocks = getAllEventCampaigns()
+        .map((campaign) => ({
+            campaign,
+            events: getCampaignEventsFromCatalog(upcoming, campaign),
+        }))
+
+    const visibleCampaignBlocks = activeCampaign
+        ? campaignBlocks.filter((entry) => entry.campaign.key === activeCampaign.key)
+        : campaignBlocks
+
+    const visibleUpcoming = activeCampaign
+        ? visibleCampaignBlocks[0]?.events ?? []
+        : upcoming
+
+    const featuredEvent = activeCampaign
+        ? visibleCampaignBlocks[0]?.events[0] ?? upcoming.find((event: any) => event.image_url) ?? upcoming[0]
+        : campaignBlocks[0]?.events[0] ?? upcoming.find((event: any) => event.image_url) ?? upcoming[0]
 
     return (
         <div className="relative flex w-full flex-1 flex-col items-center bg-background">
-            <section className="relative w-full overflow-hidden bg-gradient-to-b from-[#0a0a0a] via-[#111111] to-background">
+            <section className="relative w-full overflow-hidden bg-gradient-to-b from-[#050505] via-[#0a0a0a] to-background">
                 <div className="sapihum-grid-bg pointer-events-none absolute inset-0 opacity-10" />
-                <div className="pointer-events-none absolute left-1/4 top-0 h-[600px] w-[600px] rounded-full bg-brand-yellow/3 blur-[150px]" />
-                <div className="pointer-events-none absolute bottom-0 right-0 h-[400px] w-[400px] rounded-full bg-brand-brown/3 blur-[120px]" />
+                <div className="pointer-events-none absolute left-1/4 top-0 h-[600px] w-[600px] rounded-full bg-brand-yellow/5 blur-[150px]" />
+                <div className="pointer-events-none absolute bottom-0 right-0 h-[420px] w-[420px] rounded-full bg-brand-brown/5 blur-[140px]" />
 
                 <div className="relative z-10 mx-auto max-w-7xl px-4 py-20 sm:px-6 md:py-28 lg:px-8">
-                    <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-2">
+                    <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-[minmax(0,1fr)_420px]">
                         <div className="flex flex-col">
-                            <div className="sapihum-fade-up mb-8 inline-flex w-fit items-center gap-2 rounded-sm border border-brand-yellow/20 bg-brand-yellow/5 px-4 py-2 text-[10px] font-bold text-brand-yellow uppercase tracking-[0.2em] backdrop-blur-sm">
+                            <div className="mb-8 inline-flex w-fit items-center gap-2 rounded-sm border border-brand-yellow/20 bg-brand-yellow/5 px-4 py-2 text-[10px] font-bold uppercase tracking-[0.2em] text-brand-yellow backdrop-blur-sm">
                                 <span className="relative flex h-2 w-2">
                                     <span className="relative inline-flex h-2 w-2 rounded-full bg-brand-yellow" />
                                 </span>
-                                {upcoming.length > 0
-                                    ? `${upcoming.length} encuentro${upcoming.length !== 1 ? 's' : ''} activo${upcoming.length !== 1 ? 's' : ''}`
-                                    : 'Academia SAPIHUM'}
+                                {activeCampaign
+                                    ? `Ruta activa: ${activeCampaign.title}`
+                                    : `${campaignBlocks.length} rutas activas y ${upcoming.length} encuentro${upcoming.length !== 1 ? 's' : ''} disponibles`}
                             </div>
 
-                            <h1
-                                className="sapihum-fade-up mb-6 text-4xl font-bold leading-[1.1] tracking-tight text-white md:text-5xl lg:text-6xl"
-                                style={{ animationDelay: '0.1s' }}
-                            >
-                                Donde se forman los{' '}
-                                <span className="relative inline-block">
-                                    <span className="relative font-serif italic font-normal text-[#c0bfbc]">
-                                        mejores psicologos
-                                    </span>
+                            <h1 className="mb-6 text-4xl font-bold leading-[1.08] tracking-tight text-white md:text-5xl lg:text-6xl">
+                                {activeCampaign ? 'La agenda curada para avanzar en' : 'La entrada principal a la'}{' '}
+                                <span className="font-serif italic font-normal text-[#c0bfbc]">
+                                    {activeCampaign ? activeCampaign.title.toLowerCase() : 'Academia SAPIHUM'}
                                 </span>
                             </h1>
 
-                            <p
-                                className="sapihum-fade-up mb-10 max-w-xl text-lg leading-relaxed text-neutral-400/90 md:text-xl"
-                                style={{ animationDelay: '0.2s' }}
-                            >
-                                Talleres, formaciones clinicas, supervision y networking con profesionales de habla hispana, todo en vivo.
+                            <p className="mb-8 max-w-2xl text-lg leading-relaxed text-neutral-400/90 md:text-xl">
+                                {activeCampaign
+                                    ? activeCampaign.promise
+                                    : 'Encuentros en vivo, rutas activas, formaciones y una agenda mejor ordenada para descubrir, registrar y convertir sin perder la coherencia visual de la marca.'}
                             </p>
 
-                            <div className="sapihum-fade-up flex flex-wrap gap-3" style={{ animationDelay: '0.3s' }}>
-                                <Link href="/formaciones">
+                            <div className="flex flex-wrap gap-3">
+                                <a href="#rutas-activas">
                                     <Button size="lg" className="h-12 px-7 font-bold uppercase text-xs tracking-[0.1em]">
-                                        Ver formaciones
+                                        Ver rutas activas
                                     </Button>
-                                </Link>
+                                </a>
                                 <a href="#catalogo">
                                     <Button size="lg" variant="outline" className="h-12 px-7 font-bold uppercase text-xs tracking-[0.1em]">
                                         Explorar catalogo
                                     </Button>
                                 </a>
-                                <Link href="/precios">
+                                <Link href="/formaciones">
                                     <Button size="lg" variant="outline" className="h-12 px-7 text-sm font-semibold backdrop-blur-sm">
-                                        Ver planes
+                                        Ver formaciones
                                     </Button>
                                 </Link>
+                            </div>
+
+                            <div className="mt-8 flex flex-wrap gap-3">
+                                <Link href="/academia">
+                                    <Button variant={!activeCampaign ? 'default' : 'outline'} size="sm">
+                                        Toda la academia
+                                    </Button>
+                                </Link>
+                                {campaignBlocks.map(({ campaign }) => (
+                                    <Link key={campaign.key} href={`/academia?track=${campaign.key}`}>
+                                        <Button variant={activeCampaign?.key === campaign.key ? 'default' : 'outline'} size="sm">
+                                            {campaign.title}
+                                        </Button>
+                                    </Link>
+                                ))}
                             </div>
                         </div>
 
                         {featuredEvent && (
-                            <div className="sapihum-fade-up hidden lg:block" style={{ animationDelay: '0.25s' }}>
+                            <div className="hidden lg:block">
                                 <FeaturedEventCard event={featuredEvent} />
                             </div>
                         )}
@@ -117,15 +157,70 @@ export default async function AcademiaPage() {
                 <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-background to-transparent" />
             </section>
 
-            <section id="catalogo" className="scroll-mt-8 w-full px-4 py-16 sm:px-6 md:py-20 lg:px-8">
-                <div className="mx-auto max-w-7xl">
-                    <div className="mb-10">
-                        <h2 className="text-2xl font-bold tracking-tight md:text-3xl">Proximos Encuentros</h2>
-                        <p className="mt-2 max-w-2xl text-muted-foreground">
-                            Encuentra lo que viene en camino. Filtra por area tematica, formato o busca por nombre.
-                        </p>
+            {visibleCampaignBlocks.length > 0 && (
+                <section id="rutas-activas" className="scroll-mt-20 w-full px-4 py-16 sm:px-6 md:py-20 lg:px-8">
+                    <div className="mx-auto max-w-7xl space-y-10">
+                        <div className="max-w-3xl">
+                            <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-brand-yellow">
+                                Rutas activas
+                            </p>
+                            <h2 className="mt-3 text-3xl font-bold tracking-tight text-white md:text-4xl">
+                                {activeCampaign ? activeCampaign.title : 'Las dos rutas que hoy deben llevar el peso de la captacion'}
+                            </h2>
+                            <p className="mt-4 text-base leading-relaxed text-neutral-400 md:text-lg">
+                                {activeCampaign
+                                    ? 'Esta vista concentra la narrativa, el evento ancla y la captura de temario en una sola experiencia.'
+                                    : 'Empieza por estos bloques, usa el temario como captura secundaria y deja el resto del catalogo como soporte.'}
+                            </p>
+                        </div>
+
+                        <div className="space-y-8">
+                            {visibleCampaignBlocks.map(({ campaign, events }) => (
+                                <EventCampaignSpotlight
+                                    key={campaign.key}
+                                    campaign={campaign}
+                                    events={events}
+                                    sourceSurface="academia_route_section"
+                                    variant="editorial"
+                                    showLeadCapture
+                                    redirectAfterDownload
+                                    secondaryHref={activeCampaign ? '/academia' : `/academia?track=${campaign.key}`}
+                                    secondaryLabel={activeCampaign ? 'Volver a toda la academia' : 'Enfocar solo esta ruta'}
+                                />
+                            ))}
+                        </div>
                     </div>
-                    <AcademiaCatalog events={upcoming} />
+                </section>
+            )}
+
+            <section id="catalogo" className="scroll-mt-20 w-full px-4 py-16 sm:px-6 md:py-20 lg:px-8">
+                <div className="mx-auto max-w-7xl">
+                    <div className="mb-10 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+                        <div>
+                            <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-brand-yellow">
+                                Catalogo en vivo
+                            </p>
+                            <h2 className="mt-3 text-2xl font-bold tracking-tight text-white md:text-3xl">
+                                {activeCampaign ? `Eventos de ${activeCampaign.title}` : 'Proximos encuentros'}
+                            </h2>
+                            <p className="mt-2 max-w-2xl text-muted-foreground">
+                                {activeCampaign
+                                    ? 'Esta vista mantiene el catalogo enfocado en la ruta seleccionada sin romper la experiencia general.'
+                                    : 'Encuentra lo que viene en camino. Filtra por area tematica, formato o busca por nombre.'}
+                            </p>
+                        </div>
+                        {activeCampaign && (
+                            <div className="flex flex-wrap gap-3">
+                                <Link href="/academia">
+                                    <Button variant="outline">Limpiar ruta</Button>
+                                </Link>
+                                <Link href={getCampaignPrimaryEventPath(activeCampaign)}>
+                                    <Button>Ir al evento ancla</Button>
+                                </Link>
+                            </div>
+                        )}
+                    </div>
+                    <AcademiaCatalog events={visibleUpcoming} />
                 </div>
             </section>
 
@@ -135,13 +230,13 @@ export default async function AcademiaPage() {
                         <div className="mb-10 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
                             <div>
                                 <p className="mb-3 text-[10px] font-bold uppercase tracking-[0.2em] text-brand-yellow">
-                                    Formaciones Completas
+                                    Formaciones completas
                                 </p>
                                 <h2 className="text-2xl font-bold tracking-tight text-white md:text-3xl">
                                     Programas listos para comprar y cursar por ruta
                                 </h2>
                                 <p className="mt-2 max-w-2xl text-sm leading-relaxed text-neutral-400 md:text-base">
-                                    Despues de explorar los proximos encuentros, aqui puedes ver los programas completos con una sola compra y un recorrido guiado.
+                                    Despues de revisar la agenda activa, aqui puedes pasar a programas completos con una compra y un recorrido guiado.
                                 </p>
                             </div>
                             <Link href="/formaciones" className="shrink-0">
@@ -249,7 +344,7 @@ export default async function AcademiaPage() {
                 <section className="w-full px-4 py-16 sm:px-6 md:py-20 lg:px-8">
                     <div className="mx-auto max-w-7xl border-t border-border/60 pt-16">
                         <div className="mb-10">
-                            <h2 className="text-2xl font-bold tracking-tight md:text-3xl">Eventos Pasados</h2>
+                            <h2 className="text-2xl font-bold tracking-tight md:text-3xl">Eventos pasados</h2>
                         </div>
                         <AcademiaCatalog events={past} />
                     </div>
@@ -264,7 +359,7 @@ export default async function AcademiaPage() {
                     <div className="absolute -bottom-20 -left-20 h-48 w-48 rounded-full bg-brand-brown/3 blur-3xl" />
 
                     <div className="relative z-10 p-8 text-center text-white md:p-14">
-                        <div className="mb-3 inline-flex items-center gap-1 rounded-sm border border-brand-yellow/20 bg-brand-yellow/5 px-3 py-1 text-[10px] font-bold text-brand-yellow uppercase tracking-[0.15em]">
+                        <div className="mb-3 inline-flex items-center gap-1 rounded-sm border border-brand-yellow/20 bg-brand-yellow/5 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.15em] text-brand-yellow">
                             Beneficio de membresia
                         </div>
                         <h3 className="mb-4 text-2xl font-bold md:text-3xl">La Academia esta incluida en tu membresia</h3>

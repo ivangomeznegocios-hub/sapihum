@@ -71,14 +71,13 @@ export default async function EventosPage({ searchParams }: EventosPageProps) {
                                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-brand-yellow opacity-75" />
                                 <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-brand-yellow" />
                             </span>
-                            Agenda activa
+                            Agenda secundaria
                         </div>
                         <h1 className="text-4xl font-bold tracking-tight text-white sm:text-5xl">
                             Eventos en Vivo
                         </h1>
                         <p className="max-w-3xl text-lg leading-relaxed text-neutral-400">
-                            Convierte el catalogo actual en una agenda comercial mas clara. Aqui priorizamos los bloques activos,
-                            los eventos mas cercanos y las acciones que mas ayudan a registrar o comprar hoy.
+                            Esta ruta funciona como vista complementaria para enlaces compartidos, filtros y agenda puntual. La experiencia principal de descubrimiento y conversion vive ahora en Academia.
                         </p>
                         <div className="flex flex-wrap gap-3">
                             <Link href="/eventos">
@@ -94,7 +93,7 @@ export default async function EventosPage({ searchParams }: EventosPageProps) {
                                 </Link>
                             ))}
                             <Link href="/academia" className="inline-flex items-center gap-1.5 text-sm font-medium text-brand-yellow transition-colors hover:text-brand-yellow">
-                                &larr; Ver catalogo completo
+                                &larr; Ir al hub principal en Academia
                             </Link>
                         </div>
                     </div>

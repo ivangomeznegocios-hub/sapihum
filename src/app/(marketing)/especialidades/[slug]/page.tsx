@@ -536,16 +536,18 @@ export default async function SpecializationPage(props: Props) {
         </div>
       </section>
 
-      {activeCampaign && activeCampaignEvents.length > 0 && (
+      {activeCampaign && (
         <section className="w-full px-4 py-12 sm:px-6 lg:px-8">
           <div className="mx-auto w-full max-w-7xl">
             <div className="mb-8 max-w-3xl">
               <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-brand-yellow">Agenda activa</p>
               <h2 className="mt-3 text-3xl font-bold tracking-tight text-foreground md:text-4xl">
-                Eventos prioritarios para {spec.name}
+                La ruta activa conectada con {spec.name}
               </h2>
               <p className="mt-4 text-base leading-relaxed text-muted-foreground md:text-lg">
-                Si quieres impulsar conversion hoy, empieza por la agenda activa de esta especialidad y usa el temario como captura secundaria.
+                Esta especialidad te da contexto y autoridad. La exploracion principal de agenda, temario y registro
+                vive en Academia, y aqui te dejamos la entrada mas directa para seguir esa ruta sin perder el enfoque
+                de esta rama.
               </p>
             </div>
 
@@ -553,9 +555,7 @@ export default async function SpecializationPage(props: Props) {
               campaign={activeCampaign}
               events={activeCampaignEvents}
               sourceSurface="specialization_page"
-              redirectAfterDownload
-              secondaryHref="/eventos"
-              secondaryLabel="Ver toda la agenda de eventos"
+              variant="compact"
             />
           </div>
         </section>

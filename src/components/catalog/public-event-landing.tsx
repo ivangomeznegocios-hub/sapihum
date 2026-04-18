@@ -2,16 +2,18 @@
 
 import Link from 'next/link'
 import { useState } from 'react'
+import { ArrowRight, Check, Download, Lock } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { getEffectiveEventPriceForProfile, getEventMemberAccessMessage, isEventIncludedForMatchingSpecialization } from '@/lib/events/pricing'
 import { getEventCampaignForEvent } from '@/lib/events/campaigns'
 import { getDefaultPublicCtaLabel, getEventTypeLabel, getPublicEventPath } from '@/lib/events/public'
 import { brandName } from '@/lib/brand'
 import { getSpecializationByCode } from '@/lib/specializations'
 import { DEFAULT_TIMEZONE } from '@/lib/timezone'
-import { CampaignLeadMagnetButton } from './campaign-lead-magnet-button'
+import { cn } from '@/lib/utils'
+import { CampaignLeadMagnetInline } from './campaign-lead-magnet-inline'
 import { PublicAccessCta } from './public-access-cta'
+import { PublicCatalogCard } from './public-catalog-card'
 
 const publicAppUrl = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/+$/, '') ?? ''
 
@@ -36,7 +38,7 @@ function getAudienceLabel(audience: string[] | null | undefined): string {
         admin: 'Administradores',
         ponente: 'Ponentes',
     }
-    return audience.map(a => labels[a] || a).join(' / ')
+    return audience.map((value) => labels[value] || value).join(' / ')
 }
 
 function buildFaq(event: any) {
@@ -50,6 +52,7 @@ function buildFaq(event: any) {
             answer: 'No. Puedes comenzar con acceso rapido por correo y crear tu cuenta despues si quieres acceder a la comunidad y networking.',
         },
     ]
+
     if (Number(event.price || 0) > 0) {
         items.push({
             question: 'Que obtengo si ya soy miembro?',
@@ -101,9 +104,7 @@ function buildEventLocation(event: any, eventUrl: string) {
 }
 
 function buildStructuredData(event: any, faqItems: { question: string; answer: string }[]) {
-    const schemaType = event.event_type === 'course'
-        ? 'Course'
-        : 'Event'
+    const schemaType = event.event_type === 'course' ? 'Course' : 'Event'
     const eventPath = getPublicEventPath(event)
     const eventUrl = buildAbsoluteUrl(eventPath)
     const isFull = event.max_attendees ? (event.attendee_count || 0) >= event.max_attendees : false
@@ -238,12 +239,12 @@ function FaqAccordion({ items }: { items: { question: string; answer: string }[]
     const [openIndex, setOpenIndex] = useState<number | null>(null)
 
     return (
-        <div className="divide-y divide-border/50">
+        <div className="divide-y divide-white/10">
             {items.map((item, index) => (
                 <div key={item.question}>
                     <button
                         onClick={() => setOpenIndex(openIndex === index ? null : index)}
-                        className="flex w-full items-center justify-between py-4 text-left text-sm font-medium text-foreground transition-colors hover:text-brand-yellow"
+                        className="flex w-full items-center justify-between py-4 text-left text-sm font-medium text-white transition-colors hover:text-brand-yellow"
                     >
                         {item.question}
                         <svg
@@ -256,17 +257,43 @@ function FaqAccordion({ items }: { items: { question: string; answer: string }[]
                             strokeWidth="2"
                             strokeLinecap="round"
                             strokeLinejoin="round"
-                            className={`ml-2 shrink-0 text-muted-foreground transition-transform duration-200 ${openIndex === index ? 'rotate-180' : ''}`}
+                            className={`ml-2 shrink-0 text-neutral-500 transition-transform duration-200 ${openIndex === index ? 'rotate-180' : ''}`}
                         >
                             <path d="m6 9 6 6 6-6" />
                         </svg>
                     </button>
                     <div className={`overflow-hidden transition-all duration-200 ${openIndex === index ? 'max-h-40 pb-4' : 'max-h-0'}`}>
-                        <p className="text-sm leading-relaxed text-muted-foreground">{item.answer}</p>
+                        <p className="text-sm leading-relaxed text-neutral-400">{item.answer}</p>
                     </div>
                 </div>
             ))}
         </div>
+    )
+}
+
+function DetailShell({
+    title,
+    eyebrow,
+    children,
+    className,
+}: {
+    title: string
+    eyebrow?: string
+    children: React.ReactNode
+    className?: string
+}) {
+    return (
+        <section className={cn('rounded-[28px] border border-white/10 bg-white/[0.03] p-6 shadow-2xl shadow-black/10 backdrop-blur-sm md:p-7', className)}>
+            {eyebrow && (
+                <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-brand-yellow">
+                    {eyebrow}
+                </p>
+            )}
+            <h2 className={cn('font-bold tracking-tight text-white', eyebrow ? 'mt-3 text-2xl md:text-3xl' : 'text-2xl md:text-3xl')}>
+                {title}
+            </h2>
+            <div className="mt-5">{children}</div>
+        </section>
     )
 }
 
@@ -286,8 +313,8 @@ export function PublicEventLanding({
     hasAccess: boolean
 }) {
     const ctaLabel = getDefaultPublicCtaLabel(event)
-    const isMembersOnly = Array.isArray(event.target_audience) 
-        ? event.target_audience.includes('members') && !event.target_audience.includes('public') 
+    const isMembersOnly = Array.isArray(event.target_audience)
+        ? event.target_audience.includes('members') && !event.target_audience.includes('public')
         : false
     const specialization = getSpecializationByCode(event.specialization_code)
     const finalPrice = getEffectiveEventPriceForProfile(event, {
@@ -300,30 +327,25 @@ export function PublicEventLanding({
     const faqItems = buildFaq(event)
     const speakerReturnTo = getPublicEventPath(event)
     const campaign = getEventCampaignForEvent(event)
-    
-    // Validate edge/blocking cases
     const isFull = event.max_attendees ? (event.attendee_count || 0) >= event.max_attendees : false
     const isExpired = event.recording_expires_at ? new Date(event.recording_expires_at) < new Date() : false
     const isBlocked = !hasAccess && (isFull || isExpired)
     const materialLinks = Array.isArray(event.material_links)
         ? event.material_links.filter((item: any) => item?.title && item?.url)
         : []
-    
-    // Determine the state logic for the CTA box
-    const userIsMember = hasActiveMembership
     const includedBySpecialization = isEventIncludedForMatchingSpecialization(event, {
         membershipLevel,
         hasActiveMembership,
         membershipSpecializationCode,
     })
     const showMembershipUpsell =
-        !hasAccess
-        && !isBlocked
-        && !userIsMember
-        && (
-            isMembersOnly
-            || (Number(event.price || 0) > 0 && Boolean(event.specialization_code))
-            || (Number(event.price || 0) > 0 && event.member_access_type !== 'full_price')
+        !hasAccess &&
+        !isBlocked &&
+        !hasActiveMembership &&
+        (
+            isMembersOnly ||
+            (Number(event.price || 0) > 0 && Boolean(event.specialization_code)) ||
+            (Number(event.price || 0) > 0 && event.member_access_type !== 'full_price')
         )
     const membershipCtaLabel = isMembersOnly
         ? 'Hazte miembro para participar'
@@ -335,14 +357,33 @@ export function PublicEventLanding({
                     : 'Activa tu especialidad y accede sin costo'
             : `Suscribete y ${event.member_access_type === 'free' ? 'accede gratis' : 'ahorra'}`
 
+    const valueItems = [
+        { title: 'Acceso completo', description: 'Link exclusivo al evento y sus materiales.' },
+        { title: 'Acceso por correo', description: 'Puedes empezar sin cuenta y recuperar tu acceso cuando quieras.' },
+        ...(event.certificate_type && event.certificate_type !== 'none'
+            ? [{
+                title: event.certificate_type === 'completion'
+                    ? 'Diploma de finalizacion'
+                    : event.certificate_type === 'specialized'
+                        ? 'Acreditacion especializada'
+                        : 'Constancia de participacion',
+                description: 'Documento acreditativo sujeto a las condiciones del evento.',
+            }]
+            : []),
+        ...(event.included_resources?.length > 0
+            ? [{
+                title: 'Recursos extra',
+                description: `${event.included_resources.length} materiales complementarios disponibles para tu proceso.`,
+            }]
+            : []),
+    ]
+
     return (
-        <div className="space-y-14 pb-20">
+        <div className="space-y-10 pb-28">
             <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: buildStructuredData(event, faqItems) }} />
 
-            {/* -- HERO -- */}
-            <section className="relative overflow-hidden rounded-3xl">
-                {/* Background image or gradient */}
-                <div className="absolute inset-0 bg-gradient-to-br from-neutral-900 via-neutral-800 to-brand-brown/80">
+            <section className="relative overflow-hidden rounded-[34px] border border-white/10 bg-[linear-gradient(145deg,#070707_10%,#111111_55%,#050505_100%)] shadow-2xl shadow-black/25">
+                <div className="absolute inset-0">
                     {event.image_url && (
                         <div
                             role="img"
@@ -351,61 +392,50 @@ export function PublicEventLanding({
                             style={{ backgroundImage: `url("${event.image_url}")` }}
                         />
                     )}
-                    <div className="absolute inset-0 bg-gradient-to-t from-neutral-900/95 via-neutral-900/70 to-neutral-900/50" />
-                    {/* Decorative */}
-                    <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-brand-yellow/10 blur-3xl" />
-                    <div className="absolute -bottom-10 -left-10 h-48 w-48 rounded-full bg-brand-brown/8 blur-3xl" />
-                    <div className="absolute inset-0 opacity-[0.02]" style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, white 1px, transparent 0)', backgroundSize: '24px 24px' }} />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black via-black/75 to-black/60" />
+                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(246,174,2,0.22),transparent_34%),radial-gradient(circle_at_bottom_left,rgba(122,86,2,0.18),transparent_30%)]" />
+                    <div className="absolute inset-0 opacity-[0.05]" style={{ backgroundImage: 'linear-gradient(to right, rgba(255,255,255,0.12) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.12) 1px, transparent 1px)', backgroundSize: '28px 28px' }} />
                 </div>
 
-                <div className="relative grid gap-8 px-6 py-10 sm:px-10 sm:py-14 lg:grid-cols-[1fr_380px] lg:py-16">
-                    {/* Left: Event details */}
-                    <div className="space-y-6">
-                        {/* Badges */}
+                <div className="relative grid gap-8 px-6 py-10 sm:px-8 md:px-10 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-start lg:py-14">
+                    <div className="space-y-7">
                         <div className="flex flex-wrap items-center gap-2.5">
                             <span className="inline-flex items-center gap-1.5 rounded-full border border-brand-yellow/20 bg-brand-yellow/10 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-brand-yellow">
-                                {getEventTypeLabel(event.event_type)}
+                                {formatLabel}
                             </span>
                             {event.hero_badge && (
-                                <span className="inline-flex items-center rounded-full bg-white/10 px-3 py-1 text-xs font-medium text-white/80">
+                                <span className="inline-flex items-center rounded-full bg-white/10 px-3 py-1 text-xs font-medium text-white/85">
                                     {event.hero_badge}
                                 </span>
                             )}
                             {specialization && (
-                                <span className="inline-flex items-center rounded-full border border-brand-brown/30 bg-brand-brown/20 px-3 py-1 text-xs font-semibold text-white">
+                                <span className="inline-flex items-center rounded-full border border-white/10 bg-white/[0.08] px-3 py-1 text-xs font-semibold text-white">
                                     {specialization.name}
                                 </span>
                             )}
-                            {event.formation && !Array.isArray(event.formation) ? (
-                                <Link href={`/formaciones/${event.formation.slug}`} className="inline-flex items-center gap-1.5 rounded-full bg-brand-yellow/20 border border-brand-yellow/30 px-3 py-1 text-xs font-semibold tracking-wide text-brand-yellow hover:bg-brand-yellow/40 hover:text-white transition-colors cursor-pointer group">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="group-hover:-rotate-12 transition-transform"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" /><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" /></svg>
-                                    Parte de: {event.formation.title}
-                                </Link>
-                            ) : event.formation_track ? (
-                                <span className="inline-flex items-center gap-1.5 rounded-full bg-brand-yellow/20 border border-brand-yellow/20 px-3 py-1 text-xs font-semibold tracking-wide text-brand-yellow">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" /><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" /></svg>
-                                    Parte de: {event.formation_track}
-                                </span>
-                            ) : null}
-                            {!event.specialization_code && event.member_access_type === 'free' && Number(event.price || 0) > 0 && (
-                                <span className="inline-flex items-center gap-1 rounded-full bg-brand-brown/20 px-3 py-1 text-xs font-semibold text-brand-brown">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z" /></svg>
-                                    Incluido para miembros
+                            {event.formation_track && (
+                                <span className="inline-flex items-center gap-1.5 rounded-full border border-brand-yellow/20 bg-brand-yellow/10 px-3 py-1 text-xs font-semibold tracking-wide text-brand-yellow">
+                                    Ruta: {event.formation_track}
                                 </span>
                             )}
                         </div>
 
-                        {/* Title */}
-                        <div className="space-y-3">
-                            <h1 className="max-w-3xl text-3xl font-bold tracking-tight text-white sm:text-4xl lg:text-5xl">
+                        <div className="space-y-4">
+                            <h1 className="max-w-4xl text-3xl font-bold tracking-tight text-white sm:text-4xl lg:text-5xl">
                                 {event.title}
                             </h1>
                             {event.subtitle && (
-                                <p className="max-w-2xl text-lg text-neutral-400 sm:text-xl">{event.subtitle}</p>
+                                <p className="max-w-3xl text-lg leading-relaxed text-neutral-300 sm:text-xl">
+                                    {event.subtitle}
+                                </p>
+                            )}
+                            {event.campaign_problem && (
+                                <p className="max-w-3xl border-l border-brand-yellow/40 pl-4 text-sm leading-relaxed text-neutral-400 sm:text-base">
+                                    {event.campaign_problem}
+                                </p>
                             )}
                         </div>
 
-                        {/* Speakers inline */}
                         {event.speakers?.length > 0 && (
                             <div className="flex flex-wrap items-center gap-4">
                                 {event.speakers.map((item: any) => {
@@ -413,17 +443,18 @@ export function PublicEventLanding({
                                     const name = speaker?.profile?.full_name || 'Ponente'
                                     const avatar = getSpeakerImage(speaker)
                                     const speakerHref = getPublicSpeakerHref(speaker, speakerReturnTo)
-                                    const speakerPreview = (
+
+                                    const content = (
                                         <>
                                             {avatar ? (
                                                 <div
                                                     role="img"
                                                     aria-label={name}
-                                                    className="h-8 w-8 rounded-full bg-cover bg-center ring-2 ring-white/20"
+                                                    className="h-9 w-9 rounded-full bg-cover bg-center ring-2 ring-white/15"
                                                     style={{ backgroundImage: `url("${avatar}")` }}
                                                 />
                                             ) : (
-                                                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-brand-yellow/30 text-xs font-bold text-brand-yellow">
+                                                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-brand-yellow/20 text-sm font-bold text-brand-yellow">
                                                     {name.charAt(0)}
                                                 </div>
                                             )}
@@ -432,19 +463,14 @@ export function PublicEventLanding({
                                                 {speaker?.headline && (
                                                     <p className="text-xs text-neutral-500">{speaker.headline}</p>
                                                 )}
-                                                {speakerHref && (
-                                                    <p className="text-[11px] font-semibold uppercase tracking-wide text-brand-yellow/90">
-                                                        Ver perfil
-                                                    </p>
-                                                )}
                                             </div>
                                         </>
                                     )
 
                                     if (!speakerHref) {
                                         return (
-                                            <div key={item.id} className="flex items-center gap-2.5">
-                                                {speakerPreview}
+                                            <div key={item.id} className="flex items-center gap-3 rounded-full border border-white/10 bg-white/5 px-3 py-2">
+                                                {content}
                                             </div>
                                         )
                                     }
@@ -453,109 +479,78 @@ export function PublicEventLanding({
                                         <Link
                                             key={item.id}
                                             href={speakerHref}
-                                            className="group flex items-center gap-2.5 rounded-full border border-white/10 bg-white/5 px-3 py-2 transition-colors hover:border-brand-yellow/30 hover:bg-white/10"
+                                            className="group flex items-center gap-3 rounded-full border border-white/10 bg-white/5 px-3 py-2 transition-colors hover:border-brand-yellow/30 hover:bg-white/10"
                                         >
-                                            {speakerPreview}
+                                            {content}
                                         </Link>
                                     )
                                 })}
                             </div>
                         )}
 
-                        {/* Info pills */}
-                        <div className="flex flex-wrap gap-3">
-                            <div className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-2.5">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-brand-yellow">
-                                    <rect width="18" height="18" x="3" y="4" rx="2" ry="2" /><line x1="16" x2="16" y1="2" y2="6" /><line x1="8" x2="8" y1="2" y2="6" /><line x1="3" x2="21" y1="10" y2="10" />
-                                </svg>
-                                <span className="text-sm text-neutral-200">{formatEventDate(event.start_time)}</span>
+                        <div className="grid gap-3 sm:grid-cols-3">
+                            <div className="rounded-[22px] border border-white/10 bg-white/[0.04] p-4">
+                                <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-neutral-500">Fecha</p>
+                                <p className="mt-2 text-sm leading-relaxed text-neutral-200">{formatEventDate(event.start_time)}</p>
                             </div>
-                            <div className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-2.5">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-brand-yellow">
-                                    <path d="m22 8-6 4 6 4V8Z" /><rect width="14" height="12" x="2" y="6" rx="2" ry="2" />
-                                </svg>
-                                <span className="text-sm text-neutral-200">{formatLabel}</span>
+                            <div className="rounded-[22px] border border-white/10 bg-white/[0.04] p-4">
+                                <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-neutral-500">Formato</p>
+                                <p className="mt-2 text-sm leading-relaxed text-neutral-200">{formatLabel}</p>
                             </div>
-                            <div className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-2.5">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-brand-yellow">
-                                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" />
-                                </svg>
-                                <span className="text-sm text-neutral-200">{getAudienceLabel(event.target_audience)}</span>
+                            <div className="rounded-[22px] border border-white/10 bg-white/[0.04] p-4">
+                                <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-neutral-500">Dirigido a</p>
+                                <p className="mt-2 text-sm leading-relaxed text-neutral-200">{getAudienceLabel(event.target_audience)}</p>
                             </div>
                         </div>
                     </div>
 
-                    <div className="lg:sticky lg:top-24 lg:self-start">
-                        <div className="overflow-hidden rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm shadow-2xl">
-                            <div className="space-y-5 p-6">
-                                <div>
-                                    <p className="text-xs font-medium uppercase tracking-widest text-neutral-500">Precio</p>
-                                    <p className="mt-1 text-3xl font-bold text-white">
-                                        {finalPrice > 0 ? `$${finalPrice.toFixed(0)} MXN` : 'Gratis'}
+                    <aside className="lg:sticky lg:top-24">
+                        <div className="rounded-[28px] border border-white/10 bg-black/30 p-5 shadow-2xl shadow-black/20 backdrop-blur-sm">
+                            <div>
+                                <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-neutral-500">Inversion</p>
+                                <p className="mt-2 text-3xl font-bold text-white">
+                                    {finalPrice > 0 ? `$${finalPrice.toFixed(0)} MXN` : 'Gratis'}
+                                </p>
+                                {includedBySpecialization && (
+                                    <p className="mt-1 text-sm font-medium text-brand-yellow">
+                                        Incluido por tu especialidad
                                     </p>
-                                    {includedBySpecialization && (
-                                        <p className="mt-1 text-sm font-medium text-brand-brown">
-                                            Incluido por tu especialidad
-                                        </p>
-                                    )}
-                                    {finalPrice > 0 && finalPrice < Number(event.price || 0) && (
-                                        <p className="mt-1 text-sm text-brand-brown font-medium">
-                                            Tienes precio preferencial de miembro
-                                        </p>
-                                    )}
-                                </div>
-
-                                <div className="rounded-xl border border-white/10 bg-white/5 p-3.5 text-sm">
-                                    <p className="font-medium text-white">{memberMessage.label}</p>
-                                    {memberMessage.note && <p className="mt-1.5 text-xs text-neutral-500">{memberMessage.note}</p>}
-                                </div>
-
-                                {event.formation && !Array.isArray(event.formation) && (
-                                    <div className="rounded-xl border border-brand-yellow/20 bg-brand-yellow/10 p-4 text-sm">
-                                        <p className="font-medium text-white">
-                                            Este curso forma parte del diplomado {event.formation.title}.
-                                        </p>
-                                        <p className="mt-1 text-xs text-neutral-400">
-                                            Puedes comprar solo este curso o ver el paquete completo del diplomado.
-                                        </p>
-                                        <Link
-                                            href={`/formaciones/${event.formation.slug}`}
-                                            className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-brand-yellow hover:text-brand-yellow"
-                                        >
-                                            Ver diplomado completo
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                                                <path d="M5 12h14" />
-                                                <path d="m12 5 7 7-7 7" />
-                                            </svg>
-                                        </Link>
-                                    </div>
                                 )}
+                                {finalPrice > 0 && finalPrice < Number(event.price || 0) && (
+                                    <p className="mt-1 text-sm font-medium text-brand-yellow">
+                                        Tienes precio preferencial de miembro
+                                    </p>
+                                )}
+                            </div>
 
+                            <div className="mt-5 rounded-[22px] border border-white/10 bg-white/[0.04] p-4 text-sm">
+                                <p className="font-medium text-white">{memberMessage.label}</p>
+                                {memberMessage.note && <p className="mt-2 leading-relaxed text-neutral-400">{memberMessage.note}</p>}
+                            </div>
+
+                            <div className="mt-5 space-y-3">
                                 {hasAccess ? (
-                                    <div className="space-y-3 pt-2">
+                                    <>
                                         <Link href={`/hub/${event.slug}`}>
                                             <Button className="w-full" size="lg">
                                                 Entrar al hub privado
                                             </Button>
                                         </Link>
-                                        <p className="text-center text-xs text-brand-brown font-medium">
+                                        <p className="text-center text-xs font-medium text-brand-yellow">
                                             Ya tienes acceso a este contenido
                                         </p>
-                                    </div>
+                                    </>
                                 ) : isBlocked ? (
-                                    <div className="space-y-4 pt-2">
-                                        <Button variant="secondary" className="w-full text-base font-semibold py-6 opacity-60 cursor-not-allowed" disabled>
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="mr-2"><circle cx="12" cy="12" r="10" /><line x1="12" x2="12" y1="8" y2="12" /><line x1="12" x2="12.01" y1="16" y2="16" /></svg>
-                                            {isExpired ? 'Este material ya expiro' : 'Cupo Lleno'}
+                                    <>
+                                        <Button variant="secondary" className="w-full cursor-not-allowed py-6 text-base opacity-60" disabled>
+                                            {isExpired ? 'Este material ya expiro' : 'Cupo lleno'}
                                         </Button>
                                         <p className="text-center text-xs text-neutral-500">
-                                            {isExpired 
-                                                ? 'Este acceso ya no esta disponible.'
-                                                : 'Lo sentimos, este evento ya alcanzo su maxima capacidad.'}
+                                            {isExpired ? 'Este acceso ya no esta disponible.' : 'Lo sentimos, este evento ya alcanzo su maxima capacidad.'}
                                         </p>
-                                    </div>
+                                    </>
                                 ) : (
-                                    <div className="space-y-3">
+                                    <>
                                         {!isMembersOnly && (
                                             <PublicAccessCta
                                                 eventId={event.id}
@@ -565,246 +560,166 @@ export function PublicEventLanding({
                                                 requiresPayment={finalPrice > 0}
                                             />
                                         )}
-                                        
+
                                         {showMembershipUpsell && (
                                             <>
                                                 {!isMembersOnly && (
-                                                <div className="relative py-3 flex items-center">
-                                                    <div className="flex-grow border-t border-white/10"></div>
-                                                    <span className="shrink-0 px-3 text-xs text-neutral-500 uppercase tracking-widest">O tambien</span>
-                                                    <div className="flex-grow border-t border-white/10"></div>
-                                                </div>
+                                                    <div className="relative py-2">
+                                                        <div className="absolute inset-x-0 top-1/2 border-t border-white/10" />
+                                                        <span className="relative mx-auto flex w-fit bg-black px-3 text-[10px] uppercase tracking-[0.18em] text-neutral-500">
+                                                            o tambien
+                                                        </span>
+                                                    </div>
                                                 )}
-                                                <Link href={`/precios?next=/eventos/${event.slug}&autoCheckout=true`} className="block w-full">
+                                                <Link href={`/precios?next=/eventos/${event.slug}&autoCheckout=true`}>
                                                     <Button
-                                                        variant={isMembersOnly ? "default" : "outline"}
-                                                        className={`w-full ${isMembersOnly ? 'py-6 text-base shadow-lg' : 'border-primary/20 bg-primary/10 text-primary hover:border-primary/30 hover:bg-primary/15 hover:text-primary'}`}
+                                                        variant={isMembersOnly ? 'default' : 'outline'}
+                                                        className={cn('w-full', isMembersOnly ? 'py-6 text-base' : 'border-brand-yellow/30 text-brand-yellow hover:bg-brand-yellow/10')}
                                                         size="lg"
                                                     >
-                                                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="mr-2"><rect width="18" height="11" x="3" y="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg>
+                                                        {isMembersOnly && <Lock className="h-4 w-4" />}
                                                         {membershipCtaLabel}
                                                     </Button>
                                                 </Link>
                                             </>
                                         )}
-                                    </div>
-                                )}
 
-                                {campaign && (
-                                    <div className="pt-2">
-                                        <CampaignLeadMagnetButton
-                                            campaignKey={campaign.key}
-                                            eventId={event.id}
-                                            eventSlug={event.slug}
-                                            sourceSurface="event_detail"
-                                            triggerLabel="Descargar temario detallado"
-                                            title={`Recibe el temario de ${campaign.title}`}
-                                            description="Te enviaremos el temario del bloque y una recomendacion clara para seguir avanzando dentro de esta ruta."
-                                            className="w-full"
-                                        />
-                                    </div>
-                                )}
-
-                                {!hasAccess && (
-                                    <p className="text-center text-[11px] text-neutral-500 mt-4">
-                                        Ya lo adquiriste?{' '}
-                                        <Link href="/compras/recuperar" className="font-medium text-brand-yellow hover:underline">
-                                            Recupera tu acceso
-                                        </Link>
-                                    </p>
+                                        {campaign && (
+                                            <a href="#campaign-temario">
+                                                <Button variant="outline" className="w-full gap-2">
+                                                    <Download className="h-4 w-4" />
+                                                    Descargar temario
+                                                </Button>
+                                            </a>
+                                        )}
+                                    </>
                                 )}
                             </div>
+
+                            {!hasAccess && (
+                                <p className="mt-4 text-center text-[11px] text-neutral-500">
+                                    Ya lo adquiriste?{' '}
+                                    <Link href="/compras/recuperar" className="font-medium text-brand-yellow hover:underline">
+                                        Recupera tu acceso
+                                    </Link>
+                                </p>
+                            )}
                         </div>
-                    </div>
+                    </aside>
                 </div>
             </section>
 
-            {/* -- CONTENT -- */}
-            <section className="grid gap-8 lg:grid-cols-[1fr_340px]">
+            {campaign && (
+                <CampaignLeadMagnetInline
+                    campaignKey={campaign.key}
+                    eventId={event.id}
+                    eventSlug={event.slug}
+                    sourceSurface="event_detail_inline"
+                    eyebrow="Temario detallado"
+                    title={`Recibe el temario de ${campaign.title}`}
+                    description="Descarga el PDF del bloque, entiende que aprenderas en esta ruta y recibe una recomendacion clara del siguiente evento para seguir avanzando."
+                    sectionId="campaign-temario"
+                />
+            )}
+
+            <section className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_320px]">
                 <div className="space-y-8">
-                    {/* Description */}
                     {event.description && (
-                        <Card className="border-border/50">
-                            <CardHeader>
-                                <CardTitle className="text-xl">Acerca de este evento</CardTitle>
-                            </CardHeader>
-                            <CardContent className="space-y-3 text-muted-foreground leading-relaxed">
+                        <DetailShell title="Acerca de este encuentro" eyebrow="Contexto">
+                            <div className="space-y-3 text-sm leading-relaxed text-neutral-300 md:text-base">
                                 {event.description.split('\n').map((paragraph: string, index: number) => (
                                     <p key={index}>{paragraph}</p>
                                 ))}
-                            </CardContent>
-                        </Card>
+                            </div>
+                        </DetailShell>
                     )}
 
-                    {event.campaign_problem && (
-                        <Card className="border-border/50">
-                            <CardHeader>
-                                <CardTitle className="text-xl">Que problema resuelve este evento?</CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                                <p className="text-sm leading-relaxed text-muted-foreground">
-                                    {event.campaign_problem}
-                                </p>
-                            </CardContent>
-                        </Card>
-                    )}
-
-                    {/* Academic Value */}
                     {(event.ideal_for?.length > 0 || event.learning_outcomes?.length > 0) && (
-                        <Card className="border-border/50">
-                            <CardHeader>
-                                <CardTitle className="text-xl">Valor Academico</CardTitle>
-                            </CardHeader>
-                            <CardContent className="grid gap-8 sm:grid-cols-2">
+                        <DetailShell title="A quien va dirigido y que aprenderas" eyebrow="Valor academico">
+                            <div className="grid gap-8 md:grid-cols-2">
                                 {event.ideal_for?.length > 0 && (
                                     <div className="space-y-4">
-                                        <h4 className="font-semibold text-primary flex items-center gap-2">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M22 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>
-                                            A quien va dirigido?
-                                        </h4>
+                                        <h3 className="text-lg font-semibold text-white">A quien va dirigido</h3>
                                         <ul className="space-y-3">
-                                            {event.ideal_for.map((item: string, i: number) => (
-                                                <li key={i} className="flex items-start text-sm text-foreground">
-                                                    <svg className="mr-2 h-4 w-4 shrink-0 text-brand-brown mt-0.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
-                                                    <span className="leading-snug">{item}</span>
+                                            {event.ideal_for.map((item: string) => (
+                                                <li key={item} className="flex items-start gap-3 text-sm leading-relaxed text-neutral-300">
+                                                    <span className="mt-1 flex h-5 w-5 items-center justify-center rounded-full bg-brand-yellow/10 text-brand-yellow">
+                                                        <Check className="h-3 w-3" />
+                                                    </span>
+                                                    <span>{item}</span>
                                                 </li>
                                             ))}
                                         </ul>
                                     </div>
                                 )}
+
                                 {event.learning_outcomes?.length > 0 && (
                                     <div className="space-y-4">
-                                        <h4 className="font-semibold text-brand-yellow flex items-center gap-2">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m12 14 4-4" /><path d="M3.34 19a10 10 0 1 1 17.32 0" /></svg>
-                                            Que aprenderas?
-                                        </h4>
+                                        <h3 className="text-lg font-semibold text-white">Que aprenderas</h3>
                                         <ul className="space-y-3">
-                                            {event.learning_outcomes.map((item: string, i: number) => (
-                                                <li key={i} className="flex items-start text-sm text-foreground">
-                                                    <svg className="mr-2 h-4 w-4 shrink-0 text-brand-yellow mt-0.5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
-                                                    <span className="leading-snug">{item}</span>
+                                            {event.learning_outcomes.map((item: string) => (
+                                                <li key={item} className="flex items-start gap-3 text-sm leading-relaxed text-neutral-300">
+                                                    <span className="mt-1 flex h-5 w-5 items-center justify-center rounded-full bg-white/10 text-brand-yellow">
+                                                        <ArrowRight className="h-3 w-3" />
+                                                    </span>
+                                                    <span>{item}</span>
                                                 </li>
                                             ))}
                                         </ul>
                                     </div>
                                 )}
-                            </CardContent>
-                        </Card>
-                    )}
-
-                    {/* What you'll get */}
-                    <Card className="border-border/50">
-                        <CardHeader>
-                            <CardTitle className="text-xl">Que incluye?</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="grid gap-3 sm:grid-cols-2">
-                                {[
-                                    { icon: '+', title: 'Acceso completo', desc: 'Link exclusivo al evento y sus materiales' },
-                                    { icon: '+', title: 'Acceso por correo', desc: 'Inicia sin cuenta. Recupera tu acceso cuando quieras' },
-                                    ...(event.certificate_type && event.certificate_type !== 'none' ? [{
-                                        icon: '+',
-                                        title: event.certificate_type === 'completion' ? 'Diploma de finalizacion' : event.certificate_type === 'specialized' ? 'Acreditacion Especializada' : 'Constancia por asistencia',
-                                        desc: 'Documento acreditativo'
-                                    }] : []),
-                                    ...(event.included_resources?.length > 0 ? [{
-                                        icon: '+',
-                                        title: 'Recursos extra',
-                                        desc: `${event.included_resources.length} materiales descargables`
-                                    }] : []),
-                                    ...(Number(event.price || 0) > 0 ? [
-                                        { icon: '+', title: 'Pago seguro', desc: 'Procesado de forma segura con Stripe' }
-                                    ] : []),
-                                ].map((item) => (
-                                    <div key={item.title} className="flex gap-3 rounded-xl border border-border/40 bg-muted/30 p-3.5">
-                                        <span className="text-lg">{item.icon}</span>
-                                        <div>
-                                            <p className="text-sm font-medium">{item.title}</p>
-                                            <p className="mt-0.5 text-xs text-muted-foreground">{item.desc}</p>
-                                        </div>
-                                    </div>
-                                ))}
                             </div>
-                        </CardContent>
-                    </Card>
-
-                    {hasAccess && materialLinks.length > 0 && (
-                        <Card className="border-border/50">
-                            <CardHeader>
-                                <CardTitle className="text-xl">Materiales del Evento</CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                                <div className="space-y-3">
-                                    {materialLinks.map((item: any) => (
-                                        <div key={item.id || item.url} className="flex flex-col gap-3 rounded-xl border border-border/40 bg-muted/30 p-4 sm:flex-row sm:items-center sm:justify-between">
-                                            <div>
-                                                <p className="text-sm font-medium">{item.title}</p>
-                                                <p className="mt-1 text-xs text-muted-foreground">
-                                                    {item.type === 'presentation' ? 'Presentacion' :
-                                                        item.type === 'document' ? 'Documento' :
-                                                            item.type === 'folder' ? 'Carpeta' :
-                                                                item.type === 'download' ? 'Descarga' : 'Enlace externo'}
-                                                </p>
-                                            </div>
-                                            <Button asChild variant="outline" className="shrink-0">
-                                                <a href={item.url} target="_blank" rel="noopener noreferrer">
-                                                    Abrir material
-                                                </a>
-                                            </Button>
-                                        </div>
-                                    ))}
-                                </div>
-                            </CardContent>
-                        </Card>
+                        </DetailShell>
                     )}
 
-                    {/* Speakers section */}
+                    <DetailShell title="Que incluye tu acceso" eyebrow="Acceso">
+                        <div className="grid gap-3 md:grid-cols-2">
+                            {valueItems.map((item) => (
+                                <div key={item.title} className="rounded-[22px] border border-white/10 bg-black/20 p-4">
+                                    <p className="text-sm font-semibold text-white">{item.title}</p>
+                                    <p className="mt-2 text-sm leading-relaxed text-neutral-400">{item.description}</p>
+                                </div>
+                            ))}
+                        </div>
+                    </DetailShell>
+
                     {event.speakers?.length > 0 && (
-                        <Card className="border-border/50">
-                            <CardHeader>
-                                <CardTitle className="text-xl">Ponentes</CardTitle>
-                            </CardHeader>
-                            <CardContent className="grid gap-4 sm:grid-cols-2">
+                        <DetailShell title="Ponentes" eyebrow="Docencia">
+                            <div className="grid gap-4 md:grid-cols-2">
                                 {event.speakers.map((item: any) => {
                                     const speaker = item.speaker
                                     const name = speaker?.profile?.full_name || 'Ponente'
                                     const avatar = getSpeakerImage(speaker)
                                     const speakerHref = getPublicSpeakerHref(speaker, speakerReturnTo)
-                                    const specialties = Array.isArray(speaker?.specialties)
-                                        ? speaker.specialties.filter(Boolean).slice(0, 3)
-                                        : []
-                                    const credentials = Array.isArray(speaker?.credentials)
-                                        ? speaker.credentials.filter(Boolean).slice(0, 2)
-                                        : []
-                                    const speakerCard = (
+                                    const specialties = Array.isArray(speaker?.specialties) ? speaker.specialties.filter(Boolean).slice(0, 3) : []
+                                    const credentials = Array.isArray(speaker?.credentials) ? speaker.credentials.filter(Boolean).slice(0, 2) : []
+
+                                    const content = (
                                         <>
                                             {avatar ? (
                                                 <div
                                                     role="img"
                                                     aria-label={name}
-                                                    className="h-12 w-12 rounded-full bg-cover bg-center ring-2 ring-border"
+                                                    className="h-14 w-14 rounded-full bg-cover bg-center ring-2 ring-white/15"
                                                     style={{ backgroundImage: `url("${avatar}")` }}
                                                 />
                                             ) : (
-                                                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-brand-yellow text-sm font-bold text-brand-yellow">
+                                                <div className="flex h-14 w-14 items-center justify-center rounded-full bg-brand-yellow/20 text-lg font-bold text-brand-yellow">
                                                     {name.charAt(0)}
                                                 </div>
                                             )}
                                             <div className="min-w-0 flex-1 space-y-3">
                                                 <div>
-                                                    <p className="font-medium">{name}</p>
+                                                    <p className="font-medium text-white">{name}</p>
                                                     {speaker?.headline && (
-                                                        <p className="mt-0.5 text-sm text-muted-foreground">{speaker.headline}</p>
+                                                        <p className="mt-1 text-sm text-neutral-500">{speaker.headline}</p>
                                                     )}
                                                 </div>
 
                                                 {specialties.length > 0 && (
                                                     <div className="flex flex-wrap gap-2">
                                                         {specialties.map((specialty: string) => (
-                                                            <span
-                                                                key={specialty}
-                                                                className="inline-flex rounded-full bg-background px-2.5 py-1 text-[11px] font-medium text-muted-foreground"
-                                                            >
+                                                            <span key={specialty} className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[11px] font-medium text-neutral-300">
                                                                 {specialty}
                                                             </span>
                                                         ))}
@@ -814,21 +729,11 @@ export function PublicEventLanding({
                                                 {credentials.length > 0 && (
                                                     <div className="space-y-1.5">
                                                         {credentials.map((credential: string) => (
-                                                            <p key={credential} className="line-clamp-2 text-sm text-muted-foreground">
+                                                            <p key={credential} className="text-sm leading-relaxed text-neutral-400">
                                                                 {credential}
                                                             </p>
                                                         ))}
                                                     </div>
-                                                )}
-
-                                                {speakerHref && (
-                                                    <span className="inline-flex items-center gap-1 text-sm font-medium text-brand-yellow">
-                                                        Ver perfil completo
-                                                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                                                            <path d="M5 12h14" />
-                                                            <path d="m12 5 7 7-7 7" />
-                                                        </svg>
-                                                    </span>
                                                 )}
                                             </div>
                                         </>
@@ -836,8 +741,8 @@ export function PublicEventLanding({
 
                                     if (!speakerHref) {
                                         return (
-                                            <div key={item.id} className="flex items-start gap-3.5 rounded-xl border border-border/40 bg-muted/30 p-4">
-                                                {speakerCard}
+                                            <div key={item.id} className="flex items-start gap-4 rounded-[24px] border border-white/10 bg-black/20 p-4">
+                                                {content}
                                             </div>
                                         )
                                     }
@@ -846,100 +751,127 @@ export function PublicEventLanding({
                                         <Link
                                             key={item.id}
                                             href={speakerHref}
-                                            className="group flex h-full items-start gap-3.5 rounded-xl border border-border/40 bg-muted/30 p-4 transition-colors hover:border-brand-yellow/30 hover:bg-muted/50"
+                                            className="group flex items-start gap-4 rounded-[24px] border border-white/10 bg-black/20 p-4 transition-colors hover:border-brand-yellow/30 hover:bg-black/30"
                                         >
-                                            {speakerCard}
+                                            {content}
                                         </Link>
                                     )
                                 })}
-                            </CardContent>
-                        </Card>
+                            </div>
+                        </DetailShell>
                     )}
 
-                    {/* FAQ */}
-                    <Card className="border-border/50">
-                        <CardHeader>
-                            <CardTitle className="text-xl">Preguntas frecuentes</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <FaqAccordion items={faqItems} />
-                        </CardContent>
-                    </Card>
-                </div>
-
-                {/* Sidebar */}
-                <div className="space-y-6 lg:sticky lg:top-24 lg:self-start">
-                    {/* For members */}
-                    <Card className="border-border/50 bg-gradient-to-br from-brand-yellow/50 to-brand-dark/30 dark:from-brand-yellow/30 dark:to-brand-dark/20">
-                        <CardHeader>
-                            <CardTitle className="flex items-center gap-2 text-base">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-brand-yellow"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z" /></svg>
-                                Para miembros
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-3 text-sm text-muted-foreground">
-                            <p>La membresia potencia tu acceso con ahorro acumulado y contenido preferencial.</p>
-                            <ul className="space-y-1.5 text-sm">
-                                <li className="flex items-start gap-2">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="mt-0.5 shrink-0 text-brand-yellow"><polyline points="20 6 9 17 4 12" /></svg>
-                                    Acceso incluido o precio preferencial
-                                </li>
-                                <li className="flex items-start gap-2">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="mt-0.5 shrink-0 text-brand-yellow"><polyline points="20 6 9 17 4 12" /></svg>
-                                    Acceso preferencial a encuentros y contenidos
-                                </li>
-                                <li className="flex items-start gap-2">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="mt-0.5 shrink-0 text-brand-yellow"><polyline points="20 6 9 17 4 12" /></svg>
-                                    Comunidad y networking exclusivo
-                                </li>
-                            </ul>
-                            <Link href="/precios" className="inline-flex items-center gap-1 text-sm font-medium text-brand-yellow hover:text-brand-yellow">
-                                Ver planes
-                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14" /><path d="m12 5 7 7-7 7" /></svg>
-                            </Link>
-                        </CardContent>
-                    </Card>
-
-                    {/* Related */}
-                    {relatedEvents.length > 0 && (
-                        <Card className="border-border/50">
-                            <CardHeader>
-                                <CardTitle className="text-base">
-                                    {campaign ? 'Eventos relacionados de esta ruta' : 'Tambien te puede interesar'}
-                                </CardTitle>
-                            </CardHeader>
-                            <CardContent className="space-y-3">
-                                {relatedEvents.map((item) => (
-                                    <Link
-                                        key={item.id}
-                                        href={getPublicEventPath(item)}
-                                        className="group flex items-start gap-3 rounded-xl border border-border/40 p-3 transition-colors hover:bg-muted/50"
-                                    >
-                                        {item.image_url ? (
-                                            <div
-                                                role="img"
-                                                aria-label={item.title}
-                                                className="h-12 w-12 shrink-0 rounded-lg bg-cover bg-center"
-                                                style={{ backgroundImage: `url("${item.image_url}")` }}
-                                            />
-                                        ) : (
-                                            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-muted">
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-muted-foreground"><rect width="18" height="18" x="3" y="4" rx="2" ry="2" /><line x1="16" x2="16" y1="2" y2="6" /><line x1="8" x2="8" y1="2" y2="6" /><line x1="3" x2="21" y1="10" y2="10" /></svg>
-                                            </div>
-                                        )}
+                    {hasAccess && materialLinks.length > 0 && (
+                        <DetailShell title="Materiales del evento" eyebrow="Materiales">
+                            <div className="space-y-3">
+                                {materialLinks.map((item: any) => (
+                                    <div key={item.id || item.url} className="flex flex-col gap-3 rounded-[22px] border border-white/10 bg-black/20 p-4 md:flex-row md:items-center md:justify-between">
                                         <div>
-                                            <p className="text-sm font-medium group-hover:text-brand-yellow transition-colors">{item.title}</p>
-                                            <p className="mt-0.5 text-xs text-muted-foreground">
-                                                {Number(item.price || 0) > 0 ? `$${Number(item.price).toFixed(0)} MXN` : 'Gratis'}
+                                            <p className="text-sm font-medium text-white">{item.title}</p>
+                                            <p className="mt-1 text-xs text-neutral-500">
+                                                {item.type === 'presentation' ? 'Presentacion' :
+                                                    item.type === 'document' ? 'Documento' :
+                                                        item.type === 'folder' ? 'Carpeta' :
+                                                            item.type === 'download' ? 'Descarga' : 'Enlace externo'}
                                             </p>
                                         </div>
-                                    </Link>
+                                        <Button asChild variant="outline" className="shrink-0">
+                                            <a href={item.url} target="_blank" rel="noopener noreferrer">
+                                                Abrir material
+                                            </a>
+                                        </Button>
+                                    </div>
                                 ))}
-                            </CardContent>
-                        </Card>
+                            </div>
+                        </DetailShell>
                     )}
+
+                    <DetailShell title="Preguntas frecuentes" eyebrow="FAQ">
+                        <FaqAccordion items={faqItems} />
+                    </DetailShell>
                 </div>
+
+                <aside className="space-y-6 xl:sticky xl:top-24 xl:self-start">
+                    {event.formation && !Array.isArray(event.formation) && (
+                        <DetailShell title="Parte de una ruta mayor" eyebrow="Formacion" className="p-5">
+                            <p className="text-sm leading-relaxed text-neutral-300">
+                                Este encuentro forma parte de {event.formation.title}. Puedes tomarlo por separado o revisar la ruta completa.
+                            </p>
+                            <Link href={`/formaciones/${event.formation.slug}`} className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-brand-yellow hover:text-brand-yellow">
+                                Ver diplomado completo
+                                <ArrowRight className="h-4 w-4" />
+                            </Link>
+                        </DetailShell>
+                    )}
+
+                    <DetailShell title="Para miembros" eyebrow="Comunidad" className="p-5">
+                        <div className="space-y-3 text-sm leading-relaxed text-neutral-300">
+                            <p>La membresia potencia tu acceso con ahorro acumulado y una entrada mas continua a eventos, contenidos y networking.</p>
+                            <ul className="space-y-2">
+                                <li className="flex items-start gap-2">
+                                    <Check className="mt-0.5 h-4 w-4 shrink-0 text-brand-yellow" />
+                                    Acceso incluido o precio preferencial cuando aplica.
+                                </li>
+                                <li className="flex items-start gap-2">
+                                    <Check className="mt-0.5 h-4 w-4 shrink-0 text-brand-yellow" />
+                                    Comunidad y networking con colegas del ecosistema.
+                                </li>
+                                <li className="flex items-start gap-2">
+                                    <Check className="mt-0.5 h-4 w-4 shrink-0 text-brand-yellow" />
+                                    Continuidad entre academia, rutas y experiencias en vivo.
+                                </li>
+                            </ul>
+                            <Link href="/precios" className="inline-flex items-center gap-2 text-sm font-medium text-brand-yellow hover:text-brand-yellow">
+                                Ver planes
+                                <ArrowRight className="h-4 w-4" />
+                            </Link>
+                        </div>
+                    </DetailShell>
+                </aside>
             </section>
+
+            {relatedEvents.length > 0 && (
+                <DetailShell
+                    title={campaign ? 'Eventos relacionados de esta ruta' : 'Tambien te puede interesar'}
+                    eyebrow={campaign ? 'Agenda relacionada' : 'Siguiente paso'}
+                >
+                    <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+                        {relatedEvents.map((item) => (
+                            <PublicCatalogCard key={item.id} event={item} fixedLayout />
+                        ))}
+                    </div>
+                </DetailShell>
+            )}
+
+            {!isBlocked && (
+                <div className="fixed inset-x-0 bottom-3 z-40 px-3 lg:hidden">
+                    <div className="mx-auto flex max-w-xl items-center gap-3 rounded-[22px] border border-white/10 bg-black/85 p-3 shadow-2xl shadow-black/30 backdrop-blur-md">
+                        <div className="min-w-0 flex-1">
+                            {hasAccess ? (
+                                <Link href={`/hub/${event.slug}`} className="block">
+                                    <Button className="w-full">Entrar al hub</Button>
+                                </Link>
+                            ) : (
+                                <PublicAccessCta
+                                    eventId={event.id}
+                                    eventSlug={event.slug}
+                                    title={event.title}
+                                    label={finalPrice > 0 ? ctaLabel : 'Recibir acceso gratis'}
+                                    requiresPayment={finalPrice > 0}
+                                />
+                            )}
+                        </div>
+                        {campaign && (
+                            <a href="#campaign-temario" className="shrink-0">
+                                <Button variant="outline" className="gap-2">
+                                    <Download className="h-4 w-4" />
+                                    Temario
+                                </Button>
+                            </a>
+                        )}
+                    </div>
+                </div>
+            )}
         </div>
     )
 }
