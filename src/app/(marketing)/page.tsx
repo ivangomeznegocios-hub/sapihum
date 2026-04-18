@@ -2,6 +2,7 @@ import Link from "next/link"
 import Image from "next/image"
 import { BrandWordmark } from "@/components/brand/brand-wordmark"
 import { EventCampaignSpotlight } from "@/components/catalog/event-campaign-spotlight"
+import { PublicCatalogCard } from "@/components/catalog/public-catalog-card"
 import { Button } from "@/components/ui/button"
 import { splitPublicCatalogEvents } from "@/lib/events/public"
 import { getMarketingSpecializations, getSpecializationByCode } from "@/lib/specializations"
@@ -197,6 +198,19 @@ function formatHours(value: number | null | undefined) {
   return Number.isInteger(hours) ? `${hours} horas` : `${hours.toFixed(1)} horas`
 }
 
+function getHomeFeaturedEvents(upcomingEvents: any[], campaigns: Array<{ campaign: any; events: any[] }>) {
+  const seen = new Set<string>()
+  const prioritizedEvents = campaigns.flatMap(({ events }) => events)
+
+  return [...prioritizedEvents, ...upcomingEvents]
+    .filter((event) => {
+      if (!event?.slug || seen.has(event.slug)) return false
+      seen.add(event.slug)
+      return true
+    })
+    .slice(0, 4)
+}
+
 export default async function LandingPage() {
   const [allEvents, formations, featuredSpeakers] = await Promise.all([
     getUnifiedCatalogEvents(),
@@ -210,6 +224,8 @@ export default async function LandingPage() {
       campaign,
       events: getCampaignEventsFromCatalog(upcomingEvents, campaign),
     }))
+    .filter(({ events }) => events.length > 0)
+  const featuredUpcomingEvents = getHomeFeaturedEvents(upcomingEvents, campaignSpotlights)
   const featuredFormations = formations.slice(0, 2)
 
   return (
@@ -628,7 +644,7 @@ export default async function LandingPage() {
         </section>
       )}
 
-      {campaignSpotlights.length > 0 && (
+      {(campaignSpotlights.length > 0 || featuredUpcomingEvents.length > 0) && (
         <section className="w-full py-32 bg-background border-b border-white/[0.06]">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between mb-16">
@@ -640,7 +656,7 @@ export default async function LandingPage() {
                   Rutas activas ahora
                 </h2>
                 <p className="mt-3 text-muted-foreground font-light">
-                  Dos entradas curadas para llegar a la agenda con más sentido comercial, mejor narrativa y una derivación más clara hacia Academia.
+                  Dos entradas curadas para orientar mejor al usuario y, justo debajo, una agenda visible con los eventos que estamos impulsando en este momento.
                 </p>
               </div>
               <Link href="/academia" className="shrink-0">
@@ -651,17 +667,53 @@ export default async function LandingPage() {
               </Link>
             </div>
 
-            <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-              {campaignSpotlights.map(({ campaign, events }) => (
-                <EventCampaignSpotlight
-                  key={campaign.key}
-                  campaign={campaign}
-                  events={events}
-                  sourceSurface="home_academia_routes"
-                  variant="home"
-                />
-              ))}
-            </div>
+            {campaignSpotlights.length > 0 && (
+              <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+                {campaignSpotlights.map(({ campaign, events }) => (
+                  <EventCampaignSpotlight
+                    key={campaign.key}
+                    campaign={campaign}
+                    events={events}
+                    sourceSurface="home_academia_routes"
+                    variant="home"
+                  />
+                ))}
+              </div>
+            )}
+
+            {featuredUpcomingEvents.length > 0 && (
+              <div className="mt-16 border-t border-white/[0.08] pt-16">
+                <div className="mb-10 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+                  <div className="max-w-3xl">
+                    <p className="text-[10px] font-bold text-[#f6ae02] uppercase tracking-[0.2em] mb-4">
+                      Próximos en la Academia
+                    </p>
+                    <h3 className="text-2xl md:text-3xl font-bold tracking-tight text-white">
+                      Eventos visibles desde inicio
+                    </h3>
+                    <p className="mt-3 text-muted-foreground font-light">
+                      La home conserva la agenda a la vista para quien ya viene listo para elegir un evento concreto, sin quitar la nueva lectura por rutas.
+                    </p>
+                  </div>
+                  <Link href="/academia" className="shrink-0">
+                    <Button variant="ghost" className="gap-2 font-bold uppercase text-[10px] tracking-[0.1em]">
+                      Ver agenda completa
+                      <ArrowRight className="h-4 w-4" />
+                    </Button>
+                  </Link>
+                </div>
+
+                <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
+                  {featuredUpcomingEvents.map((event) => (
+                    <PublicCatalogCard
+                      key={event.id}
+                      event={event}
+                      fixedLayout
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </section>
       )}
