@@ -1,5 +1,8 @@
 import { createServerClient } from '@supabase/ssr'
+import type { User } from '@supabase/supabase-js'
 import { cookies } from 'next/headers'
+import { cache } from 'react'
+import { getCommercialAccessContext, type CommercialAccessSnapshot } from '@/lib/access/commercial'
 import type { Profile, UserRole, Database } from '@/types/database'
 
 export async function createClient() {
@@ -27,6 +30,19 @@ export async function createClient() {
             },
         }
     )
+}
+
+type ServerSupabaseClient = Awaited<ReturnType<typeof createClient>>
+
+export interface ViewerContext {
+    supabase: ServerSupabaseClient
+    user: User | null
+    profile: Profile | null
+    role: UserRole | null
+    profileMembershipLevel: number
+    membershipLevel: number
+    membershipSpecializationCode: Profile['membership_specialization_code']
+    commercialAccess: CommercialAccessSnapshot | null
 }
 
 export async function createAdminClient() {
@@ -62,23 +78,14 @@ export async function createAdminClient() {
     )
 }
 
-/**
- * Get the current user's profile from the database
- * Returns null if user is not authenticated or profile doesn't exist
- */
-export async function getUserProfile(): Promise<Profile | null> {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-
-    if (!user) {
-        return null
-    }
-
-
+async function getProfileByUserId(
+    supabase: ServerSupabaseClient,
+    userId: string
+): Promise<Profile | null> {
     const { data, error } = await supabase
         .from('profiles')
         .select('*')
-        .eq('id', user.id)
+        .eq('id', userId)
         .maybeSingle()
 
     if (error) {
@@ -87,7 +94,7 @@ export async function getUserProfile(): Promise<Profile | null> {
             message: error.message,
             details: error.details,
             hint: error.hint,
-            userId: user.id
+            userId,
         })
 
         throw new Error(
@@ -99,13 +106,79 @@ export async function getUserProfile(): Promise<Profile | null> {
     return data as Profile | null
 }
 
+const getBaseViewerContext = cache(async () => {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) {
+        return {
+            supabase,
+            user: null,
+            profile: null,
+            role: null,
+            profileMembershipLevel: 0,
+            membershipSpecializationCode: null,
+        }
+    }
+
+    const profile = await getProfileByUserId(supabase, user.id)
+
+    return {
+        supabase,
+        user,
+        profile,
+        role: profile?.role ?? null,
+        profileMembershipLevel: Number(profile?.membership_level ?? 0),
+        membershipSpecializationCode: profile?.membership_specialization_code ?? null,
+    }
+})
+
+const getViewerContextCached = cache(async (includeCommercialAccess: boolean): Promise<ViewerContext> => {
+    const base = await getBaseViewerContext()
+
+    if (!includeCommercialAccess || !base.user || !base.profile) {
+        return {
+            ...base,
+            membershipLevel: base.profileMembershipLevel,
+            commercialAccess: null,
+        }
+    }
+
+    const commercialAccess = await getCommercialAccessContext({
+        supabase: base.supabase,
+        userId: base.user.id,
+        profile: base.profile,
+    })
+
+    return {
+        ...base,
+        membershipLevel: commercialAccess?.membershipLevel ?? base.profileMembershipLevel,
+        commercialAccess,
+    }
+})
+
+export async function getViewerContext(options?: {
+    includeCommercialAccess?: boolean
+}): Promise<ViewerContext> {
+    return getViewerContextCached(Boolean(options?.includeCommercialAccess))
+}
+
+/**
+ * Get the current user's profile from the database
+ * Returns null if user is not authenticated or profile doesn't exist
+ */
+export async function getUserProfile(): Promise<Profile | null> {
+    const viewer = await getViewerContext()
+    return viewer.profile
+}
+
 /**
  * Get the current user's role
  * Returns null if user is not authenticated
  */
 export async function getUserRole(): Promise<UserRole | null> {
-    const profile = await getUserProfile()
-    return profile?.role ?? null
+    const viewer = await getViewerContext()
+    return viewer.role
 }
 
 /**
@@ -142,8 +215,8 @@ export async function isPatient(): Promise<boolean> {
  * Returns 0 (free tier) if user is not authenticated
  */
 export async function getUserMembershipLevel(): Promise<number> {
-    const profile = await getUserProfile()
-    return profile?.membership_level ?? 0
+    const viewer = await getViewerContext()
+    return viewer.profileMembershipLevel
 }
 
 /**

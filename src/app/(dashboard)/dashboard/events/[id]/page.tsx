@@ -755,6 +755,8 @@ export default async function EventDetailPage({ params }: PageProps) {
                                 recordingUrl={event.recording_url}
                                 eventTitle={event.title}
                                 isEmbeddable={event.is_embeddable !== false}
+                                speakerRef={eventSpeakers[0]?.speaker_id ? `speaker:${eventSpeakers[0].speaker_id}` : null}
+                                campaignName={event.formation_track || event.slug}
                             />
                         </CardContent>
                     </Card>

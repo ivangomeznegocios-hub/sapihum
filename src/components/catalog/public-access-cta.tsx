@@ -14,6 +14,7 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog'
+import { collectAnalyticsEvent, getClientAnalyticsContext } from '@/lib/analytics/client'
 
 interface PublicAccessCtaProps {
     eventId: string
@@ -46,6 +47,7 @@ export function PublicAccessCta({
         setLoading(true)
         setError(null)
         setStatusMessage(null)
+        const analyticsContext = getClientAnalyticsContext({ funnel: 'event' })
 
         try {
             const endpoint = requiresPayment ? '/api/payments/checkout' : '/api/events/public-access'
@@ -53,10 +55,12 @@ export function PublicAccessCta({
                 ? {
                     purchaseType: 'event_purchase',
                     eventId,
+                    analyticsContext,
                     ...(withGuestDetails ? { email, fullName, successPath: `/compras/exito?slug=${eventSlug}` } : {}),
                 }
                 : {
                     eventId,
+                    analyticsContext,
                     ...(withGuestDetails ? { email, fullName } : {}),
                 }
 
@@ -70,6 +74,16 @@ export function PublicAccessCta({
             if (!response.ok) {
                 if (response.status === 401 || data.requiresGuestDetails) {
                     setDialogOpen(true)
+                    await collectAnalyticsEvent('form_start', {
+                        properties: {
+                            formName: requiresPayment ? 'event_checkout_guest_details' : 'event_public_access_guest_details',
+                            eventId,
+                            eventSlug,
+                        },
+                        touch: {
+                            funnel: 'event',
+                        },
+                    }).catch(() => undefined)
                     return
                 }
 
@@ -108,11 +122,34 @@ export function PublicAccessCta({
     }
 
     async function handlePrimaryAction() {
+        await collectAnalyticsEvent('cta_clicked', {
+            properties: {
+                ctaLabel: label,
+                ctaType: requiresPayment ? 'event_checkout' : 'event_access',
+                eventId,
+                eventSlug,
+                ctaSurface: 'public_event_hero',
+            },
+            touch: {
+                funnel: 'event',
+            },
+        }).catch(() => undefined)
+
         await runRequest(false)
     }
 
     async function handleGuestSubmit(event: React.FormEvent) {
         event.preventDefault()
+        await collectAnalyticsEvent('form_submit', {
+            properties: {
+                formName: requiresPayment ? 'event_checkout_guest_details' : 'event_public_access_guest_details',
+                eventId,
+                eventSlug,
+            },
+            touch: {
+                funnel: 'event',
+            },
+        }).catch(() => undefined)
         await runRequest(true)
     }
 

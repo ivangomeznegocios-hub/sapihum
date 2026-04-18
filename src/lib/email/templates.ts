@@ -233,3 +233,58 @@ export function buildGuestAccessEmail(params: {
     `)
     return { subject, html }
 }
+
+export function buildCampaignLeadMagnetEmail(params: {
+    userName: string
+    campaignTitle: string
+    temarioUrl: string
+    primaryEventTitle: string
+    primaryEventUrl: string
+    relatedEvents: Array<{ title: string; url: string }>
+}) {
+    const subject = `Temario listo: ${params.campaignTitle}`
+    const relatedEventsHtml = params.relatedEvents
+        .slice(0, 3)
+        .map((event) => (
+            `<li style="margin:0 0 10px;color:${TEXT_COLOR};">` +
+            `<a href="${event.url}" style="color:${BRAND_COLOR};text-decoration:none;font-weight:600;">${event.title}</a>` +
+            `</li>`
+        ))
+        .join('')
+
+    const html = baseLayout(`
+        <h1 style="margin:0 0 8px;font-size:24px;color:${TEXT_COLOR};">Tu temario ya esta listo</h1>
+        <p style="margin:0 0 20px;font-size:15px;color:${MUTED_COLOR};line-height:1.6;">
+            Hola ${params.userName}, aqui tienes el temario del bloque <strong style="color:${TEXT_COLOR};">${params.campaignTitle}</strong>.
+        </p>
+        <div style="margin:0 0 20px;padding:18px 20px;background:${BG_COLOR};border-radius:12px;border:1px solid #e2e8f0;">
+            <p style="margin:0 0 8px;font-size:13px;font-weight:700;color:${TEXT_COLOR};text-transform:uppercase;letter-spacing:0.08em;">
+                Recomendacion principal
+            </p>
+            <p style="margin:0;font-size:15px;color:${TEXT_COLOR};line-height:1.6;">
+                Si quieres avanzar hoy mismo, empieza por <strong>${params.primaryEventTitle}</strong>.
+            </p>
+        </div>
+        ${ctaButton(params.temarioUrl, 'Descargar temario ->')}
+        <div style="margin:20px 0 0;text-align:center;">
+            <a href="${params.primaryEventUrl}" style="color:${BRAND_COLOR};font-weight:600;text-decoration:none;">
+                Ver evento recomendado
+            </a>
+        </div>
+        ${relatedEventsHtml ? `
+        <div style="margin:28px 0 0;">
+            <p style="margin:0 0 12px;font-size:13px;font-weight:700;color:${TEXT_COLOR};text-transform:uppercase;letter-spacing:0.08em;">
+                Eventos relacionados de esta ruta
+            </p>
+            <ul style="margin:0;padding-left:18px;font-size:14px;line-height:1.6;color:${MUTED_COLOR};">
+                ${relatedEventsHtml}
+            </ul>
+        </div>
+        ` : ''}
+        <p style="margin:18px 0 0;font-size:12px;color:${MUTED_COLOR};line-height:1.6;text-align:center;">
+            Si aun no decides comprar o registrarte, guarda este correo y vuelve cuando quieras. Tu interes ya quedo registrado.
+        </p>
+    `)
+
+    return { subject, html }
+}

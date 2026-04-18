@@ -3,21 +3,38 @@ import type {
     Event,
     EventInsert,
     EventWithRegistration,
-    EventRegistration
+    EventRegistration,
+    Profile,
 } from '@/types/database'
 import { getPublicCatalogKindForEvent } from '@/lib/events/public'
 import { getUniqueEventAccessCount, getUniqueEventAccessCounts } from '@/lib/events/attendance'
-import { audienceAllowsAccess, getCommercialAccessContext } from '@/lib/access/commercial'
+import { audienceAllowsAccess, getCommercialAccessContext, type CommercialAccessSnapshot } from '@/lib/access/commercial'
 import { canViewerSeeCatalogEvent } from '@/lib/access/catalog'
 
+interface EventViewerOptions {
+    supabase?: any
+    userId?: string | null
+    profile?: Pick<
+        Profile,
+        'id' | 'role' | 'email' | 'membership_level' | 'subscription_status' | 'membership_specialization_code'
+    > | null
+    commercialAccess?: CommercialAccessSnapshot | null
+}
 
 
 /**
  * Get events with user's registration status
  */
-export async function getEventsWithRegistration(): Promise<EventWithRegistration[]> {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+export async function getEventsWithRegistration(
+    options?: EventViewerOptions
+): Promise<EventWithRegistration[]> {
+    const supabase = options?.supabase ?? await createClient()
+    let userId = options?.userId ?? options?.profile?.id ?? null
+
+    if (userId === null && options?.userId === undefined && !options?.profile) {
+        const { data: { user } } = await supabase.auth.getUser()
+        userId = user?.id ?? null
+    }
 
     // Get upcoming events
     const { data: events, error: eventsError } = await (supabase
@@ -33,11 +50,15 @@ export async function getEventsWithRegistration(): Promise<EventWithRegistration
 
     // Get user's registrations
     const eventIds = events.map((e: any) => e.id)
-    const { data: registrations } = user
+    if (eventIds.length === 0) {
+        return []
+    }
+
+    const { data: registrations } = userId
         ? await (supabase
             .from('event_registrations') as any)
             .select('*')
-            .eq('user_id', user.id)
+            .eq('user_id', userId)
             .in('event_id', eventIds)
         : { data: [] }
 
@@ -61,23 +82,25 @@ export async function getEventsWithRegistration(): Promise<EventWithRegistration
         attendee_count: attendeeCounts[event.id] || 0
     })) as EventWithRegistration[]
 
-    if (!user) {
+    if (!userId) {
         return allEvents.filter((event) => canViewerSeeCatalogEvent(event as any, null))
     }
 
-    const { data: profileData } = await (supabase
-        .from('profiles') as any)
-        .select('role, email, membership_level, subscription_status')
-        .eq('id', user.id)
-        .single()
+    const profile = options?.profile ?? await (async () => {
+        const { data: profileData } = await (supabase
+            .from('profiles') as any)
+            .select('id, role, email, membership_level, subscription_status, membership_specialization_code')
+            .eq('id', userId)
+            .maybeSingle()
 
-    const profile = profileData as any
+        return (profileData as EventViewerOptions['profile']) ?? null
+    })()
 
     if (!profile) return []
 
-    const commercialAccess = await getCommercialAccessContext({
+    const commercialAccess = options?.commercialAccess ?? await getCommercialAccessContext({
         supabase,
-        userId: user.id,
+        userId,
         profile,
     })
 

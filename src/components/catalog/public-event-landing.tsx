@@ -5,10 +5,12 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { getEffectiveEventPriceForProfile, getEventMemberAccessMessage, isEventIncludedForMatchingSpecialization } from '@/lib/events/pricing'
+import { getEventCampaignForEvent } from '@/lib/events/campaigns'
 import { getDefaultPublicCtaLabel, getEventTypeLabel, getPublicEventPath } from '@/lib/events/public'
 import { brandName } from '@/lib/brand'
 import { getSpecializationByCode } from '@/lib/specializations'
 import { DEFAULT_TIMEZONE } from '@/lib/timezone'
+import { CampaignLeadMagnetButton } from './campaign-lead-magnet-button'
 import { PublicAccessCta } from './public-access-cta'
 
 const publicAppUrl = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/+$/, '') ?? ''
@@ -297,6 +299,7 @@ export function PublicEventLanding({
     const formatLabel = getEventTypeLabel(event.event_type)
     const faqItems = buildFaq(event)
     const speakerReturnTo = getPublicEventPath(event)
+    const campaign = getEventCampaignForEvent(event)
     
     // Validate edge/blocking cases
     const isFull = event.max_attendees ? (event.attendee_count || 0) >= event.max_attendees : false
@@ -587,6 +590,21 @@ export function PublicEventLanding({
                                     </div>
                                 )}
 
+                                {campaign && (
+                                    <div className="pt-2">
+                                        <CampaignLeadMagnetButton
+                                            campaignKey={campaign.key}
+                                            eventId={event.id}
+                                            eventSlug={event.slug}
+                                            sourceSurface="event_detail"
+                                            triggerLabel="Descargar temario detallado"
+                                            title={`Recibe el temario de ${campaign.title}`}
+                                            description="Te enviaremos el temario del bloque y una recomendacion clara para seguir avanzando dentro de esta ruta."
+                                            className="w-full"
+                                        />
+                                    </div>
+                                )}
+
                                 {!hasAccess && (
                                     <p className="text-center text-[11px] text-neutral-500 mt-4">
                                         Ya lo adquiriste?{' '}
@@ -614,6 +632,19 @@ export function PublicEventLanding({
                                 {event.description.split('\n').map((paragraph: string, index: number) => (
                                     <p key={index}>{paragraph}</p>
                                 ))}
+                            </CardContent>
+                        </Card>
+                    )}
+
+                    {event.campaign_problem && (
+                        <Card className="border-border/50">
+                            <CardHeader>
+                                <CardTitle className="text-xl">Que problema resuelve este evento?</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <p className="text-sm leading-relaxed text-muted-foreground">
+                                    {event.campaign_problem}
+                                </p>
                             </CardContent>
                         </Card>
                     )}
@@ -873,7 +904,9 @@ export function PublicEventLanding({
                     {relatedEvents.length > 0 && (
                         <Card className="border-border/50">
                             <CardHeader>
-                                <CardTitle className="text-base">Tambien te puede interesar</CardTitle>
+                                <CardTitle className="text-base">
+                                    {campaign ? 'Eventos relacionados de esta ruta' : 'Tambien te puede interesar'}
+                                </CardTitle>
                             </CardHeader>
                             <CardContent className="space-y-3">
                                 {relatedEvents.map((item) => (

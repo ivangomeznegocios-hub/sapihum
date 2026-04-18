@@ -241,6 +241,82 @@ export default async function AdminAnalyticsPage() {
                 </div>
             </section>
 
+            <section className="grid gap-6 xl:grid-cols-2">
+                <div className="rounded-2xl border bg-card p-5">
+                    <div className="mb-4 flex items-center gap-2">
+                        <BarChart3 className="h-5 w-5 text-primary" />
+                        <h2 className="text-lg font-semibold">Campanas por bloque</h2>
+                    </div>
+                    <div className="space-y-3">
+                        {dashboard.eventCampaigns.byTrack.slice(0, 6).map((row) => (
+                            <div key={row.label} className="rounded-xl border bg-muted/20 p-4">
+                                <div className="flex items-center justify-between gap-3">
+                                    <div>
+                                        <p className="font-medium">{row.label}</p>
+                                        <p className="text-xs text-muted-foreground">
+                                            {row.leads} leads · {row.registrations} registros · {row.sales} ventas
+                                        </p>
+                                    </div>
+                                    <strong>{currency(row.revenue)}</strong>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
+                <div className="rounded-2xl border bg-card p-5">
+                    <div className="mb-4 flex items-center gap-2">
+                        <BarChart3 className="h-5 w-5 text-primary" />
+                        <h2 className="text-lg font-semibold">Campanas por evento</h2>
+                    </div>
+                    <div className="space-y-3">
+                        {dashboard.eventCampaigns.byEvent.slice(0, 8).map((row) => (
+                            <div key={row.eventSlug || row.label} className="rounded-xl border bg-muted/20 p-4">
+                                <div className="flex items-center justify-between gap-3">
+                                    <div>
+                                        <p className="font-medium">{row.label}</p>
+                                        <p className="text-xs text-muted-foreground">
+                                            {row.track || 'Sin ruta'} · {row.leads} leads · {row.registrations} registros
+                                        </p>
+                                    </div>
+                                    <strong>{currency(row.revenue)}</strong>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
+                <div className="rounded-2xl border bg-card p-5">
+                    <div className="mb-4 flex items-center gap-2">
+                        <Briefcase className="h-5 w-5 text-primary" />
+                        <h2 className="text-lg font-semibold">Leads por fuente</h2>
+                    </div>
+                    <div className="space-y-3">
+                        {dashboard.eventCampaigns.bySource.slice(0, 8).map((row) => (
+                            <div key={row.label} className="flex items-center justify-between rounded-xl border bg-muted/20 px-4 py-3 text-sm">
+                                <span className="text-muted-foreground">{row.label}</span>
+                                <strong>{row.leads}</strong>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
+                <div className="rounded-2xl border bg-card p-5">
+                    <div className="mb-4 flex items-center gap-2">
+                        <Briefcase className="h-5 w-5 text-primary" />
+                        <h2 className="text-lg font-semibold">Leads por ponente</h2>
+                    </div>
+                    <div className="space-y-3">
+                        {dashboard.eventCampaigns.bySpeaker.slice(0, 8).map((row) => (
+                            <div key={row.label} className="flex items-center justify-between rounded-xl border bg-muted/20 px-4 py-3 text-sm">
+                                <span className="text-muted-foreground">{row.label}</span>
+                                <strong>{row.leads}</strong>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </section>
+
             <section className="grid gap-6 xl:grid-cols-[1fr_1fr]">
                 <div className="rounded-2xl border bg-card p-5">
                     <div className="mb-4 flex items-center gap-2">

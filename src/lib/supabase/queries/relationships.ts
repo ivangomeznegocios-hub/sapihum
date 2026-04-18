@@ -1,14 +1,19 @@
 import { createClient } from '@/lib/supabase/server'
 import type { PatientPsychologistRelationship, Profile } from '@/types/database'
 
+interface RelationshipQueryOptions {
+    supabase?: any
+}
+
 /**
  * Returns the latest active relationship for a patient.
  * We order by created_at descending to avoid breaking when legacy duplicates exist.
  */
 export async function getLatestActiveRelationshipForPatient(
-    patientId: string
+    patientId: string,
+    options?: RelationshipQueryOptions
 ): Promise<PatientPsychologistRelationship | null> {
-    const supabase = await createClient()
+    const supabase = options?.supabase ?? await createClient()
 
     const { data, error } = await (supabase
         .from('patient_psychologist_relationships') as any)
@@ -31,14 +36,15 @@ export async function getLatestActiveRelationshipForPatient(
  * Returns the current psychologist assigned to a patient, if any.
  */
 export async function getAssignedPsychologistForPatient(
-    patientId: string
+    patientId: string,
+    options?: RelationshipQueryOptions
 ): Promise<Profile | null> {
-    const relationship = await getLatestActiveRelationshipForPatient(patientId)
+    const supabase = options?.supabase ?? await createClient()
+    const relationship = await getLatestActiveRelationshipForPatient(patientId, { supabase })
     if (!relationship?.psychologist_id) {
         return null
     }
 
-    const supabase = await createClient()
     const { data, error } = await (supabase
         .from('profiles') as any)
         .select('*')

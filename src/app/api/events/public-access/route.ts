@@ -8,6 +8,7 @@ import {
 import { getUniqueEventAccessCount } from '@/lib/events/attendance'
 import { createClient } from '@/lib/supabase/server'
 import { audienceAllowsAccess, getCommercialAccessContext } from '@/lib/access/commercial'
+import { recordAnalyticsServerEvent, resolveAttributionSnapshot } from '@/lib/analytics/server'
 import { sendEmail } from '@/lib/email/index'
 import { buildGuestAccessEmail } from '@/lib/email/templates'
 
@@ -16,10 +17,11 @@ export async function POST(request: NextRequest) {
         const supabase = await createClient()
         const { data: { user } } = await supabase.auth.getUser()
         const body = await request.json()
-        const { eventId, email, fullName } = body as {
+        const { eventId, email, fullName, analyticsContext } = body as {
             eventId?: string
             email?: string
             fullName?: string
+            analyticsContext?: any
         }
 
         if (!eventId) {
@@ -28,7 +30,7 @@ export async function POST(request: NextRequest) {
 
         const { data: event } = await (supabase
             .from('events') as any)
-            .select('id, slug, title, price, member_price, member_access_type, specialization_code, target_audience, status, event_type, created_by, recording_expires_at, max_attendees')
+            .select('id, slug, title, start_time, price, member_price, member_access_type, specialization_code, target_audience, status, event_type, created_by, recording_expires_at, max_attendees')
             .eq('id', eventId)
             .single()
 
@@ -42,6 +44,10 @@ export async function POST(request: NextRequest) {
                 return NextResponse.json({ error: 'Este evento ya alcanzó su cupo' }, { status: 409 })
             }
         }
+
+        const attributionSnapshot = analyticsContext
+            ? await resolveAttributionSnapshot(analyticsContext)
+            : null
 
         if (user) {
             const { data: profile } = await (supabase
@@ -103,6 +109,8 @@ export async function POST(request: NextRequest) {
                     status: 'registered',
                     registration_data: {
                         source: 'public-access',
+                        analytics: analyticsContext ?? null,
+                        attribution_snapshot: attributionSnapshot ?? null,
                     },
                 })
             }
@@ -116,6 +124,26 @@ export async function POST(request: NextRequest) {
                 metadata: {
                     via: 'public_access_route',
                     full_name: profile.full_name || fullName || null,
+                    analytics: analyticsContext ?? null,
+                    attribution_snapshot: attributionSnapshot ?? null,
+                },
+            })
+
+            await recordAnalyticsServerEvent({
+                eventName: 'event_registered',
+                eventSource: 'server',
+                visitorId: analyticsContext?.visitorId ?? null,
+                sessionId: analyticsContext?.sessionId ?? null,
+                userId: user.id,
+                consent: analyticsContext?.consent ?? null,
+                touch: analyticsContext?.touch ?? {
+                    funnel: 'event',
+                },
+                properties: {
+                    eventId,
+                    eventSlug: event.slug,
+                    registrationType: 'free',
+                    sourceSurface: 'public_event',
                 },
             })
 
@@ -150,6 +178,25 @@ export async function POST(request: NextRequest) {
             metadata: {
                 via: 'public_guest_access',
                 full_name: fullName,
+                analytics: analyticsContext ?? null,
+                attribution_snapshot: attributionSnapshot ?? null,
+            },
+        })
+
+        await recordAnalyticsServerEvent({
+            eventName: 'event_registered',
+            eventSource: 'server',
+            visitorId: analyticsContext?.visitorId ?? null,
+            sessionId: analyticsContext?.sessionId ?? null,
+            consent: analyticsContext?.consent ?? null,
+            touch: analyticsContext?.touch ?? {
+                funnel: 'event',
+            },
+            properties: {
+                eventId,
+                eventSlug: event.slug,
+                registrationType: 'free_guest',
+                sourceSurface: 'public_event',
             },
         })
 

@@ -3,11 +3,17 @@ import Link from 'next/link'
 import { notFound, redirect } from 'next/navigation'
 import { ArrowRight, BookOpenCheck, CalendarDays, CheckCircle2, GraduationCap, Layers3, Users } from 'lucide-react'
 import { getPublicFormations } from '@/app/(marketing)/formaciones/actions'
+import { EventCampaignSpotlight } from '@/components/catalog/event-campaign-spotlight'
 import { PublicCatalogCard } from '@/components/catalog/public-catalog-card'
 import { WaitlistCTA } from '@/components/specializations/waitlist-cta'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { getAppUrl } from '@/lib/config/app-url'
+import {
+  applyEventCampaignCopy,
+  getCampaignEventsFromCatalog,
+  getCampaignForSpecializationSlug,
+} from '@/lib/events/campaigns'
 import { splitPublicCatalogEvents } from '@/lib/events/public'
 import { getFormationMemberAccessMessage } from '@/lib/formations/pricing'
 import { getSubscriptionPlan } from '@/lib/payments/config'
@@ -243,11 +249,25 @@ export default async function SpecializationPage(props: Props) {
 
   const [allEvents, allFormations] = await Promise.all([getUnifiedCatalogEvents(), getPublicFormations()])
 
+  const normalizedCatalogEvents = allEvents.map((event: CatalogEvent) => applyEventCampaignCopy(event)) as CatalogEvent[]
   const upcomingEvents = splitPublicCatalogEvents(
-    allEvents.filter((event: CatalogEvent) => event.event_type !== 'on_demand')
+    normalizedCatalogEvents.filter((event: CatalogEvent) => event.event_type !== 'on_demand')
   ).upcoming as CatalogEvent[]
 
-  const featuredEvents = selectRelevantItems(upcomingEvents, spec.code, 6)
+  const activeCampaign = getCampaignForSpecializationSlug(spec.slug)
+  const activeCampaignEvents = activeCampaign
+    ? getCampaignEventsFromCatalog(upcomingEvents, activeCampaign) as CatalogEvent[]
+    : []
+  const featuredEvents = (
+    activeCampaignEvents.length > 0
+      ? [
+          ...activeCampaignEvents,
+          ...selectRelevantItems(upcomingEvents, spec.code, 6).filter(
+            (event) => !activeCampaignEvents.some((campaignEvent) => campaignEvent.id === event.id)
+          ),
+        ]
+      : selectRelevantItems(upcomingEvents, spec.code, 6)
+  ).slice(0, 6)
   const featuredFormations = selectRelevantItems(allFormations, spec.code, 4)
   const specificEventCount = upcomingEvents.filter((event) => event.specialization_code === spec.code).length
   const generalEventCount = upcomingEvents.filter((event) => !event.specialization_code).length
@@ -515,6 +535,31 @@ export default async function SpecializationPage(props: Props) {
           </div>
         </div>
       </section>
+
+      {activeCampaign && activeCampaignEvents.length > 0 && (
+        <section className="w-full px-4 py-12 sm:px-6 lg:px-8">
+          <div className="mx-auto w-full max-w-7xl">
+            <div className="mb-8 max-w-3xl">
+              <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-brand-yellow">Agenda activa</p>
+              <h2 className="mt-3 text-3xl font-bold tracking-tight text-foreground md:text-4xl">
+                Eventos prioritarios para {spec.name}
+              </h2>
+              <p className="mt-4 text-base leading-relaxed text-muted-foreground md:text-lg">
+                Si quieres impulsar conversion hoy, empieza por la agenda activa de esta especialidad y usa el temario como captura secundaria.
+              </p>
+            </div>
+
+            <EventCampaignSpotlight
+              campaign={activeCampaign}
+              events={activeCampaignEvents}
+              sourceSurface="specialization_page"
+              redirectAfterDownload
+              secondaryHref="/eventos"
+              secondaryLabel="Ver toda la agenda de eventos"
+            />
+          </div>
+        </section>
+      )}
 
       <section className="w-full border-y bg-muted/30 py-16 md:py-20">
         <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">

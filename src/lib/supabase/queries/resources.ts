@@ -7,9 +7,10 @@ import type {
     PatientResourceInsert,
     EventResource,
     EventResourceInsert,
-    ResourceWithEvent
+    ResourceWithEvent,
+    Profile,
 } from '@/types/database'
-import { audienceAllowsAccess, getCommercialAccessContext } from '@/lib/access/commercial'
+import { audienceAllowsAccess, getCommercialAccessContext, type CommercialAccessSnapshot } from '@/lib/access/commercial'
 import { canViewerSeeListedResource } from '@/lib/access/catalog'
 
 // ============================================
@@ -24,13 +25,31 @@ export interface ResourceFilters {
     eventId?: string
 }
 
+interface ResourceViewerOptions {
+    supabase?: any
+    userId?: string | null
+    profile?: Pick<
+        Profile,
+        'id' | 'role' | 'email' | 'membership_level' | 'subscription_status' | 'membership_specialization_code'
+    > | null
+    commercialAccess?: CommercialAccessSnapshot | null
+}
+
 /**
  * Get all resources visible to the current user, filtered by role and membership level
  * Automatically excludes expired resources unless showExpired is true
  */
-export async function getVisibleResources(filters?: ResourceFilters): Promise<Resource[]> {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+export async function getVisibleResources(
+    filters?: ResourceFilters,
+    options?: ResourceViewerOptions
+): Promise<Resource[]> {
+    const supabase = options?.supabase ?? await createClient()
+    let userId = options?.userId ?? options?.profile?.id ?? null
+
+    if (userId === null && options?.userId === undefined && !options?.profile) {
+        const { data: { user } } = await supabase.auth.getUser()
+        userId = user?.id ?? null
+    }
 
     let query = (supabase.from('resources') as any).select('*')
 
@@ -63,7 +82,7 @@ export async function getVisibleResources(filters?: ResourceFilters): Promise<Re
 
     if (!resources) return []
 
-    if (!user) {
+    if (!userId) {
         return (resources as any[]).filter((resource: any) => {
             const audience: string[] = resource.target_audience || ['public']
 
@@ -75,9 +94,10 @@ export async function getVisibleResources(filters?: ResourceFilters): Promise<Re
         }) as Resource[]
     }
 
-    const commercialAccess = await getCommercialAccessContext({
+    const commercialAccess = options?.commercialAccess ?? await getCommercialAccessContext({
         supabase,
-        userId: user.id,
+        userId,
+        profile: options?.profile,
     })
 
     if (!commercialAccess) return []

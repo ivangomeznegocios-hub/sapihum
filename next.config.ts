@@ -10,6 +10,26 @@ const withSerwist = withSerwistInit({
 const nextConfig: NextConfig = {
     reactStrictMode: false,
     turbopack: {}, // Workaround for serwist + turbopack build blocking
+    images: {
+        remotePatterns: [
+            {
+                protocol: 'https',
+                hostname: 'encrypted-tbn0.gstatic.com',
+            },
+            {
+                protocol: 'https',
+                hostname: '**.googleusercontent.com',
+            },
+            {
+                protocol: 'https',
+                hostname: '**.supabase.co',
+            },
+            {
+                protocol: 'https',
+                hostname: '**.wixstatic.com',
+            },
+        ],
+    },
     async redirects() {
         return [
             {

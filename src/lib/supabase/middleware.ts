@@ -40,6 +40,21 @@ function getAuthCallbackNext(request: NextRequest) {
     return passthroughQuery ? `${fallbackPath}?${passthroughQuery}` : fallbackPath
 }
 
+function hasSupabaseSessionCookie(request: NextRequest) {
+    return request.cookies.getAll().some((cookie) => cookie.name.startsWith('sb-'))
+}
+
+function shouldRefreshSupabaseSession(request: NextRequest) {
+    const pathname = request.nextUrl.pathname
+
+    return (
+        pathname.startsWith('/dashboard') ||
+        pathname.startsWith('/auth') ||
+        pathname.startsWith('/api') ||
+        hasSupabaseSessionCookie(request)
+    )
+}
+
 export async function updateSession(request: NextRequest) {
     const pathname = request.nextUrl.pathname
 
@@ -52,6 +67,12 @@ export async function updateSession(request: NextRequest) {
         }
 
         return NextResponse.redirect(url)
+    }
+
+    if (!shouldRefreshSupabaseSession(request)) {
+        return NextResponse.next({
+            request,
+        })
     }
 
     let supabaseResponse = NextResponse.next({
@@ -140,7 +161,8 @@ export async function updateSession(request: NextRequest) {
         profile &&
         pathname.startsWith('/auth') &&
         pathname !== '/auth/callback' &&
-        pathname !== '/auth/update-password'
+        pathname !== '/auth/update-password' &&
+        pathname !== '/auth/signout'
     ) {
         const url = request.nextUrl.clone()
         url.pathname = '/dashboard'

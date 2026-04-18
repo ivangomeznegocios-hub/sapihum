@@ -21,6 +21,7 @@ import type {
 
 export const ANALYTICS_VISITOR_KEY = 'cp_analytics_visitor_id'
 export const ANALYTICS_SESSION_KEY = 'cp_analytics_session_id'
+export const ANALYTICS_LAST_TOUCH_KEY = 'cp_analytics_last_touch'
 
 type DataLayerEvent = {
     event: string
@@ -45,6 +46,35 @@ function getStoredValue(key: string): string | null {
 function setStoredValue(key: string, value: string) {
     if (typeof window === 'undefined') return
     window.localStorage.setItem(key, value)
+}
+
+function getStoredTouch(): Partial<AttributionTouch> | null {
+    const raw = getStoredValue(ANALYTICS_LAST_TOUCH_KEY)
+    if (!raw) return null
+
+    try {
+        return JSON.parse(raw) as Partial<AttributionTouch>
+    } catch {
+        return null
+    }
+}
+
+function setStoredTouch(touch: Partial<AttributionTouch>) {
+    if (typeof window === 'undefined') return
+    setStoredValue(ANALYTICS_LAST_TOUCH_KEY, JSON.stringify(touch))
+}
+
+function hasTouchSignal(touch: Partial<AttributionTouch> | null | undefined) {
+    return Boolean(
+        touch?.source ||
+        touch?.medium ||
+        touch?.campaign ||
+        touch?.ref ||
+        touch?.gclid ||
+        touch?.fbclid ||
+        touch?.ttclid ||
+        touch?.liFatId
+    )
 }
 
 function getCurrentPathname() {
@@ -127,21 +157,26 @@ export function buildBrowserTouch(overrides?: Partial<AttributionTouch> | null):
     if (typeof window === 'undefined') return null
 
     const url = new URL(window.location.href)
-    const source = overrides?.source ?? url.searchParams.get('utm_source')
-    const medium = overrides?.medium ?? url.searchParams.get('utm_medium')
-    const campaign = overrides?.campaign ?? url.searchParams.get('utm_campaign')
-    const ref = overrides?.ref ?? url.searchParams.get('ref')
-    const gclid = overrides?.gclid ?? url.searchParams.get('gclid')
-    const fbclid = overrides?.fbclid ?? url.searchParams.get('fbclid')
-    const ttclid = overrides?.ttclid ?? url.searchParams.get('ttclid')
-    const liFatId = overrides?.liFatId ?? url.searchParams.get('li_fat_id')
+    const storedTouch = getStoredTouch()
+    const source = overrides?.source ?? url.searchParams.get('utm_source') ?? storedTouch?.source ?? null
+    const medium = overrides?.medium ?? url.searchParams.get('utm_medium') ?? storedTouch?.medium ?? null
+    const campaign = overrides?.campaign ?? url.searchParams.get('utm_campaign') ?? storedTouch?.campaign ?? null
+    const ref = overrides?.ref ?? url.searchParams.get('ref') ?? storedTouch?.ref ?? null
+    const gclid = overrides?.gclid ?? url.searchParams.get('gclid') ?? storedTouch?.gclid ?? null
+    const fbclid = overrides?.fbclid ?? url.searchParams.get('fbclid') ?? storedTouch?.fbclid ?? null
+    const ttclid = overrides?.ttclid ?? url.searchParams.get('ttclid') ?? storedTouch?.ttclid ?? null
+    const liFatId = overrides?.liFatId ?? url.searchParams.get('li_fat_id') ?? storedTouch?.liFatId ?? null
     const referrer = overrides?.referrer ?? document.referrer ?? null
     const landingPath = overrides?.landingPath ?? url.pathname
-    const targetPlan = overrides?.targetPlan ?? url.searchParams.get('plan')
-    const targetSpecialization = overrides?.targetSpecialization ?? url.searchParams.get('specialization')
+    const targetPlan = overrides?.targetPlan ?? url.searchParams.get('plan') ?? storedTouch?.targetPlan ?? null
+    const targetSpecialization =
+        overrides?.targetSpecialization ??
+        url.searchParams.get('specialization') ??
+        storedTouch?.targetSpecialization ??
+        null
     const funnel = overrides?.funnel ?? inferFunnelFromPath(url.pathname)
 
-    return normalizeAttributionTouch(
+    const touch = normalizeAttributionTouch(
         {
             ...overrides,
             source,
@@ -173,6 +208,26 @@ export function buildBrowserTouch(overrides?: Partial<AttributionTouch> | null):
         },
         { landingPath, funnel }
     )
+
+    if (hasTouchSignal(touch)) {
+        setStoredTouch({
+            source: touch?.source ?? null,
+            medium: touch?.medium ?? null,
+            campaign: touch?.campaign ?? null,
+            term: touch?.term ?? null,
+            content: touch?.content ?? null,
+            ref: touch?.ref ?? null,
+            gclid: touch?.gclid ?? null,
+            fbclid: touch?.fbclid ?? null,
+            ttclid: touch?.ttclid ?? null,
+            liFatId: touch?.liFatId ?? null,
+            channel: touch?.channel ?? undefined,
+            targetPlan: touch?.targetPlan ?? null,
+            targetSpecialization: touch?.targetSpecialization ?? null,
+        })
+    }
+
+    return touch
 }
 
 export function getClientAnalyticsContext(overrides?: Partial<AttributionTouch> | null): AnalyticsContext | null {

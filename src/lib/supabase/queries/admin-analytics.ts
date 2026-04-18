@@ -1,4 +1,5 @@
 import { createAdminClient } from '@/lib/supabase/server'
+import { applyEventCampaignCopy } from '@/lib/events/campaigns'
 import { getPlanByPriceId } from '@/lib/payments/config'
 import { getTouchByModel } from '@/lib/analytics/attribution'
 import type { AttributionModel, AttributionSnapshot } from '@/lib/analytics/types'
@@ -26,6 +27,16 @@ type ChannelPerformanceRow = {
     cost: number
     cac: number
     roas: number | null
+}
+
+type EventCampaignSummaryRow = {
+    label: string
+    track?: string
+    eventSlug?: string
+    leads: number
+    registrations: number
+    sales: number
+    revenue: number
 }
 
 function startOfDay(date: Date) {
@@ -107,6 +118,8 @@ export async function getAdminAnalyticsDashboard(model: AttributionModel = 'last
         waitlistResult,
         eventPurchasesResult,
         formationPurchasesResult,
+        eventCatalogResult,
+        eventInterestLeadsResult,
         webhookEventsResult,
         adminOperationLogsResult,
     ] = await Promise.all([
@@ -121,6 +134,8 @@ export async function getAdminAnalyticsDashboard(model: AttributionModel = 'last
         (admin.from('specialization_waitlist') as any).select('id, user_id, created_at, metadata'),
         (admin.from('event_purchases') as any).select('id, user_id, amount_paid, status, purchased_at, confirmed_at, attribution_snapshot, provider_session_id, provider_payment_id'),
         (admin.from('formation_purchases') as any).select('id, user_id, amount_paid, status, purchased_at, confirmed_at, metadata, provider_session_id, provider_payment_id'),
+        (admin.from('events') as any).select('id, slug, title, formation_track'),
+        (admin.from('event_interest_leads') as any).select('id, event_id, event_slug, formation_track, source_surface, speaker_ref, attribution_snapshot, created_at'),
         (admin.from('payment_webhook_events') as any).select('id, status, attempts, created_at, failed_at, processed_at'),
         (admin.from('admin_operation_logs') as any).select('id, action_type, created_at'),
     ])
@@ -159,6 +174,8 @@ export async function getAdminAnalyticsDashboard(model: AttributionModel = 'last
     const formationPurchases = formationPurchasesAll.filter(
         (row) => row.status === 'confirmed' && (!row.user_id || !testUserIds.has(row.user_id))
     )
+    const eventCatalog = ((eventCatalogResult.data || []) as any[]).map((row) => applyEventCampaignCopy(row))
+    const eventInterestLeads = (eventInterestLeadsResult.data || []) as any[]
     const transactionRefs = {
         sessionIds: new Set(
             transactions
@@ -175,6 +192,7 @@ export async function getAdminAnalyticsDashboard(model: AttributionModel = 'last
     const sessions30d = sessions.filter((row) => new Date(row.started_at) >= windowStart)
     const events30d = events.filter((row) => new Date(row.occurred_at) >= windowStart)
     const waitlist30d = waitlist.filter((row) => new Date(row.created_at) >= windowStart)
+    const eventInterestLeads30d = eventInterestLeads.filter((row) => new Date(row.created_at) >= windowStart)
 
     const activeSubscriptions = subscriptions.filter((row) => row.status === 'active' || row.status === 'trialing')
     const mrr = activeSubscriptions.reduce((sum, row) => {
@@ -272,6 +290,7 @@ export async function getAdminAnalyticsDashboard(model: AttributionModel = 'last
     const activations30d = events30d.filter((row) => row.event_name === 'registration_verified').length
     const checkouts30d = events30d.filter((row) => row.event_name === 'checkout_started').length
     const leads30d =
+        eventInterestLeads30d.length +
         waitlist30d.length +
         events30d.filter((row) => row.event_name === 'registration_started').length
 
@@ -346,6 +365,27 @@ export async function getAdminAnalyticsDashboard(model: AttributionModel = 'last
     for (const lead of waitlist30d) {
         const snapshot = (lead.metadata?.attributionSnapshot || null) as AttributionSnapshot | null
         const meta = getTouchMeta(snapshot, model)
+        const key = buildKey(meta.channel, meta.campaign)
+        const row = channelMap.get(key) || {
+            channel: meta.channel,
+            campaign: meta.campaign,
+            visits: 0,
+            leads: 0,
+            registrations: 0,
+            activations: 0,
+            checkouts: 0,
+            sales: 0,
+            revenue: 0,
+            cost: 0,
+            cac: 0,
+            roas: null,
+        }
+        row.leads += 1
+        channelMap.set(key, row)
+    }
+
+    for (const lead of eventInterestLeads30d) {
+        const meta = getTouchMeta((lead.attribution_snapshot || null) as AttributionSnapshot | null, model)
         const key = buildKey(meta.channel, meta.campaign)
         const row = channelMap.get(key) || {
             channel: meta.channel,
@@ -464,6 +504,151 @@ export async function getAdminAnalyticsDashboard(model: AttributionModel = 'last
         successfulRefunds30d: adminOperationLogs.filter((row) => row.action_type === 'payment_refunded' && new Date(row.created_at) >= windowStart).length,
     }
 
+    const eventCatalogById = new Map(eventCatalog.map((event) => [event.id, event]))
+    const eventCatalogBySlug = new Map(eventCatalog.map((event) => [event.slug, event]))
+    const eventPurchases30d = eventPurchases.filter(
+        (row) => new Date(row.confirmed_at || row.purchased_at) >= windowStart
+    )
+    const registrationEvents30d = events30d.filter(
+        (row) => row.event_name === 'event_registered' || row.event_name === 'registration_completed'
+    )
+
+    function getEventMeta(params: { eventId?: string | null; eventSlug?: string | null; formationTrack?: string | null }) {
+        const fromId = params.eventId ? eventCatalogById.get(params.eventId) : null
+        const fromSlug = params.eventSlug ? eventCatalogBySlug.get(params.eventSlug) : null
+        const meta = fromId || fromSlug || null
+
+        return {
+            eventSlug: meta?.slug || params.eventSlug || null,
+            eventTitle: meta?.title || params.eventSlug || 'Sin evento',
+            formationTrack: meta?.formation_track || params.formationTrack || 'Sin ruta',
+        }
+    }
+
+    const trackMap = new Map<string, EventCampaignSummaryRow>()
+    const eventMap = new Map<string, EventCampaignSummaryRow>()
+    const sourceMap = new Map<string, { label: string; leads: number }>()
+    const speakerMap = new Map<string, { label: string; leads: number }>()
+
+    for (const lead of eventInterestLeads30d) {
+        const meta = getEventMeta({
+            eventId: lead.event_id,
+            eventSlug: lead.event_slug,
+            formationTrack: lead.formation_track,
+        })
+
+        const trackRow = trackMap.get(meta.formationTrack) || {
+            label: meta.formationTrack,
+            track: meta.formationTrack,
+            leads: 0,
+            registrations: 0,
+            sales: 0,
+            revenue: 0,
+        }
+        trackRow.leads += 1
+        trackMap.set(meta.formationTrack, trackRow)
+
+        if (meta.eventSlug) {
+            const eventRow = eventMap.get(meta.eventSlug) || {
+                label: meta.eventTitle,
+                track: meta.formationTrack,
+                eventSlug: meta.eventSlug,
+                leads: 0,
+                registrations: 0,
+                sales: 0,
+                revenue: 0,
+            }
+            eventRow.leads += 1
+            eventMap.set(meta.eventSlug, eventRow)
+        }
+
+        const sourceLabel = lead.source_surface || 'Sin fuente'
+        const sourceRow = sourceMap.get(sourceLabel) || { label: sourceLabel, leads: 0 }
+        sourceRow.leads += 1
+        sourceMap.set(sourceLabel, sourceRow)
+
+        const speakerLabel = lead.speaker_ref || 'Sin ponente'
+        const speakerRow = speakerMap.get(speakerLabel) || { label: speakerLabel, leads: 0 }
+        speakerRow.leads += 1
+        speakerMap.set(speakerLabel, speakerRow)
+    }
+
+    for (const event of registrationEvents30d) {
+        const properties = event.properties || {}
+        const meta = getEventMeta({
+            eventId: typeof properties.eventId === 'string' ? properties.eventId : null,
+            eventSlug: typeof properties.eventSlug === 'string' ? properties.eventSlug : null,
+            formationTrack: null,
+        })
+
+        const trackRow = trackMap.get(meta.formationTrack) || {
+            label: meta.formationTrack,
+            track: meta.formationTrack,
+            leads: 0,
+            registrations: 0,
+            sales: 0,
+            revenue: 0,
+        }
+        trackRow.registrations += 1
+        trackMap.set(meta.formationTrack, trackRow)
+
+        if (meta.eventSlug) {
+            const eventRow = eventMap.get(meta.eventSlug) || {
+                label: meta.eventTitle,
+                track: meta.formationTrack,
+                eventSlug: meta.eventSlug,
+                leads: 0,
+                registrations: 0,
+                sales: 0,
+                revenue: 0,
+            }
+            eventRow.registrations += 1
+            eventMap.set(meta.eventSlug, eventRow)
+        }
+    }
+
+    for (const purchase of eventPurchases30d) {
+        const meta = getEventMeta({
+            eventId: purchase.event_id,
+            eventSlug: null,
+            formationTrack: null,
+        })
+
+        const trackRow = trackMap.get(meta.formationTrack) || {
+            label: meta.formationTrack,
+            track: meta.formationTrack,
+            leads: 0,
+            registrations: 0,
+            sales: 0,
+            revenue: 0,
+        }
+        trackRow.sales += 1
+        trackRow.revenue += Number(purchase.amount_paid || 0)
+        trackMap.set(meta.formationTrack, trackRow)
+
+        if (meta.eventSlug) {
+            const eventRow = eventMap.get(meta.eventSlug) || {
+                label: meta.eventTitle,
+                track: meta.formationTrack,
+                eventSlug: meta.eventSlug,
+                leads: 0,
+                registrations: 0,
+                sales: 0,
+                revenue: 0,
+            }
+            eventRow.sales += 1
+            eventRow.revenue += Number(purchase.amount_paid || 0)
+            eventMap.set(meta.eventSlug, eventRow)
+        }
+    }
+
+    const eventCampaigns = {
+        byTrack: Array.from(trackMap.values()).sort((a, b) => b.revenue - a.revenue || b.leads - a.leads),
+        byEvent: Array.from(eventMap.values()).sort((a, b) => b.revenue - a.revenue || b.leads - a.leads),
+        bySource: Array.from(sourceMap.values()).sort((a, b) => b.leads - a.leads),
+        bySpeaker: Array.from(speakerMap.values()).sort((a, b) => b.leads - a.leads),
+    }
+
     return {
         attributionModel: model,
         executive: {
@@ -503,6 +688,7 @@ export async function getAdminAnalyticsDashboard(model: AttributionModel = 'last
             ltvCacRatio,
         },
         comparisonByModel,
+        eventCampaigns,
         trackingHealth,
         operationalHealth,
         manualInputs: {
