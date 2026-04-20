@@ -315,3 +315,7 @@ export function resolveTrackingRouteContext(pathname: string | null | undefined)
         allowAutoFormTracking,
     }
 }
+
+export function shouldDisplayCookieControls(pathname: string | null | undefined) {
+    return classifyTrackingZone(pathname) === 'public_safe'
+}

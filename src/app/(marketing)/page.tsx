@@ -188,10 +188,6 @@ const FAQS = [
   }
 ]
 
-function formatCurrency(value: number | null | undefined) {
-  return `$${Number(value || 0)} MXN`
-}
-
 function formatHours(value: number | null | undefined) {
   const hours = Number(value || 0)
   if (!hours) return null
@@ -631,7 +627,6 @@ export default async function LandingPage() {
                           <span className="block text-[10px] font-bold text-[#c0bfbc]/50 uppercase tracking-[0.15em]">
                             Disponible en Academia
                           </span>
-                          <span className="text-base font-bold">{formatCurrency(formation.bundle_price)}</span>
                         </div>
                         <span className="text-[10px] font-bold text-[#f6ae02] uppercase tracking-wider">Ver detalles</span>
                       </div>

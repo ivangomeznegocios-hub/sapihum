@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
+import { usePathname } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import {
     buildConsentCookieOptions,
@@ -12,6 +13,7 @@ import {
     parseConsentCookieFromDocumentCookie,
     serializeConsentCookie,
 } from '@/lib/consent'
+import { shouldDisplayCookieControls } from '@/lib/tracking/policy'
 import { recordCookieConsent } from '@/actions/consent'
 
 const COOKIE_STORAGE_KEY = CONSENT_COOKIE_NAME
@@ -106,22 +108,30 @@ async function saveConsentToDatabase(consent: ConsentStatus) {
 }
 
 export function CookieConsentBanner() {
+    const pathname = usePathname()
     const [isVisible, setIsVisible] = useState(false)
     const [showDetails, setShowDetails] = useState(false)
     const [analytics, setAnalytics] = useState(false)
     const [marketing, setMarketing] = useState(false)
     const existingConsent = useMemo(() => getStoredConsent(), [])
+    const hasCookieControls = shouldDisplayCookieControls(pathname)
 
     useEffect(() => {
+        if (!hasCookieControls) {
+            setIsVisible(false)
+            setShowDetails(false)
+            return
+        }
+
         if (hasCookiebot || existingConsent) {
             return
         }
 
         const timer = setTimeout(() => setIsVisible(true), 1000)
         return () => clearTimeout(timer)
-    }, [existingConsent])
+    }, [existingConsent, hasCookieControls])
 
-    if (hasCookiebot || !isVisible) return null
+    if (!hasCookieControls || hasCookiebot || !isVisible) return null
 
     const commitConsent = async (nextConsent: ConsentStatus) => {
         setStoredConsent(nextConsent)

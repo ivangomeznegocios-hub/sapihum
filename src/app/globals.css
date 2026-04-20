@@ -596,3 +596,12 @@ option {
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
 }
+
+html[data-cookie-surface='private'] [id^='CybotCookiebot'],
+html[data-cookie-surface='private'] [id^='CookiebotWidget'],
+html[data-cookie-surface='private'] .CookiebotWidget,
+html[data-cookie-surface='private'] iframe[src*='cookiebot'] {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
