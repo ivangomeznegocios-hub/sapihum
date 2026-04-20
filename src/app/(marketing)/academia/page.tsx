@@ -1,9 +1,10 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import Image from 'next/image'
+import { ArrowRight, CalendarDays, Filter, Sparkles } from 'lucide-react'
 import { BrandWordmark } from '@/components/brand/brand-wordmark'
 import { AcademiaCatalog } from '@/components/catalog/academia-catalog'
-import { EventCampaignSpotlight } from '@/components/catalog/event-campaign-spotlight'
+import { CampaignLeadMagnetInline } from '@/components/catalog/campaign-lead-magnet-inline'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import {
@@ -12,6 +13,7 @@ import {
     getCampaignEventsFromCatalog,
     getEventCampaignByKey,
     getCampaignPrimaryEventPath,
+    type EventCampaignConfig,
 } from '@/lib/events/campaigns'
 import { getPublicEventPath, splitPublicCatalogEvents } from '@/lib/events/public'
 import { getSpecializationByCode } from '@/lib/specializations'
@@ -95,50 +97,54 @@ export default async function AcademiaPage({ searchParams }: AcademiaPageProps) 
                                     <span className="relative inline-flex h-2 w-2 rounded-full bg-brand-yellow" />
                                 </span>
                                 {activeCampaign
-                                    ? `Ruta activa: ${activeCampaign.title}`
-                                    : `${campaignBlocks.length} rutas activas y ${upcoming.length} encuentro${upcoming.length !== 1 ? 's' : ''} disponibles`}
+                                    ? `Ruta destacada: ${activeCampaign.title}`
+                                    : `${campaignBlocks.length} rutas destacadas y ${upcoming.length} encuentro${upcoming.length !== 1 ? 's' : ''} disponibles`}
                             </div>
 
                             <h1 className="mb-6 text-4xl font-bold leading-[1.08] tracking-tight text-white md:text-5xl lg:text-6xl">
-                                {activeCampaign ? 'La agenda curada para avanzar en' : 'La entrada principal a la'}{' '}
+                                {activeCampaign ? 'La ruta recomendada para avanzar en' : 'Formacion continua para psicologos que quieren avanzar con mas'}{' '}
                                 <span className="font-serif italic font-normal text-[#c0bfbc]">
-                                    {activeCampaign ? activeCampaign.title.toLowerCase() : 'Academia SAPIHUM'}
+                                    {activeCampaign ? activeCampaign.title.toLowerCase() : 'criterio, profundidad y aplicacion real'}
                                 </span>
                             </h1>
 
                             <p className="mb-8 max-w-2xl text-lg leading-relaxed text-neutral-400/90 md:text-xl">
                                 {activeCampaign
                                     ? activeCampaign.promise
-                                    : 'Encuentros en vivo, rutas activas, formaciones y una agenda mejor ordenada para descubrir, registrar y convertir sin perder la coherencia visual de la marca.'}
+                                    : 'Explora rutas destacadas, encuentros en vivo y programas completos para seguir formandote con claridad, respaldo academico y una siguiente accion evidente en cada paso.'}
                             </p>
 
-                            <div className="flex flex-wrap gap-3">
+                            <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
                                 <a href="#rutas-activas">
-                                    <Button size="lg" className="h-12 px-7 font-bold uppercase text-xs tracking-[0.1em]">
-                                        Ver rutas activas
+                                    <Button size="lg" className="h-12 w-full px-7 font-bold uppercase text-xs tracking-[0.1em] sm:w-auto">
+                                        Ver rutas destacadas
                                     </Button>
                                 </a>
                                 <a href="#catalogo">
-                                    <Button size="lg" variant="outline" className="h-12 px-7 font-bold uppercase text-xs tracking-[0.1em]">
-                                        Explorar catalogo
+                                    <Button size="lg" variant="outline" className="h-12 w-full px-7 font-bold uppercase text-xs tracking-[0.1em] sm:w-auto">
+                                        Explorar agenda
                                     </Button>
                                 </a>
                                 <Link href="/formaciones">
-                                    <Button size="lg" variant="outline" className="h-12 px-7 text-sm font-semibold backdrop-blur-sm">
+                                    <Button size="lg" variant="outline" className="h-12 w-full px-7 text-sm font-semibold backdrop-blur-sm sm:w-auto">
                                         Ver formaciones
                                     </Button>
                                 </Link>
                             </div>
 
-                            <div className="mt-8 flex flex-wrap gap-3">
-                                <Link href="/academia">
-                                    <Button variant={!activeCampaign ? 'default' : 'outline'} size="sm">
+                            <div className="mt-8 grid gap-3 sm:flex sm:flex-wrap">
+                                <Link href="/academia" className="block sm:w-auto">
+                                    <Button variant={!activeCampaign ? 'default' : 'outline'} size="sm" className="!h-auto !whitespace-normal w-full justify-start px-4 py-3 text-left sm:w-auto sm:justify-center sm:text-center">
                                         Toda la academia
                                     </Button>
                                 </Link>
                                 {campaignBlocks.map(({ campaign }) => (
-                                    <Link key={campaign.key} href={`/academia?track=${campaign.key}`}>
-                                        <Button variant={activeCampaign?.key === campaign.key ? 'default' : 'outline'} size="sm">
+                                    <Link key={campaign.key} href={`/academia?track=${campaign.key}`} className="block sm:w-auto">
+                                        <Button
+                                            variant={activeCampaign?.key === campaign.key ? 'default' : 'outline'}
+                                            size="sm"
+                                            className="!h-auto !whitespace-normal w-full justify-start px-4 py-3 text-left sm:w-auto sm:justify-center sm:text-center"
+                                        >
                                             {campaign.title}
                                         </Button>
                                     </Link>
@@ -160,32 +166,103 @@ export default async function AcademiaPage({ searchParams }: AcademiaPageProps) 
             {visibleCampaignBlocks.length > 0 && (
                 <section id="rutas-activas" className="scroll-mt-20 w-full px-4 py-16 sm:px-6 md:py-20 lg:px-8">
                     <div className="mx-auto max-w-7xl space-y-10">
-                        <div className="max-w-3xl">
-                            <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-brand-yellow">
-                                Rutas activas
-                            </p>
-                            <h2 className="mt-3 text-3xl font-bold tracking-tight text-white md:text-4xl">
-                                {activeCampaign ? activeCampaign.title : 'Las dos rutas que hoy deben llevar el peso de la captacion'}
-                            </h2>
-                            <p className="mt-4 text-base leading-relaxed text-neutral-400 md:text-lg">
-                                {activeCampaign
-                                    ? 'Esta vista concentra la narrativa, el evento ancla y la captura de temario en una sola experiencia.'
-                                    : 'Empieza por estos bloques, usa el temario como captura secundaria y deja el resto del catalogo como soporte.'}
-                            </p>
+                        <div className="relative overflow-hidden rounded-[36px] border border-white/10 bg-[linear-gradient(145deg,#090909_15%,#121212_58%,#050505_100%)] p-6 shadow-2xl shadow-black/25 md:p-8">
+                            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(246,174,2,0.16),transparent_34%),radial-gradient(circle_at_bottom_left,rgba(192,191,188,0.12),transparent_30%)]" />
+                            <div className="pointer-events-none absolute inset-0 opacity-[0.05]" style={{ backgroundImage: 'linear-gradient(to right, rgba(255,255,255,0.12) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.12) 1px, transparent 1px)', backgroundSize: '32px 32px' }} />
+
+                            <div className="relative grid gap-8 lg:grid-cols-[minmax(0,1fr)_320px] lg:items-start">
+                                <div className="space-y-6">
+                                    <div>
+                                        <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-brand-yellow">
+                                            {activeCampaign ? 'Ruta destacada' : 'Rutas destacadas'}
+                                        </p>
+                                        <h2 className="mt-3 text-3xl font-bold tracking-tight text-white md:text-4xl">
+                                            {activeCampaign ? activeCampaign.title : 'Empieza por la ruta que mejor encaja con tu practica'}
+                                        </h2>
+                                        <p className="mt-4 max-w-3xl text-base leading-relaxed text-neutral-300 md:text-lg">
+                                            {activeCampaign
+                                                ? 'Esta ruta concentra el evento recomendado para empezar, el recorrido sugerido y el temario para ayudarte a decidir con mas claridad.'
+                                                : 'Cada ruta te muestra el evento recomendado para comenzar, los siguientes pasos del recorrido y un temario descargable para revisar el detalle antes de inscribirte.'}
+                                        </p>
+                                    </div>
+
+                                    <div className="grid gap-3 md:grid-cols-3">
+                                        <div className="rounded-[24px] border border-white/10 bg-black/25 p-4">
+                                            <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-brand-yellow">Ruta guiada</p>
+                                            <p className="mt-2 text-sm leading-relaxed text-neutral-300">
+                                                Ve el orden sugerido para avanzar sin perderte entre demasiadas opciones.
+                                            </p>
+                                        </div>
+                                        <div className="rounded-[24px] border border-white/10 bg-black/25 p-4">
+                                            <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-brand-yellow">Evento recomendado</p>
+                                            <p className="mt-2 text-sm leading-relaxed text-neutral-300">
+                                                Cada bloque te dice por donde conviene empezar hoy.
+                                            </p>
+                                        </div>
+                                        <div className="rounded-[24px] border border-white/10 bg-black/25 p-4">
+                                            <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-brand-yellow">Temario descargable</p>
+                                            <p className="mt-2 text-sm leading-relaxed text-neutral-300">
+                                                Recibe el PDF con temas clave, enfoque y siguiente paso recomendado.
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="rounded-[28px] border border-white/10 bg-black/30 p-5">
+                                    <div className="inline-flex items-center gap-2 rounded-full border border-brand-yellow/20 bg-brand-yellow/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-brand-yellow">
+                                        <Sparkles className="h-3.5 w-3.5" />
+                                        Como empezar
+                                    </div>
+
+                                    <div className="mt-5 space-y-4">
+                                        {[
+                                            'Elige la ruta que mejor se acerca a tu practica actual.',
+                                            'Revisa el encuentro recomendado para entrar con mas claridad.',
+                                            'Si quieres mas detalle, pide el temario y decide con mejor contexto.',
+                                        ].map((step, index) => (
+                                            <div key={step} className="flex items-start gap-3">
+                                                <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-white/10 bg-white/5 text-xs font-bold text-white">
+                                                    {index + 1}
+                                                </div>
+                                                <p className="text-sm leading-relaxed text-neutral-300">{step}</p>
+                                            </div>
+                                        ))}
+                                    </div>
+
+                                    <div className="mt-6 flex flex-col gap-3">
+                                        {activeCampaign ? (
+                                            <Link href="/academia#catalogo">
+                                                <Button className="w-full justify-between">
+                                                    Ver agenda de esta ruta
+                                                    <ArrowRight className="h-4 w-4" />
+                                                </Button>
+                                            </Link>
+                                        ) : (
+                                            <a href="#catalogo">
+                                                <Button className="w-full justify-between">
+                                                    Ver agenda completa
+                                                    <ArrowRight className="h-4 w-4" />
+                                                </Button>
+                                            </a>
+                                        )}
+                                        <Link href="/formaciones">
+                                            <Button variant="outline" className="w-full justify-between">
+                                                Ver formaciones completas
+                                                <ArrowRight className="h-4 w-4" />
+                                            </Button>
+                                        </Link>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
                         <div className="space-y-8">
                             {visibleCampaignBlocks.map(({ campaign, events }) => (
-                                <EventCampaignSpotlight
+                                <AcademiaRouteLeadCard
                                     key={campaign.key}
                                     campaign={campaign}
                                     events={events}
-                                    sourceSurface="academia_route_section"
-                                    variant="editorial"
-                                    showLeadCapture
-                                    redirectAfterDownload
-                                    secondaryHref={activeCampaign ? '/academia' : `/academia?track=${campaign.key}`}
-                                    secondaryLabel={activeCampaign ? 'Volver a toda la academia' : 'Enfocar solo esta ruta'}
+                                    isFocusedView={activeCampaign?.key === campaign.key}
                                 />
                             ))}
                         </div>
@@ -198,24 +275,24 @@ export default async function AcademiaPage({ searchParams }: AcademiaPageProps) 
                     <div className="mb-10 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
                         <div>
                             <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-brand-yellow">
-                                Catalogo en vivo
+                                Agenda en vivo
                             </p>
                             <h2 className="mt-3 text-2xl font-bold tracking-tight text-white md:text-3xl">
                                 {activeCampaign ? `Eventos de ${activeCampaign.title}` : 'Proximos encuentros'}
                             </h2>
                             <p className="mt-2 max-w-2xl text-muted-foreground">
                                 {activeCampaign
-                                    ? 'Esta vista mantiene el catalogo enfocado en la ruta seleccionada sin romper la experiencia general.'
+                                    ? 'Aqui ves solo los encuentros de esta ruta para mantener la decision mas simple y enfocada.'
                                     : 'Encuentra lo que viene en camino. Filtra por area tematica, formato o busca por nombre.'}
                             </p>
                         </div>
                         {activeCampaign && (
                             <div className="flex flex-wrap gap-3">
                                 <Link href="/academia">
-                                    <Button variant="outline">Limpiar ruta</Button>
+                                    <Button variant="outline">Ver todas las rutas</Button>
                                 </Link>
                                 <Link href={getCampaignPrimaryEventPath(activeCampaign)}>
-                                    <Button>Ir al evento ancla</Button>
+                                    <Button>Ver evento recomendado</Button>
                                 </Link>
                             </div>
                         )}
@@ -375,6 +452,166 @@ export default async function AcademiaPage({ searchParams }: AcademiaPageProps) 
                 </div>
             </section>
         </div>
+    )
+}
+
+function formatRouteDateTime(dateStr: string | null | undefined) {
+    if (!dateStr) return 'Fecha por anunciar'
+    return `${formatEventDate(dateStr, DEFAULT_TIMEZONE)} | ${formatEventTime(dateStr, DEFAULT_TIMEZONE)}`
+}
+
+function AcademiaRouteLeadCard({
+    campaign,
+    events,
+    isFocusedView,
+}: {
+    campaign: EventCampaignConfig
+    events: any[]
+    isFocusedView: boolean
+}) {
+    const primaryEvent = events.find((event) => event.slug === campaign.primaryEventSlug) ?? events[0] ?? null
+    const primaryEventHref = primaryEvent
+        ? getPublicEventPath(primaryEvent)
+        : isFocusedView
+            ? `#temario-${campaign.key}`
+            : `/academia?track=${campaign.key}#temario-${campaign.key}`
+    const routeHref = `/academia?track=${campaign.key}`
+
+    return (
+        <article className="relative overflow-hidden rounded-[34px] border border-white/10 bg-[linear-gradient(145deg,#080808_12%,#100f0d_58%,#050505_100%)] p-6 shadow-2xl shadow-black/25 md:p-8">
+            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(246,174,2,0.18),transparent_34%),radial-gradient(circle_at_bottom_left,rgba(122,86,2,0.14),transparent_30%)]" />
+            <div className="pointer-events-none absolute inset-0 opacity-[0.05]" style={{ backgroundImage: 'linear-gradient(to right, rgba(255,255,255,0.12) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.12) 1px, transparent 1px)', backgroundSize: '32px 32px' }} />
+
+            <div className="relative grid gap-8 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-start">
+                <div className="space-y-7">
+                    <div className="space-y-4">
+                        <div className="flex flex-wrap items-center gap-2">
+                            <span className="inline-flex items-center rounded-full border border-brand-yellow/20 bg-brand-yellow/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-brand-yellow">
+                                Ruta destacada
+                            </span>
+                            <span className="inline-flex items-center rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-medium text-neutral-300">
+                                {campaign.events.length} {campaign.events.length === 1 ? 'paso recomendado' : 'pasos sugeridos'}
+                            </span>
+                        </div>
+
+                        <div className="space-y-3">
+                            <h3 className="max-w-4xl text-3xl font-bold tracking-tight text-white md:text-4xl">
+                                {campaign.title}
+                            </h3>
+                            <p className="max-w-4xl text-lg leading-relaxed text-neutral-200">
+                                {campaign.promise}
+                            </p>
+                            <p className="max-w-3xl text-sm leading-relaxed text-neutral-400 md:text-base">
+                                {campaign.summary}
+                            </p>
+                        </div>
+                    </div>
+
+                    <div className="grid gap-4 md:grid-cols-3">
+                        {campaign.events.map((routeEvent, index) => {
+                            const liveEvent = events.find((event) => event.slug === routeEvent.slug)
+                            const stepHref = liveEvent ? getPublicEventPath(liveEvent) : routeHref
+                            const stepLabel = index === 0 ? 'Empieza aqui' : `Paso ${index + 1}`
+
+                            return (
+                                <Link
+                                    key={routeEvent.slug}
+                                    href={stepHref}
+                                    className={`group rounded-[24px] border p-4 transition-all duration-300 hover:-translate-y-0.5 hover:border-brand-yellow/30 hover:bg-black/30 ${
+                                        index === 0
+                                            ? 'border-brand-yellow/20 bg-brand-yellow/5'
+                                            : 'border-white/10 bg-black/20'
+                                    }`}
+                                >
+                                    <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-brand-yellow">
+                                        {stepLabel}
+                                    </p>
+                                    <h4 className="mt-2 text-base font-semibold leading-snug text-white transition-colors group-hover:text-brand-yellow">
+                                        {liveEvent?.title || routeEvent.title}
+                                    </h4>
+                                    <p className="mt-3 line-clamp-3 text-sm leading-relaxed text-neutral-400">
+                                        {liveEvent?.subtitle || routeEvent.subtitle}
+                                    </p>
+                                    <div className="mt-4 inline-flex items-center gap-2 text-xs text-neutral-300">
+                                        <CalendarDays className="h-3.5 w-3.5 text-brand-yellow" />
+                                        {formatRouteDateTime(liveEvent?.start_time)}
+                                    </div>
+                                </Link>
+                            )
+                        })}
+                    </div>
+
+                    <div className="rounded-[28px] border border-white/10 bg-black/20 p-5">
+                        <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-brand-yellow">
+                            Ideal para
+                        </p>
+                        <div className="mt-4 grid gap-3 md:grid-cols-3">
+                            {campaign.temario.idealFor.slice(0, 3).map((item) => (
+                                <div key={item} className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm leading-relaxed text-neutral-300">
+                                    {item}
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+
+                <div className="space-y-4">
+                    <div className="rounded-[28px] border border-white/10 bg-black/30 p-5">
+                        <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-neutral-500">
+                            Proximo paso recomendado
+                        </p>
+                        <h3 className="mt-3 text-2xl font-bold leading-tight text-white">
+                            {primaryEvent ? primaryEvent.title : `Recibe el temario de ${campaign.title}`}
+                        </h3>
+                        <p className="mt-3 text-sm leading-relaxed text-neutral-300">
+                            {primaryEvent
+                                ? `Empieza por este encuentro para entrar a ${campaign.title.toLowerCase()} con una base clara y una agenda ya conectada.`
+                                : 'Aunque la siguiente fecha todavia no este visible, ya puedes revisar el enfoque de la ruta y dejar tus datos para recibir el temario.'}
+                        </p>
+
+                        <div className="mt-5 rounded-2xl border border-white/10 bg-white/[0.04] p-4">
+                            <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-neutral-500">
+                                {primaryEvent ? 'Fecha recomendada' : 'Ruta lista para explorar'}
+                            </p>
+                            <p className="mt-2 inline-flex items-center gap-2 text-sm text-white">
+                                <CalendarDays className="h-4 w-4 text-brand-yellow" />
+                                {primaryEvent ? formatRouteDateTime(primaryEvent.start_time) : 'Consulta la ruta y recibe el temario'}
+                            </p>
+                        </div>
+
+                        <div className="mt-5 flex flex-col gap-3">
+                            <Link href={primaryEventHref}>
+                                <Button className="w-full justify-between">
+                                    {primaryEvent ? 'Ver evento recomendado' : 'Ver ruta y recibir temario'}
+                                    <ArrowRight className="h-4 w-4" />
+                                </Button>
+                            </Link>
+                            <Link href={isFocusedView ? '/academia' : routeHref}>
+                                <Button variant="outline" className="w-full justify-between">
+                                    {isFocusedView ? 'Ver todas las rutas' : 'Ver solo esta ruta'}
+                                    {isFocusedView ? <Filter className="h-4 w-4" /> : <ArrowRight className="h-4 w-4" />}
+                                </Button>
+                            </Link>
+                        </div>
+                    </div>
+
+                    <CampaignLeadMagnetInline
+                        campaignKey={campaign.key}
+                        eventId={primaryEvent?.id ?? null}
+                        eventSlug={primaryEvent?.slug ?? campaign.primaryEventSlug}
+                        sourceSurface="academia_route_section"
+                        redirectAfterSuccess
+                        compact
+                        sectionId={`temario-${campaign.key}`}
+                        eyebrow="Temario y agenda"
+                        title={`Recibe el temario de ${campaign.title}`}
+                        description="Te enviaremos el PDF con objetivos, temas clave y el siguiente paso recomendado dentro de la ruta."
+                        submitLabel="Recibir temario"
+                        className="border-white/10 bg-white/[0.04] shadow-none"
+                    />
+                </div>
+            </div>
+        </article>
     )
 }
 
