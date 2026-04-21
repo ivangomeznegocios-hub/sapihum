@@ -10,6 +10,7 @@ import {
 } from '@/lib/events/pricing'
 import { getUniqueEventAccessCount } from '@/lib/events/attendance'
 import { grantEventEntitlements } from '@/lib/events/entitlements'
+import { getMembershipEntitlementEndsAt } from '@/lib/events/access'
 import { slugifyCatalogText } from '@/lib/events/public'
 import { getEventEditorAccessForUser } from '@/lib/events/permissions'
 import { audienceAllowsAccess, getCommercialAccessContext } from '@/lib/access/commercial'
@@ -523,6 +524,8 @@ export async function registerForEvent(eventId: string, registrationData: Record
     }
 
     if (profileData?.email) {
+        const sourceType = currentPrice === 0 && Number(eventData.price || 0) > 0 ? 'membership' : 'registration'
+
         await grantEventEntitlements({
             event: {
                 id: eventId,
@@ -531,7 +534,10 @@ export async function registerForEvent(eventId: string, registrationData: Record
             } as any,
             email: profileData.email,
             userId: user.id,
-            sourceType: currentPrice === 0 && Number(eventData.price || 0) > 0 ? 'membership' : 'registration',
+            sourceType,
+            endsAt: sourceType === 'membership'
+                ? getMembershipEntitlementEndsAt(commercialAccess)
+                : undefined,
             metadata: {
                 registration_data: registrationData,
             },

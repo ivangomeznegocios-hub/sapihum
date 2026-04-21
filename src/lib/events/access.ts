@@ -1,6 +1,24 @@
 import type { Event, EventEntitlementAccessKind, EventEntitlementSourceType } from '@/types/database'
+import type { CommercialAccessSnapshot } from '@/lib/access/commercial'
+import { audienceAllowsAccess } from '@/lib/access/commercial'
+import { getMembershipAccessEnd } from '@/lib/access/catalog'
 import { createServiceClient } from '@/lib/supabase/service'
 import { getEventAccessKinds } from './entitlements'
+import { getEffectiveEventPriceForProfile, normalizeMemberAccessType } from './pricing'
+
+type EventAccessPolicyEvent = Pick<
+    Event,
+    'price' | 'member_price' | 'member_access_type' | 'specialization_code' | 'target_audience' | 'created_by'
+>
+
+type EventAccessPolicyEntitlement = {
+    source_type?: EventEntitlementSourceType | string | null
+} | null | undefined
+
+type EventAccessPolicyCommercialAccess = Pick<
+    CommercialAccessSnapshot,
+    'role' | 'membershipLevel' | 'hasActiveMembership' | 'membershipSpecializationCode' | 'subscription' | 'viewer' | 'userId'
+> | null | undefined
 
 export function getPrimaryAccessKindForEvent(event: Pick<Event, 'event_type'>): EventEntitlementAccessKind {
     if (event.event_type === 'course') return 'course_access'
@@ -13,6 +31,85 @@ export function getEntitlementEndDateForEvent(event: Pick<Event, 'event_type' | 
         return event.recording_expires_at ?? null
     }
     return null
+}
+
+export function getMembershipEntitlementEndsAt(commercialAccess: EventAccessPolicyCommercialAccess) {
+    if (!commercialAccess?.hasActiveMembership) return null
+    return getMembershipAccessEnd(commercialAccess.subscription)?.toISOString() ?? null
+}
+
+function currentProfilePriceForEvent(
+    event: EventAccessPolicyEvent,
+    commercialAccess: EventAccessPolicyCommercialAccess
+) {
+    return getEffectiveEventPriceForProfile(
+        {
+            price: event.price,
+            member_price: event.member_price,
+            member_access_type: normalizeMemberAccessType(event.member_access_type),
+            specialization_code: event.specialization_code,
+        },
+        {
+            role: commercialAccess?.role,
+            membershipLevel: commercialAccess?.membershipLevel ?? 0,
+            hasActiveMembership: commercialAccess?.hasActiveMembership ?? false,
+            membershipSpecializationCode: commercialAccess?.membershipSpecializationCode ?? null,
+        }
+    )
+}
+
+export function membershipEntitlementCanAccessEvent(params: {
+    event: EventAccessPolicyEvent
+    commercialAccess: EventAccessPolicyCommercialAccess
+}) {
+    const { event, commercialAccess } = params
+    if (!commercialAccess?.hasActiveMembership) return false
+
+    const hasAudienceAccess = audienceAllowsAccess(event.target_audience, commercialAccess as CommercialAccessSnapshot, {
+        creatorId: event.created_by,
+    })
+    if (!hasAudienceAccess) return false
+
+    return currentProfilePriceForEvent(event, commercialAccess) <= 0
+}
+
+export function eventRegistrationCanGrantAccess(params: {
+    event: EventAccessPolicyEvent
+    commercialAccess: EventAccessPolicyCommercialAccess
+    registrationStatus?: string | null
+}) {
+    const { event, commercialAccess, registrationStatus } = params
+    if (registrationStatus !== 'registered') return false
+
+    const hasAudienceAccess = audienceAllowsAccess(event.target_audience, commercialAccess as CommercialAccessSnapshot, {
+        creatorId: event.created_by,
+    })
+    if (!hasAudienceAccess) return false
+
+    return currentProfilePriceForEvent(event, commercialAccess) <= 0
+}
+
+export function entitlementCanGrantEventAccess(params: {
+    entitlement: EventAccessPolicyEntitlement
+    event: EventAccessPolicyEvent
+    commercialAccess: EventAccessPolicyCommercialAccess
+}) {
+    const { entitlement, event, commercialAccess } = params
+    if (!entitlement) return false
+
+    if (entitlement.source_type === 'membership') {
+        return membershipEntitlementCanAccessEvent({ event, commercialAccess })
+    }
+
+    if (entitlement.source_type === 'registration') {
+        return eventRegistrationCanGrantAccess({
+            event,
+            commercialAccess,
+            registrationStatus: 'registered',
+        })
+    }
+
+    return true
 }
 
 export async function upsertEventEntitlement(params: {

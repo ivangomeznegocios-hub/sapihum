@@ -5,7 +5,11 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { InteractiveToolViewer } from '@/components/interactive-tool-viewer'
-import { getActiveEntitlementForEvent } from '@/lib/events/access'
+import {
+    entitlementCanGrantEventAccess,
+    eventRegistrationCanGrantAccess,
+    getActiveEntitlementForEvent,
+} from '@/lib/events/access'
 import { getCommercialAccessContext } from '@/lib/access/commercial'
 import { canViewerSeeListedResource } from '@/lib/access/catalog'
 import { ArrowLeft, ExternalLink } from 'lucide-react'
@@ -82,34 +86,54 @@ export default async function ResourceDetailPage({ params }: PageProps) {
             .from('event_resources') as any)
             .select(`
                 event_id,
-                events:event_id (id, event_type)
+                events:event_id (
+                    id,
+                    event_type,
+                    price,
+                    member_price,
+                    member_access_type,
+                    specialization_code,
+                    target_audience,
+                    created_by
+                )
             `)
             .eq('resource_id', id)
             .limit(1)
 
         const eventAccessChecks = await Promise.all(
             (eventLink || []).map(async (link: any) => {
+                const linkedEvent = Array.isArray(link.events) ? link.events[0] : link.events
+                if (!linkedEvent) return false
+
                 const entitlement = await getActiveEntitlementForEvent({
                     supabase,
                     eventId: link.event_id,
                     userId: profile.id,
                     email: profile.email,
-                    eventType: link.events?.event_type,
+                    eventType: linkedEvent.event_type,
                 })
 
-                if (entitlement) {
+                if (entitlementCanGrantEventAccess({
+                    entitlement,
+                    event: linkedEvent,
+                    commercialAccess,
+                })) {
                     return true
                 }
 
                 const { data: registration } = await (supabase
                     .from('event_registrations') as any)
-                    .select('id')
+                    .select('id, status')
                     .eq('event_id', link.event_id)
                     .eq('user_id', profile.id)
                     .eq('status', 'registered')
                     .maybeSingle()
 
-                return Boolean(registration)
+                return eventRegistrationCanGrantAccess({
+                    event: linkedEvent,
+                    commercialAccess,
+                    registrationStatus: (registration as any)?.status ?? null,
+                })
             })
         )
 

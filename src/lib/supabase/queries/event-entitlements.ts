@@ -1,7 +1,12 @@
-import { getActiveEntitlementForEvent, claimEventEntitlementsByEmail } from '@/lib/events/access'
+import {
+    claimEventEntitlementsByEmail,
+    entitlementCanGrantEventAccess,
+    getActiveEntitlementForEvent,
+} from '@/lib/events/access'
 import { getEventAccessKinds } from '@/lib/events/entitlements'
 import { getPublicEventPath } from '@/lib/events/public'
 import { createClient, getUserProfile } from '@/lib/supabase/server'
+import { getCommercialAccessContext } from '@/lib/access/commercial'
 
 export async function claimCurrentUserEventEntitlements() {
     const profile = await getUserProfile()
@@ -21,6 +26,7 @@ export async function userHasEventHubAccess(event: any) {
     if (!profile) {
         return {
             profile: null,
+            commercialAccess: null,
             entitlement: null,
             canAccess: false,
         }
@@ -31,6 +37,7 @@ export async function userHasEventHubAccess(event: any) {
     if (profile.role === 'admin' || profile.id === event.created_by) {
         return {
             profile,
+            commercialAccess: null,
             entitlement: null,
             canAccess: true,
         }
@@ -44,10 +51,21 @@ export async function userHasEventHubAccess(event: any) {
         eventType: event.event_type,
     })
 
+    const commercialAccess = await getCommercialAccessContext({
+        supabase,
+        userId: profile.id,
+        profile,
+    })
+
     return {
         profile,
+        commercialAccess,
         entitlement,
-        canAccess: Boolean(entitlement),
+        canAccess: entitlementCanGrantEventAccess({
+            entitlement,
+            event,
+            commercialAccess,
+        }),
     }
 }
 
@@ -58,6 +76,12 @@ export async function getMyAccessibleEvents() {
     if (!profile?.id || !profile.email) return []
 
     await claimCurrentUserEventEntitlements()
+
+    const commercialAccess = await getCommercialAccessContext({
+        supabase,
+        userId: profile.id,
+        profile,
+    })
 
     const { data: entitlements, error } = await (supabase
         .from('event_entitlements') as any)
@@ -85,6 +109,14 @@ export async function getMyAccessibleEvents() {
         }
 
         if (!getEventAccessKinds({ event_type: row.event.event_type }).includes(row.access_kind)) {
+            continue
+        }
+
+        if (!entitlementCanGrantEventAccess({
+            entitlement: row,
+            event: row.event,
+            commercialAccess,
+        })) {
             continue
         }
 
@@ -116,6 +148,12 @@ export async function getMyReplayAccessibleEvents() {
 
     await claimCurrentUserEventEntitlements()
 
+    const commercialAccess = await getCommercialAccessContext({
+        supabase,
+        userId: profile.id,
+        profile,
+    })
+
     const { data: entitlements, error } = await (supabase
         .from('event_entitlements') as any)
         .select(`
@@ -136,7 +174,13 @@ export async function getMyReplayAccessibleEvents() {
             if (row.ends_at && new Date(row.ends_at) <= new Date()) {
                 return false
             }
-            return Boolean(row.event)
+            if (!row.event) return false
+
+            return entitlementCanGrantEventAccess({
+                entitlement: row,
+                event: row.event,
+                commercialAccess,
+            })
         })
         .map((row: any) => ({
             ...row,

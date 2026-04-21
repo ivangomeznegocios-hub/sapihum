@@ -13,7 +13,11 @@ import {
     isPurchasableRecordingEvent,
     normalizeMemberAccessType,
 } from '@/lib/events/pricing'
-import { getActiveEntitlementForEvent } from '@/lib/events/access'
+import {
+    entitlementCanGrantEventAccess,
+    eventRegistrationCanGrantAccess,
+    getActiveEntitlementForEvent,
+} from '@/lib/events/access'
 import { getUniqueEventAccessCount } from '@/lib/events/attendance'
 import { getEventGrantAccessKinds } from '@/lib/events/entitlements'
 import { audienceAllowsAccess, getCommercialAccessContext } from '@/lib/access/commercial'
@@ -289,7 +293,18 @@ async function resolveEventPurchaseDetails(
             .eq('status', 'registered')
             .maybeSingle()
 
-        if (existingRegistration || existingEntitlement) {
+        const existingEntitlementGrantsAccess = entitlementCanGrantEventAccess({
+            entitlement: existingEntitlement,
+            event,
+            commercialAccess,
+        })
+        const existingRegistrationGrantsAccess = eventRegistrationCanGrantAccess({
+            event,
+            commercialAccess,
+            registrationStatus: existingRegistration ? 'registered' : null,
+        })
+
+        if (existingRegistrationGrantsAccess || existingEntitlementGrantsAccess) {
             return { error: 'Ya estas registrado en este evento' as const }
         }
 

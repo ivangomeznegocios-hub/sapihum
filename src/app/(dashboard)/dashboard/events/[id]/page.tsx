@@ -13,7 +13,11 @@ import { EventRegistrationButton, EditEventButton, DeleteEventButton, DuplicateE
 import { CheckoutButton } from '@/components/payments/CheckoutButton'
 import { AddToCalendarButton } from '@/components/add-to-calendar'
 import { InteractiveToolViewer } from '@/components/interactive-tool-viewer'
-import { getActiveEntitlementForEvent } from '@/lib/events/access'
+import {
+    entitlementCanGrantEventAccess,
+    eventRegistrationCanGrantAccess,
+    getActiveEntitlementForEvent,
+} from '@/lib/events/access'
 import { getUniqueEventAccessCount } from '@/lib/events/attendance'
 import { getEventEditorAccessForUser } from '@/lib/events/permissions'
 import {
@@ -144,7 +148,22 @@ export default async function EventDetailPage({ params }: PageProps) {
     }
 
     const attendeeCount = await getUniqueEventAccessCount(supabase, id)
-    const hasEventAccess = canEditEvent || isRegistered || Boolean(accessEntitlement)
+    const accessEntitlementGrantsAccess = entitlementCanGrantEventAccess({
+        entitlement: accessEntitlement,
+        event,
+        commercialAccess,
+    })
+    const replayEntitlementGrantsAccess = entitlementCanGrantEventAccess({
+        entitlement: replayEntitlement,
+        event,
+        commercialAccess,
+    })
+    const registrationGrantsAccess = eventRegistrationCanGrantAccess({
+        event,
+        commercialAccess,
+        registrationStatus: registration?.status ?? null,
+    })
+    const hasEventAccess = canEditEvent || registrationGrantsAccess || accessEntitlementGrantsAccess
 
     // Get all registrations with user info (for admins/creators only)
     let allRegistrations: any[] = []
@@ -214,7 +233,7 @@ export default async function EventDetailPage({ params }: PageProps) {
     // Check if user can see recording while access is still active
     const canSeeRecording = Boolean(event.recording_url) && event.status === 'completed' && (
         (!event.recording_expires_at || new Date(event.recording_expires_at) > now) &&
-        (canEditEvent || Boolean(replayEntitlement) || (event.event_type === 'on_demand' && Boolean(accessEntitlement)))
+        (canEditEvent || replayEntitlementGrantsAccess || (event.event_type === 'on_demand' && accessEntitlementGrantsAccess))
     )
 
     const formatDate = (dateStr: string) => {

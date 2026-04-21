@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { grantEventEntitlements } from '@/lib/events/entitlements'
+import { getMembershipEntitlementEndsAt } from '@/lib/events/access'
 import { getPublicEventPath } from '@/lib/events/public'
 import {
     getEffectiveEventPriceForProfile,
@@ -115,12 +116,17 @@ export async function POST(request: NextRequest) {
                 })
             }
 
+            const sourceType = effectivePrice === 0 && Number(event.price || 0) > 0 ? 'membership' : 'registration'
+
             await grantEventEntitlements({
                 event,
                 email: profile.email || user.email || '',
                 userId: user.id,
-                sourceType: effectivePrice === 0 && Number(event.price || 0) > 0 ? 'membership' : 'registration',
+                sourceType,
                 sourceReference: existingRegistration?.id ?? null,
+                endsAt: sourceType === 'membership'
+                    ? getMembershipEntitlementEndsAt(commercialAccess)
+                    : undefined,
                 metadata: {
                     via: 'public_access_route',
                     full_name: profile.full_name || fullName || null,

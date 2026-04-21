@@ -17,7 +17,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { VideoPlayer } from '@/components/ui/video-player'
-import { getActiveEntitlementForEvent } from '@/lib/events/access'
+import { entitlementCanGrantEventAccess, getActiveEntitlementForEvent } from '@/lib/events/access'
 import { createClient } from '@/lib/supabase/server'
 import { userHasEventHubAccess } from '@/lib/supabase/queries/event-entitlements'
 import { getPublicEventBySlug } from '@/lib/supabase/queries/events'
@@ -111,10 +111,15 @@ export default async function EventHubPage({ params }: PageProps) {
             allowedAccessKinds: ['replay_access'],
         })
         : null
+    const replayEntitlementGrantsAccess = entitlementCanGrantEventAccess({
+        entitlement: replayEntitlement,
+        event,
+        commercialAccess: access.commercialAccess,
+    })
     const canSeeRecording = Boolean(event.recording_url) && event.status === 'completed' && (
         !event.recording_expires_at || new Date(event.recording_expires_at) > now
     ) && (
-        Boolean(replayEntitlement) || event.event_type === 'on_demand'
+        replayEntitlementGrantsAccess || event.event_type === 'on_demand'
     )
 
     return (

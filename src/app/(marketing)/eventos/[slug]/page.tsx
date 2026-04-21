@@ -6,7 +6,7 @@ import { buildEventSeoDescription, getPublicEventPath } from '@/lib/events/publi
 import { getUnifiedCatalogEvents, getPublicEventBySlug } from '@/lib/supabase/queries/events'
 import { createClient, getUserProfile } from '@/lib/supabase/server'
 import { getCommercialAccessContext } from '@/lib/access/commercial'
-import { getActiveEntitlementForEvent } from '@/lib/events/access'
+import { entitlementCanGrantEventAccess, getActiveEntitlementForEvent } from '@/lib/events/access'
 import { brandFullName } from '@/lib/brand'
 
 interface PageProps {
@@ -71,6 +71,11 @@ export default async function EventoPublicoPage({ params }: PageProps) {
         userId: user.id,
         email: user.email,
     }) : null
+    const hasAccess = entitlementCanGrantEventAccess({
+        entitlement,
+        event,
+        commercialAccess,
+    })
 
     const allEvents = (await getUnifiedCatalogEvents()).map((item: any) => applyEventCampaignCopy(item))
     const campaign = getEventCampaignForEvent(event)
@@ -89,7 +94,7 @@ export default async function EventoPublicoPage({ params }: PageProps) {
             membershipLevel={membershipLevel}
             hasActiveMembership={commercialAccess?.hasActiveMembership ?? false}
             membershipSpecializationCode={commercialAccess?.membershipSpecializationCode ?? null}
-            hasAccess={!!entitlement}
+            hasAccess={hasAccess}
         />
     )
 }

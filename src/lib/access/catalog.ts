@@ -34,7 +34,7 @@ function toDateOrNull(value: string | null | undefined) {
     return Number.isNaN(date.getTime()) ? null : date
 }
 
-function getMembershipAccessEnd(subscription: ViewerSubscriptionSnapshot | null) {
+export function getMembershipAccessEnd(subscription: Pick<Subscription, 'status' | 'current_period_end'> | null) {
     if (!subscription) return null
 
     const currentPeriodEnd = toDateOrNull(subscription.current_period_end)
