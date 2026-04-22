@@ -10,6 +10,7 @@ import { PublicSafeGtmNoscript } from '@/components/providers/gtm-noscript'
 import { TrackingBootstrap } from '@/components/providers/tracking-bootstrap'
 import { CookiebotProvider } from '@/components/providers/cookiebot-provider'
 import { CookieConsentBanner } from '@/components/gdpr/cookie-consent-banner'
+import { InstallAppPrompt } from '@/components/pwa/install-app-prompt'
 import { brandFullName, brandName, brandShortDescription } from '@/lib/brand'
 import { getAppUrl } from '@/lib/config/app-url'
 import './globals.css'
@@ -45,8 +46,25 @@ export const metadata: Metadata = {
                 type: 'image/png',
                 sizes: '32x32',
             },
+            {
+                url: '/pwa-icon-192.png',
+                type: 'image/png',
+                sizes: '192x192',
+            },
+            {
+                url: '/pwa-icon-512.png',
+                type: 'image/png',
+                sizes: '512x512',
+            },
         ],
         shortcut: '/favicon-32x32.png',
+        apple: [
+            {
+                url: '/apple-touch-icon.png',
+                type: 'image/png',
+                sizes: '180x180',
+            },
+        ],
     },
     appleWebApp: {
         capable: true,
@@ -80,6 +98,7 @@ export default function RootLayout({
                     </Suspense>
                     {children}
                     <CookieConsentBanner />
+                    <InstallAppPrompt />
                     <VercelAnalytics />
                     <SpeedInsights />
                 </ThemeProvider>
