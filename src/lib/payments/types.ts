@@ -60,6 +60,7 @@ export interface OneTimeCheckoutResult {
 // ---- Webhook Events ----
 
 export interface SubscriptionWebhookData {
+    sessionId?: string
     providerSubscriptionId: string
     providerCustomerId: string
     status: SubscriptionStatusType

@@ -11,7 +11,7 @@ export interface CommercialAccessSnapshot extends ViewerAccessContext {
     membershipLevel: number
     membershipSpecializationCode: Profile['membership_specialization_code']
     hasActiveMembership: boolean
-    membershipSource: 'subscription' | 'profile_legacy' | null
+    membershipSource: 'subscription' | 'growth_benefit' | 'profile_legacy' | null
     viewer: ViewerAccessContext
 }
 
@@ -56,7 +56,13 @@ export async function getCommercialAccessContext(params: {
         membershipLevel: viewer.membershipLevel,
         membershipSpecializationCode: viewer.membershipSpecializationCode,
         hasActiveMembership: viewer.membershipActive,
-        membershipSource: viewer.subscription ? 'subscription' : viewer.membershipActive ? 'profile_legacy' : null,
+        membershipSource: viewer.subscription
+            ? 'subscription'
+            : viewer.growthMembershipBenefit
+                ? 'growth_benefit'
+                : viewer.membershipActive
+                    ? 'profile_legacy'
+                    : null,
         viewer,
     }
 }

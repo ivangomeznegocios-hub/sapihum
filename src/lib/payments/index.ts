@@ -9,6 +9,13 @@ import { getAppUrl } from '@/lib/config/app-url'
 import { getActiveEntitlementForEvent } from '@/lib/events/access'
 import { grantEventEntitlements, revokeEventEntitlementsBySourceReference } from '@/lib/events/entitlements'
 import { upsertAutomaticEventSpeakerEarnings } from '@/lib/earnings/compensation'
+import {
+    attachGrowthConversionPaymentReference,
+    cancelGrowthConversionsForSubscription,
+    consolidateEligibleGrowthConversions,
+    recordGrowthSubscriptionActivation,
+    refundGrowthConversionsForPayment,
+} from '@/lib/growth/engine'
 import { logCommerceOperationalEvent, sendEventPurchaseConfirmation, sendFormationPurchaseConfirmation } from '@/lib/payments/commerce'
 import { syncMembershipEntitlementsForUser } from '@/lib/membership-entitlements'
 import { createUserNotification } from '@/lib/notifications'
@@ -1102,6 +1109,19 @@ export async function fulfillSubscriptionCreated(data: SubscriptionWebhookData):
     await supabase.from('profiles').update(profileUpdate).eq('id', profileId)
     await syncMembershipEntitlementsForUser(profileId)
 
+    const { data: subscriptionRecord } = await supabase
+        .from('subscriptions')
+        .select('id')
+        .eq('provider_subscription_id', data.providerSubscriptionId)
+        .maybeSingle()
+
+    await recordGrowthSubscriptionActivation({
+        data,
+        userId,
+        subscriptionId: subscriptionRecord?.id ?? null,
+        admin: supabase,
+    })
+
     console.log(`[Payment] Subscription activated: user=${profileId}, level=${membershipLevel}`)
 
     if (identity.createdNewUser && data.metadata?.guest_checkout === 'true' && identity.normalizedEmail) {
@@ -1228,8 +1248,9 @@ export async function fulfillSubscriptionRenewed(data: SubscriptionWebhookData):
         .eq('id', sub.id)
         .maybeSingle()
 
+    let paymentTransactionId = existingTransactionId
     if (data.amount && !existingTransactionId) {
-        await supabase.from('payment_transactions').insert({
+        const { data: insertedTransaction } = await supabase.from('payment_transactions').insert({
             user_id: sub.profile_id,
             profile_id: sub.profile_id,
             subscription_id: sub.id,
@@ -1247,7 +1268,21 @@ export async function fulfillSubscriptionRenewed(data: SubscriptionWebhookData):
             attribution_snapshot: (subscriptionRow as any)?.attribution_snapshot ?? {},
             completed_at: new Date().toISOString(),
         })
+            .select('id')
+            .single()
+
+        paymentTransactionId = insertedTransaction?.id ?? null
     }
+
+    await attachGrowthConversionPaymentReference({
+        providerSubscriptionId: data.providerSubscriptionId,
+        paymentTransactionId,
+        providerPaymentId: data.paymentIntentId ?? null,
+        providerInvoiceId: data.invoiceId ?? null,
+        admin: supabase,
+    })
+
+    await consolidateEligibleGrowthConversions({ admin: supabase })
 
     console.log(`[Payment] Subscription renewed: sub=${sub.id}`)
 
@@ -1370,6 +1405,16 @@ export async function fulfillSubscriptionUpdated(data: SubscriptionWebhookData):
             await supabase.from('profiles').update(profileUpdates).eq('id', sub.profile_id)
             await syncMembershipEntitlementsForUser(sub.profile_id)
         }
+    }
+
+    if (['cancelled', 'expired', 'past_due'].includes(data.status)) {
+        await cancelGrowthConversionsForSubscription({
+            providerSubscriptionId: data.providerSubscriptionId,
+            reason: `subscription_${data.status}`,
+            admin: supabase,
+        })
+    } else {
+        await consolidateEligibleGrowthConversions({ admin: supabase })
     }
 
     console.log(`[Payment] Subscription updated: ${data.providerSubscriptionId} -> ${data.status}`)
@@ -1790,6 +1835,8 @@ export async function refundOneTimePayment(data: RefundWebhookData): Promise<voi
             metadata: refundMetadata,
         })
         .eq('id', transaction.id)
+
+    await refundGrowthConversionsForPayment(data, supabase)
 
     let entityType = transaction.purchase_type
     let entityId: string | null = null

@@ -14,12 +14,14 @@ import {
     type LucideIcon,
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
-import { getInviteSystemStats, getUnprocessedRewardEvents } from '@/lib/supabase/queries/invite-referrals'
-import { getAllCampaigns, getTopReferrers } from '@/lib/supabase/queries/growth-campaigns'
+import { getAllCampaigns } from '@/lib/supabase/queries/growth-campaigns'
+import { getGrowthAdminDashboard } from '@/lib/growth/queries'
 import {
+    ConsolidateGrowthButton,
     CreateCampaignSection,
     DeleteCampaignButton,
-    ProcessRewardButton,
+    GrowthConfigForm,
+    GrowthRewardActions,
     ToggleCampaignButton,
 } from './admin-growth-forms'
 import { cn } from '@/lib/utils'
@@ -33,6 +35,13 @@ const campaignTypeLabels: Record<string, string> = {
 }
 
 const rewardTypeLabels: Record<string, string> = {
+    extra_days: 'Dias extra',
+    level2_free_month: 'Nivel 2 gratis',
+    upgrade_temp: 'Upgrade temporal',
+    exclusive_session: 'Sesion exclusiva',
+    badge: 'Badge',
+    manual_bonus: 'Bono manual',
+    revenue_share: 'Revenue share',
     credit: 'Credito',
     discount: 'Descuento',
     unlock: 'Unlock',
@@ -131,16 +140,20 @@ export default async function AdminGrowthPage() {
 
     if ((profile as any)?.role !== 'admin') redirect('/dashboard')
 
-    const [systemStats, unprocessedRewards, campaigns, topReferrers] = await Promise.all([
-        getInviteSystemStats(),
-        getUnprocessedRewardEvents(),
+    const [growthDashboard, campaigns] = await Promise.all([
+        getGrowthAdminDashboard(),
         getAllCampaigns(),
-        getTopReferrers(20),
     ])
 
+    const systemStats = growthDashboard.stats
+    const pendingRewards = growthDashboard.pendingRewards
+    const topReferrers = growthDashboard.topReferrers
+    const recentConversions = growthDashboard.recentConversions
+    const openFlags = growthDashboard.openFlags
+    const configJson = growthDashboard.config?.config_json || {}
     const conversionRate =
         systemStats && systemStats.totalAttributions > 0
-            ? ((systemStats.completedAttributions / systemStats.totalAttributions) * 100).toFixed(1)
+            ? ((systemStats.qualifiedAttributions / systemStats.totalAttributions) * 100).toFixed(1)
             : '0.0'
 
     return (
@@ -158,7 +171,10 @@ export default async function AdminGrowthPage() {
                     </div>
                 </div>
 
-                <CreateCampaignSection />
+                <div className="flex flex-col gap-2 sm:flex-row">
+                    <ConsolidateGrowthButton />
+                    <CreateCampaignSection />
+                </div>
             </div>
 
             <div className="rounded-2xl border bg-gradient-to-r from-brand-brown via-white to-brand-brown p-5 dark:from-brand-brown/10 dark:via-background dark:to-brand-brown/10">
@@ -197,24 +213,24 @@ export default async function AdminGrowthPage() {
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-5">
                     <MetricCard
                         label="Codigos activos"
-                        value={systemStats?.totalCodes ?? 0}
+                        value={systemStats?.activeProfiles ?? 0}
                         icon={Share2}
                         color="text-brand-yellow dark:text-brand-yellow"
                         description="Base de embajadores con codigo disponible"
                     />
                     <MetricCard
-                        label="Invitados psicologos"
-                        value={systemStats?.psychologistAttributions ?? 0}
+                        label="Atribuciones"
+                        value={systemStats?.totalAttributions ?? 0}
                         icon={Users}
                         color="text-brand-brown dark:text-brand-brown"
-                        description="Adquisicion del target principal"
+                        description="Usuarios con owner principal de adquisicion"
                     />
                     <MetricCard
-                        label="Invitados ponentes"
-                        value={systemStats?.ponenteAttributions ?? 0}
+                        label="Pagados"
+                        value={systemStats?.paidAttributions ?? 0}
                         icon={Megaphone}
                         color="text-brand-brown dark:text-brand-brown"
-                        description="Expansion de speakers y visibilidad"
+                        description="Primer pago exitoso antes de consolidar"
                     />
                     <MetricCard
                         label="Conversion"
@@ -224,14 +240,19 @@ export default async function AdminGrowthPage() {
                         description="Invitaciones completadas o recompensadas"
                     />
                     <MetricCard
-                        label="Rewards pendientes"
-                        value={systemStats?.pendingRewards ?? 0}
+                        label="Revision manual"
+                        value={(systemStats?.pendingRewards ?? 0) + (systemStats?.openFlags ?? 0)}
                         icon={Gift}
                         color="text-brand-brown dark:text-brand-brown"
                         description="Eventos listos para procesar payout"
                     />
                 </div>
             </div>
+
+            <GrowthConfigForm
+                attributionWindowDays={Number(configJson.attribution_window_days ?? 30)}
+                consolidationDays={Number(configJson.consolidation_days ?? 30)}
+            />
 
             <div>
                 <div className="mb-4 flex items-center gap-2">
@@ -377,17 +398,17 @@ export default async function AdminGrowthPage() {
                 <div className="rounded-2xl border bg-card p-5">
                     <h2 className="mb-4 flex items-center gap-2 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
                         <Award className="h-4 w-4" />
-                        Rewards pendientes ({unprocessedRewards.length})
+                        Rewards pendientes ({pendingRewards.length})
                     </h2>
 
-                    {unprocessedRewards.length === 0 ? (
+                    {pendingRewards.length === 0 ? (
                         <div className="py-6 text-center text-muted-foreground">
                             <CheckCircle2 className="mx-auto mb-2 h-6 w-6 opacity-40" />
-                            <p className="text-sm">No hay payouts pendientes.</p>
+                            <p className="text-sm">No hay rewards pendientes.</p>
                         </div>
                     ) : (
                         <div className="space-y-2">
-                            {unprocessedRewards.map((reward: any) => (
+                            {pendingRewards.map((reward: any) => (
                             <div key={reward.id} className="flex flex-col gap-3 rounded-xl border p-3 sm:flex-row sm:items-center">
                                     <div className="min-w-0 flex-1">
                                         <p className="text-sm font-medium">{reward.beneficiary?.full_name || 'Usuario'}</p>
@@ -396,13 +417,16 @@ export default async function AdminGrowthPage() {
                                             {reward.reward_value ? ` - ${formatRewardValue(reward.reward_value)}` : ''}
                                         </p>
                                         <p className="text-[10px] text-muted-foreground">
-                                            Trigger: {triggerLabels[reward.trigger_event] || reward.trigger_event}
+                                            Motivo: {triggerLabels[reward.reason_type] || reward.reason_type}
+                                        </p>
+                                        <p className="text-[10px] text-muted-foreground">
+                                            Estado: {reward.status}
                                         </p>
                                         <p className="text-[10px] text-muted-foreground">
                                             {new Date(reward.created_at).toLocaleDateString('es-MX')}
                                         </p>
                                     </div>
-                                    <ProcessRewardButton rewardEventId={reward.id} />
+                                    <GrowthRewardActions reward={reward} />
                                 </div>
                             ))}
                         </div>
@@ -450,6 +474,64 @@ export default async function AdminGrowthPage() {
                                         <p className="text-sm font-bold">{referrer.total_referrals}</p>
                                         <p className="text-[10px] text-muted-foreground">{referrer.completed_referrals} activados</p>
                                     </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
+            </div>
+
+            <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
+                <div className="rounded-2xl border bg-card p-5">
+                    <h2 className="mb-4 flex items-center gap-2 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+                        <TrendingUp className="h-4 w-4" />
+                        Conversiones recientes
+                    </h2>
+                    {recentConversions.length === 0 ? (
+                        <p className="py-6 text-center text-sm text-muted-foreground">Aun no hay conversiones de growth.</p>
+                    ) : (
+                        <div className="space-y-2">
+                            {recentConversions.map((conversion: any) => (
+                                <div key={conversion.id} className="rounded-xl border p-3">
+                                    <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+                                        <p className="text-sm font-medium">{conversion.invitee?.full_name || conversion.invitee?.email || 'Invitado'}</p>
+                                        <span className="w-fit rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium">
+                                            {conversion.status}
+                                        </span>
+                                    </div>
+                                    <p className="mt-1 text-xs text-muted-foreground">
+                                        Owner: {conversion.owner?.full_name || conversion.owner?.email || 'Sin owner'}
+                                    </p>
+                                    <p className="text-[10px] text-muted-foreground">
+                                        Activado: {new Date(conversion.activated_at).toLocaleDateString('es-MX')}
+                                    </p>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
+
+                <div className="rounded-2xl border bg-card p-5">
+                    <h2 className="mb-4 flex items-center gap-2 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+                        <ShieldCheck className="h-4 w-4" />
+                        Fraude / revision ({openFlags.length})
+                    </h2>
+                    {openFlags.length === 0 ? (
+                        <p className="py-6 text-center text-sm text-muted-foreground">No hay flags abiertos.</p>
+                    ) : (
+                        <div className="space-y-2">
+                            {openFlags.map((flag: any) => (
+                                <div key={flag.id} className="rounded-xl border p-3">
+                                    <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+                                        <p className="text-sm font-medium">{flag.flag_type}</p>
+                                        <span className="w-fit rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium">
+                                            {flag.severity}
+                                        </span>
+                                    </div>
+                                    <p className="mt-1 text-xs text-muted-foreground">
+                                        Usuario: {flag.user?.full_name || flag.user?.email || 'Sin usuario'}
+                                    </p>
+                                    {flag.notes && <p className="mt-1 text-xs text-muted-foreground">{flag.notes}</p>}
                                 </div>
                             ))}
                         </div>

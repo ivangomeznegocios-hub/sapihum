@@ -15,9 +15,8 @@ import {
     type LucideIcon,
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
-import { getMyInviteStats } from '@/actions/invite-referrals'
-import { getInviteRewardEvents } from '@/lib/supabase/queries/invite-referrals'
 import { getActiveCampaigns, getTopReferrers } from '@/lib/supabase/queries/growth-campaigns'
+import { getGrowthUserDashboard, getTopGrowthReferrers } from '@/lib/growth/queries'
 import { cn } from '@/lib/utils'
 import type { GrowthCampaign } from '@/types/database'
 import { getCommercialAccessContext } from '@/lib/access/commercial'
@@ -94,17 +93,19 @@ export default async function GrowthHubPage() {
     const protocol = host.includes('localhost') ? 'http' : 'https'
     const baseUrl = `${protocol}://${host}`
 
-    const [statsResult, rewards, campaigns, topReferrers] = await Promise.all([
-        getMyInviteStats(),
-        getInviteRewardEvents(user.id),
+    const [growthDashboard, campaigns, topReferrers] = await Promise.all([
+        getGrowthUserDashboard(user.id),
         getActiveCampaigns(role),
-        getTopReferrers(10),
+        getTopGrowthReferrers(10).catch(() => getTopReferrers(10)),
     ]).catch((error) => {
         console.error('Growth hub fetch error:', error)
-        return [null, [], [], []] as [any, any[], any[], any[]]
+        return [null, [], []] as [any, any[], any[]]
     })
 
-    const stats = statsResult?.stats
+    const stats = growthDashboard?.summary
+    const growthProfile = growthDashboard?.profile
+    const rewards = growthDashboard?.rewards ?? []
+    const recentAttributions = growthDashboard?.attributions?.slice(0, 8) ?? []
 
     return (
         <div className="max-w-6xl space-y-8">
@@ -166,11 +167,11 @@ export default async function GrowthHubPage() {
                         <h2 className="text-lg font-semibold">Mi codigo profesional</h2>
                     </div>
 
-                    {stats ? (
+                    {growthProfile ? (
                         <>
                             <div className="mb-4 rounded-xl bg-muted/60 px-4 py-4 text-center">
                                 <p className="text-3xl font-mono font-bold tracking-[0.25em] text-primary">
-                                    {stats.code}
+                                    {growthProfile.referral_code}
                                 </p>
                                 <p className="mt-2 text-xs text-muted-foreground">
                                     Compartelo con psicologos y ponentes para activar recompensas economicas y beneficios acumulables.
@@ -178,9 +179,9 @@ export default async function GrowthHubPage() {
                             </div>
 
                             <div className="flex flex-wrap gap-2">
-                                <CopyCodeButton code={stats.code} />
-                                <ShareLinkButton code={stats.code} baseUrl={baseUrl} />
-                                <CopyLinkButton code={stats.code} baseUrl={baseUrl} />
+                                <CopyCodeButton code={growthProfile.referral_code} />
+                                <ShareLinkButton code={growthProfile.referral_code} baseUrl={baseUrl} />
+                                <CopyLinkButton code={growthProfile.referral_code} baseUrl={baseUrl} />
                             </div>
                         </>
                     ) : (
@@ -200,27 +201,78 @@ export default async function GrowthHubPage() {
                     />
                     <StatCard
                         label="Activados"
-                        value={stats?.completedInvites ?? 0}
+                        value={stats?.qualified ?? 0}
                         icon={TrendingUp}
                         color="text-brand-brown dark:text-brand-brown"
                         description="Registros ya validados o recompensados"
                     />
                     <StatCard
-                        label="Rewards generados"
-                        value={stats?.rewardedInvites ?? 0}
+                        label="Rewards otorgados"
+                        value={stats?.grantedRewards ?? 0}
                         icon={Gift}
                         color="text-brand-brown dark:text-brand-brown"
                         description="Invitaciones que ya detonaron valor economico"
                     />
                     <StatCard
-                        label="Pendientes"
-                        value={stats?.pendingInvites ?? 0}
+                        label="Pagados sin consolidar"
+                        value={stats?.paid ?? 0}
                         icon={Clock}
                         color="text-brand-yellow dark:text-brand-yellow"
                         description="Esperando activacion o trigger economico"
                     />
                 </div>
             </div>
+
+            {stats?.nextReward && (
+                <div className="rounded-2xl border bg-card p-5">
+                    <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                        <div>
+                            <h2 className="text-lg font-semibold">Proxima recompensa</h2>
+                            <p className="mt-1 text-sm text-muted-foreground">
+                                Faltan {stats.nextReward.remaining} referido{stats.nextReward.remaining === 1 ? '' : 's'} activo{stats.nextReward.remaining === 1 ? '' : 's'} para {stats.nextReward.label}.
+                            </p>
+                        </div>
+                        <div className="text-right">
+                            <p className="text-2xl font-bold">{stats.qualified}/{stats.nextReward.threshold}</p>
+                            <p className="text-xs text-muted-foreground">activos consolidados</p>
+                        </div>
+                    </div>
+                    <div className="mt-4 h-2 overflow-hidden rounded-full bg-muted">
+                        <div
+                            className="h-full rounded-full bg-primary"
+                            style={{
+                                width: `${Math.min(100, Math.round((stats.qualified / stats.nextReward.threshold) * 100))}%`,
+                            }}
+                        />
+                    </div>
+                </div>
+            )}
+
+            {recentAttributions.length > 0 && (
+                <div className="rounded-2xl border bg-card p-5">
+                    <div className="mb-4 flex items-center gap-2">
+                        <Users className="h-5 w-5 text-primary" />
+                        <h2 className="text-lg font-semibold">Invitados recientes</h2>
+                    </div>
+                    <div className="divide-y">
+                        {recentAttributions.map((attribution: any) => (
+                            <div key={attribution.id} className="flex flex-col gap-1 py-3 sm:flex-row sm:items-center sm:justify-between">
+                                <div>
+                                    <p className="text-sm font-medium">
+                                        {attribution.invitee?.full_name || attribution.invitee_email || 'Invitado'}
+                                    </p>
+                                    <p className="text-xs text-muted-foreground">
+                                        {new Date(attribution.captured_at).toLocaleDateString('es-MX')}
+                                    </p>
+                                </div>
+                                <span className="w-fit rounded-full bg-muted px-2.5 py-1 text-xs font-medium">
+                                    {attribution.status}
+                                </span>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
 
             {campaigns.length > 0 && (
                 <div>

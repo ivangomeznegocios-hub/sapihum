@@ -364,6 +364,7 @@ async function mapStripeEvent(stripe: Stripe, event: Stripe.Event): Promise<Webh
                     type: 'subscription.created',
                     providerEventId: event.id,
                     data: {
+                        sessionId: session.id,
                         providerSubscriptionId: session.subscription as string,
                         providerCustomerId: session.customer as string,
                         status: session.payment_status === 'no_payment_required' ? 'trialing' : 'active',
@@ -371,6 +372,9 @@ async function mapStripeEvent(stripe: Stripe, event: Stripe.Event): Promise<Webh
                         specializationCode: session.metadata?.specialization_code || undefined,
                         customerEmail: session.customer_email || session.customer_details?.email || '',
                         priceId: session.metadata?.price_id || '',
+                        invoiceId: typeof session.invoice === 'string' ? session.invoice : session.invoice?.id,
+                        amount: (session.amount_total || 0) / 100,
+                        currency: session.currency || 'mxn',
                         metadata: session.metadata as Record<string, string>,
                     },
                 }

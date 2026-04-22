@@ -19,9 +19,18 @@ type ViewerSubscriptionSnapshot = Pick<
     specialization_code?: Subscription['specialization_code']
 }
 
+type ViewerGrowthMembershipBenefit = {
+    id: string
+    membership_level: number
+    specialization_code?: string | null
+    starts_at: string
+    ends_at: string
+}
+
 export interface ViewerAccessContext {
     profile: ViewerProfileSnapshot
     subscription: ViewerSubscriptionSnapshot | null
+    growthMembershipBenefit: ViewerGrowthMembershipBenefit | null
     membershipActive: boolean
     membershipLevel: number
     membershipSpecializationCode: Profile['membership_specialization_code']
@@ -98,14 +107,32 @@ export async function resolveViewerAccessContext(params: {
         .maybeSingle()
 
     const subscription = (subscriptionData as ViewerSubscriptionSnapshot | null) ?? null
-    const membershipActive = subscription
+    const { data: growthBenefitData } = await (params.supabase
+        .from('growth_membership_benefits') as any)
+        .select('id, membership_level, specialization_code, starts_at, ends_at')
+        .eq('user_id', userId)
+        .eq('status', 'active')
+        .lte('starts_at', new Date().toISOString())
+        .gt('ends_at', new Date().toISOString())
+        .order('membership_level', { ascending: false })
+        .order('ends_at', { ascending: false })
+        .limit(1)
+        .maybeSingle()
+
+    const growthMembershipBenefit = (growthBenefitData as ViewerGrowthMembershipBenefit | null) ?? null
+    const baseMembershipActive = subscription
         ? subscriptionGrantsMembershipAccess(subscription)
         : profileFallbackGrantsMembership(profile)
+    const membershipActive = baseMembershipActive || Boolean(growthMembershipBenefit)
 
-    const membershipLevel = membershipActive
+    const baseMembershipLevel = baseMembershipActive
         ? Number(subscription?.membership_level ?? profile.membership_level ?? 0)
         : 0
-    const membershipSpecializationCode = membershipActive
+    const growthMembershipLevel = Number(growthMembershipBenefit?.membership_level ?? 0)
+    const membershipLevel = Math.max(baseMembershipLevel, growthMembershipLevel)
+    const membershipSpecializationCode = membershipActive && growthMembershipLevel >= baseMembershipLevel && growthMembershipBenefit
+        ? ((growthMembershipBenefit.specialization_code ?? profile.membership_specialization_code ?? null) as Profile['membership_specialization_code'])
+        : baseMembershipActive
         ? (subscription?.specialization_code ?? profile.membership_specialization_code ?? null)
         : null
 
@@ -123,6 +150,7 @@ export async function resolveViewerAccessContext(params: {
     return {
         profile,
         subscription,
+        growthMembershipBenefit,
         membershipActive,
         membershipLevel,
         membershipSpecializationCode,

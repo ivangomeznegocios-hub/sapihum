@@ -2,6 +2,11 @@
 
 import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { recordAnalyticsServerEvent } from '@/lib/analytics/server'
+import {
+    applyGrowthAttributionForRegisteredUser,
+    ensureGrowthProfileForUser,
+    markGrowthAttributionRegistered,
+} from '@/lib/growth/engine'
 import type { InviteCode, InviteAttribution } from '@/types/database'
 
 // ============================================
@@ -38,6 +43,13 @@ export async function getOrCreateInviteCode(): Promise<{
         }
 
         if (existing) {
+            await ensureGrowthProfileForUser({
+                userId: user.id,
+                programType: 'member',
+                referralCode: existing.code,
+                inviteCodeId: existing.id,
+                admin: await createAdminClient(),
+            })
             return { success: true, code: existing as InviteCode }
         }
 
@@ -54,6 +66,14 @@ export async function getOrCreateInviteCode(): Promise<{
             console.error('Error creating invite code:', JSON.stringify(insertError, null, 2))
             return { success: false, error: 'Error al crear código de invitación' }
         }
+
+        await ensureGrowthProfileForUser({
+            userId: user.id,
+            programType: 'member',
+            referralCode: newCode.code,
+            inviteCodeId: newCode.id,
+            admin: adminClient,
+        })
 
         return { success: true, code: newCode as InviteCode }
     } catch (err: any) {
@@ -97,6 +117,12 @@ export async function applyInviteCode(
 
         // 2. Prevent self-referral
         if (result.code_owner_id === referredUserId) {
+            await applyGrowthAttributionForRegisteredUser({
+                inviteeUserId: referredUserId,
+                code,
+                captureMethod: 'manual_code',
+                admin: supabase,
+            })
             return { success: false, error: 'No puedes usar tu propio código de invitación' }
         }
 
@@ -109,6 +135,12 @@ export async function applyInviteCode(
             .maybeSingle()
 
         if (existingAttr) {
+            await applyGrowthAttributionForRegisteredUser({
+                inviteeUserId: referredUserId,
+                code,
+                captureMethod: 'manual_code',
+                admin: supabase,
+            })
             // Already attributed, silently succeed
             return { success: true }
         }
@@ -128,6 +160,13 @@ export async function applyInviteCode(
             console.error('Error creating invite attribution:', insertError)
             return { success: false, error: 'Error al registrar la invitación' }
         }
+
+        await applyGrowthAttributionForRegisteredUser({
+            inviteeUserId: referredUserId,
+            code,
+            captureMethod: 'manual_code',
+            admin: supabase,
+        })
 
         await recordAnalyticsServerEvent({
             eventName: 'invite_applied',
@@ -183,6 +222,8 @@ export async function completeInviteAttribution(
         }
 
         if (data?.id) {
+            await markGrowthAttributionRegistered(referredUserId, supabase)
+
             await recordAnalyticsServerEvent({
                 eventName: 'invite_activated',
                 eventSource: 'server',

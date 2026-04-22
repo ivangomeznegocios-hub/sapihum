@@ -18,9 +18,16 @@ import {
     type LucideIcon,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import type { GrowthCampaign, InviteRewardEvent } from '@/types/database'
+import type { GrowthCampaign } from '@/types/database'
 
 const rewardTypeLabels: Record<string, string> = {
+    extra_days: 'Dias extra',
+    level2_free_month: 'Nivel 2 gratis',
+    upgrade_temp: 'Upgrade temporal',
+    exclusive_session: 'Sesion exclusiva',
+    badge: 'Badge',
+    manual_bonus: 'Bono manual',
+    revenue_share: 'Revenue share',
     credit: 'Credito',
     discount: 'Descuento',
     unlock: 'Beneficio desbloqueado',
@@ -438,7 +445,7 @@ export function LeaderboardTable({
     )
 }
 
-export function RewardTimeline({ rewards }: { rewards: InviteRewardEvent[] }) {
+export function RewardTimeline({ rewards }: { rewards: any[] }) {
     if (rewards.length === 0) {
         return (
             <div className="py-8 text-center text-muted-foreground">
@@ -453,18 +460,20 @@ export function RewardTimeline({ rewards }: { rewards: InviteRewardEvent[] }) {
         <div className="space-y-3">
             {rewards.map((reward) => {
                 const valueLabel = formatRewardValue(reward.reward_value)
+                const isGranted = reward.status ? reward.status === 'granted' : Boolean(reward.processed)
+                const triggerLabel = reward.reason_type || reward.trigger_event
 
                 return (
                     <div key={reward.id} className="flex items-start gap-3 rounded-xl border p-3">
                         <div
                             className={cn(
                                 'mt-0.5 rounded-full p-1.5',
-                                reward.processed
+                                isGranted
                                     ? 'bg-brand-brown text-brand-brown dark:bg-brand-brown/30 dark:text-brand-brown'
                                     : 'bg-brand-yellow text-brand-yellow dark:bg-brand-yellow/30 dark:text-brand-yellow'
                             )}
                         >
-                            {reward.processed ? (
+                            {isGranted ? (
                                 <CheckCircle2 className="h-3.5 w-3.5" />
                             ) : (
                                 <Clock className="h-3.5 w-3.5" />
@@ -480,7 +489,7 @@ export function RewardTimeline({ rewards }: { rewards: InviteRewardEvent[] }) {
                                 Programa: invitacion profesional
                             </p>
                             <p className="text-xs text-muted-foreground">
-                                Trigger: {rewardTriggerLabels[reward.trigger_event] || reward.trigger_event}
+                                Motivo: {rewardTriggerLabels[triggerLabel] || triggerLabel}
                             </p>
                             <p className="text-[10px] text-muted-foreground">
                                 {new Date(reward.created_at).toLocaleDateString('es-MX', {
@@ -497,12 +506,12 @@ export function RewardTimeline({ rewards }: { rewards: InviteRewardEvent[] }) {
                         <span
                             className={cn(
                                 'shrink-0 rounded-full px-2 py-0.5 text-[10px] font-medium',
-                                reward.processed
+                                isGranted
                                     ? 'bg-brand-brown text-brand-brown dark:bg-brand-brown/30 dark:text-brand-brown'
                                     : 'bg-brand-yellow text-brand-yellow dark:bg-brand-yellow/30 dark:text-brand-yellow'
                             )}
                         >
-                            {reward.processed ? 'Entregada' : 'Pendiente'}
+                            {isGranted ? 'Entregada' : reward.status === 'approved' ? 'Aprobada' : 'Pendiente'}
                         </span>
                     </div>
                 )

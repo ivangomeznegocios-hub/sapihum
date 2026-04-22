@@ -10,7 +10,14 @@ import {
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { createCampaign, updateCampaign, toggleCampaignActive, deleteCampaign } from '@/actions/growth-campaigns'
-import { processRewardEvent } from './actions'
+import {
+    approveGrowthRewardAction,
+    consolidateGrowthNowAction,
+    grantGrowthRewardAction,
+    processRewardEvent,
+    revokeGrowthRewardAction,
+    updateMemberReferralConfigAction,
+} from './actions'
 import type { GrowthCampaign, GrowthCampaignType } from '@/types/database'
 
 const visibilityRoleLabels: Record<string, string> = {
@@ -627,6 +634,159 @@ export function ProcessRewardButton({ rewardEventId }: { rewardEventId: string }
             {loading ? <Loader2 className="h-3 w-3 animate-spin" /> : <Check className="h-3 w-3" />}
             Procesar
         </Button>
+    )
+}
+
+export function GrowthRewardActions({ reward }: { reward: { id: string; status: string } }) {
+    const [loading, setLoading] = useState<string | null>(null)
+    const [done, setDone] = useState<string | null>(null)
+
+    async function run(action: 'approve' | 'grant' | 'revoke') {
+        setLoading(action)
+        const result =
+            action === 'approve'
+                ? await approveGrowthRewardAction(reward.id)
+                : action === 'grant'
+                    ? await grantGrowthRewardAction(reward.id)
+                    : await revokeGrowthRewardAction(reward.id)
+
+        if (result.success) setDone(action)
+        setLoading(null)
+    }
+
+    if (done) {
+        const label = done === 'approve' ? 'Aprobada' : done === 'grant' ? 'Otorgada' : 'Revocada'
+        return <span className="flex items-center gap-1 text-xs text-green-600"><CheckCircle2 className="h-3 w-3" /> {label}</span>
+    }
+
+    return (
+        <div className="flex flex-wrap gap-1.5">
+            {reward.status === 'pending_review' && (
+                <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => run('approve')}
+                    disabled={Boolean(loading)}
+                    className="h-7 gap-1 text-xs"
+                >
+                    {loading === 'approve' ? <Loader2 className="h-3 w-3 animate-spin" /> : <Check className="h-3 w-3" />}
+                    Aprobar
+                </Button>
+            )}
+            {(reward.status === 'pending_review' || reward.status === 'approved') && (
+                <Button
+                    size="sm"
+                    onClick={() => run('grant')}
+                    disabled={Boolean(loading)}
+                    className="h-7 gap-1 text-xs"
+                >
+                    {loading === 'grant' ? <Loader2 className="h-3 w-3 animate-spin" /> : <CheckCircle2 className="h-3 w-3" />}
+                    Otorgar
+                </Button>
+            )}
+            <Button
+                size="sm"
+                variant="ghost"
+                onClick={() => run('revoke')}
+                disabled={Boolean(loading)}
+                className="h-7 gap-1 text-xs text-red-600 hover:text-red-700"
+            >
+                {loading === 'revoke' ? <Loader2 className="h-3 w-3 animate-spin" /> : <Trash2 className="h-3 w-3" />}
+                Revocar
+            </Button>
+        </div>
+    )
+}
+
+export function ConsolidateGrowthButton() {
+    const [loading, setLoading] = useState(false)
+    const [message, setMessage] = useState<string | null>(null)
+
+    async function handleClick() {
+        setLoading(true)
+        setMessage(null)
+        const result = await consolidateGrowthNowAction()
+        if (result.success) {
+            setMessage(`${result.qualified ?? 0} calificadas, ${result.blocked ?? 0} bloqueadas`)
+        } else {
+            setMessage(result.error || 'No se pudo consolidar')
+        }
+        setLoading(false)
+    }
+
+    return (
+        <div className="flex flex-col gap-1 sm:items-end">
+            <Button variant="outline" onClick={handleClick} disabled={loading} className="gap-1.5">
+                {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
+                Consolidar ahora
+            </Button>
+            {message && <span className="text-xs text-muted-foreground">{message}</span>}
+        </div>
+    )
+}
+
+export function GrowthConfigForm({
+    attributionWindowDays,
+    consolidationDays,
+}: {
+    attributionWindowDays: number
+    consolidationDays: number
+}) {
+    const [loading, setLoading] = useState(false)
+    const [message, setMessage] = useState<string | null>(null)
+
+    async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+        event.preventDefault()
+        setLoading(true)
+        setMessage(null)
+        const formData = new FormData(event.currentTarget)
+        const result = await updateMemberReferralConfigAction(formData)
+        setMessage(result.success ? 'Configuracion guardada' : result.error || 'Error al guardar')
+        setLoading(false)
+    }
+
+    return (
+        <form onSubmit={handleSubmit} className="rounded-2xl border bg-card p-5">
+            <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                <div>
+                    <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+                        Configuracion MVP
+                    </h2>
+                    <p className="mt-1 text-xs text-muted-foreground">
+                        Controla la ventana de atribucion y los dias para consolidar referidos activos.
+                    </p>
+                </div>
+                {message && <span className="text-xs text-muted-foreground">{message}</span>}
+            </div>
+            <div className="grid gap-3 sm:grid-cols-3">
+                <label className="text-xs font-medium">
+                    Ventana de atribucion
+                    <Input
+                        name="attributionWindowDays"
+                        type="number"
+                        min={1}
+                        defaultValue={attributionWindowDays}
+                        className="mt-1"
+                    />
+                </label>
+                <label className="text-xs font-medium">
+                    Dias de consolidacion
+                    <Input
+                        name="consolidationDays"
+                        type="number"
+                        min={1}
+                        defaultValue={consolidationDays}
+                        className="mt-1"
+                    />
+                </label>
+                <div className="flex items-end">
+                    <Button type="submit" disabled={loading} className="w-full gap-1.5">
+                        {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+                        Guardar reglas
+                    </Button>
+                </div>
+            </div>
+        </form>
     )
 }
 
