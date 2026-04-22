@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { createServiceClient } from '@/lib/supabase/service'
 import type {
     Event,
     EventInsert,
@@ -6,7 +7,7 @@ import type {
     EventRegistration,
     Profile,
 } from '@/types/database'
-import { getPublicCatalogKindForEvent } from '@/lib/events/public'
+import { canShowPublicEventOffer, getPublicCatalogKindForEvent } from '@/lib/events/public'
 import { getUniqueEventAccessCount, getUniqueEventAccessCounts } from '@/lib/events/attendance'
 import { audienceAllowsAccess, getCommercialAccessContext, type CommercialAccessSnapshot } from '@/lib/access/commercial'
 import { canViewerSeeCatalogEvent } from '@/lib/access/catalog'
@@ -275,7 +276,7 @@ export async function getEventRegistrations(eventId: string): Promise<EventRegis
  * Filters out Draft and Cancelled events.
  */
 export async function getPublicEventById(eventId: string): Promise<any | null> {
-    const supabase = await createClient()
+    const supabase = createServiceClient()
 
     const { data: event, error } = await (supabase
         .from('events') as any)
@@ -287,6 +288,10 @@ export async function getPublicEventById(eventId: string): Promise<any | null> {
 
     if (error || !event) {
         console.error('Error fetching public event:', error)
+        return null
+    }
+
+    if (!canShowPublicEventOffer(event)) {
         return null
     }
 
@@ -321,7 +326,7 @@ async function getPublicEventAttendeeCount(supabase: any, eventId: string) {
 }
 
 export async function getPublicEventBySlug(slug: string): Promise<any | null> {
-    const supabase = await createClient()
+    const supabase = createServiceClient()
 
     const { data: event, error } = await (supabase
         .from('events') as any)
@@ -356,7 +361,7 @@ export async function getPublicEventBySlug(slug: string): Promise<any | null> {
 }
 
 export async function getPublicCatalogEvents(kind: 'eventos' | 'cursos' | 'grabaciones') {
-    const supabase = await createClient()
+    const supabase = createServiceClient()
 
     let query = (supabase
         .from('events') as any)
@@ -379,7 +384,8 @@ export async function getPublicCatalogEvents(kind: 'eventos' | 'cursos' | 'graba
         return []
     }
 
-    const ids = data.map((event: any) => event.id)
+    const visibleEvents = data.filter((event: any) => canShowPublicEventOffer(event))
+    const ids = visibleEvents.map((event: any) => event.id)
     if (ids.length === 0) return []
 
     const [{ data: speakers }, attendeeCounts] = await Promise.all([
@@ -408,7 +414,7 @@ export async function getPublicCatalogEvents(kind: 'eventos' | 'cursos' | 'graba
         speakerMap.set(row.event_id, collection)
     }
 
-    return data.map((event: any) => ({
+    return visibleEvents.map((event: any) => ({
         ...event,
         speakers: speakerMap.get(event.id) ?? [],
         attendee_count: attendeeCounts[event.id] || 0,
@@ -421,7 +427,7 @@ export async function getPublicCatalogEvents(kind: 'eventos' | 'cursos' | 'graba
  * Sorts upcoming first (by start_time ASC), completed last.
  */
 export async function getUnifiedCatalogEvents() {
-    const supabase = await createClient()
+    const supabase = createServiceClient()
 
     const { data, error } = await (supabase
         .from('events') as any)
@@ -436,7 +442,8 @@ export async function getUnifiedCatalogEvents() {
         return []
     }
 
-    const ids = data.map((event: any) => event.id)
+    const visibleEvents = data.filter((event: any) => canShowPublicEventOffer(event))
+    const ids = visibleEvents.map((event: any) => event.id)
     if (ids.length === 0) return []
 
     const [{ data: speakers }, attendeeCounts] = await Promise.all([
@@ -465,7 +472,7 @@ export async function getUnifiedCatalogEvents() {
         speakerMap.set(row.event_id, collection)
     }
 
-    const enriched = data.map((event: any) => ({
+    const enriched = visibleEvents.map((event: any) => ({
         ...event,
         speakers: speakerMap.get(event.id) ?? [],
         attendee_count: attendeeCounts[event.id] || 0,

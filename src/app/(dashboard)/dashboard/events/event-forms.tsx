@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { registerForEvent, cancelEventRegistration, createEvent, updateEvent, deleteEvent, duplicateEvent } from './actions'
 import { createClient } from '@/lib/supabase/client'
-import { getPublicEventPath } from '@/lib/events/public'
+import { getPublicEventPath, isMembersOnlyAudience } from '@/lib/events/public'
 import { MaterialLinksEditor, type EditableMaterialLink } from '@/components/materials/material-links-editor'
 import {
     DEFAULT_SPEAKER_PERCENTAGE_RATE,
@@ -633,10 +633,21 @@ export function CreateEventForm({ onClose, isEmbedded = false, initialData, even
         : null
     const publicUrl = typeof window !== 'undefined' && publicPath ? `${window.location.origin}${publicPath}` : publicPath
     const statusLabel = STATUS_LABELS[statusPreview] || statusPreview
-    const summaryPrice = numericPrice > 0 ? `$${numericPrice.toFixed(0)} MXN` : 'Gratis'
+    const isMembersOnlySelection = isMembersOnlyAudience(normalizedAudience)
+    const summaryPrice = isMembersOnlySelection
+        ? 'Evento exclusivo para miembros'
+        : numericPrice > 0
+            ? `$${numericPrice.toFixed(0)} MXN`
+            : 'Gratis'
     const summaryAudience = normalizedAudience.map(getAudienceLabel).join(', ')
     const memberAccessSummary =
-        numericPrice <= 0
+        isMembersOnlySelection
+            ? numericPrice <= 0 || memberAccessType === 'free'
+                ? 'Solo miembros activos pueden participar. La landing publica no mostrara precio.'
+                : memberAccessType === 'discounted'
+                    ? `Solo miembros activos pueden participar. Precio para miembros: $${numericMemberPrice.toFixed(0)} MXN.`
+                    : `Solo miembros activos pueden participar. Precio para miembros: $${numericPrice.toFixed(0)} MXN.`
+            : numericPrice <= 0
             ? 'Los miembros entran sin costo porque el evento es gratuito.'
             : selectedSpecializationCode
                 ? memberAccessType === 'discounted'
@@ -1607,6 +1618,11 @@ export function CreateEventForm({ onClose, isEmbedded = false, initialData, even
                                 onChange={(e) => setPriceValue(e.target.value)}
                                 className="mt-1 w-full rounded-lg border bg-background px-3 py-2"
                             />
+                            {isMembersOnlySelection && (
+                                <p className="mt-1 text-xs text-muted-foreground">
+                                    En la pagina publica se mostrara como evento exclusivo para miembros, no como precio general.
+                                </p>
+                            )}
                         </div>
 
                         <div>

@@ -34,6 +34,31 @@ export function getPublicEventPath(event: Pick<Event, 'slug' | 'event_type' | 'r
     return `/eventos/${event.slug}`
 }
 
+export function isMembersOnlyAudience(audience: unknown) {
+    if (!Array.isArray(audience) || audience.length === 0) return false
+    return audience.includes('members') && !audience.includes('public')
+}
+
+export function isMembersOnlyEvent(event: {
+    target_audience?: unknown
+    is_members_only?: boolean | null
+}) {
+    if (event.is_members_only) return true
+    if (isMembersOnlyAudience(event.target_audience)) return true
+    return false
+}
+
+export function canShowPublicEventOffer(event: {
+    target_audience?: unknown
+    is_members_only?: boolean | null
+}) {
+    const audience = Array.isArray(event.target_audience) && event.target_audience.length > 0
+        ? event.target_audience
+        : ['public']
+
+    return audience.includes('public') || isMembersOnlyEvent(event)
+}
+
 export function buildPublicEventUrl(baseUrl: string, event: Pick<Event, 'slug' | 'event_type' | 'recording_url' | 'status'>) {
     return `${baseUrl}${getPublicEventPath(event)}`
 }

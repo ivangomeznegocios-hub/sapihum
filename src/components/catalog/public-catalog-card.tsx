@@ -1,5 +1,6 @@
 import Link from 'next/link'
-import { getPublicEventPath, isPastPublicCatalogEvent } from '@/lib/events/public'
+import { Lock } from 'lucide-react'
+import { getPublicEventPath, isMembersOnlyEvent, isPastPublicCatalogEvent } from '@/lib/events/public'
 import { getSpecializationByCode } from '@/lib/specializations'
 import { DEFAULT_TIMEZONE } from '@/lib/timezone'
 
@@ -61,7 +62,7 @@ export function PublicCatalogCard({
     const specialization = getSpecializationByCode(event.specialization_code)
     const memberFree = !event.specialization_code && event.member_access_type === 'free' && price > 0
     const subcategoryLabel = event.subcategory ? SUBCATEGORY_LABELS[event.subcategory] || null : null
-    const isMembersOnly = (event.target_audience || []).some((a: string) => a !== 'public') && !(event.target_audience || []).includes('public')
+    const isMembersOnly = isMembersOnlyEvent(event)
 
 
     return (
@@ -118,7 +119,8 @@ export function PublicCatalogCard({
                     )}
                     {isMembersOnly && (
                         <span className="inline-flex items-center gap-1 rounded-full bg-brand-brown/80 backdrop-blur-sm px-2 py-1 text-[10px] font-semibold text-white">
-                            🔒 Miembros
+                            <Lock className="h-3 w-3" />
+                            Solo miembros
                         </span>
                     )}
                 </div>
@@ -201,7 +203,12 @@ export function PublicCatalogCard({
                 <div className={`mt-4 flex items-center border-t border-border/50 pt-4 ${hidePrice ? 'justify-end' : 'justify-between'}`}>
                     {!hidePrice && (
                         <div>
-                            {isFree ? (
+                            {isMembersOnly ? (
+                                <span className="inline-flex items-center gap-1.5 text-sm font-bold text-brand-brown">
+                                    <Lock className="h-4 w-4" />
+                                    Exclusivo miembros
+                                </span>
+                            ) : isFree ? (
                                 <span className="inline-flex items-center gap-1 text-sm font-bold text-brand-brown">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
                                     Gratis

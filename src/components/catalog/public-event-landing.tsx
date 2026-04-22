@@ -6,7 +6,7 @@ import { ArrowRight, Check, Download, Lock } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { getEffectiveEventPriceForProfile, getEventMemberAccessMessage, isEventIncludedForMatchingSpecialization } from '@/lib/events/pricing'
 import { getEventCampaignForEvent } from '@/lib/events/campaigns'
-import { getDefaultPublicCtaLabel, getEventTypeLabel, getPublicEventPath } from '@/lib/events/public'
+import { getDefaultPublicCtaLabel, getEventTypeLabel, getPublicEventPath, isMembersOnlyEvent } from '@/lib/events/public'
 import { brandName } from '@/lib/brand'
 import { getSpecializationByCode } from '@/lib/specializations'
 import { DEFAULT_TIMEZONE } from '@/lib/timezone'
@@ -313,9 +313,7 @@ export function PublicEventLanding({
     hasAccess: boolean
 }) {
     const ctaLabel = getDefaultPublicCtaLabel(event)
-    const isMembersOnly = Array.isArray(event.target_audience)
-        ? event.target_audience.includes('members') && !event.target_audience.includes('public')
-        : false
+    const isMembersOnly = isMembersOnlyEvent(event)
     const specialization = getSpecializationByCode(event.specialization_code)
     const finalPrice = getEffectiveEventPriceForProfile(event, {
         membershipLevel,
@@ -338,6 +336,8 @@ export function PublicEventLanding({
         hasActiveMembership,
         membershipSpecializationCode,
     })
+    const membershipPurchaseHref = `/precios?next=${encodeURIComponent(getPublicEventPath(event))}&autoCheckout=true`
+    const isMembershipLocked = isMembersOnly && !hasActiveMembership && !hasAccess
     const showMembershipUpsell =
         !hasAccess &&
         !isBlocked &&
@@ -403,6 +403,12 @@ export function PublicEventLanding({
                             <span className="inline-flex items-center gap-1.5 rounded-full border border-brand-yellow/20 bg-brand-yellow/10 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-brand-yellow">
                                 {formatLabel}
                             </span>
+                            {isMembersOnly && (
+                                <span className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.08] px-3 py-1 text-xs font-semibold text-white">
+                                    <Lock className="h-3.5 w-3.5" />
+                                    Solo miembros
+                                </span>
+                            )}
                             {event.hero_badge && (
                                 <span className="inline-flex items-center rounded-full bg-white/10 px-3 py-1 text-xs font-medium text-white/85">
                                     {event.hero_badge}
@@ -507,16 +513,27 @@ export function PublicEventLanding({
                     <aside className="lg:sticky lg:top-24">
                         <div className="rounded-[28px] border border-white/10 bg-black/30 p-5 shadow-2xl shadow-black/20 backdrop-blur-sm">
                             <div>
-                                <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-neutral-500">Inversion</p>
-                                <p className="mt-2 text-3xl font-bold text-white">
-                                    {finalPrice > 0 ? `$${finalPrice.toFixed(0)} MXN` : 'Gratis'}
+                                <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-neutral-500">
+                                    {isMembershipLocked ? 'Acceso' : 'Inversion'}
                                 </p>
-                                {includedBySpecialization && (
+                                <p className={cn('mt-2 font-bold text-white', isMembershipLocked ? 'text-2xl leading-tight' : 'text-3xl')}>
+                                    {isMembershipLocked
+                                        ? 'Evento exclusivo para miembros'
+                                        : finalPrice > 0
+                                            ? `$${finalPrice.toFixed(0)} MXN`
+                                            : 'Gratis'}
+                                </p>
+                                {isMembershipLocked && (
+                                    <p className="mt-2 text-sm leading-relaxed text-neutral-400">
+                                        Activa tu membresia para participar y desbloquear el hub privado.
+                                    </p>
+                                )}
+                                {!isMembershipLocked && includedBySpecialization && (
                                     <p className="mt-1 text-sm font-medium text-brand-yellow">
                                         Incluido por tu especialidad
                                     </p>
                                 )}
-                                {finalPrice > 0 && finalPrice < Number(event.price || 0) && (
+                                {!isMembershipLocked && finalPrice > 0 && finalPrice < Number(event.price || 0) && (
                                     <p className="mt-1 text-sm font-medium text-brand-yellow">
                                         Tienes precio preferencial de miembro
                                     </p>
@@ -524,8 +541,19 @@ export function PublicEventLanding({
                             </div>
 
                             <div className="mt-5 rounded-[22px] border border-white/10 bg-white/[0.04] p-4 text-sm">
-                                <p className="font-medium text-white">{memberMessage.label}</p>
-                                {memberMessage.note && <p className="mt-2 leading-relaxed text-neutral-400">{memberMessage.note}</p>}
+                                {isMembershipLocked ? (
+                                    <>
+                                        <p className="font-medium text-white">Acceso reservado a miembros activos</p>
+                                        <p className="mt-2 leading-relaxed text-neutral-400">
+                                            Al comprar la membresia podras tomar este evento desde tu acceso privado.
+                                        </p>
+                                    </>
+                                ) : (
+                                    <>
+                                        <p className="font-medium text-white">{memberMessage.label}</p>
+                                        {memberMessage.note && <p className="mt-2 leading-relaxed text-neutral-400">{memberMessage.note}</p>}
+                                    </>
+                                )}
                             </div>
 
                             <div className="mt-5 space-y-3">
@@ -551,7 +579,7 @@ export function PublicEventLanding({
                                     </>
                                 ) : (
                                     <>
-                                        {!isMembersOnly && (
+                                        {!isMembershipLocked && (
                                             <PublicAccessCta
                                                 eventId={event.id}
                                                 eventSlug={event.slug}
@@ -571,7 +599,7 @@ export function PublicEventLanding({
                                                         </span>
                                                     </div>
                                                 )}
-                                                <Link href={`/precios?next=/eventos/${event.slug}&autoCheckout=true`}>
+                                                <Link href={membershipPurchaseHref}>
                                                     <Button
                                                         variant={isMembersOnly ? 'default' : 'outline'}
                                                         className={cn('w-full', isMembersOnly ? 'py-6 text-base' : 'border-brand-yellow/30 text-brand-yellow hover:bg-brand-yellow/10')}
@@ -850,6 +878,13 @@ export function PublicEventLanding({
                             {hasAccess ? (
                                 <Link href={`/hub/${event.slug}`} className="block">
                                     <Button className="w-full">Entrar al hub</Button>
+                                </Link>
+                            ) : isMembershipLocked ? (
+                                <Link href={membershipPurchaseHref} className="block">
+                                    <Button className="w-full gap-2">
+                                        <Lock className="h-4 w-4" />
+                                        {membershipCtaLabel}
+                                    </Button>
                                 </Link>
                             ) : (
                                 <PublicAccessCta

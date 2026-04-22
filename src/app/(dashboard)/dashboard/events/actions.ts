@@ -11,7 +11,7 @@ import {
 import { getUniqueEventAccessCount } from '@/lib/events/attendance'
 import { grantEventEntitlements } from '@/lib/events/entitlements'
 import { getMembershipEntitlementEndsAt } from '@/lib/events/access'
-import { slugifyCatalogText } from '@/lib/events/public'
+import { isMembersOnlyAudience, slugifyCatalogText } from '@/lib/events/public'
 import { getEventEditorAccessForUser } from '@/lib/events/permissions'
 import { audienceAllowsAccess, getCommercialAccessContext } from '@/lib/access/commercial'
 import { sendEmail } from '@/lib/email/index'
@@ -794,7 +794,7 @@ export async function createEvent(formData: FormData) {
             target_audience: normalizedAudience,
             registration_fields: registrationFields,
             recording_available_days: recordingDays,
-            is_members_only: normalizedAudience.includes('members'),
+            is_members_only: isMembersOnlyAudience(normalizedAudience),
             created_by: user.id,
             category: readTrimmedString(formData.get('category')) || 'general',
             subcategory: readTrimmedString(formData.get('subcategory')),
@@ -1026,7 +1026,7 @@ export async function updateEvent(eventId: string, formData: FormData) {
     }
 
     if (targetAudience) {
-        updates.is_members_only = targetAudience.includes('members')
+        updates.is_members_only = isMembersOnlyAudience(targetAudience)
     }
 
     if (category) updates.category = category
