@@ -3,10 +3,16 @@ import { expect, test, type Page } from '@playwright/test'
 import { createServerClient } from '@supabase/ssr'
 import { createClient } from '@supabase/supabase-js'
 
-dotenv.config({ path: '.env.local', quiet: true })
+dotenv.config({ path: process.env.PLAYWRIGHT_ENV_FILE ?? '.env.local', quiet: true })
 
 const PASSWORD = 'test1234'
 const BASE_URL = process.env.PLAYWRIGHT_BASE_URL ?? 'http://127.0.0.1:3000'
+const RUN_SEEDED_AUTH_AUDITS = process.env.PLAYWRIGHT_RUN_SEEDED_AUTH_AUDITS === '1'
+
+test.skip(
+  !RUN_SEEDED_AUTH_AUDITS,
+  'Seeded auth audits require PLAYWRIGHT_RUN_SEEDED_AUTH_AUDITS=1 and the @test users to exist.'
+)
 
 function createSessionSupabase(
   setCookies: (cookiesToSet: Array<{ name: string; value: string; options?: Record<string, unknown> }>) => void

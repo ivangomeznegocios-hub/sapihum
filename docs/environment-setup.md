@@ -135,6 +135,8 @@ These can stay unset until the related feature is intentionally enabled:
 - `PLAYWRIGHT_WEB_SERVER_COMMAND`
 - `PLAYWRIGHT_SKIP_WEB_SERVER`
 - `PLAYWRIGHT_STORAGE_STATE_DIR`
+- `PLAYWRIGHT_ENV_FILE`
+- `PLAYWRIGHT_RUN_SEEDED_AUTH_AUDITS`
 
 ## Operational Rules
 
@@ -145,6 +147,7 @@ These can stay unset until the related feature is intentionally enabled:
 - Never expose `SUPABASE_SERVICE_ROLE_KEY` or any other server secret through `NEXT_PUBLIC_*`.
 - Keep `NEXT_PUBLIC_COOKIEBOT_DOMAIN_GROUP_ID` and `NEXT_PUBLIC_GOOGLE_TAG_MANAGER_ID` different between staging and production if you use different CMP / GTM workspaces.
 - Do not enable `ENABLE_META_SERVER_TRACKING` or `ENABLE_TIKTOK_SERVER_TRACKING` until the corresponding test events validate correctly in staging.
+- Leave `PLAYWRIGHT_RUN_SEEDED_AUTH_AUDITS` unset in production-like databases. Set it to `1` only in a disposable seeded environment that contains the `@test` audit users.
 
 ## Analytics Stack
 
