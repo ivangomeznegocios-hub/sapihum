@@ -14,7 +14,10 @@ import {
     approveGrowthRewardAction,
     consolidateGrowthNowAction,
     grantGrowthRewardAction,
+    markGrowthAttributionFraudAction,
+    markGrowthConversionFraudAction,
     processRewardEvent,
+    reviewGrowthFraudFlagAction,
     revokeGrowthRewardAction,
     updateMemberReferralConfigAction,
 } from './actions'
@@ -698,6 +701,86 @@ export function GrowthRewardActions({ reward }: { reward: { id: string; status: 
     )
 }
 
+export function GrowthAttributionFraudButton({ attributionId }: { attributionId: string }) {
+    const [loading, setLoading] = useState(false)
+    const [done, setDone] = useState(false)
+
+    async function handleClick() {
+        setLoading(true)
+        const result = await markGrowthAttributionFraudAction(attributionId)
+        if (result.success) setDone(true)
+        setLoading(false)
+    }
+
+    if (done) {
+        return <span className="flex items-center gap-1 text-xs text-red-600"><AlertCircle className="h-3 w-3" /> Marcada como fraude</span>
+    }
+
+    return (
+        <Button variant="ghost" size="sm" onClick={handleClick} disabled={loading} className="h-7 gap-1 text-xs text-red-600 hover:text-red-700">
+            {loading ? <Loader2 className="h-3 w-3 animate-spin" /> : <AlertCircle className="h-3 w-3" />}
+            Marcar fraude
+        </Button>
+    )
+}
+
+export function GrowthConversionFraudButton({ conversionId }: { conversionId: string }) {
+    const [loading, setLoading] = useState(false)
+    const [done, setDone] = useState(false)
+
+    async function handleClick() {
+        setLoading(true)
+        const result = await markGrowthConversionFraudAction(conversionId)
+        if (result.success) setDone(true)
+        setLoading(false)
+    }
+
+    if (done) {
+        return <span className="flex items-center gap-1 text-xs text-red-600"><AlertCircle className="h-3 w-3" /> Marcada como fraude</span>
+    }
+
+    return (
+        <Button variant="ghost" size="sm" onClick={handleClick} disabled={loading} className="h-7 gap-1 text-xs text-red-600 hover:text-red-700">
+            {loading ? <Loader2 className="h-3 w-3 animate-spin" /> : <AlertCircle className="h-3 w-3" />}
+            Marcar fraude
+        </Button>
+    )
+}
+
+export function GrowthFlagReviewActions({ flagId, status }: { flagId: string; status: string }) {
+    const [loading, setLoading] = useState<string | null>(null)
+    const [done, setDone] = useState<string | null>(null)
+
+    async function run(nextStatus: 'reviewed' | 'dismissed' | 'confirmed') {
+        setLoading(nextStatus)
+        const result = await reviewGrowthFraudFlagAction(flagId, nextStatus)
+        if (result.success) setDone(nextStatus)
+        setLoading(null)
+    }
+
+    if (done || status !== 'open') {
+        const label = done === 'confirmed' ? 'Confirmado' : done === 'dismissed' ? 'Descartado' : done === 'reviewed' ? 'Revisado' : status
+        return <span className="text-xs text-muted-foreground">{label}</span>
+    }
+
+    return (
+        <div className="flex flex-wrap gap-1.5">
+            <Button size="sm" variant="outline" onClick={() => run('reviewed')} disabled={Boolean(loading)} className="h-7 gap-1 text-xs">
+                {loading === 'reviewed' ? <Loader2 className="h-3 w-3 animate-spin" /> : <Check className="h-3 w-3" />}
+                Revisar
+            </Button>
+            <Button size="sm" variant="ghost" onClick={() => run('dismissed')} disabled={Boolean(loading)} className="h-7 gap-1 text-xs">
+                {loading === 'dismissed' ? <Loader2 className="h-3 w-3 animate-spin" /> : <Trash2 className="h-3 w-3" />}
+                Descartar
+            </Button>
+            <Button size="sm" onClick={() => run('confirmed')} disabled={Boolean(loading)} className="h-7 gap-1 text-xs">
+                {loading === 'confirmed' ? <Loader2 className="h-3 w-3 animate-spin" /> : <AlertCircle className="h-3 w-3" />}
+                Confirmar fraude
+            </Button>
+        </div>
+    )
+}
+
 export function ConsolidateGrowthButton() {
     const [loading, setLoading] = useState(false)
     const [message, setMessage] = useState<string | null>(null)
@@ -727,10 +810,14 @@ export function ConsolidateGrowthButton() {
 
 export function GrowthConfigForm({
     attributionWindowDays,
-    consolidationDays,
+    consolidationRule,
+    fallbackConsolidationRule,
+    fixedDaysFallback,
 }: {
     attributionWindowDays: number
-    consolidationDays: number
+    consolidationRule: string
+    fallbackConsolidationRule: string
+    fixedDaysFallback: number
 }) {
     const [loading, setLoading] = useState(false)
     const [message, setMessage] = useState<string | null>(null)
@@ -753,12 +840,12 @@ export function GrowthConfigForm({
                         Configuracion MVP
                     </h2>
                     <p className="mt-1 text-xs text-muted-foreground">
-                        Controla la ventana de atribucion y los dias para consolidar referidos activos.
+                        Controla la ventana de atribucion, la regla principal de consolidacion y el fallback del motor.
                     </p>
                 </div>
                 {message && <span className="text-xs text-muted-foreground">{message}</span>}
             </div>
-            <div className="grid gap-3 sm:grid-cols-3">
+            <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
                 <label className="text-xs font-medium">
                     Ventana de atribucion
                     <Input
@@ -770,16 +857,39 @@ export function GrowthConfigForm({
                     />
                 </label>
                 <label className="text-xs font-medium">
-                    Dias de consolidacion
+                    Regla principal
+                    <select
+                        name="consolidationRule"
+                        defaultValue={consolidationRule}
+                        className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                    >
+                        <option value="first_renewal_paid">Primer renewal pagado</option>
+                        <option value="billing_cycle_end">Fin de ciclo</option>
+                        <option value="fixed_days">Dias fijos</option>
+                    </select>
+                </label>
+                <label className="text-xs font-medium">
+                    Fallback
+                    <select
+                        name="fallbackConsolidationRule"
+                        defaultValue={fallbackConsolidationRule}
+                        className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                    >
+                        <option value="billing_cycle_end">Fin de ciclo</option>
+                        <option value="fixed_days">Dias fijos</option>
+                    </select>
+                </label>
+                <label className="text-xs font-medium">
+                    Dias fijos fallback
                     <Input
-                        name="consolidationDays"
+                        name="fixedDaysFallback"
                         type="number"
                         min={1}
-                        defaultValue={consolidationDays}
+                        defaultValue={fixedDaysFallback}
                         className="mt-1"
                     />
                 </label>
-                <div className="flex items-end">
+                <div className="flex items-end xl:col-span-4">
                     <Button type="submit" disabled={loading} className="w-full gap-1.5">
                         {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
                         Guardar reglas

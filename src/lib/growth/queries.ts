@@ -122,6 +122,7 @@ export async function getGrowthAdminDashboard() {
         pendingRewardsCount,
         openFlagsCount,
         pendingRewardsResult,
+        recentAttributionsResult,
         recentConversionsResult,
         openFlagsResult,
         configResult,
@@ -140,6 +141,14 @@ export async function getGrowthAdminDashboard() {
             `)
             .in('status', ['pending_review', 'approved'])
             .order('created_at', { ascending: true })
+            .limit(20),
+        (admin.from('growth_attributions') as any)
+            .select(`
+                *,
+                invitee:profiles!growth_attributions_invitee_user_id_fkey(id, full_name, email, role),
+                owner:profiles!growth_attributions_owner_user_id_fkey(id, full_name, email, role)
+            `)
+            .order('created_at', { ascending: false })
             .limit(20),
         (admin.from('growth_conversions') as any)
             .select(`
@@ -175,9 +184,174 @@ export async function getGrowthAdminDashboard() {
             openFlags: openFlagsCount.count ?? 0,
         },
         pendingRewards: asArray(pendingRewardsResult.data),
+        recentAttributions: asArray(recentAttributionsResult.data),
         recentConversions: asArray(recentConversionsResult.data),
         openFlags: asArray(openFlagsResult.data),
         config: configResult.data,
         topReferrers,
+    }
+}
+
+export async function getGrowthAdminReviewData(params: {
+    entityType: 'attributions' | 'conversions' | 'rewards' | 'flags'
+    entityId: string
+}) {
+    const admin = getAdmin()
+    let attributionId: string | null = null
+    let conversionId: string | null = null
+    let rewardId: string | null = null
+    let flagId: string | null = null
+    let primary: any = null
+
+    if (params.entityType === 'attributions') {
+        const { data } = await (admin.from('growth_attributions') as any)
+            .select(`
+                *,
+                invitee:profiles!growth_attributions_invitee_user_id_fkey(id, full_name, email, role),
+                owner:profiles!growth_attributions_owner_user_id_fkey(id, full_name, email, role)
+            `)
+            .eq('id', params.entityId)
+            .maybeSingle()
+        primary = data ?? null
+        attributionId = data?.id ?? null
+    }
+
+    if (params.entityType === 'conversions') {
+        const { data } = await (admin.from('growth_conversions') as any)
+            .select(`
+                *,
+                invitee:profiles!growth_conversions_invitee_user_id_fkey(id, full_name, email, role),
+                owner:profiles!growth_conversions_owner_user_id_fkey(id, full_name, email, role)
+            `)
+            .eq('id', params.entityId)
+            .maybeSingle()
+        primary = data ?? null
+        conversionId = data?.id ?? null
+        attributionId = data?.attribution_id ?? null
+    }
+
+    if (params.entityType === 'rewards') {
+        const { data } = await (admin.from('growth_rewards') as any)
+            .select(`
+                *,
+                beneficiary:profiles!growth_rewards_beneficiary_user_id_fkey(id, full_name, email, role)
+            `)
+            .eq('id', params.entityId)
+            .maybeSingle()
+        primary = data ?? null
+        rewardId = data?.id ?? null
+        conversionId = data?.conversion_id ?? null
+        attributionId = data?.attribution_id ?? null
+    }
+
+    if (params.entityType === 'flags') {
+        const { data } = await (admin.from('growth_fraud_flags') as any)
+            .select(`
+                *,
+                user:profiles!growth_fraud_flags_user_id_fkey(id, full_name, email, role),
+                related_user:profiles!growth_fraud_flags_related_user_id_fkey(id, full_name, email, role)
+            `)
+            .eq('id', params.entityId)
+            .maybeSingle()
+        primary = data ?? null
+        flagId = data?.id ?? null
+        conversionId = data?.growth_conversion_id ?? null
+        attributionId = data?.growth_attribution_id ?? attributionId
+    }
+
+    if (!primary) return null
+
+    const [
+        attributionResult,
+        conversionsResult,
+        rewardsResult,
+        flagsResult,
+    ] = await Promise.all([
+        attributionId
+            ? (admin.from('growth_attributions') as any)
+                .select(`
+                    *,
+                    invitee:profiles!growth_attributions_invitee_user_id_fkey(id, full_name, email, role),
+                    owner:profiles!growth_attributions_owner_user_id_fkey(id, full_name, email, role)
+                `)
+                .eq('id', attributionId)
+                .maybeSingle()
+            : Promise.resolve({ data: null }),
+        attributionId
+            ? (admin.from('growth_conversions') as any)
+                .select(`
+                    *,
+                    invitee:profiles!growth_conversions_invitee_user_id_fkey(id, full_name, email, role),
+                    owner:profiles!growth_conversions_owner_user_id_fkey(id, full_name, email, role)
+                `)
+                .eq('attribution_id', attributionId)
+                .order('created_at', { ascending: false })
+            : conversionId
+                ? (admin.from('growth_conversions') as any)
+                    .select(`
+                        *,
+                        invitee:profiles!growth_conversions_invitee_user_id_fkey(id, full_name, email, role),
+                        owner:profiles!growth_conversions_owner_user_id_fkey(id, full_name, email, role)
+                    `)
+                    .eq('id', conversionId)
+                : Promise.resolve({ data: [] }),
+        attributionId
+            ? (admin.from('growth_rewards') as any)
+                .select(`
+                    *,
+                    beneficiary:profiles!growth_rewards_beneficiary_user_id_fkey(id, full_name, email, role)
+                `)
+                .eq('attribution_id', attributionId)
+                .order('created_at', { ascending: false })
+            : rewardId
+                ? (admin.from('growth_rewards') as any)
+                    .select(`
+                        *,
+                        beneficiary:profiles!growth_rewards_beneficiary_user_id_fkey(id, full_name, email, role)
+                    `)
+                    .eq('id', rewardId)
+                : Promise.resolve({ data: [] }),
+        attributionId || conversionId
+            ? (admin.from('growth_fraud_flags') as any)
+                .select(`
+                    *,
+                    user:profiles!growth_fraud_flags_user_id_fkey(id, full_name, email, role),
+                    related_user:profiles!growth_fraud_flags_related_user_id_fkey(id, full_name, email, role)
+                `)
+                .or(
+                    [
+                        attributionId ? `growth_attribution_id.eq.${attributionId}` : null,
+                        conversionId ? `growth_conversion_id.eq.${conversionId}` : null,
+                        flagId ? `id.eq.${flagId}` : null,
+                    ].filter(Boolean).join(',')
+                )
+                .order('created_at', { ascending: false })
+            : flagId
+                ? (admin.from('growth_fraud_flags') as any)
+                    .select(`
+                        *,
+                        user:profiles!growth_fraud_flags_user_id_fkey(id, full_name, email, role),
+                        related_user:profiles!growth_fraud_flags_related_user_id_fkey(id, full_name, email, role)
+                    `)
+                    .eq('id', flagId)
+                : Promise.resolve({ data: [] }),
+    ])
+
+    const rewards = asArray(rewardsResult.data)
+    const rewardIds = rewards.map((reward: any) => reward.id)
+    const benefitsResult = rewardIds.length > 0
+        ? await (admin.from('growth_membership_benefits') as any)
+            .select('*')
+            .in('reward_id', rewardIds)
+        : { data: [] }
+
+    return {
+        entityType: params.entityType,
+        primary,
+        attribution: attributionResult.data ?? null,
+        conversions: asArray(conversionsResult.data),
+        rewards,
+        flags: asArray(flagsResult.data),
+        benefits: asArray(benefitsResult.data),
     }
 }

@@ -1,4 +1,4 @@
-import { addDays, isAfter } from 'date-fns'
+import { addDays, addMonths, isAfter } from 'date-fns'
 import { createServiceClient } from '@/lib/supabase/service'
 import type { RefundWebhookData, SubscriptionWebhookData } from '@/lib/payments/types'
 
@@ -9,6 +9,7 @@ export type GrowthSourceType = 'organization' | 'host' | 'ambassador' | 'member'
 export type GrowthAttributionStatus = 'captured' | 'registered' | 'paid' | 'qualified' | 'inactive' | 'rejected'
 export type GrowthConversionStatus = 'pending' | 'confirmed' | 'qualified' | 'cancelled' | 'refunded' | 'fraud_flagged'
 export type GrowthRewardStatus = 'pending_review' | 'approved' | 'granted' | 'revoked' | 'expired'
+export type GrowthConsolidationRule = 'first_renewal_paid' | 'billing_cycle_end' | 'fixed_days'
 export type GrowthRewardType =
     | 'extra_days'
     | 'level2_free_month'
@@ -32,15 +33,33 @@ type GrowthRewardRule = {
 type GrowthProgramConfig = {
     attribution_window_days: number
     consolidation_days: number
+    consolidation_rule: GrowthConsolidationRule
+    fallback_consolidation_rule: Extract<GrowthConsolidationRule, 'billing_cycle_end' | 'fixed_days'>
     owner_priority: GrowthSourceType[]
     automatic_reward_types: GrowthRewardType[]
     manual_reward_types: GrowthRewardType[]
     reward_rules: GrowthRewardRule[]
 }
 
+type GrowthConsolidationMetadata = {
+    primary_rule: GrowthConsolidationRule
+    fallback_rule: Extract<GrowthConsolidationRule, 'billing_cycle_end' | 'fixed_days'>
+    fixed_days: number
+    billing_cycle_end_at: string | null
+    qualification_due_at: string
+    qualified_by_rule?: GrowthConsolidationRule | null
+    renewal_paid_at?: string | null
+    renewal_transaction_id?: string | null
+    renewal_payment_id?: string | null
+    renewal_invoice_id?: string | null
+    renewal_session_id?: string | null
+}
+
 const DEFAULT_MEMBER_REFERRAL_CONFIG: GrowthProgramConfig = {
     attribution_window_days: 30,
     consolidation_days: 30,
+    consolidation_rule: 'first_renewal_paid',
+    fallback_consolidation_rule: 'billing_cycle_end',
     owner_priority: ['organization', 'host', 'ambassador', 'member', 'organic'],
     automatic_reward_types: ['extra_days', 'badge'],
     manual_reward_types: ['level2_free_month', 'upgrade_temp', 'commission', 'revenue_share', 'manual_bonus'],
@@ -93,10 +112,105 @@ function sourcePriority(sourceType: string | null | undefined, priority: GrowthS
     return index === -1 ? priority.length : index
 }
 
+function toDateOrNull(value: string | Date | null | undefined) {
+    if (!value) return null
+    const date = value instanceof Date ? value : new Date(value)
+    return Number.isNaN(date.getTime()) ? null : date
+}
+
 function parsePositiveInt(value: unknown, fallback: number) {
     const parsed = Number(value)
     if (!Number.isFinite(parsed) || parsed <= 0) return fallback
     return Math.trunc(parsed)
+}
+
+function normalizeConsolidationRule(value: unknown, fallback: GrowthConsolidationRule): GrowthConsolidationRule {
+    if (value === 'first_renewal_paid' || value === 'billing_cycle_end' || value === 'fixed_days') {
+        return value
+    }
+
+    return fallback
+}
+
+function normalizeFallbackConsolidationRule(
+    value: unknown,
+    fallback: Extract<GrowthConsolidationRule, 'billing_cycle_end' | 'fixed_days'>
+): Extract<GrowthConsolidationRule, 'billing_cycle_end' | 'fixed_days'> {
+    const normalized = normalizeConsolidationRule(value, fallback)
+    return normalized === 'first_renewal_paid' ? fallback : normalized
+}
+
+function resolveConsolidationDueAt(params: {
+    activatedAt: Date
+    billingCycleEndAt: Date | null
+    primaryRule: GrowthConsolidationRule
+    fallbackRule: Extract<GrowthConsolidationRule, 'billing_cycle_end' | 'fixed_days'>
+    fixedDays: number
+}) {
+    const fixedDaysDueAt = addDays(params.activatedAt, params.fixedDays)
+
+    if (params.primaryRule === 'fixed_days') return fixedDaysDueAt
+    if (params.primaryRule === 'billing_cycle_end') return params.billingCycleEndAt ?? fixedDaysDueAt
+
+    if (params.fallbackRule === 'billing_cycle_end' && params.billingCycleEndAt) {
+        return params.billingCycleEndAt
+    }
+
+    return fixedDaysDueAt
+}
+
+function buildConsolidationMetadata(params: {
+    activatedAt: Date
+    billingCycleEndAt: Date | null
+    config: GrowthProgramConfig
+    existing?: Partial<GrowthConsolidationMetadata> | null
+}) {
+    const existing = params.existing ?? {}
+    const primaryRule = existing.primary_rule
+        ? normalizeConsolidationRule(existing.primary_rule, params.config.consolidation_rule)
+        : params.config.consolidation_rule
+    const fallbackRule = normalizeFallbackConsolidationRule(
+        existing.fallback_rule ?? params.config.fallback_consolidation_rule,
+        params.config.fallback_consolidation_rule
+    )
+    const fixedDays = parsePositiveInt(existing.fixed_days, params.config.consolidation_days)
+    const billingCycleEndAt = toDateOrNull(existing.billing_cycle_end_at) ?? params.billingCycleEndAt
+    const qualificationDueAt = resolveConsolidationDueAt({
+        activatedAt: params.activatedAt,
+        billingCycleEndAt,
+        primaryRule,
+        fallbackRule,
+        fixedDays,
+    })
+
+    return {
+        primary_rule: primaryRule,
+        fallback_rule: fallbackRule,
+        fixed_days: fixedDays,
+        billing_cycle_end_at: billingCycleEndAt?.toISOString() ?? null,
+        qualification_due_at: qualificationDueAt.toISOString(),
+        qualified_by_rule: existing.qualified_by_rule ?? null,
+        renewal_paid_at: existing.renewal_paid_at ?? null,
+        renewal_transaction_id: existing.renewal_transaction_id ?? null,
+        renewal_payment_id: existing.renewal_payment_id ?? null,
+        renewal_invoice_id: existing.renewal_invoice_id ?? null,
+        renewal_session_id: existing.renewal_session_id ?? null,
+    } satisfies GrowthConsolidationMetadata
+}
+
+function getConsolidationMetadata(conversion: any, config: GrowthProgramConfig) {
+    const rawConsolidation =
+        conversion?.metadata?.consolidation && typeof conversion.metadata.consolidation === 'object'
+            ? conversion.metadata.consolidation
+            : null
+    const activatedAt = toDateOrNull(conversion?.activated_at) ?? new Date()
+
+    return buildConsolidationMetadata({
+        activatedAt,
+        billingCycleEndAt: toDateOrNull(rawConsolidation?.billing_cycle_end_at),
+        config,
+        existing: rawConsolidation,
+    })
 }
 
 function normalizeConfig(row: any | null): GrowthProgramConfig {
@@ -106,6 +220,14 @@ function normalizeConfig(row: any | null): GrowthProgramConfig {
     return {
         attribution_window_days: parsePositiveInt(raw.attribution_window_days, DEFAULT_MEMBER_REFERRAL_CONFIG.attribution_window_days),
         consolidation_days: parsePositiveInt(raw.consolidation_days, DEFAULT_MEMBER_REFERRAL_CONFIG.consolidation_days),
+        consolidation_rule: normalizeConsolidationRule(
+            raw.consolidation_rule,
+            DEFAULT_MEMBER_REFERRAL_CONFIG.consolidation_rule
+        ),
+        fallback_consolidation_rule: normalizeFallbackConsolidationRule(
+            raw.fallback_consolidation_rule,
+            DEFAULT_MEMBER_REFERRAL_CONFIG.fallback_consolidation_rule
+        ),
         owner_priority: Array.isArray(raw.owner_priority) && raw.owner_priority.length > 0
             ? raw.owner_priority
             : DEFAULT_MEMBER_REFERRAL_CONFIG.owner_priority,
@@ -469,41 +591,63 @@ export async function recordGrowthSubscriptionActivation(params: {
     }
 
     const idempotencyKey = `subscription:${params.data.providerSubscriptionId}`
-    const qualificationDueAt = addDays(activatedAt, config.consolidation_days)
+    const { data: subscription } = params.subscriptionId
+        ? await (admin
+            .from('subscriptions') as any)
+            .select('id, current_period_start, current_period_end, status')
+            .eq('id', params.subscriptionId)
+            .maybeSingle()
+        : await (admin
+            .from('subscriptions') as any)
+            .select('id, current_period_start, current_period_end, status')
+            .eq('provider_subscription_id', params.data.providerSubscriptionId)
+            .maybeSingle()
+
+    const { data: existingConversion } = await (admin
+        .from('growth_conversions') as any)
+        .select('id, status, metadata, payment_transaction_id, provider_payment_id, provider_session_id, provider_invoice_id')
+        .eq('idempotency_key', idempotencyKey)
+        .maybeSingle()
+
+    const consolidation = buildConsolidationMetadata({
+        activatedAt,
+        billingCycleEndAt: toDateOrNull(subscription?.current_period_end),
+        config,
+        existing:
+            existingConversion?.metadata?.consolidation && typeof existingConversion.metadata.consolidation === 'object'
+                ? existingConversion.metadata.consolidation
+                : null,
+    })
 
     const payload = {
         attribution_id: attribution.id,
         owner_profile_id: attribution.owner_profile_id,
         owner_user_id: attribution.owner_user_id,
         invitee_user_id: params.userId,
-        membership_id: params.subscriptionId ?? null,
-        payment_transaction_id: params.paymentTransactionId ?? null,
+        membership_id: params.subscriptionId ?? subscription?.id ?? null,
+        payment_transaction_id: params.paymentTransactionId ?? existingConversion?.payment_transaction_id ?? null,
         conversion_type: 'membership_activation',
         payment_provider: 'stripe',
         provider_event_id: params.providerEventId ?? null,
         provider_subscription_id: params.data.providerSubscriptionId,
-        provider_payment_id: params.data.paymentIntentId ?? null,
-        provider_session_id: params.data.sessionId ?? null,
-        provider_invoice_id: params.data.invoiceId ?? null,
+        provider_payment_id: existingConversion?.provider_payment_id ?? params.data.paymentIntentId ?? null,
+        provider_session_id: existingConversion?.provider_session_id ?? params.data.sessionId ?? null,
+        provider_invoice_id: existingConversion?.provider_invoice_id ?? params.data.invoiceId ?? null,
         membership_level_at_activation: params.data.membershipLevel ?? null,
         amount: params.data.amount ?? null,
         currency: params.data.currency ?? 'MXN',
         status: 'confirmed',
         activated_at: activatedAt.toISOString(),
-        qualification_due_at: qualificationDueAt.toISOString(),
+        qualification_due_at: consolidation.qualification_due_at,
         idempotency_key: idempotencyKey,
         metadata: {
+            ...(existingConversion?.metadata ?? {}),
             provider_customer_id: params.data.providerCustomerId,
             price_id: params.data.priceId ?? null,
             specialization_code: params.data.specializationCode ?? null,
+            consolidation,
         },
     }
-
-    const { data: existingConversion } = await (admin
-        .from('growth_conversions') as any)
-        .select('id, status')
-        .eq('idempotency_key', idempotencyKey)
-        .maybeSingle()
 
     if (existingConversion && ['qualified', 'cancelled', 'refunded', 'fraud_flagged'].includes(existingConversion.status)) {
         return { success: true, conversionId: existingConversion.id, skipped: 'terminal_conversion_exists' }
@@ -540,27 +684,50 @@ export async function attachGrowthConversionPaymentReference(params: {
     providerSubscriptionId: string
     paymentTransactionId?: string | null
     providerPaymentId?: string | null
+    providerSessionId?: string | null
     providerInvoiceId?: string | null
     admin?: AdminClient
 }) {
     const admin = getAdminClient(params.admin)
-    const updates: Record<string, any> = {
-        updated_at: new Date().toISOString(),
-    }
-
-    if (params.paymentTransactionId) updates.payment_transaction_id = params.paymentTransactionId
-    if (params.providerPaymentId) updates.provider_payment_id = params.providerPaymentId
-    if (params.providerInvoiceId) updates.provider_invoice_id = params.providerInvoiceId
-
-    if (Object.keys(updates).length === 1) return
-
-    const { error } = await (admin
+    const now = new Date().toISOString()
+    const config = await getMemberReferralConfig(admin)
+    const { data: conversions, error: fetchError } = await (admin
         .from('growth_conversions') as any)
-        .update(updates)
+        .select('id, metadata, payment_transaction_id, provider_payment_id, provider_session_id, provider_invoice_id, activated_at')
         .eq('provider_subscription_id', params.providerSubscriptionId)
         .in('status', ['pending', 'confirmed'])
 
-    if (error) throw error
+    if (fetchError) throw fetchError
+    if (!conversions || conversions.length === 0) return
+
+    for (const conversion of conversions) {
+        const consolidation = getConsolidationMetadata(conversion, config)
+        const metadata = {
+            ...(conversion.metadata ?? {}),
+            consolidation: {
+                ...consolidation,
+                renewal_paid_at: now,
+                renewal_transaction_id: params.paymentTransactionId ?? consolidation.renewal_transaction_id ?? null,
+                renewal_payment_id: params.providerPaymentId ?? consolidation.renewal_payment_id ?? null,
+                renewal_invoice_id: params.providerInvoiceId ?? consolidation.renewal_invoice_id ?? null,
+                renewal_session_id: params.providerSessionId ?? consolidation.renewal_session_id ?? null,
+            },
+        }
+
+        const { error } = await (admin
+            .from('growth_conversions') as any)
+            .update({
+                payment_transaction_id: params.paymentTransactionId ?? conversion.payment_transaction_id ?? null,
+                provider_payment_id: conversion.provider_payment_id ?? params.providerPaymentId ?? null,
+                provider_session_id: conversion.provider_session_id ?? params.providerSessionId ?? null,
+                provider_invoice_id: conversion.provider_invoice_id ?? params.providerInvoiceId ?? null,
+                metadata,
+                updated_at: now,
+            })
+            .eq('id', conversion.id)
+
+        if (error) throw error
+    }
 }
 
 export async function cancelGrowthConversionsForSubscription(params: {
@@ -603,20 +770,10 @@ export async function cancelGrowthConversionsForSubscription(params: {
 
 export async function refundGrowthConversionsForPayment(data: RefundWebhookData, admin?: AdminClient) {
     const client = getAdminClient(admin)
-    const filters = [
-        data.paymentIntentId ? `provider_payment_id.eq.${data.paymentIntentId}` : null,
-        data.sessionId ? `provider_session_id.eq.${data.sessionId}` : null,
-    ].filter(Boolean) as string[]
+    const conversions = await collectGrowthConversionsForRefund(client, data)
+    if (conversions.length === 0) return
 
-    if (filters.length === 0) return
-
-    const { data: conversions } = await (client
-        .from('growth_conversions') as any)
-        .select('id, attribution_id, status')
-        .or(filters.join(','))
-        .in('status', ['pending', 'confirmed', 'qualified'])
-
-    for (const conversion of conversions ?? []) {
+    for (const conversion of conversions) {
         const refundedAt = new Date().toISOString()
         await (client
             .from('growth_conversions') as any)
@@ -624,6 +781,7 @@ export async function refundGrowthConversionsForPayment(data: RefundWebhookData,
                 status: 'refunded',
                 refunded_at: refundedAt,
                 metadata: {
+                    ...(conversion.metadata ?? {}),
                     refund_id: data.refundId,
                     refund_reason: data.refundReason ?? null,
                     refunded_amount: data.amountRefunded,
@@ -641,16 +799,205 @@ export async function refundGrowthConversionsForPayment(data: RefundWebhookData,
                 .eq('id', conversion.attribution_id)
         }
 
-        await (client
-            .from('growth_rewards') as any)
-            .update({
-                status: 'revoked',
-                revoked_at: refundedAt,
-                notes: 'Revocado por reembolso de pago',
-            })
-            .eq('conversion_id', conversion.id)
-            .in('status', ['pending_review', 'approved'])
+        await revokeGrowthRewardsForConversion(client, conversion.id, 'Revocado por reembolso de pago')
     }
+}
+
+async function ensureGrowthFraudFlag(params: {
+    admin: AdminClient
+    userId?: string | null
+    relatedUserId?: string | null
+    attributionId?: string | null
+    conversionId?: string | null
+    flagType: string
+    severity?: 'low' | 'medium' | 'high' | 'critical'
+    notes?: string
+    metadata?: Record<string, any>
+}) {
+    let query = (params.admin
+        .from('growth_fraud_flags') as any)
+        .select('id')
+        .eq('flag_type', params.flagType)
+        .eq('status', 'open')
+
+    if (params.attributionId) {
+        query = query.eq('growth_attribution_id', params.attributionId)
+    }
+
+    if (params.conversionId) {
+        query = query.eq('growth_conversion_id', params.conversionId)
+    }
+
+    const { data: existing } = await query.maybeSingle()
+
+    if (existing?.id) return existing.id
+
+    await createGrowthFraudFlag(params)
+    return null
+}
+
+export async function markGrowthAttributionFraud(params: {
+    attributionId: string
+    admin?: AdminClient
+    reviewedBy?: string | null
+    notes?: string
+}) {
+    const admin = getAdminClient(params.admin)
+    const now = new Date().toISOString()
+    const { data: attribution } = await (admin
+        .from('growth_attributions') as any)
+        .select('*')
+        .eq('id', params.attributionId)
+        .maybeSingle()
+
+    if (!attribution) return
+
+    await (admin
+        .from('growth_attributions') as any)
+        .update({
+            status: 'rejected',
+            rejected_at: now,
+            rejection_reason: 'fraud_flagged',
+            metadata: {
+                ...(attribution.metadata ?? {}),
+                fraud_reviewed_by: params.reviewedBy ?? null,
+                fraud_notes: params.notes ?? 'Marcado como fraude desde admin',
+            },
+        })
+        .eq('id', attribution.id)
+
+    const { data: conversions } = await (admin
+        .from('growth_conversions') as any)
+        .select('id, status')
+        .eq('attribution_id', attribution.id)
+
+    for (const conversion of conversions ?? []) {
+        await (admin
+            .from('growth_conversions') as any)
+            .update({
+                status: 'fraud_flagged',
+                fraud_reason: params.notes ?? 'Marcado como fraude desde admin',
+            })
+            .eq('id', conversion.id)
+
+        await revokeGrowthRewardsForConversion(
+            admin,
+            conversion.id,
+            params.notes ?? 'Reward revocado por caso marcado como fraude',
+            params.reviewedBy ?? null
+        )
+    }
+
+    await ensureGrowthFraudFlag({
+        admin,
+        userId: attribution.invitee_user_id ?? null,
+        relatedUserId: attribution.owner_user_id ?? null,
+        attributionId: attribution.id,
+        flagType: 'admin_marked_fraud',
+        severity: 'high',
+        notes: params.notes ?? 'Caso marcado manualmente como fraude',
+        metadata: { reviewed_by: params.reviewedBy ?? null },
+    })
+}
+
+export async function markGrowthConversionFraud(params: {
+    conversionId: string
+    admin?: AdminClient
+    reviewedBy?: string | null
+    notes?: string
+}) {
+    const admin = getAdminClient(params.admin)
+    const { data: conversion } = await (admin
+        .from('growth_conversions') as any)
+        .select('*')
+        .eq('id', params.conversionId)
+        .maybeSingle()
+
+    if (!conversion) return
+
+    await (admin
+        .from('growth_conversions') as any)
+        .update({
+            status: 'fraud_flagged',
+            fraud_reason: params.notes ?? 'Marcado como fraude desde admin',
+        })
+        .eq('id', conversion.id)
+
+    if (conversion.attribution_id) {
+        await (admin
+            .from('growth_attributions') as any)
+            .update({
+                status: 'rejected',
+                rejected_at: new Date().toISOString(),
+                rejection_reason: 'fraud_flagged',
+            })
+            .eq('id', conversion.attribution_id)
+    }
+
+    await revokeGrowthRewardsForConversion(
+        admin,
+        conversion.id,
+        params.notes ?? 'Reward revocado por conversion marcada como fraude',
+        params.reviewedBy ?? null
+    )
+
+    await ensureGrowthFraudFlag({
+        admin,
+        userId: conversion.invitee_user_id ?? null,
+        relatedUserId: conversion.owner_user_id ?? null,
+        attributionId: conversion.attribution_id ?? null,
+        conversionId: conversion.id,
+        flagType: 'admin_marked_fraud',
+        severity: 'high',
+        notes: params.notes ?? 'Conversion marcada manualmente como fraude',
+        metadata: { reviewed_by: params.reviewedBy ?? null },
+    })
+}
+
+export async function updateGrowthFraudFlagStatus(params: {
+    flagId: string
+    status: 'reviewed' | 'dismissed' | 'confirmed'
+    reviewedBy?: string | null
+    admin?: AdminClient
+}) {
+    const admin = getAdminClient(params.admin)
+    const { data: flag } = await (admin
+        .from('growth_fraud_flags') as any)
+        .select('*')
+        .eq('id', params.flagId)
+        .maybeSingle()
+
+    if (!flag) return
+
+    if (params.status === 'confirmed') {
+        if (flag.growth_conversion_id) {
+            await markGrowthConversionFraud({
+                conversionId: flag.growth_conversion_id,
+                reviewedBy: params.reviewedBy ?? null,
+                notes: flag.notes ?? 'Flag confirmado como fraude',
+                admin,
+            })
+        } else if (flag.growth_attribution_id) {
+            await markGrowthAttributionFraud({
+                attributionId: flag.growth_attribution_id,
+                reviewedBy: params.reviewedBy ?? null,
+                notes: flag.notes ?? 'Flag confirmado como fraude',
+                admin,
+            })
+        }
+    }
+
+    await (admin
+        .from('growth_fraud_flags') as any)
+        .update({
+            status: params.status,
+            metadata: {
+                ...(flag.metadata ?? {}),
+                reviewed_by: params.reviewedBy ?? null,
+                reviewed_at: new Date().toISOString(),
+            },
+        })
+        .eq('id', params.flagId)
 }
 
 export async function consolidateEligibleGrowthConversions(params?: {
@@ -660,6 +1007,7 @@ export async function consolidateEligibleGrowthConversions(params?: {
 }) {
     const admin = getAdminClient(params?.admin)
     const now = params?.now ?? new Date()
+    const config = await getMemberReferralConfig(admin)
     const { data: conversions } = await (admin
         .from('growth_conversions') as any)
         .select('*')
@@ -672,16 +1020,18 @@ export async function consolidateEligibleGrowthConversions(params?: {
     let blocked = 0
 
     for (const conversion of conversions ?? []) {
-        const blockedReason = await getConversionBlockReason(admin, conversion)
-        if (blockedReason) {
+        const decision = await getGrowthQualificationDecision(admin, conversion, now, config)
+        if (!decision) continue
+
+        if (decision.action === 'blocked') {
             blocked += 1
             await (admin
                 .from('growth_conversions') as any)
                 .update({
-                    status: blockedReason === 'refunded' ? 'refunded' : 'cancelled',
-                    cancelled_at: blockedReason === 'refunded' ? null : now.toISOString(),
-                    refunded_at: blockedReason === 'refunded' ? now.toISOString() : null,
-                    fraud_reason: blockedReason,
+                    status: decision.reason === 'refunded' ? 'refunded' : 'cancelled',
+                    cancelled_at: decision.reason === 'refunded' ? null : now.toISOString(),
+                    refunded_at: decision.reason === 'refunded' ? now.toISOString() : null,
+                    fraud_reason: decision.reason,
                 })
                 .eq('id', conversion.id)
 
@@ -698,29 +1048,226 @@ export async function consolidateEligibleGrowthConversions(params?: {
             continue
         }
 
-        await (admin
-            .from('growth_conversions') as any)
-            .update({
-                status: 'qualified',
-                qualified_at: now.toISOString(),
-            })
-            .eq('id', conversion.id)
-
-        if (conversion.attribution_id) {
-            await (admin
-                .from('growth_attributions') as any)
-                .update({
-                    status: 'qualified',
-                    qualified_at: now.toISOString(),
-                })
-                .eq('id', conversion.attribution_id)
-        }
-
-        await createRewardsForQualifiedConversion(admin, conversion.id)
+        await qualifyGrowthConversion({
+            admin,
+            conversion,
+            qualifiedAt: decision.qualifiedAt,
+            rule: decision.rule,
+            renewalTransaction: decision.renewalTransaction ?? null,
+        })
         qualified += 1
     }
 
     return { qualified, blocked }
+}
+
+async function collectGrowthConversionsForRefund(client: AdminClient, data: RefundWebhookData) {
+    const filters = [
+        data.paymentIntentId ? `provider_payment_id.eq.${data.paymentIntentId}` : null,
+        data.sessionId ? `provider_session_id.eq.${data.sessionId}` : null,
+    ].filter(Boolean) as string[]
+
+    if (filters.length === 0) return []
+
+    const map = new Map<string, any>()
+    const addRows = (rows: any[] | null | undefined) => {
+        for (const row of rows ?? []) {
+            if (row?.id) map.set(row.id, row)
+        }
+    }
+
+    const { data: directMatches } = await (client
+        .from('growth_conversions') as any)
+        .select('id, attribution_id, status, metadata')
+        .or(filters.join(','))
+        .in('status', ['pending', 'confirmed', 'qualified'])
+
+    addRows(directMatches)
+
+    const { data: transactions } = await (client
+        .from('payment_transactions') as any)
+        .select('id, subscription_id')
+        .or(filters.join(','))
+        .in('status', ['completed', 'refunded'])
+
+    for (const transaction of transactions ?? []) {
+        let query = (client.from('growth_conversions') as any)
+            .select('id, attribution_id, status, metadata')
+            .in('status', ['pending', 'confirmed', 'qualified'])
+
+        if (transaction.subscription_id) {
+            query = query.or(`payment_transaction_id.eq.${transaction.id},membership_id.eq.${transaction.subscription_id}`)
+        } else {
+            query = query.eq('payment_transaction_id', transaction.id)
+        }
+
+        const { data: relatedMatches } = await query
+        addRows(relatedMatches)
+    }
+
+    return Array.from(map.values())
+}
+
+async function revokeGrowthRewardsForConversion(
+    admin: AdminClient,
+    conversionId: string,
+    reason: string,
+    revokedBy?: string | null
+) {
+    const { data: rewards } = await (admin
+        .from('growth_rewards') as any)
+        .select('id')
+        .eq('conversion_id', conversionId)
+        .in('status', ['pending_review', 'approved', 'granted'])
+
+    for (const reward of rewards ?? []) {
+        await revokeGrowthReward({
+            rewardId: reward.id,
+            revokedBy: revokedBy ?? null,
+            reason,
+            admin,
+        })
+    }
+}
+
+async function findFirstRenewalTransaction(admin: AdminClient, conversion: any) {
+    let subscriptionId = conversion.membership_id ?? null
+
+    if (!subscriptionId && conversion.provider_subscription_id) {
+        const { data: subscription } = await (admin
+            .from('subscriptions') as any)
+            .select('id')
+            .eq('provider_subscription_id', conversion.provider_subscription_id)
+            .maybeSingle()
+        subscriptionId = subscription?.id ?? null
+    }
+
+    if (!subscriptionId) return null
+
+    const { data: transaction } = await (admin
+        .from('payment_transactions') as any)
+        .select('id, provider_payment_id, provider_invoice_id, provider_session_id, completed_at, created_at')
+        .eq('subscription_id', subscriptionId)
+        .eq('purchase_type', 'subscription_payment')
+        .eq('status', 'completed')
+        .gt('created_at', conversion.activated_at)
+        .order('created_at', { ascending: true })
+        .limit(1)
+        .maybeSingle()
+
+    return transaction ?? null
+}
+
+async function getGrowthQualificationDecision(
+    admin: AdminClient,
+    conversion: any,
+    now: Date,
+    config: GrowthProgramConfig
+): Promise<
+    | { action: 'blocked'; reason: string }
+    | { action: 'qualify'; rule: GrowthConsolidationRule; qualifiedAt: string; renewalTransaction?: any | null }
+    | null
+> {
+    const blockedReason = await getConversionBlockReason(admin, conversion)
+    if (blockedReason) {
+        return { action: 'blocked', reason: blockedReason }
+    }
+
+    const consolidation = getConsolidationMetadata(conversion, config)
+    const activatedAt = toDateOrNull(conversion.activated_at) ?? now
+    const billingCycleEndAt = toDateOrNull(consolidation.billing_cycle_end_at)
+    const fixedDaysDueAt = addDays(activatedAt, consolidation.fixed_days)
+    const orderedRules: GrowthConsolidationRule[] = []
+
+    if (consolidation.primary_rule === 'first_renewal_paid') {
+        const renewalTransaction = await findFirstRenewalTransaction(admin, conversion)
+        if (renewalTransaction) {
+            return {
+                action: 'qualify',
+                rule: 'first_renewal_paid',
+                qualifiedAt: renewalTransaction.completed_at ?? renewalTransaction.created_at ?? now.toISOString(),
+                renewalTransaction,
+            }
+        }
+
+        orderedRules.push(consolidation.fallback_rule)
+    } else {
+        orderedRules.push(consolidation.primary_rule)
+    }
+
+    if (!orderedRules.includes('fixed_days')) {
+        orderedRules.push('fixed_days')
+    }
+
+    for (const rule of orderedRules) {
+        if (rule === 'billing_cycle_end') {
+            if (billingCycleEndAt && !isAfter(billingCycleEndAt, now)) {
+                return {
+                    action: 'qualify',
+                    rule,
+                    qualifiedAt: billingCycleEndAt.toISOString(),
+                }
+            }
+            continue
+        }
+
+        if (!isAfter(fixedDaysDueAt, now)) {
+            return {
+                action: 'qualify',
+                rule,
+                qualifiedAt: fixedDaysDueAt.toISOString(),
+            }
+        }
+    }
+
+    return null
+}
+
+async function qualifyGrowthConversion(params: {
+    admin: AdminClient
+    conversion: any
+    rule: GrowthConsolidationRule
+    qualifiedAt: string
+    renewalTransaction?: any | null
+}) {
+    const config = await getMemberReferralConfig(params.admin)
+    const consolidation = getConsolidationMetadata(params.conversion, config)
+    const qualifiedAt = toDateOrNull(params.qualifiedAt)?.toISOString() ?? new Date().toISOString()
+
+    await (params.admin
+        .from('growth_conversions') as any)
+        .update({
+            status: 'qualified',
+            qualified_at: qualifiedAt,
+            payment_transaction_id: params.renewalTransaction?.id ?? params.conversion.payment_transaction_id ?? null,
+            metadata: {
+                ...(params.conversion.metadata ?? {}),
+                consolidation: {
+                    ...consolidation,
+                    qualified_by_rule: params.rule,
+                    renewal_paid_at: params.renewalTransaction
+                        ? (params.renewalTransaction.completed_at ?? params.renewalTransaction.created_at ?? qualifiedAt)
+                        : consolidation.renewal_paid_at ?? null,
+                    renewal_transaction_id: params.renewalTransaction?.id ?? consolidation.renewal_transaction_id ?? null,
+                    renewal_payment_id: params.renewalTransaction?.provider_payment_id ?? consolidation.renewal_payment_id ?? null,
+                    renewal_invoice_id: params.renewalTransaction?.provider_invoice_id ?? consolidation.renewal_invoice_id ?? null,
+                    renewal_session_id: params.renewalTransaction?.provider_session_id ?? consolidation.renewal_session_id ?? null,
+                },
+            },
+        })
+        .eq('id', params.conversion.id)
+
+    if (params.conversion.attribution_id) {
+        await (params.admin
+            .from('growth_attributions') as any)
+            .update({
+                status: 'qualified',
+                qualified_at: qualifiedAt,
+            })
+            .eq('id', params.conversion.attribution_id)
+    }
+
+    await createRewardsForQualifiedConversion(params.admin, params.conversion.id)
 }
 
 async function getConversionBlockReason(admin: AdminClient, conversion: any) {
@@ -929,14 +1476,30 @@ async function createMembershipBenefitForReward(admin: AdminClient, reward: any)
         .order('created_at', { ascending: false })
         .limit(1)
         .maybeSingle()
+    const { data: existingBenefit } = await (admin
+        .from('growth_membership_benefits') as any)
+        .select('id, benefit_type, ends_at')
+        .eq('user_id', reward.beneficiary_user_id)
+        .eq('status', 'active')
+        .in('benefit_type', ['extra_days', 'temporary_upgrade'])
+        .gte('ends_at', now.toISOString())
+        .order('ends_at', { ascending: false })
+        .limit(1)
+        .maybeSingle()
 
     const isUpgrade = reward.reward_type === 'level2_free_month' || reward.reward_type === 'upgrade_temp'
-    const days = isUpgrade
-        ? parsePositiveInt(rewardValue.days, parsePositiveInt(rewardValue.months, 1) * 30)
-        : parsePositiveInt(rewardValue.days, 15)
     const currentPeriodEnd = subscription?.current_period_end ? new Date(subscription.current_period_end) : null
-    const startsAt = !isUpgrade && currentPeriodEnd && isAfter(currentPeriodEnd, now) ? currentPeriodEnd : now
-    const endsAt = addDays(startsAt, days)
+    const existingBenefitEnd = existingBenefit?.ends_at ? new Date(existingBenefit.ends_at) : null
+    const preferredStart = isUpgrade
+        ? (existingBenefitEnd && isAfter(existingBenefitEnd, now) ? existingBenefitEnd : now)
+        : currentPeriodEnd && isAfter(currentPeriodEnd, now)
+            ? currentPeriodEnd
+            : now
+    const startsAt = existingBenefitEnd && isAfter(existingBenefitEnd, preferredStart) ? existingBenefitEnd : preferredStart
+    const months = parsePositiveInt(rewardValue.months, 0)
+    const days = parsePositiveInt(rewardValue.days, isUpgrade ? 30 : 15)
+    const usesRealMonths = isUpgrade && months > 0 && rewardValue.days === undefined
+    const endsAt = usesRealMonths ? addMonths(startsAt, months) : addDays(startsAt, days)
     const currentLevel = Number(subscription?.membership_level ?? 1)
     const membershipLevel = isUpgrade
         ? parsePositiveInt(rewardValue.membership_level, 2)
@@ -957,6 +1520,9 @@ async function createMembershipBenefitForReward(admin: AdminClient, reward: any)
                 metadata: {
                     reward_type: reward.reward_type,
                     reward_value: rewardValue,
+                    duration_unit: usesRealMonths ? 'months' : 'days',
+                    duration_value: usesRealMonths ? months : days,
+                    applied_mode: isUpgrade ? 'temporary_upgrade' : 'extend_membership',
                 },
             },
             { onConflict: 'reward_id' }

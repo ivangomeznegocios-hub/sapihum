@@ -360,22 +360,58 @@ async function mapStripeEvent(stripe: Stripe, event: Stripe.Event): Promise<Webh
         case 'checkout.session.completed': {
             const session = event.data.object as Stripe.Checkout.Session
             if (session.mode === 'subscription') {
+                const subscriptionId =
+                    typeof session.subscription === 'string'
+                        ? session.subscription
+                        : session.subscription?.id
+                let subscription: Stripe.Subscription | null = null
+                if (subscriptionId) {
+                    try {
+                        subscription = await stripe.subscriptions.retrieve(subscriptionId)
+                    } catch (error) {
+                        console.warn('[Stripe webhook] Failed to enrich checkout session with subscription data', {
+                            subscriptionId,
+                            message: error instanceof Error ? error.message : String(error),
+                        })
+                    }
+                }
+                const subscriptionAny = subscription as any
+
                 return {
                     type: 'subscription.created',
                     providerEventId: event.id,
                     data: {
                         sessionId: session.id,
-                        providerSubscriptionId: session.subscription as string,
+                        providerSubscriptionId: subscriptionId || '',
                         providerCustomerId: session.customer as string,
                         status: session.payment_status === 'no_payment_required' ? 'trialing' : 'active',
                         membershipLevel: Number(session.metadata?.membership_level || 0),
                         specializationCode: session.metadata?.specialization_code || undefined,
+                        currentPeriodStart: subscriptionAny?.current_period_start
+                            ? new Date(subscriptionAny.current_period_start * 1000).toISOString()
+                            : undefined,
+                        currentPeriodEnd: subscriptionAny?.current_period_end
+                            ? new Date(subscriptionAny.current_period_end * 1000).toISOString()
+                            : undefined,
+                        cancelAtPeriodEnd: subscription?.cancel_at_period_end,
+                        cancelledAt: subscription?.canceled_at
+                            ? new Date(subscription.canceled_at * 1000).toISOString()
+                            : undefined,
+                        trialStart: subscriptionAny?.trial_start
+                            ? new Date(subscriptionAny.trial_start * 1000).toISOString()
+                            : undefined,
+                        trialEnd: subscriptionAny?.trial_end
+                            ? new Date(subscriptionAny.trial_end * 1000).toISOString()
+                            : undefined,
                         customerEmail: session.customer_email || session.customer_details?.email || '',
-                        priceId: session.metadata?.price_id || '',
+                        priceId: subscription?.items.data[0]?.price?.id || session.metadata?.price_id || '',
                         invoiceId: typeof session.invoice === 'string' ? session.invoice : session.invoice?.id,
                         amount: (session.amount_total || 0) / 100,
                         currency: session.currency || 'mxn',
-                        metadata: session.metadata as Record<string, string>,
+                        metadata: {
+                            ...(subscription?.metadata ?? {}),
+                            ...((session.metadata ?? {}) as Record<string, string>),
+                        },
                     },
                 }
             } else {

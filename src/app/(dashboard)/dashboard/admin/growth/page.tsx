@@ -1,4 +1,5 @@
 import { redirect } from 'next/navigation'
+import Link from 'next/link'
 import Image from 'next/image'
 import {
     Award,
@@ -148,6 +149,7 @@ export default async function AdminGrowthPage() {
     const systemStats = growthDashboard.stats
     const pendingRewards = growthDashboard.pendingRewards
     const topReferrers = growthDashboard.topReferrers
+    const recentAttributions = growthDashboard.recentAttributions
     const recentConversions = growthDashboard.recentConversions
     const openFlags = growthDashboard.openFlags
     const configJson = growthDashboard.config?.config_json || {}
@@ -251,7 +253,9 @@ export default async function AdminGrowthPage() {
 
             <GrowthConfigForm
                 attributionWindowDays={Number(configJson.attribution_window_days ?? 30)}
-                consolidationDays={Number(configJson.consolidation_days ?? 30)}
+                consolidationRule={String(configJson.consolidation_rule ?? 'first_renewal_paid')}
+                fallbackConsolidationRule={String(configJson.fallback_consolidation_rule ?? 'billing_cycle_end')}
+                fixedDaysFallback={Number(configJson.consolidation_days ?? 30)}
             />
 
             <div>
@@ -409,7 +413,7 @@ export default async function AdminGrowthPage() {
                     ) : (
                         <div className="space-y-2">
                             {pendingRewards.map((reward: any) => (
-                            <div key={reward.id} className="flex flex-col gap-3 rounded-xl border p-3 sm:flex-row sm:items-center">
+                                <div key={reward.id} className="flex flex-col gap-3 rounded-xl border p-3 sm:flex-row sm:items-center">
                                     <div className="min-w-0 flex-1">
                                         <p className="text-sm font-medium">{reward.beneficiary?.full_name || 'Usuario'}</p>
                                         <p className="text-xs text-muted-foreground">
@@ -425,6 +429,12 @@ export default async function AdminGrowthPage() {
                                         <p className="text-[10px] text-muted-foreground">
                                             {new Date(reward.created_at).toLocaleDateString('es-MX')}
                                         </p>
+                                        <Link
+                                            href={`/dashboard/admin/growth/review/rewards/${reward.id}`}
+                                            className="mt-2 inline-flex text-[11px] font-medium text-primary hover:underline"
+                                        >
+                                            Abrir revision
+                                        </Link>
                                     </div>
                                     <GrowthRewardActions reward={reward} />
                                 </div>
@@ -481,6 +491,45 @@ export default async function AdminGrowthPage() {
                 </div>
             </div>
 
+            <div className="rounded-2xl border bg-card p-5">
+                <h2 className="mb-4 flex items-center gap-2 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+                    <Users className="h-4 w-4" />
+                    Atribuciones recientes
+                </h2>
+                {recentAttributions.length === 0 ? (
+                    <p className="py-6 text-center text-sm text-muted-foreground">Aun no hay atribuciones de growth.</p>
+                ) : (
+                    <div className="space-y-2">
+                        {recentAttributions.map((attribution: any) => (
+                            <div key={attribution.id} className="rounded-xl border p-3">
+                                <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                                    <div className="min-w-0 flex-1">
+                                        <p className="text-sm font-medium">
+                                            {attribution.invitee?.full_name || attribution.invitee?.email || attribution.invitee_email || 'Invitado'}
+                                        </p>
+                                        <p className="mt-1 text-xs text-muted-foreground">
+                                            Owner: {attribution.owner?.full_name || attribution.owner?.email || 'Sin owner'}
+                                        </p>
+                                        <p className="text-[10px] text-muted-foreground">
+                                            Estado: {attribution.status} • Canal: {attribution.source_channel || 'unknown'}
+                                        </p>
+                                        <p className="text-[10px] text-muted-foreground">
+                                            Capturada: {new Date(attribution.created_at).toLocaleDateString('es-MX')}
+                                        </p>
+                                    </div>
+                                    <Link
+                                        href={`/dashboard/admin/growth/review/attributions/${attribution.id}`}
+                                        className="text-xs font-medium text-primary hover:underline"
+                                    >
+                                        Abrir revision
+                                    </Link>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                )}
+            </div>
+
             <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
                 <div className="rounded-2xl border bg-card p-5">
                     <h2 className="mb-4 flex items-center gap-2 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
@@ -505,6 +554,12 @@ export default async function AdminGrowthPage() {
                                     <p className="text-[10px] text-muted-foreground">
                                         Activado: {new Date(conversion.activated_at).toLocaleDateString('es-MX')}
                                     </p>
+                                    <Link
+                                        href={`/dashboard/admin/growth/review/conversions/${conversion.id}`}
+                                        className="mt-2 inline-flex text-[11px] font-medium text-primary hover:underline"
+                                    >
+                                        Abrir revision
+                                    </Link>
                                 </div>
                             ))}
                         </div>
@@ -532,6 +587,12 @@ export default async function AdminGrowthPage() {
                                         Usuario: {flag.user?.full_name || flag.user?.email || 'Sin usuario'}
                                     </p>
                                     {flag.notes && <p className="mt-1 text-xs text-muted-foreground">{flag.notes}</p>}
+                                    <Link
+                                        href={`/dashboard/admin/growth/review/flags/${flag.id}`}
+                                        className="mt-2 inline-flex text-[11px] font-medium text-primary hover:underline"
+                                    >
+                                        Abrir revision
+                                    </Link>
                                 </div>
                             ))}
                         </div>

@@ -5,7 +5,10 @@ import {
     approveGrowthReward,
     consolidateEligibleGrowthConversions,
     grantGrowthReward,
+    markGrowthAttributionFraud,
+    markGrowthConversionFraud,
     revokeGrowthReward,
+    updateGrowthFraudFlagStatus,
 } from '@/lib/growth/engine'
 import { revalidatePath } from 'next/cache'
 
@@ -48,8 +51,7 @@ export async function processRewardEvent(rewardEventId: string): Promise<{
             return { success: false, error: 'Error al procesar recompensa' }
         }
 
-        revalidatePath('/dashboard/admin/growth')
-        revalidatePath('/dashboard/growth')
+        revalidateGrowthAdminPaths()
         return { success: true }
     } catch (err) {
         console.error('Unexpected error in processRewardEvent:', err)
@@ -78,6 +80,12 @@ async function requireAdmin() {
     return { supabase, user, error: null }
 }
 
+function revalidateGrowthAdminPaths() {
+    revalidatePath('/dashboard/admin/growth')
+    revalidatePath('/dashboard/growth')
+    revalidatePath('/dashboard/admin/growth/review/[entityType]/[entityId]', 'page')
+}
+
 export async function approveGrowthRewardAction(rewardId: string): Promise<{
     success: boolean
     error?: string
@@ -87,8 +95,7 @@ export async function approveGrowthRewardAction(rewardId: string): Promise<{
         if (error || !user) return { success: false, error: error ?? 'Solo administradores' }
 
         await approveGrowthReward({ rewardId, approvedBy: user.id, admin: supabase })
-        revalidatePath('/dashboard/admin/growth')
-        revalidatePath('/dashboard/growth')
+        revalidateGrowthAdminPaths()
         return { success: true }
     } catch (err) {
         console.error('Unexpected error in approveGrowthRewardAction:', err)
@@ -110,8 +117,7 @@ export async function grantGrowthRewardAction(rewardId: string): Promise<{
             admin: supabase,
             notes: 'Reward otorgado por admin desde panel growth',
         })
-        revalidatePath('/dashboard/admin/growth')
-        revalidatePath('/dashboard/growth')
+        revalidateGrowthAdminPaths()
         return { success: true }
     } catch (err) {
         console.error('Unexpected error in grantGrowthRewardAction:', err)
@@ -133,8 +139,7 @@ export async function revokeGrowthRewardAction(rewardId: string): Promise<{
             reason: 'Reward revocado por admin desde panel growth',
             admin: supabase,
         })
-        revalidatePath('/dashboard/admin/growth')
-        revalidatePath('/dashboard/growth')
+        revalidateGrowthAdminPaths()
         return { success: true }
     } catch (err) {
         console.error('Unexpected error in revokeGrowthRewardAction:', err)
@@ -153,8 +158,7 @@ export async function consolidateGrowthNowAction(): Promise<{
         if (error) return { success: false, error }
 
         const result = await consolidateEligibleGrowthConversions({ admin: supabase })
-        revalidatePath('/dashboard/admin/growth')
-        revalidatePath('/dashboard/growth')
+        revalidateGrowthAdminPaths()
         return { success: true, ...result }
     } catch (err) {
         console.error('Unexpected error in consolidateGrowthNowAction:', err)
@@ -171,13 +175,21 @@ export async function updateMemberReferralConfigAction(formData: FormData): Prom
         if (error || !user) return { success: false, error: error ?? 'Solo administradores' }
 
         const attributionWindowDays = Number(formData.get('attributionWindowDays') || 30)
-        const consolidationDays = Number(formData.get('consolidationDays') || 30)
+        const fixedDaysFallback = Number(formData.get('fixedDaysFallback') || 30)
+        const consolidationRule = String(formData.get('consolidationRule') || 'first_renewal_paid')
+        const fallbackConsolidationRule = String(formData.get('fallbackConsolidationRule') || 'billing_cycle_end')
         const safeAttributionWindow = Number.isFinite(attributionWindowDays) && attributionWindowDays > 0
             ? Math.trunc(attributionWindowDays)
             : 30
-        const safeConsolidationDays = Number.isFinite(consolidationDays) && consolidationDays > 0
-            ? Math.trunc(consolidationDays)
+        const safeFixedDaysFallback = Number.isFinite(fixedDaysFallback) && fixedDaysFallback > 0
+            ? Math.trunc(fixedDaysFallback)
             : 30
+        const safeConsolidationRule = ['first_renewal_paid', 'billing_cycle_end', 'fixed_days'].includes(consolidationRule)
+            ? consolidationRule
+            : 'first_renewal_paid'
+        const safeFallbackRule = ['billing_cycle_end', 'fixed_days'].includes(fallbackConsolidationRule)
+            ? fallbackConsolidationRule
+            : 'billing_cycle_end'
 
         const { data: current } = await (supabase as any)
             .from('growth_program_configs')
@@ -188,7 +200,9 @@ export async function updateMemberReferralConfigAction(formData: FormData): Prom
         const nextConfig = {
             ...((current?.config_json && typeof current.config_json === 'object') ? current.config_json : {}),
             attribution_window_days: safeAttributionWindow,
-            consolidation_days: safeConsolidationDays,
+            consolidation_days: safeFixedDaysFallback,
+            consolidation_rule: safeConsolidationRule,
+            fallback_consolidation_rule: safeFallbackRule,
         }
 
         const { error: updateError } = await (supabase as any)
@@ -207,11 +221,79 @@ export async function updateMemberReferralConfigAction(formData: FormData): Prom
             return { success: false, error: 'Error al guardar configuracion' }
         }
 
-        revalidatePath('/dashboard/admin/growth')
-        revalidatePath('/dashboard/growth')
+        revalidateGrowthAdminPaths()
         return { success: true }
     } catch (err) {
         console.error('Unexpected error in updateMemberReferralConfigAction:', err)
         return { success: false, error: 'Error inesperado' }
+    }
+}
+
+export async function markGrowthAttributionFraudAction(attributionId: string): Promise<{
+    success: boolean
+    error?: string
+}> {
+    try {
+        const { supabase, user, error } = await requireAdmin()
+        if (error || !user) return { success: false, error: error ?? 'Solo administradores' }
+
+        await markGrowthAttributionFraud({
+            attributionId,
+            reviewedBy: user.id,
+            notes: 'Caso marcado como fraude desde admin',
+            admin: supabase,
+        })
+        revalidateGrowthAdminPaths()
+        return { success: true }
+    } catch (err) {
+        console.error('Unexpected error in markGrowthAttributionFraudAction:', err)
+        return { success: false, error: 'Error al marcar fraude en la atribucion' }
+    }
+}
+
+export async function markGrowthConversionFraudAction(conversionId: string): Promise<{
+    success: boolean
+    error?: string
+}> {
+    try {
+        const { supabase, user, error } = await requireAdmin()
+        if (error || !user) return { success: false, error: error ?? 'Solo administradores' }
+
+        await markGrowthConversionFraud({
+            conversionId,
+            reviewedBy: user.id,
+            notes: 'Conversion marcada como fraude desde admin',
+            admin: supabase,
+        })
+        revalidateGrowthAdminPaths()
+        return { success: true }
+    } catch (err) {
+        console.error('Unexpected error in markGrowthConversionFraudAction:', err)
+        return { success: false, error: 'Error al marcar fraude en la conversion' }
+    }
+}
+
+export async function reviewGrowthFraudFlagAction(
+    flagId: string,
+    status: 'reviewed' | 'dismissed' | 'confirmed'
+): Promise<{
+    success: boolean
+    error?: string
+}> {
+    try {
+        const { supabase, user, error } = await requireAdmin()
+        if (error || !user) return { success: false, error: error ?? 'Solo administradores' }
+
+        await updateGrowthFraudFlagStatus({
+            flagId,
+            status,
+            reviewedBy: user.id,
+            admin: supabase,
+        })
+        revalidateGrowthAdminPaths()
+        return { success: true }
+    } catch (err) {
+        console.error('Unexpected error in reviewGrowthFraudFlagAction:', err)
+        return { success: false, error: 'Error al actualizar el flag de fraude' }
     }
 }

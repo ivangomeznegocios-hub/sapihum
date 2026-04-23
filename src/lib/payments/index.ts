@@ -1278,6 +1278,7 @@ export async function fulfillSubscriptionRenewed(data: SubscriptionWebhookData):
         providerSubscriptionId: data.providerSubscriptionId,
         paymentTransactionId,
         providerPaymentId: data.paymentIntentId ?? null,
+        providerSessionId: data.sessionId ?? null,
         providerInvoiceId: data.invoiceId ?? null,
         admin: supabase,
     })
