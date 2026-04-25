@@ -98,6 +98,7 @@ export interface RefundWebhookData {
     refundId: string
     chargeId?: string
     paymentIntentId?: string
+    invoiceId?: string
     sessionId?: string
     amountRefunded: number
     originalAmount?: number

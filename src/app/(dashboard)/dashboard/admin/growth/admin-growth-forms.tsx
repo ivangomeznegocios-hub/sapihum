@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -20,6 +21,8 @@ import {
     reviewGrowthFraudFlagAction,
     revokeGrowthRewardAction,
     updateMemberReferralConfigAction,
+    upsertGrowthOrganizationAction,
+    upsertGrowthProgramEnrollmentAction,
 } from './actions'
 import type { GrowthCampaign, GrowthCampaignType } from '@/types/database'
 
@@ -819,6 +822,7 @@ export function GrowthConfigForm({
     fallbackConsolidationRule: string
     fixedDaysFallback: number
 }) {
+    const router = useRouter()
     const [loading, setLoading] = useState(false)
     const [message, setMessage] = useState<string | null>(null)
 
@@ -830,6 +834,7 @@ export function GrowthConfigForm({
         const result = await updateMemberReferralConfigAction(formData)
         setMessage(result.success ? 'Configuracion guardada' : result.error || 'Error al guardar')
         setLoading(false)
+        if (result.success) router.refresh()
     }
 
     return (
@@ -894,6 +899,212 @@ export function GrowthConfigForm({
                         {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
                         Guardar reglas
                     </Button>
+                </div>
+            </div>
+        </form>
+    )
+}
+
+export function ProgramEnrollmentForm({
+    enrollment,
+    compact = false,
+}: {
+    enrollment?: {
+        id?: string
+        user_id?: string | null
+        program_type?: string
+        status?: string
+        tier?: string | null
+        approval_notes?: string | null
+        user?: { email?: string | null; full_name?: string | null } | null
+    }
+    compact?: boolean
+}) {
+    const router = useRouter()
+    const [loading, setLoading] = useState(false)
+    const [message, setMessage] = useState<string | null>(null)
+
+    async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+        event.preventDefault()
+        setLoading(true)
+        setMessage(null)
+        const formData = new FormData(event.currentTarget)
+        const result = await upsertGrowthProgramEnrollmentAction(formData)
+        setMessage(result.success ? 'Programa guardado' : result.error || 'Error al guardar')
+        setLoading(false)
+        if (result.success) router.refresh()
+    }
+
+    return (
+        <form onSubmit={handleSubmit} className={cn('rounded-2xl border bg-card p-4', compact && 'rounded-xl p-3')}>
+            {enrollment?.user_id && <input type="hidden" name="userId" value={enrollment.user_id} />}
+            {enrollment?.user_id && enrollment.program_type && (
+                <input type="hidden" name="programType" value={enrollment.program_type} />
+            )}
+            <div className={cn('grid gap-3', compact ? 'lg:grid-cols-6' : 'sm:grid-cols-2 xl:grid-cols-6')}>
+                <label className={cn('text-xs font-medium', compact ? 'lg:col-span-2' : 'xl:col-span-2')}>
+                    Usuario
+                    <Input
+                        name="userLookup"
+                        defaultValue={enrollment?.user?.email ?? ''}
+                        placeholder="email@dominio.com o user_id"
+                        disabled={Boolean(enrollment?.user_id)}
+                        className="mt-1"
+                    />
+                </label>
+                <label className="text-xs font-medium">
+                    Programa
+                    <select
+                        name={enrollment?.user_id ? undefined : 'programType'}
+                        defaultValue={enrollment?.program_type ?? 'host'}
+                        disabled={Boolean(enrollment?.user_id)}
+                        className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                    >
+                        <option value="host">Host</option>
+                        <option value="ambassador">Embajador</option>
+                    </select>
+                </label>
+                <label className="text-xs font-medium">
+                    Estado
+                    <select
+                        name="status"
+                        defaultValue={enrollment?.status ?? 'active'}
+                        className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                    >
+                        <option value="applied">Aplicado</option>
+                        <option value="approved">Aprobado</option>
+                        <option value="active">Activo</option>
+                        <option value="paused">Pausado</option>
+                        <option value="rejected">Rechazado</option>
+                        <option value="terminated">Terminado</option>
+                    </select>
+                </label>
+                <label className="text-xs font-medium">
+                    Tier
+                    <select
+                        name="tier"
+                        defaultValue={enrollment?.tier ?? 'base'}
+                        className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                    >
+                        <option value="base">Base</option>
+                        <option value="pro">Pro</option>
+                        <option value="elite">Elite</option>
+                    </select>
+                </label>
+                <label className={cn('text-xs font-medium', compact ? 'lg:col-span-6' : 'sm:col-span-2 xl:col-span-1')}>
+                    Notas
+                    <Input
+                        name="approvalNotes"
+                        defaultValue={enrollment?.approval_notes ?? ''}
+                        placeholder="Revision interna"
+                        className="mt-1"
+                    />
+                </label>
+                <div className={cn('flex items-end gap-2', compact ? 'lg:col-span-6' : 'sm:col-span-2 xl:col-span-6')}>
+                    <Button type="submit" disabled={loading} size="sm" className="gap-1.5">
+                        {loading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Save className="h-3.5 w-3.5" />}
+                        {enrollment ? 'Guardar programa' : 'Crear / aprobar'}
+                    </Button>
+                    {message && <span className="text-xs text-muted-foreground">{message}</span>}
+                </div>
+            </div>
+        </form>
+    )
+}
+
+export function OrganizationForm({
+    organization,
+    compact = false,
+}: {
+    organization?: any
+    compact?: boolean
+}) {
+    const router = useRouter()
+    const [loading, setLoading] = useState(false)
+    const [message, setMessage] = useState<string | null>(null)
+
+    async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+        event.preventDefault()
+        setLoading(true)
+        setMessage(null)
+        const formData = new FormData(event.currentTarget)
+        const result = await upsertGrowthOrganizationAction(formData)
+        setMessage(result.success ? 'Organizacion guardada' : result.error || 'Error al guardar')
+        setLoading(false)
+        if (result.success) router.refresh()
+    }
+
+    return (
+        <form onSubmit={handleSubmit} className={cn('rounded-2xl border bg-card p-4', compact && 'rounded-xl p-3')}>
+            {organization?.id && <input type="hidden" name="organizationId" value={organization.id} />}
+            <div className={cn('grid gap-3', compact ? 'lg:grid-cols-6' : 'sm:grid-cols-2 xl:grid-cols-6')}>
+                <label className={cn('text-xs font-medium', compact ? 'lg:col-span-2' : 'xl:col-span-2')}>
+                    Nombre
+                    <Input name="name" defaultValue={organization?.name ?? ''} placeholder="Universidad / comunidad" className="mt-1" />
+                </label>
+                <label className="text-xs font-medium">
+                    Tipo
+                    <select name="organizationType" defaultValue={organization?.organization_type ?? 'other'} className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
+                        <option value="university">Universidad</option>
+                        <option value="association">Asociacion</option>
+                        <option value="college">Colegio</option>
+                        <option value="community">Comunidad</option>
+                        <option value="other">Otro</option>
+                    </select>
+                </label>
+                <label className="text-xs font-medium">
+                    Estado
+                    <select name="status" defaultValue={organization?.status ?? 'lead'} className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
+                        <option value="lead">Lead</option>
+                        <option value="prospect">Prospect</option>
+                        <option value="active_partner">Activa</option>
+                        <option value="inactive_partner">Inactiva</option>
+                    </select>
+                </label>
+                <label className="text-xs font-medium">
+                    Codigo
+                    <Input name="partnerCode" defaultValue={organization?.partner_code ?? ''} placeholder="ORG123" className="mt-1 uppercase" />
+                </label>
+                <label className="text-xs font-medium">
+                    Landing slug
+                    <Input name="landingSlug" defaultValue={organization?.landing_slug ?? ''} placeholder="universidad-x" className="mt-1" />
+                </label>
+                <label className="text-xs font-medium">
+                    Contacto
+                    <Input name="contactName" defaultValue={organization?.contact_name ?? ''} placeholder="Nombre" className="mt-1" />
+                </label>
+                <label className="text-xs font-medium">
+                    Email
+                    <Input name="contactEmail" defaultValue={organization?.contact_email ?? ''} placeholder="contacto@org.com" className="mt-1" />
+                </label>
+                <label className="text-xs font-medium">
+                    Telefono
+                    <Input name="contactPhone" defaultValue={organization?.contact_phone ?? ''} placeholder="+52..." className="mt-1" />
+                </label>
+                <label className="text-xs font-medium">
+                    Beneficio
+                    <select name="benefitModel" defaultValue={organization?.benefit_model ?? 'custom'} className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
+                        <option value="discount">Descuento</option>
+                        <option value="revenue_share">Revenue share</option>
+                        <option value="bulk_access">Bulk access</option>
+                        <option value="custom">Custom</option>
+                    </select>
+                </label>
+                <label className={cn('text-xs font-medium', compact ? 'lg:col-span-6' : 'sm:col-span-2 xl:col-span-2')}>
+                    Config JSON
+                    <Input
+                        name="benefitConfig"
+                        defaultValue={organization?.benefit_config ? JSON.stringify(organization.benefit_config) : ''}
+                        placeholder='{"percentage":20}'
+                        className="mt-1 font-mono text-xs"
+                    />
+                </label>
+                <div className={cn('flex items-end gap-2', compact ? 'lg:col-span-6' : 'sm:col-span-2 xl:col-span-6')}>
+                    <Button type="submit" disabled={loading} size="sm" className="gap-1.5">
+                        {loading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Save className="h-3.5 w-3.5" />}
+                        {organization ? 'Guardar organizacion' : 'Crear organizacion'}
+                    </Button>
+                    {message && <span className="text-xs text-muted-foreground">{message}</span>}
                 </div>
             </div>
         </form>

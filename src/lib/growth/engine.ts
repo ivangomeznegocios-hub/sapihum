@@ -39,6 +39,12 @@ type GrowthProgramConfig = {
     automatic_reward_types: GrowthRewardType[]
     manual_reward_types: GrowthRewardType[]
     reward_rules: GrowthRewardRule[]
+    monthly_goal?: number
+    tiers?: Array<{
+        tier: 'base' | 'pro' | 'elite'
+        monthly_qualified_goal: number
+        label?: string
+    }>
 }
 
 type GrowthConsolidationMetadata = {
@@ -91,6 +97,114 @@ const DEFAULT_MEMBER_REFERRAL_CONFIG: GrowthProgramConfig = {
     ],
 }
 
+const DEFAULT_HOST_PROGRAM_CONFIG: GrowthProgramConfig = {
+    ...DEFAULT_MEMBER_REFERRAL_CONFIG,
+    monthly_goal: 5,
+    tiers: [
+        { tier: 'base', monthly_qualified_goal: 5, label: 'Base' },
+        { tier: 'pro', monthly_qualified_goal: 10, label: 'Pro' },
+        { tier: 'elite', monthly_qualified_goal: 20, label: 'Elite' },
+    ],
+    automatic_reward_types: ['badge'],
+    manual_reward_types: ['commission', 'revenue_share', 'manual_bonus', 'level2_free_month', 'upgrade_temp'],
+    reward_rules: [
+        {
+            threshold: 5,
+            reward_type: 'commission',
+            reward_value: { label: 'Comision host base', amount: 0, currency: 'MXN' },
+            automatic: false,
+            requires_manual_review: true,
+            reason_type: 'host_goal_monthly',
+        },
+        {
+            threshold: 10,
+            reward_type: 'commission',
+            reward_value: { label: 'Comision host pro', amount: 0, currency: 'MXN' },
+            automatic: false,
+            requires_manual_review: true,
+            reason_type: 'host_goal_monthly',
+        },
+    ],
+}
+
+const DEFAULT_AMBASSADOR_PROGRAM_CONFIG: GrowthProgramConfig = {
+    ...DEFAULT_MEMBER_REFERRAL_CONFIG,
+    monthly_goal: 3,
+    tiers: [
+        { tier: 'base', monthly_qualified_goal: 3, label: 'Base' },
+        { tier: 'pro', monthly_qualified_goal: 6, label: 'Pro' },
+        { tier: 'elite', monthly_qualified_goal: 12, label: 'Elite' },
+    ],
+    automatic_reward_types: ['extra_days', 'badge'],
+    manual_reward_types: ['level2_free_month', 'upgrade_temp', 'manual_bonus'],
+    reward_rules: [
+        {
+            threshold: 3,
+            reward_type: 'badge',
+            reward_value: { badge: 'ambassador_base', label: 'Badge embajador base' },
+            automatic: true,
+            requires_manual_review: false,
+            reason_type: 'ambassador_goal_monthly',
+        },
+        {
+            threshold: 6,
+            reward_type: 'level2_free_month',
+            reward_value: { months: 1, membership_level: 2, label: '1 mes Nivel 2 para embajador' },
+            automatic: false,
+            requires_manual_review: true,
+            reason_type: 'ambassador_goal_monthly',
+        },
+    ],
+}
+
+const DEFAULT_ORGANIZATION_PROGRAM_CONFIG: GrowthProgramConfig = {
+    ...DEFAULT_MEMBER_REFERRAL_CONFIG,
+    automatic_reward_types: [],
+    manual_reward_types: ['revenue_share', 'manual_bonus'],
+    reward_rules: [
+        {
+            threshold: 1,
+            reward_type: 'revenue_share',
+            reward_value: { percentage: 0, label: 'Revenue share institucional pendiente' },
+            automatic: false,
+            requires_manual_review: true,
+            reason_type: 'organization_revenue_share',
+        },
+    ],
+}
+
+const DEFAULT_GROUP_PACK_PROGRAM_CONFIG: GrowthProgramConfig = {
+    ...DEFAULT_MEMBER_REFERRAL_CONFIG,
+    automatic_reward_types: [],
+    manual_reward_types: ['manual_bonus', 'level2_free_month', 'custom'],
+    reward_rules: [
+        {
+            threshold: 1,
+            reward_type: 'manual_bonus',
+            reward_value: { label: 'Beneficio grupal desbloqueado' },
+            automatic: false,
+            requires_manual_review: true,
+            reason_type: 'group_pack_completed',
+        },
+    ],
+}
+
+function programKeyForProgramType(programType: GrowthProgramType | string | null | undefined) {
+    if (programType === 'host') return 'host_program'
+    if (programType === 'ambassador') return 'ambassador_program'
+    if (programType === 'organization' || programType === 'partner') return 'organization_program'
+    if (programType === 'group_pack' || programType === 'group_leader') return 'group_pack_program'
+    return 'member_referral'
+}
+
+function defaultConfigForProgramKey(programKey: string) {
+    if (programKey === 'host_program') return DEFAULT_HOST_PROGRAM_CONFIG
+    if (programKey === 'ambassador_program') return DEFAULT_AMBASSADOR_PROGRAM_CONFIG
+    if (programKey === 'organization_program') return DEFAULT_ORGANIZATION_PROGRAM_CONFIG
+    if (programKey === 'group_pack_program') return DEFAULT_GROUP_PACK_PROGRAM_CONFIG
+    return DEFAULT_MEMBER_REFERRAL_CONFIG
+}
+
 function getAdminClient(admin?: AdminClient) {
     return admin ?? createServiceClient()
 }
@@ -99,12 +213,52 @@ function normalizeReferralCode(code: string | null | undefined) {
     return (code || '').trim().toUpperCase()
 }
 
+function normalizeSlug(value: string | null | undefined) {
+    return (value || '')
+        .trim()
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '')
+}
+
+function requiredMembersForPack(packType: string, fallback?: number | null) {
+    if (packType === 'pack_3') return 3
+    if (packType === 'pack_5') return 5
+    if (packType === 'pack_10') return 10
+    const parsed = Number(fallback)
+    return Number.isFinite(parsed) && parsed > 0 ? Math.trunc(parsed) : 3
+}
+
 function sourceTypeForProgram(programType: GrowthProgramType): GrowthSourceType {
     if (programType === 'organization' || programType === 'partner') return 'organization'
     if (programType === 'host') return 'host'
     if (programType === 'ambassador') return 'ambassador'
     if (programType === 'admin') return 'admin'
     return 'member'
+}
+
+function programTypeForSourceType(sourceType: string | null | undefined): GrowthProgramType {
+    if (sourceType === 'host') return 'host'
+    if (sourceType === 'ambassador') return 'ambassador'
+    if (sourceType === 'organization') return 'organization'
+    if (sourceType === 'admin') return 'admin'
+    return 'member'
+}
+
+function usesMonthlyRewardScope(programType: GrowthProgramType | string | null | undefined) {
+    return programType === 'host' || programType === 'ambassador'
+}
+
+function getUtcMonthWindow(date: Date) {
+    const startsAt = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), 1))
+    const endsAt = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth() + 1, 1))
+    const periodMonth = `${startsAt.getUTCFullYear()}-${String(startsAt.getUTCMonth() + 1).padStart(2, '0')}`
+
+    return {
+        startsAt: startsAt.toISOString(),
+        endsAt: endsAt.toISOString(),
+        periodMonth,
+    }
 }
 
 function sourcePriority(sourceType: string | null | undefined, priority: GrowthSourceType[]) {
@@ -213,30 +367,32 @@ function getConsolidationMetadata(conversion: any, config: GrowthProgramConfig) 
     })
 }
 
-function normalizeConfig(row: any | null): GrowthProgramConfig {
+function normalizeConfig(row: any | null, defaults: GrowthProgramConfig = DEFAULT_MEMBER_REFERRAL_CONFIG): GrowthProgramConfig {
     const raw = row?.config_json && typeof row.config_json === 'object' ? row.config_json : {}
-    const rewardRules = Array.isArray(raw.reward_rules) ? raw.reward_rules : DEFAULT_MEMBER_REFERRAL_CONFIG.reward_rules
+    const rewardRules = Array.isArray(raw.reward_rules) ? raw.reward_rules : defaults.reward_rules
 
     return {
-        attribution_window_days: parsePositiveInt(raw.attribution_window_days, DEFAULT_MEMBER_REFERRAL_CONFIG.attribution_window_days),
-        consolidation_days: parsePositiveInt(raw.consolidation_days, DEFAULT_MEMBER_REFERRAL_CONFIG.consolidation_days),
+        attribution_window_days: parsePositiveInt(raw.attribution_window_days, defaults.attribution_window_days),
+        consolidation_days: parsePositiveInt(raw.consolidation_days, defaults.consolidation_days),
         consolidation_rule: normalizeConsolidationRule(
             raw.consolidation_rule,
-            DEFAULT_MEMBER_REFERRAL_CONFIG.consolidation_rule
+            defaults.consolidation_rule
         ),
         fallback_consolidation_rule: normalizeFallbackConsolidationRule(
             raw.fallback_consolidation_rule,
-            DEFAULT_MEMBER_REFERRAL_CONFIG.fallback_consolidation_rule
+            defaults.fallback_consolidation_rule
         ),
         owner_priority: Array.isArray(raw.owner_priority) && raw.owner_priority.length > 0
             ? raw.owner_priority
-            : DEFAULT_MEMBER_REFERRAL_CONFIG.owner_priority,
+            : defaults.owner_priority,
         automatic_reward_types: Array.isArray(raw.automatic_reward_types)
             ? raw.automatic_reward_types
-            : DEFAULT_MEMBER_REFERRAL_CONFIG.automatic_reward_types,
+            : defaults.automatic_reward_types,
         manual_reward_types: Array.isArray(raw.manual_reward_types)
             ? raw.manual_reward_types
-            : DEFAULT_MEMBER_REFERRAL_CONFIG.manual_reward_types,
+            : defaults.manual_reward_types,
+        monthly_goal: parsePositiveInt(raw.monthly_goal, defaults.monthly_goal ?? 0) || undefined,
+        tiers: Array.isArray(raw.tiers) ? raw.tiers : defaults.tiers,
         reward_rules: rewardRules
             .map((rule: any) => ({
                 threshold: parsePositiveInt(rule.threshold, 0),
@@ -250,16 +406,58 @@ function normalizeConfig(row: any | null): GrowthProgramConfig {
     }
 }
 
-export async function getMemberReferralConfig(admin?: AdminClient): Promise<GrowthProgramConfig> {
+export async function getGrowthProgramConfig(
+    programType: GrowthProgramType | string = 'member',
+    admin?: AdminClient
+): Promise<GrowthProgramConfig> {
     const client = getAdminClient(admin)
+    const programKey = programKeyForProgramType(programType)
+    const defaults = defaultConfigForProgramKey(programKey)
     const { data } = await (client
         .from('growth_program_configs') as any)
-        .select('config_json')
-        .eq('program_key', 'member_referral')
-        .eq('is_active', true)
+        .select('config_json, is_active')
+        .eq('program_key', programKey)
         .maybeSingle()
 
-    return normalizeConfig(data)
+    if (!data) {
+        await (client
+            .from('growth_program_configs') as any)
+            .upsert(
+                {
+                    program_key: programKey,
+                    config_json: defaults,
+                    is_active: true,
+                },
+                { onConflict: 'program_key' }
+            )
+
+        return defaults
+    }
+
+    return normalizeConfig(data, defaults)
+}
+
+export async function getMemberReferralConfig(admin?: AdminClient): Promise<GrowthProgramConfig> {
+    return getGrowthProgramConfig('member', admin)
+}
+
+async function getGrowthProgramConfigForConversion(admin: AdminClient, conversion: any) {
+    const metadataProgramType = conversion?.metadata?.program_type
+    if (metadataProgramType) {
+        return getGrowthProgramConfig(metadataProgramType, admin)
+    }
+
+    if (conversion?.owner_profile_id) {
+        const { data: profile } = await (admin
+            .from('growth_profiles') as any)
+            .select('program_type')
+            .eq('id', conversion.owner_profile_id)
+            .maybeSingle()
+
+        return getGrowthProgramConfig(profile?.program_type ?? 'member', admin)
+    }
+
+    return getGrowthProgramConfig('member', admin)
 }
 
 export async function ensureGrowthProfileForUser(params: {
@@ -339,6 +537,482 @@ export async function ensureGrowthProfileForUser(params: {
     throw error ?? new Error('No fue posible crear el perfil de growth')
 }
 
+export async function ensureGrowthProfileForOrganization(params: {
+    organizationId: string
+    referralCode?: string | null
+    landingSlug?: string | null
+    status?: 'active' | 'paused' | 'blocked'
+    metadata?: Record<string, any>
+    admin?: AdminClient
+}) {
+    const admin = getAdminClient(params.admin)
+    const { data: existing } = await (admin
+        .from('growth_profiles') as any)
+        .select('*')
+        .eq('organization_id', params.organizationId)
+        .eq('program_type', 'organization')
+        .maybeSingle()
+
+    const updates: Record<string, any> = {
+        status: params.status ?? existing?.status ?? 'active',
+        updated_at: new Date().toISOString(),
+    }
+
+    if (params.referralCode) updates.referral_code = normalizeReferralCode(params.referralCode)
+    if (params.landingSlug) updates.referral_link_slug = normalizeSlug(params.landingSlug)
+    if (params.metadata || existing?.metadata) {
+        updates.metadata = {
+            ...(existing?.metadata ?? {}),
+            ...(params.metadata ?? {}),
+        }
+    }
+
+    if (existing) {
+        const { data, error } = await (admin
+            .from('growth_profiles') as any)
+            .update(updates)
+            .eq('id', existing.id)
+            .select('*')
+            .single()
+
+        if (error) throw error
+        return data
+    }
+
+    const payload: Record<string, any> = {
+        organization_id: params.organizationId,
+        program_type: 'organization',
+        status: params.status ?? 'active',
+        metadata: params.metadata ?? {},
+    }
+
+    if (params.referralCode) payload.referral_code = normalizeReferralCode(params.referralCode)
+    if (params.landingSlug) payload.referral_link_slug = normalizeSlug(params.landingSlug)
+
+    const { data, error } = await (admin
+        .from('growth_profiles') as any)
+        .insert(payload)
+        .select('*')
+        .single()
+
+    if (error) throw error
+    return data
+}
+
+export async function upsertGrowthProgramEnrollment(params: {
+    userId: string
+    programType: 'host' | 'ambassador'
+    status: 'applied' | 'approved' | 'rejected' | 'paused' | 'active' | 'terminated'
+    tier?: 'base' | 'pro' | 'elite' | null
+    approvalNotes?: string | null
+    approvedBy?: string | null
+    admin?: AdminClient
+}) {
+    const admin = getAdminClient(params.admin)
+    await getGrowthProgramConfig(params.programType, admin)
+
+    const shouldActivateProfile = params.status === 'active' || params.status === 'approved'
+    const now = new Date().toISOString()
+    let growthProfile: any = null
+
+    if (shouldActivateProfile) {
+        growthProfile = await ensureGrowthProfileForUser({
+            userId: params.userId,
+            programType: params.programType,
+            admin,
+        })
+
+        if (growthProfile.status !== 'active') {
+            const { data, error } = await (admin
+                .from('growth_profiles') as any)
+                .update({
+                    status: 'active',
+                    updated_at: now,
+                    metadata: {
+                        ...(growthProfile.metadata ?? {}),
+                        activated_by_enrollment: true,
+                        activated_at: now,
+                    },
+                })
+                .eq('id', growthProfile.id)
+                .select('*')
+                .single()
+
+            if (error) throw error
+            growthProfile = data
+        }
+    }
+
+    const { data: existing } = await (admin
+        .from('growth_program_enrollments') as any)
+        .select('*')
+        .eq('user_id', params.userId)
+        .eq('program_type', params.programType)
+        .maybeSingle()
+
+    const payload = {
+        user_id: params.userId,
+        growth_profile_id: growthProfile?.id ?? existing?.growth_profile_id ?? null,
+        program_type: params.programType,
+        status: params.status,
+        tier: params.tier ?? existing?.tier ?? 'base',
+        approval_notes: params.approvalNotes ?? existing?.approval_notes ?? null,
+        approved_by: shouldActivateProfile ? (params.approvedBy ?? existing?.approved_by ?? null) : existing?.approved_by ?? null,
+        approved_at: shouldActivateProfile ? (existing?.approved_at ?? now) : existing?.approved_at ?? null,
+        updated_at: now,
+        metadata: {
+            ...(existing?.metadata ?? {}),
+            managed_from: 'admin_growth_programs',
+        },
+    }
+
+    const mutation = existing
+        ? (admin.from('growth_program_enrollments') as any).update(payload).eq('id', existing.id)
+        : (admin.from('growth_program_enrollments') as any).insert(payload)
+
+    const { data: enrollment, error } = await mutation
+        .select('*')
+        .single()
+
+    if (error) throw error
+
+    if (!shouldActivateProfile && enrollment.growth_profile_id) {
+        const profileStatus = params.status === 'paused' ? 'paused' : 'blocked'
+        await (admin
+            .from('growth_profiles') as any)
+            .update({
+                status: profileStatus,
+                updated_at: now,
+            })
+            .eq('id', enrollment.growth_profile_id)
+            .in('program_type', ['host', 'ambassador'])
+    }
+
+    return enrollment
+}
+
+export async function upsertGrowthOrganization(params: {
+    organizationId?: string | null
+    name: string
+    organizationType: 'university' | 'association' | 'college' | 'community' | 'other'
+    status: 'lead' | 'prospect' | 'active_partner' | 'inactive_partner'
+    partnerCode?: string | null
+    landingSlug?: string | null
+    contactName?: string | null
+    contactEmail?: string | null
+    contactPhone?: string | null
+    benefitModel: 'discount' | 'revenue_share' | 'bulk_access' | 'custom'
+    benefitConfig?: Record<string, any>
+    createdBy?: string | null
+    admin?: AdminClient
+}) {
+    const admin = getAdminClient(params.admin)
+    await getGrowthProgramConfig('organization', admin)
+
+    const partnerCode = normalizeReferralCode(params.partnerCode) || normalizeReferralCode(params.name).replace(/[^A-Z0-9]/g, '').slice(0, 8) || undefined
+    const landingSlug = normalizeSlug(params.landingSlug) || normalizeSlug(params.name) || undefined
+    const payload = {
+        name: params.name.trim(),
+        organization_type: params.organizationType,
+        status: params.status,
+        ...(partnerCode ? { partner_code: partnerCode } : {}),
+        landing_slug: landingSlug ?? null,
+        contact_name: params.contactName || null,
+        contact_email: params.contactEmail || null,
+        contact_phone: params.contactPhone || null,
+        benefit_model: params.benefitModel,
+        benefit_config: params.benefitConfig ?? {},
+        created_by: params.createdBy ?? null,
+        updated_at: new Date().toISOString(),
+    }
+
+    const mutation = params.organizationId
+        ? (admin.from('organizations') as any).update(payload).eq('id', params.organizationId)
+        : (admin.from('organizations') as any).insert(payload)
+
+    const { data: organization, error } = await mutation
+        .select('*')
+        .single()
+
+    if (error) throw error
+
+    const profileStatus = organization.status === 'active_partner' ? 'active' : organization.status === 'inactive_partner' ? 'paused' : 'paused'
+    const growthProfile = await ensureGrowthProfileForOrganization({
+        organizationId: organization.id,
+        referralCode: organization.partner_code,
+        landingSlug: organization.landing_slug,
+        status: profileStatus,
+        metadata: { managed_from: 'admin_growth_organizations' },
+        admin,
+    })
+
+    return { organization, growthProfile }
+}
+
+export async function createGroupPack(params: {
+    leaderUserId: string
+    packType: 'pack_3' | 'pack_5' | 'pack_10' | 'custom'
+    requiredMembers?: number | null
+    benefitConfig?: Record<string, any>
+    admin?: AdminClient
+}) {
+    const admin = getAdminClient(params.admin)
+    await getGrowthProgramConfig('group_pack', admin)
+
+    const requiredMembers = requiredMembersForPack(params.packType, params.requiredMembers)
+    const { data, error } = await (admin
+        .from('group_packs') as any)
+        .insert({
+            leader_user_id: params.leaderUserId,
+            pack_type: params.packType,
+            status: 'inviting',
+            required_members: requiredMembers,
+            active_members_count: 0,
+            benefit_config: params.benefitConfig ?? {
+                label: `Beneficio grupal Pack ${requiredMembers}`,
+            },
+            metadata: {
+                created_from: 'growth_dashboard',
+            },
+        })
+        .select('*')
+        .single()
+
+    if (error) throw error
+    return data
+}
+
+export async function inviteGroupPackMember(params: {
+    groupPackId: string
+    leaderUserId: string
+    invitedEmail?: string | null
+    invitedPhone?: string | null
+    admin?: AdminClient
+}) {
+    const admin = getAdminClient(params.admin)
+    const { data: pack } = await (admin
+        .from('group_packs') as any)
+        .select('id, leader_user_id, status')
+        .eq('id', params.groupPackId)
+        .eq('leader_user_id', params.leaderUserId)
+        .maybeSingle()
+
+    if (!pack || pack.status === 'cancelled') {
+        throw new Error('Pack no disponible')
+    }
+
+    const invitedEmail = (params.invitedEmail || '').trim().toLowerCase()
+    const invitedPhone = (params.invitedPhone || '').trim()
+    if (!invitedEmail && !invitedPhone) {
+        throw new Error('Indica email o telefono')
+    }
+
+    const { data: existing } = invitedEmail
+        ? await (admin
+            .from('group_pack_members') as any)
+            .select('*')
+            .eq('group_pack_id', params.groupPackId)
+            .ilike('invited_email', invitedEmail)
+            .maybeSingle()
+        : { data: null }
+
+    const payload = {
+        group_pack_id: params.groupPackId,
+        invited_email: invitedEmail || null,
+        invited_phone: invitedPhone || null,
+        status: existing?.status ?? 'invited',
+        updated_at: new Date().toISOString(),
+    }
+
+    const mutation = existing
+        ? (admin.from('group_pack_members') as any).update(payload).eq('id', existing.id)
+        : (admin.from('group_pack_members') as any).insert(payload)
+
+    const { data, error } = await mutation
+        .select('*')
+        .single()
+
+    if (error) throw error
+    return data
+}
+
+export async function applyGroupPackRegistration(params: {
+    packCode: string
+    userId: string
+    email?: string | null
+    admin?: AdminClient
+}) {
+    const admin = getAdminClient(params.admin)
+    const code = normalizeReferralCode(params.packCode)
+    if (!code) return { success: false, error: 'Pack invalido' }
+
+    const { data: pack } = await (admin
+        .from('group_packs') as any)
+        .select('*')
+        .eq('pack_code', code)
+        .neq('status', 'cancelled')
+        .maybeSingle()
+
+    if (!pack) return { success: false, error: 'Pack no encontrado' }
+    if (pack.leader_user_id === params.userId) {
+        return { success: false, error: 'El lider no puede sumarse como miembro del pack' }
+    }
+
+    const email = (params.email || '').trim().toLowerCase()
+    const { data: existingByUser } = await (admin
+        .from('group_pack_members') as any)
+        .select('*')
+        .eq('group_pack_id', pack.id)
+        .eq('user_id', params.userId)
+        .maybeSingle()
+
+    const { data: existingByEmail } = !existingByUser && email
+        ? await (admin
+            .from('group_pack_members') as any)
+            .select('*')
+            .eq('group_pack_id', pack.id)
+            .ilike('invited_email', email)
+            .maybeSingle()
+        : { data: null }
+
+    const existing = existingByUser ?? existingByEmail
+    const payload = {
+        group_pack_id: pack.id,
+        invited_email: (existing?.invited_email ?? email) || null,
+        user_id: params.userId,
+        status: ['activated', 'active'].includes(existing?.status) ? existing.status : 'registered',
+        metadata: {
+            ...(existing?.metadata ?? {}),
+            registered_at: new Date().toISOString(),
+        },
+        updated_at: new Date().toISOString(),
+    }
+
+    const mutation = existing
+        ? (admin.from('group_pack_members') as any).update(payload).eq('id', existing.id)
+        : (admin.from('group_pack_members') as any).insert(payload)
+
+    const { data, error } = await mutation
+        .select('*')
+        .single()
+
+    if (error) throw error
+    await refreshGroupPackStatus({ groupPackId: pack.id, admin })
+    return { success: true, groupPackId: pack.id, memberId: data?.id }
+}
+
+export async function markGroupPackMemberActive(params: {
+    userId: string
+    admin?: AdminClient
+}) {
+    const admin = getAdminClient(params.admin)
+    const { data: memberships } = await (admin
+        .from('group_pack_members') as any)
+        .select('id, group_pack_id, status, metadata')
+        .eq('user_id', params.userId)
+        .in('status', ['registered', 'activated'])
+
+    for (const member of memberships ?? []) {
+        await (admin
+            .from('group_pack_members') as any)
+            .update({
+                status: 'active',
+                metadata: {
+                    ...(member.metadata ?? {}),
+                    activated_at: new Date().toISOString(),
+                },
+                updated_at: new Date().toISOString(),
+            })
+            .eq('id', member.id)
+
+        await refreshGroupPackStatus({ groupPackId: member.group_pack_id, admin })
+    }
+}
+
+export async function refreshGroupPackStatus(params: {
+    groupPackId: string
+    admin?: AdminClient
+}) {
+    const admin = getAdminClient(params.admin)
+    const { data: pack } = await (admin
+        .from('group_packs') as any)
+        .select('*')
+        .eq('id', params.groupPackId)
+        .maybeSingle()
+
+    if (!pack || pack.status === 'cancelled') return null
+
+    const { data: members } = await (admin
+        .from('group_pack_members') as any)
+        .select('*')
+        .eq('group_pack_id', pack.id)
+
+    const activeMembersCount = (members ?? []).filter((member: any) => member.status === 'active').length
+    const hasRegisteredMembers = (members ?? []).some((member: any) => ['registered', 'activated', 'active'].includes(member.status))
+    const completed = activeMembersCount >= Number(pack.required_members ?? 0)
+    const now = new Date().toISOString()
+    const nextStatus = completed ? 'completed' : hasRegisteredMembers ? 'partially_active' : 'inviting'
+    let unlockedRewardId = pack.unlocked_reward_id ?? null
+
+    if (completed && !unlockedRewardId && pack.leader_user_id) {
+        const config = await getGrowthProgramConfig('group_pack', admin)
+        const rule = config.reward_rules[0] ?? DEFAULT_GROUP_PACK_PROGRAM_CONFIG.reward_rules[0]
+        const idempotencyKey = `group_pack:${pack.id}:completed`
+        const { data: existingReward } = await (admin
+            .from('growth_rewards') as any)
+            .select('id')
+            .eq('idempotency_key', idempotencyKey)
+            .maybeSingle()
+
+        if (existingReward?.id) {
+            unlockedRewardId = existingReward.id
+        } else {
+            const { data: reward } = await (admin
+                .from('growth_rewards') as any)
+                .insert({
+                    beneficiary_user_id: pack.leader_user_id,
+                    group_pack_id: pack.id,
+                    reward_type: rule.reward_type,
+                    reward_value: {
+                        ...(rule.reward_value ?? {}),
+                        ...(pack.benefit_config ?? {}),
+                    },
+                    reason_type: rule.reason_type ?? 'group_pack_completed',
+                    status: 'pending_review',
+                    automatic: false,
+                    requires_manual_review: true,
+                    idempotency_key: idempotencyKey,
+                    metadata: {
+                        program_type: 'group_pack',
+                        program_key: 'group_pack_program',
+                        pack_type: pack.pack_type,
+                        required_members: pack.required_members,
+                        active_members_count: activeMembersCount,
+                    },
+                })
+                .select('id')
+                .single()
+            unlockedRewardId = reward?.id ?? null
+        }
+    }
+
+    const { data: updatedPack } = await (admin
+        .from('group_packs') as any)
+        .update({
+            active_members_count: activeMembersCount,
+            status: nextStatus,
+            benefit_unlocked_at: completed ? (pack.benefit_unlocked_at ?? now) : pack.benefit_unlocked_at,
+            completed_at: completed ? (pack.completed_at ?? now) : null,
+            unlocked_reward_id: unlockedRewardId,
+            updated_at: now,
+        })
+        .eq('id', pack.id)
+        .select('*')
+        .single()
+
+    return updatedPack ?? null
+}
+
 export async function resolveGrowthProfileByCode(code: string, admin?: AdminClient) {
     const client = getAdminClient(admin)
     const normalized = normalizeReferralCode(code)
@@ -409,13 +1083,13 @@ export async function applyGrowthAttributionForRegisteredUser(params: {
     admin?: AdminClient
 }) {
     const admin = getAdminClient(params.admin)
-    const config = await getMemberReferralConfig(admin)
     const ownerProfile = await resolveGrowthProfileByCode(params.code, admin)
 
     if (!ownerProfile) {
         return { success: false, error: 'Codigo de growth invalido' }
     }
 
+    const config = await getGrowthProgramConfig(ownerProfile.program_type, admin)
     const ownerUserId = ownerProfile.user_id as string | null
     if (ownerUserId && ownerUserId === params.inviteeUserId) {
         await createGrowthFraudFlag({
@@ -483,7 +1157,7 @@ export async function applyGrowthAttributionForRegisteredUser(params: {
             .update(updates)
             .eq('id', existing.id)
 
-        return { success: true, attributionId: existing.id, reassigned: canReassign }
+        return { success: true, attributionId: existing.id, reassigned: canReassign, sourceType }
     }
 
     const capturedAt = now
@@ -516,7 +1190,7 @@ export async function applyGrowthAttributionForRegisteredUser(params: {
         return { success: false, error: error.message }
     }
 
-    return { success: true, attributionId: data?.id }
+    return { success: true, attributionId: data?.id, sourceType }
 }
 
 export async function markGrowthAttributionRegistered(inviteeUserId: string, admin?: AdminClient) {
@@ -540,7 +1214,6 @@ export async function recordGrowthSubscriptionActivation(params: {
     admin?: AdminClient
 }) {
     const admin = getAdminClient(params.admin)
-    const config = await getMemberReferralConfig(admin)
     const activatedAt = new Date()
 
     const { data: attribution } = await (admin
@@ -590,6 +1263,9 @@ export async function recordGrowthSubscriptionActivation(params: {
         return { success: true, skipped: 'attribution_window_expired' }
     }
 
+    const programType = programTypeForSourceType(attribution.source_type)
+    const programKey = programKeyForProgramType(programType)
+    const config = await getGrowthProgramConfig(programType, admin)
     const idempotencyKey = `subscription:${params.data.providerSubscriptionId}`
     const { data: subscription } = params.subscriptionId
         ? await (admin
@@ -645,6 +1321,8 @@ export async function recordGrowthSubscriptionActivation(params: {
             provider_customer_id: params.data.providerCustomerId,
             price_id: params.data.priceId ?? null,
             specialization_code: params.data.specializationCode ?? null,
+            program_type: programType,
+            program_key: programKey,
             consolidation,
         },
     }
@@ -676,6 +1354,7 @@ export async function recordGrowthSubscriptionActivation(params: {
             .in('status', ['captured', 'registered', 'paid'])
     }
 
+    await markGroupPackMemberActive({ userId: params.userId, admin })
     await consolidateEligibleGrowthConversions({ admin })
     return { success: true, conversionId: conversion?.id }
 }
@@ -690,10 +1369,9 @@ export async function attachGrowthConversionPaymentReference(params: {
 }) {
     const admin = getAdminClient(params.admin)
     const now = new Date().toISOString()
-    const config = await getMemberReferralConfig(admin)
     const { data: conversions, error: fetchError } = await (admin
         .from('growth_conversions') as any)
-        .select('id, metadata, payment_transaction_id, provider_payment_id, provider_session_id, provider_invoice_id, activated_at')
+        .select('id, metadata, owner_profile_id, payment_transaction_id, provider_payment_id, provider_session_id, provider_invoice_id, activated_at')
         .eq('provider_subscription_id', params.providerSubscriptionId)
         .in('status', ['pending', 'confirmed'])
 
@@ -701,6 +1379,7 @@ export async function attachGrowthConversionPaymentReference(params: {
     if (!conversions || conversions.length === 0) return
 
     for (const conversion of conversions) {
+        const config = await getGrowthProgramConfigForConversion(admin, conversion)
         const consolidation = getConsolidationMetadata(conversion, config)
         const metadata = {
             ...(conversion.metadata ?? {}),
@@ -771,7 +1450,7 @@ export async function cancelGrowthConversionsForSubscription(params: {
 export async function refundGrowthConversionsForPayment(data: RefundWebhookData, admin?: AdminClient) {
     const client = getAdminClient(admin)
     const conversions = await collectGrowthConversionsForRefund(client, data)
-    if (conversions.length === 0) return
+    if (conversions.length === 0) return 0
 
     for (const conversion of conversions) {
         const refundedAt = new Date().toISOString()
@@ -801,6 +1480,8 @@ export async function refundGrowthConversionsForPayment(data: RefundWebhookData,
 
         await revokeGrowthRewardsForConversion(client, conversion.id, 'Revocado por reembolso de pago')
     }
+
+    return conversions.length
 }
 
 async function ensureGrowthFraudFlag(params: {
@@ -1007,7 +1688,6 @@ export async function consolidateEligibleGrowthConversions(params?: {
 }) {
     const admin = getAdminClient(params?.admin)
     const now = params?.now ?? new Date()
-    const config = await getMemberReferralConfig(admin)
     const { data: conversions } = await (admin
         .from('growth_conversions') as any)
         .select('*')
@@ -1020,6 +1700,7 @@ export async function consolidateEligibleGrowthConversions(params?: {
     let blocked = 0
 
     for (const conversion of conversions ?? []) {
+        const config = await getGrowthProgramConfigForConversion(admin, conversion)
         const decision = await getGrowthQualificationDecision(admin, conversion, now, config)
         if (!decision) continue
 
@@ -1064,6 +1745,7 @@ export async function consolidateEligibleGrowthConversions(params?: {
 async function collectGrowthConversionsForRefund(client: AdminClient, data: RefundWebhookData) {
     const filters = [
         data.paymentIntentId ? `provider_payment_id.eq.${data.paymentIntentId}` : null,
+        data.invoiceId ? `provider_invoice_id.eq.${data.invoiceId}` : null,
         data.sessionId ? `provider_session_id.eq.${data.sessionId}` : null,
     ].filter(Boolean) as string[]
 
@@ -1230,7 +1912,7 @@ async function qualifyGrowthConversion(params: {
     qualifiedAt: string
     renewalTransaction?: any | null
 }) {
-    const config = await getMemberReferralConfig(params.admin)
+    const config = await getGrowthProgramConfigForConversion(params.admin, params.conversion)
     const consolidation = getConsolidationMetadata(params.conversion, config)
     const qualifiedAt = toDateOrNull(params.qualifiedAt)?.toISOString() ?? new Date().toISOString()
 
@@ -1306,15 +1988,75 @@ async function createRewardsForQualifiedConversion(admin: AdminClient, conversio
         .eq('id', conversionId)
         .maybeSingle()
 
-    if (!conversion?.owner_profile_id || !conversion.owner_user_id) return
+    if (!conversion?.owner_profile_id) return
 
-    const config = await getMemberReferralConfig(admin)
-    const { count } = await (admin
+    const { data: ownerProfile } = await (admin
+        .from('growth_profiles') as any)
+        .select('program_type, organization_id')
+        .eq('id', conversion.owner_profile_id)
+        .maybeSingle()
+    const programType = conversion.metadata?.program_type ?? ownerProfile?.program_type ?? 'member'
+    const programKey = programKeyForProgramType(programType)
+    const config = await getGrowthProgramConfig(programType, admin)
+
+    if (programType === 'organization') {
+        const rule = config.reward_rules[0] ?? DEFAULT_ORGANIZATION_PROGRAM_CONFIG.reward_rules[0]
+        const idempotencyKey = `${programKey}:${conversion.owner_profile_id}:conversion:${conversion.id}`
+        const { data: existingReward } = await (admin
+            .from('growth_rewards') as any)
+            .select('id')
+            .eq('idempotency_key', idempotencyKey)
+            .maybeSingle()
+
+        if (!existingReward) {
+            await (admin
+                .from('growth_rewards') as any)
+                .insert({
+                    attribution_id: conversion.attribution_id,
+                    conversion_id: conversion.id,
+                    beneficiary_user_id: null,
+                    organization_id: ownerProfile?.organization_id ?? conversion.metadata?.organization_id ?? null,
+                    growth_profile_id: conversion.owner_profile_id,
+                    reward_type: rule.reward_type,
+                    reward_value: rule.reward_value,
+                    reason_type: rule.reason_type ?? 'organization_revenue_share',
+                    reason_reference_id: conversion.id,
+                    status: 'pending_review',
+                    automatic: false,
+                    requires_manual_review: true,
+                    idempotency_key: idempotencyKey,
+                    metadata: {
+                        program_type: programType,
+                        program_key: programKey,
+                        reward_scope: 'per_conversion',
+                        conversion_amount: conversion.amount ?? null,
+                        conversion_currency: conversion.currency ?? 'MXN',
+                    },
+                })
+        }
+
+        return
+    }
+
+    if (!conversion.owner_user_id) return
+
+    const monthlyRewardScope = usesMonthlyRewardScope(programType)
+    const rewardWindow = monthlyRewardScope
+        ? getUtcMonthWindow(toDateOrNull(conversion.qualified_at) ?? new Date())
+        : null
+    let qualifiedCountQuery = (admin
         .from('growth_conversions') as any)
         .select('*', { count: 'exact', head: true })
         .eq('owner_profile_id', conversion.owner_profile_id)
         .eq('status', 'qualified')
 
+    if (rewardWindow) {
+        qualifiedCountQuery = qualifiedCountQuery
+            .gte('qualified_at', rewardWindow.startsAt)
+            .lt('qualified_at', rewardWindow.endsAt)
+    }
+
+    const { count } = await qualifiedCountQuery
     const qualifiedCount = count ?? 0
     const eligibleRules = config.reward_rules.filter((rule) => rule.threshold === qualifiedCount)
 
@@ -1322,7 +2064,9 @@ async function createRewardsForQualifiedConversion(admin: AdminClient, conversio
         const automatic = Boolean(rule.automatic) && config.automatic_reward_types.includes(rule.reward_type)
         const requiresManualReview = rule.requires_manual_review !== false || config.manual_reward_types.includes(rule.reward_type)
         const status: GrowthRewardStatus = automatic && !requiresManualReview ? 'approved' : 'pending_review'
-        const idempotencyKey = `member_referral:${conversion.owner_profile_id}:threshold:${rule.threshold}`
+        const idempotencyKey = rewardWindow
+            ? `${programKey}:${conversion.owner_profile_id}:period:${rewardWindow.periodMonth}:threshold:${rule.threshold}`
+            : `${programKey}:${conversion.owner_profile_id}:threshold:${rule.threshold}`
 
         const { data: existingReward } = await (admin
             .from('growth_rewards') as any)
@@ -1358,6 +2102,10 @@ async function createRewardsForQualifiedConversion(admin: AdminClient, conversio
                 requires_manual_review: requiresManualReview,
                 idempotency_key: idempotencyKey,
                 metadata: {
+                    program_type: programType,
+                    program_key: programKey,
+                    reward_scope: rewardWindow ? 'monthly' : 'lifetime',
+                    period_month: rewardWindow?.periodMonth ?? null,
                     qualified_referral_count: qualifiedCount,
                     threshold: rule.threshold,
                 },

@@ -9,6 +9,8 @@ import {
     markGrowthConversionFraud,
     revokeGrowthReward,
     updateGrowthFraudFlagStatus,
+    upsertGrowthOrganization,
+    upsertGrowthProgramEnrollment,
 } from '@/lib/growth/engine'
 import { revalidatePath } from 'next/cache'
 
@@ -226,6 +228,143 @@ export async function updateMemberReferralConfigAction(formData: FormData): Prom
     } catch (err) {
         console.error('Unexpected error in updateMemberReferralConfigAction:', err)
         return { success: false, error: 'Error inesperado' }
+    }
+}
+
+function isUuid(value: string) {
+    return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value)
+}
+
+export async function upsertGrowthProgramEnrollmentAction(formData: FormData): Promise<{
+    success: boolean
+    error?: string
+}> {
+    try {
+        const { supabase, user, error } = await requireAdmin()
+        if (error || !user) return { success: false, error: error ?? 'Solo administradores' }
+
+        const userLookup = String(formData.get('userLookup') || '').trim()
+        const existingUserId = String(formData.get('userId') || '').trim()
+        const programType = String(formData.get('programType') || 'host')
+        const status = String(formData.get('status') || 'active')
+        const tier = String(formData.get('tier') || 'base')
+        const approvalNotes = String(formData.get('approvalNotes') || '').trim()
+
+        if (!['host', 'ambassador'].includes(programType)) {
+            return { success: false, error: 'Programa invalido' }
+        }
+
+        if (!['applied', 'approved', 'rejected', 'paused', 'active', 'terminated'].includes(status)) {
+            return { success: false, error: 'Estado invalido' }
+        }
+
+        if (!['base', 'pro', 'elite'].includes(tier)) {
+            return { success: false, error: 'Tier invalido' }
+        }
+
+        const lookup = existingUserId || userLookup
+        if (!lookup) {
+            return { success: false, error: 'Indica email o ID de usuario' }
+        }
+
+        const query = (supabase as any)
+            .from('profiles')
+            .select('id, email, full_name, role')
+            .limit(1)
+
+        const { data: profiles, error: profileError } = isUuid(lookup)
+            ? await query.eq('id', lookup)
+            : await query.ilike('email', lookup)
+
+        if (profileError) {
+            return { success: false, error: 'Error al buscar usuario' }
+        }
+
+        const targetUser = profiles?.[0]
+        if (!targetUser?.id) {
+            return { success: false, error: 'Usuario no encontrado' }
+        }
+
+        await upsertGrowthProgramEnrollment({
+            userId: targetUser.id,
+            programType: programType as 'host' | 'ambassador',
+            status: status as 'applied' | 'approved' | 'rejected' | 'paused' | 'active' | 'terminated',
+            tier: tier as 'base' | 'pro' | 'elite',
+            approvalNotes: approvalNotes || null,
+            approvedBy: user.id,
+            admin: supabase,
+        })
+
+        revalidateGrowthAdminPaths()
+        return { success: true }
+    } catch (err) {
+        console.error('Unexpected error in upsertGrowthProgramEnrollmentAction:', err)
+        return { success: false, error: 'Error al guardar programa' }
+    }
+}
+
+function parseJsonObject(value: string) {
+    if (!value.trim()) return {}
+    try {
+        const parsed = JSON.parse(value)
+        return parsed && typeof parsed === 'object' && !Array.isArray(parsed) ? parsed : {}
+    } catch {
+        return {}
+    }
+}
+
+export async function upsertGrowthOrganizationAction(formData: FormData): Promise<{
+    success: boolean
+    error?: string
+}> {
+    try {
+        const { supabase, user, error } = await requireAdmin()
+        if (error || !user) return { success: false, error: error ?? 'Solo administradores' }
+
+        const organizationId = String(formData.get('organizationId') || '').trim() || null
+        const name = String(formData.get('name') || '').trim()
+        const organizationType = String(formData.get('organizationType') || 'other')
+        const status = String(formData.get('status') || 'lead')
+        const partnerCode = String(formData.get('partnerCode') || '').trim()
+        const landingSlug = String(formData.get('landingSlug') || '').trim()
+        const contactName = String(formData.get('contactName') || '').trim()
+        const contactEmail = String(formData.get('contactEmail') || '').trim()
+        const contactPhone = String(formData.get('contactPhone') || '').trim()
+        const benefitModel = String(formData.get('benefitModel') || 'custom')
+        const benefitConfig = parseJsonObject(String(formData.get('benefitConfig') || ''))
+
+        if (!name) return { success: false, error: 'Nombre requerido' }
+        if (!['university', 'association', 'college', 'community', 'other'].includes(organizationType)) {
+            return { success: false, error: 'Tipo de organizacion invalido' }
+        }
+        if (!['lead', 'prospect', 'active_partner', 'inactive_partner'].includes(status)) {
+            return { success: false, error: 'Estado de organizacion invalido' }
+        }
+        if (!['discount', 'revenue_share', 'bulk_access', 'custom'].includes(benefitModel)) {
+            return { success: false, error: 'Modelo de beneficio invalido' }
+        }
+
+        await upsertGrowthOrganization({
+            organizationId,
+            name,
+            organizationType: organizationType as 'university' | 'association' | 'college' | 'community' | 'other',
+            status: status as 'lead' | 'prospect' | 'active_partner' | 'inactive_partner',
+            partnerCode: partnerCode || null,
+            landingSlug: landingSlug || null,
+            contactName: contactName || null,
+            contactEmail: contactEmail || null,
+            contactPhone: contactPhone || null,
+            benefitModel: benefitModel as 'discount' | 'revenue_share' | 'bulk_access' | 'custom',
+            benefitConfig,
+            createdBy: user.id,
+            admin: supabase,
+        })
+
+        revalidateGrowthAdminPaths()
+        return { success: true }
+    } catch (err) {
+        console.error('Unexpected error in upsertGrowthOrganizationAction:', err)
+        return { success: false, error: 'Error al guardar organizacion' }
     }
 }
 

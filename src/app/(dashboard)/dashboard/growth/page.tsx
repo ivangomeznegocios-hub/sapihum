@@ -3,6 +3,7 @@ import { headers } from 'next/headers'
 import {
     Award,
     BriefcaseBusiness,
+    CheckCircle2,
     Clock,
     Gift,
     Megaphone,
@@ -15,6 +16,7 @@ import {
     type LucideIcon,
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { getActiveCampaigns, getTopReferrers } from '@/lib/supabase/queries/growth-campaigns'
 import { getGrowthUserDashboard, getTopGrowthReferrers } from '@/lib/growth/queries'
 import { cn } from '@/lib/utils'
@@ -25,6 +27,7 @@ import {
     CampaignCard,
     CopyCodeButton,
     CopyLinkButton,
+    GroupPackManager,
     LeaderboardTable,
     RewardTimeline,
     ShareLinkButton,
@@ -57,6 +60,17 @@ function StatCard({
             </div>
         </div>
     )
+}
+
+function formatCurrency(value: unknown): string {
+    const amount = Number(value)
+    if (!Number.isFinite(amount)) return '$0'
+
+    return new Intl.NumberFormat('es-MX', {
+        style: 'currency',
+        currency: 'MXN',
+        maximumFractionDigits: 0,
+    }).format(amount)
 }
 
 export default async function GrowthHubPage() {
@@ -106,6 +120,21 @@ export default async function GrowthHubPage() {
     const growthProfile = growthDashboard?.profile
     const rewards = growthDashboard?.rewards ?? []
     const recentAttributions = growthDashboard?.attributions?.slice(0, 8) ?? []
+    const groupPacks = growthDashboard?.groupPacks ?? []
+    const programEnrollment = growthDashboard?.programEnrollment
+    const programSummary = growthDashboard?.programSummary
+    const programLeaderboard = growthDashboard?.programLeaderboard ?? []
+    const currentRanking = growthDashboard?.currentRanking
+    const isProgramUser = Boolean(programEnrollment && programSummary)
+    const programType = programEnrollment?.program_type
+    const programLabel = programType === 'host' ? 'Host' : 'Embajador'
+    const programGoal = Math.max(1, Number(programSummary?.monthlyGoal ?? 1))
+    const programProgress = programSummary
+        ? Math.min(100, Math.round((Number(programSummary.monthlyQualified ?? 0) / programGoal) * 100))
+        : 0
+    const currentTierLabel = programSummary?.currentTier?.label ?? programSummary?.tier ?? 'base'
+    const nextTierLabel = programSummary?.nextTier?.label ?? programSummary?.nextTier?.tier ?? null
+    const nextRewardLabel = programSummary?.nextReward?.label ?? 'Sin reward pendiente'
 
     return (
         <div className="max-w-6xl space-y-8">
@@ -159,6 +188,123 @@ export default async function GrowthHubPage() {
                     </div>
                 </div>
             </div>
+
+            {isProgramUser && (
+                <Tabs defaultValue="referidos" className="space-y-4">
+                    <TabsList className="grid w-full grid-cols-3 sm:max-w-md">
+                        <TabsTrigger value="referidos">Referidos</TabsTrigger>
+                        <TabsTrigger value="programa">Programa</TabsTrigger>
+                        <TabsTrigger value="ranking">Ranking</TabsTrigger>
+                    </TabsList>
+
+                    <TabsContent value="referidos" className="space-y-4">
+                        <div className="rounded-2xl border bg-card p-5">
+                            <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+                                <div>
+                                    <h2 className="text-lg font-semibold">Referidos con codigo de {programLabel}</h2>
+                                    <p className="mt-1 text-sm text-muted-foreground">
+                                        Tu codigo activo atribuye nuevos registros al programa {programLabel}. Estas metricas usan el mismo motor base de growth.
+                                    </p>
+                                </div>
+                                {growthProfile?.referral_code && (
+                                    <div className="rounded-xl bg-muted px-3 py-2 font-mono text-sm font-semibold">
+                                        {growthProfile.referral_code}
+                                    </div>
+                                )}
+                            </div>
+                            <div className="mt-4 grid grid-cols-2 gap-3 lg:grid-cols-4">
+                                <StatCard label="Invitados" value={stats?.totalInvites ?? 0} icon={Users} />
+                                <StatCard label="Registrados" value={stats?.registered ?? 0} icon={Share2} />
+                                <StatCard label="Pagados" value={stats?.paid ?? 0} icon={Clock} />
+                                <StatCard label="Qualified" value={stats?.qualified ?? 0} icon={TrendingUp} />
+                            </div>
+                        </div>
+                    </TabsContent>
+
+                    <TabsContent value="programa" className="space-y-4">
+                        <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-4">
+                            <StatCard
+                                label="Activaciones del mes"
+                                value={programSummary?.monthlyQualified ?? 0}
+                                icon={TrendingUp}
+                                color="text-brand-brown dark:text-brand-brown"
+                            />
+                            {programType === 'host' ? (
+                                <>
+                                    <StatCard
+                                        label="Pagos del mes"
+                                        value={programSummary?.monthlyPaid ?? 0}
+                                        icon={CheckCircle2}
+                                        color="text-brand-yellow dark:text-brand-yellow"
+                                    />
+                                    <StatCard
+                                        label="Revenue generado"
+                                        value={formatCurrency(programSummary?.monthlyRevenue ?? 0)}
+                                        icon={BriefcaseBusiness}
+                                        color="text-brand-brown dark:text-brand-brown"
+                                    />
+                                </>
+                            ) : (
+                                <>
+                                    <StatCard
+                                        label="Ranking mensual"
+                                        value={currentRanking ? `#${currentRanking.rank_position}` : '-'}
+                                        icon={Trophy}
+                                        color="text-brand-yellow dark:text-brand-yellow"
+                                    />
+                                    <StatCard
+                                        label="Reward siguiente"
+                                        value={nextRewardLabel}
+                                        icon={Gift}
+                                        color="text-brand-brown dark:text-brand-brown"
+                                    />
+                                </>
+                            )}
+                            <StatCard
+                                label="Rewards pendientes"
+                                value={programSummary?.pendingRewards ?? 0}
+                                icon={Gift}
+                                color="text-brand-yellow dark:text-brand-yellow"
+                            />
+                        </div>
+
+                        <div className="rounded-2xl border bg-card p-5">
+                            <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+                                <div>
+                                    <h2 className="text-lg font-semibold">{programLabel} {currentTierLabel}</h2>
+                                    <p className="mt-1 text-sm text-muted-foreground">
+                                        Meta actual: {programSummary?.monthlyQualified ?? 0}/{programSummary?.monthlyGoal ?? 0} activaciones qualified este mes.
+                                    </p>
+                                    <p className="mt-1 text-xs text-muted-foreground">
+                                        Siguiente tier: {nextTierLabel || 'No definido'} - Reward siguiente: {nextRewardLabel}.
+                                    </p>
+                                </div>
+                                <div className="rounded-xl bg-muted px-3 py-2 text-sm">
+                                    Tier actual: <span className="font-semibold">{programSummary?.tier ?? 'base'}</span>
+                                </div>
+                            </div>
+                            <div className="mt-4 h-2 overflow-hidden rounded-full bg-muted">
+                                <div className="h-full rounded-full bg-primary" style={{ width: `${programProgress}%` }} />
+                            </div>
+                        </div>
+                    </TabsContent>
+
+                    <TabsContent value="ranking" className="space-y-4">
+                        <div className="rounded-2xl border bg-card p-5">
+                            <div className="mb-4 flex items-center gap-2">
+                                <Trophy className="h-5 w-5 text-brand-yellow" />
+                                <h2 className="text-lg font-semibold">Ranking mensual de {programLabel}</h2>
+                                {currentRanking && (
+                                    <span className="ml-auto rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">
+                                        Tu posicion #{currentRanking.rank_position}
+                                    </span>
+                                )}
+                            </div>
+                            <LeaderboardTable referrers={programLeaderboard} currentUserId={user.id} />
+                        </div>
+                    </TabsContent>
+                </Tabs>
+            )}
 
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-5">
                 <div className="rounded-2xl border bg-gradient-to-br from-card to-muted/20 p-6 lg:col-span-2">
@@ -223,7 +369,9 @@ export default async function GrowthHubPage() {
                 </div>
             </div>
 
-            {stats?.nextReward && (
+            <GroupPackManager groupPacks={groupPacks} baseUrl={baseUrl} />
+
+            {!isProgramUser && stats?.nextReward && (
                 <div className="rounded-2xl border bg-card p-5">
                     <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                         <div>

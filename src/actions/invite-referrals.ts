@@ -100,6 +100,15 @@ export async function applyInviteCode(
 }> {
     try {
         const supabase = await createAdminClient()
+        const growthResult = await applyGrowthAttributionForRegisteredUser({
+            inviteeUserId: referredUserId,
+            code,
+            captureMethod: 'manual_code',
+            admin: supabase,
+        })
+        if (growthResult.success && (growthResult as any).sourceType !== 'member') {
+            return { success: true }
+        }
 
         // 1. Validate the code using the DB function
         const { data: validation, error: valError } = await (supabase as any)

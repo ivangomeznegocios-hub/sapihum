@@ -1,6 +1,7 @@
 'use client'
 
 import Image from 'next/image'
+import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import {
@@ -19,6 +20,11 @@ import {
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { GrowthCampaign } from '@/types/database'
+import {
+    createGroupPackAction,
+    inviteGroupPackMemberAction,
+    refreshGroupPackAction,
+} from './actions'
 
 const rewardTypeLabels: Record<string, string> = {
     extra_days: 'Dias extra',
@@ -370,8 +376,13 @@ export function LeaderboardTable({
         full_name: string | null
         avatar_url: string | null
         role: string
+        referral_code?: string | null
+        rank_position?: number
         total_referrals: number
         completed_referrals: number
+        monthly_qualified?: number
+        monthly_paid?: number
+        monthly_revenue?: number
     }[]
     currentUserId: string
 }) {
@@ -391,6 +402,12 @@ export function LeaderboardTable({
         <div className="space-y-2">
             {referrers.map((referrer, index) => {
                 const isCurrentUser = referrer.id === currentUserId
+                const rank = referrer.rank_position ?? index + 1
+                const isMonthlyProgramRow = referrer.monthly_qualified !== undefined
+                const primaryScore = isMonthlyProgramRow ? referrer.monthly_qualified : referrer.total_referrals
+                const secondaryScore = isMonthlyProgramRow
+                    ? `${referrer.monthly_paid ?? 0} pagos - ${formatCurrency(referrer.monthly_revenue ?? 0)}`
+                    : `${referrer.completed_referrals} activados`
 
                 return (
                     <div
@@ -403,10 +420,10 @@ export function LeaderboardTable({
                         )}
                     >
                         <div className="w-8 shrink-0 text-center">
-                            {index < 3 ? (
+                            {rank <= 3 ? (
                                 <Crown className={cn('mx-auto h-5 w-5', medalColors[index])} />
                             ) : (
-                                <span className="text-sm font-medium text-muted-foreground">{index + 1}</span>
+                                <span className="text-sm font-medium text-muted-foreground">{rank}</span>
                             )}
                         </div>
 
@@ -431,12 +448,14 @@ export function LeaderboardTable({
                                 {referrer.full_name || 'Usuario'}
                                 {isCurrentUser && <span className="ml-1.5 text-xs text-primary/70">(tu)</span>}
                             </p>
-                            <p className="text-[10px] text-muted-foreground">{roleLabels[referrer.role] || referrer.role}</p>
+                            <p className="text-[10px] text-muted-foreground">
+                                {referrer.referral_code || roleLabels[referrer.role] || referrer.role}
+                            </p>
                         </div>
 
                         <div className="shrink-0 text-right">
-                            <p className="text-sm font-bold">{referrer.total_referrals}</p>
-                            <p className="text-[10px] text-muted-foreground">{referrer.completed_referrals} activados</p>
+                            <p className="text-sm font-bold">{primaryScore}</p>
+                            <p className="text-[10px] text-muted-foreground">{secondaryScore}</p>
                         </div>
                     </div>
                 )
@@ -516,6 +535,159 @@ export function RewardTimeline({ rewards }: { rewards: any[] }) {
                     </div>
                 )
             })}
+        </div>
+    )
+}
+
+export function GroupPackManager({
+    groupPacks,
+    baseUrl,
+}: {
+    groupPacks: any[]
+    baseUrl: string
+}) {
+    const router = useRouter()
+    const [loading, setLoading] = useState<string | null>(null)
+    const [message, setMessage] = useState<string | null>(null)
+
+    async function submitCreate(event: React.FormEvent<HTMLFormElement>) {
+        event.preventDefault()
+        setLoading('create')
+        setMessage(null)
+        const result = await createGroupPackAction(new FormData(event.currentTarget))
+        setMessage(result.success ? 'Pack creado' : result.error || 'Error al crear pack')
+        setLoading(null)
+        if (result.success) {
+            event.currentTarget.reset()
+            router.refresh()
+        }
+    }
+
+    async function submitInvite(event: React.FormEvent<HTMLFormElement>) {
+        event.preventDefault()
+        setLoading('invite')
+        setMessage(null)
+        const result = await inviteGroupPackMemberAction(new FormData(event.currentTarget))
+        setMessage(result.success ? 'Integrante invitado' : result.error || 'Error al invitar')
+        setLoading(null)
+        if (result.success) {
+            event.currentTarget.reset()
+            router.refresh()
+        }
+    }
+
+    async function refresh(packId: string) {
+        setLoading(packId)
+        const result = await refreshGroupPackAction(packId)
+        setMessage(result.success ? 'Pack actualizado' : result.error || 'Error al actualizar')
+        setLoading(null)
+        if (result.success) router.refresh()
+    }
+
+    return (
+        <div className="space-y-4">
+            <form onSubmit={submitCreate} className="rounded-2xl border bg-card p-5">
+                <div className="mb-4">
+                    <h2 className="text-lg font-semibold">Packs grupales</h2>
+                    <p className="mt-1 text-sm text-muted-foreground">
+                        Crea un grupo comercial sin cambiar el owner principal de atribucion.
+                    </p>
+                </div>
+                <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                    <label className="text-xs font-medium">
+                        Tipo de pack
+                        <select name="packType" defaultValue="pack_3" className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm">
+                            <option value="pack_3">Pack 3</option>
+                            <option value="pack_5">Pack 5</option>
+                            <option value="pack_10">Pack 10</option>
+                            <option value="custom">Custom</option>
+                        </select>
+                    </label>
+                    <label className="text-xs font-medium">
+                        Miembros requeridos
+                        <input name="requiredMembers" type="number" min={1} defaultValue={3} className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm" />
+                    </label>
+                    <label className="text-xs font-medium xl:col-span-2">
+                        Beneficio
+                        <input name="benefitLabel" placeholder="Ej. beneficio grupal manual" className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm" />
+                    </label>
+                </div>
+                <div className="mt-4 flex items-center gap-2">
+                    <Button type="submit" disabled={loading === 'create'} size="sm" className="gap-1.5">
+                        {loading === 'create' ? <Clock className="h-3.5 w-3.5 animate-spin" /> : <Gift className="h-3.5 w-3.5" />}
+                        Crear pack
+                    </Button>
+                    {message && <span className="text-xs text-muted-foreground">{message}</span>}
+                </div>
+            </form>
+
+            {groupPacks.length === 0 ? (
+                <div className="rounded-2xl border bg-muted/10 py-8 text-center text-sm text-muted-foreground">
+                    Aun no tienes packs grupales.
+                </div>
+            ) : (
+                <div className="grid gap-4 xl:grid-cols-2">
+                    {groupPacks.map((pack) => {
+                        const link = `${baseUrl}/auth/register?pack=${pack.pack_code}`
+                        const progress = Math.min(100, Math.round((Number(pack.active_members_count ?? 0) / Math.max(1, Number(pack.required_members ?? 1))) * 100))
+
+                        return (
+                            <div key={pack.id} className="rounded-2xl border bg-card p-5">
+                                <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                                    <div>
+                                        <h3 className="text-sm font-semibold">{pack.pack_type}</h3>
+                                        <p className="mt-1 text-xs text-muted-foreground">
+                                            {pack.active_members_count ?? 0}/{pack.required_members} activos - faltan {pack.missing}
+                                        </p>
+                                    </div>
+                                    <span className="w-fit rounded-full bg-muted px-2.5 py-1 text-xs font-medium">
+                                        {pack.status}
+                                    </span>
+                                </div>
+                                <div className="mt-3 rounded-xl bg-muted/50 px-3 py-2">
+                                    <p className="font-mono text-xs">{link}</p>
+                                </div>
+                                <div className="mt-3 h-2 overflow-hidden rounded-full bg-muted">
+                                    <div className="h-full rounded-full bg-primary" style={{ width: `${progress}%` }} />
+                                </div>
+
+                                <form onSubmit={submitInvite} className="mt-4 grid gap-2 sm:grid-cols-[1fr_auto]">
+                                    <input type="hidden" name="groupPackId" value={pack.id} />
+                                    <input name="invitedEmail" type="email" placeholder="email@dominio.com" className="rounded-md border border-input bg-background px-3 py-2 text-sm" />
+                                    <Button type="submit" disabled={loading === 'invite'} size="sm">
+                                        Invitar
+                                    </Button>
+                                </form>
+
+                                <div className="mt-4 space-y-2">
+                                    {(pack.members ?? []).length === 0 ? (
+                                        <p className="text-xs text-muted-foreground">Sin integrantes invitados.</p>
+                                    ) : (
+                                        (pack.members ?? []).map((member: any) => (
+                                            <div key={member.id} className="flex items-center justify-between rounded-lg border px-3 py-2 text-xs">
+                                                <span>{member.invited_email || member.invited_phone || member.user_id || 'Integrante'}</span>
+                                                <span className="rounded-full bg-muted px-2 py-0.5">{member.status}</span>
+                                            </div>
+                                        ))
+                                    )}
+                                </div>
+
+                                <div className="mt-4 flex flex-wrap items-center gap-2">
+                                    <Button type="button" variant="outline" size="sm" onClick={() => navigator.clipboard.writeText(link)}>
+                                        Copiar link
+                                    </Button>
+                                    <Button type="button" variant="ghost" size="sm" disabled={loading === pack.id} onClick={() => refresh(pack.id)}>
+                                        Actualizar
+                                    </Button>
+                                    {pack.status === 'completed' && (
+                                        <span className="text-xs font-medium text-primary">Beneficio desbloqueado</span>
+                                    )}
+                                </div>
+                            </div>
+                        )
+                    })}
+                </div>
+            )}
         </div>
     )
 }

@@ -502,6 +502,7 @@ async function mapStripeEvent(stripe: Stripe, event: Stripe.Event): Promise<Webh
 
         case 'charge.refunded': {
             const charge = event.data.object as Stripe.Charge
+            const chargeAny = charge as any
             const paymentIntentId =
                 typeof charge.payment_intent === 'string'
                     ? charge.payment_intent
@@ -509,6 +510,14 @@ async function mapStripeEvent(stripe: Stripe, event: Stripe.Event): Promise<Webh
             const paymentIntent = paymentIntentId
                 ? await stripe.paymentIntents.retrieve(paymentIntentId)
                 : null
+            const paymentIntentAny = paymentIntent as any
+            const invoiceId =
+                typeof chargeAny.invoice === 'string'
+                    ? chargeAny.invoice
+                    : chargeAny.invoice?.id
+                        || (typeof paymentIntentAny?.invoice === 'string'
+                            ? paymentIntentAny.invoice
+                            : paymentIntentAny?.invoice?.id)
             const refundEntry = charge.refunds?.data?.[0]
             const metadata = {
                 ...((paymentIntent?.metadata ?? {}) as Record<string, string>),
@@ -522,6 +531,7 @@ async function mapStripeEvent(stripe: Stripe, event: Stripe.Event): Promise<Webh
                     refundId: refundEntry?.id || `charge_refunded:${charge.id}`,
                     chargeId: charge.id,
                     paymentIntentId: paymentIntentId || undefined,
+                    invoiceId: invoiceId || undefined,
                     amountRefunded: (charge.amount_refunded || 0) / 100,
                     originalAmount: (charge.amount || 0) / 100,
                     currency: charge.currency || 'mxn',

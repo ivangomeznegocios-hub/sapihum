@@ -4,10 +4,12 @@ import Image from 'next/image'
 import {
     Award,
     BarChart3,
+    Building2,
     BriefcaseBusiness,
     CheckCircle2,
     Gift,
     Megaphone,
+    PackageCheck,
     ShieldCheck,
     Share2,
     TrendingUp,
@@ -23,6 +25,8 @@ import {
     DeleteCampaignButton,
     GrowthConfigForm,
     GrowthRewardActions,
+    OrganizationForm,
+    ProgramEnrollmentForm,
     ToggleCampaignButton,
 } from './admin-growth-forms'
 import { cn } from '@/lib/utils'
@@ -65,6 +69,29 @@ const roleLabels: Record<string, string> = {
     ponente: 'Ponentes',
     patient: 'Pacientes',
     admin: 'Admins',
+}
+
+const organizationTypeLabels: Record<string, string> = {
+    university: 'Universidad',
+    association: 'Asociacion',
+    college: 'Colegio',
+    community: 'Comunidad',
+    other: 'Otro',
+}
+
+const organizationStatusLabels: Record<string, string> = {
+    lead: 'Lead',
+    prospect: 'Prospect',
+    active_partner: 'Activa',
+    inactive_partner: 'Inactiva',
+}
+
+const packStatusLabels: Record<string, string> = {
+    draft: 'Draft',
+    inviting: 'Invitando',
+    partially_active: 'Parcialmente activo',
+    completed: 'Completado',
+    cancelled: 'Cancelado',
 }
 
 function formatCurrency(value: unknown): string {
@@ -152,7 +179,13 @@ export default async function AdminGrowthPage() {
     const recentAttributions = growthDashboard.recentAttributions
     const recentConversions = growthDashboard.recentConversions
     const openFlags = growthDashboard.openFlags
+    const programEnrollments = growthDashboard.programEnrollments
+    const organizations = growthDashboard.organizations ?? []
+    const groupPacks = growthDashboard.groupPacks ?? []
+    const hostLeaderboard = growthDashboard.hostLeaderboard
+    const ambassadorLeaderboard = growthDashboard.ambassadorLeaderboard
     const configJson = growthDashboard.config?.config_json || {}
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, '') || ''
     const conversionRate =
         systemStats && systemStats.totalAttributions > 0
             ? ((systemStats.qualifiedAttributions / systemStats.totalAttributions) * 100).toFixed(1)
@@ -257,6 +290,301 @@ export default async function AdminGrowthPage() {
                 fallbackConsolidationRule={String(configJson.fallback_consolidation_rule ?? 'billing_cycle_end')}
                 fixedDaysFallback={Number(configJson.consolidation_days ?? 30)}
             />
+
+            <section className="space-y-4">
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+                    <div>
+                        <h2 className="flex items-center gap-2 text-lg font-semibold">
+                            <BriefcaseBusiness className="h-5 w-5 text-primary" />
+                            Programs
+                        </h2>
+                        <p className="text-sm text-muted-foreground">
+                            Operacion manual de Hosts y Embajadores sobre el mismo motor de atribucion, conversion y rewards.
+                        </p>
+                    </div>
+                    <span className="w-fit rounded-full bg-muted px-2.5 py-1 text-xs text-muted-foreground">
+                        {programEnrollments.length} enrollments
+                    </span>
+                </div>
+
+                <ProgramEnrollmentForm />
+
+                {programEnrollments.length === 0 ? (
+                    <div className="rounded-2xl border bg-muted/10 py-8 text-center">
+                        <Users className="mx-auto mb-2 h-7 w-7 text-muted-foreground/40" />
+                        <p className="text-sm text-muted-foreground">Aun no hay Hosts o Embajadores aprobados.</p>
+                    </div>
+                ) : (
+                    <div className="grid gap-4 xl:grid-cols-2">
+                        {programEnrollments.map((enrollment: any) => {
+                            const code = enrollment.growth_profile?.referral_code ?? null
+                            const link = code ? `${appUrl || ''}/auth/register?ref=${code}` : ''
+
+                            return (
+                                <div key={enrollment.id} className="rounded-2xl border bg-card p-4">
+                                    <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                                        <div>
+                                            <div className="flex flex-wrap items-center gap-2">
+                                                <h3 className="text-sm font-semibold">
+                                                    {enrollment.user?.full_name || enrollment.user?.email || 'Usuario'}
+                                                </h3>
+                                                <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+                                                    {programTypeLabels[enrollment.program_type] || enrollment.program_type}
+                                                </span>
+                                                <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+                                                    {enrollmentStatusLabels[enrollment.status] || enrollment.status}
+                                                </span>
+                                            </div>
+                                            <p className="mt-1 text-xs text-muted-foreground">
+                                                {enrollment.user?.email || 'Sin email'} - Tier {enrollment.tier || 'base'}
+                                            </p>
+                                        </div>
+                                        <div className="text-left sm:text-right">
+                                            <p className="font-mono text-sm font-semibold">{code || 'Sin codigo'}</p>
+                                            {link && (
+                                                <p className="max-w-xs truncate text-[10px] text-muted-foreground">
+                                                    {link}
+                                                </p>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    <ProgramEnrollmentForm enrollment={enrollment} compact />
+                                </div>
+                            )
+                        })}
+                    </div>
+                )}
+
+                <div className="grid gap-4 xl:grid-cols-2">
+                    <div className="rounded-2xl border bg-card p-5">
+                        <h3 className="mb-3 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+                            Ranking Hosts del mes
+                        </h3>
+                        <div className="space-y-2">
+                            {hostLeaderboard.length === 0 ? (
+                                <p className="text-sm text-muted-foreground">Sin actividad mensual.</p>
+                            ) : hostLeaderboard.map((row: any) => (
+                                <div key={row.growth_profile_id} className="flex items-center gap-3 rounded-xl border p-3">
+                                    <span className="w-6 text-center text-xs font-bold text-muted-foreground">{row.rank_position}</span>
+                                    <div className="min-w-0 flex-1">
+                                        <p className="truncate text-sm font-medium">{row.full_name}</p>
+                                        <p className="text-[10px] text-muted-foreground">{row.referral_code}</p>
+                                    </div>
+                                    <div className="text-right text-xs">
+                                        <p className="font-semibold">{row.monthly_qualified} qualified</p>
+                                        <p className="text-muted-foreground">{formatCurrency(row.monthly_revenue)}</p>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+
+                    <div className="rounded-2xl border bg-card p-5">
+                        <h3 className="mb-3 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+                            Ranking Embajadores del mes
+                        </h3>
+                        <div className="space-y-2">
+                            {ambassadorLeaderboard.length === 0 ? (
+                                <p className="text-sm text-muted-foreground">Sin actividad mensual.</p>
+                            ) : ambassadorLeaderboard.map((row: any) => (
+                                <div key={row.growth_profile_id} className="flex items-center gap-3 rounded-xl border p-3">
+                                    <span className="w-6 text-center text-xs font-bold text-muted-foreground">{row.rank_position}</span>
+                                    <div className="min-w-0 flex-1">
+                                        <p className="truncate text-sm font-medium">{row.full_name}</p>
+                                        <p className="text-[10px] text-muted-foreground">{row.referral_code}</p>
+                                    </div>
+                                    <div className="text-right text-xs">
+                                        <p className="font-semibold">{row.monthly_qualified} qualified</p>
+                                        <p className="text-muted-foreground">{formatCurrency(row.monthly_revenue)}</p>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section className="space-y-4">
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+                    <div>
+                        <h2 className="flex items-center gap-2 text-lg font-semibold">
+                            <Building2 className="h-5 w-5 text-primary" />
+                            Organizations
+                        </h2>
+                        <p className="text-sm text-muted-foreground">
+                            Alianzas institucionales con owner unico, codigo propio y revenue share en revision manual.
+                        </p>
+                    </div>
+                    <span className="w-fit rounded-full bg-muted px-2.5 py-1 text-xs text-muted-foreground">
+                        {organizations.length} organizaciones
+                    </span>
+                </div>
+
+                <OrganizationForm />
+
+                {organizations.length === 0 ? (
+                    <div className="rounded-2xl border bg-muted/10 py-8 text-center">
+                        <Building2 className="mx-auto mb-2 h-7 w-7 text-muted-foreground/40" />
+                        <p className="text-sm text-muted-foreground">Aun no hay organizaciones configuradas.</p>
+                    </div>
+                ) : (
+                    <div className="grid gap-4 xl:grid-cols-2">
+                        {organizations.map((organization: any) => {
+                            const code =
+                                organization.growth_profile?.referral_link_slug ||
+                                organization.growth_profile?.referral_code ||
+                                organization.partner_code ||
+                                null
+                            const link = code ? `${appUrl || ''}/auth/register?ref=${code}` : ''
+
+                            return (
+                                <div key={organization.id} className="rounded-2xl border bg-card p-4">
+                                    <div className="mb-3 flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+                                        <div className="min-w-0">
+                                            <div className="flex flex-wrap items-center gap-2">
+                                                <h3 className="truncate text-sm font-semibold">{organization.name}</h3>
+                                                <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+                                                    {organizationTypeLabels[organization.organization_type] || organization.organization_type}
+                                                </span>
+                                                <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+                                                    {organizationStatusLabels[organization.status] || organization.status}
+                                                </span>
+                                            </div>
+                                            <p className="mt-1 text-xs text-muted-foreground">
+                                                {organization.contact_email || organization.contact_name || 'Sin contacto'} - {organization.benefit_model}
+                                            </p>
+                                        </div>
+                                        <div className="text-left lg:text-right">
+                                            <p className="font-mono text-sm font-semibold">{code || 'Sin codigo'}</p>
+                                            {link && <p className="max-w-xs truncate text-[10px] text-muted-foreground">{link}</p>}
+                                        </div>
+                                    </div>
+
+                                    <div className="mb-4 grid grid-cols-2 gap-2 md:grid-cols-5">
+                                        <div className="rounded-xl border p-3">
+                                            <p className="text-lg font-semibold">{organization.metrics?.registered ?? 0}</p>
+                                            <p className="text-[10px] text-muted-foreground">Registrados</p>
+                                        </div>
+                                        <div className="rounded-xl border p-3">
+                                            <p className="text-lg font-semibold">{organization.metrics?.paid ?? 0}</p>
+                                            <p className="text-[10px] text-muted-foreground">Pagados</p>
+                                        </div>
+                                        <div className="rounded-xl border p-3">
+                                            <p className="text-lg font-semibold">{organization.metrics?.qualified ?? 0}</p>
+                                            <p className="text-[10px] text-muted-foreground">Qualified</p>
+                                        </div>
+                                        <div className="rounded-xl border p-3">
+                                            <p className="text-lg font-semibold">{formatCurrency(organization.metrics?.revenue ?? 0) || '$0'}</p>
+                                            <p className="text-[10px] text-muted-foreground">Revenue</p>
+                                        </div>
+                                        <div className="rounded-xl border p-3">
+                                            <p className="text-lg font-semibold">{organization.metrics?.pendingRevenueShare ?? 0}</p>
+                                            <p className="text-[10px] text-muted-foreground">Share pendiente</p>
+                                        </div>
+                                    </div>
+
+                                    <OrganizationForm organization={organization} compact />
+                                </div>
+                            )
+                        })}
+                    </div>
+                )}
+            </section>
+
+            <section className="space-y-4">
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+                    <div>
+                        <h2 className="flex items-center gap-2 text-lg font-semibold">
+                            <PackageCheck className="h-5 w-5 text-primary" />
+                            Packs
+                        </h2>
+                        <p className="text-sm text-muted-foreground">
+                            Packs grupales como overlay comercial. No reemplazan owner principal ni duplican rewards de referido.
+                        </p>
+                    </div>
+                    <span className="w-fit rounded-full bg-muted px-2.5 py-1 text-xs text-muted-foreground">
+                        {groupPacks.length} packs
+                    </span>
+                </div>
+
+                {groupPacks.length === 0 ? (
+                    <div className="rounded-2xl border bg-muted/10 py-8 text-center">
+                        <PackageCheck className="mx-auto mb-2 h-7 w-7 text-muted-foreground/40" />
+                        <p className="text-sm text-muted-foreground">Aun no hay packs grupales.</p>
+                    </div>
+                ) : (
+                    <div className="grid gap-4 xl:grid-cols-2">
+                        {groupPacks.map((pack: any) => {
+                            const link = pack.pack_code ? `${appUrl || ''}/auth/register?pack=${pack.pack_code}` : ''
+                            const activeCount = Number(pack.active_members_count ?? 0)
+                            const activeMismatch = activeCount !== Number(pack.metrics?.active ?? 0)
+
+                            return (
+                                <div key={pack.id} className="rounded-2xl border bg-card p-4">
+                                    <div className="mb-4 flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+                                        <div className="min-w-0">
+                                            <div className="flex flex-wrap items-center gap-2">
+                                                <h3 className="text-sm font-semibold">{pack.pack_type}</h3>
+                                                <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+                                                    {packStatusLabels[pack.status] || pack.status}
+                                                </span>
+                                                {activeMismatch && (
+                                                    <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-amber-800">
+                                                        revisar conteo
+                                                    </span>
+                                                )}
+                                            </div>
+                                            <p className="mt-1 text-xs text-muted-foreground">
+                                                Lider: {pack.leader?.full_name || pack.leader?.email || pack.leader_user_id || 'Sin lider'}
+                                            </p>
+                                            <p className="text-[10px] text-muted-foreground">
+                                                {activeCount}/{pack.required_members} activos - faltan {pack.metrics?.missing ?? 0}
+                                            </p>
+                                        </div>
+                                        <div className="text-left lg:text-right">
+                                            <p className="font-mono text-sm font-semibold">{pack.pack_code || 'Sin codigo'}</p>
+                                            {link && <p className="max-w-xs truncate text-[10px] text-muted-foreground">{link}</p>}
+                                        </div>
+                                    </div>
+
+                                    <div className="mb-4 grid grid-cols-2 gap-2 md:grid-cols-4">
+                                        <div className="rounded-xl border p-3">
+                                            <p className="text-lg font-semibold">{pack.metrics?.invited ?? 0}</p>
+                                            <p className="text-[10px] text-muted-foreground">Invitados</p>
+                                        </div>
+                                        <div className="rounded-xl border p-3">
+                                            <p className="text-lg font-semibold">{pack.metrics?.registered ?? 0}</p>
+                                            <p className="text-[10px] text-muted-foreground">Registrados</p>
+                                        </div>
+                                        <div className="rounded-xl border p-3">
+                                            <p className="text-lg font-semibold">{pack.metrics?.active ?? 0}</p>
+                                            <p className="text-[10px] text-muted-foreground">Activos</p>
+                                        </div>
+                                        <div className="rounded-xl border p-3">
+                                            <p className="text-lg font-semibold">{pack.reward?.status || 'sin reward'}</p>
+                                            <p className="text-[10px] text-muted-foreground">Reward</p>
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        {(pack.members ?? []).length === 0 ? (
+                                            <p className="text-xs text-muted-foreground">Sin miembros invitados.</p>
+                                        ) : (
+                                            (pack.members ?? []).map((member: any) => (
+                                                <div key={member.id} className="flex items-center justify-between rounded-xl border px-3 py-2 text-xs">
+                                                    <span className="truncate">{member.invited_email || member.invited_phone || member.user_id || 'Integrante'}</span>
+                                                    <span className="rounded-full bg-muted px-2 py-0.5">{member.status}</span>
+                                                </div>
+                                            ))
+                                        )}
+                                    </div>
+                                </div>
+                            )
+                        })}
+                    </div>
+                )}
+            </section>
 
             <div>
                 <div className="mb-4 flex items-center gap-2">
@@ -412,10 +740,18 @@ export default async function AdminGrowthPage() {
                         </div>
                     ) : (
                         <div className="space-y-2">
-                            {pendingRewards.map((reward: any) => (
+                            {pendingRewards.map((reward: any) => {
+                                const beneficiaryLabel =
+                                    reward.beneficiary?.full_name ||
+                                    reward.beneficiary?.email ||
+                                    reward.organization?.name ||
+                                    (reward.group_pack?.pack_code ? `Pack ${reward.group_pack.pack_code}` : null) ||
+                                    'Beneficiario sin usuario'
+
+                                return (
                                 <div key={reward.id} className="flex flex-col gap-3 rounded-xl border p-3 sm:flex-row sm:items-center">
                                     <div className="min-w-0 flex-1">
-                                        <p className="text-sm font-medium">{reward.beneficiary?.full_name || 'Usuario'}</p>
+                                        <p className="text-sm font-medium">{beneficiaryLabel}</p>
                                         <p className="text-xs text-muted-foreground">
                                             {rewardTypeLabels[reward.reward_type] || reward.reward_type}
                                             {reward.reward_value ? ` - ${formatRewardValue(reward.reward_value)}` : ''}
@@ -438,7 +774,8 @@ export default async function AdminGrowthPage() {
                                     </div>
                                     <GrowthRewardActions reward={reward} />
                                 </div>
-                            ))}
+                                )
+                            })}
                         </div>
                     )}
                 </div>
@@ -508,10 +845,10 @@ export default async function AdminGrowthPage() {
                                             {attribution.invitee?.full_name || attribution.invitee?.email || attribution.invitee_email || 'Invitado'}
                                         </p>
                                         <p className="mt-1 text-xs text-muted-foreground">
-                                            Owner: {attribution.owner?.full_name || attribution.owner?.email || 'Sin owner'}
+                                            Owner: {attribution.organization?.name || attribution.owner?.full_name || attribution.owner?.email || 'Sin owner'}
                                         </p>
                                         <p className="text-[10px] text-muted-foreground">
-                                            Estado: {attribution.status} • Canal: {attribution.source_channel || 'unknown'}
+                                            Estado: {attribution.status} - Tipo: {attribution.source_type || 'unknown'} - Canal: {attribution.source_channel || 'unknown'}
                                         </p>
                                         <p className="text-[10px] text-muted-foreground">
                                             Capturada: {new Date(attribution.created_at).toLocaleDateString('es-MX')}
@@ -601,4 +938,18 @@ export default async function AdminGrowthPage() {
             </div>
         </div>
     )
+}
+
+const programTypeLabels: Record<string, string> = {
+    host: 'Host',
+    ambassador: 'Embajador',
+}
+
+const enrollmentStatusLabels: Record<string, string> = {
+    applied: 'Aplicado',
+    approved: 'Aprobado',
+    active: 'Activo',
+    paused: 'Pausado',
+    rejected: 'Rechazado',
+    terminated: 'Terminado',
 }

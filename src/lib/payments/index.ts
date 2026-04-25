@@ -1491,6 +1491,7 @@ export async function fulfillOneTimePayment(data: PaymentWebhookData): Promise<v
 
     const lookupFilters = [
         data.paymentIntentId ? `provider_payment_id.eq.${data.paymentIntentId}` : null,
+        data.invoiceId ? `provider_invoice_id.eq.${data.invoiceId}` : null,
         data.sessionId ? `provider_session_id.eq.${data.sessionId}` : null,
     ].filter(Boolean) as string[]
 
@@ -1745,6 +1746,7 @@ export async function refundOneTimePayment(data: RefundWebhookData): Promise<voi
     const referenceId = data.referenceId || data.metadata?.reference_id || null
     const lookupFilters = [
         data.paymentIntentId ? `provider_payment_id.eq.${data.paymentIntentId}` : null,
+        data.invoiceId ? `provider_invoice_id.eq.${data.invoiceId}` : null,
         data.sessionId ? `provider_session_id.eq.${data.sessionId}` : null,
     ].filter(Boolean) as string[]
 
@@ -1756,6 +1758,9 @@ export async function refundOneTimePayment(data: RefundWebhookData): Promise<voi
             reason: 'refund_missing_provider_references',
             details: {
                 refundId: data.refundId,
+                paymentIntentId: data.paymentIntentId ?? null,
+                invoiceId: data.invoiceId ?? null,
+                sessionId: data.sessionId ?? null,
                 purchaseType: purchaseType ?? null,
                 referenceId,
             },
@@ -1772,17 +1777,22 @@ export async function refundOneTimePayment(data: RefundWebhookData): Promise<voi
         .maybeSingle()
 
     if (!transaction) {
+        const growthRefundedCount = await refundGrowthConversionsForPayment(data, supabase)
         await logCommerceOperationalEvent({
             actionType: 'payment_refund_manual_review_required',
             entityType: 'payment_transaction',
             targetEmail: data.customerEmail ?? null,
-            reason: 'refund_transaction_not_found',
+            reason: growthRefundedCount > 0
+                ? 'refund_transaction_not_found_growth_reconciled'
+                : 'refund_transaction_not_found',
             details: {
                 refundId: data.refundId,
                 paymentIntentId: data.paymentIntentId ?? null,
+                invoiceId: data.invoiceId ?? null,
                 sessionId: data.sessionId ?? null,
                 purchaseType: purchaseType ?? null,
                 referenceId,
+                growthRefundedCount,
             },
         })
         return

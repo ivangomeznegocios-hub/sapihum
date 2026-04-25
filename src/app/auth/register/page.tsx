@@ -72,11 +72,13 @@ function RegisterForm() {
     const nextPath = requestedNext?.startsWith('/') ? requestedNext : '/dashboard'
 
     const [referralCode, setReferralCode] = useState<string | null>(null)
+    const [groupPackCode, setGroupPackCode] = useState<string | null>(null)
     const [preselectedPlan, setPreselectedPlan] = useState<string | null>(null)
     const [preselectedSpecialization, setPreselectedSpecialization] = useState<string | null>(null)
 
     useEffect(() => {
         const ref = searchParams.get('ref')
+        const pack = searchParams.get('pack')
         const plan = searchParams.get('plan')
         const specialization = searchParams.get('specialization')
 
@@ -87,6 +89,15 @@ function RegisterForm() {
         } else {
             const storedRef = localStorage.getItem('invite_ref_code')
             if (storedRef) setReferralCode(storedRef)
+        }
+
+        if (pack) {
+            const code = pack.toUpperCase()
+            setGroupPackCode(code)
+            localStorage.setItem('growth_pack_code', code)
+        } else {
+            const storedPack = localStorage.getItem('growth_pack_code')
+            if (storedPack) setGroupPackCode(storedPack)
         }
 
         if (plan) {
@@ -138,6 +149,8 @@ function RegisterForm() {
         const signUpMetadata: Record<string, unknown> = {}
         const refCode = referralCode || localStorage.getItem('invite_ref_code')
         if (refCode) signUpMetadata.invite_ref_code = refCode
+        const packCode = groupPackCode || localStorage.getItem('growth_pack_code')
+        if (packCode) signUpMetadata.growth_pack_code = packCode
 
         const selectedPlan = preselectedPlan || localStorage.getItem('preselected_plan')
         const selectedSpecialization = preselectedSpecialization || localStorage.getItem('preselected_specialization')
@@ -158,6 +171,7 @@ function RegisterForm() {
         await collectAnalyticsEvent('registration_started', {
             properties: {
                 hasInviteCode: Boolean(refCode),
+                hasGroupPack: Boolean(packCode),
                 selectedPlan: selectedPlan ?? null,
                 selectedSpecialization: selectedSpecialization ?? null,
             },
@@ -214,6 +228,7 @@ function RegisterForm() {
         await collectAnalyticsEvent('registration_completed', {
             properties: {
                 hasInviteCode: Boolean(refCode),
+                hasGroupPack: Boolean(packCode),
                 selectedPlan: selectedPlan ?? null,
                 selectedSpecialization: selectedSpecialization ?? null,
             },
@@ -309,11 +324,16 @@ function RegisterForm() {
                             onChange={(e) => setReferralCode(e.target.value.toUpperCase())}
                             className={referralCode ? 'border-green-500/50 bg-green-500/5 focus-visible:ring-green-500/50 uppercase' : 'uppercase'}
                         />
-                        {referralCode && (
-                            <p className="text-xs text-green-600 dark:text-green-400 font-medium">
-                                Codigo de invitacion aplicado
-                            </p>
-                        )}
+                {referralCode && (
+                    <p className="text-xs text-green-600 dark:text-green-400 font-medium">
+                        Codigo de invitacion aplicado
+                    </p>
+                )}
+                {groupPackCode && (
+                    <p className="text-xs text-green-600 dark:text-green-400 font-medium">
+                        Pack grupal aplicado: {groupPackCode}
+                    </p>
+                )}
                     </div>
 
                     <div className="space-y-2">

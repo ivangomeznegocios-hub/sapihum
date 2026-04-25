@@ -6,6 +6,7 @@ import { hasRegistrationConsentMetadata } from '@/lib/consent'
 import { recordAnalyticsServerEvent } from '@/lib/analytics/server'
 import { claimCurrentUserEventEntitlements } from '@/lib/supabase/queries/event-entitlements'
 import { ensureProfileForAuthUser } from '@/lib/supabase/profile-provisioning'
+import { applyGroupPackRegistration } from '@/lib/growth/engine'
 
 export async function POST() {
     const supabase = await createClient()
@@ -29,6 +30,7 @@ export async function POST() {
 
         const userMetadata = user.user_metadata ?? null
         const inviteRefCode = userMetadata?.invite_ref_code
+        const growthPackCode = typeof userMetadata?.growth_pack_code === 'string' ? userMetadata.growth_pack_code : null
         const visitorId = typeof userMetadata?.analytics_visitor_id === 'string' ? userMetadata.analytics_visitor_id : null
         const sessionId = typeof userMetadata?.analytics_session_id === 'string' ? userMetadata.analytics_session_id : null
         const consent = userMetadata?.analytics_consent && typeof userMetadata.analytics_consent === 'object'
@@ -54,6 +56,7 @@ export async function POST() {
             touch,
             properties: {
                 hasInviteCode: Boolean(inviteRefCode),
+                hasGroupPack: Boolean(growthPackCode),
                 selectedPlan: userMetadata?.preselected_plan ?? null,
                 selectedSpecialization: userMetadata?.preselected_specialization ?? null,
             },
@@ -64,6 +67,14 @@ export async function POST() {
             if (result.success) {
                 await completeInviteAttribution(user.id)
             }
+        }
+
+        if (growthPackCode) {
+            await applyGroupPackRegistration({
+                packCode: growthPackCode,
+                userId: user.id,
+                email: user.email,
+            })
         }
     } catch (error) {
         console.error('Error processing post-auth callback tasks', {
