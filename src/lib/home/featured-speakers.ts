@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { createPublicClient } from '@/lib/supabase/public'
 import {
     DEFAULT_HOME_FEATURED_SPEAKERS_SETTINGS,
     HOME_FEATURED_SPEAKERS_SETTING_KEY,
@@ -13,7 +13,7 @@ export {
 export type { HomeFeaturedSpeakersMode, HomeFeaturedSpeakersSettings } from '@/lib/home/featured-speakers-config'
 
 export async function getHomeFeaturedSpeakersSettings() {
-    const supabase = await createClient()
+    const supabase = createPublicClient()
     const { data, error } = await (supabase
         .from('platform_settings') as any)
         .select('value')

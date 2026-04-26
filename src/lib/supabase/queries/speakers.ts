@@ -1,4 +1,5 @@
 import { createAdminClient, createClient } from '@/lib/supabase/server'
+import { createPublicClient } from '@/lib/supabase/public'
 import { getHomeFeaturedSpeakersSettings } from '@/lib/home/featured-speakers'
 import { selectFeaturedSpeakers, selectRotatingFeaturedSpeakers, sortSpeakersByMerit } from '@/lib/speakers/ranking'
 import type {
@@ -158,7 +159,7 @@ function attachProfilesToSpeakers<T extends { id: string }>(
  * Get all public speakers with their profile info
  */
 export async function getPublicSpeakers(): Promise<SpeakerWithProfile[]> {
-    const supabase = await createClient()
+    const supabase = createPublicClient()
 
     const { data, error } = await (supabase
         .from('speakers') as any)

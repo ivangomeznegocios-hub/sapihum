@@ -1,3 +1,4 @@
+import { Suspense } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { RecoveryForm } from './recovery-form'
 import { formatPageTitle } from '@/lib/brand'
@@ -31,7 +32,9 @@ export default function PurchaseRecoveryPage() {
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
-                        <RecoveryForm />
+                        <Suspense fallback={<div className="h-40 rounded-xl bg-muted/40" />}>
+                            <RecoveryForm />
+                        </Suspense>
                     </CardContent>
                 </Card>
             </div>

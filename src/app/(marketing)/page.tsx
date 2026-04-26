@@ -18,6 +18,8 @@ export const metadata = {
   },
 }
 
+export const revalidate = 3600
+
 const SPECIALTIES = getMarketingSpecializations()
 
 type SpecialtyBackground = {
@@ -60,7 +62,7 @@ const SPECIALTY_BACKGROUNDS: Record<string, SpecialtyBackground> = {
     position: "center",
   },
   sexologia_clinica: {
-    image: "https://unsplash.com/photos/UB58ZfXeI1k/download?force=true&w=1400&q=80",
+    image: "https://unsplash.com/photos/K_MSe-zglGI/download?force=true&w=1400&q=80",
     position: "center",
   },
 }
@@ -279,9 +281,13 @@ export default async function LandingPage() {
       ══════════════════════════════════════════════════ */}
       <section className="relative w-full py-32 border-b border-white/[0.06] overflow-hidden bg-black">
         {/* Imagen de fondo con soporte WebP automático en Cloudinary */}
-        <div 
-          className="absolute inset-0 z-0 opacity-40 bg-cover bg-center"
-          style={{ backgroundImage: "url('https://res.cloudinary.com/dguo9gbxd/image/upload/f_auto,q_auto/v1775704950/PSICOLOGIA_AVANZADA_E_INVESTIGACION_HUMANA_1_whpj2o.jpg')" }}
+        <Image
+          src="https://res.cloudinary.com/dguo9gbxd/image/upload/f_auto,q_auto/v1775704950/PSICOLOGIA_AVANZADA_E_INVESTIGACION_HUMANA_1_whpj2o.jpg"
+          alt=""
+          fill
+          sizes="100vw"
+          quality={62}
+          className="absolute inset-0 z-0 object-cover object-center opacity-40"
         />
         {/* Gradiente sutil para mejorar legibilidad conectando el negro del fondo */}
         <div className="absolute inset-0 z-0 bg-gradient-to-b from-black via-black/40 to-black" />
@@ -327,11 +333,15 @@ export default async function LandingPage() {
                   href={`/especialidades/${spec.slug}`}
                   className="group relative isolate min-h-[320px] overflow-hidden bg-black"
                 >
-                  <div
-                    className="absolute inset-0 bg-cover bg-center transition-transform duration-700 ease-out group-hover:scale-105"
+                  <Image
+                    src={background?.image ?? SPECIALTY_BACKGROUNDS.clinica.image}
+                    alt=""
+                    fill
+                    sizes="(min-width: 1280px) 25vw, (min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+                    quality={55}
+                    className="absolute inset-0 object-cover transition-transform duration-700 ease-out group-hover:scale-105"
                     style={{
-                      backgroundImage: `url('${background?.image ?? SPECIALTY_BACKGROUNDS.clinica.image}')`,
-                      backgroundPosition: background?.position ?? "center",
+                      objectPosition: background?.position ?? "center",
                     }}
                   />
                   <div className="absolute inset-0 bg-black/55 transition-colors duration-500 group-hover:bg-black/45" />
@@ -404,11 +414,15 @@ export default async function LandingPage() {
           8. RECURSOS Y HERRAMIENTAS (Software) — Minimalista
       ══════════════════════════════════════════════════ */}
       <section className="relative w-full overflow-hidden border-b border-white/[0.06] bg-[#030303] py-28 md:py-32">
-        <div
-          className="absolute inset-0 bg-cover bg-center opacity-[0.24]"
+        <Image
+          src={PLATFORM_SECTION_BACKGROUND.image}
+          alt=""
+          fill
+          sizes="100vw"
+          quality={55}
+          className="absolute inset-0 object-cover opacity-[0.24]"
           style={{
-            backgroundImage: `url('${PLATFORM_SECTION_BACKGROUND.image}')`,
-            backgroundPosition: PLATFORM_SECTION_BACKGROUND.position,
+            objectPosition: PLATFORM_SECTION_BACKGROUND.position,
           }}
         />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(246,174,2,0.1),transparent_42%)]" />
@@ -558,7 +572,7 @@ export default async function LandingPage() {
                           src={formation.image_url}
                           alt={formation.title}
                           fill
-                          unoptimized
+                          quality={60}
                           sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
                           className="object-cover transition-transform duration-700 group-hover:scale-105"
                         />
@@ -653,7 +667,7 @@ export default async function LandingPage() {
                         src={photoUrl}
                         alt={name}
                         fill
-                        unoptimized
+                        quality={60}
                         sizes="(min-width: 1024px) 25vw, (min-width: 768px) 50vw, 100vw"
                         className="object-cover transition-all duration-700 opacity-70 group-hover:opacity-100 group-hover:scale-105"
                       />
