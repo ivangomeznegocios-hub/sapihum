@@ -31,7 +31,7 @@ export function CookiebotProvider() {
                     src="https://consent.cookiebot.com/uc.js"
                     data-cbid={cookiebotDomainGroupId}
                     data-blockingmode="auto"
-                    strategy="afterInteractive"
+                    strategy="lazyOnload"
                 />
             ) : null}
             <CookiebotBridge hasCookiebot={hasCookiebot} />

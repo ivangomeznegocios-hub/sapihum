@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { createPublicClient } from '@/lib/supabase/public'
 import { getCommercialAccessContext } from '@/lib/access/commercial'
 import { claimFormationRecordsByEmail } from '@/lib/formations/service'
 import { getFormationCommercialState, getFormationMemberAccessMessage } from '@/lib/formations/pricing'
@@ -55,7 +56,7 @@ async function getPublicFormationSeoData(supabase: any, slug: string) {
 }
 
 export async function getPublicFormations(): Promise<Formation[]> {
-    const supabase = await createClient()
+    const supabase = createPublicClient()
 
     const { data: formations, error } = await (supabase
         .from('formations') as any)

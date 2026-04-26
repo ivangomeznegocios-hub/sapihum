@@ -18,6 +18,8 @@ export const metadata = {
   },
 }
 
+export const revalidate = 3600
+
 const SPECIALTIES = getMarketingSpecializations()
 
 type SpecialtyBackground = {
@@ -60,7 +62,7 @@ const SPECIALTY_BACKGROUNDS: Record<string, SpecialtyBackground> = {
     position: "center",
   },
   sexologia_clinica: {
-    image: "https://unsplash.com/photos/UB58ZfXeI1k/download?force=true&w=1400&q=80",
+    image: "https://unsplash.com/photos/K_MSe-zglGI/download?force=true&w=1400&q=80",
     position: "center",
   },
 }
@@ -205,17 +207,17 @@ export default async function LandingPage() {
       <section className="relative flex w-full items-center overflow-hidden bg-black min-h-[68svh] md:min-h-[72svh]">
         {/* Subtle background */}
         <div className="absolute inset-0 -z-0 sapihum-grid-bg opacity-30" />
-        <div className="absolute left-1/2 top-0 -translate-x-1/2 h-[500px] w-[500px] rounded-full bg-gradient-to-br from-[#f6ae02]/5 to-[#7a5602]/3 blur-[120px]" />
+        <div className="absolute left-1/2 top-0 -translate-x-1/2 h-[420px] w-[420px] rounded-full bg-[#f6ae02]/5" />
         
         <div className="relative z-10 mx-auto max-w-5xl px-4 py-20 sm:px-6 md:py-24 lg:px-8 lg:py-28">
           <div className="max-w-4xl mx-auto text-center flex flex-col items-center">
             {/* Badge — minimal editorial */}
-            <div className="sapihum-fade-up inline-flex items-center gap-2 rounded-sm border border-[#f6ae02]/20 bg-[#f6ae02]/5 backdrop-blur-sm px-4 py-1.5 text-[10px] font-bold text-[#f6ae02] uppercase tracking-[0.2em] mb-10">
+            <div className="inline-flex items-center gap-2 rounded-sm border border-[#f6ae02]/20 bg-[#f6ae02]/5 px-4 py-1.5 text-[10px] font-bold text-[#f6ae02] uppercase tracking-[0.2em] mb-10">
               Academia SAPIHUM | Formación especializada para psicólogos
             </div>
 
             {/* H1 — Editorial serif/sans mix */}
-            <h1 className="sapihum-fade-up text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.08] text-white" style={{ animationDelay: '0.1s' }}>
+            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.08] text-white">
               Cursos y formaciones especializadas para psicólogos que quieren{" "}
               <span className="font-serif italic font-normal text-[#c0bfbc]">
                 crecer con más nivel, criterio y respaldo profesional.
@@ -223,12 +225,12 @@ export default async function LandingPage() {
             </h1>
 
             {/* Subtitle */}
-            <p className="sapihum-fade-up mt-8 text-lg md:text-xl text-[#c0bfbc]/70 max-w-3xl leading-relaxed font-light" style={{ animationDelay: '0.2s' }}>
+            <p className="mt-8 text-lg md:text-xl text-[#c0bfbc]/70 max-w-3xl leading-relaxed font-light">
               Accede a programas completos, formación continua y rutas de especialización diseñadas para fortalecer tu práctica, actualizarte con seriedad y diferenciarte en un entorno cada vez más exigente.
             </p>
 
             {/* CTA Buttons — Luxury style */}
-            <div className="sapihum-fade-up mt-12 flex flex-col sm:flex-row gap-5 w-full sm:w-auto uppercase text-xs tracking-[0.1em]" style={{ animationDelay: '0.3s' }}>
+            <div className="mt-12 flex flex-col sm:flex-row gap-5 w-full sm:w-auto uppercase text-xs tracking-[0.1em]">
               <Link
                 href="/formaciones"
                 className="w-full sm:w-auto"
@@ -279,9 +281,13 @@ export default async function LandingPage() {
       ══════════════════════════════════════════════════ */}
       <section className="relative w-full py-32 border-b border-white/[0.06] overflow-hidden bg-black">
         {/* Imagen de fondo con soporte WebP automático en Cloudinary */}
-        <div 
-          className="absolute inset-0 z-0 opacity-40 bg-cover bg-center"
-          style={{ backgroundImage: "url('https://res.cloudinary.com/dguo9gbxd/image/upload/f_auto,q_auto/v1775704950/PSICOLOGIA_AVANZADA_E_INVESTIGACION_HUMANA_1_whpj2o.jpg')" }}
+        <Image
+          src="https://res.cloudinary.com/dguo9gbxd/image/upload/f_auto,q_auto/v1775704950/PSICOLOGIA_AVANZADA_E_INVESTIGACION_HUMANA_1_whpj2o.jpg"
+          alt=""
+          fill
+          sizes="100vw"
+          quality={58}
+          className="absolute inset-0 z-0 object-cover object-center opacity-40"
         />
         {/* Gradiente sutil para mejorar legibilidad conectando el negro del fondo */}
         <div className="absolute inset-0 z-0 bg-gradient-to-b from-black via-black/40 to-black" />
@@ -327,11 +333,15 @@ export default async function LandingPage() {
                   href={`/especialidades/${spec.slug}`}
                   className="group relative isolate min-h-[320px] overflow-hidden bg-black"
                 >
-                  <div
-                    className="absolute inset-0 bg-cover bg-center transition-transform duration-700 ease-out group-hover:scale-105"
+                  <Image
+                    src={background?.image ?? SPECIALTY_BACKGROUNDS.clinica.image}
+                    alt=""
+                    fill
+                    sizes="(min-width: 1280px) 25vw, (min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+                    quality={52}
+                    className="absolute inset-0 object-cover transition-transform duration-700 ease-out group-hover:scale-105"
                     style={{
-                      backgroundImage: `url('${background?.image ?? SPECIALTY_BACKGROUNDS.clinica.image}')`,
-                      backgroundPosition: background?.position ?? "center",
+                      objectPosition: background?.position ?? "center",
                     }}
                   />
                   <div className="absolute inset-0 bg-black/55 transition-colors duration-500 group-hover:bg-black/45" />
@@ -404,11 +414,15 @@ export default async function LandingPage() {
           8. RECURSOS Y HERRAMIENTAS (Software) — Minimalista
       ══════════════════════════════════════════════════ */}
       <section className="relative w-full overflow-hidden border-b border-white/[0.06] bg-[#030303] py-28 md:py-32">
-        <div
-          className="absolute inset-0 bg-cover bg-center opacity-[0.24]"
+        <Image
+          src={PLATFORM_SECTION_BACKGROUND.image}
+          alt=""
+          fill
+          sizes="100vw"
+          quality={52}
+          className="absolute inset-0 object-cover opacity-[0.24]"
           style={{
-            backgroundImage: `url('${PLATFORM_SECTION_BACKGROUND.image}')`,
-            backgroundPosition: PLATFORM_SECTION_BACKGROUND.position,
+            objectPosition: PLATFORM_SECTION_BACKGROUND.position,
           }}
         />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(246,174,2,0.1),transparent_42%)]" />
@@ -558,7 +572,7 @@ export default async function LandingPage() {
                           src={formation.image_url}
                           alt={formation.title}
                           fill
-                          unoptimized
+                          quality={58}
                           sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
                           className="object-cover transition-transform duration-700 group-hover:scale-105"
                         />
@@ -653,7 +667,7 @@ export default async function LandingPage() {
                         src={photoUrl}
                         alt={name}
                         fill
-                        unoptimized
+                        quality={58}
                         sizes="(min-width: 1024px) 25vw, (min-width: 768px) 50vw, 100vw"
                         className="object-cover transition-all duration-700 opacity-70 group-hover:opacity-100 group-hover:scale-105"
                       />

@@ -1,15 +1,8 @@
 import type { Metadata, Viewport } from 'next'
 import { Manrope, Playfair_Display } from 'next/font/google'
-import { Suspense } from 'react'
-import { Analytics as VercelAnalytics } from '@vercel/analytics/next'
-import { SpeedInsights } from '@vercel/speed-insights/next'
 import { ThemeProvider } from '@/components/theme-provider'
-import { OneSignalSetup } from '@/components/providers/onesignal-provider'
-import { AnalyticsProvider } from '@/components/providers/analytics-provider'
-import { PublicSafeGtmNoscript } from '@/components/providers/gtm-noscript'
 import { TrackingBootstrap } from '@/components/providers/tracking-bootstrap'
-import { CookiebotProvider } from '@/components/providers/cookiebot-provider'
-import { CookieConsentBanner } from '@/components/gdpr/cookie-consent-banner'
+import { DeferredClientRuntime } from '@/components/providers/deferred-client-runtime'
 import { brandFullName, brandName, brandShortDescription } from '@/lib/brand'
 import { getAppUrl } from '@/lib/config/app-url'
 import './globals.css'
@@ -66,24 +59,16 @@ export default function RootLayout({
     return (
         <html lang="es" suppressHydrationWarning>
             <body className={`${manrope.variable} ${playfair.variable} antialiased`}>
-                <PublicSafeGtmNoscript />
                 <TrackingBootstrap />
-                <CookiebotProvider />
                 <ThemeProvider
                     attribute="class"
                     defaultTheme="dark"
                     enableSystem={false}
                     disableTransitionOnChange
                 >
-                    <Suspense fallback={null}>
-                        <AnalyticsProvider />
-                    </Suspense>
                     {children}
-                    <CookieConsentBanner />
-                    <VercelAnalytics />
-                    <SpeedInsights />
+                    <DeferredClientRuntime />
                 </ThemeProvider>
-                <OneSignalSetup />
             </body>
         </html>
     )
