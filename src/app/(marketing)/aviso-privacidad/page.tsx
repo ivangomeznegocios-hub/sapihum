@@ -73,9 +73,6 @@ export default function AvisoPrivacidadPage() {
                 <p className="max-w-3xl text-muted-foreground">
                     Version vigente: 2026-03-18. Este aviso resume como operamos los datos personales, incluidos datos clinicos sensibles, dentro de la plataforma.
                 </p>
-                <p className="max-w-3xl text-sm text-muted-foreground">
-                    El texto esta orientado a LFPDPPP, HIPAA y GDPR como marco de referencia operativo, y debe revisarse con asesoria legal local antes de publicacion final.
-                </p>
             </div>
 
             <div className="grid gap-6">
@@ -117,4 +114,3 @@ export default function AvisoPrivacidadPage() {
         </div>
     )
 }
-

@@ -190,9 +190,9 @@ export default async function NosotrosPage() {
               profesional.
             </h2>
             <p className="mt-6 max-w-xl text-lg font-light leading-relaxed text-muted-foreground">
-              La página de “Nosotros” no debería sonar a plantilla, sino a
-              posicionamiento claro. Esta es la historia que mejor explica por qué
-              existe SAPIHUM y qué busca aportar al gremio.
+              Nuestra historia explica por qué existe SAPIHUM y qué busca aportar
+              al gremio: estructura, criterio profesional y una forma más seria de
+              acompañar el crecimiento de la psicología.
             </p>
           </div>
 
@@ -295,9 +295,8 @@ export default async function NosotrosPage() {
                   SAPIHUM.
                 </h2>
                 <p className="mt-4 text-lg font-light leading-relaxed text-[#c0bfbc]/70">
-                  En lugar de mostrar placeholders, aquí aparece parte del cuerpo
-                  público de especialistas y docentes que hoy ya nutren la
-                  experiencia de la plataforma.
+                  Especialistas y docentes que hoy dan profundidad académica,
+                  criterio clínico y experiencia profesional a la plataforma.
                 </p>
               </div>
 
