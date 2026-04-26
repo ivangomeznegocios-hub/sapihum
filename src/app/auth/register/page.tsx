@@ -13,6 +13,8 @@ import { collectAnalyticsEvent, getClientAnalyticsContext } from '@/lib/analytic
 import { brandCommunityLabel } from '@/lib/brand'
 import { buildAuthCallbackUrl } from '@/lib/config/app-url'
 
+type RegistrationRole = 'psychologist' | 'patient'
+
 function normalizeRegistrationValue(value: string | null): string {
     return (value || '').trim().toLowerCase()
 }
@@ -58,6 +60,7 @@ function RegisterForm() {
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
     const [confirmPassword, setConfirmPassword] = useState('')
+    const [registrationRole, setRegistrationRole] = useState<RegistrationRole | null>(null)
     const [privacyPolicyAccepted, setPrivacyPolicyAccepted] = useState(false)
     const [termsAccepted, setTermsAccepted] = useState(false)
     const [clinicalDataAccepted, setClinicalDataAccepted] = useState(false)
@@ -135,7 +138,15 @@ function RegisterForm() {
             return
         }
 
+        if (!registrationRole) {
+            setError('Elige como quieres usar SAPIHUM')
+            setLoading(false)
+            return
+        }
+
         const signUpMetadata: Record<string, unknown> = {}
+        signUpMetadata.registration_role = registrationRole
+
         const refCode = referralCode || localStorage.getItem('invite_ref_code')
         if (refCode) signUpMetadata.invite_ref_code = refCode
 
@@ -158,6 +169,7 @@ function RegisterForm() {
         await collectAnalyticsEvent('registration_started', {
             properties: {
                 hasInviteCode: Boolean(refCode),
+                registrationRole,
                 selectedPlan: selectedPlan ?? null,
                 selectedSpecialization: selectedSpecialization ?? null,
             },
@@ -214,6 +226,7 @@ function RegisterForm() {
         await collectAnalyticsEvent('registration_completed', {
             properties: {
                 hasInviteCode: Boolean(refCode),
+                registrationRole,
                 selectedPlan: selectedPlan ?? null,
                 selectedSpecialization: selectedSpecialization ?? null,
             },
@@ -296,6 +309,56 @@ function RegisterForm() {
                             {error}
                         </div>
                     )}
+
+                    <div className="space-y-2">
+                        <Label>¿Cómo quieres usar SAPIHUM?</Label>
+                        <div className="grid gap-3 sm:grid-cols-2">
+                            <label
+                                className={`flex cursor-pointer items-start gap-3 rounded-md border p-3 transition-colors ${registrationRole === 'psychologist'
+                                    ? 'border-primary bg-primary/5'
+                                    : 'border-border bg-background hover:bg-muted/40'
+                                    }`}
+                            >
+                                <input
+                                    type="radio"
+                                    name="registrationRole"
+                                    value="psychologist"
+                                    checked={registrationRole === 'psychologist'}
+                                    onChange={() => setRegistrationRole('psychologist')}
+                                    className="mt-1 h-4 w-4 accent-primary"
+                                    required
+                                />
+                                <span className="space-y-1">
+                                    <span className="block text-sm font-semibold">Soy psicólogo/a</span>
+                                    <span className="block text-xs text-muted-foreground">
+                                        Para formación, comunidad profesional, eventos y herramientas de práctica.
+                                    </span>
+                                </span>
+                            </label>
+                            <label
+                                className={`flex cursor-pointer items-start gap-3 rounded-md border p-3 transition-colors ${registrationRole === 'patient'
+                                    ? 'border-primary bg-primary/5'
+                                    : 'border-border bg-background hover:bg-muted/40'
+                                    }`}
+                            >
+                                <input
+                                    type="radio"
+                                    name="registrationRole"
+                                    value="patient"
+                                    checked={registrationRole === 'patient'}
+                                    onChange={() => setRegistrationRole('patient')}
+                                    className="mt-1 h-4 w-4 accent-primary"
+                                    required
+                                />
+                                <span className="space-y-1">
+                                    <span className="block text-sm font-semibold">Soy paciente</span>
+                                    <span className="block text-xs text-muted-foreground">
+                                        Para acceder a servicios, comunicación o seguimiento clínico, si aplica.
+                                    </span>
+                                </span>
+                            </label>
+                        </div>
+                    </div>
 
                     <div className="space-y-2">
                         <Label htmlFor="inviteCode">
@@ -428,7 +491,7 @@ function RegisterForm() {
                 </CardContent>
 
                 <CardFooter className="flex flex-col gap-4">
-                    <Button type="submit" className="w-full" disabled={loading} data-analytics-cta data-analytics-label="Crear cuenta" data-analytics-funnel="registration">
+                    <Button type="submit" className="w-full" disabled={loading || !registrationRole} data-analytics-cta data-analytics-label="Crear cuenta" data-analytics-funnel="registration">
                         {loading ? 'Creando cuenta...' : 'Crear cuenta'}
                     </Button>
                     <p className="text-sm text-muted-foreground text-center">

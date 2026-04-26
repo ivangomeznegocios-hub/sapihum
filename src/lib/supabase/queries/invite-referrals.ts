@@ -1,10 +1,20 @@
 import { createClient } from '@/lib/supabase/server'
+import {
+    PROFESSIONAL_INVITE_PROGRAM_TYPE,
+    isProfessionalInviteReferrerRole,
+} from '@/lib/growth/programs'
 import type {
     InviteCode,
     InviteAttribution,
     InviteAttributionWithProfiles,
     InviteRewardEvent,
 } from '@/types/database'
+import {
+    type GrowthDashboardQueryOptions,
+    isHiddenGrowthProfile,
+    shouldShowGrowthAttribution,
+    shouldShowGrowthReward,
+} from './growth-dashboard-filters'
 
 // ============================================
 // INVITE CODE QUERIES
@@ -58,7 +68,8 @@ export async function getInviteCodeByCode(code: string): Promise<InviteCode | nu
  * Get all people invited by a specific user
  */
 export async function getInviteAttributionsByReferrer(
-    referrerId: string
+    referrerId: string,
+    options: GrowthDashboardQueryOptions = {}
 ): Promise<InviteAttributionWithProfiles[]> {
     const supabase = await createClient()
 
@@ -66,10 +77,11 @@ export async function getInviteAttributionsByReferrer(
         .from('invite_attributions')
         .select(`
             *,
-            referred:referred_id(id, full_name, avatar_url, role, created_at)
+            referrer:profiles!invite_attributions_referrer_id_fkey(*),
+            referred:profiles!invite_attributions_referred_id_fkey(*)
         `)
         .eq('referrer_id', referrerId)
-        .eq('program_type', 'professional_invite')
+        .eq('program_type', PROFESSIONAL_INVITE_PROGRAM_TYPE)
         .order('attributed_at', { ascending: false })
 
     if (error) {
@@ -77,14 +89,15 @@ export async function getInviteAttributionsByReferrer(
         return []
     }
 
-    return (data || []) as InviteAttributionWithProfiles[]
+    return (data || []).filter((row: any) => shouldShowGrowthAttribution(row, options)) as InviteAttributionWithProfiles[]
 }
 
 /**
  * Get the attribution for a specific referred user (who invited them?)
  */
 export async function getAttributionForUser(
-    referredId: string
+    referredId: string,
+    options: GrowthDashboardQueryOptions = {}
 ): Promise<InviteAttribution | null> {
     const supabase = await createClient()
 
@@ -92,16 +105,19 @@ export async function getAttributionForUser(
         .from('invite_attributions')
         .select(`
             *,
-            referrer:referrer_id(id, full_name, avatar_url, role)
+            referrer:profiles!invite_attributions_referrer_id_fkey(*),
+            referred:profiles!invite_attributions_referred_id_fkey(*)
         `)
         .eq('referred_id', referredId)
-        .eq('program_type', 'professional_invite')
+        .eq('program_type', PROFESSIONAL_INVITE_PROGRAM_TYPE)
         .maybeSingle()
 
     if (error) {
         console.error('Error fetching attribution for user:', error)
         return null
     }
+
+    if (!data || !shouldShowGrowthAttribution(data, options)) return null
 
     return data as InviteAttribution | null
 }
@@ -114,15 +130,24 @@ export async function getAttributionForUser(
  * Get reward events for a specific user (beneficiary)
  */
 export async function getInviteRewardEvents(
-    beneficiaryId: string
+    beneficiaryId: string,
+    options: GrowthDashboardQueryOptions = {}
 ): Promise<InviteRewardEvent[]> {
     const supabase = await createClient()
 
     const { data, error } = await (supabase as any)
         .from('invite_reward_events')
-        .select('*')
+        .select(`
+            *,
+            beneficiary:profiles!invite_reward_events_beneficiary_id_fkey(*),
+            attribution:invite_attributions!invite_reward_events_attribution_id_fkey(
+                *,
+                referrer:profiles!invite_attributions_referrer_id_fkey(*),
+                referred:profiles!invite_attributions_referred_id_fkey(*)
+            )
+        `)
         .eq('beneficiary_id', beneficiaryId)
-        .eq('program_type', 'professional_invite')
+        .eq('program_type', PROFESSIONAL_INVITE_PROGRAM_TYPE)
         .order('created_at', { ascending: false })
 
     if (error) {
@@ -130,22 +155,29 @@ export async function getInviteRewardEvents(
         return []
     }
 
-    return (data || []) as InviteRewardEvent[]
+    return (data || []).filter((row: any) => shouldShowGrowthReward(row, options)) as InviteRewardEvent[]
 }
 
 /**
  * Get unprocessed reward events (for admin processing)
  */
-export async function getUnprocessedRewardEvents(): Promise<InviteRewardEvent[]> {
+export async function getUnprocessedRewardEvents(
+    options: GrowthDashboardQueryOptions = {}
+): Promise<InviteRewardEvent[]> {
     const supabase = await createClient()
 
     const { data, error } = await (supabase as any)
         .from('invite_reward_events')
         .select(`
             *,
-            beneficiary:beneficiary_id(id, full_name, avatar_url, role)
+            beneficiary:profiles!invite_reward_events_beneficiary_id_fkey(*),
+            attribution:invite_attributions!invite_reward_events_attribution_id_fkey(
+                *,
+                referrer:profiles!invite_attributions_referrer_id_fkey(*),
+                referred:profiles!invite_attributions_referred_id_fkey(*)
+            )
         `)
-        .eq('program_type', 'professional_invite')
+        .eq('program_type', PROFESSIONAL_INVITE_PROGRAM_TYPE)
         .eq('processed', false)
         .order('created_at', { ascending: true })
 
@@ -154,7 +186,7 @@ export async function getUnprocessedRewardEvents(): Promise<InviteRewardEvent[]>
         return []
     }
 
-    return (data || []) as InviteRewardEvent[]
+    return (data || []).filter((row: any) => shouldShowGrowthReward(row, options)) as InviteRewardEvent[]
 }
 
 // ============================================
@@ -164,7 +196,7 @@ export async function getUnprocessedRewardEvents(): Promise<InviteRewardEvent[]>
 /**
  * Get global invite stats for admin dashboard
  */
-export async function getInviteSystemStats(): Promise<{
+export async function getInviteSystemStats(options: GrowthDashboardQueryOptions = {}): Promise<{
     totalCodes: number
     totalAttributions: number
     completedAttributions: number
@@ -175,56 +207,58 @@ export async function getInviteSystemStats(): Promise<{
 } | null> {
     const supabase = await createClient()
 
-    // Count codes
-    const { count: totalCodes } = await (supabase as any)
+    // Count codes that belong to commercial-visible profiles.
+    const { data: inviteCodes } = await (supabase as any)
         .from('invite_codes')
-        .select('*', { count: 'exact', head: true })
+        .select(`
+            id,
+            owner:profiles!invite_codes_owner_id_fkey(*)
+        `)
 
-    // Count attributions by status
-    const { count: totalAttributions } = await (supabase as any)
-        .from('invite_attributions')
-        .select('*', { count: 'exact', head: true })
-        .eq('program_type', 'professional_invite')
-
-    const { count: completedAttributions } = await (supabase as any)
-        .from('invite_attributions')
-        .select('*', { count: 'exact', head: true })
-        .eq('program_type', 'professional_invite')
-        .in('status', ['completed', 'rewarded'])
-
-    const { count: rewardedAttributions } = await (supabase as any)
-        .from('invite_attributions')
-        .select('*', { count: 'exact', head: true })
-        .eq('program_type', 'professional_invite')
-        .eq('status', 'rewarded')
-
-    // Count unprocessed rewards
-    const { count: pendingRewards } = await (supabase as any)
-        .from('invite_reward_events')
-        .select('*', { count: 'exact', head: true })
-        .eq('program_type', 'professional_invite')
-        .eq('processed', false)
-
-    const { data: attributionRoles } = await (supabase as any)
+    const { data: attributionRows } = await (supabase as any)
         .from('invite_attributions')
         .select(`
-            referred:referred_id(role)
+            *,
+            referrer:profiles!invite_attributions_referrer_id_fkey(*),
+            referred:profiles!invite_attributions_referred_id_fkey(*)
         `)
-        .eq('program_type', 'professional_invite')
+        .eq('program_type', PROFESSIONAL_INVITE_PROGRAM_TYPE)
 
-    const psychologistAttributions = (attributionRoles || []).filter(
+    const { data: rewardRows } = await (supabase as any)
+        .from('invite_reward_events')
+        .select(`
+            *,
+            beneficiary:profiles!invite_reward_events_beneficiary_id_fkey(*),
+            attribution:invite_attributions!invite_reward_events_attribution_id_fkey(
+                *,
+                referrer:profiles!invite_attributions_referrer_id_fkey(*),
+                referred:profiles!invite_attributions_referred_id_fkey(*)
+            )
+        `)
+        .eq('program_type', PROFESSIONAL_INVITE_PROGRAM_TYPE)
+
+    const professionalCodes = (inviteCodes || []).filter((row: any) => isProfessionalInviteReferrerRole(row.owner?.role))
+    const visibleCodes = options.includeHistory
+        ? professionalCodes
+        : professionalCodes.filter((row: any) => !isHiddenGrowthProfile(row.owner))
+    const visibleAttributions = (attributionRows || []).filter((row: any) => shouldShowGrowthAttribution(row, options))
+    const visibleRewards = (rewardRows || []).filter((row: any) => shouldShowGrowthReward(row, options))
+
+    const psychologistAttributions = visibleAttributions.filter(
         (row: any) => row.referred?.role === 'psychologist'
     ).length
-    const ponenteAttributions = (attributionRoles || []).filter(
+    const ponenteAttributions = visibleAttributions.filter(
         (row: any) => row.referred?.role === 'ponente'
     ).length
 
     return {
-        totalCodes: totalCodes || 0,
-        totalAttributions: totalAttributions || 0,
-        completedAttributions: completedAttributions || 0,
-        rewardedAttributions: rewardedAttributions || 0,
-        pendingRewards: pendingRewards || 0,
+        totalCodes: visibleCodes.length,
+        totalAttributions: visibleAttributions.length,
+        completedAttributions: visibleAttributions.filter(
+            (row: any) => row.status === 'completed' || row.status === 'rewarded'
+        ).length,
+        rewardedAttributions: visibleAttributions.filter((row: any) => row.status === 'rewarded').length,
+        pendingRewards: visibleRewards.filter((row: any) => !row.processed).length,
         psychologistAttributions,
         ponenteAttributions,
     }

@@ -1,5 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
+import { PROFESSIONAL_INVITE_PROGRAM_TYPE } from '@/lib/growth/programs'
 import { getPlanByPriceId } from '@/lib/payments/config'
+import { shouldShowGrowthAttribution } from '@/lib/supabase/queries/growth-dashboard-filters'
 
 export async function getAnalytics() {
     const supabase = await createClient()
@@ -363,7 +365,13 @@ export async function getAnalytics() {
 
     // 9. Organic Growth (Viralidad)
     const { data: attributions } = await applyTestFilter(
-        (supabase.from('invite_attributions') as any).select('status'),
+        (supabase.from('invite_attributions') as any)
+            .select(`
+                status,
+                referrer:profiles!invite_attributions_referrer_id_fkey(*),
+                referred:profiles!invite_attributions_referred_id_fkey(*)
+            `)
+            .eq('program_type', PROFESSIONAL_INVITE_PROGRAM_TYPE),
         'referrer_id'
     )
 
@@ -371,8 +379,9 @@ export async function getAnalytics() {
     let totalAttributions = 0
 
     if (attributions && attributions.length > 0) {
-        totalAttributions = attributions.length
-        completedAttributions = attributions.filter((a: any) => a.status === 'completed' || a.status === 'rewarded').length
+        const professionalAttributions = attributions.filter((row: any) => shouldShowGrowthAttribution(row))
+        totalAttributions = professionalAttributions.length
+        completedAttributions = professionalAttributions.filter((a: any) => a.status === 'completed' || a.status === 'rewarded').length
     }
 
     const kFactor = totalUsers > 0 ? (completedAttributions / totalUsers) : 0

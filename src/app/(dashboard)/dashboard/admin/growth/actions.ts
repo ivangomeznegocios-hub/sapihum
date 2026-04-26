@@ -2,6 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
+import { PROFESSIONAL_INVITE_PROGRAM_TYPE } from '@/lib/growth/programs'
 
 // ============================================
 // PROCESS REWARD EVENT (mark as processed)
@@ -35,7 +36,7 @@ export async function processRewardEvent(rewardEventId: string): Promise<{
                 processed_at: new Date().toISOString(),
             })
             .eq('id', rewardEventId)
-            .eq('program_type', 'professional_invite')
+            .eq('program_type', PROFESSIONAL_INVITE_PROGRAM_TYPE)
 
         if (error) {
             console.error('Error processing reward event:', error)

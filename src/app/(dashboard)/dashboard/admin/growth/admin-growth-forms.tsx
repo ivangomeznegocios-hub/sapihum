@@ -9,6 +9,7 @@ import {
     CheckCircle2, AlertCircle, Pencil, Save
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { PROFESSIONAL_INVITE_PROGRAM_TYPE } from '@/lib/growth/programs'
 import { createCampaign, updateCampaign, toggleCampaignActive, deleteCampaign } from '@/actions/growth-campaigns'
 import { processRewardEvent } from './actions'
 import type { GrowthCampaign, GrowthCampaignType } from '@/types/database'
@@ -146,7 +147,7 @@ export function CampaignForm({
             title: title.trim(),
             description: description.trim() || null,
             campaign_type: campaignType,
-            program_type: 'professional_invite' as const,
+            program_type: PROFESSIONAL_INVITE_PROGRAM_TYPE,
             reward_config: nextRewardConfig,
             target_roles: targetRoles,
             eligible_referrer_roles: eligibleReferrerRoles,

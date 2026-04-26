@@ -2,6 +2,12 @@
 
 import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { recordAnalyticsServerEvent } from '@/lib/analytics/server'
+import {
+    PROFESSIONAL_INVITE_PROGRAM_TYPE,
+    isProfessionalInviteReferredRole,
+    isProfessionalInviteReferrerRole,
+} from '@/lib/growth/programs'
+import { shouldShowGrowthAttribution } from '@/lib/supabase/queries/growth-dashboard-filters'
 import type { InviteCode, InviteAttribution } from '@/types/database'
 
 // ============================================
@@ -100,12 +106,32 @@ export async function applyInviteCode(
             return { success: false, error: 'No puedes usar tu propio código de invitación' }
         }
 
+        const { data: profileRoles, error: profileRolesError } = await (supabase as any)
+            .from('profiles')
+            .select('id, role')
+            .in('id', [referredUserId, result.code_owner_id])
+
+        if (profileRolesError) {
+            console.error('Error loading invite participant roles:', profileRolesError)
+            return { success: false, error: 'Error al validar elegibilidad de invitacion' }
+        }
+
+        const referredProfile = (profileRoles || []).find((profile: any) => profile.id === referredUserId)
+        const referrerProfile = (profileRoles || []).find((profile: any) => profile.id === result.code_owner_id)
+
+        if (
+            !isProfessionalInviteReferredRole(referredProfile?.role) ||
+            !isProfessionalInviteReferrerRole(referrerProfile?.role)
+        ) {
+            return { success: true }
+        }
+
         // 3. Check if user was already referred
         const { data: existingAttr } = await (supabase as any)
             .from('invite_attributions')
             .select('id')
             .eq('referred_id', referredUserId)
-            .eq('program_type', 'professional_invite')
+            .eq('program_type', PROFESSIONAL_INVITE_PROGRAM_TYPE)
             .maybeSingle()
 
         if (existingAttr) {
@@ -120,7 +146,7 @@ export async function applyInviteCode(
                 invite_code_id: result.code_id,
                 referrer_id: result.code_owner_id,
                 referred_id: referredUserId,
-                program_type: 'professional_invite',
+                program_type: PROFESSIONAL_INVITE_PROGRAM_TYPE,
                 status: 'pending',
             })
 
@@ -136,7 +162,7 @@ export async function applyInviteCode(
             properties: {
                 inviteCodeId: result.code_id,
                 referrerId: result.code_owner_id,
-                programType: 'professional_invite',
+                programType: PROFESSIONAL_INVITE_PROGRAM_TYPE,
             },
         })
 
@@ -172,7 +198,7 @@ export async function completeInviteAttribution(
                 completed_at: new Date().toISOString(),
             })
             .eq('referred_id', referredUserId)
-            .eq('program_type', 'professional_invite')
+            .eq('program_type', PROFESSIONAL_INVITE_PROGRAM_TYPE)
             .eq('status', 'pending')
             .select('id')
             .maybeSingle()
@@ -189,7 +215,7 @@ export async function completeInviteAttribution(
                 userId: referredUserId,
                 properties: {
                     attributionId: data.id,
-                    programType: 'professional_invite',
+                    programType: PROFESSIONAL_INVITE_PROGRAM_TYPE,
                 },
             })
         }
@@ -238,9 +264,13 @@ export async function getMyInviteStats(): Promise<{
         // 2. Get attributions
         const { data: attributions, error: attrError } = await (supabase as any)
             .from('invite_attributions')
-            .select('*')
+            .select(`
+                *,
+                referrer:profiles!invite_attributions_referrer_id_fkey(*),
+                referred:profiles!invite_attributions_referred_id_fkey(*)
+            `)
             .eq('referrer_id', user.id)
-            .eq('program_type', 'professional_invite')
+            .eq('program_type', PROFESSIONAL_INVITE_PROGRAM_TYPE)
             .order('attributed_at', { ascending: false })
 
         if (attrError) {
@@ -248,7 +278,7 @@ export async function getMyInviteStats(): Promise<{
             return { success: false, error: 'Error al obtener estadísticas' }
         }
 
-        const attrs = (attributions || []) as InviteAttribution[]
+        const attrs = (attributions || []).filter((row: any) => shouldShowGrowthAttribution(row)) as InviteAttribution[]
 
         return {
             success: true,
@@ -298,7 +328,12 @@ export async function createInviteRewardEvent(
         const supabase = await createAdminClient()
         const { data: attribution, error: attributionError } = await (supabase as any)
             .from('invite_attributions')
-            .select('id, program_type')
+            .select(`
+                id,
+                program_type,
+                referrer:profiles!invite_attributions_referrer_id_fkey(role),
+                referred:profiles!invite_attributions_referred_id_fkey(role)
+            `)
             .eq('id', attributionId)
             .maybeSingle()
 
@@ -307,8 +342,15 @@ export async function createInviteRewardEvent(
             return { success: false, error: 'No se encontro la invitacion profesional' }
         }
 
-        if (attribution.program_type !== 'professional_invite') {
+        if (attribution.program_type !== PROFESSIONAL_INVITE_PROGRAM_TYPE) {
             return { success: false, error: 'Solo las invitaciones profesionales pueden generar recompensas' }
+        }
+
+        if (
+            !isProfessionalInviteReferredRole(attribution.referred?.role) ||
+            !isProfessionalInviteReferrerRole(attribution.referrer?.role)
+        ) {
+            return { success: false, error: 'Solo invitados profesionales elegibles pueden generar recompensas' }
         }
 
         const { data, error } = await (supabase as any)
@@ -316,7 +358,7 @@ export async function createInviteRewardEvent(
             .insert({
                 attribution_id: attributionId,
                 beneficiary_id: beneficiaryId,
-                program_type: 'professional_invite',
+                program_type: PROFESSIONAL_INVITE_PROGRAM_TYPE,
                 reward_type: rewardType,
                 reward_value: rewardValue,
                 trigger_event: triggerEvent,
@@ -334,7 +376,7 @@ export async function createInviteRewardEvent(
             .from('invite_attributions')
             .update({ status: 'rewarded' })
             .eq('id', attributionId)
-            .eq('program_type', 'professional_invite')
+            .eq('program_type', PROFESSIONAL_INVITE_PROGRAM_TYPE)
 
         return { success: true, rewardEventId: data?.id }
     } catch (err) {

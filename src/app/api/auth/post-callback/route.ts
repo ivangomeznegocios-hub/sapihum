@@ -54,6 +54,7 @@ export async function POST() {
             touch,
             properties: {
                 hasInviteCode: Boolean(inviteRefCode),
+                registrationRole: userMetadata?.registration_role ?? null,
                 selectedPlan: userMetadata?.preselected_plan ?? null,
                 selectedSpecialization: userMetadata?.preselected_specialization ?? null,
             },

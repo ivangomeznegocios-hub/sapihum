@@ -2,6 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
+import { PROFESSIONAL_INVITE_PROGRAM_TYPE } from '@/lib/growth/programs'
 import type { GrowthCampaignInsert, GrowthCampaignUpdate } from '@/types/database'
 
 // ============================================
@@ -35,7 +36,7 @@ export async function createCampaign(data: GrowthCampaignInsert): Promise<{
             .from('growth_campaigns')
             .insert({
                 ...data,
-                program_type: 'professional_invite',
+                program_type: PROFESSIONAL_INVITE_PROGRAM_TYPE,
                 created_by: user.id,
             })
             .select('id')
@@ -88,7 +89,7 @@ export async function updateCampaign(
             .from('growth_campaigns')
             .update({
                 ...data,
-                program_type: 'professional_invite',
+                program_type: PROFESSIONAL_INVITE_PROGRAM_TYPE,
             })
             .eq('id', campaignId)
 

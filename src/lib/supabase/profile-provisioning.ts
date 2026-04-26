@@ -1,8 +1,10 @@
 import { createClient } from '@supabase/supabase-js'
 import type { User } from '@supabase/supabase-js'
-import type { Database } from '@/types/database'
+import type { Database, UserRole } from '@/types/database'
 
 type AuthUserSnapshot = Pick<User, 'id' | 'email' | 'user_metadata'>
+
+const REGISTRATION_PROFILE_ROLES = new Set<UserRole>(['psychologist', 'patient'])
 
 let adminClient: ReturnType<typeof createClient<Database>> | null = null
 
@@ -33,10 +35,21 @@ function pickMetadataText(metadata: User['user_metadata'], key: string) {
     return typeof value === 'string' && value.trim().length > 0 ? value.trim() : null
 }
 
+function pickRegistrationRole(metadata: User['user_metadata']): UserRole {
+    const requestedRole = pickMetadataText(metadata, 'registration_role')
+
+    if (requestedRole && REGISTRATION_PROFILE_ROLES.has(requestedRole as UserRole)) {
+        return requestedRole as UserRole
+    }
+
+    return 'patient'
+}
+
 export async function ensureProfileForAuthUser(user: AuthUserSnapshot) {
     const admin = getAdminClient()
     const fullName = pickMetadataText(user.user_metadata, 'full_name') ?? pickMetadataText(user.user_metadata, 'name')
     const avatarUrl = pickMetadataText(user.user_metadata, 'avatar_url')
+    const registrationRole = pickRegistrationRole(user.user_metadata)
 
     const { error } = await (admin
         .from('profiles') as any)
@@ -46,6 +59,7 @@ export async function ensureProfileForAuthUser(user: AuthUserSnapshot) {
                 email: user.email ?? null,
                 full_name: fullName,
                 avatar_url: avatarUrl,
+                role: registrationRole,
             },
             {
                 onConflict: 'id',
