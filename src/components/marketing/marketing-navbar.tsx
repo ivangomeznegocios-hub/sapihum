@@ -18,7 +18,7 @@ const NAV_ITEMS = [
     {
         label: 'Academia',
         children: [
-            { label: 'Próximos Encuentros', href: '/academia', description: 'Talleres, formaciones y sesiones en vivo' },
+            { label: 'Eventos', href: '/academia', description: 'Talleres, formaciones y sesiones en vivo' },
             { label: 'Formaciones', href: '/formaciones', description: 'Programas completos con ruta, horas y compra directa' },
             { label: 'Nuestros Ponentes', href: '/speakers', description: 'Directorio público de expertos y facilitadores' },
         ],

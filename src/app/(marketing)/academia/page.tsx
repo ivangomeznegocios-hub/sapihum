@@ -148,7 +148,7 @@ export default async function AcademiaPage({ searchParams }: AcademiaPageProps) 
                                 Agenda en vivo
                             </p>
                             <h2 className="mt-3 text-2xl font-bold tracking-tight text-white md:text-3xl">
-                                {activeCampaign ? `Eventos de ${activeCampaign.title}` : 'Proximos encuentros'}
+                                {activeCampaign ? `Eventos de ${activeCampaign.title}` : 'Eventos'}
                             </h2>
                             <p className="mt-2 max-w-2xl text-muted-foreground">
                                 {activeCampaign
