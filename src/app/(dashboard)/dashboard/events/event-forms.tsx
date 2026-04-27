@@ -183,12 +183,19 @@ interface CreateEventFormProps {
     initialData?: any // Should be typed properly with Event type
     eventId?: string
     userRole?: string
+    speakerOptions?: SpeakerOption[]
 }
 
 type SpeakerAssignmentState = {
     speakerId: string
     compensationType: SpeakerCompensationType
     compensationValue: string
+}
+
+type SpeakerOption = {
+    id: string
+    name: string
+    avatar: string | null
 }
 
 function formatSpeakerCompensationInputValue(
@@ -513,7 +520,14 @@ const STATUS_LABELS: Record<string, string> = {
     cancelled: 'Cancelado',
 }
 
-export function CreateEventForm({ onClose, isEmbedded = false, initialData, eventId, userRole }: CreateEventFormProps) {
+export function CreateEventForm({
+    onClose,
+    isEmbedded = false,
+    initialData,
+    eventId,
+    userRole,
+    speakerOptions,
+}: CreateEventFormProps) {
     const router = useRouter()
     const isAdmin = userRole === 'admin'
     const [isLoading, setIsLoading] = useState(false)
@@ -588,13 +602,13 @@ export function CreateEventForm({ onClose, isEmbedded = false, initialData, even
         MEMBERSHIP_SPECIALIZATION_OPTIONS.find((option) => option.value === selectedSpecializationCode)?.label ?? null
 
     // Speakers selection
-    const [availableSpeakers, setAvailableSpeakers] = useState<{ id: string; name: string; avatar: string | null }[]>([])
+    const [availableSpeakers, setAvailableSpeakers] = useState<SpeakerOption[]>(speakerOptions ?? [])
     const [selectedSpeakerAssignments, setSelectedSpeakerAssignments] = useState<SpeakerAssignmentState[]>(
         (initialData?.speakers || [])
             .map((speaker: any) => mapSpeakerAssignmentFromSource(speaker))
             .filter((assignment: SpeakerAssignmentState | null): assignment is SpeakerAssignmentState => Boolean(assignment))
     )
-    const [loadingSpeakers, setLoadingSpeakers] = useState(true)
+    const [loadingSpeakers, setLoadingSpeakers] = useState(speakerOptions === undefined)
     const selectedSpeakerIds = selectedSpeakerAssignments.map((assignment) => assignment.speakerId)
 
     // Use a counter ref to generate stable unique IDs
@@ -655,6 +669,13 @@ export function CreateEventForm({ onClose, isEmbedded = false, initialData, even
         let ignore = false
 
         async function fetchSpeakers() {
+            if (speakerOptions !== undefined) {
+                if (ignore) return
+                setAvailableSpeakers(speakerOptions)
+                setLoadingSpeakers(false)
+                return
+            }
+
             setLoadingSpeakers(true)
             const supabase = createClient()
             const [{ data, error }, selectedSpeakerResponse] = await Promise.all([
@@ -697,7 +718,7 @@ export function CreateEventForm({ onClose, isEmbedded = false, initialData, even
         return () => {
             ignore = true
         }
-    }, [eventId, initialData?.speakers])
+    }, [eventId, initialData?.speakers, speakerOptions])
 
     function toggleAudience(value: string) {
         setSelectedAudience(prev => {
@@ -1949,7 +1970,7 @@ export function CreateEventForm({ onClose, isEmbedded = false, initialData, even
     )
 }
 
-export function CreateEventButton() {
+export function CreateEventButton({ speakerOptions }: { speakerOptions?: SpeakerOption[] } = {}) {
     const [showForm, setShowForm] = useState(false)
 
     return (
@@ -1958,12 +1979,20 @@ export function CreateEventButton() {
                 <Plus className="mr-2 h-4 w-4" />
                 Nuevo Evento
             </Button>
-            {showForm && <CreateEventForm onClose={() => setShowForm(false)} />}
+            {showForm && <CreateEventForm onClose={() => setShowForm(false)} speakerOptions={speakerOptions} />}
         </>
     )
 }
 
-export function EditEventButton({ event, userRole }: { event: any, userRole?: string }) {
+export function EditEventButton({
+    event,
+    userRole,
+    speakerOptions,
+}: {
+    event: any
+    userRole?: string
+    speakerOptions?: SpeakerOption[]
+}) {
     const [showForm, setShowForm] = useState(false)
 
     return (
@@ -1972,7 +2001,15 @@ export function EditEventButton({ event, userRole }: { event: any, userRole?: st
                 <Pencil className="mr-2 h-4 w-4" />
                 Editar
             </Button>
-            {showForm && <CreateEventForm onClose={() => setShowForm(false)} initialData={event} eventId={event.id} userRole={userRole} />}
+            {showForm && (
+                <CreateEventForm
+                    onClose={() => setShowForm(false)}
+                    initialData={event}
+                    eventId={event.id}
+                    userRole={userRole}
+                    speakerOptions={speakerOptions}
+                />
+            )}
         </>
     )
 }

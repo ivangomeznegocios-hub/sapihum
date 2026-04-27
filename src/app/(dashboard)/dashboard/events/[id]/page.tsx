@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { VideoPlayer } from '@/components/ui/video-player'
 import { ShareEventButton } from '../share-button'
-import { getEventSpeakers } from '@/lib/supabase/queries/speakers'
+import { getAllSpeakers, getEventSpeakers } from '@/lib/supabase/queries/speakers'
 import { getResourcesByEvent } from '@/lib/supabase/queries/resources'
 import { redirect, notFound } from 'next/navigation'
 import Link from 'next/link'
@@ -94,6 +94,14 @@ export default async function EventDetailPage({ params }: PageProps) {
         role: profile.role,
         createdBy: event.created_by,
     })
+
+    const speakerOptions = canEditEvent
+        ? (await getAllSpeakers()).map((speaker) => ({
+            id: speaker.id,
+            name: speaker.profile?.full_name || 'Desconocido',
+            avatar: speaker.profile?.avatar_url || null,
+        }))
+        : []
 
     const accessEntitlement = canEditEvent
         ? null
@@ -308,7 +316,7 @@ export default async function EventDetailPage({ params }: PageProps) {
 
                 {canEditEvent && (
                     <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:justify-end">
-                        <EditEventButton event={event} userRole={profile.role || ''} />
+                        <EditEventButton event={event} userRole={profile.role || ''} speakerOptions={speakerOptions} />
                         {canManageEvent && <DuplicateEventButton eventId={event.id} />}
                         {canManageEvent && <DeleteEventButton eventId={event.id} />}
                     </div>

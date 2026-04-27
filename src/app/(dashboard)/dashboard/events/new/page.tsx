@@ -1,4 +1,5 @@
 import { getUserProfile } from '@/lib/supabase/server'
+import { getAllSpeakers } from '@/lib/supabase/queries/speakers'
 import { redirect } from 'next/navigation'
 import { CreateEventForm } from '../event-forms'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -16,6 +17,12 @@ export default async function NewEventPage() {
     if (!['admin', 'ponente'].includes(profile.role || '')) {
         redirect('/dashboard/events')
     }
+
+    const speakerOptions = (await getAllSpeakers()).map((speaker) => ({
+        id: speaker.id,
+        name: speaker.profile?.full_name || 'Desconocido',
+        avatar: speaker.profile?.avatar_url || null,
+    }))
 
     return (
         <div className="space-y-8">
@@ -40,7 +47,11 @@ export default async function NewEventPage() {
                     <CardTitle>Detalles del Evento</CardTitle>
                 </CardHeader>
                 <CardContent>
-                    <CreateEventForm isEmbedded userRole={profile.role || ''} />
+                    <CreateEventForm
+                        isEmbedded
+                        userRole={profile.role || ''}
+                        speakerOptions={speakerOptions}
+                    />
                 </CardContent>
             </Card>
         </div>
