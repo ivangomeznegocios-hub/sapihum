@@ -379,473 +379,493 @@ export function PublicEventLanding({
     ]
 
     return (
-        <div className="space-y-10 pb-28">
+        <div className="pb-28">
             <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: buildStructuredData(event, faqItems) }} />
 
-            <section className="relative overflow-hidden rounded-[34px] border border-white/10 bg-[linear-gradient(145deg,#070707_10%,#111111_55%,#050505_100%)] shadow-2xl shadow-black/25">
-                <div className="absolute inset-0">
-                    {event.image_url && (
-                        <div
-                            role="img"
-                            aria-label={event.title}
-                            className="absolute inset-0 h-full w-full bg-cover bg-center opacity-20 blur-sm"
-                            style={{ backgroundImage: `url("${event.image_url}")` }}
-                        />
-                    )}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black via-black/75 to-black/60" />
-                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(246,174,2,0.22),transparent_34%),radial-gradient(circle_at_bottom_left,rgba(122,86,2,0.18),transparent_30%)]" />
-                    <div className="absolute inset-0 opacity-[0.05]" style={{ backgroundImage: 'linear-gradient(to right, rgba(255,255,255,0.12) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.12) 1px, transparent 1px)', backgroundSize: '28px 28px' }} />
-                </div>
+            {/* HERO SECTION */}
+            <section className="relative overflow-hidden pt-8 pb-16 md:pt-16 md:pb-24">
+                {/* Refined Background Effect */}
+                <div className="absolute top-[-20%] left-1/2 -translate-x-1/2 w-[800px] h-[800px] opacity-[0.15] pointer-events-none rounded-full blur-[120px]" style={{ background: 'radial-gradient(circle, rgba(246,174,2,0.8) 0%, transparent 70%)' }} />
+                <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'linear-gradient(to right, rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.1) 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
 
-                <div className="relative grid gap-8 px-6 py-10 sm:px-8 md:px-10 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-start lg:py-14">
-                    <div className="space-y-7">
-                        <div className="flex flex-wrap items-center gap-2.5">
-                            <span className="inline-flex items-center gap-1.5 rounded-full border border-brand-yellow/20 bg-brand-yellow/10 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-brand-yellow">
-                                {formatLabel}
-                            </span>
-                            {event.hero_badge && (
-                                <span className="inline-flex items-center rounded-full bg-white/10 px-3 py-1 text-xs font-medium text-white/85">
-                                    {event.hero_badge}
+                <div className="relative mx-auto px-6 sm:px-8 max-w-7xl">
+                    <div className="grid gap-12 lg:grid-cols-[1fr_380px] xl:grid-cols-[1fr_420px] lg:gap-16 items-start">
+                        
+                        {/* LEFT: Text Content */}
+                        <div className="space-y-8 pt-4">
+                            <div className="flex flex-wrap items-center gap-3">
+                                <span className="inline-flex items-center gap-1.5 rounded-full border border-brand-yellow/30 bg-brand-yellow/10 px-3 py-1.5 text-xs font-semibold uppercase tracking-widest text-brand-yellow">
+                                    {formatLabel}
                                 </span>
-                            )}
-                            {specialization && (
-                                <span className="inline-flex items-center rounded-full border border-white/10 bg-white/[0.08] px-3 py-1 text-xs font-semibold text-white">
-                                    {specialization.name}
-                                </span>
-                            )}
-                            {event.formation_track && (
-                                <span className="inline-flex items-center gap-1.5 rounded-full border border-brand-yellow/20 bg-brand-yellow/10 px-3 py-1 text-xs font-semibold tracking-wide text-brand-yellow">
-                                    Ruta: {event.formation_track}
-                                </span>
-                            )}
-                        </div>
+                                {event.hero_badge && (
+                                    <span className="inline-flex items-center rounded-full bg-white/10 px-3 py-1.5 text-xs font-medium text-white/90">
+                                        {event.hero_badge}
+                                    </span>
+                                )}
+                                {specialization && (
+                                    <span className="inline-flex items-center rounded-full border border-white/10 bg-white/[0.05] px-3 py-1.5 text-xs font-semibold text-white">
+                                        {specialization.name}
+                                    </span>
+                                )}
+                            </div>
 
-                        <div className="space-y-4">
-                            <h1 className="max-w-4xl text-3xl font-bold tracking-tight text-white sm:text-4xl lg:text-5xl">
-                                {event.title}
-                            </h1>
-                            {event.subtitle && (
-                                <p className="max-w-3xl text-lg leading-relaxed text-neutral-300 sm:text-xl">
-                                    {event.subtitle}
-                                </p>
-                            )}
-                            {event.campaign_problem && (
-                                <p className="max-w-3xl border-l border-brand-yellow/40 pl-4 text-sm leading-relaxed text-neutral-400 sm:text-base">
-                                    {event.campaign_problem}
-                                </p>
-                            )}
-                        </div>
+                            <div className="space-y-5">
+                                <h1 className="max-w-3xl text-4xl font-bold tracking-tight text-white sm:text-5xl lg:text-6xl leading-[1.1]">
+                                    {event.title}
+                                </h1>
+                                {event.subtitle && (
+                                    <p className="max-w-2xl text-lg leading-relaxed text-neutral-400 sm:text-xl font-light">
+                                        {event.subtitle}
+                                    </p>
+                                )}
+                                {event.campaign_problem && (
+                                    <div className="max-w-2xl rounded-2xl border border-brand-yellow/20 bg-brand-yellow/5 p-4">
+                                        <p className="text-sm leading-relaxed text-brand-yellow/90 sm:text-base">
+                                            {event.campaign_problem}
+                                        </p>
+                                    </div>
+                                )}
+                            </div>
 
-                        {event.speakers?.length > 0 && (
-                            <div className="flex flex-wrap items-center gap-4">
-                                {event.speakers.map((item: any) => {
-                                    const speaker = item.speaker
-                                    const name = speaker?.profile?.full_name || 'Ponente'
-                                    const avatar = getSpeakerImage(speaker)
-                                    const speakerHref = getPublicSpeakerHref(speaker, speakerReturnTo)
+                            {event.speakers?.length > 0 && (
+                                <div className="flex flex-wrap items-center gap-5 pt-4">
+                                    {event.speakers.map((item: any) => {
+                                        const speaker = item.speaker
+                                        const name = speaker?.profile?.full_name || 'Ponente'
+                                        const avatar = getSpeakerImage(speaker)
+                                        const speakerHref = getPublicSpeakerHref(speaker, speakerReturnTo)
 
-                                    const content = (
-                                        <>
-                                            {avatar ? (
-                                                <div
-                                                    role="img"
-                                                    aria-label={name}
-                                                    className="h-9 w-9 rounded-full bg-cover bg-center ring-2 ring-white/15"
-                                                    style={{ backgroundImage: `url("${avatar}")` }}
-                                                />
-                                            ) : (
-                                                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-brand-yellow/20 text-sm font-bold text-brand-yellow">
-                                                    {name.charAt(0)}
-                                                </div>
-                                            )}
-                                            <div>
-                                                <p className="text-sm font-medium text-white">{name}</p>
-                                                {speaker?.headline && (
-                                                    <p className="text-xs text-neutral-500">{speaker.headline}</p>
+                                        const content = (
+                                            <>
+                                                {avatar ? (
+                                                    <div
+                                                        role="img"
+                                                        aria-label={name}
+                                                        className="h-12 w-12 rounded-full bg-cover bg-center ring-2 ring-white/10 shadow-lg"
+                                                        style={{ backgroundImage: `url("${avatar}")` }}
+                                                    />
+                                                ) : (
+                                                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-brand-yellow/20 text-sm font-bold text-brand-yellow ring-2 ring-white/10">
+                                                        {name.charAt(0)}
+                                                    </div>
                                                 )}
-                                            </div>
-                                        </>
-                                    )
-
-                                    if (!speakerHref) {
-                                        return (
-                                            <div key={item.id} className="flex items-center gap-3 rounded-full border border-white/10 bg-white/5 px-3 py-2">
-                                                {content}
-                                            </div>
+                                                <div>
+                                                    <p className="text-sm font-semibold text-white">{name}</p>
+                                                    {speaker?.headline && (
+                                                        <p className="text-xs text-neutral-400 mt-0.5">{speaker.headline}</p>
+                                                    )}
+                                                </div>
+                                            </>
                                         )
-                                    }
 
-                                    return (
-                                        <Link
-                                            key={item.id}
-                                            href={speakerHref}
-                                            className="group flex items-center gap-3 rounded-full border border-white/10 bg-white/5 px-3 py-2 transition-colors hover:border-brand-yellow/30 hover:bg-white/10"
-                                        >
-                                            {content}
-                                        </Link>
-                                    )
-                                })}
+                                        if (!speakerHref) {
+                                            return <div key={item.id} className="flex items-center gap-3">{content}</div>
+                                        }
+
+                                        return (
+                                            <Link key={item.id} href={speakerHref} className="group flex items-center gap-3 transition-opacity hover:opacity-80">
+                                                {content}
+                                            </Link>
+                                        )
+                                    })}
+                                </div>
+                            )}
+
+                            <div className="flex flex-wrap gap-x-12 gap-y-6 pt-6 border-t border-white/10">
+                                <div>
+                                    <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-neutral-500">Fecha y Hora</p>
+                                    <p className="mt-2 text-sm font-medium text-white">{formatEventDate(event.start_time)}</p>
+                                </div>
+                                <div>
+                                    <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-neutral-500">Formato</p>
+                                    <p className="mt-2 text-sm font-medium text-white">{formatLabel}</p>
+                                </div>
+                                <div>
+                                    <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-neutral-500">Dirigido a</p>
+                                    <p className="mt-2 text-sm font-medium text-white">{getAudienceLabel(event.target_audience)}</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* RIGHT: Image & CTA */}
+                        <aside className="space-y-6 lg:sticky lg:top-24">
+                            {event.image_url && (
+                                <div className="aspect-[4/3] sm:aspect-video lg:aspect-[4/5] w-full rounded-[32px] overflow-hidden border border-white/10 shadow-2xl relative group">
+                                    <div 
+                                        role="img" 
+                                        aria-label={event.title}
+                                        className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105" 
+                                        style={{ backgroundImage: `url("${event.image_url}")` }} 
+                                    />
+                                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-80" />
+                                    <div className="absolute inset-0 ring-1 ring-inset ring-white/10 rounded-[32px] pointer-events-none" />
+                                    {event.formation_track && (
+                                        <div className="absolute bottom-4 left-4 right-4 text-center">
+                                            <span className="inline-block rounded-full bg-black/60 backdrop-blur-md px-4 py-1.5 text-xs font-medium tracking-wide text-brand-yellow border border-white/10">
+                                                Ruta: {event.formation_track}
+                                            </span>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+
+                            <div className="rounded-[32px] border border-white/10 bg-[#0A0A0A]/80 p-6 shadow-2xl backdrop-blur-xl relative overflow-hidden">
+                                {/* Subtle internal glow for the card */}
+                                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-1/2 bg-brand-yellow/5 blur-3xl pointer-events-none" />
+                                
+                                <div className="relative z-10">
+                                    <div className="flex items-end justify-between gap-4">
+                                        <div>
+                                            <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-neutral-500">Inversion</p>
+                                            <p className="mt-1 text-3xl font-bold tracking-tight text-white">
+                                                {finalPrice > 0 ? `$${finalPrice.toFixed(0)} MXN` : 'Gratis'}
+                                            </p>
+                                        </div>
+                                        {finalPrice > 0 && finalPrice < Number(event.price || 0) && (
+                                            <div className="text-right">
+                                                <p className="text-xs text-neutral-500 line-through">${Number(event.price).toFixed(0)}</p>
+                                                <p className="text-xs font-medium text-brand-yellow">Ahorras ${Number(event.price - finalPrice).toFixed(0)}</p>
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {includedBySpecialization && (
+                                        <div className="mt-4 flex items-center gap-2 rounded-xl bg-brand-yellow/10 px-3 py-2 text-xs font-medium text-brand-yellow border border-brand-yellow/20">
+                                            <Check className="h-3.5 w-3.5" />
+                                            Acceso incluido por tu especialidad
+                                        </div>
+                                    )}
+
+                                    <div className="mt-6 space-y-3">
+                                        {hasAccess ? (
+                                            <>
+                                                <Link href={`/hub/${event.slug}`}>
+                                                    <Button className="w-full h-12 text-base font-semibold shadow-lg shadow-brand-yellow/20" size="lg">
+                                                        Entrar al hub privado
+                                                    </Button>
+                                                </Link>
+                                                <p className="text-center text-xs font-medium text-brand-yellow">
+                                                    Ya tienes acceso a este contenido
+                                                </p>
+                                            </>
+                                        ) : isBlocked ? (
+                                            <>
+                                                <Button variant="secondary" className="w-full h-12 text-base opacity-60 cursor-not-allowed" disabled>
+                                                    {isExpired ? 'Este material ya expiro' : 'Cupo lleno'}
+                                                </Button>
+                                                <p className="text-center text-xs text-neutral-500">
+                                                    {isExpired ? 'Este acceso ya no esta disponible.' : 'Lo sentimos, este evento ya alcanzo su maxima capacidad.'}
+                                                </p>
+                                            </>
+                                        ) : (
+                                            <>
+                                                {!isMembersOnly && (
+                                                    <PublicAccessCta
+                                                        eventId={event.id}
+                                                        eventSlug={event.slug}
+                                                        title={event.title}
+                                                        label={finalPrice > 0 ? ctaLabel : 'Recibir acceso gratis'}
+                                                        requiresPayment={finalPrice > 0}
+                                                    />
+                                                )}
+
+                                                {showMembershipUpsell && (
+                                                    <>
+                                                        {!isMembersOnly && (
+                                                            <div className="relative py-2">
+                                                                <div className="absolute inset-x-0 top-1/2 border-t border-white/5" />
+                                                                <span className="relative mx-auto flex w-fit bg-[#0A0A0A] px-3 text-[10px] uppercase tracking-[0.18em] text-neutral-600">
+                                                                    o tambien
+                                                                </span>
+                                                            </div>
+                                                        )}
+                                                        <Link href={`/precios?next=/eventos/${event.slug}&autoCheckout=true`}>
+                                                            <Button
+                                                                variant={isMembersOnly ? 'default' : 'outline'}
+                                                                className={cn('w-full h-12 text-sm', isMembersOnly ? 'text-base font-semibold' : 'border-white/10 text-white hover:bg-white/5 hover:text-white')}
+                                                                size="lg"
+                                                            >
+                                                                {isMembersOnly && <Lock className="h-4 w-4 mr-2" />}
+                                                                {membershipCtaLabel}
+                                                            </Button>
+                                                        </Link>
+                                                    </>
+                                                )}
+
+                                                {campaign && (
+                                                    <a href="#campaign-temario" className="block pt-2">
+                                                        <Button variant="ghost" className="w-full text-xs text-neutral-400 hover:text-white hover:bg-white/5">
+                                                            <Download className="h-3.5 w-3.5 mr-2" />
+                                                            Descargar temario PDF
+                                                        </Button>
+                                                    </a>
+                                                )}
+                                            </>
+                                        )}
+                                    </div>
+
+                                    {!hasAccess && (
+                                        <p className="mt-5 text-center text-[11px] text-neutral-500">
+                                            Ya lo adquiriste?{' '}
+                                            <Link href="/compras/recuperar" className="font-medium text-white hover:text-brand-yellow transition-colors underline underline-offset-2">
+                                                Recupera tu acceso
+                                            </Link>
+                                        </p>
+                                    )}
+                                </div>
+                            </div>
+                        </aside>
+                    </div>
+                </div>
+            </section>
+
+            {campaign && (
+                <div className="mx-auto max-w-7xl px-6 sm:px-8 mb-16">
+                    <CampaignLeadMagnetInline
+                        campaignKey={campaign.key}
+                        eventId={event.id}
+                        eventSlug={event.slug}
+                        sourceSurface="event_detail_inline"
+                        eyebrow="Temario detallado"
+                        title={`Recibe el temario de ${campaign.title}`}
+                        description="Descarga el PDF del bloque, entiende que aprenderas en esta ruta y recibe una recomendacion clara del siguiente evento para seguir avanzando."
+                        sectionId="campaign-temario"
+                    />
+                </div>
+            )}
+
+            {/* MAIN CONTENT SECTION */}
+            <section className="mx-auto max-w-7xl px-6 sm:px-8">
+                <div className="grid gap-12 lg:grid-cols-[1fr_380px] xl:grid-cols-[1fr_420px] items-start">
+                    
+                    {/* LEFT: Details */}
+                    <div className="space-y-16">
+                        {event.description && (
+                            <div>
+                                <h2 className="text-2xl font-semibold text-white mb-6">Acerca de este encuentro</h2>
+                                <div className="space-y-4 text-base leading-relaxed text-neutral-400">
+                                    {event.description.split('\n').map((paragraph: string, index: number) => (
+                                        <p key={index}>{paragraph}</p>
+                                    ))}
+                                </div>
                             </div>
                         )}
 
-                        <div className="grid gap-3 sm:grid-cols-3">
-                            <div className="rounded-[22px] border border-white/10 bg-white/[0.04] p-4">
-                                <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-neutral-500">Fecha</p>
-                                <p className="mt-2 text-sm leading-relaxed text-neutral-200">{formatEventDate(event.start_time)}</p>
+                        {(event.ideal_for?.length > 0 || event.learning_outcomes?.length > 0) && (
+                            <div>
+                                <h2 className="text-2xl font-semibold text-white mb-8">Valor Academico</h2>
+                                <div className="grid gap-8 sm:grid-cols-2">
+                                    {event.ideal_for?.length > 0 && (
+                                        <div className="space-y-5">
+                                            <h3 className="text-sm font-semibold uppercase tracking-widest text-neutral-500">A quien va dirigido</h3>
+                                            <ul className="space-y-4">
+                                                {event.ideal_for.map((item: string) => (
+                                                    <li key={item} className="flex items-start gap-3 text-sm leading-relaxed text-neutral-300">
+                                                        <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-white/5 border border-white/10 text-brand-yellow">
+                                                            <Check className="h-3 w-3" />
+                                                        </span>
+                                                        <span>{item}</span>
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        </div>
+                                    )}
+
+                                    {event.learning_outcomes?.length > 0 && (
+                                        <div className="space-y-5">
+                                            <h3 className="text-sm font-semibold uppercase tracking-widest text-neutral-500">Que aprenderas</h3>
+                                            <ul className="space-y-4">
+                                                {event.learning_outcomes.map((item: string) => (
+                                                    <li key={item} className="flex items-start gap-3 text-sm leading-relaxed text-neutral-300">
+                                                        <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-brand-yellow/10 text-brand-yellow">
+                                                            <ArrowRight className="h-3 w-3" />
+                                                        </span>
+                                                        <span>{item}</span>
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
-                            <div className="rounded-[22px] border border-white/10 bg-white/[0.04] p-4">
-                                <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-neutral-500">Formato</p>
-                                <p className="mt-2 text-sm leading-relaxed text-neutral-200">{formatLabel}</p>
+                        )}
+
+                        <div>
+                            <h2 className="text-2xl font-semibold text-white mb-6">Que incluye tu acceso</h2>
+                            <div className="grid gap-4 sm:grid-cols-2">
+                                {valueItems.map((item) => (
+                                    <div key={item.title} className="rounded-2xl border border-white/5 bg-white/[0.02] p-5 hover:bg-white/[0.04] transition-colors">
+                                        <p className="text-base font-medium text-white">{item.title}</p>
+                                        <p className="mt-2 text-sm leading-relaxed text-neutral-400">{item.description}</p>
+                                    </div>
+                                ))}
                             </div>
-                            <div className="rounded-[22px] border border-white/10 bg-white/[0.04] p-4">
-                                <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-neutral-500">Dirigido a</p>
-                                <p className="mt-2 text-sm leading-relaxed text-neutral-200">{getAudienceLabel(event.target_audience)}</p>
+                        </div>
+
+                        {event.speakers?.length > 0 && (
+                            <div>
+                                <h2 className="text-2xl font-semibold text-white mb-6">Conoce a los ponentes</h2>
+                                <div className="grid gap-6 sm:grid-cols-2">
+                                    {event.speakers.map((item: any) => {
+                                        const speaker = item.speaker
+                                        const name = speaker?.profile?.full_name || 'Ponente'
+                                        const avatar = getSpeakerImage(speaker)
+                                        const speakerHref = getPublicSpeakerHref(speaker, speakerReturnTo)
+                                        const specialties = Array.isArray(speaker?.specialties) ? speaker.specialties.filter(Boolean).slice(0, 3) : []
+                                        const credentials = Array.isArray(speaker?.credentials) ? speaker.credentials.filter(Boolean).slice(0, 2) : []
+
+                                        const content = (
+                                            <div className="flex flex-col h-full rounded-[24px] border border-white/5 bg-white/[0.02] overflow-hidden hover:border-brand-yellow/30 hover:bg-white/[0.04] transition-all group">
+                                                <div className="p-6 pb-0 flex items-center gap-4">
+                                                    {avatar ? (
+                                                        <div
+                                                            role="img"
+                                                            aria-label={name}
+                                                            className="h-16 w-16 shrink-0 rounded-full bg-cover bg-center ring-2 ring-white/10"
+                                                            style={{ backgroundImage: `url("${avatar}")` }}
+                                                        />
+                                                    ) : (
+                                                        <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-brand-yellow/10 text-xl font-bold text-brand-yellow ring-2 ring-brand-yellow/20">
+                                                            {name.charAt(0)}
+                                                        </div>
+                                                    )}
+                                                    <div>
+                                                        <p className="text-lg font-semibold text-white group-hover:text-brand-yellow transition-colors">{name}</p>
+                                                        {speaker?.headline && (
+                                                            <p className="mt-1 text-sm text-neutral-400">{speaker.headline}</p>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                                <div className="p-6 flex flex-col justify-between flex-1">
+                                                    <div className="space-y-4">
+                                                        {specialties.length > 0 && (
+                                                            <div className="flex flex-wrap gap-2">
+                                                                {specialties.map((specialty: string) => (
+                                                                    <span key={specialty} className="rounded-md bg-white/5 px-2 py-1 text-xs font-medium text-neutral-300">
+                                                                        {specialty}
+                                                                    </span>
+                                                                ))}
+                                                            </div>
+                                                        )}
+                                                        {credentials.length > 0 && (
+                                                            <div className="space-y-2">
+                                                                {credentials.map((credential: string) => (
+                                                                    <p key={credential} className="text-xs leading-relaxed text-neutral-500">
+                                                                        • {credential}
+                                                                    </p>
+                                                                ))}
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )
+
+                                        if (!speakerHref) return <div key={item.id} className="h-full">{content}</div>
+                                        return <Link key={item.id} href={speakerHref} className="block h-full">{content}</Link>
+                                    })}
+                                </div>
+                            </div>
+                        )}
+
+                        {hasAccess && materialLinks.length > 0 && (
+                            <div>
+                                <h2 className="text-2xl font-semibold text-white mb-6">Materiales del evento</h2>
+                                <div className="space-y-3">
+                                    {materialLinks.map((item: any) => (
+                                        <div key={item.id || item.url} className="flex items-center justify-between gap-4 rounded-2xl border border-white/5 bg-white/[0.02] p-5">
+                                            <div>
+                                                <p className="text-base font-medium text-white">{item.title}</p>
+                                                <p className="mt-1 text-sm text-neutral-500">
+                                                    {item.type === 'presentation' ? 'Presentacion' :
+                                                        item.type === 'document' ? 'Documento' :
+                                                            item.type === 'folder' ? 'Carpeta' :
+                                                                item.type === 'download' ? 'Descarga' : 'Enlace externo'}
+                                                </p>
+                                            </div>
+                                            <Button asChild variant="secondary" size="sm" className="shrink-0 bg-white/10 hover:bg-white/20 text-white">
+                                                <a href={item.url} target="_blank" rel="noopener noreferrer">
+                                                    Abrir
+                                                </a>
+                                            </Button>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        <div className="pt-8 border-t border-white/10">
+                            <h2 className="text-2xl font-semibold text-white mb-6">Preguntas frecuentes</h2>
+                            <div className="max-w-3xl">
+                                <FaqAccordion items={faqItems} />
                             </div>
                         </div>
                     </div>
 
-                    <aside className="lg:sticky lg:top-24">
-                        <div className="rounded-[28px] border border-white/10 bg-black/30 p-5 shadow-2xl shadow-black/20 backdrop-blur-sm">
-                            <div>
-                                <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-neutral-500">Inversion</p>
-                                <p className="mt-2 text-3xl font-bold text-white">
-                                    {finalPrice > 0 ? `$${finalPrice.toFixed(0)} MXN` : 'Gratis'}
+                    {/* RIGHT: Supplemental Links */}
+                    <aside className="space-y-8 lg:sticky lg:top-24">
+                        {event.formation && !Array.isArray(event.formation) && (
+                            <div className="rounded-2xl border border-brand-yellow/20 bg-brand-yellow/5 p-6 relative overflow-hidden">
+                                <div className="absolute top-0 right-0 p-4 opacity-10">
+                                    <svg width="64" height="64" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+                                </div>
+                                <h3 className="text-sm font-semibold uppercase tracking-widest text-brand-yellow mb-3">Parte de una ruta mayor</h3>
+                                <p className="text-sm leading-relaxed text-neutral-300">
+                                    Este encuentro forma parte de <strong className="text-white font-medium">{event.formation.title}</strong>. Puedes tomarlo por separado o revisar la ruta completa para obtener la certificacion.
                                 </p>
-                                {includedBySpecialization && (
-                                    <p className="mt-1 text-sm font-medium text-brand-yellow">
-                                        Incluido por tu especialidad
-                                    </p>
-                                )}
-                                {finalPrice > 0 && finalPrice < Number(event.price || 0) && (
-                                    <p className="mt-1 text-sm font-medium text-brand-yellow">
-                                        Tienes precio preferencial de miembro
-                                    </p>
-                                )}
+                                <Link href={`/formaciones/${event.formation.slug}`} className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-brand-yellow hover:text-white transition-colors">
+                                    Ver diplomado completo
+                                    <ArrowRight className="h-4 w-4" />
+                                </Link>
                             </div>
+                        )}
 
-                            <div className="mt-5 rounded-[22px] border border-white/10 bg-white/[0.04] p-4 text-sm">
-                                <p className="font-medium text-white">{memberMessage.label}</p>
-                                {memberMessage.note && <p className="mt-2 leading-relaxed text-neutral-400">{memberMessage.note}</p>}
+                        <div className="rounded-2xl border border-white/5 bg-[#0A0A0A] p-6">
+                            <h3 className="text-sm font-semibold uppercase tracking-widest text-neutral-400 mb-4">Para Miembros</h3>
+                            <div className="space-y-4 text-sm leading-relaxed text-neutral-400">
+                                <p>La membresia potencia tu acceso con ahorro acumulado y una entrada mas continua a eventos, contenidos y networking.</p>
+                                <ul className="space-y-3">
+                                    <li className="flex items-start gap-3">
+                                        <Check className="mt-0.5 h-4 w-4 shrink-0 text-white" />
+                                        Acceso incluido o precio preferencial.
+                                    </li>
+                                    <li className="flex items-start gap-3">
+                                        <Check className="mt-0.5 h-4 w-4 shrink-0 text-white" />
+                                        Comunidad y networking con colegas.
+                                    </li>
+                                </ul>
+                                <Link href="/precios" className="mt-2 inline-flex items-center gap-2 text-sm font-medium text-white hover:text-brand-yellow transition-colors underline underline-offset-4">
+                                    Explorar planes
+                                </Link>
                             </div>
-
-                            <div className="mt-5 space-y-3">
-                                {hasAccess ? (
-                                    <>
-                                        <Link href={`/hub/${event.slug}`}>
-                                            <Button className="w-full" size="lg">
-                                                Entrar al hub privado
-                                            </Button>
-                                        </Link>
-                                        <p className="text-center text-xs font-medium text-brand-yellow">
-                                            Ya tienes acceso a este contenido
-                                        </p>
-                                    </>
-                                ) : isBlocked ? (
-                                    <>
-                                        <Button variant="secondary" className="w-full cursor-not-allowed py-6 text-base opacity-60" disabled>
-                                            {isExpired ? 'Este material ya expiro' : 'Cupo lleno'}
-                                        </Button>
-                                        <p className="text-center text-xs text-neutral-500">
-                                            {isExpired ? 'Este acceso ya no esta disponible.' : 'Lo sentimos, este evento ya alcanzo su maxima capacidad.'}
-                                        </p>
-                                    </>
-                                ) : (
-                                    <>
-                                        {!isMembersOnly && (
-                                            <PublicAccessCta
-                                                eventId={event.id}
-                                                eventSlug={event.slug}
-                                                title={event.title}
-                                                label={finalPrice > 0 ? ctaLabel : 'Recibir acceso gratis'}
-                                                requiresPayment={finalPrice > 0}
-                                            />
-                                        )}
-
-                                        {showMembershipUpsell && (
-                                            <>
-                                                {!isMembersOnly && (
-                                                    <div className="relative py-2">
-                                                        <div className="absolute inset-x-0 top-1/2 border-t border-white/10" />
-                                                        <span className="relative mx-auto flex w-fit bg-black px-3 text-[10px] uppercase tracking-[0.18em] text-neutral-500">
-                                                            o tambien
-                                                        </span>
-                                                    </div>
-                                                )}
-                                                <Link href={`/precios?next=/eventos/${event.slug}&autoCheckout=true`}>
-                                                    <Button
-                                                        variant={isMembersOnly ? 'default' : 'outline'}
-                                                        className={cn('w-full', isMembersOnly ? 'py-6 text-base' : 'border-brand-yellow/30 text-brand-yellow hover:bg-brand-yellow/10')}
-                                                        size="lg"
-                                                    >
-                                                        {isMembersOnly && <Lock className="h-4 w-4" />}
-                                                        {membershipCtaLabel}
-                                                    </Button>
-                                                </Link>
-                                            </>
-                                        )}
-
-                                        {campaign && (
-                                            <a href="#campaign-temario">
-                                                <Button variant="outline" className="w-full gap-2">
-                                                    <Download className="h-4 w-4" />
-                                                    Descargar temario
-                                                </Button>
-                                            </a>
-                                        )}
-                                    </>
-                                )}
-                            </div>
-
-                            {!hasAccess && (
-                                <p className="mt-4 text-center text-[11px] text-neutral-500">
-                                    Ya lo adquiriste?{' '}
-                                    <Link href="/compras/recuperar" className="font-medium text-brand-yellow hover:underline">
-                                        Recupera tu acceso
-                                    </Link>
-                                </p>
-                            )}
                         </div>
                     </aside>
                 </div>
             </section>
 
-            {campaign && (
-                <CampaignLeadMagnetInline
-                    campaignKey={campaign.key}
-                    eventId={event.id}
-                    eventSlug={event.slug}
-                    sourceSurface="event_detail_inline"
-                    eyebrow="Temario detallado"
-                    title={`Recibe el temario de ${campaign.title}`}
-                    description="Descarga el PDF del bloque, entiende que aprenderas en esta ruta y recibe una recomendacion clara del siguiente evento para seguir avanzando."
-                    sectionId="campaign-temario"
-                />
-            )}
-
-            <section className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_320px]">
-                <div className="space-y-8">
-                    {event.description && (
-                        <DetailShell title="Acerca de este encuentro" eyebrow="Contexto">
-                            <div className="space-y-3 text-sm leading-relaxed text-neutral-300 md:text-base">
-                                {event.description.split('\n').map((paragraph: string, index: number) => (
-                                    <p key={index}>{paragraph}</p>
-                                ))}
-                            </div>
-                        </DetailShell>
-                    )}
-
-                    {(event.ideal_for?.length > 0 || event.learning_outcomes?.length > 0) && (
-                        <DetailShell title="A quien va dirigido y que aprenderas" eyebrow="Valor academico">
-                            <div className="grid gap-8 md:grid-cols-2">
-                                {event.ideal_for?.length > 0 && (
-                                    <div className="space-y-4">
-                                        <h3 className="text-lg font-semibold text-white">A quien va dirigido</h3>
-                                        <ul className="space-y-3">
-                                            {event.ideal_for.map((item: string) => (
-                                                <li key={item} className="flex items-start gap-3 text-sm leading-relaxed text-neutral-300">
-                                                    <span className="mt-1 flex h-5 w-5 items-center justify-center rounded-full bg-brand-yellow/10 text-brand-yellow">
-                                                        <Check className="h-3 w-3" />
-                                                    </span>
-                                                    <span>{item}</span>
-                                                </li>
-                                            ))}
-                                        </ul>
-                                    </div>
-                                )}
-
-                                {event.learning_outcomes?.length > 0 && (
-                                    <div className="space-y-4">
-                                        <h3 className="text-lg font-semibold text-white">Que aprenderas</h3>
-                                        <ul className="space-y-3">
-                                            {event.learning_outcomes.map((item: string) => (
-                                                <li key={item} className="flex items-start gap-3 text-sm leading-relaxed text-neutral-300">
-                                                    <span className="mt-1 flex h-5 w-5 items-center justify-center rounded-full bg-white/10 text-brand-yellow">
-                                                        <ArrowRight className="h-3 w-3" />
-                                                    </span>
-                                                    <span>{item}</span>
-                                                </li>
-                                            ))}
-                                        </ul>
-                                    </div>
-                                )}
-                            </div>
-                        </DetailShell>
-                    )}
-
-                    <DetailShell title="Que incluye tu acceso" eyebrow="Acceso">
-                        <div className="grid gap-3 md:grid-cols-2">
-                            {valueItems.map((item) => (
-                                <div key={item.title} className="rounded-[22px] border border-white/10 bg-black/20 p-4">
-                                    <p className="text-sm font-semibold text-white">{item.title}</p>
-                                    <p className="mt-2 text-sm leading-relaxed text-neutral-400">{item.description}</p>
-                                </div>
-                            ))}
-                        </div>
-                    </DetailShell>
-
-                    {event.speakers?.length > 0 && (
-                        <DetailShell title="Ponentes" eyebrow="Docencia">
-                            <div className="grid gap-4 md:grid-cols-2">
-                                {event.speakers.map((item: any) => {
-                                    const speaker = item.speaker
-                                    const name = speaker?.profile?.full_name || 'Ponente'
-                                    const avatar = getSpeakerImage(speaker)
-                                    const speakerHref = getPublicSpeakerHref(speaker, speakerReturnTo)
-                                    const specialties = Array.isArray(speaker?.specialties) ? speaker.specialties.filter(Boolean).slice(0, 3) : []
-                                    const credentials = Array.isArray(speaker?.credentials) ? speaker.credentials.filter(Boolean).slice(0, 2) : []
-
-                                    const content = (
-                                        <>
-                                            {avatar ? (
-                                                <div
-                                                    role="img"
-                                                    aria-label={name}
-                                                    className="h-14 w-14 rounded-full bg-cover bg-center ring-2 ring-white/15"
-                                                    style={{ backgroundImage: `url("${avatar}")` }}
-                                                />
-                                            ) : (
-                                                <div className="flex h-14 w-14 items-center justify-center rounded-full bg-brand-yellow/20 text-lg font-bold text-brand-yellow">
-                                                    {name.charAt(0)}
-                                                </div>
-                                            )}
-                                            <div className="min-w-0 flex-1 space-y-3">
-                                                <div>
-                                                    <p className="font-medium text-white">{name}</p>
-                                                    {speaker?.headline && (
-                                                        <p className="mt-1 text-sm text-neutral-500">{speaker.headline}</p>
-                                                    )}
-                                                </div>
-
-                                                {specialties.length > 0 && (
-                                                    <div className="flex flex-wrap gap-2">
-                                                        {specialties.map((specialty: string) => (
-                                                            <span key={specialty} className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[11px] font-medium text-neutral-300">
-                                                                {specialty}
-                                                            </span>
-                                                        ))}
-                                                    </div>
-                                                )}
-
-                                                {credentials.length > 0 && (
-                                                    <div className="space-y-1.5">
-                                                        {credentials.map((credential: string) => (
-                                                            <p key={credential} className="text-sm leading-relaxed text-neutral-400">
-                                                                {credential}
-                                                            </p>
-                                                        ))}
-                                                    </div>
-                                                )}
-                                            </div>
-                                        </>
-                                    )
-
-                                    if (!speakerHref) {
-                                        return (
-                                            <div key={item.id} className="flex items-start gap-4 rounded-[24px] border border-white/10 bg-black/20 p-4">
-                                                {content}
-                                            </div>
-                                        )
-                                    }
-
-                                    return (
-                                        <Link
-                                            key={item.id}
-                                            href={speakerHref}
-                                            className="group flex items-start gap-4 rounded-[24px] border border-white/10 bg-black/20 p-4 transition-colors hover:border-brand-yellow/30 hover:bg-black/30"
-                                        >
-                                            {content}
-                                        </Link>
-                                    )
-                                })}
-                            </div>
-                        </DetailShell>
-                    )}
-
-                    {hasAccess && materialLinks.length > 0 && (
-                        <DetailShell title="Materiales del evento" eyebrow="Materiales">
-                            <div className="space-y-3">
-                                {materialLinks.map((item: any) => (
-                                    <div key={item.id || item.url} className="flex flex-col gap-3 rounded-[22px] border border-white/10 bg-black/20 p-4 md:flex-row md:items-center md:justify-between">
-                                        <div>
-                                            <p className="text-sm font-medium text-white">{item.title}</p>
-                                            <p className="mt-1 text-xs text-neutral-500">
-                                                {item.type === 'presentation' ? 'Presentacion' :
-                                                    item.type === 'document' ? 'Documento' :
-                                                        item.type === 'folder' ? 'Carpeta' :
-                                                            item.type === 'download' ? 'Descarga' : 'Enlace externo'}
-                                            </p>
-                                        </div>
-                                        <Button asChild variant="outline" className="shrink-0">
-                                            <a href={item.url} target="_blank" rel="noopener noreferrer">
-                                                Abrir material
-                                            </a>
-                                        </Button>
-                                    </div>
-                                ))}
-                            </div>
-                        </DetailShell>
-                    )}
-
-                    <DetailShell title="Preguntas frecuentes" eyebrow="FAQ">
-                        <FaqAccordion items={faqItems} />
-                    </DetailShell>
-                </div>
-
-                <aside className="space-y-6 xl:sticky xl:top-24 xl:self-start">
-                    {event.formation && !Array.isArray(event.formation) && (
-                        <DetailShell title="Parte de una ruta mayor" eyebrow="Formacion" className="p-5">
-                            <p className="text-sm leading-relaxed text-neutral-300">
-                                Este encuentro forma parte de {event.formation.title}. Puedes tomarlo por separado o revisar la ruta completa.
-                            </p>
-                            <Link href={`/formaciones/${event.formation.slug}`} className="mt-4 inline-flex items-center gap-2 text-sm font-medium text-brand-yellow hover:text-brand-yellow">
-                                Ver diplomado completo
-                                <ArrowRight className="h-4 w-4" />
-                            </Link>
-                        </DetailShell>
-                    )}
-
-                    <DetailShell title="Para miembros" eyebrow="Comunidad" className="p-5">
-                        <div className="space-y-3 text-sm leading-relaxed text-neutral-300">
-                            <p>La membresia potencia tu acceso con ahorro acumulado y una entrada mas continua a eventos, contenidos y networking.</p>
-                            <ul className="space-y-2">
-                                <li className="flex items-start gap-2">
-                                    <Check className="mt-0.5 h-4 w-4 shrink-0 text-brand-yellow" />
-                                    Acceso incluido o precio preferencial cuando aplica.
-                                </li>
-                                <li className="flex items-start gap-2">
-                                    <Check className="mt-0.5 h-4 w-4 shrink-0 text-brand-yellow" />
-                                    Comunidad y networking con colegas del ecosistema.
-                                </li>
-                                <li className="flex items-start gap-2">
-                                    <Check className="mt-0.5 h-4 w-4 shrink-0 text-brand-yellow" />
-                                    Continuidad entre academia, rutas y experiencias en vivo.
-                                </li>
-                            </ul>
-                            <Link href="/precios" className="inline-flex items-center gap-2 text-sm font-medium text-brand-yellow hover:text-brand-yellow">
-                                Ver planes
-                                <ArrowRight className="h-4 w-4" />
-                            </Link>
-                        </div>
-                    </DetailShell>
-                </aside>
-            </section>
-
             {relatedEvents.length > 0 && (
-                <DetailShell
-                    title={campaign ? 'Eventos relacionados de esta ruta' : 'Tambien te puede interesar'}
-                    eyebrow={campaign ? 'Agenda relacionada' : 'Siguiente paso'}
-                >
-                    <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+                <section className="mx-auto max-w-7xl px-6 sm:px-8 mt-24">
+                    <div className="flex items-end justify-between mb-8">
+                        <div>
+                            <p className="text-sm font-semibold uppercase tracking-widest text-brand-yellow mb-2">
+                                {campaign ? 'Agenda relacionada' : 'Siguiente paso'}
+                            </p>
+                            <h2 className="text-3xl font-bold text-white">
+                                {campaign ? 'Eventos de esta ruta' : 'Tambien te puede interesar'}
+                            </h2>
+                        </div>
+                    </div>
+                    <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
                         {relatedEvents.map((item) => (
                             <PublicCatalogCard key={item.id} event={item} fixedLayout />
                         ))}
                     </div>
-                </DetailShell>
+                </section>
             )}
 
             {!isBlocked && (
-                <div className="fixed inset-x-0 bottom-3 z-40 px-3 lg:hidden">
-                    <div className="mx-auto flex max-w-xl items-center gap-3 rounded-[22px] border border-white/10 bg-black/85 p-3 shadow-2xl shadow-black/30 backdrop-blur-md">
+                <div className="fixed inset-x-0 bottom-0 z-50 p-4 lg:hidden bg-gradient-to-t from-black via-black/90 to-transparent pt-12 pointer-events-none">
+                    <div className="mx-auto flex max-w-md items-center gap-3 rounded-2xl border border-white/10 bg-[#0A0A0A]/95 p-3 shadow-2xl backdrop-blur-xl pointer-events-auto">
                         <div className="min-w-0 flex-1">
                             {hasAccess ? (
                                 <Link href={`/hub/${event.slug}`} className="block">
@@ -863,9 +883,8 @@ export function PublicEventLanding({
                         </div>
                         {campaign && (
                             <a href="#campaign-temario" className="shrink-0">
-                                <Button variant="outline" className="gap-2">
+                                <Button variant="secondary" className="gap-2 bg-white/5 text-white hover:bg-white/10 border-none">
                                     <Download className="h-4 w-4" />
-                                    Temario
                                 </Button>
                             </a>
                         )}
