@@ -911,7 +911,7 @@ export function CreateEventForm({
                     )}
                 </div>
 
-                {selectedSpeakerAssignments.length > 0 && (
+                {isAdmin && selectedSpeakerAssignments.length > 0 && (
                     <div className="space-y-3 rounded-xl border bg-background p-4">
                         <div>
                             <h4 className="text-sm font-medium">Pago por ponente</h4>
