@@ -1,10 +1,9 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { getPublicSpeakers } from '@/lib/supabase/queries/speakers'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
 import { formatPageTitle } from '@/lib/brand'
 import { getSpeakerHeadline, getSpeakerImage, getSpeakerName } from '@/lib/speakers/display'
+import { Mic2 } from 'lucide-react'
 
 export const metadata = {
     title: formatPageTitle('Nuestros Ponentes'),
@@ -15,106 +14,106 @@ export default async function PonentesPage() {
     const speakers = await getPublicSpeakers()
 
     return (
-        <div className="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6 sm:py-12">
-            <div className="mb-8 space-y-2">
-                <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">Nuestros Ponentes</h1>
-                <p className="max-w-2xl text-base text-muted-foreground sm:text-lg">
-                    Conoce a los expertos que imparten nuestros eventos, talleres y cursos.
+        <div className="mx-auto w-full max-w-7xl px-4 py-24 sm:px-6 lg:px-8">
+            {/* ── Editorial header ── */}
+            <div className="flex flex-col md:flex-row justify-between items-end mb-20 gap-8">
+                <div className="max-w-2xl">
+                    <p className="text-[10px] font-bold text-[#f6ae02] uppercase tracking-[0.2em] mb-4">
+                        Cuerpo Docente
+                    </p>
+                    <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight text-white">
+                        Nuestros{" "}
+                        <span className="font-serif italic font-normal text-[#c0bfbc]">
+                            ponentes
+                        </span>
+                    </h1>
+                    <div className="h-px w-20 bg-[#7a5602] mt-6" />
+                </div>
+                <p className="text-[#c0bfbc]/50 max-w-sm text-sm font-light leading-relaxed">
+                    Conoce a los expertos que imparten nuestros eventos, talleres y cursos especializados.
                 </p>
             </div>
 
             {speakers.length === 0 ? (
-                <Card className="border-dashed p-12 text-center">
-                    <CardContent className="space-y-4">
-                        <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-muted">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-muted-foreground">
-                                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-                                <circle cx="9" cy="7" r="4" />
-                                <line x1="19" y1="8" x2="19" y2="14" />
-                                <line x1="22" y1="11" x2="16" y2="11" />
-                            </svg>
-                        </div>
-                        <h3 className="text-xl font-medium">No hay ponentes publicos</h3>
-                        <p className="mx-auto max-w-sm text-muted-foreground">
-                            Aun no se han configurado perfiles publicos de ponentes en la plataforma.
-                        </p>
-                    </CardContent>
-                </Card>
+                <div className="flex flex-col items-center justify-center py-24 text-center">
+                    <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full border border-white/[0.08] bg-white/[0.02] mb-6">
+                        <Mic2 className="h-8 w-8 text-[#c0bfbc]/30" />
+                    </div>
+                    <h3 className="text-xl font-medium text-white mb-2">No hay ponentes públicos</h3>
+                    <p className="mx-auto max-w-sm text-sm text-[#c0bfbc]/50 font-light">
+                        Aún no se han configurado perfiles públicos de ponentes en la plataforma.
+                    </p>
+                </div>
             ) : (
-                <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
                     {speakers.map((speaker: any) => {
                         const speakerName = getSpeakerName(speaker)
                         const speakerHeadline = getSpeakerHeadline(speaker)
                         const speakerImage = getSpeakerImage(speaker)
+                        const mainSpecialty = speaker.specialties?.[0]
+                        const credential = speaker.credentials?.length > 0
+                            ? speaker.credentials.join(' · ')
+                            : speakerHeadline
 
                         return (
-                            <Card key={speaker.id} className="group flex h-full flex-col overflow-hidden bg-card transition-colors hover:bg-muted/50 hover:shadow-md">
-                                <Link href={`/speakers/${speaker.id}`} className="flex h-full flex-col">
-                                    <CardHeader className="pb-4 text-center">
-                                        <div className="relative mx-auto mb-4 h-24 w-24 overflow-hidden rounded-full border-4 border-primary/10 shadow-sm">
-                                            {speakerImage ? (
-                                                <Image
-                                                    src={speakerImage}
-                                                    alt={speakerName}
-                                                    fill
-                                                    unoptimized
-                                                    sizes="96px"
-                                                    className="object-cover"
-                                                />
-                                            ) : (
-                                                <div className="flex h-full w-full items-center justify-center bg-primary/5 text-2xl font-semibold text-primary/40">
-                                                    {speakerName.charAt(0).toUpperCase()}
-                                                </div>
-                                            )}
-                                        </div>
-                                        <CardTitle className="text-xl leading-tight">{speakerName}</CardTitle>
-                                        {speakerHeadline && (
-                                            <CardDescription className="mt-1 text-base font-medium text-primary">
-                                                {speakerHeadline}
-                                            </CardDescription>
-                                        )}
-                                    </CardHeader>
-                                    <CardContent className="flex flex-1 flex-col pt-0 text-center">
-                                        {speaker.bio ? (
-                                            <p className="mb-4 line-clamp-3 text-sm text-muted-foreground">
-                                                {speaker.bio}
-                                            </p>
-                                        ) : (
-                                            <div className="mb-4" />
-                                        )}
-
-                                        {speaker.credentials && speaker.credentials.length > 0 && (
-                                            <p className="mb-4 line-clamp-3 px-2 text-xs text-muted-foreground">
-                                                {speaker.credentials.join(' | ')}
-                                            </p>
-                                        )}
-
-                                        {speaker.specialties && speaker.specialties.length > 0 && (
-                                            <div className="mt-auto flex flex-wrap justify-center gap-2 pb-4">
-                                                {speaker.specialties.slice(0, 3).map((spec: string, i: number) => (
-                                                    <Badge key={i} variant="secondary" className="text-xs">
-                                                        {spec}
-                                                    </Badge>
-                                                ))}
-                                                {speaker.specialties.length > 3 && (
-                                                    <Badge variant="outline" className="text-xs">
-                                                        +{speaker.specialties.length - 3} mas
-                                                    </Badge>
-                                                )}
-                                            </div>
-                                        )}
-                                        <div className="mt-auto w-full border-t pt-4 text-center">
-                                            <span className="flex items-center justify-center gap-1 text-sm font-medium text-primary">
-                                                Ver perfil y eventos
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="ml-1">
-                                                    <path d="M5 12h14" />
-                                                    <path d="m12 5 7 7-7 7" />
-                                                </svg>
+                            <Link
+                                key={speaker.id}
+                                href={`/speakers/${speaker.id}`}
+                                className="group cursor-pointer block"
+                            >
+                                {/* Portrait photo with duotone warm hover */}
+                                <div className="relative w-full aspect-[4/5] bg-[#0a0a0a] mb-5 overflow-hidden rounded-md border border-white/[0.06]">
+                                    {speakerImage ? (
+                                        <Image
+                                            src={speakerImage}
+                                            alt={speakerName}
+                                            fill
+                                            unoptimized
+                                            sizes="(min-width: 1280px) 25vw, (min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"
+                                            className="object-cover transition-all duration-700 opacity-70 group-hover:opacity-100 group-hover:scale-105"
+                                        />
+                                    ) : (
+                                        <div className="absolute inset-0 flex items-center justify-center bg-[#111]">
+                                            <span className="text-[#c0bfbc]/30 font-serif italic text-6xl">
+                                                {speakerName.split(' ')[1]?.[0] || speakerName[0]}
                                             </span>
                                         </div>
-                                    </CardContent>
-                                </Link>
-                            </Card>
+                                    )}
+
+                                    {/* Warm duotone tint on hover */}
+                                    <div
+                                        className="absolute inset-0 opacity-0 group-hover:opacity-[0.55] transition-opacity duration-500 pointer-events-none"
+                                        style={{ backgroundColor: '#f6ae02', mixBlendMode: 'multiply' as any }}
+                                    />
+
+                                    {/* Bottom gradient for text legibility */}
+                                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent" />
+
+                                    {/* Name and specialty overlay */}
+                                    <div className="absolute bottom-4 left-4 right-4 z-10">
+                                        {mainSpecialty && (
+                                            <p className="text-[10px] text-[#f6ae02] uppercase tracking-widest font-semibold mb-1 group-hover:text-[#fcd34d] transition-colors">
+                                                {mainSpecialty}
+                                            </p>
+                                        )}
+                                        <h3 className="text-xl font-serif text-white leading-tight">{speakerName}</h3>
+                                    </div>
+                                </div>
+
+                                {/* Credentials below the photo */}
+                                <div className="pl-4 border-l border-white/[0.08] group-hover:border-[#f6ae02] transition-colors duration-300">
+                                    {credential && (
+                                        <p className="text-xs text-[#c0bfbc] mb-2 leading-relaxed line-clamp-2">
+                                            {credential}
+                                        </p>
+                                    )}
+                                    {speakerHeadline && speaker.credentials?.length > 0 && (
+                                        <p className="text-[10px] uppercase tracking-wide text-[#c0bfbc]/50">
+                                            {speakerHeadline}
+                                        </p>
+                                    )}
+                                </div>
+                            </Link>
                         )
                     })}
                 </div>
