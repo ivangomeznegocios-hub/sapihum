@@ -3,6 +3,7 @@ import type {
     Event,
     EventInsert,
     EventWithRegistration,
+    EventWithSpeakers,
     EventRegistration,
     Profile,
 } from '@/types/database'
@@ -19,6 +20,11 @@ interface EventViewerOptions {
         'id' | 'role' | 'email' | 'membership_level' | 'subscription_status' | 'membership_specialization_code'
     > | null
     commercialAccess?: CommercialAccessSnapshot | null
+}
+
+export type PublicCatalogEvent = EventWithSpeakers & {
+    attendee_count: number
+    public_kind: ReturnType<typeof getPublicCatalogKindForEvent>
 }
 
 
@@ -355,7 +361,7 @@ export async function getPublicEventBySlug(slug: string): Promise<any | null> {
     }
 }
 
-export async function getPublicCatalogEvents(kind: 'eventos' | 'cursos' | 'grabaciones') {
+export async function getPublicCatalogEvents(kind: 'eventos' | 'cursos' | 'grabaciones'): Promise<PublicCatalogEvent[]> {
     const supabase = await createClient()
 
     let query = (supabase
@@ -420,7 +426,7 @@ export async function getPublicCatalogEvents(kind: 'eventos' | 'cursos' | 'graba
  * Get ALL published events (excluding on_demand recordings) — unified catalog for Academia.
  * Sorts upcoming first (by start_time ASC), completed last.
  */
-export async function getUnifiedCatalogEvents() {
+export async function getUnifiedCatalogEvents(): Promise<PublicCatalogEvent[]> {
     const supabase = await createClient()
 
     const { data, error } = await (supabase
