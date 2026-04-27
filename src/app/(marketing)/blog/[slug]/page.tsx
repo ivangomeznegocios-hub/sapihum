@@ -123,12 +123,12 @@ export default async function BlogPostPage({ params }: PageProps) {
           </section>
 
           <section className="rounded-3xl border bg-gradient-to-br from-muted/50 to-background p-6 shadow-sm">
-            <p className="text-sm font-medium text-muted-foreground">En resumen</p>
+            <p className="text-sm font-medium text-muted-foreground">Continúa tu aprendizaje</p>
             <p className="mt-3 text-lg font-medium leading-7">
-              Contenido claro para entender mejor cada tema y descubrir opciones que acompanen tu siguiente paso profesional.
+              La formación continua y el bienestar personal son la base de una buena práctica.
             </p>
             <p className="mt-3 text-sm leading-6 text-muted-foreground">
-              Si este tema conecta contigo, puedes profundizar con la opcion relacionada que mejor se ajuste a tu momento actual.
+              Si estas ideas resuenan con tu momento actual, te invitamos a explorar opciones de desarrollo profesional diseñadas específicamente para acompañarte.
             </p>
             <div className="mt-5 flex flex-wrap gap-2">
               {post.tags.map((tag) => (

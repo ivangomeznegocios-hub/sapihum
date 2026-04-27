@@ -25,10 +25,10 @@ export default function BlogPage() {
           <div className="mt-5 grid gap-8 lg:grid-cols-[1.4fr_0.9fr] lg:items-end">
             <div className="space-y-5">
               <h1 className="max-w-3xl text-4xl font-semibold tracking-tight sm:text-5xl">
-                Ideas, guias y contenido util para profesionales de la psicologia
+                Reflexiones y herramientas para tu práctica clínica
               </h1>
               <p className="max-w-2xl text-base text-muted-foreground sm:text-lg">
-                Aqui reunimos articulos claros sobre practica profesional, formacion y crecimiento para ayudarte a tomar mejores decisiones en cada etapa.
+                Exploramos el lado humano y técnico de nuestra profesión. Desde el autocuidado hasta la gestión de consulta, acompañándote en cada paso de tu desarrollo.
               </p>
               <div className="flex flex-wrap gap-3">
                 <Link
@@ -48,13 +48,13 @@ export default function BlogPage() {
               </div>
             </div>
 
-            <div className="rounded-2xl border bg-card p-5">
-              <p className="text-sm font-medium text-muted-foreground">Sobre esta seccion</p>
+            <div className="rounded-2xl border bg-card p-6 shadow-sm">
+              <p className="text-sm font-medium text-muted-foreground">Nuestro Enfoque</p>
               <p className="mt-3 text-lg font-medium leading-7">
-                Encontraras contenido pensado para orientar tu siguiente paso en eventos, cursos y formaciones.
+                Contenido riguroso pero accesible, pensado de terapeuta a terapeuta.
               </p>
               <p className="mt-4 text-sm text-muted-foreground">
-                Cada articulo busca aportar contexto, claridad y opciones concretas para seguir avanzando.
+                Creemos que la formación continua debe ir de la mano con el bienestar personal. Aquí encontrarás el equilibrio entre ambas.
               </p>
             </div>
           </div>
@@ -102,22 +102,22 @@ export default function BlogPage() {
 
           <aside className="space-y-4">
             <div className="rounded-3xl border bg-card p-6 shadow-sm">
-              <h2 className="text-lg font-semibold">Que encontraras aqui</h2>
+              <h2 className="text-lg font-semibold">Qué encontrarás aquí</h2>
               <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                {posts.length} articulos con ideas, recomendaciones y recursos para tu desarrollo profesional.
+                Artículos, reflexiones y guías pensadas para acompañar tu día a día profesional.
               </p>
               <div className="mt-5 grid gap-3 text-sm">
-                <div className="rounded-2xl bg-muted/40 p-4">
-                  <p className="font-medium">Eventos</p>
-                  <p className="mt-1 text-muted-foreground">Novedades, recomendaciones y contexto para elegir mejor cada encuentro.</p>
+                <div className="rounded-2xl bg-muted/30 p-4 transition-colors hover:bg-muted/50">
+                  <p className="font-medium">Desarrollo Clínico</p>
+                  <p className="mt-1 text-muted-foreground">Herramientas, abordajes y actualización constante para tu práctica.</p>
                 </div>
-                <div className="rounded-2xl bg-muted/40 p-4">
-                  <p className="font-medium">Cursos</p>
-                  <p className="mt-1 text-muted-foreground">Contenido para profundizar en habilidades y encontrar opciones de aprendizaje utiles.</p>
+                <div className="rounded-2xl bg-muted/30 p-4 transition-colors hover:bg-muted/50">
+                  <p className="font-medium">Bienestar y Autocuidado</p>
+                  <p className="mt-1 text-muted-foreground">Estrategias para prevenir el burnout y mantener el equilibrio personal.</p>
                 </div>
-                <div className="rounded-2xl bg-muted/40 p-4">
-                  <p className="font-medium">Formaciones</p>
-                  <p className="mt-1 text-muted-foreground">Guias para dar continuidad a tu crecimiento con propuestas mas completas.</p>
+                <div className="rounded-2xl bg-muted/30 p-4 transition-colors hover:bg-muted/50">
+                  <p className="font-medium">Gestión de Consulta</p>
+                  <p className="mt-1 text-muted-foreground">Recomendaciones para construir un espacio ético y sostenible.</p>
                 </div>
               </div>
             </div>
