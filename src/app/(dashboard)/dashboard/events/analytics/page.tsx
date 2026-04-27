@@ -14,6 +14,7 @@ export default async function EventAnalyticsPage() {
     if (!profile || profile.role !== 'admin') {
         redirect('/dashboard/events')
     }
+    const userTimezone = (profile as any).timezone || DEFAULT_TIMEZONE
 
     // 2. Fetch All Events with Views
     const { data: events, error } = await (supabase
@@ -153,7 +154,7 @@ export default async function EventAnalyticsPage() {
                                                     day: 'numeric',
                                                     month: 'short',
                                                     year: 'numeric',
-                                                }, DEFAULT_TIMEZONE)}
+                                                }, userTimezone)}
                                             </div>
                                         </td>
                                         <td className="p-4">

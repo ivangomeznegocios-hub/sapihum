@@ -96,6 +96,17 @@ export function formatEventDateTime(dateStr: string, timezone?: string): string 
     }, timezone)
 }
 
+export function getTimezoneShortLabel(timezone: string = DEFAULT_TIMEZONE): string {
+    if (!timezone || timezone === DEFAULT_TIMEZONE) return 'CDMX'
+
+    return getTimezoneLabel(timezone).replace(/\s*\(UTC[+-]\d+\)\s*$/, '')
+}
+
+export function formatEventDateTimeWithZone(dateStr: string, timezone?: string): string {
+    const tz = timezone || DEFAULT_TIMEZONE
+    return `${formatEventDateTime(dateStr, tz)} ${getTimezoneShortLabel(tz)}`
+}
+
 function getTimeZoneDateParts(date: Date, timezone: string) {
     const formatter = new Intl.DateTimeFormat('en-CA', {
         timeZone: timezone,

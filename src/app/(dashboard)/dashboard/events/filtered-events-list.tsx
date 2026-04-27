@@ -4,18 +4,20 @@ import { useState } from 'react'
 import { SubcategoryFilter, ModalityFilter } from './events-filter'
 import { EventCard } from './event-card'
 import type { EventWithRegistration } from '@/types/database'
-import { isEventPast } from '@/lib/timezone'
+import { DEFAULT_TIMEZONE, isEventPast } from '@/lib/timezone'
 
 export function FilteredEventsList({
     events,
     isActiveMember,
     userId,
-    isReadOnly
+    isReadOnly,
+    timezone = DEFAULT_TIMEZONE,
 }: {
     events: EventWithRegistration[]
     isActiveMember: boolean
     userId?: string
     isReadOnly?: boolean
+    timezone?: string
 }) {
     const [selectedSub, setSelectedSub] = useState<string | null>(null)
     const [selectedModality, setSelectedModality] = useState('all')
@@ -95,6 +97,7 @@ export function FilteredEventsList({
                                 isActiveMember={isActiveMember}
                                 userId={userId}
                                 isReadOnly={isReadOnly}
+                                timezone={timezone}
                             />
                         ))}
                     </div>
@@ -121,6 +124,7 @@ export function FilteredEventsList({
                                 isActiveMember={isActiveMember}
                                 userId={userId}
                                 isReadOnly={isReadOnly}
+                                timezone={timezone}
                             />
                         ))}
                     </div>

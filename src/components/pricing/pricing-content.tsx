@@ -218,15 +218,14 @@ export function PricingContent({
                 Membresía SAPIHUM
               </div>
               <h1 className="sapihum-fade-up mt-8 text-3xl font-bold leading-[1.1] tracking-tight text-white sm:text-4xl md:text-5xl lg:text-6xl">
-                Planes para crecer con
-                {' '}
+                Una membresía. Una comunidad.{' '}
                 <span className="font-serif font-normal italic text-[#c0bfbc]">
-                  más estructura y respaldo profesional
+                  Todo lo que necesitas para crecer como psicólogo.
                 </span>
               </h1>
               <p className="sapihum-fade-up mx-auto mt-8 max-w-2xl text-base font-light leading-relaxed text-[#c0bfbc]/65 md:text-lg">
-                Comunidad, consultorio digital y acompañamiento premium.
-                Elige el nivel que se adapte a tu etapa profesional.
+                Accede a formación continua, red de profesionales, recursos clínicos y eventos.
+                Para quienes quieren más, hay expansiones opcionales.
               </p>
 
               <div className="sapihum-fade-up mt-10">
@@ -238,7 +237,7 @@ export function PricingContent({
               </div>
 
               <p className="mt-5 text-xs text-[#c0bfbc]/40">
-                Montos en MXN · El Nivel 2 disponible hoy corresponde a Psicología Clínica
+                Montos en MXN · La expansión de Consultorio Digital es para Psicología Clínica
               </p>
             </div>
           </div>
@@ -246,9 +245,9 @@ export function PricingContent({
 
         {/* ── Pricing Cards ── */}
         <section className="w-full bg-black py-16 sm:py-20">
-          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 lg:gap-5">
-              {cardConfigs.map((card) => {
+          <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+            <div className="mx-auto mb-16 max-w-2xl">
+              {cardConfigs.filter(c => c.key === 'level1').map((card) => {
                 if (!card.plan) return null
 
                 const copy = PRICING_PLAN_COPY[card.key]
@@ -303,33 +302,18 @@ export function PricingContent({
                       <div className="flex flex-1 flex-col border-t border-white/[0.06] px-6 py-5 sm:px-7">
                         <p className="mb-4 flex items-center justify-between text-[10px] font-bold uppercase tracking-[0.18em] text-[#c0bfbc]/40">
                           <span>Lo que incluye</span>
-                          {card.key === 'level2' && (
-                            <span className="text-[#f6ae02]/70">+ todo de Nivel 1</span>
-                          )}
-                          {card.key === 'level3' && (
-                            <span className="text-[#f6ae02]/70">+ todo de Nivel 2</span>
-                          )}
                         </p>
 
                         <ul className="flex-1 space-y-2.5">
                           {card.featureIds.map((featureId) => {
                             const feature = PRICING_FEATURES_BY_ID[featureId]
-                            const carryover = featureId === 'todo-nivel-1' || featureId === 'todo-nivel-2'
-
                             return (
-                              <li
-                                key={featureId}
-                                className="group/feat flex items-center gap-3"
-                              >
-                                {carryover ? (
-                                  <PlusCircle className="h-4 w-4 shrink-0 text-[#f6ae02]" />
-                                ) : (
-                                  <Check className="h-4 w-4 shrink-0 text-[#f6ae02]/70" />
-                                )}
+                              <li key={featureId} className="group/feat flex items-center gap-3">
+                                <Check className="h-4 w-4 shrink-0 text-[#f6ae02]/70" />
                                 <button
                                   type="button"
                                   onClick={() => setSelectedFeatureId(feature.id)}
-                                  className={`text-left text-sm transition-colors hover:text-[#f6ae02] ${carryover ? 'font-medium text-white' : 'text-[#c0bfbc]/70'}`}
+                                  className="text-left text-sm font-medium text-[#c0bfbc]/70 transition-colors hover:text-[#f6ae02]"
                                 >
                                   {feature.title}
                                 </button>
@@ -358,13 +342,107 @@ export function PricingContent({
                                 membershipLevel={1}
                                 billingInterval={isAnnual ? 'annual' : 'monthly'}
                                 label={copy.cta.guest}
-                                title="tu Nivel 1"
+                                title="tu Membresía"
                                 successPath="/dashboard/subscription"
                                 className="w-full"
                               />
                             )
                           )}
 
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )
+              })}
+            </div>
+
+            {/* Separator */}
+            <div className="relative mb-16 flex items-center justify-center">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-white/[0.06]"></div>
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="bg-black px-4 font-medium tracking-wide text-[#c0bfbc]/50 uppercase text-[10px]">Expansiones opcionales</span>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:gap-5">
+              {cardConfigs.filter(c => c.key !== 'level1').map((card) => {
+                if (!card.plan) return null
+                const copy = PRICING_PLAN_COPY[card.key]
+                const Icon = card.icon
+                return (
+                  <Card
+                    key={card.key}
+                    className={`relative flex h-full flex-col overflow-hidden rounded-2xl ${card.cardClassName}`}
+                  >
+                    {card.accent && (
+                      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#f6ae02]/50 to-transparent" />
+                    )}
+                    <CardContent className="flex h-full flex-col p-0">
+                      <div className="px-6 pt-6 pb-5 sm:px-7">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <Badge className="border border-white/10 bg-white/[0.04] text-[10px] uppercase tracking-[0.18em] text-[#c0bfbc]/70 hover:bg-white/[0.04]">
+                            {copy.levelLabel}
+                          </Badge>
+                          {copy.badge && (
+                            <Badge className="border border-[#f6ae02]/15 bg-[#f6ae02]/8 text-[10px] uppercase tracking-[0.18em] text-[#f6ae02] hover:bg-[#f6ae02]/8">
+                              {copy.badge}
+                            </Badge>
+                          )}
+                        </div>
+                        <div className="mt-5 flex items-center gap-3">
+                          <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${card.accent ? 'bg-[#f6ae02]/12 text-[#f6ae02]' : 'bg-white/[0.04] text-[#f6ae02]'}`}>
+                            <Icon className="h-5 w-5" />
+                          </div>
+                          <h2 className="text-xl font-bold text-white sm:text-2xl">
+                            {copy.title}
+                          </h2>
+                        </div>
+                        <p className="mt-3 text-sm leading-relaxed text-[#c0bfbc]/55">
+                          {copy.description}
+                        </p>
+                        <div className="mt-5 border-t border-white/[0.06] pt-5">
+                          <PriceDisplay plan={card.plan} isAnnual={isAnnual} />
+                        </div>
+                      </div>
+                      <div className="flex flex-1 flex-col border-t border-white/[0.06] px-6 py-5 sm:px-7">
+                        <p className="mb-4 flex items-center justify-between text-[10px] font-bold uppercase tracking-[0.18em] text-[#c0bfbc]/40">
+                          <span>Lo que incluye</span>
+                          {card.key === 'level2' && (
+                            <span className="text-[#f6ae02]/70">+ toda la Membresía</span>
+                          )}
+                          {card.key === 'level3' && (
+                            <span className="text-[#f6ae02]/70">+ todo Consultorio Digital</span>
+                          )}
+                        </p>
+                        <ul className="flex-1 space-y-2.5">
+                          {card.featureIds.map((featureId) => {
+                            const feature = PRICING_FEATURES_BY_ID[featureId]
+                            const carryover = featureId === 'todo-nivel-1' || featureId === 'todo-nivel-2'
+                            return (
+                              <li key={featureId} className="group/feat flex items-center gap-3">
+                                {carryover ? (
+                                  <PlusCircle className="h-4 w-4 shrink-0 text-[#f6ae02]" />
+                                ) : (
+                                  <Check className="h-4 w-4 shrink-0 text-[#f6ae02]/70" />
+                                )}
+                                <button
+                                  type="button"
+                                  onClick={() => setSelectedFeatureId(feature.id)}
+                                  className={`text-left text-sm transition-colors hover:text-[#f6ae02] ${carryover ? 'font-medium text-white' : 'text-[#c0bfbc]/70'}`}
+                                >
+                                  {feature.title}
+                                </button>
+                              </li>
+                            )
+                          })}
+                        </ul>
+                        <p className="mt-5 border-t border-white/[0.06] pt-4 text-xs leading-relaxed text-[#c0bfbc]/40">
+                          {copy.note}
+                        </p>
+                        <div className="mt-5">
                           {card.key === 'level2' && (
                             isLoggedIn ? (
                               <Link href="/dashboard/subscription" className="block">
@@ -385,7 +463,6 @@ export function PricingContent({
                               />
                             )
                           )}
-
                           {card.key === 'level3' && (
                             isLoggedIn ? (
                               <Link href="/dashboard/subscription" className="block">
@@ -394,7 +471,7 @@ export function PricingContent({
                                   size="lg"
                                   variant={level3Eligible ? 'default' : 'outline'}
                                 >
-                                  {level3Eligible ? copy.cta.member : 'Desbloquea primero tu Nivel 2'}
+                                  {level3Eligible ? copy.cta.member : 'Desbloquea primero Consultorio Digital'}
                                   <ArrowRight className="h-4 w-4" />
                                 </Button>
                               </Link>
@@ -408,10 +485,9 @@ export function PricingContent({
                             )
                           )}
                         </div>
-
                         {card.key === 'level3' && (
                           <p className="mt-3 text-center text-[11px] text-[#c0bfbc]/40">
-                            Se habilita una vez que ya tienes activo tu Nivel 2.
+                            Se habilita una vez que ya tienes activo Consultorio Digital.
                           </p>
                         )}
                       </div>
@@ -433,7 +509,7 @@ export function PricingContent({
               <h2 className="mt-4 text-2xl font-bold tracking-tight text-white sm:text-3xl">
                 Detalle por beneficio y{' '}
                 <span className="font-serif font-normal italic text-[#c0bfbc]">
-                  nivel de membresía
+                  expansión
                 </span>
               </h2>
               <p className="mx-auto mt-4 max-w-xl text-sm font-light leading-relaxed text-[#c0bfbc]/55">
@@ -465,13 +541,13 @@ export function PricingContent({
                     <TableRow className="border-white/[0.08] bg-white/[0.03] hover:bg-white/[0.03]">
                       <TableHead className="w-[40%] text-[#c0bfbc]/60 text-xs">Beneficio</TableHead>
                       <TableHead className="w-[20%] text-center text-[#c0bfbc]/60 text-xs">
-                        {PRICING_PLAN_COPY.level1.title}
+                        Comunidad
                       </TableHead>
                       <TableHead className="w-[20%] text-center text-[#c0bfbc]/60 text-xs">
-                        {PRICING_PLAN_COPY.level2.title}
+                        + Consultorio
                       </TableHead>
                       <TableHead className="w-[20%] text-center text-[#c0bfbc]/60 text-xs">
-                        {PRICING_PLAN_COPY.level3.title}
+                        + Marketing
                       </TableHead>
                     </TableRow>
                   </TableHeader>
@@ -523,18 +599,18 @@ export function PricingContent({
             {[
               {
                 icon: Users,
-                title: 'Cómo empieza el recorrido',
-                text: 'El Nivel 1 es la base para comunidad, formación continua y recursos. Desde ahí puedes decidir tu siguiente paso.',
+                title: 'Dónde empieza todo',
+                text: 'La membresía es tu comunidad de referencia: formación, red y recursos desde el día uno.',
               },
               {
                 icon: BookOpen,
-                title: 'Qué cubre Consultorio Digital',
-                text: 'El Nivel 2 agrega infraestructura operativa: web, agenda, pagos, plataforma clínica y soporte.',
+                title: '¿Quieres digitalizar tu consultorio?',
+                text: 'Suma la expansión clínica: web, agenda, pagos, plataforma y soporte operativo.',
               },
               {
                 icon: Sparkles,
-                title: 'Cuándo conviene Nivel 3',
-                text: 'Cuando operas con Nivel 2 y quieres acelerar con ejecución de marca, contenido y posicionamiento.',
+                title: '¿Quieres crecer tu marca?',
+                text: 'La expansión de marketing te da community manager, contenido, ads y posicionamiento local.',
               },
             ].map((item) => (
               <div
@@ -593,7 +669,7 @@ export function PricingContent({
                         }`}
                       >
                         {enabled && <Check className="h-3 w-3" />}
-                        N{level.replace('level', '')}
+                        {level === 'level1' ? 'Membresía' : level === 'level2' ? '+Consultorio' : '+Marketing'}
                       </span>
                     )
                   })}

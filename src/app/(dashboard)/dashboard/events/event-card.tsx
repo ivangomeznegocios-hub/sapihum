@@ -5,10 +5,10 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { AddToCalendarButton } from '@/components/add-to-calendar'
 import type { EventWithRegistration } from '@/types/database'
-import { DEFAULT_TIMEZONE, formatEventDateTime } from '@/lib/timezone'
+import { DEFAULT_TIMEZONE, formatEventDateTimeWithZone } from '@/lib/timezone'
 
-function formatDashboardEventDate(dateStr: string) {
-    return `${formatEventDateTime(dateStr, DEFAULT_TIMEZONE)} CDMX`
+function formatDashboardEventDate(dateStr: string, timezone: string = DEFAULT_TIMEZONE) {
+    return formatEventDateTimeWithZone(dateStr, timezone)
 }
 
 function EventStatusBadge({ status }: { status: string }) {
@@ -62,11 +62,13 @@ export function EventCard({
     isActiveMember,
     userId,
     isReadOnly = false,
+    timezone = DEFAULT_TIMEZONE,
 }: {
     event: EventWithRegistration
     isActiveMember: boolean
     userId?: string
     isReadOnly?: boolean
+    timezone?: string
 }) {
     const isRegistered = event.registration?.status === 'registered'
     const hasRecording = event.status === 'completed' && event.recording_url
@@ -124,7 +126,7 @@ export function EventCard({
                         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                             <rect width="18" height="18" x="3" y="4" rx="2" ry="2" /><line x1="16" x2="16" y1="2" y2="6" /><line x1="8" x2="8" y1="2" y2="6" /><line x1="3" x2="21" y1="10" y2="10" />
                         </svg>
-                        {formatDashboardEventDate(event.start_time)}
+                        {formatDashboardEventDate(event.start_time, timezone)}
                     </CardDescription>
                     {subcategory && (
                         <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-full w-fit">
@@ -220,7 +222,7 @@ export function EventCard({
                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <rect width="18" height="18" x="3" y="4" rx="2" ry="2" /><line x1="16" x2="16" y1="2" y2="6" /><line x1="8" x2="8" y1="2" y2="6" /><line x1="3" x2="21" y1="10" y2="10" />
                     </svg>
-                    {formatDashboardEventDate(event.start_time)}
+                    {formatDashboardEventDate(event.start_time, timezone)}
                 </CardDescription>
                 {subcategory && (
                     <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-full w-fit">

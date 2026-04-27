@@ -10,7 +10,7 @@ import { AddToCalendarButton } from '@/components/add-to-calendar'
 import { RecordingCountdown } from './recordings/recording-countdown'
 import { EventsCategoryNav } from './events-filter'
 import type { EventWithRegistration } from '@/types/database'
-import { DEFAULT_TIMEZONE, formatEventDateTime, isEventPast } from '@/lib/timezone'
+import { DEFAULT_TIMEZONE, formatEventDateTimeWithZone, isEventPast } from '@/lib/timezone'
 import {
     getEffectiveEventPriceForProfile,
     getEventTypePurchaseLabel,
@@ -18,8 +18,8 @@ import {
 } from '@/lib/events/pricing'
 import { getCommercialAccessContext, isCommunityReadOnlyViewer } from '@/lib/access/commercial'
 
-function formatEventDate(dateStr: string) {
-    return `${formatEventDateTime(dateStr, DEFAULT_TIMEZONE)} CDMX`
+function formatEventDate(dateStr: string, timezone: string = DEFAULT_TIMEZONE) {
+    return formatEventDateTimeWithZone(dateStr, timezone)
 }
 
 // Status badge component
@@ -60,6 +60,7 @@ function EventCard({
     canEditEvent = false,
     commercialAccess,
     isReadOnly = false,
+    timezone = DEFAULT_TIMEZONE,
 }: {
     event: EventWithRegistration
     userId?: string
@@ -71,6 +72,7 @@ function EventCard({
         membershipSpecializationCode?: string | null
     }
     isReadOnly?: boolean
+    timezone?: string
 }) {
     const isRegistered = event.registration?.status === 'registered'
     const hasRecording = event.status === 'completed' && event.recording_url
@@ -120,7 +122,7 @@ function EventCard({
                     <CardTitle className="min-w-0 break-words line-clamp-2 text-muted-foreground">{event.title}</CardTitle>
                     <CardDescription className="min-w-0 flex items-start gap-2 break-words">
                         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2" /><line x1="16" x2="16" y1="2" y2="6" /><line x1="8" x2="8" y1="2" y2="6" /><line x1="3" x2="21" y1="10" y2="10" /></svg>
-                        {formatEventDate(event.start_time)}
+                        {formatEventDate(event.start_time, timezone)}
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -247,7 +249,7 @@ function EventCard({
                         <line x1="8" x2="8" y1="2" y2="6" />
                         <line x1="3" x2="21" y1="10" y2="10" />
                     </svg>
-                    {formatEventDate(event.start_time)}
+                    {formatEventDate(event.start_time, timezone)}
                 </CardDescription>
             </CardHeader>
 
@@ -454,6 +456,7 @@ export default async function EventsPage() {
     const isReadOnly = commercialAccess
         ? isCommunityReadOnlyViewer(commercialAccess)
         : Boolean(isPsychologist)
+    const userTimezone = (profile as any)?.timezone || DEFAULT_TIMEZONE
     let assignedEventIds = new Set<string>()
 
     if (profile?.role === 'ponente' && supabase) {
@@ -627,6 +630,7 @@ export default async function EventsPage() {
                                     hasActiveMembership: commercialAccess.hasActiveMembership,
                                 } : undefined}
                                 isReadOnly={isReadOnly}
+                                timezone={userTimezone}
                             />
                         ))}
                     </div>
@@ -670,6 +674,7 @@ export default async function EventsPage() {
                                     hasActiveMembership: commercialAccess.hasActiveMembership,
                                 } : undefined}
                                 isReadOnly={isReadOnly}
+                                timezone={userTimezone}
                             />
                         ))}
                     </div>
@@ -716,6 +721,7 @@ export default async function EventsPage() {
                                     hasActiveMembership: commercialAccess.hasActiveMembership,
                                 } : undefined}
                                 isReadOnly={isReadOnly}
+                                timezone={userTimezone}
                             />
                         ))}
                     </div>

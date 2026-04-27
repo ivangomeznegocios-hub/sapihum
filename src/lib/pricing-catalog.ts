@@ -11,16 +11,16 @@ export interface PricingFeatureDefinition {
 }
 
 export const PRICING_GROUP_LABELS: Record<PricingPlanKey, string> = {
-    level1: 'Comunidad y Crecimiento',
+    level1: 'Membresía',
     level2: 'Consultorio Digital',
     level3: 'Gestión y Marketing Premium',
 }
 
 export const PRICING_PLAN_COPY = {
     level1: {
-        levelLabel: 'Nivel 1',
+        levelLabel: 'Membresía Base',
         eyebrow: 'Educación y comunidad',
-        title: 'Comunidad y Crecimiento',
+        title: 'Membresía',
         description:
             'Enfocado en la conexión con colegas, el aprendizaje continuo y el acceso a recursos básicos para la práctica.',
         badge: null,
@@ -31,7 +31,7 @@ export const PRICING_PLAN_COPY = {
         note: 'Ideal para mantenerte cerca de la comunidad, la formación y los recursos base.',
     },
     level2: {
-        levelLabel: 'Nivel 2',
+        levelLabel: 'Expansión · Consultorio',
         eyebrow: 'Psicología clínica',
         title: 'Consultorio Digital',
         description:
@@ -41,10 +41,10 @@ export const PRICING_PLAN_COPY = {
             guest: 'Activar Consultorio Digital',
             member: 'Subir desde mi cuenta',
         },
-        note: 'Incluye todo lo de Nivel 1 más software, automatización y soporte para operar tu consulta.',
+        note: 'Incluye toda la Membresía más software, automatización y soporte para operar tu consulta.',
     },
     level3: {
-        levelLabel: 'Nivel 3',
+        levelLabel: 'Expansión · Marketing',
         eyebrow: 'Escala y delegación',
         title: 'Gestión y Marketing Premium',
         description:
@@ -52,9 +52,9 @@ export const PRICING_PLAN_COPY = {
         badge: null,
         cta: {
             guest: 'Explorar el plan',
-            member: 'Activar Nivel 3',
+            member: 'Activar Expansión',
         },
-        note: 'Incluye todo lo de Nivel 2 y suma acompañamiento operativo, marketing y posicionamiento.',
+        note: 'Incluye todo Consultorio Digital y suma acompañamiento operativo, marketing y posicionamiento.',
     },
 } as const
 
@@ -151,8 +151,8 @@ export const PRICING_FEATURES: PricingFeatureDefinition[] = [
     },
     {
         id: 'todo-nivel-1',
-        title: 'Todo de Comunidad y Crecimiento',
-        description: 'Incluye todos los beneficios del Nivel 1.',
+        title: 'Todo de la Membresía',
+        description: 'Incluye todos los beneficios de la membresía.',
         details:
             'Acceso a comunidad, educación continua, materiales, red de profesionales, sesiones en vivo, eventos de negocio, newsletter, convenios y certificaciones.',
         group: 'level2',
@@ -272,9 +272,9 @@ export const PRICING_FEATURES: PricingFeatureDefinition[] = [
     {
         id: 'todo-nivel-2',
         title: 'Todo de Consultorio Digital',
-        description: 'Incluye todos los beneficios del Nivel 2.',
+        description: 'Incluye todos los beneficios de Consultorio Digital.',
         details:
-            'Todo lo del Nivel 1 más supervisión, red de derivación, página web, agenda, plataforma clínica, kit legal, pagos, dashboard financiero, soporte, integración con redes y transcripción con IA.',
+            'Todo lo de la Membresía más supervisión, red de derivación, página web, agenda, plataforma clínica, kit legal, pagos, dashboard financiero, soporte, integración con redes y transcripción con IA.',
         group: 'level3',
         availability: { level1: false, level2: false, level3: true },
         showInComparison: false,

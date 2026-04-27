@@ -4,6 +4,7 @@ import { Suspense } from 'react'
 import { EventsCategoryNav } from '../events-filter'
 import { FilteredEventsList } from '../filtered-events-list'
 import { getCommercialAccessContext, isCommunityReadOnlyViewer } from '@/lib/access/commercial'
+import { DEFAULT_TIMEZONE } from '@/lib/timezone'
 
 export default async function ClinicalEventsPage() {
     const events = await getEventsWithRegistration()
@@ -21,6 +22,7 @@ export default async function ClinicalEventsPage() {
         profile?.role === 'patient' ||
         profile?.role === 'admin'
     )
+    const userTimezone = (profile as any)?.timezone || DEFAULT_TIMEZONE
 
     // Filter by clinical category
     const clinicalEvents = events.filter((e: any) => e.category === 'clinical')
@@ -44,6 +46,7 @@ export default async function ClinicalEventsPage() {
                     isActiveMember={isActiveMember}
                     userId={profile?.id}
                     isReadOnly={commercialAccess ? isCommunityReadOnlyViewer(commercialAccess) : false}
+                    timezone={userTimezone}
                 />
             </Suspense>
         </div>

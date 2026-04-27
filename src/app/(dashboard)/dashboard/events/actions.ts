@@ -16,7 +16,7 @@ import { getEventEditorAccessForUser } from '@/lib/events/permissions'
 import { audienceAllowsAccess, getCommercialAccessContext } from '@/lib/access/commercial'
 import { sendEmail } from '@/lib/email/index'
 import { buildEventRegistrationEmail } from '@/lib/email/templates'
-import { DEFAULT_TIMEZONE, formatDateInTimezone, zonedDateTimeToUtcIso } from '@/lib/timezone'
+import { DEFAULT_TIMEZONE, formatDateInTimezone, getTimezoneShortLabel, zonedDateTimeToUtcIso } from '@/lib/timezone'
 import { findExternalCalendarConflictForUsers } from '@/lib/calendar-sync'
 import { createUserNotification } from '@/lib/notifications'
 import {
@@ -437,7 +437,7 @@ export async function registerForEvent(eventId: string, registrationData: Record
     // Get user profile
     const { data: profile } = await (supabase
         .from('profiles') as any)
-        .select('full_name, role, membership_level, subscription_status, membership_specialization_code, email')
+            .select('full_name, role, membership_level, subscription_status, membership_specialization_code, email, timezone')
         .eq('id', user.id)
         .single()
 
@@ -565,8 +565,9 @@ export async function registerForEvent(eventId: string, registrationData: Record
         if (profileData?.email) {
             const { getAppUrl } = await import('@/lib/config/app-url')
             const appUrl = getAppUrl()
+            const userTimezone = profileData.timezone || DEFAULT_TIMEZONE
             const eventDate = eventData.start_time
-                ? `${formatDateInTimezone(eventData.start_time, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', hour: 'numeric', minute: '2-digit' }, DEFAULT_TIMEZONE)} CDMX`
+                ? `${formatDateInTimezone(eventData.start_time, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', hour: 'numeric', minute: '2-digit' }, userTimezone)} ${getTimezoneShortLabel(userTimezone)}`
                 : 'Por confirmar'
 
             const emailContent = buildEventRegistrationEmail({

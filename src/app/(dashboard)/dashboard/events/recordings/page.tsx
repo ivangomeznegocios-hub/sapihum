@@ -23,6 +23,7 @@ export default async function RecordingsPage() {
     }
 
     const now = new Date()
+    const userTimezone = (profile as any).timezone || DEFAULT_TIMEZONE
     const accessibleEvents = await getMyReplayAccessibleEvents()
     const accessibleRecordings = accessibleEvents
         .map((row: any) => row.event)
@@ -39,7 +40,7 @@ export default async function RecordingsPage() {
             day: 'numeric',
             month: 'long',
             year: 'numeric'
-        }, DEFAULT_TIMEZONE)
+        }, userTimezone)
     }
 
     const getDaysRemaining = (expiresAt: string | null) => {

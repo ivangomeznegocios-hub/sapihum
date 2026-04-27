@@ -10,7 +10,7 @@ import type { Metadata } from 'next'
 export const metadata: Metadata = {
   title: 'Precios - SAPIHUM',
   description:
-    'Precios claros para Comunidad y Crecimiento, Consultorio Digital y Gestion y Marketing Premium dentro de SAPIHUM.',
+    'Únete a la membresía de SAPIHUM: formación continua, red de profesionales y recursos clínicos. Expansiones opcionales de Consultorio Digital y Marketing.',
 }
 
 export default async function PricingPage() {
