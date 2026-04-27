@@ -6,6 +6,7 @@ import { RecordingCountdown, RecordingCardWrapper } from './recording-countdown'
 import { getMyReplayAccessibleEvents } from '@/lib/supabase/queries/event-entitlements'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
+import { DEFAULT_TIMEZONE, formatDateInTimezone } from '@/lib/timezone'
 import {
     Play,
     Calendar,
@@ -34,12 +35,11 @@ export default async function RecordingsPage() {
         .sort((a: any, b: any) => new Date(b.start_time).getTime() - new Date(a.start_time).getTime())
 
     const formatDate = (dateStr: string) => {
-        const date = new Date(dateStr)
-        return date.toLocaleDateString('es-MX', {
+        return formatDateInTimezone(dateStr, {
             day: 'numeric',
             month: 'long',
             year: 'numeric'
-        })
+        }, DEFAULT_TIMEZONE)
     }
 
     const getDaysRemaining = (expiresAt: string | null) => {

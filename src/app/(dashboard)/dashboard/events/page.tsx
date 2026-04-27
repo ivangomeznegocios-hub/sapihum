@@ -10,7 +10,7 @@ import { AddToCalendarButton } from '@/components/add-to-calendar'
 import { RecordingCountdown } from './recordings/recording-countdown'
 import { EventsCategoryNav } from './events-filter'
 import type { EventWithRegistration } from '@/types/database'
-import { isEventPast } from '@/lib/timezone'
+import { DEFAULT_TIMEZONE, formatEventDateTime, isEventPast } from '@/lib/timezone'
 import {
     getEffectiveEventPriceForProfile,
     getEventTypePurchaseLabel,
@@ -18,16 +18,8 @@ import {
 } from '@/lib/events/pricing'
 import { getCommercialAccessContext, isCommunityReadOnlyViewer } from '@/lib/access/commercial'
 
-// Helper to format date in Spanish
 function formatEventDate(dateStr: string) {
-    const date = new Date(dateStr)
-    return new Intl.DateTimeFormat('es-MX', {
-        weekday: 'long',
-        day: 'numeric',
-        month: 'long',
-        hour: 'numeric',
-        minute: '2-digit'
-    }).format(date)
+    return `${formatEventDateTime(dateStr, DEFAULT_TIMEZONE)} CDMX`
 }
 
 // Status badge component

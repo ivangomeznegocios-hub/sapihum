@@ -28,6 +28,7 @@ import {
 } from '@/lib/events/pricing'
 import { audienceAllowsAccess, getCommercialAccessContext, isCommunityReadOnlyViewer } from '@/lib/access/commercial'
 import { getSpecializationByCode } from '@/lib/specializations'
+import { DEFAULT_TIMEZONE, formatDateInTimezone } from '@/lib/timezone'
 import {
     Calendar,
     Clock,
@@ -226,7 +227,12 @@ export default async function EventDetailPage({ params }: PageProps) {
     const hubPath = `/hub/${event.slug}`
 
     // Meeting link visible: same day, user has access, event not completed
-    const isSameDay = now.toDateString() === eventDate.toDateString()
+    const toCdmxDayKey = (date: Date) => formatDateInTimezone(date, {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+    }, DEFAULT_TIMEZONE, 'en-CA')
+    const isSameDay = toCdmxDayKey(now) === toCdmxDayKey(eventDate)
     const isEventTime = now >= new Date(eventDate.getTime() - 30 * 60000) && now <= eventEndDate // 30 min before to end
     const canSeeMeetingLink = event.meeting_link && hasEventAccess && (isSameDay || isEventTime) && event.status !== 'completed'
 
@@ -237,21 +243,19 @@ export default async function EventDetailPage({ params }: PageProps) {
     )
 
     const formatDate = (dateStr: string) => {
-        const date = new Date(dateStr)
-        return date.toLocaleDateString('es-MX', {
+        return formatDateInTimezone(dateStr, {
             weekday: 'long',
             day: 'numeric',
             month: 'long',
             year: 'numeric'
-        })
+        }, DEFAULT_TIMEZONE)
     }
 
     const formatTime = (dateStr: string) => {
-        const date = new Date(dateStr)
-        return date.toLocaleTimeString('es-MX', {
+        return `${formatDateInTimezone(dateStr, {
             hour: '2-digit',
             minute: '2-digit'
-        })
+        }, DEFAULT_TIMEZONE)} CDMX`
     }
 
     const getTypeLabel = (type: string) => {
@@ -827,12 +831,12 @@ export default async function EventDetailPage({ params }: PageProps) {
                                                 </div>
                                             </td>
                                             <td className="py-2 px-3 text-muted-foreground">
-                                                {new Date(reg.registered_at).toLocaleDateString('es-MX', {
+                                                {formatDateInTimezone(reg.registered_at, {
                                                     day: 'numeric',
                                                     month: 'short',
                                                     hour: '2-digit',
                                                     minute: '2-digit'
-                                                })}
+                                                }, DEFAULT_TIMEZONE)}
                                             </td>
                                             {event.registration_fields?.map((field: any, i: number) => (
                                                 <td key={i} className="py-2 px-3">

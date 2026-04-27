@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import { ArrowLeft, TrendingUp, Users, Eye, DollarSign } from 'lucide-react'
+import { DEFAULT_TIMEZONE, formatDateInTimezone } from '@/lib/timezone'
 
 export default async function EventAnalyticsPage() {
     const supabase = await createClient()
@@ -148,7 +149,11 @@ export default async function EventAnalyticsPage() {
                                         <td className="p-4">
                                             <div className="font-medium">{event.title}</div>
                                             <div className="text-xs text-muted-foreground">
-                                                {new Date(event.start_time).toLocaleDateString()}
+                                                {formatDateInTimezone(event.start_time, {
+                                                    day: 'numeric',
+                                                    month: 'short',
+                                                    year: 'numeric',
+                                                }, DEFAULT_TIMEZONE)}
                                             </div>
                                         </td>
                                         <td className="p-4">

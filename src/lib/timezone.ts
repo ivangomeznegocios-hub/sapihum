@@ -24,6 +24,22 @@ export const TIMEZONE_OPTIONS = [
 
 export const DEFAULT_TIMEZONE = 'America/Mexico_City'
 
+export function formatDateInTimezone(
+    dateStr: string | Date,
+    options: Intl.DateTimeFormatOptions,
+    timezone: string = DEFAULT_TIMEZONE,
+    locale: string = 'es-MX'
+): string {
+    const date = typeof dateStr === 'string' ? new Date(dateStr) : dateStr
+
+    if (Number.isNaN(date.getTime())) return ''
+
+    return new Intl.DateTimeFormat(locale, {
+        ...options,
+        timeZone: timezone || DEFAULT_TIMEZONE,
+    }).format(date)
+}
+
 export function getCurrentHourInTimezone(timezone: string = DEFAULT_TIMEZONE, now = new Date()) {
     try {
         const formattedHour = new Intl.DateTimeFormat('en-US', {
@@ -50,43 +66,34 @@ export function getGreetingForTimezone(timezone: string = DEFAULT_TIMEZONE, now 
  * Format an event date string in the user's timezone
  */
 export function formatEventDate(dateStr: string, timezone?: string): string {
-    const tz = timezone || DEFAULT_TIMEZONE
-    const date = new Date(dateStr)
-    return new Intl.DateTimeFormat('es-MX', {
+    return formatDateInTimezone(dateStr, {
         weekday: 'long',
         day: 'numeric',
         month: 'long',
-        timeZone: tz,
-    }).format(date)
+    }, timezone)
 }
 
 /**
  * Format an event time string in the user's timezone
  */
 export function formatEventTime(dateStr: string, timezone?: string): string {
-    const tz = timezone || DEFAULT_TIMEZONE
-    const date = new Date(dateStr)
-    return new Intl.DateTimeFormat('es-MX', {
+    return formatDateInTimezone(dateStr, {
         hour: '2-digit',
         minute: '2-digit',
-        timeZone: tz,
-    }).format(date)
+    }, timezone)
 }
 
 /**
  * Format date and time together
  */
 export function formatEventDateTime(dateStr: string, timezone?: string): string {
-    const tz = timezone || DEFAULT_TIMEZONE
-    const date = new Date(dateStr)
-    return new Intl.DateTimeFormat('es-MX', {
+    return formatDateInTimezone(dateStr, {
         weekday: 'long',
         day: 'numeric',
         month: 'long',
         hour: 'numeric',
         minute: '2-digit',
-        timeZone: tz,
-    }).format(date)
+    }, timezone)
 }
 
 function getTimeZoneDateParts(date: Date, timezone: string) {

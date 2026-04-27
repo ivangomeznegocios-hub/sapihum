@@ -16,7 +16,7 @@ import { getEventEditorAccessForUser } from '@/lib/events/permissions'
 import { audienceAllowsAccess, getCommercialAccessContext } from '@/lib/access/commercial'
 import { sendEmail } from '@/lib/email/index'
 import { buildEventRegistrationEmail } from '@/lib/email/templates'
-import { DEFAULT_TIMEZONE, zonedDateTimeToUtcIso } from '@/lib/timezone'
+import { DEFAULT_TIMEZONE, formatDateInTimezone, zonedDateTimeToUtcIso } from '@/lib/timezone'
 import { findExternalCalendarConflictForUsers } from '@/lib/calendar-sync'
 import { createUserNotification } from '@/lib/notifications'
 import {
@@ -275,12 +275,12 @@ function buildEventDateRange(dateValue: string, timeValue: string, durationMinut
 }
 
 function formatConflictDateLabel(dateValue: string) {
-    return new Date(dateValue).toLocaleString('es-MX', {
+    return `${formatDateInTimezone(dateValue, {
         day: 'numeric',
         month: 'short',
         hour: '2-digit',
         minute: '2-digit',
-    })
+    }, DEFAULT_TIMEZONE)} CDMX`
 }
 
 type EventScheduleConflict = {
@@ -566,7 +566,7 @@ export async function registerForEvent(eventId: string, registrationData: Record
             const { getAppUrl } = await import('@/lib/config/app-url')
             const appUrl = getAppUrl()
             const eventDate = eventData.start_time
-                ? new Intl.DateTimeFormat('es-MX', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', hour: 'numeric', minute: '2-digit' }).format(new Date(eventData.start_time))
+                ? `${formatDateInTimezone(eventData.start_time, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', hour: 'numeric', minute: '2-digit' }, DEFAULT_TIMEZONE)} CDMX`
                 : 'Por confirmar'
 
             const emailContent = buildEventRegistrationEmail({
