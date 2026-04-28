@@ -6,6 +6,24 @@ export type BlogAssetLink = {
   kind: BlogAssetKind
 }
 
+export type BlogMetric = {
+  label: string
+  value: string
+  note?: string
+}
+
+export type BlogFigure = {
+  src: string
+  alt: string
+  caption: string
+}
+
+export type BlogResourceLink = {
+  label: string
+  href: string
+  description?: string
+}
+
 export type BlogSection = {
   heading: string
   paragraphs: string[]
@@ -25,7 +43,11 @@ export type BlogPost = {
   tags: string[]
   canonicalFocus: BlogAssetKind[]
   assetLinks: BlogAssetLink[]
+  resources?: BlogResourceLink[]
+  stats?: BlogMetric[]
+  figures?: BlogFigure[]
   intro: string
   sections: BlogSection[]
   ctaLabel: string
+  ctaLink?: string
 }

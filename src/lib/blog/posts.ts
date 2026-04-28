@@ -1,4 +1,5 @@
 import { getPublicCatalogDescription } from '@/lib/events/public'
+import { sapihumStudyBlogPost } from '@/lib/research/sapihum-study'
 import type { BlogPost } from './types'
 
 const canonicalAssetLinks = {
@@ -15,6 +16,7 @@ const canonicalAssetLinks = {
 }
 
 const blogPosts: BlogPost[] = [
+  sapihumStudyBlogPost,
   {
     slug: 'autocuidado-del-terapeuta-prevenir-burnout',
     title: 'El autocuidado del terapeuta: Estrategias prácticas para prevenir el burnout',

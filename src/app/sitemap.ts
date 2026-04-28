@@ -1,6 +1,7 @@
 import { createClient } from '@supabase/supabase-js'
 import type { MetadataRoute } from 'next'
 import { getAppUrl } from '@/lib/config/app-url'
+import { getBlogPosts } from '@/lib/blog/posts'
 import { getMarketingSpecializations } from '@/lib/specializations'
 import type { Database } from '@/types/database'
 
@@ -76,6 +77,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
             changeFrequency: 'weekly',
             priority: 0.7,
         },
+        {
+            url: toAbsoluteUrl(appUrl, '/investigacion'),
+            lastModified: new Date(),
+            changeFrequency: 'weekly',
+            priority: 0.75,
+        },
     ]
 
     const eventRoutes: MetadataRoute.Sitemap = (eventsResponse.data ?? []).map((event: { slug: string; updated_at: string }) => ({
@@ -99,9 +106,17 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         priority: 0.8,
     }))
 
+    const blogRoutes: MetadataRoute.Sitemap = getBlogPosts().map((post) => ({
+        url: toAbsoluteUrl(appUrl, `/blog/${post.slug}`),
+        lastModified: post.updatedAt ? new Date(post.updatedAt) : new Date(),
+        changeFrequency: 'weekly',
+        priority: post.featured ? 0.8 : 0.65,
+    }))
+
     return [
         ...staticRoutes,
         ...specializationRoutes,
+        ...blogRoutes,
         ...eventRoutes,
         ...formationRoutes,
     ]

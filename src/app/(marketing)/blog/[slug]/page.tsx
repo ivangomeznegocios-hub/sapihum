@@ -1,7 +1,8 @@
+import Image from 'next/image'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { ArrowRight, CalendarDays, Tag } from 'lucide-react'
+import { ArrowRight, BookOpen, CalendarDays, Download, Tag } from 'lucide-react'
 import { getBlogPostBySlug, getBlogPosts } from '@/lib/blog/posts'
 import { brandName, formatPageTitle } from '@/lib/brand'
 
@@ -79,6 +80,47 @@ export default async function BlogPostPage({ params }: PageProps) {
             <p className="text-lg leading-8">{post.intro}</p>
           </section>
 
+          {post.stats?.length ? (
+            <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+              {post.stats.map((metric) => (
+                <div key={`${metric.label}-${metric.value}`} className="rounded-2xl border bg-card p-5 shadow-sm">
+                  <p className="text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">
+                    {metric.label}
+                  </p>
+                  <p className="mt-2 text-3xl font-semibold tracking-tight">{metric.value}</p>
+                  {metric.note ? <p className="mt-2 text-sm leading-6 text-muted-foreground">{metric.note}</p> : null}
+                </div>
+              ))}
+            </section>
+          ) : null}
+
+          {post.figures?.length ? (
+            <section className="rounded-3xl border bg-card p-8 shadow-sm">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Resumen visual</p>
+                <h2 className="mt-1 text-2xl font-semibold tracking-tight">Indicadores clave del estudio</h2>
+              </div>
+              <div className="mt-6 grid gap-5 md:grid-cols-2">
+                {post.figures.map((figure) => (
+                  <figure key={figure.src} className="overflow-hidden rounded-2xl border bg-background">
+                    <div className="relative aspect-[16/9] bg-white">
+                      <Image
+                        src={figure.src}
+                        alt={figure.alt}
+                        fill
+                        sizes="(min-width: 1024px) 40rem, (min-width: 768px) 50vw, 100vw"
+                        className="object-contain p-2"
+                      />
+                    </div>
+                    <figcaption className="border-t px-4 py-3 text-sm leading-6 text-muted-foreground">
+                      {figure.caption}
+                    </figcaption>
+                  </figure>
+                ))}
+              </div>
+            </section>
+          ) : null}
+
           <div className="space-y-6">
             {post.sections.map((section) => (
               <section key={section.heading} className="rounded-3xl border bg-card p-8 shadow-sm">
@@ -122,6 +164,34 @@ export default async function BlogPostPage({ params }: PageProps) {
             </div>
           </section>
 
+          {post.resources?.length ? (
+            <section className="rounded-3xl border bg-card p-6 shadow-sm">
+              <p className="text-sm font-medium text-muted-foreground">Recursos</p>
+              <div className="mt-4 space-y-3">
+                {post.resources.map((resource) => {
+                  const isPdf = resource.href.toLowerCase().endsWith('.pdf')
+
+                  return (
+                    <Link
+                      key={resource.href}
+                      href={resource.href}
+                      download={isPdf ? '' : undefined}
+                      className="flex items-center justify-between gap-4 rounded-2xl border px-4 py-3 transition-colors hover:bg-muted/40"
+                    >
+                      <span>
+                        <span className="block text-sm font-medium">{resource.label}</span>
+                        {resource.description ? (
+                          <span className="block text-xs text-muted-foreground">{resource.description}</span>
+                        ) : null}
+                      </span>
+                      {isPdf ? <Download className="h-4 w-4 text-muted-foreground" /> : <BookOpen className="h-4 w-4 text-muted-foreground" />}
+                    </Link>
+                  )
+                })}
+              </div>
+            </section>
+          ) : null}
+
           <section className="rounded-3xl border bg-gradient-to-br from-muted/50 to-background p-6 shadow-sm">
             <p className="text-sm font-medium text-muted-foreground">Continúa tu aprendizaje</p>
             <p className="mt-3 text-lg font-medium leading-7">
@@ -143,7 +213,7 @@ export default async function BlogPostPage({ params }: PageProps) {
             <p className="text-sm font-medium text-muted-foreground">Siguiente paso</p>
             <div className="mt-3 grid gap-3">
               <Link
-                href={post.assetLinks[0]?.href ?? '/eventos'}
+                href={post.ctaLink ?? post.assetLinks[0]?.href ?? '/eventos'}
                 className="inline-flex items-center justify-center gap-2 rounded-full bg-primary px-5 py-3 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
               >
                 {post.ctaLabel}
