@@ -183,7 +183,8 @@ export const stripeAdapter: PaymentProviderAdapter = {
             params.priceId ||
             (billingInterval === 'annual' ? plan.annual.stripePriceId : plan.monthly.stripePriceId)
         const useCatalogPrice = isStripePriceIdConfigured(resolvedPriceId)
-        const intervalAmount = billingInterval === 'annual' ? plan.annual.amount : plan.monthly.amount
+        const intervalAmount = params.overrideAmount ?? (billingInterval === 'annual' ? plan.annual.amount : plan.monthly.amount)
+        const productName = params.overrideName || plan.name
 
         const lineItem: Stripe.Checkout.SessionCreateParams.LineItem = useCatalogPrice
             ? {
@@ -194,7 +195,7 @@ export const stripeAdapter: PaymentProviderAdapter = {
                 price_data: {
                     currency: 'mxn',
                     product_data: {
-                        name: plan.name,
+                        name: productName,
                     },
                     recurring: {
                         interval: billingInterval === 'annual' ? 'year' : 'month',

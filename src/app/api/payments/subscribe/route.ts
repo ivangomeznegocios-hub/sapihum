@@ -33,6 +33,7 @@ export async function POST(request: NextRequest) {
             successPath,
             email,
             fullName,
+            offerCode,
         } = body as {
             membershipLevel: number
             billingInterval?: BillingInterval
@@ -52,6 +53,7 @@ export async function POST(request: NextRequest) {
             successPath?: string
             email?: string
             fullName?: string
+            offerCode?: string
         }
 
         if (!membershipLevel || typeof membershipLevel !== 'number') {
@@ -74,7 +76,13 @@ export async function POST(request: NextRequest) {
             }
         }
 
-        const priceId = getStripePriceId(membershipLevel, billingInterval, resolvedSpecializationCode)
+        const isFounderOffer =
+            offerCode === 'founders_mx_2026' &&
+            membershipLevel === 1 &&
+            billingInterval === 'monthly'
+        const priceId = isFounderOffer
+            ? process.env.STRIPE_PRICE_LEVEL_1_FOUNDER_MONTHLY || 'price_level1_founder_monthly_placeholder'
+            : getStripePriceId(membershipLevel, billingInterval, resolvedSpecializationCode)
         if (!priceId) {
             return NextResponse.json({ error: 'Precio no encontrado' }, { status: 400 })
         }
@@ -191,6 +199,8 @@ export async function POST(request: NextRequest) {
                 billingInterval,
                 specializationCode: resolvedSpecializationCode ?? null,
                 guestCheckout: !user,
+                offerCode: isFounderOffer ? offerCode : null,
+                offerName: isFounderOffer ? 'Primeros 100 Miembros Fundadores SAPIHUM Mexico' : null,
             },
         })
 
@@ -205,6 +215,9 @@ export async function POST(request: NextRequest) {
             guest_checkout: user ? 'false' : 'true',
             buyer_full_name: fullName?.trim() || '',
             post_checkout_path: nextPath,
+            offer_code: isFounderOffer ? offerCode : '',
+            offer_name: isFounderOffer ? 'Primeros 100 Miembros Fundadores SAPIHUM Mexico' : '',
+            founder_price_locked: isFounderOffer ? 'true' : 'false',
         }
 
         let result
@@ -219,6 +232,8 @@ export async function POST(request: NextRequest) {
                 profileId: profile.data?.id || '',
                 trialDays: plan.trialDays,
                 priceId,
+                overrideAmount: isFounderOffer ? 250 : undefined,
+                overrideName: isFounderOffer ? 'Miembro Fundador SAPIHUM Mexico' : undefined,
                 metadata: checkoutMetadata,
                 successUrl: resolvedSuccessUrl,
                 cancelUrl: resolvedCancelUrl,
@@ -243,6 +258,8 @@ export async function POST(request: NextRequest) {
                     profileId: profile.data?.id || '',
                     trialDays: plan.trialDays,
                     priceId,
+                    overrideAmount: isFounderOffer ? 250 : undefined,
+                    overrideName: isFounderOffer ? 'Miembro Fundador SAPIHUM Mexico' : undefined,
                     metadata: checkoutMetadata,
                     successUrl: resolvedSuccessUrl,
                     cancelUrl: resolvedCancelUrl,

@@ -21,6 +21,8 @@ export interface CreateSubscriptionParams {
     profileId: string
     trialDays?: number
     priceId?: string              // Override price ID (for monthly/annual)
+    overrideAmount?: number       // MXN amount for campaign-specific dynamic prices
+    overrideName?: string
     metadata?: Record<string, string>
     successUrl: string
     cancelUrl: string
