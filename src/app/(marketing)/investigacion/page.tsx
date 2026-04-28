@@ -182,7 +182,7 @@ export default function InvestigacionPage() {
           <div className="bg-[#0a0a0a] border border-white/[0.08] p-8 md:p-12 relative group">
             <div className="absolute inset-0 bg-gradient-to-br from-white/[0.02] to-transparent pointer-events-none" />
             
-            <form className="relative flex flex-col gap-6" onSubmit={(e) => e.preventDefault()}>
+            <form className="relative flex flex-col gap-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <label className="text-[10px] font-bold uppercase tracking-[0.1em] text-[#c0bfbc]/70 ml-1">
