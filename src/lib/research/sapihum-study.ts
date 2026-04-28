@@ -2,9 +2,6 @@ import type { BlogFigure, BlogMetric, BlogPost, BlogSection } from '@/lib/blog/t
 
 export const sapihumStudySlug = 'estado-practica-psicologica-bienestar-2025'
 
-export const sapihumStudyPdfHref =
-  '/investigacion/sapihum-2025/estado-practica-psicologica-2025-sapihum.pdf'
-
 export const sapihumStudyMetrics: BlogMetric[] = [
   {
     label: 'Más pacientes',
@@ -185,14 +182,9 @@ export const sapihumStudyBlogPost: BlogPost = {
   ],
   resources: [
     {
-      label: 'Descargar PDF',
-      href: sapihumStudyPdfHref,
-      description: 'Versión completa del artículo científico en PDF.',
-    },
-    {
-      label: 'Abrir investigación',
-      href: '/investigacion',
-      description: 'Publicación destacada en el área institucional.',
+      label: 'Recibir más estudios',
+      href: '/auth/register',
+      description: 'Regístrate para recibir novedades, investigaciones y recursos de SAPIHUM.',
     },
   ],
   stats: sapihumStudyMetrics,
@@ -200,6 +192,6 @@ export const sapihumStudyBlogPost: BlogPost = {
   intro:
     'SAPIHUM presenta un estudio transversal retrospectivo con 312 profesionales de la psicología que ejercieron activamente durante 2025. El objetivo fue leer la práctica real del gremio desde cuatro ángulos: demanda, modalidad de trabajo, bienestar profesional y adopción tecnológica.',
   sections: sapihumStudySections,
-  ctaLabel: 'Ver la publicación en investigación',
-  ctaLink: '/investigacion',
+  ctaLabel: 'Recibir más estudios',
+  ctaLink: '/auth/register',
 }

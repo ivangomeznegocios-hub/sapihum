@@ -2,7 +2,7 @@ import Image from 'next/image'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { ArrowRight, BookOpen, CalendarDays, Download, Tag } from 'lucide-react'
+import { ArrowRight, BookOpen, CalendarDays, Tag, UserPlus } from 'lucide-react'
 import { getBlogPostBySlug, getBlogPosts } from '@/lib/blog/posts'
 import { brandName, formatPageTitle } from '@/lib/brand'
 
@@ -169,13 +169,10 @@ export default async function BlogPostPage({ params }: PageProps) {
               <p className="text-sm font-medium text-muted-foreground">Recursos</p>
               <div className="mt-4 space-y-3">
                 {post.resources.map((resource) => {
-                  const isPdf = resource.href.toLowerCase().endsWith('.pdf')
-
                   return (
                     <Link
                       key={resource.href}
                       href={resource.href}
-                      download={isPdf ? '' : undefined}
                       className="flex items-center justify-between gap-4 rounded-2xl border px-4 py-3 transition-colors hover:bg-muted/40"
                     >
                       <span>
@@ -184,7 +181,11 @@ export default async function BlogPostPage({ params }: PageProps) {
                           <span className="block text-xs text-muted-foreground">{resource.description}</span>
                         ) : null}
                       </span>
-                      {isPdf ? <Download className="h-4 w-4 text-muted-foreground" /> : <BookOpen className="h-4 w-4 text-muted-foreground" />}
+                      {resource.href === '/auth/register' ? (
+                        <UserPlus className="h-4 w-4 text-muted-foreground" />
+                      ) : (
+                        <BookOpen className="h-4 w-4 text-muted-foreground" />
+                      )}
                     </Link>
                   )
                 })}
