@@ -271,32 +271,6 @@ function FaqAccordion({ items }: { items: { question: string; answer: string }[]
     )
 }
 
-function DetailShell({
-    title,
-    eyebrow,
-    children,
-    className,
-}: {
-    title: string
-    eyebrow?: string
-    children: React.ReactNode
-    className?: string
-}) {
-    return (
-        <section className={cn('rounded-[28px] border border-white/10 bg-white/[0.03] p-6 shadow-2xl shadow-black/10 backdrop-blur-sm md:p-7', className)}>
-            {eyebrow && (
-                <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-brand-yellow">
-                    {eyebrow}
-                </p>
-            )}
-            <h2 className={cn('font-bold tracking-tight text-white', eyebrow ? 'mt-3 text-2xl md:text-3xl' : 'text-2xl md:text-3xl')}>
-                {title}
-            </h2>
-            <div className="mt-5">{children}</div>
-        </section>
-    )
-}
-
 export function PublicEventLanding({
     event,
     relatedEvents,
@@ -322,7 +296,6 @@ export function PublicEventLanding({
         hasActiveMembership,
         membershipSpecializationCode,
     })
-    const memberMessage = getEventMemberAccessMessage(event)
     const formatLabel = getEventTypeLabel(event.event_type)
     const faqItems = buildFaq(event)
     const speakerReturnTo = getPublicEventPath(event)

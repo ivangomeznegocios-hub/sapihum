@@ -145,34 +145,6 @@ async function loadSpeakerProfiles(speakerIds: string[]) {
     return profileMap
 }
 
-async function loadPublicSpeakerProfiles(speakerIds: string[]) {
-    const uniqueIds = Array.from(new Set(speakerIds.filter(Boolean)))
-    if (uniqueIds.length === 0) return new Map<string, SpeakerProfileSummary>()
-
-    const supabase = createPublicClient()
-    const { data, error } = await (supabase
-        .from('profiles') as any)
-        .select('id, full_name, avatar_url, role')
-        .in('id', uniqueIds)
-
-    if (error) {
-        console.error('Error fetching public speaker profiles:', error)
-        return new Map<string, SpeakerProfileSummary>()
-    }
-
-    return new Map(
-        ((data ?? []) as SpeakerProfileSummary[]).map((profile) => [
-            profile.id,
-            {
-                ...profile,
-                full_name: normalizeText(profile.full_name),
-                avatar_url: normalizeText(profile.avatar_url),
-                role: normalizeText(profile.role),
-            },
-        ])
-    )
-}
-
 function attachProfilesToSpeakers<T extends { id: string }>(
     speakers: T[],
     profileMap: Map<string, SpeakerProfileSummary>
