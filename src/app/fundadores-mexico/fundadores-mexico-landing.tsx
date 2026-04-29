@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 import {
     ArrowRight,
     BadgeCheck,
@@ -451,7 +452,13 @@ export function FundadoresMexicoLanding() {
             <div className="pointer-events-none fixed inset-0 z-0 opacity-[0.08] [background-image:linear-gradient(rgba(255,255,255,.9)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.9)_1px,transparent_1px)] [background-size:64px_64px]" />
 
             <header className="relative z-10 mx-auto flex max-w-7xl items-center justify-between px-5 py-5 md:px-8">
-                <div className="text-sm font-black uppercase tracking-[0.28em] text-white">SAPIHUM</div>
+                <Link
+                    href="/fundadores-mexico"
+                    className="text-sm font-black uppercase tracking-[0.28em] text-white transition-colors hover:text-[#f1b541]"
+                    aria-label="Volver al inicio de Miembros Fundadores SAPIHUM Mexico"
+                >
+                    SAPIHUM
+                </Link>
                 <div className="hidden items-center gap-3 text-xs text-stone-300 md:flex">
                     <span>Primeros 100 lugares</span>
                     <span className="h-1 w-1 rounded-full bg-[#f1b541]" />
@@ -791,7 +798,13 @@ export function FundadoresMexicoLanding() {
             </section>
 
             <footer className="relative z-10 border-t border-white/10 px-5 py-8 text-center text-xs text-stone-500 md:px-8">
-                SAPIHUM Mexico · Comunidad profesional online · Membresia mensual cancelable
+                <div>SAPIHUM Mexico · Comunidad profesional online · Membresia mensual cancelable</div>
+                <Link
+                    href="/"
+                    className="mt-3 inline-flex text-stone-400 underline-offset-4 transition-colors hover:text-[#f1b541] hover:underline"
+                >
+                    Conocer SAPIHUM
+                </Link>
             </footer>
 
             <div className="fixed inset-x-0 bottom-0 z-40 border-t border-white/10 bg-[#090806]/92 p-3 backdrop-blur-xl md:hidden">
