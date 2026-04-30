@@ -4,6 +4,7 @@ import { applyInviteCode, completeInviteAttribution } from '@/actions/invite-ref
 import { recordRegistrationConsents } from '@/actions/consent'
 import { hasRegistrationConsentMetadata } from '@/lib/consent'
 import { recordAnalyticsServerEvent } from '@/lib/analytics/server'
+import { reconcileGrowthRewards } from '@/lib/growth/reward-engine'
 import { claimCurrentUserEventEntitlements } from '@/lib/supabase/queries/event-entitlements'
 import { ensureProfileForAuthUser } from '@/lib/supabase/profile-provisioning'
 
@@ -64,6 +65,7 @@ export async function POST() {
             const result = await applyInviteCode(user.id, inviteRefCode)
             if (result.success) {
                 await completeInviteAttribution(user.id)
+                await reconcileGrowthRewards({ userId: user.id, trigger: 'signup' })
             }
         }
     } catch (error) {

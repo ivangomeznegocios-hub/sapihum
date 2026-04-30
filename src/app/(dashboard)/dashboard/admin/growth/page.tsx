@@ -15,7 +15,7 @@ import {
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { getInviteSystemStats, getUnprocessedRewardEvents } from '@/lib/supabase/queries/invite-referrals'
-import { getAllCampaigns, getTopReferrers } from '@/lib/supabase/queries/growth-campaigns'
+import { getAllCampaigns, getGrowthRewardGrantAdminRows, getTopReferrers } from '@/lib/supabase/queries/growth-campaigns'
 import {
     CreateCampaignSection,
     DeleteCampaignButton,
@@ -70,6 +70,12 @@ function formatCurrency(value: unknown): string {
 
 function formatRewardValue(config?: Record<string, any> | null): string {
     if (!config) return ''
+    if (config.benefit_kind === 'percent_discount') {
+        return `${config.discount_percent ?? 0}% sobre ${config.target_membership_level === 'current' ? 'plan actual' : `Nivel ${config.target_membership_level}`}`
+    }
+    if (config.benefit_kind === 'free_membership_level') {
+        return `${config.target_membership_level === 'current' ? 'Membresia actual' : `Nivel ${config.target_membership_level}`} gratis`
+    }
     if (config.label) return String(config.label)
     if (config.amount !== undefined && config.amount !== null) return formatCurrency(config.amount)
     if (config.percentage !== undefined && config.percentage !== null) return `${config.percentage}%`
@@ -79,11 +85,6 @@ function formatRewardValue(config?: Record<string, any> | null): string {
 function formatRoleList(roles?: string[] | null): string {
     if (!roles || roles.length === 0) return 'Sin definir'
     return roles.map((role) => roleLabels[role] || role).join(', ')
-}
-
-function formatTriggerList(triggers?: string[] | null): string {
-    if (!triggers || triggers.length === 0) return 'Sin definir'
-    return triggers.map((trigger) => triggerLabels[trigger] || trigger).join(', ')
 }
 
 function MetricCard({
@@ -131,11 +132,12 @@ export default async function AdminGrowthPage() {
 
     if ((profile as any)?.role !== 'admin') redirect('/dashboard')
 
-    const [systemStats, unprocessedRewards, campaigns, topReferrers] = await Promise.all([
+    const [systemStats, unprocessedRewards, campaigns, topReferrers, rewardGrants] = await Promise.all([
         getInviteSystemStats(),
         getUnprocessedRewardEvents(),
         getAllCampaigns(),
         getTopReferrers(20),
+        getGrowthRewardGrantAdminRows(),
     ])
 
     const conversionRate =
@@ -293,11 +295,12 @@ export default async function AdminGrowthPage() {
                                                         Regla economica
                                                     </p>
                                                     <div className="mt-2 space-y-1.5 text-xs text-muted-foreground">
-                                                        <p>Reward base: {rewardSummary || 'Sin definir'}</p>
+                                                        <p>Hito: {rewardConfig.threshold_count ?? 0} invitados activos</p>
+                                                        <p>Beneficio: {rewardSummary || 'Sin definir'}</p>
+                                                        <p>Prioridad: {rewardConfig.priority ?? 0}</p>
                                                         <p>Visible para: {formatRoleList(campaign.target_roles)}</p>
                                                         <p>Puede invitar: {formatRoleList(campaign.eligible_referrer_roles)}</p>
                                                         <p>Invitado elegible: {formatRoleList(campaign.eligible_referred_roles)}</p>
-                                                        <p>Triggers: {formatTriggerList(campaign.allowed_trigger_events)}</p>
                                                     </div>
                                                 </div>
 
@@ -374,6 +377,59 @@ export default async function AdminGrowthPage() {
             </div>
 
             <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
+                <div className="rounded-2xl border bg-card p-5">
+                    <h2 className="mb-4 flex items-center gap-2 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+                        <ShieldCheck className="h-4 w-4" />
+                        Grants automaticos ({rewardGrants.length})
+                    </h2>
+
+                    {rewardGrants.length === 0 ? (
+                        <div className="py-6 text-center text-muted-foreground">
+                            <ShieldCheck className="mx-auto mb-2 h-6 w-6 opacity-40" />
+                            <p className="text-sm">Aun no hay grants evaluados.</p>
+                        </div>
+                    ) : (
+                        <div className="space-y-2">
+                            {rewardGrants.map((grant) => (
+                                <div key={grant.id} className="rounded-xl border p-3">
+                                    <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                                        <div className="min-w-0">
+                                            <p className="text-sm font-medium">{grant.beneficiaryName}</p>
+                                            <p className="text-xs text-muted-foreground">{grant.campaignTitle}</p>
+                                            <p className="mt-1 text-[10px] text-muted-foreground">
+                                                {grant.resolvedBenefit.discount_percent ?? 0}% - valor mensual {formatCurrency(grant.resolvedBenefit.monthly_value_mxn)}
+                                            </p>
+                                        </div>
+                                        <span className={cn(
+                                            'rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide',
+                                            grant.status === 'applied'
+                                                ? 'bg-green-100 text-green-700 dark:bg-green-950/30 dark:text-green-300'
+                                                : grant.status === 'sync_error'
+                                                    ? 'bg-red-100 text-red-700 dark:bg-red-950/30 dark:text-red-300'
+                                                    : 'bg-muted text-muted-foreground'
+                                        )}>
+                                            {grant.status}
+                                        </span>
+                                    </div>
+                                    {grant.lastEvaluatedAt && (
+                                        <p className="mt-2 text-[10px] text-muted-foreground">
+                                            Evaluado: {new Date(grant.lastEvaluatedAt).toLocaleString('es-MX')}
+                                        </p>
+                                    )}
+                                    {grant.lastStripeSyncAt && (
+                                        <p className="text-[10px] text-muted-foreground">
+                                            Stripe sync: {new Date(grant.lastStripeSyncAt).toLocaleString('es-MX')}
+                                        </p>
+                                    )}
+                                    {grant.lastError && (
+                                        <p className="mt-2 text-xs text-red-600">{grant.lastError}</p>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
+
                 <div className="rounded-2xl border bg-card p-5">
                     <h2 className="mb-4 flex items-center gap-2 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
                         <Award className="h-4 w-4" />

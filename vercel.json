@@ -1,0 +1,8 @@
+{
+  "crons": [
+    {
+      "path": "/api/cron/growth-rewards/reconcile",
+      "schedule": "17 8 * * *"
+    }
+  ]
+}

@@ -17,7 +17,7 @@ import {
 import { createClient } from '@/lib/supabase/server'
 import { getMyInviteStats } from '@/actions/invite-referrals'
 import { getInviteRewardEvents } from '@/lib/supabase/queries/invite-referrals'
-import { getActiveCampaigns, getTopReferrers } from '@/lib/supabase/queries/growth-campaigns'
+import { getActiveCampaigns, getGrowthRewardProgress, getTopReferrers } from '@/lib/supabase/queries/growth-campaigns'
 import { cn } from '@/lib/utils'
 import type { GrowthCampaign } from '@/types/database'
 import { getCommercialAccessContext } from '@/lib/access/commercial'
@@ -94,14 +94,15 @@ export default async function GrowthHubPage() {
     const protocol = host.includes('localhost') ? 'http' : 'https'
     const baseUrl = `${protocol}://${host}`
 
-    const [statsResult, rewards, campaigns, topReferrers] = await Promise.all([
+    const [statsResult, rewards, campaigns, topReferrers, rewardProgress] = await Promise.all([
         getMyInviteStats(),
         getInviteRewardEvents(user.id),
         getActiveCampaigns(role),
         getTopReferrers(10),
+        getGrowthRewardProgress(user.id, role),
     ]).catch((error) => {
         console.error('Growth hub fetch error:', error)
-        return [null, [], [], []] as [any, any[], any[], any[]]
+        return [null, [], [], [], []] as [any, any[], any[], any[], any[]]
     })
 
     const stats = statsResult?.stats
@@ -235,6 +236,60 @@ export default async function GrowthHubPage() {
                         {campaigns.map((campaign: GrowthCampaign) => (
                             <CampaignCard key={campaign.id} campaign={campaign} />
                         ))}
+                    </div>
+                </div>
+            )}
+
+            {rewardProgress.length > 0 && (
+                <div>
+                    <div className="mb-4 flex items-center gap-2">
+                        <Award className="h-5 w-5 text-brand-brown" />
+                        <h2 className="text-lg font-semibold">Progreso de recompensas</h2>
+                    </div>
+                    <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
+                        {rewardProgress.map((item) => {
+                            const percent = Math.min(100, Math.round((item.activeInviteCount / item.thresholdCount) * 100))
+                            const statusLabel = item.grantStatus === 'applied'
+                                ? 'Beneficio activo'
+                                : item.activeInviteCount >= item.thresholdCount
+                                    ? 'Beneficio pendiente de aplicacion'
+                                    : 'En progreso'
+
+                            return (
+                                <div key={item.campaign.id} className="rounded-2xl border bg-card p-5">
+                                    <div className="flex items-start justify-between gap-3">
+                                        <div>
+                                            <h3 className="text-sm font-semibold">{item.campaign.title}</h3>
+                                            <p className="mt-1 text-xs text-muted-foreground">
+                                                {item.activeInviteCount} de {item.thresholdCount} invitados activos
+                                            </p>
+                                        </div>
+                                        <span className="rounded-full bg-muted px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+                                            {statusLabel}
+                                        </span>
+                                    </div>
+                                    <div className="mt-4 h-2 overflow-hidden rounded-full bg-muted">
+                                        <div className="h-full rounded-full bg-primary" style={{ width: `${percent}%` }} />
+                                    </div>
+                                    {item.activeBenefit && (
+                                        <p className="mt-3 text-xs text-primary">
+                                            Beneficio vigente: {item.activeBenefit.discount_percent}% sobre {item.activeBenefit.target_membership_level === 'current' ? 'tu plan actual' : `Nivel ${item.activeBenefit.target_membership_level}`}
+                                        </p>
+                                    )}
+                                    {item.qualifyingInviteNames.length > 0 && (
+                                        <p className="mt-3 text-xs text-muted-foreground">
+                                            Invitados validos: {item.qualifyingInviteNames.slice(0, 5).join(', ')}
+                                            {item.qualifyingInviteNames.length > 5 ? ` +${item.qualifyingInviteNames.length - 5}` : ''}
+                                        </p>
+                                    )}
+                                    {item.lastEvaluatedAt && (
+                                        <p className="mt-2 text-[10px] text-muted-foreground">
+                                            Ultima evaluacion: {new Date(item.lastEvaluatedAt).toLocaleDateString('es-MX')}
+                                        </p>
+                                    )}
+                                </div>
+                            )
+                        })}
                     </div>
                 </div>
             )}

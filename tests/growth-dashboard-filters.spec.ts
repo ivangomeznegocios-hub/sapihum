@@ -48,4 +48,14 @@ test.describe('professional growth filters', () => {
       })
     ).toBe(false)
   })
+
+  test('excludes QA/test profiles from professional growth metrics', () => {
+    expect(
+      shouldShowGrowthAttribution({
+        status: 'completed',
+        referrer: { role: 'psychologist', email: 'pro@sapihum.com', is_test: true },
+        referred: { role: 'psychologist', email: 'colleague@sapihum.com' },
+      })
+    ).toBe(false)
+  })
 })

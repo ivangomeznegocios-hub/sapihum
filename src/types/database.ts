@@ -63,6 +63,7 @@ export interface Profile {
     calendar_feed_token?: string | null
     subscription_status: SubscriptionStatus | null
     membership_level: number
+    is_test?: boolean
     ai_minutes_available: number
     email_notifications: boolean
     session_reminders: boolean
@@ -100,6 +101,7 @@ export interface ProfileInsert {
     calendar_feed_token?: string | null
     subscription_status?: SubscriptionStatus | null
     membership_level?: number
+    is_test?: boolean
     ai_minutes_available?: number
     email_notifications?: boolean
     session_reminders?: boolean
@@ -114,6 +116,7 @@ export interface ProfileUpdate {
     calendar_feed_token?: string | null
     subscription_status?: SubscriptionStatus | null
     membership_level?: number
+    is_test?: boolean
     phone?: string | null
     cedula_profesional?: string | null
     populations_served?: string[]
@@ -1558,6 +1561,11 @@ export interface Database {
                 Insert: InviteRewardEventInsert
                 Update: InviteRewardEventUpdate
             }
+            growth_reward_grants: {
+                Row: GrowthRewardGrant
+                Insert: GrowthRewardGrantInsert
+                Update: GrowthRewardGrantUpdate
+            }
             specialization_waitlist: {
                 Row: SpecializationWaitlist
                 Insert: SpecializationWaitlistInsert
@@ -1824,6 +1832,94 @@ export interface InviteRewardEventUpdate {
     processed?: boolean
     processed_at?: string | null
     notes?: string | null
+}
+
+// ============================================
+// TABLE: growth_reward_grants
+// ============================================
+export type GrowthRewardGrantStatus = 'applied' | 'qualified_not_applied' | 'revoked' | 'sync_error'
+
+export type GrowthRewardBenefitKind = 'percent_discount' | 'free_membership_level'
+export type GrowthRewardTargetMembershipLevel = 'current' | 1 | 2 | 3
+
+export interface GrowthRewardConfig {
+    threshold_count: number
+    qualifier: 'referred_active_membership'
+    require_referrer_active_membership: boolean
+    benefit_kind: GrowthRewardBenefitKind
+    discount_percent?: number | null
+    target_membership_level: GrowthRewardTargetMembershipLevel
+    duration_policy: 'while_qualified'
+    priority?: number | null
+}
+
+export interface GrowthRewardGrant {
+    id: string
+    beneficiary_id: string
+    campaign_id: string
+    program_type: 'professional_invite'
+    qualifying_attribution_ids: string[]
+    status: GrowthRewardGrantStatus
+    qualified_at: string | null
+    applied_at: string | null
+    revoked_at: string | null
+    resolved_benefit: Record<string, any>
+    stripe_subscription_id: string | null
+    stripe_coupon_id: string | null
+    stripe_discount_id: string | null
+    original_subscription_item_id: string | null
+    original_price_id: string | null
+    original_membership_level: number | null
+    original_specialization_code: string | null
+    auto_upgraded: boolean
+    last_evaluated_at: string | null
+    last_stripe_sync_at: string | null
+    last_error: string | null
+    created_at: string
+    updated_at: string
+}
+
+export interface GrowthRewardGrantInsert {
+    beneficiary_id: string
+    campaign_id: string
+    program_type?: 'professional_invite'
+    qualifying_attribution_ids?: string[]
+    status?: GrowthRewardGrantStatus
+    qualified_at?: string | null
+    applied_at?: string | null
+    revoked_at?: string | null
+    resolved_benefit?: Record<string, any>
+    stripe_subscription_id?: string | null
+    stripe_coupon_id?: string | null
+    stripe_discount_id?: string | null
+    original_subscription_item_id?: string | null
+    original_price_id?: string | null
+    original_membership_level?: number | null
+    original_specialization_code?: string | null
+    auto_upgraded?: boolean
+    last_evaluated_at?: string | null
+    last_stripe_sync_at?: string | null
+    last_error?: string | null
+}
+
+export interface GrowthRewardGrantUpdate {
+    qualifying_attribution_ids?: string[]
+    status?: GrowthRewardGrantStatus
+    qualified_at?: string | null
+    applied_at?: string | null
+    revoked_at?: string | null
+    resolved_benefit?: Record<string, any>
+    stripe_subscription_id?: string | null
+    stripe_coupon_id?: string | null
+    stripe_discount_id?: string | null
+    original_subscription_item_id?: string | null
+    original_price_id?: string | null
+    original_membership_level?: number | null
+    original_specialization_code?: string | null
+    auto_upgraded?: boolean
+    last_evaluated_at?: string | null
+    last_stripe_sync_at?: string | null
+    last_error?: string | null
 }
 
 // ============================================

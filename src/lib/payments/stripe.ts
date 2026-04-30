@@ -17,12 +17,168 @@ import { getSubscriptionPlan, isStripePriceIdConfigured } from './config'
 import { sanitizeStripeMetadata } from './stripe-metadata'
 
 // Initialize Stripe with the secret key
-function getStripeInstance(): Stripe {
+export function getStripeInstance(): Stripe {
     const key = process.env.STRIPE_SECRET_KEY
     if (!key) {
         throw new Error('STRIPE_SECRET_KEY is not configured')
     }
     return new Stripe(key)
+}
+
+export async function ensureGrowthRewardCoupon(discountPercent: number): Promise<string> {
+    const percentOff = Math.max(1, Math.min(100, Math.round(discountPercent)))
+    const couponId = `growth-reward-${percentOff}-percent`
+    const stripe = getStripeInstance()
+
+    try {
+        const existing = await stripe.coupons.retrieve(couponId)
+        if (!existing.deleted) {
+            return existing.id
+        }
+    } catch (error: any) {
+        if (error?.statusCode !== 404) {
+            throw error
+        }
+    }
+
+    const coupon = await stripe.coupons.create({
+        id: couponId,
+        name: `Growth reward ${percentOff}%`,
+        percent_off: percentOff,
+        duration: 'forever',
+        metadata: {
+            program_type: 'professional_invite',
+            source: 'growth_reward_grants',
+        },
+    })
+
+    return coupon.id
+}
+
+function getSubscriptionDiscounts(subscription: Stripe.Subscription): any[] {
+    const subscriptionAny = subscription as any
+    if (Array.isArray(subscriptionAny.discounts?.data)) {
+        return subscriptionAny.discounts.data.filter(Boolean)
+    }
+
+    if (subscriptionAny.discount) {
+        return [subscriptionAny.discount]
+    }
+
+    return []
+}
+
+function isGrowthRewardDiscount(discount: any, grantId?: string | null) {
+    const coupon = discount?.coupon
+    const couponId = typeof coupon === 'string' ? coupon : coupon?.id
+    const couponMetadata = typeof coupon === 'object' ? coupon?.metadata : null
+    const discountMetadata = discount?.metadata ?? {}
+
+    return (
+        (grantId && discountMetadata?.growth_grant_id === grantId)
+        || couponId?.startsWith('growth-reward-')
+        || couponMetadata?.source === 'growth_reward_grants'
+    )
+}
+
+function assertCanReplaceGrowthRewardDiscount(subscription: Stripe.Subscription, grantId: string) {
+    const discounts = getSubscriptionDiscounts(subscription)
+    const unmanagedDiscount = discounts.find((discount) => !isGrowthRewardDiscount(discount, grantId))
+
+    if (unmanagedDiscount) {
+        const coupon = unmanagedDiscount?.coupon
+        const couponId = typeof coupon === 'string' ? coupon : coupon?.id
+        throw new Error(
+            `Subscription already has an unmanaged Stripe discount${couponId ? ` (${couponId})` : ''}. Manual review required before applying growth reward.`
+        )
+    }
+}
+
+export async function applyGrowthRewardDiscountToStripeSubscription(params: {
+    subscriptionId: string
+    couponId: string
+    grantId: string
+    campaignId: string
+    priceId?: string | null
+}): Promise<{
+    subscriptionItemId: string | null
+    discountId: string | null
+}> {
+    const stripe = getStripeInstance()
+    const subscription = await stripe.subscriptions.retrieve(params.subscriptionId)
+    const item = subscription.items.data[0]
+    assertCanReplaceGrowthRewardDiscount(subscription, params.grantId)
+
+    const updatePayload: any = {
+        discounts: [{ coupon: params.couponId }],
+        metadata: {
+            ...(subscription.metadata || {}),
+            growth_grant_id: params.grantId,
+            growth_campaign_id: params.campaignId,
+            program_type: 'professional_invite',
+        },
+    }
+
+    if (params.priceId && item?.id && item.price?.id !== params.priceId) {
+        updatePayload.items = [{
+            id: item.id,
+            price: params.priceId,
+        }]
+        updatePayload.proration_behavior = 'none'
+    }
+
+    const updated = await stripe.subscriptions.update(params.subscriptionId, updatePayload)
+    const discount = (updated as any).discount ?? (updated as any).discounts?.data?.[0] ?? null
+
+    return {
+        subscriptionItemId: updated.items.data[0]?.id ?? item?.id ?? null,
+        discountId: typeof discount === 'string' ? discount : discount?.id ?? null,
+    }
+}
+
+export async function removeGrowthRewardFromStripeSubscription(params: {
+    subscriptionId: string
+    priceId?: string | null
+}): Promise<{
+    subscriptionItemId: string | null
+}> {
+    const stripe = getStripeInstance()
+    const subscription = await stripe.subscriptions.retrieve(params.subscriptionId)
+    const item = subscription.items.data[0]
+    const discounts = getSubscriptionDiscounts(subscription)
+    const hasUnmanagedDiscount = discounts.some((discount) => !isGrowthRewardDiscount(discount, null))
+
+    if (hasUnmanagedDiscount) {
+        throw new Error('Subscription has an unmanaged Stripe discount. Manual review required before removing growth reward.')
+    }
+
+    const hasGrowthDiscount = discounts.some((discount) => isGrowthRewardDiscount(discount, null))
+    const updatePayload: any = {
+        metadata: {
+            ...(subscription.metadata || {}),
+            growth_grant_id: '',
+            growth_campaign_id: '',
+            program_type: '',
+        },
+    }
+
+    if (hasGrowthDiscount) {
+        updatePayload.discounts = ''
+    }
+
+    if (params.priceId && item?.id && item.price?.id !== params.priceId) {
+        updatePayload.items = [{
+            id: item.id,
+            price: params.priceId,
+        }]
+        updatePayload.proration_behavior = 'none'
+    }
+
+    const updated = await stripe.subscriptions.update(params.subscriptionId, updatePayload)
+
+    return {
+        subscriptionItemId: updated.items.data[0]?.id ?? item?.id ?? null,
+    }
 }
 
 export async function findStripeCustomerIdByEmail(email: string): Promise<string | null> {

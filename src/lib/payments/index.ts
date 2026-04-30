@@ -9,6 +9,7 @@ import { getAppUrl } from '@/lib/config/app-url'
 import { getActiveEntitlementForEvent } from '@/lib/events/access'
 import { grantEventEntitlements, revokeEventEntitlementsBySourceReference } from '@/lib/events/entitlements'
 import { upsertAutomaticEventSpeakerEarnings } from '@/lib/earnings/compensation'
+import { reconcileGrowthRewards } from '@/lib/growth/reward-engine'
 import { logCommerceOperationalEvent, sendEventPurchaseConfirmation, sendFormationPurchaseConfirmation } from '@/lib/payments/commerce'
 import { syncMembershipEntitlementsForUser } from '@/lib/membership-entitlements'
 import { createUserNotification } from '@/lib/notifications'
@@ -50,6 +51,20 @@ function getServiceSupabase() {
         throw new Error('Supabase service role credentials not configured')
     }
     return createServiceClient(url, key)
+}
+
+async function reconcileGrowthRewardsAfterSubscriptionChange(userId: string | null | undefined, trigger: any) {
+    if (!userId) return
+
+    try {
+        await reconcileGrowthRewards({ userId, trigger })
+    } catch (error) {
+        console.error('[Payment] Failed to reconcile growth rewards:', {
+            userId,
+            trigger,
+            message: error instanceof Error ? error.message : String(error),
+        })
+    }
 }
 
 function emptySnapshot(): AttributionSnapshot {
@@ -1101,6 +1116,7 @@ export async function fulfillSubscriptionCreated(data: SubscriptionWebhookData):
 
     await supabase.from('profiles').update(profileUpdate).eq('id', profileId)
     await syncMembershipEntitlementsForUser(profileId)
+    await reconcileGrowthRewardsAfterSubscriptionChange(profileId, 'subscription_created')
 
     console.log(`[Payment] Subscription activated: user=${profileId}, level=${membershipLevel}`)
 
@@ -1203,6 +1219,7 @@ export async function fulfillSubscriptionRenewed(data: SubscriptionWebhookData):
 
     await supabase.from('profiles').update({ subscription_status: 'active' }).eq('id', sub.profile_id)
     await syncMembershipEntitlementsForUser(sub.profile_id)
+    await reconcileGrowthRewardsAfterSubscriptionChange(sub.profile_id, 'subscription_renewed')
 
     let existingTransactionId: string | null = null
     if (data.invoiceId) {
@@ -1334,6 +1351,7 @@ export async function fulfillSubscriptionUpdated(data: SubscriptionWebhookData):
                 })
                 .eq('id', sub.profile_id)
             await syncMembershipEntitlementsForUser(sub.profile_id)
+            await reconcileGrowthRewardsAfterSubscriptionChange(sub.profile_id, 'subscription_deleted')
         }
     } else if (data.status === 'past_due') {
         const { data: sub } = await supabase
@@ -1345,6 +1363,7 @@ export async function fulfillSubscriptionUpdated(data: SubscriptionWebhookData):
             if (sub) {
                 await supabase.from('profiles').update({ subscription_status: 'past_due' }).eq('id', sub.profile_id)
                 await syncMembershipEntitlementsForUser(sub.profile_id)
+                await reconcileGrowthRewardsAfterSubscriptionChange(sub.profile_id, 'subscription_updated')
             }
     } else {
         const { data: sub } = await supabase
@@ -1369,6 +1388,7 @@ export async function fulfillSubscriptionUpdated(data: SubscriptionWebhookData):
 
             await supabase.from('profiles').update(profileUpdates).eq('id', sub.profile_id)
             await syncMembershipEntitlementsForUser(sub.profile_id)
+            await reconcileGrowthRewardsAfterSubscriptionChange(sub.profile_id, 'subscription_updated')
         }
     }
 

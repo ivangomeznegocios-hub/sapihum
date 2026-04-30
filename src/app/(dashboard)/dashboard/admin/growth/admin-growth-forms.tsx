@@ -45,35 +45,19 @@ export function CampaignForm({
 }) {
     const isEditing = !!campaign
     const rewardConfig = campaign?.reward_config || {}
-    const stageRewards = rewardConfig.stage_rewards || {}
-    const milestoneRewards = rewardConfig.milestone_rewards || {}
-    const dualReward = rewardConfig.dual_reward || {}
 
     const [title, setTitle] = useState(campaign?.title || '')
     const [description, setDescription] = useState(campaign?.description || '')
-    const [campaignType, setCampaignType] = useState<GrowthCampaignType>(campaign?.campaign_type || 'referral_boost')
-    const [rewardType, setRewardType] = useState(rewardConfig.reward_type || 'commission')
-    const [rewardAmount, setRewardAmount] = useState(
-        rewardConfig.amount?.toString() || rewardConfig.cash_amount?.toString() || ''
-    )
-    const [rewardPercentage, setRewardPercentage] = useState(rewardConfig.percentage?.toString() || '')
-    const [rewardLabel, setRewardLabel] = useState(rewardConfig.label || '')
+    const [campaignType, setCampaignType] = useState<GrowthCampaignType>(campaign?.campaign_type || 'milestone')
+    const [thresholdCount, setThresholdCount] = useState(rewardConfig.threshold_count?.toString() || '3')
+    const [benefitKind, setBenefitKind] = useState(rewardConfig.benefit_kind || 'percent_discount')
+    const [discountPercent, setDiscountPercent] = useState(rewardConfig.discount_percent?.toString() || '100')
+    const [targetMembershipLevel, setTargetMembershipLevel] = useState(String(rewardConfig.target_membership_level || 'current'))
+    const [priority, setPriority] = useState(rewardConfig.priority?.toString() || '0')
     const [targetRoles, setTargetRoles] = useState<string[]>(campaign?.target_roles || ['psychologist', 'ponente'])
     const [eligibleReferrerRoles, setEligibleReferrerRoles] = useState<string[]>(campaign?.eligible_referrer_roles || ['psychologist', 'ponente'])
     const [eligibleReferredRoles, setEligibleReferredRoles] = useState<string[]>(campaign?.eligible_referred_roles || ['psychologist'])
     const [allowedTriggerEvents, setAllowedTriggerEvents] = useState<string[]>(campaign?.allowed_trigger_events || ['signup', 'profile_completed', 'subscription', 'first_purchase'])
-    const [signupBonus, setSignupBonus] = useState(stageRewards.signup?.toString() || '')
-    const [profileBonus, setProfileBonus] = useState(stageRewards.profile_completed?.toString() || '')
-    const [subscriptionBonus, setSubscriptionBonus] = useState(stageRewards.subscription?.toString() || '')
-    const [firstPurchaseBonus, setFirstPurchaseBonus] = useState(stageRewards.first_purchase?.toString() || '')
-    const [milestone3, setMilestone3] = useState(milestoneRewards['3']?.toString() || '')
-    const [milestone5, setMilestone5] = useState(milestoneRewards['5']?.toString() || '')
-    const [milestone10, setMilestone10] = useState(milestoneRewards['10']?.toString() || '')
-    const [dualRewardEnabled, setDualRewardEnabled] = useState(Boolean(dualReward?.reward_type))
-    const [dualRewardType, setDualRewardType] = useState(dualReward.reward_type || 'discount')
-    const [dualRewardAmount, setDualRewardAmount] = useState(dualReward.amount?.toString() || '')
-    const [dualRewardPercentage, setDualRewardPercentage] = useState(dualReward.percentage?.toString() || '')
-    const [dualRewardLabel, setDualRewardLabel] = useState(dualReward.label || '')
     const [startsAt, setStartsAt] = useState(campaign?.starts_at ? campaign.starts_at.slice(0, 16) : '')
     const [endsAt, setEndsAt] = useState(campaign?.ends_at ? campaign.ends_at.slice(0, 16) : '')
     const [isActive, setIsActive] = useState(campaign?.is_active ?? true)
@@ -88,8 +72,29 @@ export function CampaignForm({
             return
         }
 
-        if (eligibleReferrerRoles.length === 0 || eligibleReferredRoles.length === 0 || allowedTriggerEvents.length === 0) {
-            setMessage({ type: 'error', text: 'Define roles elegibles y al menos un trigger economico' })
+        if (targetRoles.length === 0 || eligibleReferrerRoles.length === 0 || eligibleReferredRoles.length === 0) {
+            setMessage({ type: 'error', text: 'Define roles elegibles' })
+            return
+        }
+
+        const parsedThreshold = parseInt(thresholdCount)
+        const rawDiscount = parseFloat(discountPercent)
+        const parsedDiscount = benefitKind === 'free_membership_level'
+            ? 100
+            : rawDiscount
+
+        if (!Number.isFinite(parsedThreshold) || parsedThreshold < 1 || !Number.isFinite(parsedDiscount) || parsedDiscount < 1 || parsedDiscount > 100) {
+            setMessage({ type: 'error', text: 'Define hito y descuento validos' })
+            return
+        }
+
+        if (!['current', '1', '2', '3'].includes(targetMembershipLevel)) {
+            setMessage({ type: 'error', text: 'El nivel objetivo no es valido' })
+            return
+        }
+
+        if (startsAt && endsAt && new Date(endsAt) <= new Date(startsAt)) {
+            setMessage({ type: 'error', text: 'La fecha de fin debe ser posterior al inicio' })
             return
         }
 
@@ -97,50 +102,14 @@ export function CampaignForm({
         setMessage(null)
 
         const nextRewardConfig: Record<string, any> = {
-            reward_type: rewardType,
-        }
-
-        if (rewardAmount) {
-            nextRewardConfig.amount = parseFloat(rewardAmount)
-            nextRewardConfig.currency = 'MXN'
-        }
-        if (rewardPercentage) {
-            nextRewardConfig.percentage = parseFloat(rewardPercentage)
-        }
-        if (rewardLabel.trim()) {
-            nextRewardConfig.label = rewardLabel.trim()
-        }
-
-        const nextStageRewards: Record<string, number> = {}
-        if (signupBonus) nextStageRewards.signup = parseFloat(signupBonus)
-        if (profileBonus) nextStageRewards.profile_completed = parseFloat(profileBonus)
-        if (subscriptionBonus) nextStageRewards.subscription = parseFloat(subscriptionBonus)
-        if (firstPurchaseBonus) nextStageRewards.first_purchase = parseFloat(firstPurchaseBonus)
-        if (Object.keys(nextStageRewards).length > 0) {
-            nextRewardConfig.stage_rewards = nextStageRewards
-        }
-
-        const nextMilestones: Record<string, number> = {}
-        if (milestone3) nextMilestones['3'] = parseFloat(milestone3)
-        if (milestone5) nextMilestones['5'] = parseFloat(milestone5)
-        if (milestone10) nextMilestones['10'] = parseFloat(milestone10)
-        if (Object.keys(nextMilestones).length > 0) {
-            nextRewardConfig.milestone_rewards = nextMilestones
-        }
-
-        if (dualRewardEnabled) {
-            const dualRewardConfig: Record<string, any> = { reward_type: dualRewardType }
-            if (dualRewardAmount) {
-                dualRewardConfig.amount = parseFloat(dualRewardAmount)
-                dualRewardConfig.currency = 'MXN'
-            }
-            if (dualRewardPercentage) {
-                dualRewardConfig.percentage = parseFloat(dualRewardPercentage)
-            }
-            if (dualRewardLabel.trim()) {
-                dualRewardConfig.label = dualRewardLabel.trim()
-            }
-            nextRewardConfig.dual_reward = dualRewardConfig
+            threshold_count: parsedThreshold,
+            qualifier: 'referred_active_membership',
+            require_referrer_active_membership: true,
+            benefit_kind: benefitKind,
+            discount_percent: parsedDiscount,
+            target_membership_level: targetMembershipLevel === 'current' ? 'current' : Number(targetMembershipLevel),
+            duration_policy: 'while_qualified',
+            priority: parseInt(priority) || 0,
         }
 
         const data = {
@@ -318,169 +287,62 @@ export function CampaignForm({
 
             <div className="rounded-lg border p-4 space-y-3">
                 <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                    Reward Principal
+                    Recompensa automatica Stripe
                 </p>
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
                     <div>
-                        <label className="text-xs font-medium">Tipo de reward</label>
+                        <label className="text-xs font-medium">Hito de invitados activos</label>
+                        <Input
+                            type="number"
+                            value={thresholdCount}
+                            onChange={(event) => setThresholdCount(event.target.value)}
+                            min={1}
+                            className="mt-1"
+                        />
+                    </div>
+                    <div>
+                        <label className="text-xs font-medium">Beneficio</label>
                         <select
-                            value={rewardType}
-                            onChange={(event) => setRewardType(event.target.value)}
+                            value={benefitKind}
+                            onChange={(event) => setBenefitKind(event.target.value)}
                             className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
                         >
-                            <option value="commission">Comision</option>
-                            <option value="cash_bonus">Bono en efectivo</option>
-                            <option value="credit">Credito</option>
-                            <option value="discount">Descuento</option>
-                            <option value="membership_benefit">Beneficio de membresia</option>
-                            <option value="unlock">Beneficio exclusivo</option>
-                            <option value="custom">Custom</option>
+                            <option value="percent_discount">Descuento porcentual</option>
+                            <option value="free_membership_level">Membresia gratis</option>
                         </select>
                     </div>
                     <div>
-                        <label className="text-xs font-medium">Monto MXN</label>
+                        <label className="text-xs font-medium">Descuento %</label>
                         <Input
                             type="number"
-                            value={rewardAmount}
-                            onChange={(event) => setRewardAmount(event.target.value)}
-                            placeholder="500"
-                            min={0}
-                            className="mt-1"
-                        />
-                    </div>
-                    <div>
-                        <label className="text-xs font-medium">Porcentaje</label>
-                        <Input
-                            type="number"
-                            value={rewardPercentage}
-                            onChange={(event) => setRewardPercentage(event.target.value)}
-                            placeholder="20"
-                            min={0}
+                            value={discountPercent}
+                            onChange={(event) => setDiscountPercent(event.target.value)}
+                            min={1}
                             max={100}
+                            disabled={benefitKind === 'free_membership_level'}
                             className="mt-1"
                         />
                     </div>
                     <div>
-                        <label className="text-xs font-medium">Etiqueta corta</label>
-                        <Input
-                            value={rewardLabel}
-                            onChange={(event) => setRewardLabel(event.target.value)}
-                            placeholder="Bono premium"
-                            className="mt-1"
-                        />
+                        <label className="text-xs font-medium">Nivel objetivo</label>
+                        <select
+                            value={targetMembershipLevel}
+                            onChange={(event) => setTargetMembershipLevel(event.target.value)}
+                            className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                        >
+                            <option value="current">Plan actual</option>
+                            <option value="1">Nivel 1</option>
+                            <option value="2">Nivel 2</option>
+                            <option value="3">Nivel 3</option>
+                        </select>
                     </div>
                 </div>
-            </div>
-
-            <div className="rounded-lg border p-4 space-y-3">
-                <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                    Bonos por Activacion
-                </p>
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
                     <div>
-                        <label className="text-xs font-medium">Registro validado</label>
-                        <Input type="number" value={signupBonus} onChange={(event) => setSignupBonus(event.target.value)} placeholder="150" min={0} className="mt-1" />
-                    </div>
-                    <div>
-                        <label className="text-xs font-medium">Perfil completo</label>
-                        <Input type="number" value={profileBonus} onChange={(event) => setProfileBonus(event.target.value)} placeholder="200" min={0} className="mt-1" />
-                    </div>
-                    <div>
-                        <label className="text-xs font-medium">Primera suscripcion</label>
-                        <Input type="number" value={subscriptionBonus} onChange={(event) => setSubscriptionBonus(event.target.value)} placeholder="900" min={0} className="mt-1" />
-                    </div>
-                    <div>
-                        <label className="text-xs font-medium">Primera compra</label>
-                        <Input type="number" value={firstPurchaseBonus} onChange={(event) => setFirstPurchaseBonus(event.target.value)} placeholder="350" min={0} className="mt-1" />
+                        <label className="text-xs font-medium">Prioridad</label>
+                        <Input type="number" value={priority} onChange={(event) => setPriority(event.target.value)} className="mt-1" />
                     </div>
                 </div>
-            </div>
-
-            <div className="rounded-lg border p-4 space-y-3">
-                <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                    Bonos por Volumen
-                </p>
-                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
-                    <div>
-                        <label className="text-xs font-medium">Hito 3 invitados</label>
-                        <Input type="number" value={milestone3} onChange={(event) => setMilestone3(event.target.value)} placeholder="400" min={0} className="mt-1" />
-                    </div>
-                    <div>
-                        <label className="text-xs font-medium">Hito 5 invitados</label>
-                        <Input type="number" value={milestone5} onChange={(event) => setMilestone5(event.target.value)} placeholder="900" min={0} className="mt-1" />
-                    </div>
-                    <div>
-                        <label className="text-xs font-medium">Hito 10 invitados</label>
-                        <Input type="number" value={milestone10} onChange={(event) => setMilestone10(event.target.value)} placeholder="2500" min={0} className="mt-1" />
-                    </div>
-                </div>
-            </div>
-
-            <div className="rounded-lg border p-4 space-y-3">
-                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                    <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                        Reward Dual para Invitado
-                    </p>
-                    <Button
-                        type="button"
-                        variant={dualRewardEnabled ? 'default' : 'outline'}
-                        size="sm"
-                        onClick={() => setDualRewardEnabled(!dualRewardEnabled)}
-                    >
-                        {dualRewardEnabled ? 'Activo' : 'Inactivo'}
-                    </Button>
-                </div>
-
-                {dualRewardEnabled && (
-                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
-                        <div>
-                            <label className="text-xs font-medium">Tipo</label>
-                            <select
-                                value={dualRewardType}
-                                onChange={(event) => setDualRewardType(event.target.value)}
-                                className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                            >
-                                <option value="discount">Descuento</option>
-                                <option value="credit">Credito</option>
-                                <option value="membership_benefit">Beneficio de membresia</option>
-                                <option value="unlock">Beneficio exclusivo</option>
-                                <option value="custom">Custom</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label className="text-xs font-medium">Monto MXN</label>
-                            <Input
-                                type="number"
-                                value={dualRewardAmount}
-                                onChange={(event) => setDualRewardAmount(event.target.value)}
-                                placeholder="300"
-                                min={0}
-                                className="mt-1"
-                            />
-                        </div>
-                        <div>
-                            <label className="text-xs font-medium">Porcentaje</label>
-                            <Input
-                                type="number"
-                                value={dualRewardPercentage}
-                                onChange={(event) => setDualRewardPercentage(event.target.value)}
-                                placeholder="25"
-                                min={0}
-                                max={100}
-                                className="mt-1"
-                            />
-                        </div>
-                        <div>
-                            <label className="text-xs font-medium">Etiqueta</label>
-                            <Input
-                                value={dualRewardLabel}
-                                onChange={(event) => setDualRewardLabel(event.target.value)}
-                                placeholder="Trial extendido"
-                                className="mt-1"
-                            />
-                        </div>
-                    </div>
-                )}
             </div>
 
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">

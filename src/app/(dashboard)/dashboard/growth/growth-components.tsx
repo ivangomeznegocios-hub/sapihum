@@ -89,6 +89,12 @@ function formatCurrency(value: unknown): string {
 function formatRewardValue(config?: Record<string, any> | null): string {
     if (!config) return ''
 
+    if (config.benefit_kind === 'percent_discount') {
+        return `${config.discount_percent ?? 0}% sobre ${config.target_membership_level === 'current' ? 'plan actual' : `Nivel ${config.target_membership_level}`}`
+    }
+    if (config.benefit_kind === 'free_membership_level') {
+        return `${config.target_membership_level === 'current' ? 'Membresia actual' : `Nivel ${config.target_membership_level}`} gratis`
+    }
     if (config.label) return String(config.label)
     if (config.amount !== undefined && config.amount !== null) return formatCurrency(config.amount)
     if (config.percentage !== undefined && config.percentage !== null) return `${config.percentage}%`
@@ -99,11 +105,6 @@ function formatRewardValue(config?: Record<string, any> | null): string {
 function formatRoleList(roles?: string[] | null): string {
     if (!roles || roles.length === 0) return 'Sin definir'
     return roles.map((role) => roleLabels[role] || role).join(', ')
-}
-
-function formatTriggerList(triggers?: string[] | null): string {
-    if (!triggers || triggers.length === 0) return 'Sin definir'
-    return triggers.map((trigger) => rewardTriggerLabels[trigger] || trigger).join(', ')
 }
 
 function getTimeLabel(endsAt: string | null): string {
@@ -281,7 +282,7 @@ export function CampaignCard({ campaign }: { campaign: GrowthCampaign }) {
                     <div className="mt-3 flex flex-wrap gap-2">
                         {baseRewardLabel && (
                             <span className="rounded-full bg-white/80 px-2.5 py-1 text-xs font-medium dark:bg-white/10">
-                                Pago base: {baseRewardLabel}
+                                Beneficio: {baseRewardLabel}
                             </span>
                         )}
                         {timeLabel && (
@@ -301,7 +302,7 @@ export function CampaignCard({ campaign }: { campaign: GrowthCampaign }) {
                                 <p>Visible para: {formatRoleList(campaign.target_roles)}</p>
                                 <p>Puede invitar: {formatRoleList(campaign.eligible_referrer_roles)}</p>
                                 <p>Invitado elegible: {formatRoleList(campaign.eligible_referred_roles)}</p>
-                                <p>Triggers: {formatTriggerList(campaign.allowed_trigger_events)}</p>
+                                <p>Hito: {rewardConfig.threshold_count ?? 0} invitados activos</p>
                             </div>
                         </div>
 

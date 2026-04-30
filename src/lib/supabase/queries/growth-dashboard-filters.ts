@@ -33,7 +33,7 @@ export function isBlockedGrowthProfile(profile: any): boolean {
 }
 
 export function isHiddenGrowthProfile(profile: any): boolean {
-    return isBlockedGrowthProfile(profile) || isGrowthQaEmail(profile?.email)
+    return Boolean(profile?.is_test) || isBlockedGrowthProfile(profile) || isGrowthQaEmail(profile?.email)
 }
 
 export function shouldShowGrowthAttribution(row: any, options: GrowthDashboardQueryOptions = {}): boolean {
