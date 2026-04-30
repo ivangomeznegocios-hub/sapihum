@@ -9,9 +9,31 @@ import type { ContentItem } from '@/components/dashboard/ui/ContentCarousel'
 import { getAssignedPsychologistForPatient } from '@/lib/supabase/queries/relationships'
 import { canAccessClinicalWorkspace, getPsychologistDashboardLevel } from '@/lib/access/internal-modules'
 import { getEventsWithRegistration } from '@/lib/supabase/queries/events'
+import { getUniqueEventAccessCounts } from '@/lib/events/attendance'
 import { getVisibleResources } from '@/lib/supabase/queries/resources'
 import { DEFAULT_TIMEZONE, getGreetingForTimezone } from '@/lib/timezone'
 import { ArrowRight, Library } from 'lucide-react'
+
+const DASHBOARD_EVENT_SELECT = [
+    'id',
+    'title',
+    'image_url',
+    'start_time',
+    'status',
+    'target_audience',
+    'created_by',
+].join(', ')
+
+const DASHBOARD_RESOURCE_SELECT = [
+    'id',
+    'title',
+    'thumbnail_url',
+    'visibility',
+    'target_audience',
+    'min_membership_level',
+    'created_by',
+    'expires_at',
+].join(', ')
 
 function calculatePsychologistCompleteness(profile: any): number {
     const fields = [
@@ -199,8 +221,16 @@ export default async function DashboardPage() {
             eventRegistrationsResult,
             clinicalResults,
         ] = await Promise.all([
-            getEventsWithRegistration(viewerQueryOptions),
-            getVisibleResources(undefined, viewerQueryOptions),
+            getEventsWithRegistration({
+                ...viewerQueryOptions,
+                statuses: ['upcoming', 'live'],
+                select: DASHBOARD_EVENT_SELECT,
+                includeRegistrations: false,
+                includeAttendeeCounts: false,
+            }),
+            getVisibleResources({
+                select: DASHBOARD_RESOURCE_SELECT,
+            }, viewerQueryOptions),
             (supabase.from('event_registrations') as any)
                 .select('*', { count: 'exact', head: true })
                 .eq('user_id', profile.id),
@@ -353,7 +383,14 @@ export default async function DashboardPage() {
             nextAppointmentResult,
         ] = await Promise.all([
             getAssignedPsychologistForPatient(profile.id, { supabase }),
-            getEventsWithRegistration(viewerQueryOptions),
+            getEventsWithRegistration({
+                ...viewerQueryOptions,
+                statuses: ['upcoming', 'live'],
+                limit: 8,
+                select: DASHBOARD_EVENT_SELECT,
+                includeRegistrations: false,
+                includeAttendeeCounts: false,
+            }),
             (supabase.from('appointments') as any)
                 .select('*', { count: 'exact', head: true })
                 .eq('patient_id', profile.id)
@@ -459,17 +496,14 @@ export default async function DashboardPage() {
         const allEvents = [...createdEvents, ...(assignedEventsResult.data || [])]
             .sort((a: any, b: any) => new Date(b.start_time).getTime() - new Date(a.start_time).getTime())
 
-        const attendeeCountResults = await Promise.all(
-            allEvents.map((evt: any) =>
-                (supabase.from('event_registrations') as any)
-                    .select('*', { count: 'exact', head: true })
-                    .eq('event_id', evt.id)
-            )
+        const attendeeCounts = await getUniqueEventAccessCounts(
+            supabase,
+            allEvents.map((evt: any) => evt.id)
         )
 
         let totalAttendees = 0
-        const eventsWithAttendees = allEvents.map((evt: any, index: number) => {
-            const attendeeCount = attendeeCountResults[index]?.count || 0
+        const eventsWithAttendees = allEvents.map((evt: any) => {
+            const attendeeCount = attendeeCounts[evt.id] || 0
             totalAttendees += attendeeCount
             return {
                 ...evt,

@@ -23,6 +23,8 @@ export interface ResourceFilters {
     search?: string
     showExpired?: boolean
     eventId?: string
+    limit?: number
+    select?: string
 }
 
 interface ResourceViewerOptions {
@@ -51,7 +53,7 @@ export async function getVisibleResources(
         userId = user?.id ?? null
     }
 
-    let query = (supabase.from('resources') as any).select('*')
+    let query = (supabase.from('resources') as any).select(filters?.select ?? '*')
 
     // Apply type filter
     if (filters?.type && filters.type !== 'all') {
@@ -72,6 +74,10 @@ export async function getVisibleResources(
     query = query.order('is_featured', { ascending: false })
         .order('sort_order', { ascending: true })
         .order('created_at', { ascending: false })
+
+    if (filters?.limit) {
+        query = query.limit(filters.limit)
+    }
 
     const { data: resources, error } = await query
 

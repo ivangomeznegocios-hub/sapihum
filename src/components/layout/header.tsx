@@ -43,7 +43,7 @@ export function Header({
     membershipSpecializationCode = null,
 }: HeaderProps) {
     const router = useRouter()
-    const supabase = createClient()
+    const [supabase] = useState(() => createClient())
     const pathname = usePathname()
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 

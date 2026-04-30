@@ -57,6 +57,20 @@ async function readNotificationSnapshot(supabase: ReturnType<typeof createClient
     }
 }
 
+async function readUnreadNotificationCount(supabase: ReturnType<typeof createClient>, userId: string) {
+    const { count, error } = await (supabase
+        .from('user_notifications') as any)
+        .select('id', { count: 'exact', head: true })
+        .eq('user_id', userId)
+        .eq('is_read', false)
+
+    if (error) {
+        throw error
+    }
+
+    return count ?? 0
+}
+
 function formatNotificationTime(value: string) {
     const parsedDate = new Date(value)
     const diffMs = Date.now() - parsedDate.getTime()
@@ -137,7 +151,7 @@ export function NotificationsBell({ userId }: NotificationsBellProps) {
     const router = useRouter()
     const [supabase] = useState(() => createClient())
     const [notifications, setNotifications] = useState<UserNotification[]>([])
-    const [loading, setLoading] = useState(true)
+    const [loading, setLoading] = useState(false)
     const [isOpen, setIsOpen] = useState(false)
     const [markingAll, setMarkingAll] = useState(false)
     const [unreadCount, setUnreadCount] = useState(0)
@@ -168,7 +182,7 @@ export function NotificationsBell({ userId }: NotificationsBellProps) {
     useEffect(() => {
         let isActive = true
 
-        async function loadInitialNotifications() {
+        async function loadInitialUnreadCount() {
             if (!userId) {
                 setNotifications([])
                 setUnreadCount(0)
@@ -176,16 +190,13 @@ export function NotificationsBell({ userId }: NotificationsBellProps) {
                 return
             }
 
-            setLoading(true)
-
             try {
-                const snapshot = await readNotificationSnapshot(supabase, userId)
+                const count = await readUnreadNotificationCount(supabase, userId)
                 if (!isActive) {
                     return
                 }
 
-                setNotifications(snapshot.notifications)
-                setUnreadCount(snapshot.unreadCount)
+                setUnreadCount(count)
             } catch (error) {
                 if (!isActive) {
                     return
@@ -199,7 +210,7 @@ export function NotificationsBell({ userId }: NotificationsBellProps) {
             }
         }
 
-        void loadInitialNotifications()
+        void loadInitialUnreadCount()
 
         return () => {
             isActive = false
@@ -213,9 +224,15 @@ export function NotificationsBell({ userId }: NotificationsBellProps) {
 
         const syncFromRealtime = async () => {
             try {
-                const snapshot = await readNotificationSnapshot(supabase, userId)
-                setNotifications(snapshot.notifications)
-                setUnreadCount(snapshot.unreadCount)
+                if (isOpen) {
+                    const snapshot = await readNotificationSnapshot(supabase, userId)
+                    setNotifications(snapshot.notifications)
+                    setUnreadCount(snapshot.unreadCount)
+                    return
+                }
+
+                const count = await readUnreadNotificationCount(supabase, userId)
+                setUnreadCount(count)
             } catch (error) {
                 console.error('Error syncing internal notifications:', error)
             }
@@ -240,7 +257,7 @@ export function NotificationsBell({ userId }: NotificationsBellProps) {
         return () => {
             void supabase.removeChannel(channel)
         }
-    }, [supabase, userId])
+    }, [isOpen, supabase, userId])
 
     async function markNotificationAsRead(notificationId: string) {
         if (!userId) {
@@ -333,7 +350,7 @@ export function NotificationsBell({ userId }: NotificationsBellProps) {
             onOpenChange={(open) => {
                 setIsOpen(open)
                 if (open) {
-                    void refreshNotifications()
+                    void refreshNotifications(true)
                 }
             }}
         >

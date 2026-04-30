@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import type {
     Event,
+    EventStatus,
     EventInsert,
     EventWithRegistration,
     EventWithSpeakers,
@@ -15,6 +16,11 @@ import { canViewerSeeCatalogEvent } from '@/lib/access/catalog'
 interface EventViewerOptions {
     supabase?: any
     userId?: string | null
+    statuses?: EventStatus[]
+    limit?: number
+    select?: string
+    includeRegistrations?: boolean
+    includeAttendeeCounts?: boolean
     profile?: Pick<
         Profile,
         'id' | 'role' | 'email' | 'membership_level' | 'subscription_status' | 'membership_specialization_code'
@@ -36,18 +42,24 @@ export async function getEventsWithRegistration(
 ): Promise<EventWithRegistration[]> {
     const supabase = options?.supabase ?? await createClient()
     let userId = options?.userId ?? options?.profile?.id ?? null
+    const statuses = options?.statuses ?? ['draft', 'upcoming', 'live', 'completed', 'cancelled']
 
     if (userId === null && options?.userId === undefined && !options?.profile) {
         const { data: { user } } = await supabase.auth.getUser()
         userId = user?.id ?? null
     }
 
-    // Get upcoming events
-    const { data: events, error: eventsError } = await (supabase
+    let eventsQuery = (supabase
         .from('events') as any)
-        .select('*')
-        .in('status', ['draft', 'upcoming', 'live', 'completed', 'cancelled'])
+        .select(options?.select ?? '*')
+        .in('status', statuses)
         .order('start_time', { ascending: true })
+
+    if (options?.limit) {
+        eventsQuery = eventsQuery.limit(options.limit)
+    }
+
+    const { data: events, error: eventsError } = await eventsQuery
 
     if (eventsError || !events) {
         console.error('Error fetching events:', eventsError?.message || eventsError)
@@ -60,7 +72,7 @@ export async function getEventsWithRegistration(
         return []
     }
 
-    const { data: registrations } = userId
+    const { data: registrations } = userId && options?.includeRegistrations !== false
         ? await (supabase
             .from('event_registrations') as any)
             .select('*')
@@ -69,11 +81,13 @@ export async function getEventsWithRegistration(
         : { data: [] }
 
     // Get attendee counts
-    const { data: counts } = await (supabase
-        .from('event_registrations') as any)
-        .select('event_id')
-        .in('event_id', eventIds)
-        .eq('status', 'registered')
+    const { data: counts } = options?.includeAttendeeCounts === false
+        ? { data: [] }
+        : await (supabase
+            .from('event_registrations') as any)
+            .select('event_id')
+            .in('event_id', eventIds)
+            .eq('status', 'registered')
 
     // Count attendees per event
     const attendeeCounts: Record<string, number> = {}

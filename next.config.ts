@@ -11,6 +11,7 @@ const nextConfig: NextConfig = {
     reactStrictMode: false,
     turbopack: {}, // Workaround for serwist + turbopack build blocking
     images: {
+        qualities: [52, 58, 75],
         remotePatterns: [
             {
                 protocol: 'https',
