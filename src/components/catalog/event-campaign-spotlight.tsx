@@ -24,7 +24,7 @@ function getCampaignPalette(campaignKey: EventCampaignKey) {
         shell: 'border-border bg-[linear-gradient(145deg,#ffffff_10%,#eff6ff_55%,#fafaf9_100%)]',
             glow: 'bg-[radial-gradient(circle_at_top_right,rgba(37,99,235,0.2),transparent_32%),radial-gradient(circle_at_bottom_left,rgba(30,58,138,0.18),transparent_28%)]',
             badge: 'border-brand-blue/20 bg-brand-blue/10 text-brand-blue',
-            accentPanel: 'border-border/10 bg-background/25',
+            accentPanel: 'border-brand-border bg-brand-surface-soft',
         }
     }
 
@@ -32,7 +32,7 @@ function getCampaignPalette(campaignKey: EventCampaignKey) {
         shell: 'border-border bg-[linear-gradient(145deg,#ffffff_10%,#f0fdfa_55%,#fafaf9_100%)]',
         glow: 'bg-[radial-gradient(circle_at_top_right,rgba(107,114,128,0.16),transparent_34%),radial-gradient(circle_at_bottom_left,rgba(37,99,235,0.14),transparent_28%)]',
         badge: 'border-border/15 bg-white/10 text-foreground',
-        accentPanel: 'border-border/10 bg-background/25',
+        accentPanel: 'border-brand-border bg-brand-surface-soft',
     }
 }
 
@@ -71,7 +71,7 @@ function CampaignEventList({
                     <Link
                         key={campaignEvent.slug}
                         href={href}
-                        className="group rounded-[22px] border border-border/10 bg-background/20 p-4 transition-all duration-300 hover:-translate-y-0.5 hover:border-brand-blue/30 hover:bg-background/30"
+                        className="group rounded-[22px] border border-brand-border bg-white p-4 transition-all duration-300 hover:-translate-y-0.5 hover:border-brand-blue/30 hover:bg-background/30"
                     >
                         <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-brand-blue/80">
                             {liveEvent?.slug === campaign.primaryEventSlug ? 'Evento ancla' : 'Ruta activa'}
@@ -79,7 +79,7 @@ function CampaignEventList({
                         <h3 className={cn('mt-2 font-semibold text-foreground transition-colors group-hover:text-brand-blue', compact ? 'text-sm' : 'text-sm md:text-base')}>
                             {liveEvent?.title || campaignEvent.title}
                         </h3>
-                        <div className="mt-4 flex flex-wrap items-center gap-3 text-xs text-neutral-400">
+                        <div className="mt-4 flex flex-wrap items-center gap-3 text-xs text-brand-text-muted">
                             <span className="inline-flex items-center gap-1.5">
                                 <CalendarDays className="h-3.5 w-3.5 text-brand-blue" />
                                 {formatShortDate(liveEvent?.start_time)}
@@ -126,10 +126,10 @@ export function EventCampaignSpotlight({
                             <h3 className="text-3xl font-bold tracking-tight text-foreground">
                                 {campaign.title}
                             </h3>
-                            <p className="text-base leading-relaxed text-neutral-200">
+                            <p className="text-base leading-relaxed text-brand-text">
                                 {campaign.promise}
                             </p>
-                            <p className="text-sm leading-relaxed text-neutral-400">
+                            <p className="text-sm leading-relaxed text-brand-text-muted">
                                 {campaign.summary}
                             </p>
                         </div>
@@ -166,7 +166,7 @@ export function EventCampaignSpotlight({
                             Agenda activa
                         </div>
                         <h3 className="text-2xl font-bold tracking-tight text-foreground">{campaign.title}</h3>
-                        <p className="max-w-3xl text-sm leading-relaxed text-neutral-300">
+                        <p className="max-w-3xl text-sm leading-relaxed text-brand-text-muted">
                             Empieza por la ruta activa y usa Academia como el punto principal para explorar agenda, registro y temario.
                         </p>
                     </div>
@@ -205,7 +205,7 @@ export function EventCampaignSpotlight({
                                 <span className={cn('inline-flex items-center gap-2 rounded-full border px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em]', palette.badge)}>
                                     Ruta activa
                                 </span>
-                                <span className="inline-flex rounded-full border border-border/10 bg-white/5 px-3 py-1 text-xs font-medium text-neutral-300">
+                                <span className="inline-flex rounded-full border border-brand-border bg-brand-surface-soft px-3 py-1 text-xs font-medium text-brand-text-muted">
                                     {campaign.events.length} {campaign.events.length === 1 ? 'evento clave' : 'eventos conectados'}
                                 </span>
                             </div>
@@ -213,10 +213,10 @@ export function EventCampaignSpotlight({
                                 <h2 className="max-w-4xl text-3xl font-bold tracking-tight text-foreground md:text-4xl">
                                     {campaign.title}
                                 </h2>
-                                <p className="max-w-4xl text-lg leading-relaxed text-neutral-200">
+                                <p className="max-w-4xl text-lg leading-relaxed text-brand-text">
                                     {campaign.promise}
                                 </p>
-                                <p className="max-w-3xl text-sm leading-relaxed text-neutral-400 md:text-base">
+                                <p className="max-w-3xl text-sm leading-relaxed text-brand-text-muted md:text-base">
                                     {campaign.summary}
                                 </p>
                             </div>
@@ -269,10 +269,10 @@ export function EventCampaignSpotlight({
                                     Evento ancla
                                 </p>
                                 <h3 className="text-2xl font-bold text-foreground">{primaryEvent?.title}</h3>
-                                <p className="text-sm leading-relaxed text-neutral-400">
+                                <p className="text-sm leading-relaxed text-brand-text-muted">
                                     Empieza por el encuentro mas cercano y usa esta ruta para mantener continuidad entre eventos relacionados.
                                 </p>
-                                <div className="rounded-2xl border border-border/10 bg-background/25 p-4 text-sm text-neutral-300">
+                                <div className="rounded-2xl border border-brand-border bg-brand-surface-soft p-4 text-sm text-brand-text-muted">
                                     <p className="font-medium text-foreground">Fecha recomendada</p>
                                     <p className="mt-2 inline-flex items-center gap-2">
                                         <CalendarDays className="h-4 w-4 text-brand-blue" />

@@ -305,10 +305,10 @@ export default async function SpecializationPage(props: Props) {
                 <span className="text-base leading-none">{spec.icon}</span>
                 Especialidad activa
               </Badge>
-              <Badge variant="outline" className="border-border/10 bg-white/5 text-neutral-200">
+              <Badge variant="outline" className="border-brand-border bg-brand-surface-soft text-brand-text">
                 Eventos, cursos y formaciones
               </Badge>
-              <Badge variant="outline" className="border-border/10 bg-white/5 text-neutral-200">
+              <Badge variant="outline" className="border-brand-border bg-brand-surface-soft text-brand-text">
                 Membresia + Nivel 2
               </Badge>
             </div>
@@ -317,7 +317,7 @@ export default async function SpecializationPage(props: Props) {
               <h1 className="text-4xl font-black leading-[1.05] tracking-tight text-foreground md:text-5xl lg:text-6xl">
                 {spec.name}: eventos, cursos y formacion especializada
               </h1>
-              <p className="max-w-3xl text-lg leading-relaxed text-neutral-300 md:text-xl">
+              <p className="max-w-3xl text-lg leading-relaxed text-brand-text-muted md:text-xl">
                 {description}
               </p>
             </div>
@@ -326,7 +326,7 @@ export default async function SpecializationPage(props: Props) {
               {seoProfile.terms.map((term) => (
                 <span
                   key={term}
-                  className="inline-flex rounded-full border border-border/10 bg-white/[0.04] px-3 py-1.5 text-xs font-medium text-neutral-200"
+                  className="inline-flex rounded-full border border-brand-border bg-brand-surface-soft px-3 py-1.5 text-xs font-medium text-brand-text"
                 >
                   {term}
                 </span>
@@ -366,45 +366,45 @@ export default async function SpecializationPage(props: Props) {
           </div>
 
           <aside className="lg:justify-self-end">
-            <div className="grid gap-4 rounded-[28px] border border-border/10 bg-white/[0.04] p-6 text-foreground shadow-2xl shadow-black/30 backdrop-blur-sm">
+            <div className="grid gap-4 rounded-[28px] border border-brand-border bg-brand-surface-soft p-6 text-foreground shadow-2xl shadow-slate-200/80 backdrop-blur-sm">
               {hasSpecificCatalogContent ? (
                 <>
-                  <div className="rounded-2xl border border-border/10 bg-background/30 p-4">
+                  <div className="rounded-2xl border border-brand-border bg-white p-4">
                     <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-neutral-500">Eventos y cursos</p>
                     {hasSpecificEvents ? (
                       <>
                         <p className="mt-2 text-3xl font-black text-foreground">{specificEventCount}</p>
-                        <p className="mt-1 text-sm text-neutral-400">especificos de la especialidad</p>
+                        <p className="mt-1 text-sm text-brand-text-muted">especificos de la especialidad</p>
                       </>
                     ) : (
                       <>
                         <p className="mt-2 text-lg font-bold text-foreground">Próximamente</p>
-                        <p className="mt-1 text-sm text-neutral-400">Estamos preparando nuevos eventos para esta especialidad.</p>
+                        <p className="mt-1 text-sm text-brand-text-muted">Estamos preparando nuevos eventos para esta especialidad.</p>
                       </>
                     )}
                   </div>
 
-                  <div className="rounded-2xl border border-border/10 bg-background/30 p-4">
+                  <div className="rounded-2xl border border-brand-border bg-white p-4">
                     <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-neutral-500">Formaciones</p>
                     {hasSpecificFormations ? (
                       <>
                         <p className="mt-2 text-3xl font-black text-foreground">{specificFormationCount}</p>
-                        <p className="mt-1 text-sm text-neutral-400">rutas activas de esta rama</p>
+                        <p className="mt-1 text-sm text-brand-text-muted">rutas activas de esta rama</p>
                       </>
                     ) : (
                       <>
                         <p className="mt-2 text-lg font-bold text-foreground">En preparación</p>
-                        <p className="mt-1 text-sm text-neutral-400">Próximamente publicaremos formaciones diseñadas para esta especialidad.</p>
+                        <p className="mt-1 text-sm text-brand-text-muted">Próximamente publicaremos formaciones diseñadas para esta especialidad.</p>
                       </>
                     )}
                   </div>
 
-                  <div className="rounded-2xl border border-border/10 bg-background/30 p-4">
+                  <div className="rounded-2xl border border-brand-border bg-white p-4">
                     <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-neutral-500">Membresia</p>
                     <p className="mt-2 text-lg font-bold text-foreground">
                       {level1Plan ? `Desde ${formatCurrency(level1Plan.monthly.amount)}/mes` : 'Acceso general'}
                     </p>
-                    <p className="mt-1 text-sm text-neutral-400">Para pertenecer y entrar al ecosistema.</p>
+                    <p className="mt-1 text-sm text-brand-text-muted">Para pertenecer y entrar al ecosistema.</p>
                   </div>
 
                   <div className="rounded-2xl border border-brand-blue/20 bg-brand-blue/10 p-4">
@@ -412,7 +412,7 @@ export default async function SpecializationPage(props: Props) {
                     <p className="mt-2 text-lg font-bold text-foreground">
                       {level2Plan ? `Desde ${formatCurrency(level2Plan.monthly.amount)}/mes` : 'Próximamente'}
                     </p>
-                    <p className="mt-1 text-sm text-neutral-300">
+                    <p className="mt-1 text-sm text-brand-text-muted">
                       {level2Plan ? 'Formación avanzada para crecer dentro de la especialidad.' : 'Regístrate para recibir aviso cuando esté disponible.'}
                     </p>
                   </div>
@@ -425,13 +425,13 @@ export default async function SpecializationPage(props: Props) {
                 </>
               ) : (
                 <>
-                  <div className="rounded-2xl border border-border/10 bg-background/30 p-4">
+                  <div className="rounded-2xl border border-brand-border bg-white p-4">
                     <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-neutral-500">Temas que cubre</p>
                     <div className="mt-3 flex flex-wrap gap-2">
                       {seoProfile.terms.map((term) => (
                         <span
                           key={term}
-                          className="rounded-full border border-border/10 bg-white/5 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-neutral-200"
+                          className="rounded-full border border-brand-border bg-brand-surface-soft px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-brand-text"
                         >
                           {term}
                         </span>
@@ -439,20 +439,20 @@ export default async function SpecializationPage(props: Props) {
                     </div>
                   </div>
 
-                  <div className="rounded-2xl border border-border/10 bg-background/30 p-4">
+                  <div className="rounded-2xl border border-brand-border bg-white p-4">
                     <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-neutral-500">Membresía</p>
                     <p className="mt-2 text-lg font-bold text-foreground">
                       {level1Plan ? `Desde ${formatCurrency(level1Plan.monthly.amount)}/mes` : 'Acceso general'}
                     </p>
-                    <p className="mt-1 text-sm text-neutral-400">Accede a la comunidad y a todos los contenidos disponibles.</p>
+                    <p className="mt-1 text-sm text-brand-text-muted">Accede a la comunidad y a todos los contenidos disponibles.</p>
                   </div>
 
-                  <div className="rounded-2xl border border-border/10 bg-background/30 p-4">
+                  <div className="rounded-2xl border border-brand-border bg-white p-4">
                     <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-neutral-500">Contenido disponible</p>
                     <p className="mt-2 text-lg font-bold text-foreground">
                       {transversalContentSummary || 'Catálogo general activo'}
                     </p>
-                    <p className="mt-1 text-sm text-neutral-400">Explora eventos y formaciones relevantes para tu desarrollo profesional.</p>
+                    <p className="mt-1 text-sm text-brand-text-muted">Explora eventos y formaciones relevantes para tu desarrollo profesional.</p>
                   </div>
 
                   <div className="rounded-2xl border border-brand-blue/20 bg-brand-blue/10 p-4">
@@ -460,7 +460,7 @@ export default async function SpecializationPage(props: Props) {
                     <p className="mt-2 text-lg font-bold text-foreground">
                       {level2Plan ? `Desde ${formatCurrency(level2Plan.monthly.amount)}/mes` : 'Próximamente'}
                     </p>
-                    <p className="mt-1 text-sm text-neutral-300">
+                    <p className="mt-1 text-sm text-brand-text-muted">
                       {level2Plan ? 'Formación avanzada diseñada para profundizar en la especialidad.' : 'Déjanos tu interés y te avisamos cuando esté disponible.'}
                     </p>
                   </div>
@@ -628,12 +628,12 @@ export default async function SpecializationPage(props: Props) {
                         variant="outline"
                         className={isSpecific
                           ? 'border-brand-blue/30 bg-brand-blue/10 text-brand-blue'
-                          : 'border-border/10 bg-muted text-muted-foreground'}
+                          : 'border-brand-border bg-muted text-muted-foreground'}
                       >
                         {isSpecific ? spec.name : 'General'}
                       </Badge>
                       {totalHours && (
-                        <Badge variant="outline" className="border-border/10 bg-muted text-muted-foreground">
+                        <Badge variant="outline" className="border-brand-border bg-muted text-muted-foreground">
                           {totalHours}
                         </Badge>
                       )}
@@ -701,15 +701,15 @@ export default async function SpecializationPage(props: Props) {
           </div>
 
           <div className="grid gap-6 lg:grid-cols-2">
-            <article className="rounded-[30px] border border-border/10 bg-white/[0.04] p-7 shadow-2xl shadow-black/20">
+            <article className="rounded-[30px] border border-brand-border bg-brand-surface-soft p-7 shadow-2xl shadow-slate-200/80">
               <Badge variant="outline" className="border-brand-blue/30 bg-brand-blue/10 text-brand-blue">
                 Nivel 1
               </Badge>
               <h3 className="mt-5 text-3xl font-bold">{PRICING_PLAN_COPY.level1.title}</h3>
-              <p className="mt-3 text-base leading-relaxed text-neutral-300">
+              <p className="mt-3 text-base leading-relaxed text-brand-text-muted">
                 Accede a la comunidad, participa en eventos y descubre todas las especialidades disponibles.
               </p>
-              <div className="mt-6 rounded-2xl border border-border/10 bg-background/25 p-5">
+              <div className="mt-6 rounded-2xl border border-brand-border bg-background/25 p-5">
                 <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-neutral-500">Desde</p>
                 <p className="mt-2 text-3xl font-black text-foreground">
                   {level1Plan ? `${formatCurrency(level1Plan.monthly.amount)}/mes` : 'Consulta disponibilidad'}
@@ -730,16 +730,16 @@ export default async function SpecializationPage(props: Props) {
               </div>
             </article>
 
-            <article className="rounded-[30px] border border-brand-blue/20 bg-brand-blue/10 p-7 shadow-2xl shadow-black/20">
-              <Badge variant="outline" className="border-brand-blue/30 bg-background/20 text-brand-blue">
+            <article className="rounded-[30px] border border-brand-blue/20 bg-brand-blue/10 p-7 shadow-2xl shadow-slate-200/80">
+              <Badge variant="outline" className="border-brand-blue/30 bg-white text-brand-blue">
                 Nivel 2
               </Badge>
               <h3 className="mt-5 text-3xl font-bold text-foreground">{level2OfferName}</h3>
-              <p className="mt-3 text-base leading-relaxed text-neutral-200">
+              <p className="mt-3 text-base leading-relaxed text-brand-text">
                 Formación avanzada con mayor profundidad, contenido exclusivo y una ruta diseñada para quienes
                 quieren especializarse en {spec.name}.
               </p>
-              <div className="mt-6 rounded-2xl border border-brand-blue/20 bg-background/20 p-5">
+              <div className="mt-6 rounded-2xl border border-brand-blue/20 bg-white p-5">
                 <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-brand-blue">Inversión</p>
                 <p className="mt-2 text-3xl font-black text-foreground">
                   {level2Plan ? `${formatCurrency(level2Plan.monthly.amount)}/mes` : 'Próximamente'}
@@ -763,7 +763,7 @@ export default async function SpecializationPage(props: Props) {
                   />
                 )}
                 <Link href="/precios">
-                  <Button variant="outline" className="gap-2 border-border/15 bg-background/10 text-foreground hover:bg-background/20">
+                  <Button variant="outline" className="gap-2 border-border/15 bg-background/10 text-foreground hover:bg-white">
                     Comparar planes
                   </Button>
                 </Link>
@@ -779,7 +779,7 @@ export default async function SpecializationPage(props: Props) {
           <h2 className="text-3xl font-bold tracking-tight md:text-5xl">
             Todo lo que necesitas en {spec.name}, en un solo lugar
           </h2>
-          <p className="mx-auto mt-5 max-w-3xl text-lg leading-relaxed text-neutral-400">
+          <p className="mx-auto mt-5 max-w-3xl text-lg leading-relaxed text-brand-text-muted">
             Únete a la comunidad, accede a eventos y formaciones de la especialidad, y avanza hacia {level2OfferName}
             cuando estés listo para profundizar.
           </p>
@@ -809,20 +809,20 @@ export default async function SpecializationPage(props: Props) {
           </div>
 
           <div className="mt-10 grid gap-4 text-left md:grid-cols-3">
-            <div className="rounded-2xl border border-border/10 bg-white/[0.04] p-5">
+            <div className="rounded-2xl border border-brand-border bg-brand-surface-soft p-5">
               <Users className="mb-3 h-5 w-5 text-brand-blue" />
               <h3 className="font-bold">Membresia</h3>
-              <p className="mt-2 text-sm leading-relaxed text-neutral-400">Accede a la comunidad y a todos los recursos generales disponibles.</p>
+              <p className="mt-2 text-sm leading-relaxed text-brand-text-muted">Accede a la comunidad y a todos los recursos generales disponibles.</p>
             </div>
-            <div className="rounded-2xl border border-border/10 bg-white/[0.04] p-5">
+            <div className="rounded-2xl border border-brand-border bg-brand-surface-soft p-5">
               <CalendarDays className="mb-3 h-5 w-5 text-brand-blue" />
               <h3 className="font-bold">Eventos y cursos</h3>
-              <p className="mt-2 text-sm leading-relaxed text-neutral-400">Talleres, cursos y eventos en vivo con profesionales de primer nivel.</p>
+              <p className="mt-2 text-sm leading-relaxed text-brand-text-muted">Talleres, cursos y eventos en vivo con profesionales de primer nivel.</p>
             </div>
-            <div className="rounded-2xl border border-border/10 bg-white/[0.04] p-5">
+            <div className="rounded-2xl border border-brand-border bg-brand-surface-soft p-5">
               <BookOpenCheck className="mb-3 h-5 w-5 text-brand-blue" />
               <h3 className="font-bold">{level2OfferName}</h3>
-              <p className="mt-2 text-sm leading-relaxed text-neutral-400">Formación avanzada para quienes buscan una ruta completa de especialización.</p>
+              <p className="mt-2 text-sm leading-relaxed text-brand-text-muted">Formación avanzada para quienes buscan una ruta completa de especialización.</p>
             </div>
           </div>
         </div>

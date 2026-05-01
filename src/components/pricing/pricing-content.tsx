@@ -76,13 +76,13 @@ function BillingToggle({
   savingsPercent: number
 }) {
   return (
-    <div className="inline-flex items-center rounded-full border border-border/10 bg-white/[0.03] p-1">
+    <div className="inline-flex items-center rounded-full border border-brand-border bg-white p-1">
       <button
         onClick={() => !isAnnual || onToggle()}
         className={`rounded-full px-5 py-2.5 text-sm font-semibold transition-all ${
           !isAnnual
-            ? 'bg-white text-black shadow-sm'
-            : 'text-[#6B7280]/70 hover:text-foreground'
+            ? 'bg-brand-text-strong text-white shadow-sm'
+            : 'text-brand-text-muted hover:text-brand-text-strong'
         }`}
       >
         Mensual
@@ -91,8 +91,8 @@ function BillingToggle({
         onClick={() => isAnnual || onToggle()}
         className={`inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold transition-all ${
           isAnnual
-            ? 'bg-white text-black shadow-sm'
-            : 'text-[#6B7280]/70 hover:text-foreground'
+            ? 'bg-brand-text-strong text-white shadow-sm'
+            : 'text-brand-text-muted hover:text-brand-text-strong'
         }`}
       >
         Anual
@@ -120,9 +120,9 @@ function PriceDisplay({
           <span className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
             {currency(plan.annual.monthlyEquivalent)}
           </span>
-          <span className="text-sm text-[#6B7280]/50">/mes</span>
+          <span className="text-sm text-brand-text-muted">/mes</span>
         </div>
-        <p className="mt-2 text-xs text-[#6B7280]/45">
+        <p className="mt-2 text-xs text-brand-text-muted">
           <span className="line-through">{currency(plan.monthly.amount)}/mes</span>
           {' · '}
           {currency(plan.annual.amount)} facturado anualmente
@@ -136,7 +136,7 @@ function PriceDisplay({
       <span className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
         {currency(plan.monthly.amount)}
       </span>
-      <span className="text-sm text-[#6B7280]/50">/mes</span>
+      <span className="text-sm text-brand-text-muted">/mes</span>
     </div>
   )
 }
@@ -147,7 +147,7 @@ function ComparisonCell({ included }: { included: boolean }) {
       <Check className="h-3.5 w-3.5" />
     </span>
   ) : (
-    <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-white/[0.04] text-foreground/20">
+    <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-brand-surface-soft text-foreground/20">
       <X className="h-3.5 w-3.5" />
     </span>
   )
@@ -183,7 +183,7 @@ export function PricingContent({
       icon: Users,
       featureIds: LEVEL_1_FEATURE_IDS,
       accent: false,
-      cardClassName: 'border-border/[0.08] bg-background',
+      cardClassName: 'border-brand-border bg-background',
     },
     {
       key: 'level2' as const,
@@ -200,7 +200,7 @@ export function PricingContent({
       icon: Crown,
       featureIds: LEVEL_3_CARD_FEATURE_IDS,
       accent: false,
-      cardClassName: 'border-border/[0.08] bg-background',
+      cardClassName: 'border-brand-border bg-background',
     },
   ]
 
@@ -212,7 +212,7 @@ export function PricingContent({
           <div className="absolute inset-0 sapihum-grid-bg opacity-20" />
           <div className="absolute left-1/2 top-0 h-[540px] w-[540px] -translate-x-1/2 rounded-full bg-[#2563EB]/6 blur-[140px]" />
 
-          <div className="relative z-10 mx-auto max-w-5xl px-4 py-24 sm:px-6 lg:px-8 lg:py-32">
+            <div className="relative z-10 mx-auto max-w-5xl px-4 py-16 sm:px-6 md:py-20 lg:px-8 lg:py-24">
             <div className="mx-auto max-w-4xl text-center">
               <div className="sapihum-fade-up inline-flex items-center gap-2 rounded-sm border border-[#2563EB]/20 bg-[#2563EB]/5 px-4 py-1.5 text-[10px] font-bold uppercase tracking-[0.2em] text-[#2563EB]">
                 Membresía SAPIHUM
@@ -236,7 +236,7 @@ export function PricingContent({
                 />
               </div>
 
-              <p className="mt-5 text-xs text-[#6B7280]/40">
+              <p className="mt-5 text-xs text-brand-text-muted">
                 Montos en MXN · La expansión de Consultorio Digital es para Psicología Clínica
               </p>
             </div>
@@ -244,7 +244,7 @@ export function PricingContent({
         </section>
 
         {/* ── Pricing Cards ── */}
-        <section className="w-full bg-background py-16 sm:py-20">
+        <section className="w-full bg-background pb-16 pt-8 sm:pb-20 sm:pt-10">
           <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
             <div className="mx-auto mb-16 max-w-2xl">
               {cardConfigs.filter(c => c.key === 'level1').map((card) => {
@@ -268,7 +268,7 @@ export function PricingContent({
                       <div className="px-6 pt-6 pb-5 sm:px-7">
                         {/* Badges row */}
                         <div className="flex flex-wrap items-center gap-2">
-                          <Badge className="border border-border/10 bg-white/[0.04] text-[10px] uppercase tracking-[0.18em] text-[#6B7280]/70 hover:bg-white/[0.04]">
+                          <Badge className="border border-brand-border bg-brand-surface-soft text-[10px] uppercase tracking-[0.18em] text-brand-text-muted hover:bg-brand-surface-soft">
                             {copy.levelLabel}
                           </Badge>
                           {copy.badge && (
@@ -280,7 +280,7 @@ export function PricingContent({
 
                         {/* Icon + Title + Description */}
                         <div className="mt-5 flex items-center gap-3">
-                          <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${card.accent ? 'bg-[#2563EB]/12 text-[#2563EB]' : 'bg-white/[0.04] text-[#2563EB]'}`}>
+                          <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${card.accent ? 'bg-[#2563EB]/12 text-[#2563EB]' : 'bg-brand-surface-soft text-[#2563EB]'}`}>
                             <Icon className="h-5 w-5" />
                           </div>
                           <h2 className="text-xl font-bold text-foreground sm:text-2xl">
@@ -288,7 +288,7 @@ export function PricingContent({
                           </h2>
                         </div>
 
-                        <p className="mt-3 text-sm leading-relaxed text-[#6B7280]/55">
+                        <p className="mt-3 text-sm leading-relaxed text-brand-text-muted">
                           {copy.description}
                         </p>
 
@@ -300,7 +300,7 @@ export function PricingContent({
 
                       {/* Feature list */}
                       <div className="flex flex-1 flex-col border-t border-border/[0.06] px-6 py-5 sm:px-7">
-                        <p className="mb-4 flex items-center justify-between text-[10px] font-bold uppercase tracking-[0.18em] text-[#6B7280]/40">
+                        <p className="mb-4 flex items-center justify-between text-[10px] font-bold uppercase tracking-[0.18em] text-brand-text-muted">
                           <span>Lo que incluye</span>
                         </p>
 
@@ -313,7 +313,7 @@ export function PricingContent({
                                 <button
                                   type="button"
                                   onClick={() => setSelectedFeatureId(feature.id)}
-                                  className="text-left text-sm font-medium text-[#6B7280]/70 transition-colors hover:text-[#2563EB]"
+                                  className="text-left text-sm font-medium text-brand-text-muted transition-colors hover:text-[#2563EB]"
                                 >
                                   {feature.title}
                                 </button>
@@ -323,7 +323,7 @@ export function PricingContent({
                         </ul>
 
                         {/* Note */}
-                        <p className="mt-5 border-t border-border/[0.06] pt-4 text-xs leading-relaxed text-[#6B7280]/40">
+                        <p className="mt-5 border-t border-border/[0.06] pt-4 text-xs leading-relaxed text-brand-text-muted">
                           {copy.note}
                         </p>
 
@@ -363,7 +363,7 @@ export function PricingContent({
                 <div className="w-full border-t border-border/[0.06]"></div>
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="bg-background px-4 font-medium tracking-wide text-[#6B7280]/50 uppercase text-[10px]">Expansiones opcionales</span>
+                <span className="bg-background px-4 font-medium tracking-wide text-brand-text-muted uppercase text-[10px]">Expansiones opcionales</span>
               </div>
             </div>
 
@@ -383,7 +383,7 @@ export function PricingContent({
                     <CardContent className="flex h-full flex-col p-0">
                       <div className="px-6 pt-6 pb-5 sm:px-7">
                         <div className="flex flex-wrap items-center gap-2">
-                          <Badge className="border border-border/10 bg-white/[0.04] text-[10px] uppercase tracking-[0.18em] text-[#6B7280]/70 hover:bg-white/[0.04]">
+                          <Badge className="border border-brand-border bg-brand-surface-soft text-[10px] uppercase tracking-[0.18em] text-brand-text-muted hover:bg-brand-surface-soft">
                             {copy.levelLabel}
                           </Badge>
                           {copy.badge && (
@@ -393,7 +393,7 @@ export function PricingContent({
                           )}
                         </div>
                         <div className="mt-5 flex items-center gap-3">
-                          <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${card.accent ? 'bg-[#2563EB]/12 text-[#2563EB]' : 'bg-white/[0.04] text-[#2563EB]'}`}>
+                          <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${card.accent ? 'bg-[#2563EB]/12 text-[#2563EB]' : 'bg-brand-surface-soft text-[#2563EB]'}`}>
                             <Icon className="h-5 w-5" />
                           </div>
                           <h2 className="text-xl font-bold text-foreground sm:text-2xl">
@@ -408,7 +408,7 @@ export function PricingContent({
                         </div>
                       </div>
                       <div className="flex flex-1 flex-col border-t border-border/[0.06] px-6 py-5 sm:px-7">
-                        <p className="mb-4 flex items-center justify-between text-[10px] font-bold uppercase tracking-[0.18em] text-[#6B7280]/40">
+                        <p className="mb-4 flex items-center justify-between text-[10px] font-bold uppercase tracking-[0.18em] text-brand-text-muted">
                           <span>Lo que incluye</span>
                           {card.key === 'level2' && (
                             <span className="text-[#2563EB]/70">+ toda la Membresía</span>
@@ -431,7 +431,7 @@ export function PricingContent({
                                 <button
                                   type="button"
                                   onClick={() => setSelectedFeatureId(feature.id)}
-                                  className={`text-left text-sm transition-colors hover:text-[#2563EB] ${carryover ? 'font-medium text-foreground' : 'text-[#6B7280]/70'}`}
+                                  className={`text-left text-sm transition-colors hover:text-[#2563EB] ${carryover ? 'font-medium text-foreground' : 'text-brand-text-muted'}`}
                                 >
                                   {feature.title}
                                 </button>
@@ -439,7 +439,7 @@ export function PricingContent({
                             )
                           })}
                         </ul>
-                        <p className="mt-5 border-t border-border/[0.06] pt-4 text-xs leading-relaxed text-[#6B7280]/40">
+                        <p className="mt-5 border-t border-border/[0.06] pt-4 text-xs leading-relaxed text-brand-text-muted">
                           {copy.note}
                         </p>
                         <div className="mt-5">
@@ -486,7 +486,7 @@ export function PricingContent({
                           )}
                         </div>
                         {card.key === 'level3' && (
-                          <p className="mt-3 text-center text-[11px] text-[#6B7280]/40">
+                          <p className="mt-3 text-center text-[11px] text-brand-text-muted">
                             Se habilita una vez que ya tienes activo Consultorio Digital.
                           </p>
                         )}
@@ -535,10 +535,10 @@ export function PricingContent({
             </div>
 
             {comparisonOpen && (
-              <div className="mt-10 overflow-x-auto rounded-2xl border border-border/[0.08] bg-[#070707]">
+              <div className="mt-10 overflow-x-auto rounded-2xl border border-brand-border bg-[#070707]">
                 <Table className="w-full min-w-[640px] text-foreground">
                   <TableHeader>
-                    <TableRow className="border-border/[0.08] bg-white/[0.03] hover:bg-white/[0.03]">
+                    <TableRow className="border-brand-border bg-white hover:bg-white">
                       <TableHead className="w-[40%] text-[#6B7280]/60 text-xs">Beneficio</TableHead>
                       <TableHead className="w-[20%] text-center text-[#6B7280]/60 text-xs">
                         Comunidad
@@ -562,7 +562,7 @@ export function PricingContent({
                         {group.rows.map((feature, index) => (
                           <TableRow
                             key={feature.id}
-                            className={`cursor-pointer border-border/[0.05] transition-colors hover:bg-white/[0.04] ${
+                            className={`cursor-pointer border-border/[0.05] transition-colors hover:bg-brand-surface-soft ${
                               index % 2 === 0 ? 'bg-transparent' : 'bg-white/[0.015]'
                             }`}
                             onClick={() => setSelectedFeatureId(feature.id)}
@@ -570,7 +570,7 @@ export function PricingContent({
                             <TableCell className="align-middle">
                               <div className="min-w-0">
                                 <p className="text-sm font-medium text-foreground">{feature.title}</p>
-                                <p className="mt-0.5 text-xs text-[#6B7280]/45">{feature.description}</p>
+                                <p className="mt-0.5 text-xs text-brand-text-muted">{feature.description}</p>
                               </div>
                             </TableCell>
                             <TableCell className="text-center align-middle">
@@ -615,13 +615,13 @@ export function PricingContent({
             ].map((item) => (
               <div
                 key={item.title}
-                className="rounded-xl border border-border/[0.08] bg-background p-6"
+                className="rounded-xl border border-brand-border bg-background p-6"
               >
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/[0.04] text-[#2563EB]">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-surface-soft text-[#2563EB]">
                   <item.icon className="h-4.5 w-4.5" />
                 </div>
                 <h3 className="mt-4 text-base font-semibold text-foreground">{item.title}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-[#6B7280]/50">
+                <p className="mt-2 text-sm leading-relaxed text-brand-text-muted">
                   {item.text}
                 </p>
               </div>
@@ -632,7 +632,7 @@ export function PricingContent({
 
       {/* ── Feature Detail Dialog — Minimalist ── */}
       <Dialog open={!!selectedFeature} onOpenChange={(open) => !open && setSelectedFeatureId(null)}>
-        <DialogContent className="max-w-md border-border/[0.08] bg-background text-foreground sm:rounded-2xl">
+        <DialogContent className="max-w-md border-brand-border bg-background text-foreground sm:rounded-2xl">
           {selectedFeature && (
             <div className="space-y-4">
               <DialogHeader className="space-y-2 text-left">
@@ -647,13 +647,13 @@ export function PricingContent({
                 </DialogDescription>
               </DialogHeader>
 
-              <div className="rounded-xl border border-border/[0.06] bg-white/[0.02] p-4 text-sm leading-relaxed text-[#6B7280]/70">
+              <div className="rounded-xl border border-border/[0.06] bg-white/[0.02] p-4 text-sm leading-relaxed text-brand-text-muted">
                 {selectedFeature.details}
               </div>
 
               {/* Simple availability row — compact */}
               <div className="flex items-center gap-3 pt-1">
-                <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-[#6B7280]/35">
+                <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-brand-text-muted">
                   Disponible en:
                 </span>
                 <div className="flex items-center gap-2">

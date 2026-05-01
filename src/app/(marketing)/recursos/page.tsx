@@ -92,13 +92,13 @@ export default function RecursosPage() {
 
           <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight leading-[1.08] text-foreground">
             Todo lo que necesitas para{' '}
-            <span className="font-serif italic font-normal text-[#6B7280]">
+            <span className="font-serif italic font-normal text-brand-text-muted">
               ejercer con más criterio
             </span>{' '}
             está adentro.
           </h1>
 
-          <p className="mt-8 text-lg md:text-xl text-[#6B7280]/60 max-w-2xl mx-auto leading-relaxed font-light">
+          <p className="mt-8 text-lg md:text-xl text-brand-text-muted max-w-2xl mx-auto leading-relaxed font-light">
             Plantillas, protocolos, grabaciones, escalas e instrumentos clínicos.
             El catálogo completo de recursos SAPIHUM está disponible para miembros activos.
           </p>
@@ -124,7 +124,7 @@ export default function RecursosPage() {
       </section>
 
       {/* ── QUÉ INCLUYE ─────────────────────────────────────────── */}
-      <section className="w-full py-32 bg-background border-t border-border/[0.06]">
+      <section className="w-full py-32 bg-background border-t border-brand-border">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           {/* Header */}
           <div className="max-w-2xl mb-20">
@@ -133,7 +133,7 @@ export default function RecursosPage() {
             </p>
             <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-foreground leading-tight">
               Recursos diseñados para{' '}
-              <span className="font-serif italic font-normal text-[#6B7280]">
+              <span className="font-serif italic font-normal text-brand-text-muted">
                 la práctica real
               </span>
             </h2>
@@ -142,7 +142,7 @@ export default function RecursosPage() {
 
           {/* Resource grid — blurred/locked state */}
           <div className="relative">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-px bg-white/[0.05] border border-border/[0.05]">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-px bg-brand-border border border-brand-border">
               {RESOURCE_CATEGORIES.map((cat) => (
                 <div
                   key={cat.label}
@@ -154,14 +154,14 @@ export default function RecursosPage() {
                   </div>
 
                   {/* Icon */}
-                  <div className="mb-5 inline-flex h-11 w-11 items-center justify-center border border-border/[0.06] bg-background text-[#6B7280] group-hover:text-[#2563EB] group-hover:border-[#2563EB]/20 transition-colors duration-300">
+                  <div className="mb-5 inline-flex h-11 w-11 items-center justify-center border border-brand-border bg-background text-brand-text-muted group-hover:text-[#2563EB] group-hover:border-[#2563EB]/20 transition-colors duration-300">
                     {cat.icon}
                   </div>
 
                   <h3 className="text-sm font-bold text-foreground uppercase tracking-[0.08em] mb-3">
                     {cat.label}
                   </h3>
-                  <p className="text-sm font-light text-[#6B7280]/55 leading-relaxed mb-6">
+                  <p className="text-sm font-light text-brand-text-muted leading-relaxed mb-6">
                     {cat.description}
                   </p>
                   <span className="text-[10px] font-bold text-[#2563EB]/60 uppercase tracking-[0.15em]">
@@ -183,7 +183,7 @@ export default function RecursosPage() {
                 <h3 className="text-lg font-bold text-foreground mb-3">
                   Acceso completo con membresía
                 </h3>
-                <p className="text-sm text-[#6B7280]/60 font-light leading-relaxed mb-6">
+                <p className="text-sm text-brand-text-muted font-light leading-relaxed mb-6">
                   Todos estos recursos están disponibles desde el primer día que formas parte de SAPIHUM.
                 </p>
                 <Link href="/membresia">
@@ -199,7 +199,7 @@ export default function RecursosPage() {
       </section>
 
       {/* ── QUÉ OBTIENES (pillars) ──────────────────────────────── */}
-      <section className="w-full py-28 bg-background border-t border-border/[0.06]">
+      <section className="w-full py-28 bg-background border-t border-brand-border">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
             {/* Left: copy */}
@@ -209,12 +209,12 @@ export default function RecursosPage() {
               </p>
               <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-foreground leading-tight mb-8">
                 No solo recursos.{' '}
-                <span className="font-serif italic font-normal text-[#6B7280]">
+                <span className="font-serif italic font-normal text-brand-text-muted">
                   Un ecosistema completo.
                 </span>
               </h2>
               <div className="border-l border-border/[0.08] pl-8 py-2 mb-10">
-                <p className="text-[#6B7280]/60 font-light leading-relaxed">
+                <p className="text-brand-text-muted font-light leading-relaxed">
                   La membresía SAPIHUM va más allá de un catálogo de archivos. Integra formación continua,
                   comunidad profesional y software clínico en una sola experiencia.
                 </p>
@@ -235,12 +235,12 @@ export default function RecursosPage() {
               {MEMBERSHIP_PILLARS.map((pillar, i) => (
                 <div
                   key={pillar}
-                  className="flex items-center gap-5 py-5 border-b border-border/[0.06] group"
+                  className="flex items-center gap-5 py-5 border-b border-brand-border group"
                 >
                   <span className="font-serif text-lg text-[#2563EB]/40 w-8 shrink-0">
                     {String(i + 1).padStart(2, '0')}.
                   </span>
-                  <span className="text-[#6B7280]/70 font-light text-sm leading-relaxed group-hover:text-foreground transition-colors duration-300">
+                  <span className="text-brand-text-muted/70 font-light text-sm leading-relaxed group-hover:text-foreground transition-colors duration-300">
                     {pillar}
                   </span>
                 </div>
@@ -251,7 +251,7 @@ export default function RecursosPage() {
       </section>
 
       {/* ── FINAL CTA ───────────────────────────────────────────── */}
-      <section className="w-full py-36 bg-background border-t border-border/[0.06]">
+      <section className="w-full py-36 bg-background border-t border-brand-border">
         <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 text-center relative">
           <div className="absolute inset-0 bg-[#2563EB]/3 blur-[120px] rounded-full pointer-events-none" />
           <div className="relative z-10">
@@ -260,11 +260,11 @@ export default function RecursosPage() {
             </p>
             <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight text-foreground leading-tight mb-6">
               Los recursos están listos.{' '}
-              <span className="font-serif italic font-normal text-[#6B7280]">
+              <span className="font-serif italic font-normal text-brand-text-muted">
                 Solo falta que tú estés adentro.
               </span>
             </h2>
-            <p className="text-lg text-[#6B7280]/50 font-light leading-relaxed max-w-xl mx-auto mb-14">
+            <p className="text-lg text-brand-text-muted font-light leading-relaxed max-w-xl mx-auto mb-14">
               Únete a la membresía y accede de inmediato a plantillas, guías, grabaciones y todo lo que necesitas para ejercer con más estructura y respaldo.
             </p>
             <div className="flex flex-col sm:flex-row gap-5 justify-center uppercase text-xs tracking-[0.1em]">
@@ -284,7 +284,7 @@ export default function RecursosPage() {
                 </Button>
               </Link>
             </div>
-            <p className="mt-8 text-[11px] text-[#6B7280]/30">
+            <p className="mt-8 text-[11px] text-brand-text-disabled">
               Acceso a recursos sujeto al nivel de membresía activa.
             </p>
           </div>

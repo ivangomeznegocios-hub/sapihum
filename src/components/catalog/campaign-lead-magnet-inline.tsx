@@ -150,7 +150,7 @@ export function CampaignLeadMagnetInline({
         <section
             id={sectionId}
             className={cn(
-                'relative overflow-hidden rounded-[28px] border border-border/10 bg-[linear-gradient(160deg,rgba(255,255,255,0.06),rgba(255,255,255,0.02))] p-6 text-foreground shadow-2xl shadow-black/25 backdrop-blur-sm',
+                'relative overflow-hidden rounded-[28px] border border-brand-border bg-[linear-gradient(160deg,rgba(255,255,255,0.06),rgba(255,255,255,0.02))] p-6 text-foreground shadow-2xl shadow-black/25 backdrop-blur-sm',
                 compact ? 'p-5' : 'p-6 md:p-7',
                 className
             )}
@@ -168,7 +168,7 @@ export function CampaignLeadMagnetInline({
                         <h3 className={cn('font-bold tracking-tight text-foreground', compact ? 'text-2xl' : 'text-2xl md:text-3xl')}>
                             {title || `Recibe el temario de ${activeCampaign.title}`}
                         </h3>
-                        <p className="max-w-2xl text-sm leading-relaxed text-neutral-300 md:text-base">
+                        <p className="max-w-2xl text-sm leading-relaxed text-brand-text-muted md:text-base">
                             {description || `Te enviaremos el temario del bloque, la agenda activa y el siguiente evento recomendado dentro de ${activeCampaign.title.toLowerCase()}.`}
                         </p>
                     </div>
@@ -178,7 +178,7 @@ export function CampaignLeadMagnetInline({
                     {topTopics.map((topic) => (
                         <div
                             key={topic}
-                            className="rounded-2xl border border-border/10 bg-background/20 px-4 py-3 text-sm leading-relaxed text-neutral-200"
+                            className="rounded-2xl border border-brand-border bg-white px-4 py-3 text-sm leading-relaxed text-brand-text"
                         >
                             {topic}
                         </div>
@@ -186,7 +186,7 @@ export function CampaignLeadMagnetInline({
                 </div>
 
                 {successMessage ? (
-                    <div className="rounded-[24px] border border-brand-blue/20 bg-background/25 p-5">
+                    <div className="rounded-[24px] border border-brand-blue/20 bg-brand-surface-soft p-5">
                         <div className="flex items-start gap-3">
                             <div className="mt-0.5 flex h-10 w-10 items-center justify-center rounded-full bg-brand-blue/15 text-brand-blue">
                                 <CheckCircle2 className="h-5 w-5" />
@@ -194,7 +194,7 @@ export function CampaignLeadMagnetInline({
                             <div className="space-y-3">
                                 <div>
                                     <p className="text-base font-semibold text-foreground">Temario enviado</p>
-                                    <p className="mt-1 text-sm leading-relaxed text-neutral-300">{successMessage}</p>
+                                    <p className="mt-1 text-sm leading-relaxed text-brand-text-muted">{successMessage}</p>
                                 </div>
                                 <div className="flex flex-wrap gap-3">
                                     {downloadUrl && (
@@ -221,7 +221,7 @@ export function CampaignLeadMagnetInline({
                     <form className="grid gap-4" onSubmit={handleSubmit} onFocusCapture={trackFormStart}>
                         <div className={cn('grid gap-4', compact ? 'md:grid-cols-1' : 'md:grid-cols-2')}>
                             <div className="space-y-2">
-                                <Label htmlFor={`campaign-inline-name-${campaignKey}`} className="text-xs uppercase tracking-[0.16em] text-neutral-400">
+                                <Label htmlFor={`campaign-inline-name-${campaignKey}`} className="text-xs uppercase tracking-[0.16em] text-brand-text-muted">
                                     Nombre
                                 </Label>
                                 <div className="relative">
@@ -231,14 +231,14 @@ export function CampaignLeadMagnetInline({
                                         value={name}
                                         onChange={(inputEvent) => setName(inputEvent.target.value)}
                                         placeholder="Tu nombre completo"
-                                        className="border-border/10 bg-background/20 pl-10 text-foreground placeholder:text-neutral-500"
+                                        className="border-brand-border bg-white pl-10 text-foreground placeholder:text-neutral-500"
                                         required
                                     />
                                 </div>
                             </div>
 
                             <div className="space-y-2">
-                                <Label htmlFor={`campaign-inline-email-${campaignKey}`} className="text-xs uppercase tracking-[0.16em] text-neutral-400">
+                                <Label htmlFor={`campaign-inline-email-${campaignKey}`} className="text-xs uppercase tracking-[0.16em] text-brand-text-muted">
                                     Correo
                                 </Label>
                                 <div className="relative">
@@ -249,7 +249,7 @@ export function CampaignLeadMagnetInline({
                                         value={email}
                                         onChange={(inputEvent) => setEmail(inputEvent.target.value)}
                                         placeholder="tu@email.com"
-                                        className="border-border/10 bg-background/20 pl-10 text-foreground placeholder:text-neutral-500"
+                                        className="border-brand-border bg-white pl-10 text-foreground placeholder:text-neutral-500"
                                         required
                                     />
                                 </div>
@@ -257,7 +257,7 @@ export function CampaignLeadMagnetInline({
                         </div>
 
                         <div className="space-y-2">
-                            <Label htmlFor={`campaign-inline-whatsapp-${campaignKey}`} className="text-xs uppercase tracking-[0.16em] text-neutral-400">
+                            <Label htmlFor={`campaign-inline-whatsapp-${campaignKey}`} className="text-xs uppercase tracking-[0.16em] text-brand-text-muted">
                                 WhatsApp opcional
                             </Label>
                             <div className="relative">
@@ -267,13 +267,13 @@ export function CampaignLeadMagnetInline({
                                     value={whatsapp}
                                     onChange={(inputEvent) => setWhatsapp(inputEvent.target.value)}
                                     placeholder="5512345678"
-                                    className="border-border/10 bg-background/20 pl-10 text-foreground placeholder:text-neutral-500"
+                                    className="border-brand-border bg-white pl-10 text-foreground placeholder:text-neutral-500"
                                 />
                             </div>
                         </div>
 
                         <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-                            <p className="text-xs leading-relaxed text-neutral-400">
+                            <p className="text-xs leading-relaxed text-brand-text-muted">
                                 Recibes PDF, contexto del bloque y una recomendacion clara del siguiente evento.
                             </p>
                             <Button type="submit" className="gap-2 md:min-w-[15rem]" disabled={loading}>

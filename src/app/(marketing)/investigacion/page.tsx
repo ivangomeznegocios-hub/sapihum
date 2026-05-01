@@ -188,7 +188,7 @@ export default function InvestigacionPage() {
             </p>
           </div>
 
-          <article className="grid overflow-hidden border border-border/[0.08] bg-white/[0.03] lg:grid-cols-[0.95fr_1.05fr]">
+          <article className="grid overflow-hidden border border-brand-border bg-white lg:grid-cols-[0.95fr_1.05fr]">
             {summaryFigure ? (
               <div className="relative min-h-[320px] bg-white">
                 <Image
@@ -218,7 +218,7 @@ export default function InvestigacionPage() {
 
               <div className="grid gap-3 sm:grid-cols-2">
                 {featuredStats.map((metric) => (
-                  <div key={metric.label} className="border border-border/[0.08] bg-background/20 p-4">
+                  <div key={metric.label} className="border border-border/[0.08] bg-white p-4">
                     <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#6B7280]/55">
                       {metric.label}
                     </p>

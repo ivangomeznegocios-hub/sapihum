@@ -29,7 +29,7 @@ export default function EspecialidadesIndexPage() {
               eventos, cursos y Nivel 2
             </span>
           </h1>
-          <p className="mx-auto max-w-2xl text-lg text-neutral-400">
+          <p className="mx-auto max-w-2xl text-lg text-brand-text-muted">
             Encuentra la rama que mejor se ajusta a tu práctica profesional. Cada especialidad ofrece eventos, cursos, formaciones y una ruta de Nivel 2 para quienes buscan mayor profundidad.
           </p>
         </div>

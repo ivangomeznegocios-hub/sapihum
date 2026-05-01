@@ -29,7 +29,7 @@ export default async function PonentesPage() {
                     </h1>
                     <div className="h-px w-20 bg-[#1E3A8A] mt-6" />
                 </div>
-                <p className="text-[#6B7280]/50 max-w-sm text-sm font-light leading-relaxed">
+                <p className="max-w-sm text-sm font-medium leading-relaxed text-brand-text-muted">
                     Conoce a los expertos que imparten nuestros eventos, talleres y cursos especializados.
                 </p>
             </div>
@@ -61,8 +61,7 @@ export default async function PonentesPage() {
                                 href={`/speakers/${speaker.id}`}
                                 className="group cursor-pointer block"
                             >
-                                {/* Portrait photo with duotone warm hover */}
-                                <div className="relative w-full aspect-[4/5] bg-card mb-5 overflow-hidden rounded-md border border-border">
+                                <div className="relative mb-5 aspect-[4/5] w-full overflow-hidden rounded-md border border-brand-border bg-card shadow-sm transition-all duration-300 group-hover:-translate-y-0.5 group-hover:shadow-[0_18px_50px_rgba(15,23,42,0.12)]">
                                     {speakerImage ? (
                                         <Image
                                             src={speakerImage}
@@ -70,45 +69,42 @@ export default async function PonentesPage() {
                                             fill
                                             unoptimized
                                             sizes="(min-width: 1280px) 25vw, (min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"
-                                            className="object-cover transition-all duration-700 opacity-70 group-hover:opacity-100 group-hover:scale-105"
+                                            className="object-cover opacity-90 transition-all duration-700 group-hover:scale-105 group-hover:opacity-100"
                                         />
                                     ) : (
                                         <div className="absolute inset-0 flex items-center justify-center bg-brand-blue-soft">
-                                            <span className="text-[#6B7280]/30 font-serif italic text-6xl">
+                                            <span className="font-serif text-6xl italic text-brand-blue/30">
                                                 {speakerName.split(' ')[1]?.[0] || speakerName[0]}
                                             </span>
                                         </div>
                                     )}
 
-                                    {/* Warm duotone tint on hover */}
                                     <div
-                                        className="absolute inset-0 opacity-0 group-hover:opacity-[0.55] transition-opacity duration-500 pointer-events-none"
+                                        className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-[0.18]"
                                         style={{ backgroundColor: '#2563EB', mixBlendMode: 'multiply' as any }}
                                     />
 
-                                    {/* Bottom gradient for text legibility */}
-                                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent" />
+                                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950/82 via-slate-950/16 to-transparent" />
 
                                     {/* Name and specialty overlay */}
                                     <div className="absolute bottom-4 left-4 right-4 z-10">
                                         {mainSpecialty && (
-                                            <p className="text-[10px] text-[#2563EB] uppercase tracking-widest font-semibold mb-1 group-hover:text-brand-blue-dark transition-colors">
+                                            <p className="mb-1 text-[10px] font-semibold uppercase tracking-widest text-brand-blue-soft transition-colors group-hover:text-white">
                                                 {mainSpecialty}
                                             </p>
                                         )}
-                                        <h3 className="text-xl font-serif text-foreground leading-tight">{speakerName}</h3>
+                                        <h3 className="font-serif text-xl leading-tight text-white">{speakerName}</h3>
                                     </div>
                                 </div>
 
-                                {/* Credentials below the photo */}
                                 <div className="pl-4 border-l border-border group-hover:border-[#2563EB] transition-colors duration-300">
                                     {credential && (
-                                        <p className="text-xs text-[#6B7280] mb-2 leading-relaxed line-clamp-2">
+                                        <p className="mb-2 line-clamp-2 text-xs leading-relaxed text-brand-text-muted">
                                             {credential}
                                         </p>
                                     )}
                                     {speakerHeadline && speaker.credentials?.length > 0 && (
-                                        <p className="text-[10px] uppercase tracking-wide text-[#6B7280]/50">
+                                        <p className="text-[10px] uppercase tracking-wide text-brand-text-muted">
                                             {speakerHeadline}
                                         </p>
                                     )}

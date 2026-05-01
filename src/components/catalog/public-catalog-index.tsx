@@ -28,7 +28,7 @@ export function PublicCatalogIndex({
                             Catálogo Abierto
                         </div>
                         <h1 className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl lg:text-6xl">{title}</h1>
-                        <p className="max-w-2xl text-lg leading-relaxed text-neutral-400 sm:text-xl">{description}</p>
+                        <p className="max-w-2xl text-lg leading-relaxed text-brand-text-muted sm:text-xl">{description}</p>
                     </div>
                 </div>
             </section>
