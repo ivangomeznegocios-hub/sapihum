@@ -265,7 +265,7 @@ export function EventCampaignSpotlight({
                             />
                         ) : (
                             <div className="space-y-4 p-5">
-                                <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-neutral-500">
+                                <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-brand-text-muted">
                                     Evento ancla
                                 </p>
                                 <h3 className="text-2xl font-bold text-foreground">{primaryEvent?.title}</h3>

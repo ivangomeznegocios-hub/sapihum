@@ -23,7 +23,7 @@ export default async function PonentesPage() {
                     </p>
                     <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight text-foreground">
                         Nuestros{" "}
-                        <span className="font-serif italic font-normal text-[#6B7280]">
+                        <span className="font-serif italic font-normal text-brand-text-muted">
                             ponentes
                         </span>
                     </h1>
@@ -37,10 +37,10 @@ export default async function PonentesPage() {
             {speakers.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-24 text-center">
                     <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full border border-border bg-card mb-6">
-                        <Mic2 className="h-8 w-8 text-[#6B7280]/30" />
+                        <Mic2 className="h-8 w-8 text-brand-text-disabled" />
                     </div>
                     <h3 className="text-xl font-medium text-foreground mb-2">No hay ponentes públicos</h3>
-                    <p className="mx-auto max-w-sm text-sm text-[#6B7280]/50 font-light">
+                    <p className="mx-auto max-w-sm text-sm text-brand-text-muted font-light">
                         Aún no se han configurado perfiles públicos de ponentes en la plataforma.
                     </p>
                 </div>

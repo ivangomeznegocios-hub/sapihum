@@ -68,7 +68,7 @@ export function ActivityFeed({
                                 {item.description && (
                                     <p className="mt-0.5 break-words text-xs text-muted-foreground">{item.description}</p>
                                 )}
-                                <p className="text-xs text-muted-foreground/60 mt-1">{item.timeAgo}</p>
+                                <p className="text-xs text-muted-foreground mt-1">{item.timeAgo}</p>
                             </div>
                         </div>
                     )

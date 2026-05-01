@@ -240,7 +240,7 @@ export default function RecursosPage() {
                   <span className="font-serif text-lg text-[#2563EB]/40 w-8 shrink-0">
                     {String(i + 1).padStart(2, '0')}.
                   </span>
-                  <span className="text-brand-text-muted/70 font-light text-sm leading-relaxed group-hover:text-foreground transition-colors duration-300">
+                  <span className="text-brand-text-muted font-light text-sm leading-relaxed group-hover:text-foreground transition-colors duration-300">
                     {pillar}
                   </span>
                 </div>

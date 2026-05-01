@@ -111,7 +111,7 @@ export function AcademiaCatalog({ events }: AcademiaCatalogProps) {
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         placeholder="Buscar por titulo, ponente o tema..."
-                        className="w-full rounded-xl border border-border/60 bg-card py-3 pl-10 pr-10 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20 placeholder:text-muted-foreground/60"
+                        className="w-full rounded-xl border border-border/60 bg-card py-3 pl-10 pr-10 text-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20 placeholder:text-muted-foreground"
                     />
                     {searchQuery && (
                         <button
@@ -197,7 +197,7 @@ export function AcademiaCatalog({ events }: AcademiaCatalogProps) {
                     <span className="font-semibold text-foreground">{filteredEvents.length}</span>{' '}
                     {filteredEvents.length === 1 ? 'resultado' : 'resultados'}
                     {hasActiveFilters && (
-                        <span className="text-muted-foreground/60"> de {events.length} en total</span>
+                        <span className="text-muted-foreground"> de {events.length} en total</span>
                     )}
                 </p>
 

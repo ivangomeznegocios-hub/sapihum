@@ -340,7 +340,7 @@ export default async function AcademiaPage({ searchParams }: AcademiaPageProps) 
 
                                                 <div className="mt-6 flex flex-col gap-4 border-t border-brand-border pt-5 sm:flex-row sm:items-center sm:justify-between">
                                                     <div>
-                                                        <p className="text-xs font-semibold uppercase tracking-[0.15em] text-neutral-500">
+                                                        <p className="text-xs font-semibold uppercase tracking-[0.15em] text-brand-text-muted">
                                                             Inversion completa
                                                         </p>
                                                         <p className="mt-1 text-2xl font-black text-foreground">
@@ -551,7 +551,7 @@ function AcademiaRouteLeadCard({
                                                 </p>
                                             </div>
 
-                                            <ArrowRight className="mt-1 h-4 w-4 shrink-0 text-neutral-500 transition-colors group-hover:text-brand-blue" />
+                                            <ArrowRight className="mt-1 h-4 w-4 shrink-0 text-brand-text-muted transition-colors group-hover:text-brand-blue" />
                                         </Link>
                                     )
                                 })}
@@ -622,7 +622,7 @@ function AcademiaRouteLeadCard({
                                 </div>
 
                                 <div className="rounded-[26px] border border-brand-border bg-brand-surface-soft p-4">
-                                    <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-neutral-500">
+                                    <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-brand-text-muted">
                                         Evento recomendado para empezar
                                     </p>
                                     <h4 className="mt-3 text-2xl font-bold leading-tight text-foreground">
@@ -635,7 +635,7 @@ function AcademiaRouteLeadCard({
                                     </p>
 
                                     <div className="mt-4 rounded-2xl border border-brand-border bg-brand-surface-soft p-4">
-                                        <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-neutral-500">
+                                        <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-brand-text-muted">
                                             {primaryEvent ? 'Fecha sugerida' : 'Ruta lista para revisar'}
                                         </p>
                                         <p className="mt-2 inline-flex items-center gap-2 text-sm text-foreground">
@@ -783,13 +783,13 @@ function FeaturedEventCard({ event }: { event: any }) {
                                 {speakerName.charAt(0)}
                             </div>
                         )}
-                        <span className="text-xs font-medium text-neutral-500">{speakerName}</span>
+                        <span className="text-xs font-medium text-brand-text-muted">{speakerName}</span>
                     </div>
                 )}
 
                 <h3 className="line-clamp-2 text-lg font-bold leading-snug text-foreground">{event.title}</h3>
 
-                <div className="flex items-center gap-3 text-xs text-neutral-500">
+                <div className="flex items-center gap-3 text-xs text-brand-text-muted">
                     <span>{dateStr}</span>
                     <span className="text-neutral-600">&middot;</span>
                     <span>{timeStr}</span>

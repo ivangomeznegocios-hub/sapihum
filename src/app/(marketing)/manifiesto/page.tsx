@@ -43,7 +43,7 @@ export default function ManifiestoPage() {
           <h1 className="sapihum-fade-up text-4xl md:text-5xl lg:text-7xl font-bold tracking-tight mb-6 leading-tight" style={{ animationDelay: '0.1s' }}>
             El Manifiesto SAPIHUM
           </h1>
-          <p className="sapihum-fade-up text-lg md:text-xl text-neutral-400 max-w-3xl leading-relaxed" style={{ animationDelay: '0.2s' }}>
+          <p className="sapihum-fade-up text-lg md:text-xl text-brand-text-muted max-w-3xl leading-relaxed" style={{ animationDelay: '0.2s' }}>
             En un mundo lleno de intrusismo y gurús sin respaldo, declaramos nuestra lealtad absoluta al rigor metodológico, la evidencia empírica y la empatía científica.
           </p>
         </div>
@@ -71,7 +71,7 @@ export default function ManifiestoPage() {
         <div className="absolute inset-0 sapihum-grid-bg opacity-10" />
         <div className="relative z-10 max-w-3xl mx-auto px-4">
           <h2 className="text-3xl font-bold mb-6">Si compartes estos valores, estás en casa.</h2>
-          <p className="text-lg text-neutral-400 mb-8 max-w-2xl mx-auto">
+          <p className="text-lg text-brand-text-muted mb-8 max-w-2xl mx-auto">
             SAPIHUM es la trinchera de los profesionales que se toman el cuidado mental humano con el mayor nivel de responsabilidad posible.
           </p>
           <Link href="/auth/register">

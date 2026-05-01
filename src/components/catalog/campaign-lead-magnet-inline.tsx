@@ -225,13 +225,13 @@ export function CampaignLeadMagnetInline({
                                     Nombre
                                 </Label>
                                 <div className="relative">
-                                    <User className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-500" />
+                                    <User className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-brand-text-muted" />
                                     <Input
                                         id={`campaign-inline-name-${campaignKey}`}
                                         value={name}
                                         onChange={(inputEvent) => setName(inputEvent.target.value)}
                                         placeholder="Tu nombre completo"
-                                        className="border-brand-border bg-white pl-10 text-foreground placeholder:text-neutral-500"
+                                        className="border-brand-border bg-white pl-10 text-foreground placeholder:text-brand-text-muted"
                                         required
                                     />
                                 </div>
@@ -242,14 +242,14 @@ export function CampaignLeadMagnetInline({
                                     Correo
                                 </Label>
                                 <div className="relative">
-                                    <Mail className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-500" />
+                                    <Mail className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-brand-text-muted" />
                                     <Input
                                         id={`campaign-inline-email-${campaignKey}`}
                                         type="email"
                                         value={email}
                                         onChange={(inputEvent) => setEmail(inputEvent.target.value)}
                                         placeholder="tu@email.com"
-                                        className="border-brand-border bg-white pl-10 text-foreground placeholder:text-neutral-500"
+                                        className="border-brand-border bg-white pl-10 text-foreground placeholder:text-brand-text-muted"
                                         required
                                     />
                                 </div>
@@ -261,13 +261,13 @@ export function CampaignLeadMagnetInline({
                                 WhatsApp opcional
                             </Label>
                             <div className="relative">
-                                <Phone className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-500" />
+                                <Phone className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-brand-text-muted" />
                                 <Input
                                     id={`campaign-inline-whatsapp-${campaignKey}`}
                                     value={whatsapp}
                                     onChange={(inputEvent) => setWhatsapp(inputEvent.target.value)}
                                     placeholder="5512345678"
-                                    className="border-brand-border bg-white pl-10 text-foreground placeholder:text-neutral-500"
+                                    className="border-brand-border bg-white pl-10 text-foreground placeholder:text-brand-text-muted"
                                 />
                             </div>
                         </div>

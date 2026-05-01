@@ -11,8 +11,8 @@
   --brand-border: #e5e7eb;
   --brand-text: #1c1917;
   --brand-text-strong: #0f172a;
-  --brand-text-muted: #6b7280;
-  --brand-text-disabled: #9ca3af;
+  --brand-text-muted: #4b5563;
+  --brand-text-disabled: #6b7280;
   --brand-blue: #2563eb;
   --brand-blue-dark: #1d4ed8;
   --brand-blue-hover: #1e3a8a;
@@ -30,7 +30,7 @@
   --secondary: #f3f4f6;
   --secondary-foreground: #1c1917;
   --muted: #f3f4f6;
-  --muted-foreground: #6b7280;
+  --muted-foreground: #4b5563;
   --accent: #eff6ff;
   --accent-foreground: #1d4ed8;
   --destructive: #ef4444;
@@ -51,7 +51,7 @@
   --chart-2: #1d4ed8;
   --chart-3: #1e3a8a;
   --chart-4: #0f172a;
-  --chart-5: #6b7280;
+  --chart-5: #4b5563;
   --sidebar: #0f172a;
 }
 

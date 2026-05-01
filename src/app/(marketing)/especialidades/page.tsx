@@ -25,7 +25,7 @@ export default function EspecialidadesIndexPage() {
           </p>
           <h1 className="mb-6 text-4xl font-bold leading-tight tracking-tight text-foreground md:text-5xl lg:text-6xl">
             Especialidades con{' '}
-            <span className="font-serif font-normal italic text-[#6B7280]">
+            <span className="font-serif font-normal italic text-brand-text-muted">
               eventos, cursos y Nivel 2
             </span>
           </h1>
@@ -81,7 +81,7 @@ export default function EspecialidadesIndexPage() {
                   </div>
                 ))}
                 {spec.tools.length > 3 && (
-                  <div className="text-xs text-muted-foreground/60">
+                  <div className="text-xs text-muted-foreground">
                     +{spec.tools.length - 3} herramientas mas
                   </div>
                 )}

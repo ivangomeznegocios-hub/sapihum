@@ -223,7 +223,7 @@ export function PricingContent({
                   Todo lo que necesitas para crecer como psicólogo.
                 </span>
               </h1>
-              <p className="sapihum-fade-up mx-auto mt-8 max-w-2xl text-base font-light leading-relaxed text-[#6B7280]/65 md:text-lg">
+              <p className="sapihum-fade-up mx-auto mt-8 max-w-2xl text-base font-light leading-relaxed text-brand-text-muted md:text-lg">
                 Accede a formación continua, red de profesionales, recursos clínicos y eventos.
                 Para quienes quieren más, hay expansiones opcionales.
               </p>
@@ -400,7 +400,7 @@ export function PricingContent({
                             {copy.title}
                           </h2>
                         </div>
-                        <p className="mt-3 text-sm leading-relaxed text-[#6B7280]/55">
+                        <p className="mt-3 text-sm leading-relaxed text-brand-text-muted">
                           {copy.description}
                         </p>
                         <div className="mt-5 border-t border-border/[0.06] pt-5">
@@ -508,11 +508,11 @@ export function PricingContent({
               </p>
               <h2 className="mt-4 text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
                 Detalle por beneficio y{' '}
-                <span className="font-serif font-normal italic text-[#6B7280]">
+                <span className="font-serif font-normal italic text-brand-text-muted">
                   expansión
                 </span>
               </h2>
-              <p className="mx-auto mt-4 max-w-xl text-sm font-light leading-relaxed text-[#6B7280]/55">
+              <p className="mx-auto mt-4 max-w-xl text-sm font-light leading-relaxed text-brand-text-muted">
                 Toca cualquier beneficio para ver la explicación completa.
               </p>
             </div>
@@ -539,14 +539,14 @@ export function PricingContent({
                 <Table className="w-full min-w-[640px] text-foreground">
                   <TableHeader>
                     <TableRow className="border-brand-border bg-white hover:bg-white">
-                      <TableHead className="w-[40%] text-[#6B7280]/60 text-xs">Beneficio</TableHead>
-                      <TableHead className="w-[20%] text-center text-[#6B7280]/60 text-xs">
+                      <TableHead className="w-[40%] text-brand-text-muted text-xs">Beneficio</TableHead>
+                      <TableHead className="w-[20%] text-center text-brand-text-muted text-xs">
                         Comunidad
                       </TableHead>
-                      <TableHead className="w-[20%] text-center text-[#6B7280]/60 text-xs">
+                      <TableHead className="w-[20%] text-center text-brand-text-muted text-xs">
                         + Consultorio
                       </TableHead>
-                      <TableHead className="w-[20%] text-center text-[#6B7280]/60 text-xs">
+                      <TableHead className="w-[20%] text-center text-brand-text-muted text-xs">
                         + Marketing
                       </TableHead>
                     </TableRow>
@@ -642,7 +642,7 @@ export function PricingContent({
                 <DialogTitle className="text-xl font-bold tracking-tight text-foreground">
                   {selectedFeature.title}
                 </DialogTitle>
-                <DialogDescription className="text-sm text-[#6B7280]/60">
+                <DialogDescription className="text-sm text-brand-text-muted">
                   {selectedFeature.description}
                 </DialogDescription>
               </DialogHeader>
@@ -665,7 +665,7 @@ export function PricingContent({
                         className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider ${
                           enabled
                             ? 'border border-[#2563EB]/20 bg-[#2563EB]/8 text-[#2563EB]'
-                            : 'border border-border/[0.06] bg-white/[0.02] text-[#6B7280]/30'
+                            : 'border border-border/[0.06] bg-white/[0.02] text-brand-text-disabled'
                         }`}
                       >
                         {enabled && <Check className="h-3 w-3" />}

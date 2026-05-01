@@ -64,7 +64,7 @@ export function MilestoneTracker({ milestones, title }: MilestoneTrackerProps) {
                                             ? 'text-brand-blue-hover dark:text-brand-blue-hover font-medium'
                                             : milestone.current
                                                 ? 'text-brand-blue dark:text-brand-blue font-medium'
-                                                : 'text-muted-foreground/60'
+                                                : 'text-muted-foreground'
                                         }`}
                                 >
                                     {milestone.title}

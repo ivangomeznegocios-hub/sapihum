@@ -158,7 +158,7 @@ function ScheduleItemCard({ item }: { item: ScheduleCalendarItem }) {
                     <p className="mt-1 text-sm text-muted-foreground">{item.subtitle}</p>
                 ) : null}
                 {item.sourceLabel ? (
-                    <p className="mt-1 text-xs font-medium uppercase tracking-[0.12em] text-muted-foreground/80">
+                    <p className="mt-1 text-xs font-medium uppercase tracking-[0.12em] text-muted-foreground">
                         {item.sourceLabel}
                     </p>
                 ) : null}
@@ -303,7 +303,7 @@ export function ScheduleCalendar({
                                     button_next: 'static h-9 w-9 rounded-full border border-border bg-background p-0 text-foreground opacity-100 hover:bg-accent',
                                     month_grid: 'w-full table-fixed border-separate border-spacing-1 sm:border-spacing-2',
                                     weekdays: 'grid grid-cols-7 gap-1 sm:gap-2',
-                                    weekday: 'flex h-9 items-center justify-center text-center text-[0.72rem] font-semibold uppercase tracking-[0.14em] text-muted-foreground/80',
+                                    weekday: 'flex h-9 items-center justify-center text-center text-[0.72rem] font-semibold uppercase tracking-[0.14em] text-muted-foreground',
                                     weeks: 'space-y-1 sm:space-y-2',
                                     week: 'grid grid-cols-7 gap-1 sm:gap-2',
                                     day: 'relative h-12 w-full sm:h-14',

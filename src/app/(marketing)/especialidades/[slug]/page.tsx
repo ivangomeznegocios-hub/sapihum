@@ -370,7 +370,7 @@ export default async function SpecializationPage(props: Props) {
               {hasSpecificCatalogContent ? (
                 <>
                   <div className="rounded-2xl border border-brand-border bg-white p-4">
-                    <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-neutral-500">Eventos y cursos</p>
+                    <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-brand-text-muted">Eventos y cursos</p>
                     {hasSpecificEvents ? (
                       <>
                         <p className="mt-2 text-3xl font-black text-foreground">{specificEventCount}</p>
@@ -385,7 +385,7 @@ export default async function SpecializationPage(props: Props) {
                   </div>
 
                   <div className="rounded-2xl border border-brand-border bg-white p-4">
-                    <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-neutral-500">Formaciones</p>
+                    <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-brand-text-muted">Formaciones</p>
                     {hasSpecificFormations ? (
                       <>
                         <p className="mt-2 text-3xl font-black text-foreground">{specificFormationCount}</p>
@@ -400,7 +400,7 @@ export default async function SpecializationPage(props: Props) {
                   </div>
 
                   <div className="rounded-2xl border border-brand-border bg-white p-4">
-                    <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-neutral-500">Membresia</p>
+                    <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-brand-text-muted">Membresia</p>
                     <p className="mt-2 text-lg font-bold text-foreground">
                       {level1Plan ? `Desde ${formatCurrency(level1Plan.monthly.amount)}/mes` : 'Acceso general'}
                     </p>
@@ -417,7 +417,7 @@ export default async function SpecializationPage(props: Props) {
                     </p>
                   </div>
 
-                  <p className="text-xs leading-relaxed text-neutral-500">
+                  <p className="text-xs leading-relaxed text-brand-text-muted">
                     {transversalContentSummary
                       ? `También encontrarás ${transversalContentSummary} relevantes para tu práctica.`
                       : 'Además, tendrás acceso a contenido general que complementa tu formación.'}
@@ -426,7 +426,7 @@ export default async function SpecializationPage(props: Props) {
               ) : (
                 <>
                   <div className="rounded-2xl border border-brand-border bg-white p-4">
-                    <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-neutral-500">Temas que cubre</p>
+                    <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-brand-text-muted">Temas que cubre</p>
                     <div className="mt-3 flex flex-wrap gap-2">
                       {seoProfile.terms.map((term) => (
                         <span
@@ -440,7 +440,7 @@ export default async function SpecializationPage(props: Props) {
                   </div>
 
                   <div className="rounded-2xl border border-brand-border bg-white p-4">
-                    <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-neutral-500">Membresía</p>
+                    <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-brand-text-muted">Membresía</p>
                     <p className="mt-2 text-lg font-bold text-foreground">
                       {level1Plan ? `Desde ${formatCurrency(level1Plan.monthly.amount)}/mes` : 'Acceso general'}
                     </p>
@@ -448,7 +448,7 @@ export default async function SpecializationPage(props: Props) {
                   </div>
 
                   <div className="rounded-2xl border border-brand-border bg-white p-4">
-                    <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-neutral-500">Contenido disponible</p>
+                    <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-brand-text-muted">Contenido disponible</p>
                     <p className="mt-2 text-lg font-bold text-foreground">
                       {transversalContentSummary || 'Catálogo general activo'}
                     </p>
@@ -710,7 +710,7 @@ export default async function SpecializationPage(props: Props) {
                 Accede a la comunidad, participa en eventos y descubre todas las especialidades disponibles.
               </p>
               <div className="mt-6 rounded-2xl border border-brand-border bg-background/25 p-5">
-                <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-neutral-500">Desde</p>
+                <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-brand-text-muted">Desde</p>
                 <p className="mt-2 text-3xl font-black text-foreground">
                   {level1Plan ? `${formatCurrency(level1Plan.monthly.amount)}/mes` : 'Consulta disponibilidad'}
                 </p>

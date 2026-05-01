@@ -260,9 +260,9 @@ export default async function LandingPage() {
       ══════════════════════════════════════════════════ */}
       <section className="w-full border-b border-border/[0.08] bg-background py-8">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-wrap items-center justify-center gap-x-12 gap-y-4 opacity-60">
+          <div className="flex flex-wrap items-center justify-center gap-x-12 gap-y-4">
             {CREDIBILITY_PILLS.map((pill) => (
-              <div key={pill} className="flex items-center text-[10px] font-bold uppercase tracking-[0.2em] text-foreground/80">
+              <div key={pill} className="flex items-center text-[10px] font-bold uppercase tracking-[0.2em] text-brand-text-muted">
                 <span className="w-1.5 h-1.5 rounded-full bg-[#2563EB] mr-3" />
                 {pill}
               </div>
@@ -312,7 +312,7 @@ export default async function LandingPage() {
               </h2>
               <div className="h-px w-20 bg-[#1E3A8A]" />
             </div>
-            <p className="text-[#6B7280]/50 max-w-sm text-sm font-light leading-relaxed">
+            <p className="text-brand-text-muted max-w-sm text-sm font-light leading-relaxed">
               Cada especialidad integra formación, actualización, recursos y comunidad para fortalecer tu ejercicio profesional.
             </p>
           </div>
@@ -378,10 +378,10 @@ export default async function LandingPage() {
               </p>
               <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight leading-tight mb-10 text-foreground">
                 Investigación aplicada para una{" "}
-                <span className="font-serif italic font-normal text-[#6B7280]">práctica institucional.</span>
+                <span className="font-serif italic font-normal text-brand-text-muted">práctica institucional.</span>
               </h2>
               <div className="border-l border-border/[0.1] pl-10 py-2">
-                <p className="text-xl text-[#6B7280]/70 leading-relaxed font-light">
+                <p className="text-xl text-brand-text-muted leading-relaxed font-light">
                   En SAPIHUM impulsamos una visión donde la formación, la práctica profesional y la investigación se conectan para generar más criterio, mejores decisiones y mayor profundidad clínica y profesional.
                 </p>
               </div>
@@ -443,7 +443,7 @@ export default async function LandingPage() {
               <h3 className="mb-6 text-xl font-bold tracking-tight text-foreground md:text-2xl">
                 Infraestructura profesional conectada
               </h3>
-              <p className="mb-8 text-sm font-light leading-relaxed text-[#6B7280]/60">
+              <p className="mb-8 text-sm font-light leading-relaxed text-brand-text-muted">
                 No solo aprendes: también puedes organizar tu consulta y trabajar con mejor soporte clínico y tecnológico.
               </p>
 
@@ -453,13 +453,13 @@ export default async function LandingPage() {
                     key={feature.title}
                     className="group rounded-xl border border-border/[0.06] bg-white/[0.02] p-5 transition-all duration-500 hover:border-[#2563EB]/15"
                   >
-                    <div className="mb-3 inline-flex h-10 w-10 items-center justify-center rounded-xl border border-border/[0.06] bg-background text-[#6B7280] transition-colors duration-500 group-hover:text-[#2563EB]">
+                    <div className="mb-3 inline-flex h-10 w-10 items-center justify-center rounded-xl border border-border/[0.06] bg-background text-brand-text-muted transition-colors duration-500 group-hover:text-[#2563EB]">
                       {feature.icon}
                     </div>
                     <h4 className="text-sm font-bold text-foreground">
                       {feature.title}
                     </h4>
-                    <p className="mt-2 text-xs font-light leading-relaxed text-[#6B7280]/55">
+                    <p className="mt-2 text-xs font-light leading-relaxed text-brand-text-muted">
                       {feature.description}
                     </p>
                   </div>
@@ -472,7 +472,7 @@ export default async function LandingPage() {
               <div className="flex-1 rounded-xl border border-border/[0.08] bg-background p-6 md:p-8">
                 {/* Header */}
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="inline-flex items-center rounded-full bg-white/5 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-foreground/70">
+                  <span className="inline-flex items-center rounded-full bg-white/5 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-brand-text-muted">
                     {PRICING_PLAN_COPY.level2.levelLabel}
                   </span>
                   {PRICING_PLAN_COPY.level2.badge && (
@@ -485,7 +485,7 @@ export default async function LandingPage() {
                 <h3 className="mt-4 text-2xl font-bold tracking-tight text-foreground">
                   {PRICING_PLAN_COPY.level2.title}
                 </h3>
-                <p className="mt-3 text-sm font-light leading-relaxed text-[#6B7280]/60">
+                <p className="mt-3 text-sm font-light leading-relaxed text-brand-text-muted">
                   {PRICING_PLAN_COPY.level2.note}
                 </p>
 
@@ -494,7 +494,7 @@ export default async function LandingPage() {
                   {LEVEL_2_SHOWCASE_BENEFITS.map((benefit) => (
                     <li key={benefit} className="flex items-center gap-3">
                       <span className="text-[#2563EB] text-sm">+</span>
-                      <span className="text-sm text-[#6B7280]/70">{benefit}</span>
+                      <span className="text-sm text-brand-text-muted">{benefit}</span>
                     </li>
                   ))}
                 </ul>
@@ -515,7 +515,7 @@ export default async function LandingPage() {
                 </div>
               </div>
 
-              <p className="mt-3 text-[11px] font-light text-[#6B7280]/35">
+              <p className="mt-3 text-[11px] font-light text-brand-text-muted">
                 Nivel 2 aparece como ejemplo de la capa más completa dentro de SAPIHUM.
               </p>
             </div>
@@ -570,12 +570,12 @@ export default async function LandingPage() {
             </p>
             <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-foreground mb-6">
               Aprende con docentes de {" "}
-              <span className="font-serif italic font-normal text-[#6B7280]">
+              <span className="font-serif italic font-normal text-brand-text-muted">
                 alto nivel académico
               </span> {" "}
               y reconocimiento real
             </h2>
-            <p className="text-[#6B7280]/70 text-lg font-light leading-relaxed">
+            <p className="text-brand-text-muted text-lg font-light leading-relaxed">
               En SAPIHUM reunimos docentes con trayectoria sólida, formación avanzada y experiencia académica, para construir programas con mayor profundidad, claridad y aplicación real.
             </p>
           </div>
@@ -606,7 +606,7 @@ export default async function LandingPage() {
                       />
                     ) : (
                       <div className="absolute inset-0 flex items-center justify-center bg-brand-blue-soft">
-                        <span className="text-[#6B7280]/30 font-serif italic text-6xl">
+                        <span className="text-brand-text-disabled font-serif italic text-6xl">
                           {name.split(' ')[1]?.[0] || name[0]}
                         </span>
                       </div>
@@ -635,12 +635,12 @@ export default async function LandingPage() {
                   {/* Credentials below the photo */}
                   <div className="pl-4 border-l border-border/[0.08] group-hover:border-[#2563EB] transition-colors duration-300">
                     {credential && (
-                      <p className="text-xs text-[#6B7280] mb-2 leading-relaxed line-clamp-2">
+                      <p className="text-xs text-brand-text-muted mb-2 leading-relaxed line-clamp-2">
                         {credential}
                       </p>
                     )}
                     {speaker.headline && speaker.credentials?.length > 0 && (
-                      <p className="text-[10px] uppercase tracking-wide text-[#6B7280]/50">
+                      <p className="text-[10px] uppercase tracking-wide text-brand-text-muted">
                         {speaker.headline}
                       </p>
                     )}
@@ -652,7 +652,7 @@ export default async function LandingPage() {
 
           <div className="mt-16 text-center">
             <Link href="/speakers">
-              <Button variant="outline" className="gap-2 font-bold uppercase text-[10px] tracking-[0.1em] h-12 px-8 border-border/20 hover:bg-white/5 text-[#6B7280] hover:text-foreground transition-colors">
+              <Button variant="outline" className="gap-2 font-bold uppercase text-[10px] tracking-[0.1em] h-12 px-8 border-border/20 hover:bg-white/5 text-brand-text-muted hover:text-foreground transition-colors">
                 Conocer cuerpo docente
                 <ArrowRight className="h-4 w-4" />
               </Button>
@@ -673,7 +673,7 @@ export default async function LandingPage() {
                   <span className="text-lg font-light text-foreground group-open:text-[#2563EB] transition-all">{faq.q}</span>
                   <span className="ml-4 text-[#2563EB] text-xl font-light transition-transform duration-300 group-open:rotate-45">+</span>
                 </summary>
-                <div className="pt-6 text-sm text-[#6B7280]/50 leading-relaxed font-light">
+                <div className="pt-6 text-sm text-brand-text-muted leading-relaxed font-light">
                   {faq.a}
                 </div>
               </details>
@@ -692,7 +692,7 @@ export default async function LandingPage() {
             <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight leading-tight text-foreground mb-6">
               Empieza por la formación que mejor encaje con tu siguiente etapa profesional
             </h2>
-            <p className="mx-auto max-w-3xl text-lg text-[#6B7280]/60 font-light leading-relaxed">
+            <p className="mx-auto max-w-3xl text-lg text-brand-text-muted font-light leading-relaxed">
               Explora cursos, programas y formaciones completas dentro de la Academia SAPIHUM. Y si buscas una experiencia más amplia, conoce también la membresía.
             </p>
             
@@ -722,7 +722,7 @@ export default async function LandingPage() {
                 </Button>
               </Link>
             </div>
-            <p className="mt-10 text-[11px] text-[#6B7280]/40">
+            <p className="mt-10 text-[11px] text-brand-text-muted">
               Formación especializada para psicólogos. Acceso y beneficios sujetos al tipo de programa o membresía.
             </p>
           </div>

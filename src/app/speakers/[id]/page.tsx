@@ -214,7 +214,7 @@ export default async function PublicSpeakerDetailPage({ params, searchParams }: 
                                                 </div>
                                             ) : (
                                                 <div className="flex aspect-video w-full items-center justify-center rounded-t-xl border-b bg-muted">
-                                                    <Calendar className="h-8 w-8 text-muted-foreground/50" />
+                                                    <Calendar className="h-8 w-8 text-muted-foreground" />
                                                 </div>
                                             )}
                                             <CardContent className="flex flex-1 flex-col p-4">

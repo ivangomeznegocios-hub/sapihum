@@ -44,13 +44,13 @@ export default function InvestigacionPage() {
             >
               Generando ciencia,{' '}
               <br className="hidden md:block" />
-              <span className="font-serif font-normal italic text-[#6B7280]">
+              <span className="font-serif font-normal italic text-brand-text-muted">
                 transformando la práctica.
               </span>
             </h1>
 
             <p
-              className="sapihum-fade-up mt-8 max-w-2xl text-lg font-light leading-relaxed text-[#6B7280]/80 md:text-xl lg:text-2xl"
+              className="sapihum-fade-up mt-8 max-w-2xl text-lg font-light leading-relaxed text-brand-text-muted md:text-xl lg:text-2xl"
               style={{ animationDelay: '0.2s' }}
             >
               Nuestra comunidad no solo consume evidencia empírica, la crea. Desarrollamos
@@ -125,7 +125,7 @@ export default function InvestigacionPage() {
                     <h3 className="text-2xl font-semibold text-foreground mb-3">
                       Red de Práctica Basada en Evidencia
                     </h3>
-                    <p className="text-[#6B7280]/70 leading-relaxed font-light">
+                    <p className="text-brand-text-muted leading-relaxed font-light">
                       Agrupamos a clínicos independientes bajo una misma taxonomía para generar evidencia
                       empírica real, anonimizada desde su origen y en estricto cumplimiento legal.
                     </p>
@@ -142,7 +142,7 @@ export default function InvestigacionPage() {
                     <h3 className="text-2xl font-semibold text-foreground mb-3">
                       Papers y Publicaciones Científicas
                     </h3>
-                    <p className="text-[#6B7280]/70 leading-relaxed font-light">
+                    <p className="text-brand-text-muted leading-relaxed font-light">
                       Desarrollo de artículos académicos, guías clínicas y adaptaciones de herramientas
                       para la población hispanohablante, buscando cerrar la brecha entre la academia y la
                       trinchera del consultorio.
@@ -160,7 +160,7 @@ export default function InvestigacionPage() {
                     <h3 className="text-2xl font-semibold text-foreground mb-3">
                       Aportes a la Comunidad de Salud
                     </h3>
-                    <p className="text-[#6B7280]/70 leading-relaxed font-light">
+                    <p className="text-brand-text-muted leading-relaxed font-light">
                       Investigación orientada a mejorar la calidad de vida de los pacientes y el bienestar
                       del profesional de la salud mental, compartiendo hallazgos y recursos en pro de la
                       psicología global.
@@ -182,7 +182,7 @@ export default function InvestigacionPage() {
             <h2 className="mt-4 text-3xl font-bold tracking-tight text-foreground md:text-5xl leading-tight">
               Investigación aplicada publicada por SAPIHUM.
             </h2>
-            <p className="mt-6 text-lg font-light leading-relaxed text-[#6B7280]/70">
+            <p className="mt-6 text-lg font-light leading-relaxed text-brand-text-muted">
               Estudios y artículos institucionales para abrir conversaciones profesionales basadas en
               datos, no solo en intuiciones.
             </p>
@@ -205,13 +205,13 @@ export default function InvestigacionPage() {
               <div>
                 <div className="mb-5 flex flex-wrap items-center gap-2 text-[10px] font-bold uppercase tracking-[0.16em] text-[#2563EB]">
                   <span>{study.category}</span>
-                  <span className="text-[#6B7280]/40">/</span>
+                  <span className="text-brand-text-muted">/</span>
                   <span>{study.publishedAt}</span>
                 </div>
                 <h3 className="text-2xl font-semibold leading-tight text-foreground md:text-3xl">
                   {study.title}
                 </h3>
-                <p className="mt-4 text-sm leading-7 text-[#6B7280]/70 md:text-base">
+                <p className="mt-4 text-sm leading-7 text-brand-text-muted md:text-base">
                   {study.excerpt}
                 </p>
               </div>
@@ -219,7 +219,7 @@ export default function InvestigacionPage() {
               <div className="grid gap-3 sm:grid-cols-2">
                 {featuredStats.map((metric) => (
                   <div key={metric.label} className="border border-border/[0.08] bg-white p-4">
-                    <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#6B7280]/55">
+                    <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-brand-text-muted">
                       {metric.label}
                     </p>
                     <p className="mt-2 text-2xl font-semibold text-foreground">{metric.value}</p>
@@ -260,9 +260,9 @@ export default function InvestigacionPage() {
             </p>
             <h2 className="mt-5 text-3xl font-bold tracking-tight text-foreground md:text-5xl">
               Alianzas para expandir <br />
-              <span className="font-serif italic text-[#6B7280]">el conocimiento.</span>
+              <span className="font-serif italic text-brand-text-muted">el conocimiento.</span>
             </h2>
-            <p className="mt-6 text-lg font-light leading-relaxed text-[#6B7280]/65">
+            <p className="mt-6 text-lg font-light leading-relaxed text-brand-text-muted">
               Colaboramos activamente con universidades, centros de investigación y hospitales. Ofrecemos
               infraestructura técnica y acceso a datos anonimizados para investigadores y organizaciones
               que compartan nuestra rigurosidad ética.
@@ -278,35 +278,35 @@ export default function InvestigacionPage() {
             <form className="relative flex flex-col gap-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <label className="text-[10px] font-bold uppercase tracking-[0.1em] text-[#6B7280]/70 ml-1">
+                  <label className="text-[10px] font-bold uppercase tracking-[0.1em] text-brand-text-muted ml-1">
                     Nombre o Institución
                   </label>
                   <input
                     type="text"
                     placeholder="Dr. Ej. López / Universidad X"
-                    className="w-full bg-background/50 border-b border-border/[0.1] px-4 py-4 text-foreground placeholder:text-foreground/20 focus:border-[#2563EB]/50 focus:outline-none focus:ring-0 transition-colors"
+                    className="w-full bg-background/50 border-b border-border/[0.1] px-4 py-4 text-foreground placeholder:text-brand-text-muted focus:border-[#2563EB]/50 focus:outline-none focus:ring-0 transition-colors"
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-[10px] font-bold uppercase tracking-[0.1em] text-[#6B7280]/70 ml-1">
+                  <label className="text-[10px] font-bold uppercase tracking-[0.1em] text-brand-text-muted ml-1">
                     Correo Electrónico
                   </label>
                   <input
                     type="email"
                     placeholder="contacto@institucion.edu"
-                    className="w-full bg-background/50 border-b border-border/[0.1] px-4 py-4 text-foreground placeholder:text-foreground/20 focus:border-[#2563EB]/50 focus:outline-none focus:ring-0 transition-colors"
+                    className="w-full bg-background/50 border-b border-border/[0.1] px-4 py-4 text-foreground placeholder:text-brand-text-muted focus:border-[#2563EB]/50 focus:outline-none focus:ring-0 transition-colors"
                   />
                 </div>
               </div>
 
               <div className="space-y-2">
-                <label className="text-[10px] font-bold uppercase tracking-[0.1em] text-[#6B7280]/70 ml-1">
+                <label className="text-[10px] font-bold uppercase tracking-[0.1em] text-brand-text-muted ml-1">
                   Breve descripción de la propuesta o línea de interés
                 </label>
                 <textarea
                   rows={4}
                   placeholder="Nos interesa colaborar en un proyecto sobre..."
-                  className="w-full bg-background/50 border-b border-border/[0.1] px-4 py-4 text-foreground placeholder:text-foreground/20 focus:border-[#2563EB]/50 focus:outline-none focus:ring-0 transition-colors resize-none"
+                  className="w-full bg-background/50 border-b border-border/[0.1] px-4 py-4 text-foreground placeholder:text-brand-text-muted focus:border-[#2563EB]/50 focus:outline-none focus:ring-0 transition-colors resize-none"
                 />
               </div>
 
@@ -322,7 +322,7 @@ export default function InvestigacionPage() {
             </form>
 
             <div className="mt-8 pt-8 border-t border-border/[0.06] text-center">
-              <p className="text-xs text-[#6B7280]/50 font-light">
+              <p className="text-xs text-brand-text-muted font-light">
                 También puedes escribirnos directamente a:{' '}
                 <a href="mailto:investigacion@sapihum.com" className="text-[#2563EB] hover:underline">
                   investigacion@sapihum.com

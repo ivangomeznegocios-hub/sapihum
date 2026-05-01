@@ -570,7 +570,7 @@ export default async function FormationLandingPage({ params }: { params: Promise
                                 <h2 className="font-serif text-3xl font-bold tracking-normal text-brand-text-strong sm:text-4xl">
                                     Materiales Incluidos
                                 </h2>
-                                <p className="mt-3 max-w-2xl text-sm leading-relaxed text-neutral-500">
+                                <p className="mt-3 max-w-2xl text-sm leading-relaxed text-brand-text-muted">
                                     Estos enlaces estan disponibles para quienes ya activaron la formacion completa.
                                 </p>
                             </div>
@@ -580,7 +580,7 @@ export default async function FormationLandingPage({ params }: { params: Promise
                                     <div key={item.id || item.url} className="flex flex-col gap-4 rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm sm:flex-row sm:items-center sm:justify-between">
                                         <div>
                                             <p className="text-base font-bold text-brand-text-strong">{item.title}</p>
-                                            <p className="mt-1 text-sm text-neutral-500">
+                                            <p className="mt-1 text-sm text-brand-text-muted">
                                                 {item.type === 'presentation' ? 'Presentacion' :
                                                     item.type === 'document' ? 'Documento' :
                                                         item.type === 'folder' ? 'Carpeta' :

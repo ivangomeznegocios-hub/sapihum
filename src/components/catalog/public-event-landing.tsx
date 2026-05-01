@@ -257,7 +257,7 @@ function FaqAccordion({ items }: { items: { question: string; answer: string }[]
                             strokeWidth="2"
                             strokeLinecap="round"
                             strokeLinejoin="round"
-                            className={`ml-2 shrink-0 text-neutral-500 transition-transform duration-200 ${openIndex === index ? 'rotate-180' : ''}`}
+                            className={`ml-2 shrink-0 text-brand-text-muted transition-transform duration-200 ${openIndex === index ? 'rotate-180' : ''}`}
                         >
                             <path d="m6 9 6 6 6-6" />
                         </svg>
@@ -446,15 +446,15 @@ export function PublicEventLanding({
 
                             <div className="flex flex-wrap gap-x-12 gap-y-6 pt-6 border-t border-brand-border">
                                 <div>
-                                    <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-neutral-500">Fecha y Hora</p>
+                                    <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-brand-text-muted">Fecha y Hora</p>
                                     <p className="mt-2 text-sm font-medium text-brand-text-strong">{formatEventDate(event.start_time)}</p>
                                 </div>
                                 <div>
-                                    <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-neutral-500">Formato</p>
+                                    <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-brand-text-muted">Formato</p>
                                     <p className="mt-2 text-sm font-medium text-brand-text-strong">{formatLabel}</p>
                                 </div>
                                 <div>
-                                    <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-neutral-500">Dirigido a</p>
+                                    <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-brand-text-muted">Dirigido a</p>
                                     <p className="mt-2 text-sm font-medium text-brand-text-strong">{getAudienceLabel(event.target_audience)}</p>
                                 </div>
                             </div>
@@ -489,14 +489,14 @@ export function PublicEventLanding({
                                 <div className="relative z-10">
                                     <div className="flex items-end justify-between gap-4">
                                         <div>
-                                            <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-neutral-500">Inversion</p>
+                                            <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-brand-text-muted">Inversion</p>
                                             <p className="mt-1 text-3xl font-bold tracking-tight text-brand-text-strong">
                                                 {finalPrice > 0 ? `$${finalPrice.toFixed(0)} MXN` : 'Gratis'}
                                             </p>
                                         </div>
                                         {finalPrice > 0 && finalPrice < Number(event.price || 0) && (
                                             <div className="text-right">
-                                                <p className="text-xs text-neutral-500 line-through">${Number(event.price).toFixed(0)}</p>
+                                                <p className="text-xs text-brand-text-muted line-through">${Number(event.price).toFixed(0)}</p>
                                                 <p className="text-xs font-medium text-brand-blue">Ahorras ${Number(event.price - finalPrice).toFixed(0)}</p>
                                             </div>
                                         )}
@@ -526,7 +526,7 @@ export function PublicEventLanding({
                                                 <Button variant="secondary" className="w-full h-12 text-base opacity-60 cursor-not-allowed" disabled>
                                                     {isExpired ? 'Este material ya expiro' : 'Cupo lleno'}
                                                 </Button>
-                                                <p className="text-center text-xs text-neutral-500">
+                                                <p className="text-center text-xs text-brand-text-muted">
                                                     {isExpired ? 'Este acceso ya no esta disponible.' : 'Lo sentimos, este evento ya alcanzo su maxima capacidad.'}
                                                 </p>
                                             </>
@@ -578,7 +578,7 @@ export function PublicEventLanding({
                                     </div>
 
                                     {!hasAccess && (
-                                        <p className="mt-5 text-center text-[11px] text-neutral-500">
+                                        <p className="mt-5 text-center text-[11px] text-brand-text-muted">
                                             Ya lo adquiriste?{' '}
                                             <Link href="/compras/recuperar" className="font-medium text-brand-text-strong hover:text-brand-blue transition-colors underline underline-offset-2">
                                                 Recupera tu acceso
@@ -630,7 +630,7 @@ export function PublicEventLanding({
                                 <div className="grid gap-8 sm:grid-cols-2">
                                     {event.ideal_for?.length > 0 && (
                                         <div className="space-y-5">
-                                            <h3 className="text-sm font-semibold uppercase tracking-widest text-neutral-500">A quien va dirigido</h3>
+                                            <h3 className="text-sm font-semibold uppercase tracking-widest text-brand-text-muted">A quien va dirigido</h3>
                                             <ul className="space-y-4">
                                                 {event.ideal_for.map((item: string) => (
                                                     <li key={item} className="flex items-start gap-3 text-sm leading-relaxed text-brand-text">
@@ -646,7 +646,7 @@ export function PublicEventLanding({
 
                                     {event.learning_outcomes?.length > 0 && (
                                         <div className="space-y-5">
-                                            <h3 className="text-sm font-semibold uppercase tracking-widest text-neutral-500">Que aprenderas</h3>
+                                            <h3 className="text-sm font-semibold uppercase tracking-widest text-brand-text-muted">Que aprenderas</h3>
                                             <ul className="space-y-4">
                                                 {event.learning_outcomes.map((item: string) => (
                                                     <li key={item} className="flex items-start gap-3 text-sm leading-relaxed text-brand-text">
@@ -723,7 +723,7 @@ export function PublicEventLanding({
                                                         {credentials.length > 0 && (
                                                             <div className="space-y-2">
                                                                 {credentials.map((credential: string) => (
-                                                                    <p key={credential} className="text-xs leading-relaxed text-neutral-500">
+                                                                    <p key={credential} className="text-xs leading-relaxed text-brand-text-muted">
                                                                         • {credential}
                                                                     </p>
                                                                 ))}
@@ -749,7 +749,7 @@ export function PublicEventLanding({
                                         <div key={item.id || item.url} className="flex items-center justify-between gap-4 rounded-2xl border border-brand-border bg-white p-5">
                                             <div>
                                                 <p className="text-base font-medium text-brand-text-strong">{item.title}</p>
-                                                <p className="mt-1 text-sm text-neutral-500">
+                                                <p className="mt-1 text-sm text-brand-text-muted">
                                                     {item.type === 'presentation' ? 'Presentacion' :
                                                         item.type === 'document' ? 'Documento' :
                                                             item.type === 'folder' ? 'Carpeta' :

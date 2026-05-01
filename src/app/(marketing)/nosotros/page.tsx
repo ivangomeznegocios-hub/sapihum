@@ -126,12 +126,12 @@ export default async function NosotrosPage() {
               style={{ animationDelay: "0.1s" }}
             >
               Un ecosistema serio para psicólogos que quieren{" "}
-              <span className="font-serif font-normal italic text-[#6B7280]">
+              <span className="font-serif font-normal italic text-brand-text-muted">
                 crecer con estructura, ciencia y criterio.
               </span>
             </h1>
             <p
-              className="sapihum-fade-up mt-8 max-w-3xl text-lg font-light leading-relaxed text-[#6B7280]/75 md:text-xl"
+              className="sapihum-fade-up mt-8 max-w-3xl text-lg font-light leading-relaxed text-brand-text-muted md:text-xl"
               style={{ animationDelay: "0.2s" }}
             >
               SAPIHUM dejó de ser solo una comunidad para convertirse en una
@@ -170,7 +170,7 @@ export default async function NosotrosPage() {
                 <div className="text-3xl font-bold text-foreground md:text-4xl">
                   {stat.value}
                 </div>
-                <p className="mt-2 text-[11px] font-bold uppercase tracking-[0.18em] text-[#6B7280]/55">
+                <p className="mt-2 text-[11px] font-bold uppercase tracking-[0.18em] text-brand-text-muted">
                   {stat.label}
                 </p>
               </div>
@@ -294,7 +294,7 @@ export default async function NosotrosPage() {
                   Personas reales que dan rostro y profundidad al ecosistema
                   SAPIHUM.
                 </h2>
-                <p className="mt-4 text-lg font-light leading-relaxed text-[#6B7280]/70">
+                <p className="mt-4 text-lg font-light leading-relaxed text-brand-text-muted">
                   En lugar de mostrar placeholders, aquí aparece parte del cuerpo
                   público de especialistas y docentes que hoy ya nutren la
                   experiencia de la plataforma.
@@ -358,7 +358,7 @@ export default async function NosotrosPage() {
                     </div>
 
                     <div className="border-t border-border/[0.06] p-5">
-                      <p className="text-sm leading-relaxed text-[#6B7280]/70">
+                      <p className="text-sm leading-relaxed text-brand-text-muted">
                         {descriptor}
                       </p>
                     </div>
@@ -414,7 +414,7 @@ export default async function NosotrosPage() {
             Si compartes esta forma de entender la psicología, aquí hay una
             plataforma hecha para acompañar tu siguiente etapa profesional.
           </h2>
-          <p className="mx-auto mt-6 max-w-3xl text-lg font-light leading-relaxed text-[#6B7280]/65">
+          <p className="mx-auto mt-6 max-w-3xl text-lg font-light leading-relaxed text-brand-text-muted">
             Explora la academia, conoce nuestras áreas visibles de especialización
             y revisa el manifiesto que sostiene la forma en que construimos
             SAPIHUM.
