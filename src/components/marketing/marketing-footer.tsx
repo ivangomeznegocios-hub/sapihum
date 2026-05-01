@@ -75,7 +75,7 @@ const SOCIAL_LINKS = [
 
 export function MarketingFooter() {
   return (
-    <footer className="border-t bg-[#030303]">
+    <footer className="border-t bg-card">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-2 gap-8 py-12 sm:grid-cols-3 md:grid-cols-6">
           <div className="col-span-2 sm:col-span-3 md:col-span-1">
@@ -96,7 +96,7 @@ export function MarketingFooter() {
                   const iconClassName =
                     "h-5 w-5 transition-transform duration-300 group-hover:scale-110"
                   const buttonClassName =
-                    "group inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-white/[0.03] text-muted-foreground transition-all duration-300 hover:-translate-y-1 hover:border-[#f6ae02]/50 hover:bg-[#f6ae02]/10 hover:text-[#f6ae02]"
+                    "group inline-flex h-11 w-11 items-center justify-center rounded-full border border-border bg-secondary text-muted-foreground transition-all duration-300 hover:-translate-y-1 hover:border-brand-blue/50 hover:bg-brand-blue-soft hover:text-brand-blue"
 
                   return (
                     <Link
@@ -121,7 +121,7 @@ export function MarketingFooter() {
                   <li key={link.href + link.label}>
                     <Link
                       href={link.href}
-                      className="text-sm text-muted-foreground transition-colors hover:text-[#f6ae02]"
+                      className="text-sm text-muted-foreground transition-colors hover:text-[#2563EB]"
                     >
                       {link.label}
                     </Link>

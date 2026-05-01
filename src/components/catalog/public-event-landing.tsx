@@ -239,12 +239,12 @@ function FaqAccordion({ items }: { items: { question: string; answer: string }[]
     const [openIndex, setOpenIndex] = useState<number | null>(null)
 
     return (
-        <div className="divide-y divide-white/10">
+        <div className="divide-y divide-border">
             {items.map((item, index) => (
                 <div key={item.question}>
                     <button
                         onClick={() => setOpenIndex(openIndex === index ? null : index)}
-                        className="flex w-full items-center justify-between py-4 text-left text-sm font-medium text-white transition-colors hover:text-brand-yellow"
+                        className="flex w-full items-center justify-between py-4 text-left text-sm font-medium text-brand-text-strong transition-colors hover:text-brand-blue"
                     >
                         {item.question}
                         <svg
@@ -263,7 +263,7 @@ function FaqAccordion({ items }: { items: { question: string; answer: string }[]
                         </svg>
                     </button>
                     <div className={`overflow-hidden transition-all duration-200 ${openIndex === index ? 'max-h-40 pb-4' : 'max-h-0'}`}>
-                        <p className="text-sm leading-relaxed text-neutral-400">{item.answer}</p>
+                        <p className="text-sm leading-relaxed text-brand-text-muted">{item.answer}</p>
                     </div>
                 </div>
             ))}
@@ -358,7 +358,7 @@ export function PublicEventLanding({
             {/* HERO SECTION */}
             <section className="relative overflow-hidden pt-8 pb-16 md:pt-16 md:pb-24">
                 {/* Refined Background Effect */}
-                <div className="absolute top-[-20%] left-1/2 -translate-x-1/2 w-[800px] h-[800px] opacity-[0.15] pointer-events-none rounded-full blur-[120px]" style={{ background: 'radial-gradient(circle, rgba(246,174,2,0.8) 0%, transparent 70%)' }} />
+                <div className="absolute top-[-20%] left-1/2 -translate-x-1/2 w-[800px] h-[800px] opacity-[0.15] pointer-events-none rounded-full blur-[120px]" style={{ background: 'radial-gradient(circle, rgba(37,99,235,0.8) 0%, transparent 70%)' }} />
                 <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'linear-gradient(to right, rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.1) 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
 
                 <div className="relative mx-auto px-6 sm:px-8 max-w-7xl">
@@ -367,33 +367,33 @@ export function PublicEventLanding({
                         {/* LEFT: Text Content */}
                         <div className="space-y-8 pt-4">
                             <div className="flex flex-wrap items-center gap-3">
-                                <span className="inline-flex items-center gap-1.5 rounded-full border border-brand-yellow/30 bg-brand-yellow/10 px-3 py-1.5 text-xs font-semibold uppercase tracking-widest text-brand-yellow">
+                                <span className="inline-flex items-center gap-1.5 rounded-full border border-brand-blue/30 bg-brand-blue/10 px-3 py-1.5 text-xs font-semibold uppercase tracking-widest text-brand-blue">
                                     {formatLabel}
                                 </span>
                                 {event.hero_badge && (
-                                    <span className="inline-flex items-center rounded-full bg-white/10 px-3 py-1.5 text-xs font-medium text-white/90">
+                                    <span className="inline-flex items-center rounded-full bg-brand-blue-soft px-3 py-1.5 text-xs font-medium text-brand-text-strong">
                                         {event.hero_badge}
                                     </span>
                                 )}
                                 {specialization && (
-                                    <span className="inline-flex items-center rounded-full border border-white/10 bg-white/[0.05] px-3 py-1.5 text-xs font-semibold text-white">
+                                    <span className="inline-flex items-center rounded-full border border-brand-border bg-brand-surface-soft px-3 py-1.5 text-xs font-semibold text-brand-text-strong">
                                         {specialization.name}
                                     </span>
                                 )}
                             </div>
 
                             <div className="space-y-5">
-                                <h1 className="max-w-3xl text-4xl font-bold tracking-tight text-white sm:text-5xl lg:text-6xl leading-[1.1]">
+                                <h1 className="max-w-3xl font-serif text-4xl font-bold tracking-normal text-brand-text-strong sm:text-5xl lg:text-6xl leading-[1.06]">
                                     {event.title}
                                 </h1>
                                 {event.subtitle && (
-                                    <p className="max-w-2xl text-lg leading-relaxed text-neutral-400 sm:text-xl font-light">
+                                    <p className="max-w-2xl text-lg leading-relaxed text-brand-text-muted sm:text-xl font-light">
                                         {event.subtitle}
                                     </p>
                                 )}
                                 {event.campaign_problem && (
-                                    <div className="max-w-2xl rounded-2xl border border-brand-yellow/20 bg-brand-yellow/5 p-4">
-                                        <p className="text-sm leading-relaxed text-brand-yellow/90 sm:text-base">
+                                    <div className="max-w-2xl rounded-2xl border border-brand-blue/20 bg-brand-blue/5 p-4">
+                                        <p className="text-sm leading-relaxed text-brand-blue/90 sm:text-base">
                                             {event.campaign_problem}
                                         </p>
                                     </div>
@@ -414,18 +414,18 @@ export function PublicEventLanding({
                                                     <div
                                                         role="img"
                                                         aria-label={name}
-                                                        className="h-12 w-12 rounded-full bg-cover bg-center ring-2 ring-white/10 shadow-lg"
+                                                        className="h-12 w-12 rounded-full bg-cover bg-center ring-2 ring-brand-border shadow-lg"
                                                         style={{ backgroundImage: `url("${avatar}")` }}
                                                     />
                                                 ) : (
-                                                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-brand-yellow/20 text-sm font-bold text-brand-yellow ring-2 ring-white/10">
+                                                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-brand-blue/20 text-sm font-bold text-brand-blue ring-2 ring-brand-border">
                                                         {name.charAt(0)}
                                                     </div>
                                                 )}
                                                 <div>
-                                                    <p className="text-sm font-semibold text-white">{name}</p>
+                                                    <p className="text-sm font-semibold text-brand-text-strong">{name}</p>
                                                     {speaker?.headline && (
-                                                        <p className="text-xs text-neutral-400 mt-0.5">{speaker.headline}</p>
+                                                        <p className="text-xs text-brand-text-muted mt-0.5">{speaker.headline}</p>
                                                     )}
                                                 </div>
                                             </>
@@ -444,18 +444,18 @@ export function PublicEventLanding({
                                 </div>
                             )}
 
-                            <div className="flex flex-wrap gap-x-12 gap-y-6 pt-6 border-t border-white/10">
+                            <div className="flex flex-wrap gap-x-12 gap-y-6 pt-6 border-t border-brand-border">
                                 <div>
                                     <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-neutral-500">Fecha y Hora</p>
-                                    <p className="mt-2 text-sm font-medium text-white">{formatEventDate(event.start_time)}</p>
+                                    <p className="mt-2 text-sm font-medium text-brand-text-strong">{formatEventDate(event.start_time)}</p>
                                 </div>
                                 <div>
                                     <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-neutral-500">Formato</p>
-                                    <p className="mt-2 text-sm font-medium text-white">{formatLabel}</p>
+                                    <p className="mt-2 text-sm font-medium text-brand-text-strong">{formatLabel}</p>
                                 </div>
                                 <div>
                                     <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-neutral-500">Dirigido a</p>
-                                    <p className="mt-2 text-sm font-medium text-white">{getAudienceLabel(event.target_audience)}</p>
+                                    <p className="mt-2 text-sm font-medium text-brand-text-strong">{getAudienceLabel(event.target_audience)}</p>
                                 </div>
                             </div>
                         </div>
@@ -463,18 +463,18 @@ export function PublicEventLanding({
                         {/* RIGHT: Image & CTA */}
                         <aside className="space-y-6 lg:sticky lg:top-24">
                             {event.image_url && (
-                                <div className="aspect-[4/3] sm:aspect-video lg:aspect-[4/5] w-full rounded-[32px] overflow-hidden border border-white/10 shadow-2xl relative group">
+                                <div className="aspect-[4/3] sm:aspect-video lg:aspect-[4/5] w-full rounded-[32px] overflow-hidden border border-brand-border shadow-2xl relative group">
                                     <div 
                                         role="img" 
                                         aria-label={event.title}
                                         className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105" 
                                         style={{ backgroundImage: `url("${event.image_url}")` }} 
                                     />
-                                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-80" />
-                                    <div className="absolute inset-0 ring-1 ring-inset ring-white/10 rounded-[32px] pointer-events-none" />
+                                    <div className="absolute inset-0 bg-gradient-to-t from-background/60 via-transparent to-transparent opacity-80" />
+                                    <div className="absolute inset-0 ring-1 ring-inset ring-brand-border rounded-[32px] pointer-events-none" />
                                     {event.formation_track && (
                                         <div className="absolute bottom-4 left-4 right-4 text-center">
-                                            <span className="inline-block rounded-full bg-black/60 backdrop-blur-md px-4 py-1.5 text-xs font-medium tracking-wide text-brand-yellow border border-white/10">
+                                            <span className="inline-block rounded-full bg-background/60 backdrop-blur-md px-4 py-1.5 text-xs font-medium tracking-wide text-brand-blue border border-brand-border">
                                                 Ruta: {event.formation_track}
                                             </span>
                                         </div>
@@ -482,28 +482,28 @@ export function PublicEventLanding({
                                 </div>
                             )}
 
-                            <div className="rounded-[32px] border border-white/10 bg-[#0A0A0A]/80 p-6 shadow-2xl backdrop-blur-xl relative overflow-hidden">
+                            <div className="rounded-[32px] border border-border bg-card/90 p-6 shadow-2xl backdrop-blur-xl relative overflow-hidden">
                                 {/* Subtle internal glow for the card */}
-                                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-1/2 bg-brand-yellow/5 blur-3xl pointer-events-none" />
+                                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-1/2 bg-brand-blue/5 blur-3xl pointer-events-none" />
                                 
                                 <div className="relative z-10">
                                     <div className="flex items-end justify-between gap-4">
                                         <div>
                                             <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-neutral-500">Inversion</p>
-                                            <p className="mt-1 text-3xl font-bold tracking-tight text-white">
+                                            <p className="mt-1 text-3xl font-bold tracking-tight text-brand-text-strong">
                                                 {finalPrice > 0 ? `$${finalPrice.toFixed(0)} MXN` : 'Gratis'}
                                             </p>
                                         </div>
                                         {finalPrice > 0 && finalPrice < Number(event.price || 0) && (
                                             <div className="text-right">
                                                 <p className="text-xs text-neutral-500 line-through">${Number(event.price).toFixed(0)}</p>
-                                                <p className="text-xs font-medium text-brand-yellow">Ahorras ${Number(event.price - finalPrice).toFixed(0)}</p>
+                                                <p className="text-xs font-medium text-brand-blue">Ahorras ${Number(event.price - finalPrice).toFixed(0)}</p>
                                             </div>
                                         )}
                                     </div>
 
                                     {includedBySpecialization && (
-                                        <div className="mt-4 flex items-center gap-2 rounded-xl bg-brand-yellow/10 px-3 py-2 text-xs font-medium text-brand-yellow border border-brand-yellow/20">
+                                        <div className="mt-4 flex items-center gap-2 rounded-xl bg-brand-blue/10 px-3 py-2 text-xs font-medium text-brand-blue border border-brand-blue/20">
                                             <Check className="h-3.5 w-3.5" />
                                             Acceso incluido por tu especialidad
                                         </div>
@@ -513,11 +513,11 @@ export function PublicEventLanding({
                                         {hasAccess ? (
                                             <>
                                                 <Link href={`/hub/${event.slug}`}>
-                                                    <Button className="w-full h-12 text-base font-semibold shadow-lg shadow-brand-yellow/20" size="lg">
+                                                    <Button className="w-full h-12 text-base font-semibold shadow-lg shadow-brand-blue/20" size="lg">
                                                         Entrar al hub privado
                                                     </Button>
                                                 </Link>
-                                                <p className="text-center text-xs font-medium text-brand-yellow">
+                                                <p className="text-center text-xs font-medium text-brand-blue">
                                                     Ya tienes acceso a este contenido
                                                 </p>
                                             </>
@@ -546,8 +546,8 @@ export function PublicEventLanding({
                                                     <>
                                                         {!isMembersOnly && (
                                                             <div className="relative py-2">
-                                                                <div className="absolute inset-x-0 top-1/2 border-t border-white/5" />
-                                                                <span className="relative mx-auto flex w-fit bg-[#0A0A0A] px-3 text-[10px] uppercase tracking-[0.18em] text-neutral-600">
+                                                                <div className="absolute inset-x-0 top-1/2 border-t border-brand-border" />
+                                    <span className="relative mx-auto flex w-fit bg-card px-3 text-[10px] uppercase tracking-[0.18em] text-neutral-600">
                                                                     o tambien
                                                                 </span>
                                                             </div>
@@ -555,7 +555,7 @@ export function PublicEventLanding({
                                                         <Link href={`/precios?next=/eventos/${event.slug}&autoCheckout=true`}>
                                                             <Button
                                                                 variant={isMembersOnly ? 'default' : 'outline'}
-                                                                className={cn('w-full h-12 text-sm', isMembersOnly ? 'text-base font-semibold' : 'border-white/10 text-white hover:bg-white/5 hover:text-white')}
+                                                                className={cn('w-full h-12 text-sm', isMembersOnly ? 'text-base font-semibold' : 'border-brand-border text-brand-text-strong hover:bg-brand-surface-soft hover:text-brand-text-strong')}
                                                                 size="lg"
                                                             >
                                                                 {isMembersOnly && <Lock className="h-4 w-4 mr-2" />}
@@ -567,7 +567,7 @@ export function PublicEventLanding({
 
                                                 {campaign && (
                                                     <a href="#campaign-temario" className="block pt-2">
-                                                        <Button variant="ghost" className="w-full text-xs text-neutral-400 hover:text-white hover:bg-white/5">
+                                                        <Button variant="ghost" className="w-full text-xs text-brand-text-muted hover:text-brand-text-strong hover:bg-brand-surface-soft">
                                                             <Download className="h-3.5 w-3.5 mr-2" />
                                                             Descargar temario PDF
                                                         </Button>
@@ -580,7 +580,7 @@ export function PublicEventLanding({
                                     {!hasAccess && (
                                         <p className="mt-5 text-center text-[11px] text-neutral-500">
                                             Ya lo adquiriste?{' '}
-                                            <Link href="/compras/recuperar" className="font-medium text-white hover:text-brand-yellow transition-colors underline underline-offset-2">
+                                            <Link href="/compras/recuperar" className="font-medium text-brand-text-strong hover:text-brand-blue transition-colors underline underline-offset-2">
                                                 Recupera tu acceso
                                             </Link>
                                         </p>
@@ -615,8 +615,8 @@ export function PublicEventLanding({
                     <div className="space-y-16">
                         {event.description && (
                             <div>
-                                <h2 className="text-2xl font-semibold text-white mb-6">Acerca de este encuentro</h2>
-                                <div className="space-y-4 text-base leading-relaxed text-neutral-400">
+                                <h2 className="text-2xl font-semibold text-brand-text-strong mb-6">Acerca de este encuentro</h2>
+                                <div className="space-y-4 text-base leading-relaxed text-brand-text-muted">
                                     {event.description.split('\n').map((paragraph: string, index: number) => (
                                         <p key={index}>{paragraph}</p>
                                     ))}
@@ -626,15 +626,15 @@ export function PublicEventLanding({
 
                         {(event.ideal_for?.length > 0 || event.learning_outcomes?.length > 0) && (
                             <div>
-                                <h2 className="text-2xl font-semibold text-white mb-8">Valor Academico</h2>
+                                <h2 className="text-2xl font-semibold text-brand-text-strong mb-8">Valor Academico</h2>
                                 <div className="grid gap-8 sm:grid-cols-2">
                                     {event.ideal_for?.length > 0 && (
                                         <div className="space-y-5">
                                             <h3 className="text-sm font-semibold uppercase tracking-widest text-neutral-500">A quien va dirigido</h3>
                                             <ul className="space-y-4">
                                                 {event.ideal_for.map((item: string) => (
-                                                    <li key={item} className="flex items-start gap-3 text-sm leading-relaxed text-neutral-300">
-                                                        <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-white/5 border border-white/10 text-brand-yellow">
+                                                    <li key={item} className="flex items-start gap-3 text-sm leading-relaxed text-brand-text">
+                                                        <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-brand-surface-soft border border-brand-border text-brand-blue">
                                                             <Check className="h-3 w-3" />
                                                         </span>
                                                         <span>{item}</span>
@@ -649,8 +649,8 @@ export function PublicEventLanding({
                                             <h3 className="text-sm font-semibold uppercase tracking-widest text-neutral-500">Que aprenderas</h3>
                                             <ul className="space-y-4">
                                                 {event.learning_outcomes.map((item: string) => (
-                                                    <li key={item} className="flex items-start gap-3 text-sm leading-relaxed text-neutral-300">
-                                                        <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-brand-yellow/10 text-brand-yellow">
+                                                    <li key={item} className="flex items-start gap-3 text-sm leading-relaxed text-brand-text">
+                                                        <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-brand-blue/10 text-brand-blue">
                                                             <ArrowRight className="h-3 w-3" />
                                                         </span>
                                                         <span>{item}</span>
@@ -664,12 +664,12 @@ export function PublicEventLanding({
                         )}
 
                         <div>
-                            <h2 className="text-2xl font-semibold text-white mb-6">Que incluye tu acceso</h2>
+                            <h2 className="text-2xl font-semibold text-brand-text-strong mb-6">Que incluye tu acceso</h2>
                             <div className="grid gap-4 sm:grid-cols-2">
                                 {valueItems.map((item) => (
-                                    <div key={item.title} className="rounded-2xl border border-white/5 bg-white/[0.02] p-5 hover:bg-white/[0.04] transition-colors">
-                                        <p className="text-base font-medium text-white">{item.title}</p>
-                                        <p className="mt-2 text-sm leading-relaxed text-neutral-400">{item.description}</p>
+                                    <div key={item.title} className="rounded-2xl border border-brand-border bg-white p-5 hover:bg-brand-blue-soft/60 transition-colors">
+                                        <p className="text-base font-medium text-brand-text-strong">{item.title}</p>
+                                        <p className="mt-2 text-sm leading-relaxed text-brand-text-muted">{item.description}</p>
                                     </div>
                                 ))}
                             </div>
@@ -677,7 +677,7 @@ export function PublicEventLanding({
 
                         {event.speakers?.length > 0 && (
                             <div>
-                                <h2 className="text-2xl font-semibold text-white mb-6">Conoce a los ponentes</h2>
+                                <h2 className="text-2xl font-semibold text-brand-text-strong mb-6">Conoce a los ponentes</h2>
                                 <div className="grid gap-6 sm:grid-cols-2">
                                     {event.speakers.map((item: any) => {
                                         const speaker = item.speaker
@@ -688,24 +688,24 @@ export function PublicEventLanding({
                                         const credentials = Array.isArray(speaker?.credentials) ? speaker.credentials.filter(Boolean).slice(0, 2) : []
 
                                         const content = (
-                                            <div className="flex flex-col h-full rounded-[24px] border border-white/5 bg-white/[0.02] overflow-hidden hover:border-brand-yellow/30 hover:bg-white/[0.04] transition-all group">
+                                            <div className="flex flex-col h-full rounded-[24px] border border-brand-border bg-white overflow-hidden hover:border-brand-blue/30 hover:bg-brand-blue-soft/60 transition-all group">
                                                 <div className="p-6 pb-0 flex items-center gap-4">
                                                     {avatar ? (
                                                         <div
                                                             role="img"
                                                             aria-label={name}
-                                                            className="h-16 w-16 shrink-0 rounded-full bg-cover bg-center ring-2 ring-white/10"
+                                                            className="h-16 w-16 shrink-0 rounded-full bg-cover bg-center ring-2 ring-brand-border"
                                                             style={{ backgroundImage: `url("${avatar}")` }}
                                                         />
                                                     ) : (
-                                                        <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-brand-yellow/10 text-xl font-bold text-brand-yellow ring-2 ring-brand-yellow/20">
+                                                        <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-brand-blue/10 text-xl font-bold text-brand-blue ring-2 ring-brand-blue/20">
                                                             {name.charAt(0)}
                                                         </div>
                                                     )}
                                                     <div>
-                                                        <p className="text-lg font-semibold text-white group-hover:text-brand-yellow transition-colors">{name}</p>
+                                                        <p className="text-lg font-semibold text-brand-text-strong group-hover:text-brand-blue transition-colors">{name}</p>
                                                         {speaker?.headline && (
-                                                            <p className="mt-1 text-sm text-neutral-400">{speaker.headline}</p>
+                                                            <p className="mt-1 text-sm text-brand-text-muted">{speaker.headline}</p>
                                                         )}
                                                     </div>
                                                 </div>
@@ -714,7 +714,7 @@ export function PublicEventLanding({
                                                         {specialties.length > 0 && (
                                                             <div className="flex flex-wrap gap-2">
                                                                 {specialties.map((specialty: string) => (
-                                                                    <span key={specialty} className="rounded-md bg-white/5 px-2 py-1 text-xs font-medium text-neutral-300">
+                                                                    <span key={specialty} className="rounded-md bg-brand-surface-soft px-2 py-1 text-xs font-medium text-brand-text">
                                                                         {specialty}
                                                                     </span>
                                                                 ))}
@@ -743,12 +743,12 @@ export function PublicEventLanding({
 
                         {hasAccess && materialLinks.length > 0 && (
                             <div>
-                                <h2 className="text-2xl font-semibold text-white mb-6">Materiales del evento</h2>
+                                <h2 className="text-2xl font-semibold text-brand-text-strong mb-6">Materiales del evento</h2>
                                 <div className="space-y-3">
                                     {materialLinks.map((item: any) => (
-                                        <div key={item.id || item.url} className="flex items-center justify-between gap-4 rounded-2xl border border-white/5 bg-white/[0.02] p-5">
+                                        <div key={item.id || item.url} className="flex items-center justify-between gap-4 rounded-2xl border border-brand-border bg-white p-5">
                                             <div>
-                                                <p className="text-base font-medium text-white">{item.title}</p>
+                                                <p className="text-base font-medium text-brand-text-strong">{item.title}</p>
                                                 <p className="mt-1 text-sm text-neutral-500">
                                                     {item.type === 'presentation' ? 'Presentacion' :
                                                         item.type === 'document' ? 'Documento' :
@@ -756,7 +756,7 @@ export function PublicEventLanding({
                                                                 item.type === 'download' ? 'Descarga' : 'Enlace externo'}
                                                 </p>
                                             </div>
-                                            <Button asChild variant="secondary" size="sm" className="shrink-0 bg-white/10 hover:bg-white/20 text-white">
+                                            <Button asChild variant="secondary" size="sm" className="shrink-0 bg-brand-blue-soft hover:bg-brand-blue-border text-brand-text-strong">
                                                 <a href={item.url} target="_blank" rel="noopener noreferrer">
                                                     Abrir
                                                 </a>
@@ -767,8 +767,8 @@ export function PublicEventLanding({
                             </div>
                         )}
 
-                        <div className="pt-8 border-t border-white/10">
-                            <h2 className="text-2xl font-semibold text-white mb-6">Preguntas frecuentes</h2>
+                        <div className="pt-8 border-t border-brand-border">
+                            <h2 className="text-2xl font-semibold text-brand-text-strong mb-6">Preguntas frecuentes</h2>
                             <div className="max-w-3xl">
                                 <FaqAccordion items={faqItems} />
                             </div>
@@ -778,36 +778,36 @@ export function PublicEventLanding({
                     {/* RIGHT: Supplemental Links */}
                     <aside className="space-y-8 lg:sticky lg:top-24">
                         {event.formation && !Array.isArray(event.formation) && (
-                            <div className="rounded-2xl border border-brand-yellow/20 bg-brand-yellow/5 p-6 relative overflow-hidden">
+                            <div className="rounded-2xl border border-brand-blue/20 bg-brand-blue/5 p-6 relative overflow-hidden">
                                 <div className="absolute top-0 right-0 p-4 opacity-10">
                                     <svg width="64" height="64" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
                                 </div>
-                                <h3 className="text-sm font-semibold uppercase tracking-widest text-brand-yellow mb-3">Parte de una ruta mayor</h3>
-                                <p className="text-sm leading-relaxed text-neutral-300">
-                                    Este encuentro forma parte de <strong className="text-white font-medium">{event.formation.title}</strong>. Puedes tomarlo por separado o revisar la ruta completa para obtener la certificacion.
+                                <h3 className="text-sm font-semibold uppercase tracking-widest text-brand-blue mb-3">Parte de una ruta mayor</h3>
+                                <p className="text-sm leading-relaxed text-brand-text">
+                                    Este encuentro forma parte de <strong className="text-brand-text-strong font-medium">{event.formation.title}</strong>. Puedes tomarlo por separado o revisar la ruta completa para obtener la certificacion.
                                 </p>
-                                <Link href={`/formaciones/${event.formation.slug}`} className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-brand-yellow hover:text-white transition-colors">
+                                <Link href={`/formaciones/${event.formation.slug}`} className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-brand-blue hover:text-brand-text-strong transition-colors">
                                     Ver diplomado completo
                                     <ArrowRight className="h-4 w-4" />
                                 </Link>
                             </div>
                         )}
 
-                        <div className="rounded-2xl border border-white/5 bg-[#0A0A0A] p-6">
-                            <h3 className="text-sm font-semibold uppercase tracking-widest text-neutral-400 mb-4">Para Miembros</h3>
-                            <div className="space-y-4 text-sm leading-relaxed text-neutral-400">
+                                        <div className="rounded-2xl border border-border bg-card p-6">
+                            <h3 className="text-sm font-semibold uppercase tracking-widest text-brand-text-muted mb-4">Para Miembros</h3>
+                            <div className="space-y-4 text-sm leading-relaxed text-brand-text-muted">
                                 <p>La membresia potencia tu acceso con ahorro acumulado y una entrada mas continua a eventos, contenidos y networking.</p>
                                 <ul className="space-y-3">
                                     <li className="flex items-start gap-3">
-                                        <Check className="mt-0.5 h-4 w-4 shrink-0 text-white" />
+                                        <Check className="mt-0.5 h-4 w-4 shrink-0 text-brand-text-strong" />
                                         Acceso incluido o precio preferencial.
                                     </li>
                                     <li className="flex items-start gap-3">
-                                        <Check className="mt-0.5 h-4 w-4 shrink-0 text-white" />
+                                        <Check className="mt-0.5 h-4 w-4 shrink-0 text-brand-text-strong" />
                                         Comunidad y networking con colegas.
                                     </li>
                                 </ul>
-                                <Link href="/precios" className="mt-2 inline-flex items-center gap-2 text-sm font-medium text-white hover:text-brand-yellow transition-colors underline underline-offset-4">
+                                <Link href="/precios" className="mt-2 inline-flex items-center gap-2 text-sm font-medium text-brand-text-strong hover:text-brand-blue transition-colors underline underline-offset-4">
                                     Explorar planes
                                 </Link>
                             </div>
@@ -820,10 +820,10 @@ export function PublicEventLanding({
                 <section className="mx-auto max-w-7xl px-6 sm:px-8 mt-24">
                     <div className="flex items-end justify-between mb-8">
                         <div>
-                            <p className="text-sm font-semibold uppercase tracking-widest text-brand-yellow mb-2">
+                            <p className="text-sm font-semibold uppercase tracking-widest text-brand-blue mb-2">
                                 {campaign ? 'Agenda relacionada' : 'Siguiente paso'}
                             </p>
-                            <h2 className="text-3xl font-bold text-white">
+                            <h2 className="text-3xl font-bold text-brand-text-strong">
                                 {campaign ? 'Eventos de esta ruta' : 'Tambien te puede interesar'}
                             </h2>
                         </div>
@@ -837,8 +837,8 @@ export function PublicEventLanding({
             )}
 
             {!isBlocked && (
-                <div className="fixed inset-x-0 bottom-0 z-50 p-4 lg:hidden bg-gradient-to-t from-black via-black/90 to-transparent pt-12 pointer-events-none">
-                    <div className="mx-auto flex max-w-md items-center gap-3 rounded-2xl border border-white/10 bg-[#0A0A0A]/95 p-3 shadow-2xl backdrop-blur-xl pointer-events-auto">
+                <div className="fixed inset-x-0 bottom-0 z-50 p-4 lg:hidden bg-gradient-to-t from-background via-background/90 to-transparent pt-12 pointer-events-none">
+                    <div className="mx-auto flex max-w-md items-center gap-3 rounded-2xl border border-border bg-card/95 p-3 shadow-2xl backdrop-blur-xl pointer-events-auto">
                         <div className="min-w-0 flex-1">
                             {hasAccess ? (
                                 <Link href={`/hub/${event.slug}`} className="block">
@@ -856,7 +856,7 @@ export function PublicEventLanding({
                         </div>
                         {campaign && (
                             <a href="#campaign-temario" className="shrink-0">
-                                <Button variant="secondary" className="gap-2 bg-white/5 text-white hover:bg-white/10 border-none">
+                                <Button variant="secondary" className="gap-2 bg-brand-surface-soft text-brand-text-strong hover:bg-brand-blue-soft border-none">
                                     <Download className="h-4 w-4" />
                                 </Button>
                             </a>

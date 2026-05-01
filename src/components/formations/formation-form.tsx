@@ -331,9 +331,9 @@ export function FormationForm({ initialData, availableEvents, canPublish = true 
                         </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
-                        <div className="mb-4 rounded-lg border border-brand-brown/20 bg-brand-brown/10 p-4">
-                            <p className="text-sm font-medium text-brand-brown">Info de precios individuales</p>
-                            <p className="mt-1 text-xs text-brand-brown">
+                        <div className="mb-4 rounded-lg border border-brand-blue-hover/20 bg-brand-blue-hover/10 p-4">
+                            <p className="text-sm font-medium text-brand-blue-hover">Info de precios individuales</p>
+                            <p className="mt-1 text-xs text-brand-blue-hover">
                                 Si un alumno compra cada curso por separado, el total seria de <strong>${sumIndividualPrices} MXN</strong>.
                                 Aprovecha para poner un precio menor por el paquete completo.
                             </p>

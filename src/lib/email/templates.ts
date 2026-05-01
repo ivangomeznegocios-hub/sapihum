@@ -1,6 +1,6 @@
 import { getAppUrl } from '@/lib/config/app-url'
 
-const BRAND_COLOR = '#f6ae02' // SAPIHUM yellow
+const BRAND_COLOR = '#2563EB' // SAPIHUM yellow
 const BG_COLOR = '#f5f5f5'
 const CARD_BG = '#ffffff'
 const TEXT_COLOR = '#2c2c2b'
@@ -53,7 +53,7 @@ function ctaButton(href: string, label: string) {
     return `
     <table width="100%" cellpadding="0" cellspacing="0" style="margin:24px 0 0;">
         <tr><td align="center">
-            <a href="${href}" style="display:inline-block;padding:14px 32px;background:linear-gradient(135deg,${BRAND_COLOR},#7a5602);color:white;text-decoration:none;border-radius:10px;font-weight:600;font-size:15px;">
+            <a href="${href}" style="display:inline-block;padding:14px 32px;background:linear-gradient(135deg,${BRAND_COLOR},#1E3A8A);color:white;text-decoration:none;border-radius:10px;font-weight:600;font-size:15px;">
                 ${label}
             </a>
         </td></tr>
@@ -85,7 +85,7 @@ export function buildEventRegistrationEmail(params: {
             </tr>
             <tr>
                 <td style="padding:8px 0;font-size:13px;color:${MUTED_COLOR};">Acceso</td>
-                <td style="padding:8px 0;font-size:14px;font-weight:600;color:#7a5602;text-align:right;">Confirmado</td>
+                <td style="padding:8px 0;font-size:14px;font-weight:600;color:#1E3A8A;text-align:right;">Confirmado</td>
             </tr>
         </table>
         ${ctaButton(params.eventUrl, 'Ir al evento →')}
@@ -128,7 +128,7 @@ export function buildEventPurchaseEmail(params: {
             </tr>
             <tr>
                 <td style="padding:8px 0;font-size:13px;color:${MUTED_COLOR};">Acceso</td>
-                <td style="padding:8px 0;font-size:14px;font-weight:600;color:#7a5602;text-align:right;">✅ Activo</td>
+                <td style="padding:8px 0;font-size:14px;font-weight:600;color:#1E3A8A;text-align:right;">✅ Activo</td>
             </tr>
         </table>
         ${ctaButton(params.eventUrl, 'Acceder al evento →')}
@@ -183,7 +183,7 @@ export function buildFormationPurchaseEmail(params: {
             </tr>
             <tr>
                 <td style="padding:8px 0;font-size:13px;color:${MUTED_COLOR};">Acceso</td>
-                <td style="padding:8px 0;font-size:14px;font-weight:600;color:#7a5602;text-align:right;">Activo</td>
+                <td style="padding:8px 0;font-size:14px;font-weight:600;color:#1E3A8A;text-align:right;">Activo</td>
             </tr>
         </table>
         ${ctaButton(params.accessUrl, 'Ir a mi acceso ->')}

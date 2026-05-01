@@ -59,11 +59,19 @@ const config: Config = {
                 },
                 /* ── SAPIHUM Brand Colors ── */
                 brand: {
-                    yellow: '#f6ae02',
-                    brown: '#7a5602',
-                    carbon: '#2c2c2b',
-                    gray: '#c0bfbc',
-                    dark: '#0a0a0a',
+                    background: '#fafaf9',
+                    surface: '#ffffff',
+                    'surface-soft': '#f3f4f6',
+                    border: '#e5e7eb',
+                    text: '#1c1917',
+                    'text-strong': '#0f172a',
+                    'text-muted': '#6b7280',
+                    blue: '#2563eb',
+                    'blue-dark': '#1d4ed8',
+                    'blue-hover': '#1e3a8a',
+                    'blue-soft': '#eff6ff',
+                    'blue-border': '#dbeafe',
+                    'teal-soft': '#f0fdfa',
                 },
             },
             borderRadius: {
@@ -72,10 +80,10 @@ const config: Config = {
                 sm: 'calc(var(--radius) - 4px)',
             },
             boxShadow: {
-                'brand-base': '0 4px 12px rgba(0, 0, 0, 0.08)',
-                'brand-hover': '0 4px 12px rgba(0, 0, 0, 0.15)',
-                'brand-glow': '0 2px 8px rgba(246, 174, 2, 0.08)',
-                'brand-luxury': '0 32px 80px rgba(0, 0, 0, 0.4)',
+                'brand-base': '0 4px 12px rgba(15, 23, 42, 0.08)',
+                'brand-hover': '0 8px 24px rgba(15, 23, 42, 0.12)',
+                'brand-glow': '0 2px 10px rgba(37, 99, 235, 0.12)',
+                'brand-luxury': '0 28px 80px rgba(15, 23, 42, 0.14)',
             },
             keyframes: {
                 'accordion-down': {

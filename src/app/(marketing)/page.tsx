@@ -199,55 +199,55 @@ export default async function LandingPage() {
       {/* ══════════════════════════════════════════════════
           1. HERO
       ══════════════════════════════════════════════════ */}
-      <section className="relative flex w-full items-center overflow-hidden bg-black min-h-[68svh] md:min-h-[72svh]">
-        {/* Subtle background */}
-        <div className="absolute inset-0 -z-0 sapihum-grid-bg opacity-30" />
-        <div className="absolute left-1/2 top-0 -translate-x-1/2 h-[420px] w-[420px] rounded-full bg-[#f6ae02]/5" />
+      <section className="relative flex w-full items-center overflow-hidden bg-background min-h-[76svh] md:min-h-[82svh]">
+        <div className="absolute inset-0 -z-0 bg-[radial-gradient(circle_at_18%_10%,rgba(219,234,254,0.78),transparent_34%),radial-gradient(circle_at_82%_80%,rgba(240,253,250,0.72),transparent_30%),linear-gradient(180deg,#ffffff_0%,#fafaf9_56%,#f7fbff_100%)]" />
+        <div className="absolute inset-0 -z-0 sapihum-grid-bg opacity-[0.18]" />
         
-        <div className="relative z-10 mx-auto max-w-5xl px-4 py-20 sm:px-6 md:py-24 lg:px-8 lg:py-28">
-          <div className="max-w-4xl mx-auto text-center flex flex-col items-center">
-            {/* Badge — minimal editorial */}
-            <div className="inline-flex items-center gap-2 rounded-sm border border-[#f6ae02]/20 bg-[#f6ae02]/5 px-4 py-1.5 text-[10px] font-bold text-[#f6ae02] uppercase tracking-[0.2em] mb-10">
-              Academia SAPIHUM | Formación especializada para psicólogos
+        <div className="relative z-10 mx-auto max-w-[88rem] px-4 py-20 sm:px-6 md:py-24 lg:px-8 lg:py-28">
+          <div className="mx-auto flex max-w-7xl flex-col items-center text-center">
+            <div className="mb-12 inline-flex items-center gap-2 rounded-full border border-brand-blue-border bg-brand-blue-soft/80 px-5 py-2 text-[11px] font-extrabold uppercase tracking-[0.16em] text-brand-blue-dark shadow-sm">
+              <Shield className="h-3.5 w-3.5 fill-brand-blue text-brand-blue" />
+              Para profesionales de la salud mental
             </div>
 
-            {/* H1 — Editorial serif/sans mix */}
-            <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.08] text-white">
-              Cursos y formaciones especializadas para psicólogos que quieren{" "}
-              <span className="font-serif italic font-normal text-[#c0bfbc]">
-                crecer con más nivel, criterio y respaldo profesional.
+            <h1 className="font-serif text-[clamp(2.85rem,4.65vw,5.85rem)] font-bold leading-[1.04] tracking-normal text-brand-text-strong">
+              <span className="block md:whitespace-nowrap">La comunidad para los</span>
+              <span className="block md:whitespace-nowrap">profesionales del</span>
+              <span className="block pt-2 text-[0.88em] italic font-bold text-brand-text md:whitespace-nowrap">
+                comportamiento <span className="text-brand-blue-dark">humano.</span>
               </span>
             </h1>
 
-            {/* Subtitle */}
-            <p className="mt-8 text-lg md:text-xl text-[#c0bfbc]/70 max-w-3xl leading-relaxed font-light">
-              Accede a programas completos, formación continua y rutas de especialización diseñadas para fortalecer tu práctica, actualizarte con seriedad y diferenciarte en un entorno cada vez más exigente.
-            </p>
+            <div className="mt-10 max-w-3xl text-xl leading-relaxed text-brand-text-muted md:text-2xl">
+              <p>Psicólogos, Terapeutas, Consultores y Educadores.</p>
+              <p className="font-semibold text-brand-text">Diferentes trincheras, una misma misión:</p>
+              <p>Impactar vidas con ética y rigor.</p>
+            </div>
 
-            {/* CTA Buttons — Luxury style */}
-            <div className="mt-12 flex flex-col sm:flex-row gap-5 w-full sm:w-auto uppercase text-xs tracking-[0.1em]">
+            <div className="mt-14 flex w-full flex-col gap-5 text-sm sm:w-auto sm:flex-row">
               <Link
-                href="/formaciones"
+                href="/auth/register"
                 className="w-full sm:w-auto"
                 data-analytics-cta
-                data-analytics-label="Hero Ver Formaciones"
+                data-analytics-label="Hero Unirme Comunidad"
                 data-analytics-surface="home_hero"
-                data-analytics-funnel="landing"
+                data-analytics-funnel="registration"
               >
-                <Button size="lg" className="w-full h-13 px-10 font-bold">
-                  Ver Formaciones
+                <Button size="lg" className="h-14 w-full px-10 text-base font-bold normal-case tracking-normal">
+                  Unirme a la Comunidad
+                  <ArrowRight className="h-4 w-4" />
                 </Button>
               </Link>
               <Link
-                href="/membresia"
+                href="/nosotros"
                 className="w-full sm:w-auto"
                 data-analytics-cta
-                data-analytics-label="Hero Conocer Membresia"
+                data-analytics-label="Hero Conocer Mas"
                 data-analytics-surface="home_hero"
-                data-analytics-funnel="checkout"
+                data-analytics-funnel="landing"
               >
-                <Button size="lg" variant="outline" className="w-full h-13 px-10 font-bold">
-                  Conocer Membresía
+                <Button size="lg" variant="outline" className="h-14 w-full px-10 text-base font-bold normal-case tracking-normal">
+                  Conocer Más
                 </Button>
               </Link>
             </div>
@@ -258,12 +258,12 @@ export default async function LandingPage() {
       {/* ══════════════════════════════════════════════════
           2. BLOQUE DE CREDIBILIDAD
       ══════════════════════════════════════════════════ */}
-      <section className="w-full border-b border-white/[0.08] bg-black py-8">
+      <section className="w-full border-b border-border/[0.08] bg-background py-8">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex flex-wrap items-center justify-center gap-x-12 gap-y-4 opacity-60">
             {CREDIBILITY_PILLS.map((pill) => (
-              <div key={pill} className="flex items-center text-[10px] font-bold uppercase tracking-[0.2em] text-white/80">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#f6ae02] mr-3" />
+              <div key={pill} className="flex items-center text-[10px] font-bold uppercase tracking-[0.2em] text-foreground/80">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#2563EB] mr-3" />
                 {pill}
               </div>
             ))}
@@ -274,28 +274,27 @@ export default async function LandingPage() {
       {/* ══════════════════════════════════════════════════
           3. QUÉ ES SAPIHUM
       ══════════════════════════════════════════════════ */}
-      <section className="relative w-full py-32 border-b border-white/[0.06] overflow-hidden bg-black">
+      <section className="relative w-full py-32 border-b border-border/[0.06] overflow-hidden bg-background">
         {/* Imagen de fondo con soporte WebP automático en Cloudinary */}
         <Image
           src="https://res.cloudinary.com/dguo9gbxd/image/upload/f_auto,q_auto/v1775704950/PSICOLOGIA_AVANZADA_E_INVESTIGACION_HUMANA_1_whpj2o.jpg"
           alt=""
           fill
           sizes="100vw"
-          quality={58}
-          className="absolute inset-0 z-0 object-cover object-center opacity-40"
+          quality={72}
+          className="absolute inset-0 z-0 object-cover object-center opacity-[0.82]"
         />
-        {/* Gradiente sutil para mejorar legibilidad conectando el negro del fondo */}
-        <div className="absolute inset-0 z-0 bg-gradient-to-b from-black via-black/40 to-black" />
+        <div className="absolute inset-0 z-0 bg-gradient-to-b from-background/72 via-background/28 to-background/84" />
 
         <div className="relative z-10 mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 text-center">
-          <p className="text-[10px] font-bold text-[#f6ae02] uppercase tracking-[0.2em] mb-4">
+          <p className="text-[10px] font-bold text-[#2563EB] uppercase tracking-[0.2em] mb-4">
             El Ecosistema
           </p>
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight leading-tight text-white drop-shadow-md">
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight leading-tight text-foreground drop-shadow-md">
             Qué es SAPIHUM
           </h2>
-          <p className="mt-8 text-xl text-[#c0bfbc] leading-relaxed font-light drop-shadow-sm">
-            SAPIHUM es un ecosistema profesional en línea para psicólogos que buscan crecer con <span className="text-white font-semibold">mayor profundidad, estructura y respaldo</span>. Integramos todas las piezas del rompecabezas profesional en un solo lugar.
+          <p className="mt-8 text-xl leading-relaxed text-brand-text font-medium drop-shadow-[0_1px_14px_rgba(255,255,255,0.9)]">
+            SAPIHUM es un ecosistema profesional en línea para psicólogos que buscan crecer con <span className="text-foreground font-semibold">mayor profundidad, estructura y respaldo</span>. Integramos todas las piezas del rompecabezas profesional en un solo lugar.
           </p>
         </div>
       </section>
@@ -303,22 +302,22 @@ export default async function LandingPage() {
       {/* ══════════════════════════════════════════════════
           5. ESPECIALIDADES (SEO-friendly grid)
       ══════════════════════════════════════════════════ */}
-      <section className="w-full py-32 bg-black">
+      <section className="w-full py-32 bg-background">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row justify-between items-end mb-20 gap-8">
             <div className="max-w-2xl">
-              <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight mb-6 text-white">
+              <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight mb-6 text-foreground">
                 Áreas de{" "}
-                <span className="font-serif italic font-normal text-[#f6ae02]">especialización</span>
+                <span className="font-serif italic font-normal text-[#2563EB]">especialización</span>
               </h2>
-              <div className="h-px w-20 bg-[#7a5602]" />
+              <div className="h-px w-20 bg-[#1E3A8A]" />
             </div>
-            <p className="text-[#c0bfbc]/50 max-w-sm text-sm font-light leading-relaxed">
+            <p className="text-[#6B7280]/50 max-w-sm text-sm font-light leading-relaxed">
               Cada especialidad integra formación, actualización, recursos y comunidad para fortalecer tu ejercicio profesional.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-px bg-white/[0.06] border border-white/[0.06] sapihum-stagger">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-px bg-white/[0.06] border border-border/[0.06] sapihum-stagger">
             {SPECIALTIES.map((spec, idx) => {
               const background = SPECIALTY_BACKGROUNDS[spec.code]
 
@@ -326,7 +325,7 @@ export default async function LandingPage() {
                 <Link
                   key={spec.code}
                   href={`/especialidades/${spec.slug}`}
-                  className="group relative isolate min-h-[320px] overflow-hidden bg-black"
+                  className="group relative isolate min-h-[320px] overflow-hidden bg-background"
                 >
                   <Image
                     src={background?.image ?? SPECIALTY_BACKGROUNDS.clinica.image}
@@ -339,23 +338,23 @@ export default async function LandingPage() {
                       objectPosition: background?.position ?? "center",
                     }}
                   />
-                  <div className="absolute inset-0 bg-black/55 transition-colors duration-500 group-hover:bg-black/45" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black via-black/80 to-black/25" />
-                  <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-[#f6ae02]/60 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+                  <div className="absolute inset-0 bg-slate-950/28 transition-colors duration-500 group-hover:bg-slate-950/18" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950/88 via-slate-950/38 to-transparent" />
+                  <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-[#2563EB]/60 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
 
                   <div className="relative z-10 flex h-full flex-col justify-between p-10">
                     <div>
-                      <div className="mb-6 font-serif text-2xl text-[#f6ae02] drop-shadow-[0_2px_12px_rgba(0,0,0,0.55)]">
+                      <div className="mb-6 font-serif text-2xl text-[#2563EB] drop-shadow-[0_2px_12px_rgba(0,0,0,0.55)]">
                         {String(idx + 1).padStart(2, '0')}.
                       </div>
-                      <h3 className="mb-3 text-sm font-bold uppercase tracking-[0.1em] text-white transition-colors duration-500 group-hover:text-[#f6ae02]">
+                      <h3 className="mb-3 text-sm font-bold uppercase tracking-[0.1em] text-white transition-colors duration-500 group-hover:text-brand-blue-soft">
                         {spec.name}
                       </h3>
-                      <p className="max-w-[18rem] text-xs leading-relaxed text-white/78">
+                      <p className="max-w-[18rem] text-xs leading-relaxed text-white/82">
                         {spec.tagline}
                       </p>
                     </div>
-                    <div className="flex items-center text-[10px] font-bold uppercase tracking-[0.15em] text-[#f6ae02]">
+                    <div className="flex items-center text-[10px] font-bold uppercase tracking-[0.15em] text-[#2563EB]">
                       Descubrir <span className="ml-1 transition-transform duration-500 group-hover:translate-x-2">→</span>
                     </div>
                   </div>
@@ -374,29 +373,29 @@ export default async function LandingPage() {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-20 items-center">
             <div className="lg:col-span-8">
-              <p className="text-[10px] font-bold text-[#f6ae02] uppercase tracking-[0.2em] mb-4">
+              <p className="text-[10px] font-bold text-[#2563EB] uppercase tracking-[0.2em] mb-4">
                 Ciencia & Rigor
               </p>
-              <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight leading-tight mb-10 text-white">
+              <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight leading-tight mb-10 text-foreground">
                 Investigación aplicada para una{" "}
-                <span className="font-serif italic font-normal text-[#c0bfbc]">práctica institucional.</span>
+                <span className="font-serif italic font-normal text-[#6B7280]">práctica institucional.</span>
               </h2>
-              <div className="border-l border-white/[0.1] pl-10 py-2">
-                <p className="text-xl text-[#c0bfbc]/70 leading-relaxed font-light">
+              <div className="border-l border-border/[0.1] pl-10 py-2">
+                <p className="text-xl text-[#6B7280]/70 leading-relaxed font-light">
                   En SAPIHUM impulsamos una visión donde la formación, la práctica profesional y la investigación se conectan para generar más criterio, mejores decisiones y mayor profundidad clínica y profesional.
                 </p>
               </div>
             </div>
             <div className="lg:col-span-4 flex justify-end">
-              <div className="w-full border border-white/[0.08] p-10 flex flex-col justify-center items-center text-center">
-                <div className="w-16 h-16 bg-[#f6ae02]/10 rounded-full flex items-center justify-center mb-6">
-                  <Beaker className="w-8 h-8 text-[#f6ae02]" />
+              <div className="w-full border border-border/[0.08] p-10 flex flex-col justify-center items-center text-center">
+                <div className="w-16 h-16 bg-[#2563EB]/10 rounded-full flex items-center justify-center mb-6">
+                  <Beaker className="w-8 h-8 text-[#2563EB]" />
                 </div>
                 <h3 className="font-bold text-lg mb-4 text-foreground">Líneas de investigación activas</h3>
                 <p className="text-sm text-muted-foreground mb-8 font-light italic">
                   &ldquo;Nuestros hallazgos alimentan directamente los protocolos ofrecidos en el ecosistema.&rdquo;
                 </p>
-                <span className="text-[10px] font-bold text-[#f6ae02] uppercase tracking-[0.15em]">
+                <span className="text-[10px] font-bold text-[#2563EB] uppercase tracking-[0.15em]">
                   Explorar ciencia SAPIHUM
                 </span>
               </div>
@@ -408,31 +407,31 @@ export default async function LandingPage() {
       {/* ══════════════════════════════════════════════════
           8. RECURSOS Y HERRAMIENTAS (Software) — Minimalista
       ══════════════════════════════════════════════════ */}
-      <section className="relative w-full overflow-hidden border-b border-white/[0.06] bg-[#030303] py-28 md:py-32">
+      <section className="relative w-full overflow-hidden border-b border-border/[0.06] bg-background py-28 md:py-32">
         <Image
           src={PLATFORM_SECTION_BACKGROUND.image}
           alt=""
           fill
           sizes="100vw"
           quality={52}
-          className="absolute inset-0 object-cover opacity-[0.24]"
+          className="absolute inset-0 object-cover opacity-[0.62]"
           style={{
             objectPosition: PLATFORM_SECTION_BACKGROUND.position,
           }}
         />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(246,174,2,0.1),transparent_42%)]" />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/76 via-black/72 to-[#030303]/88" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(37,99,235,0.1),transparent_42%)]" />
+        <div className="absolute inset-0 bg-gradient-to-b from-background/78 via-background/48 to-background/88" />
 
         <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           {/* Section header */}
           <div className="mx-auto mb-16 max-w-3xl text-center">
-            <p className="mb-4 text-[10px] font-bold uppercase tracking-[0.2em] text-[#f6ae02]">
+            <p className="mb-4 text-[10px] font-bold uppercase tracking-[0.2em] text-[#2563EB]">
               Mucho más que formación
             </p>
-            <h2 className="text-3xl font-bold leading-tight tracking-tight text-white md:text-4xl">
+            <h2 className="text-3xl font-bold leading-tight tracking-tight text-foreground md:text-4xl">
               Formación, software clínico y membresía en una misma experiencia
             </h2>
-            <p className="mt-6 text-base font-light leading-relaxed text-[#c0bfbc]/60">
+            <p className="mt-6 text-base font-light leading-relaxed text-brand-text-muted">
               Además de la academia, existe un ecosistema que te ayuda a operar con más orden, seguimiento y respaldo profesional.
             </p>
           </div>
@@ -441,10 +440,10 @@ export default async function LandingPage() {
           <div className="grid grid-cols-1 gap-8 lg:grid-cols-2 lg:gap-12">
             {/* Left: Platform features — clean grid */}
             <div>
-              <h3 className="mb-6 text-xl font-bold tracking-tight text-white md:text-2xl">
+              <h3 className="mb-6 text-xl font-bold tracking-tight text-foreground md:text-2xl">
                 Infraestructura profesional conectada
               </h3>
-              <p className="mb-8 text-sm font-light leading-relaxed text-[#c0bfbc]/60">
+              <p className="mb-8 text-sm font-light leading-relaxed text-[#6B7280]/60">
                 No solo aprendes: también puedes organizar tu consulta y trabajar con mejor soporte clínico y tecnológico.
               </p>
 
@@ -452,15 +451,15 @@ export default async function LandingPage() {
                 {PLATFORM_FEATURES.map((feature) => (
                   <div
                     key={feature.title}
-                    className="group rounded-xl border border-white/[0.06] bg-white/[0.02] p-5 transition-all duration-500 hover:border-[#f6ae02]/15"
+                    className="group rounded-xl border border-border/[0.06] bg-white/[0.02] p-5 transition-all duration-500 hover:border-[#2563EB]/15"
                   >
-                    <div className="mb-3 inline-flex h-10 w-10 items-center justify-center rounded-xl border border-white/[0.06] bg-black text-[#c0bfbc] transition-colors duration-500 group-hover:text-[#f6ae02]">
+                    <div className="mb-3 inline-flex h-10 w-10 items-center justify-center rounded-xl border border-border/[0.06] bg-background text-[#6B7280] transition-colors duration-500 group-hover:text-[#2563EB]">
                       {feature.icon}
                     </div>
-                    <h4 className="text-sm font-bold text-white">
+                    <h4 className="text-sm font-bold text-foreground">
                       {feature.title}
                     </h4>
-                    <p className="mt-2 text-xs font-light leading-relaxed text-[#c0bfbc]/55">
+                    <p className="mt-2 text-xs font-light leading-relaxed text-[#6B7280]/55">
                       {feature.description}
                     </p>
                   </div>
@@ -470,23 +469,23 @@ export default async function LandingPage() {
 
             {/* Right: Nivel 2 showcase — simplified, no nested info box */}
             <div className="flex flex-col">
-              <div className="flex-1 rounded-xl border border-white/[0.08] bg-[#050505] p-6 md:p-8">
+              <div className="flex-1 rounded-xl border border-border/[0.08] bg-background p-6 md:p-8">
                 {/* Header */}
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="inline-flex items-center rounded-full bg-white/5 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-white/70">
+                  <span className="inline-flex items-center rounded-full bg-white/5 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-foreground/70">
                     {PRICING_PLAN_COPY.level2.levelLabel}
                   </span>
                   {PRICING_PLAN_COPY.level2.badge && (
-                    <span className="inline-flex items-center rounded-full border border-[#f6ae02]/20 bg-[#f6ae02]/8 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-[#f6ae02]">
+                    <span className="inline-flex items-center rounded-full border border-[#2563EB]/20 bg-[#2563EB]/8 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-[#2563EB]">
                       {PRICING_PLAN_COPY.level2.badge}
                     </span>
                   )}
                 </div>
 
-                <h3 className="mt-4 text-2xl font-bold tracking-tight text-white">
+                <h3 className="mt-4 text-2xl font-bold tracking-tight text-foreground">
                   {PRICING_PLAN_COPY.level2.title}
                 </h3>
-                <p className="mt-3 text-sm font-light leading-relaxed text-[#c0bfbc]/60">
+                <p className="mt-3 text-sm font-light leading-relaxed text-[#6B7280]/60">
                   {PRICING_PLAN_COPY.level2.note}
                 </p>
 
@@ -494,8 +493,8 @@ export default async function LandingPage() {
                 <ul className="mt-6 space-y-2.5">
                   {LEVEL_2_SHOWCASE_BENEFITS.map((benefit) => (
                     <li key={benefit} className="flex items-center gap-3">
-                      <span className="text-[#f6ae02] text-sm">+</span>
-                      <span className="text-sm text-[#c0bfbc]/70">{benefit}</span>
+                      <span className="text-[#2563EB] text-sm">+</span>
+                      <span className="text-sm text-[#6B7280]/70">{benefit}</span>
                     </li>
                   ))}
                 </ul>
@@ -516,7 +515,7 @@ export default async function LandingPage() {
                 </div>
               </div>
 
-              <p className="mt-3 text-[11px] font-light text-[#c0bfbc]/35">
+              <p className="mt-3 text-[11px] font-light text-[#6B7280]/35">
                 Nivel 2 aparece como ejemplo de la capa más completa dentro de SAPIHUM.
               </p>
             </div>
@@ -528,14 +527,14 @@ export default async function LandingPage() {
           8.5. PRÓXIMOS EVENTOS
       ══════════════════════════════════════════════════ */}
       {featuredEvents.length > 0 && (
-        <section className="w-full py-24 bg-[#050505] border-b border-white/[0.06]">
+        <section className="w-full py-24 bg-background border-b border-border/[0.06]">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between mb-12">
               <div className="max-w-3xl">
-                <p className="text-[10px] font-bold text-[#f6ae02] uppercase tracking-[0.2em] mb-4">
+                <p className="text-[10px] font-bold text-[#2563EB] uppercase tracking-[0.2em] mb-4">
                   Agenda SAPIHUM
                 </p>
-                <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-white">
+                <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-foreground">
                   Próximos eventos para psicólogos que quieren actualizarse y conectar con la comunidad
                 </h2>
                 <p className="mt-3 text-muted-foreground font-light">
@@ -566,17 +565,17 @@ export default async function LandingPage() {
       <section className="w-full py-32 bg-background">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="max-w-3xl mx-auto text-center mb-16">
-            <p className="text-[10px] font-bold text-[#f6ae02] uppercase tracking-[0.2em] mb-4">
+            <p className="text-[10px] font-bold text-[#2563EB] uppercase tracking-[0.2em] mb-4">
               Docentes destacados
             </p>
-            <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-white mb-6">
+            <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-foreground mb-6">
               Aprende con docentes de {" "}
-              <span className="font-serif italic font-normal text-[#c0bfbc]">
+              <span className="font-serif italic font-normal text-[#6B7280]">
                 alto nivel académico
               </span> {" "}
               y reconocimiento real
             </h2>
-            <p className="text-[#c0bfbc]/70 text-lg font-light leading-relaxed">
+            <p className="text-[#6B7280]/70 text-lg font-light leading-relaxed">
               En SAPIHUM reunimos docentes con trayectoria sólida, formación avanzada y experiencia académica, para construir programas con mayor profundidad, claridad y aplicación real.
             </p>
           </div>
@@ -595,7 +594,7 @@ export default async function LandingPage() {
                   className="group cursor-pointer block"
                 >
                   {/* Portrait photo with duotone warm hover */}
-                  <div className="relative w-full aspect-[4/5] bg-[#0a0a0a] mb-5 overflow-hidden rounded-md border border-white/[0.06]">
+                  <div className="relative w-full aspect-[4/5] bg-background mb-5 overflow-hidden rounded-md border border-border/[0.06]">
                     {photoUrl ? (
                       <Image
                         src={photoUrl}
@@ -603,29 +602,29 @@ export default async function LandingPage() {
                         fill
                         quality={58}
                         sizes="(min-width: 1024px) 25vw, (min-width: 768px) 50vw, 100vw"
-                        className="object-cover transition-all duration-700 opacity-70 group-hover:opacity-100 group-hover:scale-105"
+                        className="object-cover transition-all duration-700 opacity-95 group-hover:opacity-100 group-hover:scale-105"
                       />
                     ) : (
-                      <div className="absolute inset-0 flex items-center justify-center bg-[#111]">
-                        <span className="text-[#c0bfbc]/30 font-serif italic text-6xl">
+                      <div className="absolute inset-0 flex items-center justify-center bg-brand-blue-soft">
+                        <span className="text-[#6B7280]/30 font-serif italic text-6xl">
                           {name.split(' ')[1]?.[0] || name[0]}
                         </span>
                       </div>
                     )}
 
-                    {/* Warm duotone tint on hover */}
+                    {/* Blue duotone tint on hover */}
                     <div
-                      className="absolute inset-0 opacity-0 group-hover:opacity-[0.55] transition-opacity duration-500 pointer-events-none"
-                      style={{ backgroundColor: '#f6ae02', mixBlendMode: 'multiply' as any }}
+                      className="absolute inset-0 opacity-0 group-hover:opacity-[0.28] transition-opacity duration-500 pointer-events-none"
+                      style={{ backgroundColor: '#2563EB', mixBlendMode: 'multiply' as any }}
                     />
 
                     {/* Bottom gradient for text legibility */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950/86 via-slate-950/16 to-transparent" />
 
                     {/* Name and specialty overlay */}
                     <div className="absolute bottom-4 left-4 right-4 z-10">
                       {mainSpecialty && (
-                        <p className="text-[10px] text-[#f6ae02] uppercase tracking-widest font-semibold mb-1 group-hover:text-[#fcd34d] transition-colors">
+                        <p className="text-[10px] text-brand-blue-soft uppercase tracking-widest font-semibold mb-1 group-hover:text-white transition-colors">
                           {mainSpecialty}
                         </p>
                       )}
@@ -634,14 +633,14 @@ export default async function LandingPage() {
                   </div>
 
                   {/* Credentials below the photo */}
-                  <div className="pl-4 border-l border-white/[0.08] group-hover:border-[#f6ae02] transition-colors duration-300">
+                  <div className="pl-4 border-l border-border/[0.08] group-hover:border-[#2563EB] transition-colors duration-300">
                     {credential && (
-                      <p className="text-xs text-[#c0bfbc] mb-2 leading-relaxed line-clamp-2">
+                      <p className="text-xs text-[#6B7280] mb-2 leading-relaxed line-clamp-2">
                         {credential}
                       </p>
                     )}
                     {speaker.headline && speaker.credentials?.length > 0 && (
-                      <p className="text-[10px] uppercase tracking-wide text-[#c0bfbc]/50">
+                      <p className="text-[10px] uppercase tracking-wide text-[#6B7280]/50">
                         {speaker.headline}
                       </p>
                     )}
@@ -653,7 +652,7 @@ export default async function LandingPage() {
 
           <div className="mt-16 text-center">
             <Link href="/speakers">
-              <Button variant="outline" className="gap-2 font-bold uppercase text-[10px] tracking-[0.1em] h-12 px-8 border-white/20 hover:bg-white/5 text-[#c0bfbc] hover:text-white transition-colors">
+              <Button variant="outline" className="gap-2 font-bold uppercase text-[10px] tracking-[0.1em] h-12 px-8 border-border/20 hover:bg-white/5 text-[#6B7280] hover:text-foreground transition-colors">
                 Conocer cuerpo docente
                 <ArrowRight className="h-4 w-4" />
               </Button>
@@ -662,19 +661,19 @@ export default async function LandingPage() {
         </div>
       </section>
       )}
-      <section className="w-full py-32 bg-[#030303] border-y border-white/[0.06]">
+      <section className="w-full py-32 bg-background border-y border-border/[0.06]">
         <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-white font-serif italic">Consultas frecuentes</h2>
+            <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-foreground font-serif italic">Consultas frecuentes</h2>
           </div>
           <div className="space-y-4">
             {FAQS.map((faq, idx) => (
-              <details key={idx} className="group border-b border-white/[0.06] pb-6 [&_summary::-webkit-details-marker]:hidden cursor-pointer">
+              <details key={idx} className="group border-b border-border/[0.06] pb-6 [&_summary::-webkit-details-marker]:hidden cursor-pointer">
                 <summary className="flex items-center justify-between outline-none">
-                  <span className="text-lg font-light text-white group-open:text-[#f6ae02] transition-all">{faq.q}</span>
-                  <span className="ml-4 text-[#f6ae02] text-xl font-light transition-transform duration-300 group-open:rotate-45">+</span>
+                  <span className="text-lg font-light text-foreground group-open:text-[#2563EB] transition-all">{faq.q}</span>
+                  <span className="ml-4 text-[#2563EB] text-xl font-light transition-transform duration-300 group-open:rotate-45">+</span>
                 </summary>
-                <div className="pt-6 text-sm text-[#c0bfbc]/50 leading-relaxed font-light">
+                <div className="pt-6 text-sm text-[#6B7280]/50 leading-relaxed font-light">
                   {faq.a}
                 </div>
               </details>
@@ -686,14 +685,14 @@ export default async function LandingPage() {
       {/* ══════════════════════════════════════════════════
           12. FINAL CTA
       ══════════════════════════════════════════════════ */}
-      <section className="w-full py-40 bg-black">
+      <section className="w-full py-40 bg-background">
         <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 text-center relative">
-          <div className="absolute inset-0 bg-[#f6ae02]/3 blur-[120px] rounded-full pointer-events-none" />
+          <div className="absolute inset-0 bg-[#2563EB]/3 blur-[120px] rounded-full pointer-events-none" />
           <div className="relative z-10">
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight leading-tight text-white mb-6">
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight leading-tight text-foreground mb-6">
               Empieza por la formación que mejor encaje con tu siguiente etapa profesional
             </h2>
-            <p className="mx-auto max-w-3xl text-lg text-[#c0bfbc]/60 font-light leading-relaxed">
+            <p className="mx-auto max-w-3xl text-lg text-[#6B7280]/60 font-light leading-relaxed">
               Explora cursos, programas y formaciones completas dentro de la Academia SAPIHUM. Y si buscas una experiencia más amplia, conoce también la membresía.
             </p>
             
@@ -723,7 +722,7 @@ export default async function LandingPage() {
                 </Button>
               </Link>
             </div>
-            <p className="mt-10 text-[11px] text-[#c0bfbc]/40">
+            <p className="mt-10 text-[11px] text-[#6B7280]/40">
               Formación especializada para psicólogos. Acceso y beneficios sujetos al tipo de programa o membresía.
             </p>
           </div>

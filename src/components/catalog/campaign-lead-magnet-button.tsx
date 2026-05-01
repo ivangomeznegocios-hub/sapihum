@@ -172,7 +172,7 @@ export function CampaignLeadMagnetButton({
                     {triggerLabel}
                 </Button>
                 {successMessage && (
-                    <p className="rounded-lg border border-brand-yellow/30 bg-brand-yellow/10 px-3 py-2 text-sm text-foreground">
+                    <p className="rounded-lg border border-brand-blue/30 bg-brand-blue/10 px-3 py-2 text-sm text-foreground">
                         {successMessage}
                     </p>
                 )}

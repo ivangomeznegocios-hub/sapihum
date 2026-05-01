@@ -150,22 +150,22 @@ export function CampaignLeadMagnetInline({
         <section
             id={sectionId}
             className={cn(
-                'relative overflow-hidden rounded-[28px] border border-white/10 bg-[linear-gradient(160deg,rgba(255,255,255,0.06),rgba(255,255,255,0.02))] p-6 text-white shadow-2xl shadow-black/25 backdrop-blur-sm',
+                'relative overflow-hidden rounded-[28px] border border-border/10 bg-[linear-gradient(160deg,rgba(255,255,255,0.06),rgba(255,255,255,0.02))] p-6 text-foreground shadow-2xl shadow-black/25 backdrop-blur-sm',
                 compact ? 'p-5' : 'p-6 md:p-7',
                 className
             )}
         >
-            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(246,174,2,0.18),transparent_34%),radial-gradient(circle_at_bottom_left,rgba(122,86,2,0.16),transparent_30%)]" />
+            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(37,99,235,0.18),transparent_34%),radial-gradient(circle_at_bottom_left,rgba(30,58,138,0.16),transparent_30%)]" />
             <div className="pointer-events-none absolute inset-0 opacity-[0.06]" style={{ backgroundImage: 'linear-gradient(to right, rgba(255,255,255,0.12) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.12) 1px, transparent 1px)', backgroundSize: '28px 28px' }} />
 
             <div className="relative space-y-5">
                 <div className="space-y-3">
-                    <div className="inline-flex items-center gap-2 rounded-full border border-brand-yellow/20 bg-brand-yellow/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-brand-yellow">
+                    <div className="inline-flex items-center gap-2 rounded-full border border-brand-blue/20 bg-brand-blue/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-brand-blue">
                         <Sparkles className="h-3.5 w-3.5" />
                         {eyebrow}
                     </div>
                     <div className="space-y-2">
-                        <h3 className={cn('font-bold tracking-tight text-white', compact ? 'text-2xl' : 'text-2xl md:text-3xl')}>
+                        <h3 className={cn('font-bold tracking-tight text-foreground', compact ? 'text-2xl' : 'text-2xl md:text-3xl')}>
                             {title || `Recibe el temario de ${activeCampaign.title}`}
                         </h3>
                         <p className="max-w-2xl text-sm leading-relaxed text-neutral-300 md:text-base">
@@ -178,7 +178,7 @@ export function CampaignLeadMagnetInline({
                     {topTopics.map((topic) => (
                         <div
                             key={topic}
-                            className="rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-sm leading-relaxed text-neutral-200"
+                            className="rounded-2xl border border-border/10 bg-background/20 px-4 py-3 text-sm leading-relaxed text-neutral-200"
                         >
                             {topic}
                         </div>
@@ -186,14 +186,14 @@ export function CampaignLeadMagnetInline({
                 </div>
 
                 {successMessage ? (
-                    <div className="rounded-[24px] border border-brand-yellow/20 bg-black/25 p-5">
+                    <div className="rounded-[24px] border border-brand-blue/20 bg-background/25 p-5">
                         <div className="flex items-start gap-3">
-                            <div className="mt-0.5 flex h-10 w-10 items-center justify-center rounded-full bg-brand-yellow/15 text-brand-yellow">
+                            <div className="mt-0.5 flex h-10 w-10 items-center justify-center rounded-full bg-brand-blue/15 text-brand-blue">
                                 <CheckCircle2 className="h-5 w-5" />
                             </div>
                             <div className="space-y-3">
                                 <div>
-                                    <p className="text-base font-semibold text-white">Temario enviado</p>
+                                    <p className="text-base font-semibold text-foreground">Temario enviado</p>
                                     <p className="mt-1 text-sm leading-relaxed text-neutral-300">{successMessage}</p>
                                 </div>
                                 <div className="flex flex-wrap gap-3">
@@ -231,7 +231,7 @@ export function CampaignLeadMagnetInline({
                                         value={name}
                                         onChange={(inputEvent) => setName(inputEvent.target.value)}
                                         placeholder="Tu nombre completo"
-                                        className="border-white/10 bg-black/20 pl-10 text-white placeholder:text-neutral-500"
+                                        className="border-border/10 bg-background/20 pl-10 text-foreground placeholder:text-neutral-500"
                                         required
                                     />
                                 </div>
@@ -249,7 +249,7 @@ export function CampaignLeadMagnetInline({
                                         value={email}
                                         onChange={(inputEvent) => setEmail(inputEvent.target.value)}
                                         placeholder="tu@email.com"
-                                        className="border-white/10 bg-black/20 pl-10 text-white placeholder:text-neutral-500"
+                                        className="border-border/10 bg-background/20 pl-10 text-foreground placeholder:text-neutral-500"
                                         required
                                     />
                                 </div>
@@ -267,7 +267,7 @@ export function CampaignLeadMagnetInline({
                                     value={whatsapp}
                                     onChange={(inputEvent) => setWhatsapp(inputEvent.target.value)}
                                     placeholder="5512345678"
-                                    className="border-white/10 bg-black/20 pl-10 text-white placeholder:text-neutral-500"
+                                    className="border-border/10 bg-background/20 pl-10 text-foreground placeholder:text-neutral-500"
                                 />
                             </div>
                         </div>

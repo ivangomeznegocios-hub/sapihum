@@ -427,8 +427,8 @@ export function ClinicalNoteForm({ patientId, note, appointments, onClose }: Cli
                             <div className="space-y-4">
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
-                                        <label className="text-sm font-semibold text-brand-yellow dark:text-brand-yellow flex items-center gap-1">
-                                            <span className="w-5 h-5 rounded bg-brand-yellow dark:bg-brand-yellow/20 flex items-center justify-center text-xs font-bold">S</span>
+                                        <label className="text-sm font-semibold text-brand-blue dark:text-brand-blue flex items-center gap-1">
+                                            <span className="w-5 h-5 rounded bg-brand-blue dark:bg-brand-blue/20 flex items-center justify-center text-xs font-bold">S</span>
                                             Subjetivo
                                         </label>
                                         <p className="text-[11px] text-muted-foreground mb-1">Lo que el paciente refiere</p>
@@ -440,8 +440,8 @@ export function ClinicalNoteForm({ patientId, note, appointments, onClose }: Cli
                                         />
                                     </div>
                                     <div>
-                                        <label className="text-sm font-semibold text-brand-brown dark:text-brand-brown flex items-center gap-1">
-                                            <span className="w-5 h-5 rounded bg-brand-brown dark:bg-brand-brown/20 flex items-center justify-center text-xs font-bold">O</span>
+                                        <label className="text-sm font-semibold text-brand-blue-hover dark:text-brand-blue-hover flex items-center gap-1">
+                                            <span className="w-5 h-5 rounded bg-brand-blue-hover dark:bg-brand-blue-hover/20 flex items-center justify-center text-xs font-bold">O</span>
                                             Objetivo
                                         </label>
                                         <p className="text-[11px] text-muted-foreground mb-1">Observaciones del terapeuta</p>
@@ -453,8 +453,8 @@ export function ClinicalNoteForm({ patientId, note, appointments, onClose }: Cli
                                         />
                                     </div>
                                     <div>
-                                        <label className="text-sm font-semibold text-brand-yellow dark:text-brand-yellow flex items-center gap-1">
-                                            <span className="w-5 h-5 rounded bg-brand-yellow dark:bg-brand-yellow/20 flex items-center justify-center text-xs font-bold">A</span>
+                                        <label className="text-sm font-semibold text-brand-blue dark:text-brand-blue flex items-center gap-1">
+                                            <span className="w-5 h-5 rounded bg-brand-blue dark:bg-brand-blue/20 flex items-center justify-center text-xs font-bold">A</span>
                                             Análisis
                                         </label>
                                         <p className="text-[11px] text-muted-foreground mb-1">Interpretación clínica</p>
@@ -466,8 +466,8 @@ export function ClinicalNoteForm({ patientId, note, appointments, onClose }: Cli
                                         />
                                     </div>
                                     <div>
-                                        <label className="text-sm font-semibold text-brand-brown dark:text-brand-brown flex items-center gap-1">
-                                            <span className="w-5 h-5 rounded bg-brand-brown dark:bg-brand-brown/20 flex items-center justify-center text-xs font-bold">P</span>
+                                        <label className="text-sm font-semibold text-brand-blue-hover dark:text-brand-blue-hover flex items-center gap-1">
+                                            <span className="w-5 h-5 rounded bg-brand-blue-hover dark:bg-brand-blue-hover/20 flex items-center justify-center text-xs font-bold">P</span>
                                             Plan
                                         </label>
                                         <p className="text-[11px] text-muted-foreground mb-1">Próximos pasos y tareas</p>
@@ -680,10 +680,10 @@ export function DocumentUploadForm({ patientId, onClose }: DocumentUploadFormPro
                             />
                             {selectedFile ? (
                                 <div className="space-y-2">
-                                    <File className="h-10 w-10 mx-auto text-brand-brown dark:text-brand-brown" />
+                                    <File className="h-10 w-10 mx-auto text-brand-blue-hover dark:text-brand-blue-hover" />
                                     <p className="font-medium text-sm">{selectedFile.name}</p>
                                     <p className="text-xs text-muted-foreground">{formatFileSize(selectedFile.size)}</p>
-                                    <p className="text-xs text-brand-brown dark:text-brand-brown">Haz clic para cambiar archivo</p>
+                                    <p className="text-xs text-brand-blue-hover dark:text-brand-blue-hover">Haz clic para cambiar archivo</p>
                                 </div>
                             ) : (
                                 <div className="space-y-2">

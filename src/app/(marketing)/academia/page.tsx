@@ -83,26 +83,26 @@ export default async function AcademiaPage({ searchParams }: AcademiaPageProps) 
 
     return (
         <div className="relative flex w-full flex-1 flex-col items-center bg-background">
-            <section className="relative w-full overflow-hidden bg-gradient-to-b from-[#050505] via-[#0a0a0a] to-background">
+                <section className="relative w-full overflow-hidden bg-gradient-to-b from-background via-brand-blue-soft/60 to-background">
                 <div className="sapihum-grid-bg pointer-events-none absolute inset-0 opacity-10" />
-                <div className="pointer-events-none absolute left-1/4 top-0 h-[600px] w-[600px] rounded-full bg-brand-yellow/5 blur-[150px]" />
-                <div className="pointer-events-none absolute bottom-0 right-0 h-[420px] w-[420px] rounded-full bg-brand-brown/5 blur-[140px]" />
+                <div className="pointer-events-none absolute left-1/4 top-0 h-[600px] w-[600px] rounded-full bg-brand-blue/5 blur-[150px]" />
+                <div className="pointer-events-none absolute bottom-0 right-0 h-[420px] w-[420px] rounded-full bg-brand-blue-hover/5 blur-[140px]" />
 
                 <div className="relative z-10 mx-auto max-w-7xl px-4 py-20 sm:px-6 md:py-28 lg:px-8">
                     <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-[minmax(0,1fr)_420px]">
                         <div className="flex flex-col">
-                            <div className="mb-8 inline-flex w-fit items-center gap-2 rounded-sm border border-brand-yellow/20 bg-brand-yellow/5 px-4 py-2 text-[10px] font-bold uppercase tracking-[0.2em] text-brand-yellow backdrop-blur-sm">
+                            <div className="mb-8 inline-flex w-fit items-center gap-2 rounded-sm border border-brand-blue/20 bg-brand-blue/5 px-4 py-2 text-[10px] font-bold uppercase tracking-[0.2em] text-brand-blue backdrop-blur-sm">
                                 <span className="relative flex h-2 w-2">
-                                    <span className="relative inline-flex h-2 w-2 rounded-full bg-brand-yellow" />
+                                    <span className="relative inline-flex h-2 w-2 rounded-full bg-brand-blue" />
                                 </span>
                                 {activeCampaign
                                     ? `Ruta destacada: ${activeCampaign.title}`
                                     : `Qué viene en la Academia`}
                             </div>
 
-                            <h1 className="mb-6 text-4xl font-bold leading-[1.08] tracking-tight text-white md:text-5xl lg:text-6xl">
+                            <h1 className="mb-6 font-serif text-4xl font-bold leading-[1.05] tracking-normal text-brand-text-strong md:text-5xl lg:text-6xl">
                                 {activeCampaign ? 'La ruta recomendada para avanzar en' : 'Formacion continua para psicologos que quieren avanzar con mas'}{' '}
-                                <span className="font-serif italic font-normal text-[#c0bfbc]">
+                                <span className="italic font-bold text-brand-blue-dark">
                                     {activeCampaign ? activeCampaign.title.toLowerCase() : 'criterio, profundidad y aplicacion real'}
                                 </span>
                             </h1>
@@ -144,10 +144,10 @@ export default async function AcademiaPage({ searchParams }: AcademiaPageProps) 
                 <div className="mx-auto max-w-7xl">
                     <div className="mb-10 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
                         <div>
-                            <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-brand-yellow">
+                            <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-brand-blue">
                                 Agenda en vivo
                             </p>
-                            <h2 className="mt-3 text-2xl font-bold tracking-tight text-white md:text-3xl">
+                            <h2 className="mt-3 text-2xl font-bold tracking-tight text-foreground md:text-3xl">
                                 {activeCampaign ? `Eventos de ${activeCampaign.title}` : 'Eventos'}
                             </h2>
                             <p className="mt-2 max-w-2xl text-muted-foreground">
@@ -162,7 +162,7 @@ export default async function AcademiaPage({ searchParams }: AcademiaPageProps) 
                         <Link href="/academia#catalogo">
                             <Badge 
                                 variant={!activeCampaign ? 'default' : 'outline'} 
-                                className={!activeCampaign ? 'bg-brand-yellow text-black hover:bg-brand-yellow/90 px-4 py-1.5' : 'border-white/10 hover:bg-white/5 px-4 py-1.5'}
+                                className={!activeCampaign ? 'bg-brand-blue text-black hover:bg-brand-blue/90 px-4 py-1.5' : 'border-border/10 hover:bg-white/5 px-4 py-1.5'}
                             >
                                 Toda la agenda
                             </Badge>
@@ -171,7 +171,7 @@ export default async function AcademiaPage({ searchParams }: AcademiaPageProps) 
                             <Link key={campaign.key} href={`/academia?track=${campaign.key}#catalogo`}>
                                 <Badge 
                                     variant={activeCampaign?.key === campaign.key ? 'default' : 'outline'} 
-                                    className={activeCampaign?.key === campaign.key ? 'bg-brand-yellow text-black hover:bg-brand-yellow/90 px-4 py-1.5' : 'border-white/10 hover:bg-white/5 px-4 py-1.5'}
+                                    className={activeCampaign?.key === campaign.key ? 'bg-brand-blue text-black hover:bg-brand-blue/90 px-4 py-1.5' : 'border-border/10 hover:bg-white/5 px-4 py-1.5'}
                                 >
                                     {campaign.title}
                                 </Badge>
@@ -184,7 +184,7 @@ export default async function AcademiaPage({ searchParams }: AcademiaPageProps) 
             </section>
 
             {visibleCampaignBlocks.length > 0 && (
-                <section id="rutas-activas" className="w-full border-y border-border/60 bg-[#050505] px-4 py-16 sm:px-6 md:py-20 lg:px-8">
+                <section id="rutas-activas" className="w-full border-y border-border/60 bg-background px-4 py-16 sm:px-6 md:py-20 lg:px-8">
                     <div className="mx-auto max-w-7xl space-y-10">
                         {activeCampaign ? (
                             <div id="temario" className="scroll-mt-20">
@@ -197,10 +197,10 @@ export default async function AcademiaPage({ searchParams }: AcademiaPageProps) 
                         ) : (
                             <>
                                 <div className="mb-8">
-                                    <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-brand-yellow">
+                                    <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-brand-blue">
                                         Rutas guiadas
                                     </p>
-                                    <h2 className="mt-3 text-2xl font-bold tracking-tight text-white md:text-3xl">
+                                    <h2 className="mt-3 text-2xl font-bold tracking-tight text-foreground md:text-3xl">
                                         Explora por especialidad
                                     </h2>
                                     <p className="mt-2 max-w-2xl text-muted-foreground">
@@ -217,10 +217,10 @@ export default async function AcademiaPage({ searchParams }: AcademiaPageProps) 
                                     ))}
                                 </div>
 
-                                <div className="mt-12 overflow-hidden rounded-3xl border border-brand-yellow/20 bg-brand-yellow/5 p-6 md:p-8">
+                                <div className="mt-12 overflow-hidden rounded-3xl border border-brand-blue/20 bg-brand-blue/5 p-6 md:p-8">
                                     <div className="grid gap-8 md:grid-cols-2 md:items-center">
                                         <div>
-                                            <h3 className="text-2xl font-bold text-white">¿No sabes por dónde empezar?</h3>
+                                            <h3 className="text-2xl font-bold text-foreground">¿No sabes por dónde empezar?</h3>
                                             <p className="mt-2 text-neutral-300">Recibe un resumen con el temario y enfoque de las rutas activas para tomar una mejor decisión.</p>
                                         </div>
                                         <div>
@@ -252,10 +252,10 @@ export default async function AcademiaPage({ searchParams }: AcademiaPageProps) 
                     <div className="mx-auto max-w-7xl">
                         <div className="mb-10 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
                             <div>
-                                <p className="mb-3 text-[10px] font-bold uppercase tracking-[0.2em] text-brand-yellow">
+                                <p className="mb-3 text-[10px] font-bold uppercase tracking-[0.2em] text-brand-blue">
                                     Formaciones completas
                                 </p>
-                                <h2 className="text-2xl font-bold tracking-tight text-white md:text-3xl">
+                                <h2 className="text-2xl font-bold tracking-tight text-foreground md:text-3xl">
                                     Programas listos para comprar y cursar por ruta
                                 </h2>
                                 <p className="mt-2 max-w-2xl text-sm leading-relaxed text-neutral-400 md:text-base">
@@ -277,10 +277,10 @@ export default async function AcademiaPage({ searchParams }: AcademiaPageProps) 
                                 return (
                                     <article
                                         key={formation.id}
-                                        className="group overflow-hidden rounded-3xl border border-white/10 bg-white/[0.03] transition-all duration-300 hover:-translate-y-1 hover:border-brand-yellow/30 hover:shadow-2xl hover:shadow-black/20"
+                                        className="group overflow-hidden rounded-3xl border border-border/10 bg-white/[0.03] transition-all duration-300 hover:-translate-y-1 hover:border-brand-blue/30 hover:shadow-2xl hover:shadow-black/20"
                                     >
                                         <div className="grid h-full gap-0 md:grid-cols-[220px_minmax(0,1fr)]">
-                                            <div className="relative min-h-[220px] overflow-hidden bg-gradient-to-br from-brand-yellow/20 via-black to-brand-brown/40">
+                                            <div className="relative min-h-[220px] overflow-hidden bg-gradient-to-br from-brand-blue/20 via-background to-brand-blue-hover/40">
                                                 {formation.image_url ? (
                                                     <Image
                                                         src={formation.image_url}
@@ -292,12 +292,12 @@ export default async function AcademiaPage({ searchParams }: AcademiaPageProps) 
                                                     />
                                                 ) : (
                                                     <div className="absolute inset-0 flex items-center justify-center">
-                                                        <BrandWordmark className="text-2xl text-white/10 sm:text-3xl lg:text-4xl lg:tracking-[0.18em]" />
+                                                        <BrandWordmark className="text-2xl text-foreground/10 sm:text-3xl lg:text-4xl lg:tracking-[0.18em]" />
                                                     </div>
                                                 )}
-                                                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+                                                <div className="absolute inset-0 bg-gradient-to-t from-background/70 via-background/20 to-transparent" />
                                                 <div className="absolute left-4 top-4">
-                                                    <span className="inline-flex rounded-full bg-brand-yellow px-3 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-black">
+                                                    <span className="inline-flex rounded-full bg-brand-blue px-3 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-black">
                                                         Formacion
                                                     </span>
                                                 </div>
@@ -306,21 +306,21 @@ export default async function AcademiaPage({ searchParams }: AcademiaPageProps) 
                                             <div className="flex h-full flex-col p-6 md:p-7">
                                                 <div className="mb-4 flex flex-wrap gap-2">
                                                     {specialization && (
-                                                        <Badge variant="outline" className="border-brand-yellow/30 bg-brand-yellow/10 text-brand-yellow">
+                                                        <Badge variant="outline" className="border-brand-blue/30 bg-brand-blue/10 text-brand-blue">
                                                             {specialization.name}
                                                         </Badge>
                                                     )}
                                                     {totalHours && (
-                                                        <Badge variant="outline" className="border-white/10 bg-white/5 text-neutral-200">
+                                                        <Badge variant="outline" className="border-border/10 bg-white/5 text-neutral-200">
                                                             {totalHours}
                                                         </Badge>
                                                     )}
-                                                    <Badge variant="outline" className="border-white/10 bg-white/5 text-neutral-200">
+                                                    <Badge variant="outline" className="border-border/10 bg-white/5 text-neutral-200">
                                                         Programa completo
                                                     </Badge>
                                                 </div>
 
-                                                <h3 className="text-2xl font-bold leading-tight text-white">
+                                                <h3 className="text-2xl font-bold leading-tight text-foreground">
                                                     {formation.title}
                                                 </h3>
 
@@ -338,12 +338,12 @@ export default async function AcademiaPage({ searchParams }: AcademiaPageProps) 
 
                                                 <div className="flex-1" />
 
-                                                <div className="mt-6 flex flex-col gap-4 border-t border-white/10 pt-5 sm:flex-row sm:items-center sm:justify-between">
+                                                <div className="mt-6 flex flex-col gap-4 border-t border-border/10 pt-5 sm:flex-row sm:items-center sm:justify-between">
                                                     <div>
                                                         <p className="text-xs font-semibold uppercase tracking-[0.15em] text-neutral-500">
                                                             Inversion completa
                                                         </p>
-                                                        <p className="mt-1 text-2xl font-black text-white">
+                                                        <p className="mt-1 text-2xl font-black text-foreground">
                                                             {formatCurrency(formation.bundle_price)}
                                                         </p>
                                                     </div>
@@ -376,13 +376,13 @@ export default async function AcademiaPage({ searchParams }: AcademiaPageProps) 
 
             <section className="w-full px-4 py-16">
                 <div className="relative mx-auto max-w-4xl overflow-hidden rounded-3xl shadow-2xl">
-                    <div className="absolute inset-0 bg-gradient-to-br from-[#0a0a0a] via-[#111111] to-[#0a0a0a]" />
+                            <div className="absolute inset-0 bg-gradient-to-br from-card via-brand-blue-soft to-background" />
                     <div className="sapihum-grid-bg absolute inset-0 opacity-10" />
-                    <div className="absolute -right-20 -top-20 h-48 w-48 rounded-full bg-brand-yellow/5 blur-3xl" />
-                    <div className="absolute -bottom-20 -left-20 h-48 w-48 rounded-full bg-brand-brown/3 blur-3xl" />
+                    <div className="absolute -right-20 -top-20 h-48 w-48 rounded-full bg-brand-blue/5 blur-3xl" />
+                    <div className="absolute -bottom-20 -left-20 h-48 w-48 rounded-full bg-brand-blue-hover/3 blur-3xl" />
 
-                    <div className="relative z-10 p-8 text-center text-white md:p-14">
-                        <div className="mb-3 inline-flex items-center gap-1 rounded-sm border border-brand-yellow/20 bg-brand-yellow/5 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.15em] text-brand-yellow">
+                    <div className="relative z-10 p-8 text-center text-foreground md:p-14">
+                        <div className="mb-3 inline-flex items-center gap-1 rounded-sm border border-brand-blue/20 bg-brand-blue/5 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.15em] text-brand-blue">
                             Beneficio de membresia
                         </div>
                         <h3 className="mb-4 text-2xl font-bold md:text-3xl">La Academia esta incluida en tu membresia</h3>
@@ -406,17 +406,17 @@ function CompactRouteCard({ campaign, events }: { campaign: EventCampaignConfig;
     const primaryEvent = events.find((event) => event.slug === campaign.primaryEventSlug) ?? events[0] ?? null
 
     return (
-        <div className="group relative flex flex-col gap-5 overflow-hidden rounded-[24px] border border-white/10 bg-[linear-gradient(145deg,#090909_15%,#121212_58%,#050505_100%)] p-5 transition-all duration-300 hover:-translate-y-1 hover:border-brand-yellow/30 hover:shadow-2xl hover:shadow-black/20 md:flex-row md:items-center md:p-6 lg:p-8">
+                                    <div className="group relative flex flex-col gap-5 overflow-hidden rounded-[24px] border border-border bg-[linear-gradient(145deg,#ffffff_15%,#eff6ff_58%,#fafaf9_100%)] p-5 transition-all duration-300 hover:-translate-y-1 hover:border-brand-blue/30 hover:shadow-2xl hover:shadow-slate-200/70 md:flex-row md:items-center md:p-6 lg:p-8">
             <div className="flex-1 space-y-3">
                 <div className="flex flex-wrap items-center gap-2">
-                    <span className="inline-flex items-center rounded-full border border-brand-yellow/20 bg-brand-yellow/10 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.2em] text-brand-yellow">
+                    <span className="inline-flex items-center rounded-full border border-brand-blue/20 bg-brand-blue/10 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.2em] text-brand-blue">
                         Ruta destacada
                     </span>
-                    <span className="inline-flex items-center rounded-full border border-white/10 bg-white/5 px-2.5 py-0.5 text-[10px] font-medium text-neutral-300">
+                    <span className="inline-flex items-center rounded-full border border-border/10 bg-white/5 px-2.5 py-0.5 text-[10px] font-medium text-neutral-300">
                         {events.length} {events.length === 1 ? 'paso' : 'pasos'}
                     </span>
                 </div>
-                <h3 className="text-xl font-bold tracking-tight text-white md:text-2xl">
+                <h3 className="text-xl font-bold tracking-tight text-foreground md:text-2xl">
                     {campaign.title}
                 </h3>
                 <p className="max-w-3xl text-sm leading-relaxed text-neutral-400 line-clamp-2">
@@ -426,9 +426,9 @@ function CompactRouteCard({ campaign, events }: { campaign: EventCampaignConfig;
             
             <div className="shrink-0 space-y-3 md:w-64">
                 {primaryEvent && (
-                    <div className="rounded-xl border border-white/10 bg-black/30 p-3">
-                        <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-brand-yellow">Empieza con</p>
-                        <p className="mt-1 text-xs font-medium text-white line-clamp-2">{primaryEvent.title}</p>
+                    <div className="rounded-xl border border-border/10 bg-background/30 p-3">
+                        <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-brand-blue">Empieza con</p>
+                        <p className="mt-1 text-xs font-medium text-foreground line-clamp-2">{primaryEvent.title}</p>
                     </div>
                 )}
                 <Link href={routeHref} className="block">
@@ -472,23 +472,23 @@ function AcademiaRouteLeadCard({
     const stepLabels = ['Evento recomendado', 'Siguiente paso', 'Profundiza']
 
     return (
-        <article className="relative overflow-hidden rounded-[34px] border border-white/10 bg-[linear-gradient(145deg,#080808_12%,#100f0d_58%,#050505_100%)] p-6 shadow-2xl shadow-black/25 md:p-8">
-            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(246,174,2,0.18),transparent_34%),radial-gradient(circle_at_bottom_left,rgba(122,86,2,0.14),transparent_30%)]" />
+                                            <article className="relative overflow-hidden rounded-[34px] border border-border bg-[linear-gradient(145deg,#ffffff_12%,#eff6ff_58%,#fafaf9_100%)] p-6 shadow-2xl shadow-slate-200/70 md:p-8">
+            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(37,99,235,0.18),transparent_34%),radial-gradient(circle_at_bottom_left,rgba(30,58,138,0.14),transparent_30%)]" />
             <div className="pointer-events-none absolute inset-0 opacity-[0.05]" style={{ backgroundImage: 'linear-gradient(to right, rgba(255,255,255,0.12) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.12) 1px, transparent 1px)', backgroundSize: '32px 32px' }} />
 
             <div className="relative space-y-7">
                 <div className="space-y-4">
                     <div className="flex flex-wrap items-center gap-2">
-                        <span className="inline-flex items-center rounded-full border border-brand-yellow/20 bg-brand-yellow/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-brand-yellow">
+                        <span className="inline-flex items-center rounded-full border border-brand-blue/20 bg-brand-blue/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-brand-blue">
                             Ruta destacada
                         </span>
-                        <span className="inline-flex items-center rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-medium text-neutral-300">
+                        <span className="inline-flex items-center rounded-full border border-border/10 bg-white/5 px-3 py-1 text-xs font-medium text-neutral-300">
                             {campaign.events.length} {campaign.events.length === 1 ? 'paso recomendado' : 'pasos sugeridos'}
                         </span>
                     </div>
 
                     <div className="space-y-3">
-                        <h3 className="max-w-4xl text-3xl font-bold tracking-tight text-white md:text-4xl">
+                        <h3 className="max-w-4xl font-serif text-3xl font-bold tracking-normal text-brand-text-strong md:text-4xl">
                             {campaign.title}
                         </h3>
                         <p className="max-w-4xl text-lg leading-relaxed text-neutral-200">
@@ -502,23 +502,23 @@ function AcademiaRouteLeadCard({
 
                 <div className="grid gap-8 lg:grid-cols-[minmax(0,1.02fr)_minmax(0,0.98fr)] lg:items-start">
                     <div className="order-2 space-y-6 lg:order-1">
-                        <div className="rounded-[30px] border border-white/10 bg-black/20 p-5 md:p-6">
+                        <div className="rounded-[30px] border border-border/10 bg-background/20 p-5 md:p-6">
                             <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
                                 <div>
-                                    <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-brand-yellow">
+                                    <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-brand-blue">
                                         Recorrido sugerido
                                     </p>
                                     <p className="mt-2 max-w-2xl text-sm leading-relaxed text-neutral-300">
                                         Empieza por un punto claro y avanza por la ruta con una sensacion real de progreso, no como si estuvieras viendo un catalogo suelto.
                                     </p>
                                 </div>
-                                <span className="inline-flex rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-medium text-neutral-300">
+                                <span className="inline-flex rounded-full border border-border/10 bg-white/5 px-3 py-1 text-xs font-medium text-neutral-300">
                                     {campaign.events.length} {campaign.events.length === 1 ? 'etapa visible' : 'etapas conectadas'}
                                 </span>
                             </div>
 
                             <div className="relative space-y-4">
-                                <div className="pointer-events-none absolute bottom-6 left-[1rem] top-6 w-px bg-[linear-gradient(to_bottom,rgba(246,174,2,0.55),rgba(255,255,255,0.06))] md:left-[1.1rem]" />
+                                <div className="pointer-events-none absolute bottom-6 left-[1rem] top-6 w-px bg-[linear-gradient(to_bottom,rgba(37,99,235,0.55),rgba(255,255,255,0.06))] md:left-[1.1rem]" />
                                 {campaign.events.map((routeEvent, index) => {
                                     const liveEvent = events.find((event) => event.slug === routeEvent.slug)
                                     const stepHref = liveEvent ? getPublicEventPath(liveEvent) : routeHref
@@ -528,22 +528,22 @@ function AcademiaRouteLeadCard({
                                         <Link
                                             key={routeEvent.slug}
                                             href={stepHref}
-                                            className="group relative flex gap-4 rounded-[26px] border border-white/10 bg-[linear-gradient(160deg,rgba(255,255,255,0.04),rgba(255,255,255,0.02))] p-4 transition-all duration-300 hover:-translate-y-0.5 hover:border-brand-yellow/30 hover:bg-black/30"
+                                            className="group relative flex gap-4 rounded-[26px] border border-border/10 bg-[linear-gradient(160deg,rgba(255,255,255,0.04),rgba(255,255,255,0.02))] p-4 transition-all duration-300 hover:-translate-y-0.5 hover:border-brand-blue/30 hover:bg-background/30"
                                         >
-                                            <div className="relative z-10 flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-brand-yellow/30 bg-[#14110a] text-xs font-bold text-brand-yellow shadow-[0_0_18px_rgba(246,174,2,0.18)]">
+                                            <div className="relative z-10 flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-brand-blue/30 bg-[#EFF6FF] text-xs font-bold text-brand-blue shadow-[0_0_18px_rgba(37,99,235,0.18)]">
                                                 {index + 1}
                                             </div>
 
                                             <div className="min-w-0 flex-1">
                                                 <div className="flex flex-wrap items-center gap-2">
-                                                    <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-brand-yellow">
+                                                    <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-brand-blue">
                                                         {stepLabel}
                                                     </p>
-                                                    <span className="inline-flex rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[10px] font-medium text-neutral-300">
+                                                    <span className="inline-flex rounded-full border border-border/10 bg-white/5 px-2.5 py-1 text-[10px] font-medium text-neutral-300">
                                                         {liveEvent ? formatRouteDateTime(liveEvent.start_time) : 'Fecha por anunciar'}
                                                     </span>
                                                 </div>
-                                                <h4 className="mt-2 text-lg font-semibold leading-snug text-white transition-colors group-hover:text-brand-yellow">
+                                                <h4 className="mt-2 text-lg font-semibold leading-snug text-foreground transition-colors group-hover:text-brand-blue">
                                                     {liveEvent?.title || routeEvent.title}
                                                 </h4>
                                                 <p className="mt-2 line-clamp-3 text-sm leading-relaxed text-neutral-400">
@@ -551,32 +551,32 @@ function AcademiaRouteLeadCard({
                                                 </p>
                                             </div>
 
-                                            <ArrowRight className="mt-1 h-4 w-4 shrink-0 text-neutral-500 transition-colors group-hover:text-brand-yellow" />
+                                            <ArrowRight className="mt-1 h-4 w-4 shrink-0 text-neutral-500 transition-colors group-hover:text-brand-blue" />
                                         </Link>
                                     )
                                 })}
                             </div>
                         </div>
 
-                        <div className="rounded-[28px] border border-white/10 bg-black/20 p-5">
+                        <div className="rounded-[28px] border border-border/10 bg-background/20 p-5">
                             <div className="flex flex-wrap items-center justify-between gap-3">
                                 <div>
-                                    <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-brand-yellow">
+                                    <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-brand-blue">
                                         Para quien encaja mejor
                                     </p>
                                     <p className="mt-2 text-sm leading-relaxed text-neutral-300">
                                         Si te reconoces en uno de estos perfiles, esta ruta ya te da un siguiente paso mucho mas claro.
                                     </p>
                                 </div>
-                                <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-neutral-300">
-                                    <Sparkles className="h-3.5 w-3.5 text-brand-yellow" />
+                                <span className="inline-flex items-center gap-2 rounded-full border border-border/10 bg-white/5 px-3 py-1 text-xs text-neutral-300">
+                                    <Sparkles className="h-3.5 w-3.5 text-brand-blue" />
                                     Decision mas simple
                                 </span>
                             </div>
 
                             <div className="mt-4 grid gap-3 md:grid-cols-3">
                                 {campaign.temario.idealFor.slice(0, 3).map((item) => (
-                                    <div key={item} className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm leading-relaxed text-neutral-300">
+                                    <div key={item} className="rounded-2xl border border-border/10 bg-white/[0.03] px-4 py-3 text-sm leading-relaxed text-neutral-300">
                                         {item}
                                     </div>
                                 ))}
@@ -585,12 +585,12 @@ function AcademiaRouteLeadCard({
                     </div>
 
                     <div className="order-1 relative lg:order-2">
-                        <div className="absolute inset-0 rounded-[32px] bg-[radial-gradient(circle_at_top,rgba(246,174,2,0.22),transparent_52%)] blur-2xl" />
-                        <div className="relative overflow-hidden rounded-[32px] border border-brand-yellow/20 bg-[linear-gradient(160deg,rgba(255,255,255,0.09),rgba(255,255,255,0.03))] p-5 shadow-[0_28px_80px_rgba(0,0,0,0.34)] backdrop-blur-xl md:p-6 lg:sticky lg:top-24">
-                            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(246,174,2,0.14),transparent_36%),linear-gradient(180deg,rgba(255,255,255,0.04),transparent_55%)]" />
+                        <div className="absolute inset-0 rounded-[32px] bg-[radial-gradient(circle_at_top,rgba(37,99,235,0.22),transparent_52%)] blur-2xl" />
+                        <div className="relative overflow-hidden rounded-[32px] border border-brand-blue/20 bg-[linear-gradient(160deg,rgba(255,255,255,0.09),rgba(255,255,255,0.03))] p-5 shadow-[0_28px_80px_rgba(0,0,0,0.34)] backdrop-blur-xl md:p-6 lg:sticky lg:top-24">
+                            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(37,99,235,0.14),transparent_36%),linear-gradient(180deg,rgba(255,255,255,0.04),transparent_55%)]" />
                             <div className="relative space-y-6">
                                 <div className="space-y-3">
-                                    <div className="inline-flex items-center gap-2 rounded-full border border-brand-yellow/20 bg-[#1a1407] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-brand-yellow">
+                                    <div className="inline-flex items-center gap-2 rounded-full border border-brand-blue/20 bg-[#1a1407] px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-brand-blue">
                                         <Sparkles className="h-3.5 w-3.5" />
                                         Descarga premium
                                     </div>
@@ -598,8 +598,8 @@ function AcademiaRouteLeadCard({
                                         <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-neutral-400">
                                             Recurso de decision
                                         </p>
-                                        <h3 className="text-3xl font-bold leading-tight text-white">
-                                            Recibe <span className="font-serif text-[1.05em] italic font-normal text-[#f3d27d]">El Temario Oficial</span>
+                                        <h3 className="text-3xl font-bold leading-tight text-foreground">
+                                            Recibe <span className="font-serif text-[1.05em] italic font-normal text-brand-blue-dark">El Temario Oficial</span>
                                         </h3>
                                         <p className="text-sm leading-relaxed text-neutral-300">
                                             No es un flyer generico. Es el PDF con la agenda activa, el enfoque del bloque y la recomendacion concreta para saber por donde empezar.
@@ -607,25 +607,25 @@ function AcademiaRouteLeadCard({
                                     </div>
                                 </div>
 
-                                <div className="rounded-[26px] border border-white/10 bg-black/25 p-4">
-                                    <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-brand-yellow">
+                                <div className="rounded-[26px] border border-border/10 bg-background/25 p-4">
+                                    <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-brand-blue">
                                         Lo que obtienes al descargarlo
                                     </p>
                                     <div className="mt-4 space-y-3">
                                         {deliverables.map((item) => (
                                             <div key={item} className="flex items-start gap-3 text-sm leading-relaxed text-neutral-200">
-                                                <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-brand-yellow" />
+                                                <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-brand-blue" />
                                                 <p>{item}</p>
                                             </div>
                                         ))}
                                     </div>
                                 </div>
 
-                                <div className="rounded-[26px] border border-white/10 bg-black/25 p-4">
+                                <div className="rounded-[26px] border border-border/10 bg-background/25 p-4">
                                     <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-neutral-500">
                                         Evento recomendado para empezar
                                     </p>
-                                    <h4 className="mt-3 text-2xl font-bold leading-tight text-white">
+                                    <h4 className="mt-3 text-2xl font-bold leading-tight text-foreground">
                                         {primaryEvent ? primaryEvent.title : campaign.title}
                                     </h4>
                                     <p className="mt-2 text-sm leading-relaxed text-neutral-300">
@@ -634,12 +634,12 @@ function AcademiaRouteLeadCard({
                                             : 'Si primero quieres contexto antes de inscribirte, pide el temario y te dejamos lista la recomendacion inicial.'}
                                     </p>
 
-                                    <div className="mt-4 rounded-2xl border border-white/10 bg-white/[0.04] p-4">
+                                    <div className="mt-4 rounded-2xl border border-border/10 bg-white/[0.04] p-4">
                                         <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-neutral-500">
                                             {primaryEvent ? 'Fecha sugerida' : 'Ruta lista para revisar'}
                                         </p>
-                                        <p className="mt-2 inline-flex items-center gap-2 text-sm text-white">
-                                            <CalendarDays className="h-4 w-4 text-brand-yellow" />
+                                        <p className="mt-2 inline-flex items-center gap-2 text-sm text-foreground">
+                                            <CalendarDays className="h-4 w-4 text-brand-blue" />
                                             {primaryEvent ? formatRouteDateTime(primaryEvent.start_time) : 'Solicitud inmediata del temario'}
                                         </p>
                                     </div>
@@ -672,7 +672,7 @@ function AcademiaRouteLeadCard({
                                     title="Completa tus datos y recibe el PDF"
                                     description="Te enviamos el temario oficial, la agenda activa y el siguiente paso recomendado dentro de la ruta."
                                     submitLabel="Quiero el temario oficial"
-                                    className="border-white/10 bg-black/25 shadow-none"
+                                    className="border-border/10 bg-background/25 shadow-none"
                                 />
                             </div>
                         </div>
@@ -714,7 +714,7 @@ function FeaturedEventCard({ event }: { event: any }) {
         <Link
             href={publicPath}
             aria-label={`Ver detalles de ${event.title}`}
-            className="group relative block overflow-hidden rounded-2xl border border-white/10 bg-white/[0.03] shadow-2xl backdrop-blur-sm transition-all duration-500 hover:border-brand-yellow/20"
+            className="group relative block overflow-hidden rounded-2xl border border-border/10 bg-white/[0.03] shadow-2xl backdrop-blur-sm transition-all duration-500 hover:border-brand-blue/20"
         >
             <div className="relative aspect-[16/9] overflow-hidden">
                 {event.image_url ? (
@@ -727,16 +727,16 @@ function FeaturedEventCard({ event }: { event: any }) {
                         className="object-cover transition-transform duration-700 group-hover:scale-105"
                     />
                 ) : (
-                    <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-brand-yellow/60 to-white/40">
+                    <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-brand-blue/60 to-white/40">
                         <span className="text-6xl opacity-20">S</span>
                     </div>
                 )}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-background/20 to-transparent" />
 
                 <div className="absolute left-3 top-3 flex items-center gap-2">
                     <span
-                        className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[11px] font-bold uppercase tracking-wide text-white ${
-                            isLive ? 'animate-pulse bg-red-500' : 'bg-gradient-to-r from-brand-yellow to-white'
+                        className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[11px] font-bold uppercase tracking-wide text-foreground ${
+                            isLive ? 'animate-pulse bg-red-500' : 'bg-gradient-to-r from-brand-blue to-white'
                         }`}
                     >
                         {isLive && (
@@ -748,19 +748,19 @@ function FeaturedEventCard({ event }: { event: any }) {
                         {badgeLabel}
                     </span>
                     {event.hero_badge && (
-                        <span className="inline-flex items-center rounded-full bg-white/15 px-2.5 py-1 text-[11px] font-medium text-white backdrop-blur-sm">
+                        <span className="inline-flex items-center rounded-full bg-white/15 px-2.5 py-1 text-[11px] font-medium text-foreground backdrop-blur-sm">
                             {event.hero_badge}
                         </span>
                     )}
                     {specialization && (
-                        <span className="inline-flex items-center rounded-full bg-brand-brown/70 px-2.5 py-1 text-[11px] font-semibold text-white backdrop-blur-sm">
+                                                    <span className="inline-flex items-center rounded-full bg-brand-blue-hover/90 px-2.5 py-1 text-[11px] font-semibold text-primary-foreground backdrop-blur-sm">
                             {specialization.name}
                         </span>
                     )}
                 </div>
 
                 <div className="absolute bottom-3 right-3">
-                    <span className="rounded bg-black/50 px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-brand-yellow backdrop-blur-sm">
+                    <span className="rounded bg-background/50 px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-brand-blue backdrop-blur-sm">
                         Proximo encuentro
                     </span>
                 </div>
@@ -779,7 +779,7 @@ function FeaturedEventCard({ event }: { event: any }) {
                                 className="h-6 w-6 rounded-full object-cover ring-1 ring-white/20"
                             />
                         ) : (
-                            <div className="flex h-6 w-6 items-center justify-center rounded-full bg-brand-yellow/30 text-[10px] font-bold text-brand-yellow">
+                            <div className="flex h-6 w-6 items-center justify-center rounded-full bg-brand-blue/30 text-[10px] font-bold text-brand-blue">
                                 {speakerName.charAt(0)}
                             </div>
                         )}
@@ -787,7 +787,7 @@ function FeaturedEventCard({ event }: { event: any }) {
                     </div>
                 )}
 
-                <h3 className="line-clamp-2 text-lg font-bold leading-snug text-white">{event.title}</h3>
+                <h3 className="line-clamp-2 text-lg font-bold leading-snug text-foreground">{event.title}</h3>
 
                 <div className="flex items-center gap-3 text-xs text-neutral-500">
                     <span>{dateStr}</span>
@@ -795,13 +795,13 @@ function FeaturedEventCard({ event }: { event: any }) {
                     <span>{timeStr}</span>
                 </div>
 
-                <div className="flex items-center justify-between border-t border-white/5 pt-2">
+                <div className="flex items-center justify-between border-t border-border/5 pt-2">
                     {price > 0 ? (
-                        <span className="text-lg font-bold text-white">${price.toFixed(0)} MXN</span>
+                        <span className="text-lg font-bold text-foreground">${price.toFixed(0)} MXN</span>
                     ) : (
-                        <span className="text-sm font-bold text-brand-brown">Gratis</span>
+                        <span className="text-sm font-bold text-brand-blue-hover">Gratis</span>
                     )}
-                    <span className="text-xs font-semibold text-brand-yellow transition-colors group-hover:text-brand-yellow">
+                    <span className="text-xs font-semibold text-brand-blue transition-colors group-hover:text-brand-blue">
                         Ver detalles
                     </span>
                 </div>

@@ -958,7 +958,7 @@ export function CreateEventForm({
                                             </div>
 
                                             {assignment.compensationType === 'variable' ? (
-                                                <div className="rounded-xl border border-brand-yellow bg-brand-yellow p-4 text-sm text-brand-yellow">
+                                                <div className="rounded-xl border border-brand-blue bg-brand-blue p-4 text-sm text-brand-blue">
                                                     Este esquema no genera la ganancia automaticamente. Se deja para ajuste manual despues.
                                                 </div>
                                             ) : (
@@ -1773,7 +1773,7 @@ export function CreateEventForm({
                 )}
 
                 {!isAdmin && (
-                    <div className="flex items-start gap-2 rounded-xl border border-brand-yellow bg-brand-yellow p-4 text-sm text-brand-yellow">
+                    <div className="flex items-start gap-2 rounded-xl border border-brand-blue bg-brand-blue p-4 text-sm text-brand-blue">
                         <AlertTriangle className="mt-0.5 h-4 w-4 flex-shrink-0" />
                         <p>
                             Al guardar, este evento quedara en <strong>Borrador</strong> para revision administrativa.

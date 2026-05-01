@@ -244,17 +244,17 @@ function MembershipBadge({
     const tier = getMembershipTier(level)
 
     const badgeStyles: Record<number, string> = {
-        0: 'from-neutral-100 to-neutral-50 border-neutral-200 dark:from-neutral-800 dark:to-neutral-900 dark:border-neutral-700',
-        1: 'from-brand-yellow to-brand-brown border-brand-yellow dark:from-brand-yellow dark:to-brand-brown dark:border-brand-yellow',
-        2: 'from-brand-brown to-brand-brown border-brand-brown dark:from-brand-brown dark:to-brand-brown dark:border-brand-brown',
-        3: 'from-brand-yellow to-brand-brown border-brand-yellow dark:from-brand-yellow dark:to-brand-brown dark:border-brand-yellow',
+        0: 'from-brand-surface to-brand-surface-soft border-white/20',
+        1: 'from-brand-blue-soft to-brand-teal-soft border-brand-blue-border',
+        2: 'from-brand-blue to-brand-blue-dark border-brand-blue',
+        3: 'from-brand-text-strong to-brand-blue-hover border-brand-blue-hover',
     }
 
     const dotStyles: Record<number, string> = {
-        0: 'bg-neutral-400',
-        1: 'bg-brand-yellow',
-        2: 'bg-brand-brown',
-        3: 'bg-brand-yellow',
+        0: 'bg-brand-text-muted',
+        1: 'bg-brand-blue',
+        2: 'bg-white',
+        3: 'bg-brand-blue-soft',
     }
 
     return (
@@ -268,7 +268,7 @@ function MembershipBadge({
         >
             <div className="flex items-center gap-2">
                 <div className={cn('h-2 w-2 rounded-full', dotStyles[level] ?? dotStyles[0])} />
-                <span className="truncate text-xs font-bold text-sidebar-foreground">
+                <span className={cn('truncate text-xs font-bold', level >= 2 ? 'text-white' : 'text-brand-text-strong')}>
                     {tier.label}
                 </span>
             </div>

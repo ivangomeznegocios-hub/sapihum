@@ -21,18 +21,18 @@ function formatShortDate(date: string | null | undefined) {
 function getCampaignPalette(campaignKey: EventCampaignKey) {
     if (campaignKey === 'forense') {
         return {
-            shell: 'border-white/10 bg-[linear-gradient(145deg,#080808_10%,#120f0a_55%,#050505_100%)]',
-            glow: 'bg-[radial-gradient(circle_at_top_right,rgba(246,174,2,0.2),transparent_32%),radial-gradient(circle_at_bottom_left,rgba(122,86,2,0.18),transparent_28%)]',
-            badge: 'border-brand-yellow/20 bg-brand-yellow/10 text-brand-yellow',
-            accentPanel: 'border-white/10 bg-black/25',
+        shell: 'border-border bg-[linear-gradient(145deg,#ffffff_10%,#eff6ff_55%,#fafaf9_100%)]',
+            glow: 'bg-[radial-gradient(circle_at_top_right,rgba(37,99,235,0.2),transparent_32%),radial-gradient(circle_at_bottom_left,rgba(30,58,138,0.18),transparent_28%)]',
+            badge: 'border-brand-blue/20 bg-brand-blue/10 text-brand-blue',
+            accentPanel: 'border-border/10 bg-background/25',
         }
     }
 
     return {
-        shell: 'border-white/10 bg-[linear-gradient(145deg,#080808_10%,#0b1012_55%,#050505_100%)]',
-        glow: 'bg-[radial-gradient(circle_at_top_right,rgba(192,191,188,0.16),transparent_34%),radial-gradient(circle_at_bottom_left,rgba(246,174,2,0.14),transparent_28%)]',
-        badge: 'border-white/15 bg-white/10 text-white',
-        accentPanel: 'border-white/10 bg-black/25',
+        shell: 'border-border bg-[linear-gradient(145deg,#ffffff_10%,#f0fdfa_55%,#fafaf9_100%)]',
+        glow: 'bg-[radial-gradient(circle_at_top_right,rgba(107,114,128,0.16),transparent_34%),radial-gradient(circle_at_bottom_left,rgba(37,99,235,0.14),transparent_28%)]',
+        badge: 'border-border/15 bg-white/10 text-foreground',
+        accentPanel: 'border-border/10 bg-background/25',
     }
 }
 
@@ -71,17 +71,17 @@ function CampaignEventList({
                     <Link
                         key={campaignEvent.slug}
                         href={href}
-                        className="group rounded-[22px] border border-white/10 bg-black/20 p-4 transition-all duration-300 hover:-translate-y-0.5 hover:border-brand-yellow/30 hover:bg-black/30"
+                        className="group rounded-[22px] border border-border/10 bg-background/20 p-4 transition-all duration-300 hover:-translate-y-0.5 hover:border-brand-blue/30 hover:bg-background/30"
                     >
-                        <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-brand-yellow/80">
+                        <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-brand-blue/80">
                             {liveEvent?.slug === campaign.primaryEventSlug ? 'Evento ancla' : 'Ruta activa'}
                         </p>
-                        <h3 className={cn('mt-2 font-semibold text-white transition-colors group-hover:text-brand-yellow', compact ? 'text-sm' : 'text-sm md:text-base')}>
+                        <h3 className={cn('mt-2 font-semibold text-foreground transition-colors group-hover:text-brand-blue', compact ? 'text-sm' : 'text-sm md:text-base')}>
                             {liveEvent?.title || campaignEvent.title}
                         </h3>
                         <div className="mt-4 flex flex-wrap items-center gap-3 text-xs text-neutral-400">
                             <span className="inline-flex items-center gap-1.5">
-                                <CalendarDays className="h-3.5 w-3.5 text-brand-yellow" />
+                                <CalendarDays className="h-3.5 w-3.5 text-brand-blue" />
                                 {formatShortDate(liveEvent?.start_time)}
                             </span>
                             {speakerName && <span className="line-clamp-1">{speakerName}</span>}
@@ -123,7 +123,7 @@ export function EventCampaignSpotlight({
                             Rutas activas ahora
                         </div>
                         <div className="space-y-3">
-                            <h3 className="text-3xl font-bold tracking-tight text-white">
+                            <h3 className="text-3xl font-bold tracking-tight text-foreground">
                                 {campaign.title}
                             </h3>
                             <p className="text-base leading-relaxed text-neutral-200">
@@ -165,7 +165,7 @@ export function EventCampaignSpotlight({
                         <div className={cn('inline-flex items-center gap-2 rounded-full border px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em]', palette.badge)}>
                             Agenda activa
                         </div>
-                        <h3 className="text-2xl font-bold tracking-tight text-white">{campaign.title}</h3>
+                        <h3 className="text-2xl font-bold tracking-tight text-foreground">{campaign.title}</h3>
                         <p className="max-w-3xl text-sm leading-relaxed text-neutral-300">
                             Empieza por la ruta activa y usa Academia como el punto principal para explorar agenda, registro y temario.
                         </p>
@@ -205,12 +205,12 @@ export function EventCampaignSpotlight({
                                 <span className={cn('inline-flex items-center gap-2 rounded-full border px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em]', palette.badge)}>
                                     Ruta activa
                                 </span>
-                                <span className="inline-flex rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-medium text-neutral-300">
+                                <span className="inline-flex rounded-full border border-border/10 bg-white/5 px-3 py-1 text-xs font-medium text-neutral-300">
                                     {campaign.events.length} {campaign.events.length === 1 ? 'evento clave' : 'eventos conectados'}
                                 </span>
                             </div>
                             <div className="space-y-3">
-                                <h2 className="max-w-4xl text-3xl font-bold tracking-tight text-white md:text-4xl">
+                                <h2 className="max-w-4xl text-3xl font-bold tracking-tight text-foreground md:text-4xl">
                                     {campaign.title}
                                 </h2>
                                 <p className="max-w-4xl text-lg leading-relaxed text-neutral-200">
@@ -268,14 +268,14 @@ export function EventCampaignSpotlight({
                                 <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-neutral-500">
                                     Evento ancla
                                 </p>
-                                <h3 className="text-2xl font-bold text-white">{primaryEvent?.title}</h3>
+                                <h3 className="text-2xl font-bold text-foreground">{primaryEvent?.title}</h3>
                                 <p className="text-sm leading-relaxed text-neutral-400">
                                     Empieza por el encuentro mas cercano y usa esta ruta para mantener continuidad entre eventos relacionados.
                                 </p>
-                                <div className="rounded-2xl border border-white/10 bg-black/25 p-4 text-sm text-neutral-300">
-                                    <p className="font-medium text-white">Fecha recomendada</p>
+                                <div className="rounded-2xl border border-border/10 bg-background/25 p-4 text-sm text-neutral-300">
+                                    <p className="font-medium text-foreground">Fecha recomendada</p>
                                     <p className="mt-2 inline-flex items-center gap-2">
-                                        <CalendarDays className="h-4 w-4 text-brand-yellow" />
+                                        <CalendarDays className="h-4 w-4 text-brand-blue" />
                                         {formatShortDate(primaryEvent?.start_time)}
                                     </p>
                                 </div>
@@ -295,11 +295,11 @@ export function EventCampaignSpotlight({
 
     return (
         <article className="relative overflow-hidden rounded-[28px] border border-border/60 bg-card shadow-sm shadow-black/5">
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(246,174,2,0.16),transparent_38%),radial-gradient(circle_at_bottom_left,rgba(122,86,2,0.12),transparent_32%)]" />
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(37,99,235,0.16),transparent_38%),radial-gradient(circle_at_bottom_left,rgba(30,58,138,0.12),transparent_32%)]" />
             <div className="relative grid gap-8 px-6 py-7 lg:grid-cols-[minmax(0,1fr)_320px] lg:px-8">
                 <div className="space-y-5">
                     <div className="flex flex-wrap items-center gap-2">
-                        <span className="inline-flex rounded-full border border-brand-yellow/20 bg-brand-yellow/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-brand-yellow">
+                        <span className="inline-flex rounded-full border border-brand-blue/20 bg-brand-blue/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-brand-blue">
                             Ruta activa
                         </span>
                         <span className="inline-flex rounded-full border border-border/60 bg-background/80 px-3 py-1 text-xs font-medium text-muted-foreground">
@@ -328,12 +328,12 @@ export function EventCampaignSpotlight({
                                 <Link
                                     key={event.slug}
                                     href={href}
-                                    className="group rounded-2xl border border-border/60 bg-background/75 p-4 transition-colors hover:border-brand-yellow/30 hover:bg-background"
+                                    className="group rounded-2xl border border-border/60 bg-background/75 p-4 transition-colors hover:border-brand-blue/30 hover:bg-background"
                                 >
-                                    <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-brand-yellow">
+                                    <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-brand-blue">
                                         {liveEvent?.slug === primaryEvent?.slug ? 'Evento prioritario' : 'Agenda del bloque'}
                                     </p>
-                                    <h3 className="mt-2 line-clamp-2 text-sm font-semibold text-foreground transition-colors group-hover:text-brand-yellow">
+                                    <h3 className="mt-2 line-clamp-2 text-sm font-semibold text-foreground transition-colors group-hover:text-brand-blue">
                                         {liveEvent?.title || event.title}
                                     </h3>
                                     <div className="mt-3 flex items-center gap-2 text-xs text-muted-foreground">
@@ -387,8 +387,8 @@ export function EventCampaignSpotlight({
                             </Link>
                         )}
 
-                        <p className="flex items-start gap-2 rounded-xl border border-brand-yellow/20 bg-brand-yellow/10 px-3 py-3 text-xs leading-relaxed text-muted-foreground">
-                            <Download className="mt-0.5 h-3.5 w-3.5 shrink-0 text-brand-yellow" />
+                        <p className="flex items-start gap-2 rounded-xl border border-brand-blue/20 bg-brand-blue/10 px-3 py-3 text-xs leading-relaxed text-muted-foreground">
+                            <Download className="mt-0.5 h-3.5 w-3.5 shrink-0 text-brand-blue" />
                             El temario entrega el objetivo del bloque, temas clave, perfil ideal y el siguiente evento recomendado para avanzar.
                         </p>
                     </div>

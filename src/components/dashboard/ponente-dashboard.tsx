@@ -47,7 +47,7 @@ function getSpeakerMilestones(profileComplete: number, totalEvents: number, tota
 
 const statusBadges: Record<string, { label: string; color: string }> = {
     draft: { label: 'Borrador', color: 'bg-muted text-muted-foreground' },
-    upcoming: { label: 'Próximo', color: 'bg-brand-yellow text-brand-yellow dark:bg-brand-yellow/40 dark:text-brand-yellow' },
+    upcoming: { label: 'Próximo', color: 'bg-brand-blue text-brand-blue dark:bg-brand-blue/40 dark:text-brand-blue' },
     live: { label: 'En Vivo', color: 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300' },
     completed: { label: 'Finalizado', color: 'bg-muted text-muted-foreground' },
     cancelled: { label: 'Cancelado', color: 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300' },
@@ -74,7 +74,7 @@ export function PonenteDashboard({
     return (
         <div className="space-y-8 dashboard-stagger">
             {/* Hero Banner */}
-            <div className="rounded-2xl border bg-gradient-to-br from-card to-brand-brown/30 dark:from-card dark:to-brand-brown/10 p-6 sm:p-8">
+            <div className="rounded-2xl border bg-gradient-to-br from-card to-brand-blue-hover/30 dark:from-card dark:to-brand-blue-hover/10 p-6 sm:p-8">
                 <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6">
                     <ProgressRing
                         percentage={profileCompleteness}
@@ -120,7 +120,7 @@ export function PonenteDashboard({
             <div className="rounded-xl border bg-card p-5">
                 <div className="flex flex-col gap-3 mb-4 sm:flex-row sm:items-center sm:justify-between">
                     <h2 className="text-base font-semibold flex items-center gap-2">
-                        <DollarSign className="h-4 w-4 text-brand-brown" />
+                        <DollarSign className="h-4 w-4 text-brand-blue-hover" />
                         Resumen Financiero
                     </h2>
                     <Button asChild variant="outline" size="sm" className="min-h-11 w-full sm:min-h-8 sm:w-auto">
@@ -131,36 +131,36 @@ export function PonenteDashboard({
                     </Button>
                 </div>
                 <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-                    <div className="p-3 rounded-lg bg-brand-yellow/50 dark:bg-brand-yellow/20 border border-brand-yellow/50 dark:border-brand-yellow/30">
+                    <div className="p-3 rounded-lg bg-brand-blue/50 dark:bg-brand-blue/20 border border-brand-blue/50 dark:border-brand-blue/30">
                         <div className="flex items-center gap-2 mb-1">
-                            <TrendingUp className="h-3.5 w-3.5 text-brand-yellow" />
+                            <TrendingUp className="h-3.5 w-3.5 text-brand-blue" />
                             <span className="text-xs text-muted-foreground">Total Acumulado</span>
                         </div>
                         <p className="text-lg font-bold">
                             {new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(totalAccumulated)}
                         </p>
                     </div>
-                    <div className="p-3 rounded-lg bg-brand-brown/50 dark:bg-brand-brown/20 border border-brand-brown/50 dark:border-brand-brown/30">
+                    <div className="p-3 rounded-lg bg-brand-blue-hover/50 dark:bg-brand-blue-hover/20 border border-brand-blue-hover/50 dark:border-brand-blue-hover/30">
                         <div className="flex items-center gap-2 mb-1">
-                            <CheckCircle2 className="h-3.5 w-3.5 text-brand-brown" />
+                            <CheckCircle2 className="h-3.5 w-3.5 text-brand-blue-hover" />
                             <span className="text-xs text-muted-foreground">Disponible</span>
                         </div>
-                        <p className="text-lg font-bold text-brand-brown dark:text-brand-brown">
+                        <p className="text-lg font-bold text-brand-blue-hover dark:text-brand-blue-hover">
                             {new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(availableForPayment)}
                         </p>
                     </div>
-                    <div className="p-3 rounded-lg bg-brand-yellow/50 dark:bg-brand-yellow/20 border border-brand-yellow/50 dark:border-brand-yellow/30">
+                    <div className="p-3 rounded-lg bg-brand-blue/50 dark:bg-brand-blue/20 border border-brand-blue/50 dark:border-brand-blue/30">
                         <div className="flex items-center gap-2 mb-1">
-                            <Clock className="h-3.5 w-3.5 text-brand-yellow" />
+                            <Clock className="h-3.5 w-3.5 text-brand-blue" />
                             <span className="text-xs text-muted-foreground">En Garantía (30d)</span>
                         </div>
-                        <p className="text-lg font-bold text-brand-yellow dark:text-brand-yellow">
+                        <p className="text-lg font-bold text-brand-blue dark:text-brand-blue">
                             {new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(pendingAmount)}
                         </p>
                     </div>
-                    <div className="p-3 rounded-lg bg-brand-brown/50 dark:bg-brand-brown/20 border border-brand-brown/50 dark:border-brand-brown/30">
+                    <div className="p-3 rounded-lg bg-brand-blue-hover/50 dark:bg-brand-blue-hover/20 border border-brand-blue-hover/50 dark:border-brand-blue-hover/30">
                         <div className="flex items-center gap-2 mb-1">
-                            <CalendarDays className="h-3.5 w-3.5 text-brand-brown" />
+                            <CalendarDays className="h-3.5 w-3.5 text-brand-blue-hover" />
                             <span className="text-xs text-muted-foreground">Este Mes</span>
                         </div>
                         <p className="text-lg font-bold">
@@ -274,7 +274,7 @@ export function PonenteDashboard({
                 <Card>
                     <CardHeader>
                         <CardTitle className="text-base flex items-center gap-2">
-                            <Mic2 className="h-4 w-4 text-brand-brown" />
+                            <Mic2 className="h-4 w-4 text-brand-blue-hover" />
                             Perfil de Ponente
                         </CardTitle>
                         <CardDescription>
@@ -290,7 +290,7 @@ export function PonenteDashboard({
                             </div>
                             <div className="h-2 bg-muted rounded-full overflow-hidden">
                                 <div
-                                    className="h-full bg-brand-brown rounded-full transition-all duration-1000"
+                                    className="h-full bg-brand-blue-hover rounded-full transition-all duration-1000"
                                     style={{ width: `${profileCompleteness}%` }}
                                 />
                             </div>

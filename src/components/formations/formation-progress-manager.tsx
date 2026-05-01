@@ -114,7 +114,7 @@ export function FormationProgressManager({ formationId, learners }: FormationPro
                                             {learner.completedRequiredCount}/{learner.totalRequiredCount} cursos requeridos
                                         </Badge>
                                         {learner.hasFullCertificate ? (
-                                            <Badge className="bg-brand-brown hover:bg-brand-brown text-white">
+                                            <Badge className="bg-brand-blue-hover hover:bg-brand-blue-hover text-white">
                                                 <Award className="mr-1 h-3.5 w-3.5" />
                                                 Certificado final emitido
                                             </Badge>
@@ -140,7 +140,7 @@ export function FormationProgressManager({ formationId, learners }: FormationPro
                                                         </p>
                                                     </div>
                                                     {course.hasCertificate ? (
-                                                        <Badge className="bg-brand-brown text-brand-brown hover:bg-brand-brown">
+                                                        <Badge className="bg-brand-blue-hover text-brand-blue-hover hover:bg-brand-blue-hover">
                                                             Certificado
                                                         </Badge>
                                                     ) : (

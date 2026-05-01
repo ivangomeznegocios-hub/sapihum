@@ -68,7 +68,7 @@ export default async function AnalyticsPage() {
             {/* 1. Salud Clínica y Retención */}
             <div>
                 <h2 className="text-xl font-semibold mb-3 flex items-center gap-2">
-                    <HeartPulse className="h-5 w-5 text-brand-brown" />
+                    <HeartPulse className="h-5 w-5 text-brand-blue-hover" />
                     Salud Clínica y Retención
                 </h2>
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -107,7 +107,7 @@ export default async function AnalyticsPage() {
                     {/* 2. Finanzas y Suscripciones */}
                     <div>
                 <h2 className="text-xl font-semibold mb-3 flex items-center gap-2">
-                    <DollarSign className="h-5 w-5 text-brand-brown" /> 
+                    <DollarSign className="h-5 w-5 text-brand-blue-hover" />
                     Finanzas & Retención (SaaS)
                 </h2>
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -151,7 +151,7 @@ export default async function AnalyticsPage() {
             {/* 3. Unit Economics */}
             <div>
                 <h2 className="text-xl font-semibold mb-3 flex items-center gap-2">
-                    <PieChart className="h-5 w-5 text-brand-brown" />
+                    <PieChart className="h-5 w-5 text-brand-blue-hover" />
                     Unit Economics
                 </h2>
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -186,7 +186,7 @@ export default async function AnalyticsPage() {
             {/* 4. Unit Economics Avanzados */}
             <div>
                 <h2 className="text-xl font-semibold mb-3 flex items-center gap-2">
-                    <PieChart className="h-5 w-5 text-brand-yellow" />
+                    <PieChart className="h-5 w-5 text-brand-blue" />
                     Unit Economics Avanzados
                 </h2>
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -221,7 +221,7 @@ export default async function AnalyticsPage() {
             {/* 5. Engagement & Marketplace */}
             <div>
                 <h2 className="text-xl font-semibold mb-3 flex items-center gap-2">
-                    <HeartPulse className="h-5 w-5 text-brand-brown" />
+                    <HeartPulse className="h-5 w-5 text-brand-blue-hover" />
                     Engagement & Marketplace
                 </h2>
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -264,7 +264,7 @@ export default async function AnalyticsPage() {
             {/* 6. Crecimiento Orgánico (Viralidad) */}
             <div>
                 <h2 className="text-xl font-semibold mb-3 flex items-center gap-2">
-                    <TrendingUp className="h-5 w-5 text-brand-yellow" />
+                    <TrendingUp className="h-5 w-5 text-brand-blue" />
                     Crecimiento Orgánico y Viralidad
                 </h2>
                 <div className="grid gap-4 sm:grid-cols-2">
@@ -294,7 +294,7 @@ export default async function AnalyticsPage() {
             {/* 7. Plataforma & Eventos (Métricas Base) */}
             <div>
                 <h2 className="text-xl font-semibold mb-3 flex items-center gap-2">
-                    <Calendar className="h-5 w-5 text-brand-yellow" />
+                    <Calendar className="h-5 w-5 text-brand-blue" />
                     General de la Plataforma
                 </h2>
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -349,9 +349,9 @@ export default async function AnalyticsPage() {
                                 stats.activity.map((item: any, i: number) => (
                                     <div key={i} className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg">
                                         <div className="p-2 bg-background rounded-full">
-                                            {item.type === 'appointment' && <Calendar className="h-4 w-4 text-brand-yellow" />}
+                                            {item.type === 'appointment' && <Calendar className="h-4 w-4 text-brand-blue" />}
                                             {item.type === 'user' && <Users className="h-4 w-4 text-green-500" />}
-                                            {item.type === 'event' && <TrendingUp className="h-4 w-4 text-brand-brown" />}
+                                            {item.type === 'event' && <TrendingUp className="h-4 w-4 text-brand-blue-hover" />}
                                         </div>
                                         <div className="flex-1">
                                             <p className="text-sm font-medium line-clamp-2">{item.description}</p>

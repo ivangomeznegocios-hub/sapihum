@@ -28,10 +28,10 @@ interface UsersTableProps {
 
 const ROLE_BADGES: Record<string, string> = {
     admin: 'surface-alert-error dark:bg-red-900 dark:text-red-200',
-    support: 'bg-brand-yellow text-brand-yellow dark:bg-brand-yellow dark:text-brand-yellow',
-    psychologist: 'bg-brand-yellow text-brand-yellow dark:bg-brand-yellow dark:text-brand-yellow',
+    support: 'bg-brand-blue text-brand-blue dark:bg-brand-blue dark:text-brand-blue',
+    psychologist: 'bg-brand-blue text-brand-blue dark:bg-brand-blue dark:text-brand-blue',
     patient: 'surface-alert-success dark:bg-green-900 dark:text-green-200',
-    ponente: 'bg-brand-brown text-brand-brown dark:bg-brand-brown dark:text-brand-brown',
+    ponente: 'bg-brand-blue-hover text-brand-blue-hover dark:bg-brand-blue-hover dark:text-brand-blue-hover',
 }
 
 const ROLE_LABELS: Record<string, string> = {
@@ -152,7 +152,7 @@ export function UsersTable({ users }: UsersTableProps) {
                                                 </span>
                                                 <span className={`inline-flex rounded-full px-2 py-0.5 text-[10px] font-medium ${user.email_confirmed_at
                                                     ? 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300'
-                                                    : 'bg-brand-yellow/20 text-brand-yellow dark:bg-brand-yellow/20 dark:text-brand-yellow'
+                                                    : 'bg-brand-blue/20 text-brand-blue dark:bg-brand-blue/20 dark:text-brand-blue'
                                                     }`}>
                                                     {user.email_confirmed_at ? 'Correo confirmado' : 'Correo pendiente'}
                                                 </span>

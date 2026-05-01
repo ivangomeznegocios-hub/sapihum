@@ -35,7 +35,7 @@ export default async function PatientToolsPage() {
             {pending.length > 0 && (
                 <div>
                     <h2 className="text-sm font-semibold text-muted-foreground mb-3 flex items-center gap-2">
-                        <Clock className="h-4 w-4 text-brand-yellow" />
+                        <Clock className="h-4 w-4 text-brand-blue" />
                         Pendientes ({pending.length})
                     </h2>
                     <div className="grid gap-3 md:grid-cols-2">
@@ -74,7 +74,7 @@ export default async function PatientToolsPage() {
                                                     </p>
                                                 )}
                                                 {assignment.due_date && (
-                                                    <p className="text-xs text-brand-yellow font-medium mt-1.5 flex items-center gap-1">
+                                                    <p className="text-xs text-brand-blue font-medium mt-1.5 flex items-center gap-1">
                                                         <AlertCircle className="h-3 w-3" />
                                                         Límite: {new Date(assignment.due_date).toLocaleDateString('es-ES', { day: 'numeric', month: 'long' })}
                                                     </p>

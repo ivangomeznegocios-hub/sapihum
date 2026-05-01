@@ -12,8 +12,8 @@ interface ProgressRingProps {
 }
 
 const colorMap = {
-    primary: { stroke: 'stroke-brand-yellow', text: 'text-brand-yellow', track: 'stroke-brand-yellow/15' },
-    secondary: { stroke: 'stroke-brand-brown', text: 'text-brand-brown', track: 'stroke-brand-brown/15' },
+    primary: { stroke: 'stroke-brand-blue', text: 'text-brand-blue', track: 'stroke-brand-blue/15' },
+    secondary: { stroke: 'stroke-brand-blue-hover', text: 'text-brand-blue-hover', track: 'stroke-brand-blue-hover/15' },
 }
 
 export function ProgressRing({

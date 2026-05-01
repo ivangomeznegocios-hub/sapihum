@@ -77,28 +77,28 @@ export default function RecursosPage() {
   return (
     <div className="flex flex-col items-center w-full">
       {/* ── HERO ────────────────────────────────────────────────── */}
-      <section className="relative w-full min-h-[60svh] flex items-center overflow-hidden bg-black">
+      <section className="relative w-full min-h-[60svh] flex items-center overflow-hidden bg-background">
         {/* Grid background */}
         <div className="absolute inset-0 sapihum-grid-bg opacity-20" />
         {/* Glow */}
-        <div className="absolute left-1/2 top-0 -translate-x-1/2 h-[500px] w-[500px] rounded-full bg-[#f6ae02]/4 blur-3xl" />
+        <div className="absolute left-1/2 top-0 -translate-x-1/2 h-[500px] w-[500px] rounded-full bg-[#2563EB]/4 blur-3xl" />
 
         <div className="relative z-10 mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-28 text-center">
           {/* Lock badge */}
-          <div className="inline-flex items-center gap-2 rounded-sm border border-[#f6ae02]/20 bg-[#f6ae02]/5 px-4 py-1.5 text-[10px] font-bold text-[#f6ae02] uppercase tracking-[0.2em] mb-10">
+          <div className="inline-flex items-center gap-2 rounded-sm border border-[#2563EB]/20 bg-[#2563EB]/5 px-4 py-1.5 text-[10px] font-bold text-[#2563EB] uppercase tracking-[0.2em] mb-10">
             <Lock className="w-3 h-3" />
             Acceso exclusivo para miembros
           </div>
 
-          <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight leading-[1.08] text-white">
+          <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight leading-[1.08] text-foreground">
             Todo lo que necesitas para{' '}
-            <span className="font-serif italic font-normal text-[#c0bfbc]">
+            <span className="font-serif italic font-normal text-[#6B7280]">
               ejercer con más criterio
             </span>{' '}
             está adentro.
           </h1>
 
-          <p className="mt-8 text-lg md:text-xl text-[#c0bfbc]/60 max-w-2xl mx-auto leading-relaxed font-light">
+          <p className="mt-8 text-lg md:text-xl text-[#6B7280]/60 max-w-2xl mx-auto leading-relaxed font-light">
             Plantillas, protocolos, grabaciones, escalas e instrumentos clínicos.
             El catálogo completo de recursos SAPIHUM está disponible para miembros activos.
           </p>
@@ -124,47 +124,47 @@ export default function RecursosPage() {
       </section>
 
       {/* ── QUÉ INCLUYE ─────────────────────────────────────────── */}
-      <section className="w-full py-32 bg-[#030303] border-t border-white/[0.06]">
+      <section className="w-full py-32 bg-background border-t border-border/[0.06]">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           {/* Header */}
           <div className="max-w-2xl mb-20">
-            <p className="text-[10px] font-bold text-[#f6ae02] uppercase tracking-[0.2em] mb-4">
+            <p className="text-[10px] font-bold text-[#2563EB] uppercase tracking-[0.2em] mb-4">
               Dentro de la membresía
             </p>
-            <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-white leading-tight">
+            <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-foreground leading-tight">
               Recursos diseñados para{' '}
-              <span className="font-serif italic font-normal text-[#c0bfbc]">
+              <span className="font-serif italic font-normal text-[#6B7280]">
                 la práctica real
               </span>
             </h2>
-            <div className="mt-6 h-px w-20 bg-[#7a5602]" />
+            <div className="mt-6 h-px w-20 bg-[#1E3A8A]" />
           </div>
 
           {/* Resource grid — blurred/locked state */}
           <div className="relative">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-px bg-white/[0.05] border border-white/[0.05]">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-px bg-white/[0.05] border border-border/[0.05]">
               {RESOURCE_CATEGORIES.map((cat) => (
                 <div
                   key={cat.label}
-                  className="group relative bg-[#030303] p-8 transition-colors duration-300 hover:bg-[#0a0a0a]"
+                  className="group relative bg-background p-8 transition-colors duration-300 hover:bg-background"
                 >
                   {/* Lock overlay hint */}
                   <div className="absolute top-4 right-4 opacity-20 group-hover:opacity-40 transition-opacity">
-                    <Lock className="w-4 h-4 text-[#f6ae02]" />
+                    <Lock className="w-4 h-4 text-[#2563EB]" />
                   </div>
 
                   {/* Icon */}
-                  <div className="mb-5 inline-flex h-11 w-11 items-center justify-center border border-white/[0.06] bg-black text-[#c0bfbc] group-hover:text-[#f6ae02] group-hover:border-[#f6ae02]/20 transition-colors duration-300">
+                  <div className="mb-5 inline-flex h-11 w-11 items-center justify-center border border-border/[0.06] bg-background text-[#6B7280] group-hover:text-[#2563EB] group-hover:border-[#2563EB]/20 transition-colors duration-300">
                     {cat.icon}
                   </div>
 
-                  <h3 className="text-sm font-bold text-white uppercase tracking-[0.08em] mb-3">
+                  <h3 className="text-sm font-bold text-foreground uppercase tracking-[0.08em] mb-3">
                     {cat.label}
                   </h3>
-                  <p className="text-sm font-light text-[#c0bfbc]/55 leading-relaxed mb-6">
+                  <p className="text-sm font-light text-[#6B7280]/55 leading-relaxed mb-6">
                     {cat.description}
                   </p>
-                  <span className="text-[10px] font-bold text-[#f6ae02]/60 uppercase tracking-[0.15em]">
+                  <span className="text-[10px] font-bold text-[#2563EB]/60 uppercase tracking-[0.15em]">
                     {cat.count}
                   </span>
                 </div>
@@ -172,18 +172,18 @@ export default function RecursosPage() {
             </div>
 
             {/* Gate overlay */}
-            <div className="absolute inset-0 bg-gradient-to-t from-[#030303] via-[#030303]/60 to-transparent pointer-events-none" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent pointer-events-none" />
 
             {/* Central CTA card over overlay */}
             <div className="absolute bottom-0 left-0 right-0 flex justify-center pb-16 z-10 pointer-events-none">
-              <div className="pointer-events-auto mx-4 max-w-lg w-full border border-[#f6ae02]/20 bg-black/90 backdrop-blur-sm p-8 text-center">
-                <div className="w-10 h-10 rounded-full bg-[#f6ae02]/10 flex items-center justify-center mx-auto mb-5">
-                  <Shield className="w-5 h-5 text-[#f6ae02]" />
+              <div className="pointer-events-auto mx-4 max-w-lg w-full border border-[#2563EB]/20 bg-background/90 backdrop-blur-sm p-8 text-center">
+                <div className="w-10 h-10 rounded-full bg-[#2563EB]/10 flex items-center justify-center mx-auto mb-5">
+                  <Shield className="w-5 h-5 text-[#2563EB]" />
                 </div>
-                <h3 className="text-lg font-bold text-white mb-3">
+                <h3 className="text-lg font-bold text-foreground mb-3">
                   Acceso completo con membresía
                 </h3>
-                <p className="text-sm text-[#c0bfbc]/60 font-light leading-relaxed mb-6">
+                <p className="text-sm text-[#6B7280]/60 font-light leading-relaxed mb-6">
                   Todos estos recursos están disponibles desde el primer día que formas parte de SAPIHUM.
                 </p>
                 <Link href="/membresia">
@@ -199,22 +199,22 @@ export default function RecursosPage() {
       </section>
 
       {/* ── QUÉ OBTIENES (pillars) ──────────────────────────────── */}
-      <section className="w-full py-28 bg-black border-t border-white/[0.06]">
+      <section className="w-full py-28 bg-background border-t border-border/[0.06]">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
             {/* Left: copy */}
             <div>
-              <p className="text-[10px] font-bold text-[#f6ae02] uppercase tracking-[0.2em] mb-6">
+              <p className="text-[10px] font-bold text-[#2563EB] uppercase tracking-[0.2em] mb-6">
                 La membresía incluye
               </p>
-              <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-white leading-tight mb-8">
+              <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-foreground leading-tight mb-8">
                 No solo recursos.{' '}
-                <span className="font-serif italic font-normal text-[#c0bfbc]">
+                <span className="font-serif italic font-normal text-[#6B7280]">
                   Un ecosistema completo.
                 </span>
               </h2>
-              <div className="border-l border-white/[0.08] pl-8 py-2 mb-10">
-                <p className="text-[#c0bfbc]/60 font-light leading-relaxed">
+              <div className="border-l border-border/[0.08] pl-8 py-2 mb-10">
+                <p className="text-[#6B7280]/60 font-light leading-relaxed">
                   La membresía SAPIHUM va más allá de un catálogo de archivos. Integra formación continua,
                   comunidad profesional y software clínico en una sola experiencia.
                 </p>
@@ -235,12 +235,12 @@ export default function RecursosPage() {
               {MEMBERSHIP_PILLARS.map((pillar, i) => (
                 <div
                   key={pillar}
-                  className="flex items-center gap-5 py-5 border-b border-white/[0.06] group"
+                  className="flex items-center gap-5 py-5 border-b border-border/[0.06] group"
                 >
-                  <span className="font-serif text-lg text-[#f6ae02]/40 w-8 shrink-0">
+                  <span className="font-serif text-lg text-[#2563EB]/40 w-8 shrink-0">
                     {String(i + 1).padStart(2, '0')}.
                   </span>
-                  <span className="text-[#c0bfbc]/70 font-light text-sm leading-relaxed group-hover:text-white transition-colors duration-300">
+                  <span className="text-[#6B7280]/70 font-light text-sm leading-relaxed group-hover:text-foreground transition-colors duration-300">
                     {pillar}
                   </span>
                 </div>
@@ -251,20 +251,20 @@ export default function RecursosPage() {
       </section>
 
       {/* ── FINAL CTA ───────────────────────────────────────────── */}
-      <section className="w-full py-36 bg-[#030303] border-t border-white/[0.06]">
+      <section className="w-full py-36 bg-background border-t border-border/[0.06]">
         <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 text-center relative">
-          <div className="absolute inset-0 bg-[#f6ae02]/3 blur-[120px] rounded-full pointer-events-none" />
+          <div className="absolute inset-0 bg-[#2563EB]/3 blur-[120px] rounded-full pointer-events-none" />
           <div className="relative z-10">
-            <p className="text-[10px] font-bold text-[#f6ae02] uppercase tracking-[0.2em] mb-6">
+            <p className="text-[10px] font-bold text-[#2563EB] uppercase tracking-[0.2em] mb-6">
               Empieza hoy
             </p>
-            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight text-white leading-tight mb-6">
+            <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight text-foreground leading-tight mb-6">
               Los recursos están listos.{' '}
-              <span className="font-serif italic font-normal text-[#c0bfbc]">
+              <span className="font-serif italic font-normal text-[#6B7280]">
                 Solo falta que tú estés adentro.
               </span>
             </h2>
-            <p className="text-lg text-[#c0bfbc]/50 font-light leading-relaxed max-w-xl mx-auto mb-14">
+            <p className="text-lg text-[#6B7280]/50 font-light leading-relaxed max-w-xl mx-auto mb-14">
               Únete a la membresía y accede de inmediato a plantillas, guías, grabaciones y todo lo que necesitas para ejercer con más estructura y respaldo.
             </p>
             <div className="flex flex-col sm:flex-row gap-5 justify-center uppercase text-xs tracking-[0.1em]">
@@ -284,7 +284,7 @@ export default function RecursosPage() {
                 </Button>
               </Link>
             </div>
-            <p className="mt-8 text-[11px] text-[#c0bfbc]/30">
+            <p className="mt-8 text-[11px] text-[#6B7280]/30">
               Acceso a recursos sujeto al nivel de membresía activa.
             </p>
           </div>

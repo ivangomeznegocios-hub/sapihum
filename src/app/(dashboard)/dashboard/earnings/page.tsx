@@ -75,7 +75,7 @@ export default async function EarningsDashboardPage() {
                             {courses.slice(0, 8).map((course: any) => {
                                 const statusColors: Record<string, string> = {
                                     draft: 'bg-muted text-muted-foreground',
-                                    upcoming: 'bg-brand-yellow text-brand-yellow dark:bg-brand-yellow/40 dark:text-brand-yellow',
+                                    upcoming: 'bg-brand-blue text-brand-blue dark:bg-brand-blue/40 dark:text-brand-blue',
                                     live: 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300',
                                     completed: 'bg-muted text-muted-foreground',
                                     cancelled: 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300',
@@ -111,14 +111,14 @@ export default async function EarningsDashboardPage() {
                                                 <a href={course.meeting_link} target="_blank" rel="noopener noreferrer"
                                                     className="p-1.5 rounded-md hover:bg-background transition-colors"
                                                     title="Link de Sesión">
-                                                    <Link2 className="h-3.5 w-3.5 text-brand-yellow" />
+                                                    <Link2 className="h-3.5 w-3.5 text-brand-blue" />
                                                 </a>
                                             )}
                                             {course.recording_url && !course.recording_expired && (
                                                 <a href={course.recording_url} target="_blank" rel="noopener noreferrer"
                                                     className="p-1.5 rounded-md hover:bg-background transition-colors"
                                                     title={`Grabación (expira en ${course.recording_available_days || 20} días)`}>
-                                                    <Video className="h-3.5 w-3.5 text-brand-brown" />
+                                                    <Video className="h-3.5 w-3.5 text-brand-blue-hover" />
                                                 </a>
                                             )}
                                             {course.recording_url && course.recording_expired && (

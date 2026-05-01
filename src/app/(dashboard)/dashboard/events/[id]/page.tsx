@@ -281,7 +281,7 @@ export default async function EventDetailPage({ params }: PageProps) {
 
     const getStatusBadge = (status: string) => {
         switch (status) {
-            case 'upcoming': return 'bg-brand-yellow text-brand-yellow'
+            case 'upcoming': return 'bg-brand-blue text-brand-blue'
             case 'live': return 'surface-alert-success animate-pulse'
             case 'completed': return 'bg-gray-100 text-gray-800'
             case 'cancelled': return 'surface-alert-error'
@@ -351,7 +351,7 @@ export default async function EventDetailPage({ params }: PageProps) {
                                                     event.status === 'completed' ? 'Finalizado' : 'Cancelado'}
                                         </span>
                                         {event.is_members_only && (
-                                            <span className="text-xs px-2 py-1 rounded-full bg-brand-yellow text-brand-yellow flex items-center gap-1">
+                                            <span className="text-xs px-2 py-1 rounded-full bg-brand-blue text-brand-blue flex items-center gap-1">
                                                 <Lock className="h-3 w-3" />
                                                 Solo Miembros
                                             </span>
@@ -429,11 +429,11 @@ export default async function EventDetailPage({ params }: PageProps) {
                                 <div className="space-y-4">
                                     <div className="flex items-center justify-between">
                                         <h3 className="font-semibold flex items-center gap-2">
-                                            <Play className="h-5 w-5 text-brand-brown" />
+                                            <Play className="h-5 w-5 text-brand-blue-hover" />
                                             Grabación del Evento
                                         </h3>
                                         {event.recording_expires_at && (
-                                            <span className="text-xs px-2 py-1 bg-brand-brown text-brand-brown rounded-full">
+                                            <span className="text-xs px-2 py-1 bg-brand-blue-hover text-brand-blue-hover rounded-full">
                                                 Disponible hasta: {formatDate(event.recording_expires_at)}
                                             </span>
                                         )}
@@ -448,14 +448,14 @@ export default async function EventDetailPage({ params }: PageProps) {
 
                             {/* Recording pending message */}
                             {event.status === 'completed' && !event.recording_url && hasEventAccess && (
-                                <div className="p-4 bg-brand-yellow dark:bg-brand-yellow/30 border border-brand-yellow dark:border-brand-yellow rounded-lg">
+                                <div className="p-4 bg-brand-blue dark:bg-brand-blue/30 border border-brand-blue dark:border-brand-blue rounded-lg">
                                     <div className="flex items-start gap-3">
-                                        <Video className="h-5 w-5 text-brand-yellow flex-shrink-0 mt-0.5" />
+                                        <Video className="h-5 w-5 text-brand-blue flex-shrink-0 mt-0.5" />
                                         <div>
-                                            <p className="font-medium text-brand-yellow dark:text-brand-yellow">
+                                            <p className="font-medium text-brand-blue dark:text-brand-blue">
                                                 Grabación en proceso
                                             </p>
-                                            <p className="text-sm text-brand-yellow dark:text-brand-yellow mt-1">
+                                            <p className="text-sm text-brand-blue dark:text-brand-blue mt-1">
                                                 La grabación estará disponible en un plazo de hasta 24 horas.
                                                 Te notificaremos cuando esté lista.
                                             </p>
@@ -575,7 +575,7 @@ export default async function EventDetailPage({ params }: PageProps) {
                                                             {isLocked ? (
                                                                 <Lock className="h-4 w-4 text-muted-foreground" />
                                                             ) : isInteractiveTool ? (
-                                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-brand-yellow">
+                                                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-brand-blue">
                                                                     <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" />
                                                                 </svg>
                                                             ) : (
@@ -649,7 +649,7 @@ export default async function EventDetailPage({ params }: PageProps) {
                                         Este evento ya finalizó
                                     </p>
                                     {canSeeRecording && (
-                                        <p className="text-sm text-brand-brown">
+                                        <p className="text-sm text-brand-blue-hover">
                                             ¡Grabación disponible arriba!
                                         </p>
                                     )}
@@ -673,7 +673,7 @@ export default async function EventDetailPage({ params }: PageProps) {
                                 </div>
                             ) : hasEventAccess ? (
                                 <>
-                                    <div className="rounded-lg border border-brand-brown bg-brand-brown p-3 text-center text-sm text-brand-brown">
+                                    <div className="rounded-lg border border-brand-blue-hover bg-brand-blue-hover p-3 text-center text-sm text-brand-blue-hover">
                                         Ya tienes acceso activo a este contenido.
                                     </div>
                                     <Button asChild className="w-full">
@@ -757,8 +757,8 @@ export default async function EventDetailPage({ params }: PageProps) {
                         <CardContent className="space-y-4">
                             {/* Dual pricing display */}
                             {eventSpecialization && event.price > 0 && (
-                                <div className="p-2 bg-brand-brown/10 rounded-lg border border-brand-brown/20 text-center">
-                                    <p className="text-sm font-medium text-brand-brown">
+                                <div className="p-2 bg-brand-blue-hover/10 rounded-lg border border-brand-blue-hover/20 text-center">
+                                    <p className="text-sm font-medium text-brand-blue-hover">
                                         Incluido en {eventSpecialization.name} Nivel 2+
                                     </p>
                                 </div>
@@ -771,8 +771,8 @@ export default async function EventDetailPage({ params }: PageProps) {
                                 </div>
                             )}
                             {!eventSpecialization && normalizeMemberAccessType(event.member_access_type) === 'discounted' && (
-                                <div className="p-2 bg-brand-yellow dark:bg-brand-yellow rounded-lg border border-brand-yellow dark:border-brand-yellow text-center">
-                                    <p className="text-sm font-medium text-brand-yellow dark:text-brand-yellow">
+                                <div className="p-2 bg-brand-blue dark:bg-brand-blue rounded-lg border border-brand-blue dark:border-brand-blue text-center">
+                                    <p className="text-sm font-medium text-brand-blue dark:text-brand-blue">
                                         ✨ Miembros: ${event.member_price?.toFixed(2)} MXN
                                     </p>
                                 </div>

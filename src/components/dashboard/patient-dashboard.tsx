@@ -96,7 +96,7 @@ export function PatientDashboard({
     return (
         <div className="space-y-8 dashboard-stagger">
             {/* Hero Banner */}
-            <div className="rounded-2xl border bg-gradient-to-br from-card via-brand-brown/20 to-green-50/30 dark:from-card dark:via-brand-brown/10 dark:to-green-950/10 p-6 sm:p-8">
+            <div className="rounded-2xl border bg-gradient-to-br from-card via-brand-blue-hover/20 to-green-50/30 dark:from-card dark:via-brand-blue-hover/10 dark:to-green-950/10 p-6 sm:p-8">
                 <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6">
                     <ProgressRing
                         percentage={wellnessPercentage}
@@ -167,25 +167,25 @@ export function PatientDashboard({
                     </CardHeader>
                     <CardContent>
                         {nextAppointment ? (
-                            <div className="bg-gradient-to-br from-brand-yellow to-brand-yellow/50 dark:from-brand-yellow/30 dark:to-brand-yellow/20 rounded-xl p-5">
+                            <div className="bg-gradient-to-br from-brand-blue to-brand-blue/50 dark:from-brand-blue/30 dark:to-brand-blue/20 rounded-xl p-5">
                                 <div className="flex items-start gap-4">
-                                    <div className="p-3 bg-brand-yellow dark:bg-brand-yellow/50 rounded-xl">
-                                        <Calendar className="h-6 w-6 text-brand-yellow dark:text-brand-yellow" />
+                                    <div className="p-3 bg-brand-blue dark:bg-brand-blue/50 rounded-xl">
+                                        <Calendar className="h-6 w-6 text-brand-blue dark:text-brand-blue" />
                                     </div>
                                     <div className="flex-1 min-w-0">
-                                        <p className="font-semibold text-brand-yellow dark:text-brand-yellow">
+                                        <p className="font-semibold text-brand-blue dark:text-brand-blue">
                                             {new Date(nextAppointment.start_time).toLocaleDateString('es-MX', {
                                                 weekday: 'long', day: 'numeric', month: 'long'
                                             })}
                                         </p>
-                                        <p className="mt-0.5 break-words whitespace-normal text-sm text-brand-yellow dark:text-brand-yellow">
+                                        <p className="mt-0.5 break-words whitespace-normal text-sm text-brand-blue dark:text-brand-blue">
                                             {new Date(nextAppointment.start_time).toLocaleTimeString('es-MX', {
                                                 hour: '2-digit', minute: '2-digit'
                                             })}
                                             {' · '}con {nextAppointment.psychologist_name}
                                         </p>
                                         <div className="mt-3">
-                                            <Button asChild size="sm" className="min-h-11 bg-brand-yellow hover:bg-brand-yellow sm:min-h-8">
+                                            <Button asChild size="sm" className="min-h-11 bg-brand-blue hover:bg-brand-blue sm:min-h-8">
                                                 <Link href="/dashboard/calendar">
                                                     Ver Detalles
                                                 </Link>
@@ -219,7 +219,7 @@ export function PatientDashboard({
                         </div>
                         {totalTasks > 0 && (
                             <div className="text-right">
-                                <span className="text-2xl font-bold text-brand-brown">
+                                <span className="text-2xl font-bold text-brand-blue-hover">
                                     {totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0}%
                                 </span>
                             </div>

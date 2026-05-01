@@ -64,7 +64,7 @@ export function BrandBriefModal({ existingBrief, onClose }: BrandBriefModalProps
             <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
                 <Card className="w-full max-w-md text-center py-12">
                     <CardContent className="space-y-4">
-                        <CheckCircle2 className="w-16 h-16 text-brand-brown mx-auto" />
+                        <CheckCircle2 className="w-16 h-16 text-brand-blue-hover mx-auto" />
                         <h2 className="text-2xl font-bold">¡Brief Enviado!</h2>
                         <p className="text-muted-foreground">
                             Tu equipo de marketing revisará tu brief y comenzará a trabajar.
@@ -80,7 +80,7 @@ export function BrandBriefModal({ existingBrief, onClose }: BrandBriefModalProps
             <Card className="w-full max-w-2xl my-8">
                 <CardHeader className="relative">
                     <div className="flex items-center gap-2 mb-1">
-                        <div className="p-2 rounded-lg bg-brand-yellow dark:bg-brand-yellow/50 text-brand-yellow dark:text-brand-yellow">
+                        <div className="p-2 rounded-lg bg-brand-blue dark:bg-brand-blue/50 text-brand-blue dark:text-brand-blue">
                             <FileEdit className="w-5 h-5" />
                         </div>
                         <CardTitle className="text-xl">

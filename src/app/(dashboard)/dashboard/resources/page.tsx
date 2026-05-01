@@ -63,11 +63,11 @@ function ResourceTypeIcon({ type }: { type: string }) {
 
 const typeColors: Record<string, string> = {
     pdf: 'bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-300',
-    video: 'bg-brand-brown text-brand-brown dark:bg-brand-brown dark:text-brand-brown',
-    audio: 'bg-brand-yellow text-brand-yellow dark:bg-brand-yellow dark:text-brand-yellow',
+    video: 'bg-brand-blue-hover text-brand-blue-hover dark:bg-brand-blue-hover dark:text-brand-blue-hover',
+    audio: 'bg-brand-blue text-brand-blue dark:bg-brand-blue dark:text-brand-blue',
     link: 'bg-green-100 text-green-700 dark:bg-green-950 dark:text-green-300',
-    document: 'bg-brand-yellow text-brand-yellow dark:bg-brand-yellow dark:text-brand-yellow',
-    tool: 'bg-brand-yellow text-brand-yellow dark:bg-brand-yellow dark:text-brand-yellow'
+    document: 'bg-brand-blue text-brand-blue dark:bg-brand-blue dark:text-brand-blue',
+    tool: 'bg-brand-blue text-brand-blue dark:bg-brand-blue dark:text-brand-blue'
 }
 
 const typeLabels: Record<string, string> = {
@@ -101,7 +101,7 @@ function getExpirationBadge(expiresAt: string | null) {
         return <Badge variant="destructive" className="text-[10px]">Expira en {daysLeft}d</Badge>
     }
     if (daysLeft <= 30) {
-        return <Badge variant={'warning' as any} className="text-[10px] bg-brand-yellow/90 text-white">Expira en {daysLeft}d</Badge>
+        return <Badge variant={'warning' as any} className="text-[10px] bg-brand-blue/90 text-white">Expira en {daysLeft}d</Badge>
     }
     return <Badge variant="outline" className="text-[10px]">Expira en {daysLeft}d</Badge>
 }
@@ -130,7 +130,7 @@ function ResourceCard({
                             <ResourceTypeIcon type={resource.type} />
                         </div>
                         {(resource as any).is_featured && (
-                            <span className="text-brand-yellow text-lg" title="Destacado">⭐</span>
+                            <span className="text-brand-blue text-lg" title="Destacado">⭐</span>
                         )}
                     </div>
 

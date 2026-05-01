@@ -294,27 +294,27 @@ export default async function SpecializationPage(props: Props) {
     <div className="relative flex w-full flex-1 flex-col items-center overflow-x-hidden bg-background">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: structuredData }} />
 
-      <section className="relative w-full overflow-hidden bg-gradient-to-b from-[#050505] via-[#0a0a0a] to-background">
+            <section className="relative w-full overflow-hidden bg-gradient-to-b from-background via-brand-blue-soft/60 to-background">
         <div className="sapihum-grid-bg absolute inset-0 opacity-10" />
-        <div className="pointer-events-none absolute left-1/2 top-0 h-[440px] w-[440px] -translate-x-1/2 rounded-full bg-brand-yellow/10 blur-[130px]" />
+        <div className="pointer-events-none absolute left-1/2 top-0 h-[440px] w-[440px] -translate-x-1/2 rounded-full bg-brand-blue/10 blur-[130px]" />
 
         <div className="relative mx-auto grid w-full max-w-7xl gap-12 px-4 py-20 sm:px-6 lg:grid-cols-[minmax(0,1fr)_360px] lg:px-8 lg:py-28">
           <div className="max-w-4xl space-y-8">
             <div className="flex flex-wrap items-center gap-3">
-              <Badge variant="outline" className="gap-2 border-brand-yellow/30 bg-brand-yellow/10 text-brand-yellow">
+              <Badge variant="outline" className="gap-2 border-brand-blue/30 bg-brand-blue/10 text-brand-blue">
                 <span className="text-base leading-none">{spec.icon}</span>
                 Especialidad activa
               </Badge>
-              <Badge variant="outline" className="border-white/10 bg-white/5 text-neutral-200">
+              <Badge variant="outline" className="border-border/10 bg-white/5 text-neutral-200">
                 Eventos, cursos y formaciones
               </Badge>
-              <Badge variant="outline" className="border-white/10 bg-white/5 text-neutral-200">
+              <Badge variant="outline" className="border-border/10 bg-white/5 text-neutral-200">
                 Membresia + Nivel 2
               </Badge>
             </div>
 
             <div className="space-y-5">
-              <h1 className="text-4xl font-black leading-[1.05] tracking-tight text-white md:text-5xl lg:text-6xl">
+              <h1 className="text-4xl font-black leading-[1.05] tracking-tight text-foreground md:text-5xl lg:text-6xl">
                 {spec.name}: eventos, cursos y formacion especializada
               </h1>
               <p className="max-w-3xl text-lg leading-relaxed text-neutral-300 md:text-xl">
@@ -326,7 +326,7 @@ export default async function SpecializationPage(props: Props) {
               {seoProfile.terms.map((term) => (
                 <span
                   key={term}
-                  className="inline-flex rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-xs font-medium text-neutral-200"
+                  className="inline-flex rounded-full border border-border/10 bg-white/[0.04] px-3 py-1.5 text-xs font-medium text-neutral-200"
                 >
                   {term}
                 </span>
@@ -366,50 +366,50 @@ export default async function SpecializationPage(props: Props) {
           </div>
 
           <aside className="lg:justify-self-end">
-            <div className="grid gap-4 rounded-[28px] border border-white/10 bg-white/[0.04] p-6 text-white shadow-2xl shadow-black/30 backdrop-blur-sm">
+            <div className="grid gap-4 rounded-[28px] border border-border/10 bg-white/[0.04] p-6 text-foreground shadow-2xl shadow-black/30 backdrop-blur-sm">
               {hasSpecificCatalogContent ? (
                 <>
-                  <div className="rounded-2xl border border-white/10 bg-black/30 p-4">
+                  <div className="rounded-2xl border border-border/10 bg-background/30 p-4">
                     <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-neutral-500">Eventos y cursos</p>
                     {hasSpecificEvents ? (
                       <>
-                        <p className="mt-2 text-3xl font-black text-white">{specificEventCount}</p>
+                        <p className="mt-2 text-3xl font-black text-foreground">{specificEventCount}</p>
                         <p className="mt-1 text-sm text-neutral-400">especificos de la especialidad</p>
                       </>
                     ) : (
                       <>
-                        <p className="mt-2 text-lg font-bold text-white">Próximamente</p>
+                        <p className="mt-2 text-lg font-bold text-foreground">Próximamente</p>
                         <p className="mt-1 text-sm text-neutral-400">Estamos preparando nuevos eventos para esta especialidad.</p>
                       </>
                     )}
                   </div>
 
-                  <div className="rounded-2xl border border-white/10 bg-black/30 p-4">
+                  <div className="rounded-2xl border border-border/10 bg-background/30 p-4">
                     <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-neutral-500">Formaciones</p>
                     {hasSpecificFormations ? (
                       <>
-                        <p className="mt-2 text-3xl font-black text-white">{specificFormationCount}</p>
+                        <p className="mt-2 text-3xl font-black text-foreground">{specificFormationCount}</p>
                         <p className="mt-1 text-sm text-neutral-400">rutas activas de esta rama</p>
                       </>
                     ) : (
                       <>
-                        <p className="mt-2 text-lg font-bold text-white">En preparación</p>
+                        <p className="mt-2 text-lg font-bold text-foreground">En preparación</p>
                         <p className="mt-1 text-sm text-neutral-400">Próximamente publicaremos formaciones diseñadas para esta especialidad.</p>
                       </>
                     )}
                   </div>
 
-                  <div className="rounded-2xl border border-white/10 bg-black/30 p-4">
+                  <div className="rounded-2xl border border-border/10 bg-background/30 p-4">
                     <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-neutral-500">Membresia</p>
-                    <p className="mt-2 text-lg font-bold text-white">
+                    <p className="mt-2 text-lg font-bold text-foreground">
                       {level1Plan ? `Desde ${formatCurrency(level1Plan.monthly.amount)}/mes` : 'Acceso general'}
                     </p>
                     <p className="mt-1 text-sm text-neutral-400">Para pertenecer y entrar al ecosistema.</p>
                   </div>
 
-                  <div className="rounded-2xl border border-brand-yellow/20 bg-brand-yellow/10 p-4">
-                    <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-brand-yellow">{level2OfferName}</p>
-                    <p className="mt-2 text-lg font-bold text-white">
+                  <div className="rounded-2xl border border-brand-blue/20 bg-brand-blue/10 p-4">
+                    <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-brand-blue">{level2OfferName}</p>
+                    <p className="mt-2 text-lg font-bold text-foreground">
                       {level2Plan ? `Desde ${formatCurrency(level2Plan.monthly.amount)}/mes` : 'Próximamente'}
                     </p>
                     <p className="mt-1 text-sm text-neutral-300">
@@ -425,13 +425,13 @@ export default async function SpecializationPage(props: Props) {
                 </>
               ) : (
                 <>
-                  <div className="rounded-2xl border border-white/10 bg-black/30 p-4">
+                  <div className="rounded-2xl border border-border/10 bg-background/30 p-4">
                     <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-neutral-500">Temas que cubre</p>
                     <div className="mt-3 flex flex-wrap gap-2">
                       {seoProfile.terms.map((term) => (
                         <span
                           key={term}
-                          className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-neutral-200"
+                          className="rounded-full border border-border/10 bg-white/5 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-neutral-200"
                         >
                           {term}
                         </span>
@@ -439,25 +439,25 @@ export default async function SpecializationPage(props: Props) {
                     </div>
                   </div>
 
-                  <div className="rounded-2xl border border-white/10 bg-black/30 p-4">
+                  <div className="rounded-2xl border border-border/10 bg-background/30 p-4">
                     <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-neutral-500">Membresía</p>
-                    <p className="mt-2 text-lg font-bold text-white">
+                    <p className="mt-2 text-lg font-bold text-foreground">
                       {level1Plan ? `Desde ${formatCurrency(level1Plan.monthly.amount)}/mes` : 'Acceso general'}
                     </p>
                     <p className="mt-1 text-sm text-neutral-400">Accede a la comunidad y a todos los contenidos disponibles.</p>
                   </div>
 
-                  <div className="rounded-2xl border border-white/10 bg-black/30 p-4">
+                  <div className="rounded-2xl border border-border/10 bg-background/30 p-4">
                     <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-neutral-500">Contenido disponible</p>
-                    <p className="mt-2 text-lg font-bold text-white">
+                    <p className="mt-2 text-lg font-bold text-foreground">
                       {transversalContentSummary || 'Catálogo general activo'}
                     </p>
                     <p className="mt-1 text-sm text-neutral-400">Explora eventos y formaciones relevantes para tu desarrollo profesional.</p>
                   </div>
 
-                  <div className="rounded-2xl border border-brand-yellow/20 bg-brand-yellow/10 p-4">
-                    <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-brand-yellow">{level2OfferName}</p>
-                    <p className="mt-2 text-lg font-bold text-white">
+                  <div className="rounded-2xl border border-brand-blue/20 bg-brand-blue/10 p-4">
+                    <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-brand-blue">{level2OfferName}</p>
+                    <p className="mt-2 text-lg font-bold text-foreground">
                       {level2Plan ? `Desde ${formatCurrency(level2Plan.monthly.amount)}/mes` : 'Próximamente'}
                     </p>
                     <p className="mt-1 text-sm text-neutral-300">
@@ -475,7 +475,7 @@ export default async function SpecializationPage(props: Props) {
         <div className="mx-auto grid w-full max-w-7xl gap-10 px-4 sm:px-6 lg:grid-cols-[minmax(0,1fr)_380px] lg:px-8">
           <div className="space-y-6">
             <div>
-              <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-brand-yellow">Áreas de enfoque</p>
+              <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-brand-blue">Áreas de enfoque</p>
               <h2 className="mt-3 text-3xl font-bold tracking-tight text-foreground md:text-4xl">
                 Temas clave en {spec.name}
               </h2>
@@ -490,7 +490,7 @@ export default async function SpecializationPage(props: Props) {
               {seoProfile.terms.map((item) => (
                 <div key={item} className="rounded-2xl border bg-card p-5 shadow-sm shadow-black/5">
                   <div className="flex items-start gap-3">
-                    <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand-yellow/10 text-brand-yellow">
+                    <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand-blue/10 text-brand-blue">
                       <CheckCircle2 className="h-4 w-4" />
                     </div>
                     <p className="text-sm leading-relaxed text-muted-foreground">{item}</p>
@@ -503,7 +503,7 @@ export default async function SpecializationPage(props: Props) {
           <div className="grid gap-4">
             <div className="rounded-[28px] border bg-card p-6 shadow-sm shadow-black/5">
               <div className="flex items-center gap-3">
-                <Users className="h-5 w-5 text-brand-yellow" />
+                <Users className="h-5 w-5 text-brand-blue" />
                 <h3 className="text-lg font-bold">Ideal para</h3>
               </div>
               <div className="mt-5 space-y-3">
@@ -517,7 +517,7 @@ export default async function SpecializationPage(props: Props) {
 
             <div className="rounded-[28px] border bg-card p-6 shadow-sm shadow-black/5">
               <div className="flex items-center gap-3">
-                <Layers3 className="h-5 w-5 text-brand-yellow" />
+                <Layers3 className="h-5 w-5 text-brand-blue" />
                 <h3 className="text-lg font-bold">Lo que encontrarás aquí</h3>
               </div>
               <div className="mt-5 space-y-3">
@@ -540,7 +540,7 @@ export default async function SpecializationPage(props: Props) {
         <section className="w-full px-4 py-12 sm:px-6 lg:px-8">
           <div className="mx-auto w-full max-w-7xl">
             <div className="mb-8 max-w-3xl">
-              <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-brand-yellow">Agenda activa</p>
+              <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-brand-blue">Agenda activa</p>
               <h2 className="mt-3 text-3xl font-bold tracking-tight text-foreground md:text-4xl">
                 La ruta activa conectada con {spec.name}
               </h2>
@@ -564,7 +564,7 @@ export default async function SpecializationPage(props: Props) {
       <section className="w-full border-y bg-muted/30 py-16 md:py-20">
         <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mb-8 max-w-3xl">
-            <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-brand-yellow">Eventos y cursos</p>
+            <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-brand-blue">Eventos y cursos</p>
             <h2 className="mt-3 text-3xl font-bold tracking-tight text-foreground md:text-4xl">
               {hasSpecificEvents ? `Próximos eventos de ${spec.name}` : `Eventos recomendados para ${spec.name}`}
             </h2>
@@ -583,7 +583,7 @@ export default async function SpecializationPage(props: Props) {
             </div>
           ) : (
             <div className="rounded-[28px] border bg-card px-6 py-16 text-center shadow-sm shadow-black/5">
-              <CalendarDays className="mx-auto mb-4 h-10 w-10 text-brand-yellow" />
+              <CalendarDays className="mx-auto mb-4 h-10 w-10 text-brand-blue" />
               <h3 className="text-2xl font-bold text-foreground">
                 {hasSpecificCatalogContent ? 'Nuevos eventos próximamente' : 'Próximamente'}
               </h3>
@@ -600,7 +600,7 @@ export default async function SpecializationPage(props: Props) {
       <section className="w-full py-16 md:py-20">
         <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mb-8 max-w-3xl">
-            <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-brand-yellow">Formaciones</p>
+            <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-brand-blue">Formaciones</p>
             <h2 className="mt-3 text-3xl font-bold tracking-tight text-foreground md:text-4xl">
               {hasSpecificFormations ? `Formaciones de ${spec.name}` : `Formaciones recomendadas para ${spec.name}`}
             </h2>
@@ -627,13 +627,13 @@ export default async function SpecializationPage(props: Props) {
                       <Badge
                         variant="outline"
                         className={isSpecific
-                          ? 'border-brand-yellow/30 bg-brand-yellow/10 text-brand-yellow'
-                          : 'border-white/10 bg-muted text-muted-foreground'}
+                          ? 'border-brand-blue/30 bg-brand-blue/10 text-brand-blue'
+                          : 'border-border/10 bg-muted text-muted-foreground'}
                       >
                         {isSpecific ? spec.name : 'General'}
                       </Badge>
                       {totalHours && (
-                        <Badge variant="outline" className="border-white/10 bg-muted text-muted-foreground">
+                        <Badge variant="outline" className="border-border/10 bg-muted text-muted-foreground">
                           {totalHours}
                         </Badge>
                       )}
@@ -677,7 +677,7 @@ export default async function SpecializationPage(props: Props) {
             </div>
           ) : (
             <div className="rounded-[28px] border bg-card px-6 py-16 text-center shadow-sm shadow-black/5">
-              <GraduationCap className="mx-auto mb-4 h-10 w-10 text-brand-yellow" />
+              <GraduationCap className="mx-auto mb-4 h-10 w-10 text-brand-blue" />
               <h3 className="text-2xl font-bold text-foreground">
                 {hasSpecificCatalogContent ? 'Nuevas formaciones próximamente' : 'Próximamente'}
               </h3>
@@ -691,27 +691,27 @@ export default async function SpecializationPage(props: Props) {
         </div>
       </section>
 
-      <section className="w-full border-y bg-[#050505] py-16 text-white md:py-20">
+      <section className="w-full border-y bg-background py-16 text-foreground md:py-20">
         <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mb-8 max-w-3xl">
-            <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-brand-yellow">Membresía y Nivel 2</p>
+            <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-brand-blue">Membresía y Nivel 2</p>
             <h2 className="mt-3 text-3xl font-bold tracking-tight md:text-4xl">
               Tu ruta de crecimiento en {spec.name}
             </h2>
           </div>
 
           <div className="grid gap-6 lg:grid-cols-2">
-            <article className="rounded-[30px] border border-white/10 bg-white/[0.04] p-7 shadow-2xl shadow-black/20">
-              <Badge variant="outline" className="border-brand-yellow/30 bg-brand-yellow/10 text-brand-yellow">
+            <article className="rounded-[30px] border border-border/10 bg-white/[0.04] p-7 shadow-2xl shadow-black/20">
+              <Badge variant="outline" className="border-brand-blue/30 bg-brand-blue/10 text-brand-blue">
                 Nivel 1
               </Badge>
               <h3 className="mt-5 text-3xl font-bold">{PRICING_PLAN_COPY.level1.title}</h3>
               <p className="mt-3 text-base leading-relaxed text-neutral-300">
                 Accede a la comunidad, participa en eventos y descubre todas las especialidades disponibles.
               </p>
-              <div className="mt-6 rounded-2xl border border-white/10 bg-black/25 p-5">
+              <div className="mt-6 rounded-2xl border border-border/10 bg-background/25 p-5">
                 <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-neutral-500">Desde</p>
-                <p className="mt-2 text-3xl font-black text-white">
+                <p className="mt-2 text-3xl font-black text-foreground">
                   {level1Plan ? `${formatCurrency(level1Plan.monthly.amount)}/mes` : 'Consulta disponibilidad'}
                 </p>
               </div>
@@ -730,25 +730,25 @@ export default async function SpecializationPage(props: Props) {
               </div>
             </article>
 
-            <article className="rounded-[30px] border border-brand-yellow/20 bg-brand-yellow/10 p-7 shadow-2xl shadow-black/20">
-              <Badge variant="outline" className="border-brand-yellow/30 bg-black/20 text-brand-yellow">
+            <article className="rounded-[30px] border border-brand-blue/20 bg-brand-blue/10 p-7 shadow-2xl shadow-black/20">
+              <Badge variant="outline" className="border-brand-blue/30 bg-background/20 text-brand-blue">
                 Nivel 2
               </Badge>
-              <h3 className="mt-5 text-3xl font-bold text-white">{level2OfferName}</h3>
+              <h3 className="mt-5 text-3xl font-bold text-foreground">{level2OfferName}</h3>
               <p className="mt-3 text-base leading-relaxed text-neutral-200">
                 Formación avanzada con mayor profundidad, contenido exclusivo y una ruta diseñada para quienes
                 quieren especializarse en {spec.name}.
               </p>
-              <div className="mt-6 rounded-2xl border border-brand-yellow/20 bg-black/20 p-5">
-                <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-brand-yellow">Inversión</p>
-                <p className="mt-2 text-3xl font-black text-white">
+              <div className="mt-6 rounded-2xl border border-brand-blue/20 bg-background/20 p-5">
+                <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-brand-blue">Inversión</p>
+                <p className="mt-2 text-3xl font-black text-foreground">
                   {level2Plan ? `${formatCurrency(level2Plan.monthly.amount)}/mes` : 'Próximamente'}
                 </p>
               </div>
               <div className="mt-6 flex flex-col gap-3 sm:flex-row">
                 {level2Plan ? (
                   <Link href={level2Href}>
-                    <Button className="gap-2 bg-black text-white hover:bg-black/90">
+                    <Button className="gap-2 bg-background text-foreground hover:bg-background/90">
                       Activar {level2OfferName}
                       <ArrowRight className="h-4 w-4" />
                     </Button>
@@ -759,11 +759,11 @@ export default async function SpecializationPage(props: Props) {
                     specializationName={level2OfferName}
                     source="landing"
                     buttonLabel={`Quiero ${level2OfferName}`}
-                    className="bg-black text-white hover:bg-black/90"
+                    className="bg-background text-foreground hover:bg-background/90"
                   />
                 )}
                 <Link href="/precios">
-                  <Button variant="outline" className="gap-2 border-white/15 bg-black/10 text-white hover:bg-black/20">
+                  <Button variant="outline" className="gap-2 border-border/15 bg-background/10 text-foreground hover:bg-background/20">
                     Comparar planes
                   </Button>
                 </Link>
@@ -773,7 +773,7 @@ export default async function SpecializationPage(props: Props) {
         </div>
       </section>
 
-      <section className="relative w-full overflow-hidden bg-[#0a0a0a] py-16 text-white md:py-20">
+      <section className="relative w-full overflow-hidden bg-background py-16 text-foreground md:py-20">
         <div className="sapihum-grid-bg absolute inset-0 opacity-10" />
         <div className="relative mx-auto w-full max-w-5xl px-4 text-center sm:px-6 lg:px-8">
           <h2 className="text-3xl font-bold tracking-tight md:text-5xl">
@@ -809,18 +809,18 @@ export default async function SpecializationPage(props: Props) {
           </div>
 
           <div className="mt-10 grid gap-4 text-left md:grid-cols-3">
-            <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-5">
-              <Users className="mb-3 h-5 w-5 text-brand-yellow" />
+            <div className="rounded-2xl border border-border/10 bg-white/[0.04] p-5">
+              <Users className="mb-3 h-5 w-5 text-brand-blue" />
               <h3 className="font-bold">Membresia</h3>
               <p className="mt-2 text-sm leading-relaxed text-neutral-400">Accede a la comunidad y a todos los recursos generales disponibles.</p>
             </div>
-            <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-5">
-              <CalendarDays className="mb-3 h-5 w-5 text-brand-yellow" />
+            <div className="rounded-2xl border border-border/10 bg-white/[0.04] p-5">
+              <CalendarDays className="mb-3 h-5 w-5 text-brand-blue" />
               <h3 className="font-bold">Eventos y cursos</h3>
               <p className="mt-2 text-sm leading-relaxed text-neutral-400">Talleres, cursos y eventos en vivo con profesionales de primer nivel.</p>
             </div>
-            <div className="rounded-2xl border border-white/10 bg-white/[0.04] p-5">
-              <BookOpenCheck className="mb-3 h-5 w-5 text-brand-yellow" />
+            <div className="rounded-2xl border border-border/10 bg-white/[0.04] p-5">
+              <BookOpenCheck className="mb-3 h-5 w-5 text-brand-blue" />
               <h3 className="font-bold">{level2OfferName}</h3>
               <p className="mt-2 text-sm leading-relaxed text-neutral-400">Formación avanzada para quienes buscan una ruta completa de especialización.</p>
             </div>

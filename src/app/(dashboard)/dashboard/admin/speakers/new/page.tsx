@@ -43,7 +43,7 @@ export default function NewSpeakerPage() {
                         Agregar Nuevo Ponente
                     </h1>
                     <p className="text-sm text-muted-foreground flex items-center gap-1 mt-1">
-                        <Shield className="h-3 w-3 text-brand-yellow" />
+                        <Shield className="h-3 w-3 text-brand-blue" />
                         Acción exclusiva de administradores
                     </p>
                 </div>

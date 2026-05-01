@@ -33,7 +33,7 @@ export function MobileMarketingMenu({ navItems }: MobileMarketingMenuProps) {
         <>
             <button
                 onClick={() => setMobileOpen((open) => !open)}
-                className="flex flex-col gap-1.5 rounded-md p-2 transition-colors hover:bg-accent lg:hidden"
+                className="flex flex-col gap-1.5 rounded-md p-2 transition-colors hover:bg-brand-blue-soft lg:hidden"
                 aria-label="Abrir menú"
                 aria-expanded={mobileOpen}
             >
@@ -59,7 +59,7 @@ export function MobileMarketingMenu({ navItems }: MobileMarketingMenuProps) {
                                         data-analytics-label={child.label}
                                         data-analytics-surface="marketing_nav_mobile"
                                         data-analytics-funnel="landing"
-                                        className="block rounded-lg px-3 py-2 text-sm font-semibold text-foreground transition-colors hover:bg-accent"
+                                        className="block rounded-lg px-3 py-2 text-sm font-semibold text-foreground transition-colors hover:bg-brand-blue-soft hover:text-brand-blue-hover"
                                     >
                                         {child.label}
                                     </Link>
@@ -74,7 +74,7 @@ export function MobileMarketingMenu({ navItems }: MobileMarketingMenuProps) {
                                 data-analytics-label={item.label}
                                 data-analytics-surface="marketing_nav_mobile"
                                 data-analytics-funnel="landing"
-                                className="block rounded-lg px-3 py-2 text-sm font-semibold text-foreground transition-colors hover:bg-accent"
+                                className="block rounded-lg px-3 py-2 text-sm font-semibold text-foreground transition-colors hover:bg-brand-blue-soft hover:text-brand-blue-hover"
                             >
                                 {item.label}
                             </Link>

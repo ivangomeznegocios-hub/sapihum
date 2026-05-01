@@ -22,7 +22,7 @@ export function ThankYouContent() {
     return (
         <div className="relative flex w-full flex-1 flex-col items-center justify-center overflow-hidden bg-background">
             <div className="absolute inset-0 z-0">
-                <div className="absolute left-1/2 top-1/2 h-[800px] w-[800px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-brand-yellow/5 blur-[100px] dark:bg-brand-yellow/10" />
+                <div className="absolute left-1/2 top-1/2 h-[800px] w-[800px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-brand-blue/5 blur-[100px] dark:bg-brand-blue/10" />
             </div>
 
             <div className="z-10 w-full max-w-xl px-4 py-16 text-center">
@@ -44,14 +44,14 @@ export function ThankYouContent() {
                     <h3 className="mb-4 font-semibold text-foreground">En los proximos minutos:</h3>
                     <ul className="space-y-4">
                         <li className="flex items-start gap-3">
-                            <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-brand-yellow text-sm font-bold text-brand-yellow">1</span>
+                            <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-brand-blue text-sm font-bold text-brand-blue">1</span>
                             <div>
                                 <p className="font-medium">Recibiras un email con tus accesos</p>
                                 <p className="text-sm text-muted-foreground">Revisa tu bandeja de entrada o spam.</p>
                             </div>
                         </li>
                         <li className="flex items-start gap-3">
-                            <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-brand-yellow text-sm font-bold text-brand-yellow">2</span>
+                            <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-brand-blue text-sm font-bold text-brand-blue">2</span>
                             <div>
                                 <p className="font-medium">La comunidad te dara la bienvenida</p>
                                 <p className="text-sm text-muted-foreground">Podras configurar tu perfil y empezar tu recorrido dentro de la plataforma.</p>

@@ -15,18 +15,18 @@ function formatEventDate(date: string) {
 
 function getTypeMeta(event: any) {
     if (isPastPublicCatalogEvent(event)) {
-        return { label: 'Finalizado', color: 'bg-neutral-500/90 text-white' }
+        return { label: 'Finalizado', color: 'bg-neutral-500/90 text-foreground' }
     }
     if (event.status === 'live') {
-        return { label: 'En Vivo', color: 'bg-red-500/90 text-white animate-pulse' }
+        return { label: 'En Vivo', color: 'bg-red-500/90 text-foreground animate-pulse' }
     }
     if (event.event_type === 'course') {
-        return { label: 'Formación', color: 'bg-brand-brown/90 text-white' }
+            return { label: 'Formación', color: 'bg-brand-blue-hover/90 text-primary-foreground' }
     }
     if (event.event_type === 'presencial') {
-        return { label: 'Presencial', color: 'bg-brand-yellow/90 text-white' }
+            return { label: 'Presencial', color: 'bg-brand-blue/90 text-primary-foreground' }
     }
-    return { label: 'Evento', color: 'bg-brand-yellow/90 text-white' }
+    return { label: 'Evento', color: 'bg-brand-blue/90 text-primary-foreground' }
 }
 
 const SUBCATEGORY_LABELS: Record<string, string> = {
@@ -67,12 +67,12 @@ export function PublicCatalogCard({
     return (
         <Link
             href={publicPath}
-            className={`group relative flex flex-col overflow-hidden rounded-2xl border border-border/50 bg-card transition-all duration-300 hover:-translate-y-1 hover:border-brand-yellow/30 hover:shadow-xl hover:shadow-brand-yellow/5 ${
+            className={`group relative flex flex-col overflow-hidden rounded-2xl border border-border/50 bg-card transition-all duration-300 hover:-translate-y-1 hover:border-brand-blue/30 hover:shadow-xl hover:shadow-brand-blue/5 ${
                 fixedLayout ? 'h-full' : ''
             }`}
         >
             {/* Image Section */}
-            <div className="relative aspect-[16/9] overflow-hidden bg-gradient-to-br from-neutral-900 via-neutral-800 to-brand-brown/40">
+            <div className="relative aspect-[16/9] overflow-hidden bg-gradient-to-br from-neutral-900 via-neutral-800 to-brand-blue-hover/40">
                 {event.image_url ? (
                     <div
                         role="img"
@@ -83,7 +83,7 @@ export function PublicCatalogCard({
                 ) : (
                     <div className="absolute inset-0 flex items-center justify-center">
                         <div className="h-16 w-16 rounded-2xl bg-white/5 flex items-center justify-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-white/30">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-foreground/30">
                                 <rect width="18" height="18" x="3" y="4" rx="2" ry="2" />
                                 <line x1="16" x2="16" y1="2" y2="6" />
                                 <line x1="8" x2="8" y1="2" y2="6" />
@@ -94,7 +94,7 @@ export function PublicCatalogCard({
                     </div>
                 )}
                 {/* Dark gradient overlay */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-t from-background/60 via-transparent to-transparent" />
 
                 {/* Type Badge */}
                 <div className="absolute left-3 top-3 flex items-center gap-1.5 flex-wrap max-w-[calc(100%-6rem)]">
@@ -102,22 +102,22 @@ export function PublicCatalogCard({
                         {typeMeta.label}
                     </span>
                     {subcategoryLabel && (
-                        <span className="inline-flex items-center rounded-full bg-white/20 backdrop-blur-sm px-2 py-1 text-[10px] font-medium text-white">
+                        <span className="inline-flex items-center rounded-full bg-white/20 backdrop-blur-sm px-2 py-1 text-[10px] font-medium text-foreground">
                             {subcategoryLabel}
                         </span>
                     )}
                     {specialization && (
-                        <span className="inline-flex items-center rounded-full bg-brand-brown/80 backdrop-blur-sm px-2 py-1 text-[10px] font-semibold text-white">
+                            <span className="inline-flex items-center rounded-full bg-brand-blue-hover/80 backdrop-blur-sm px-2 py-1 text-[10px] font-semibold text-primary-foreground">
                             {specialization.name}
                         </span>
                     )}
                     {event.hero_badge && (
-                        <span className="inline-flex items-center rounded-full bg-white/20 backdrop-blur-sm px-2.5 py-1 text-[11px] font-medium text-white">
+                        <span className="inline-flex items-center rounded-full bg-white/20 backdrop-blur-sm px-2.5 py-1 text-[11px] font-medium text-foreground">
                             {event.hero_badge}
                         </span>
                     )}
                     {isMembersOnly && (
-                        <span className="inline-flex items-center gap-1 rounded-full bg-brand-brown/80 backdrop-blur-sm px-2 py-1 text-[10px] font-semibold text-white">
+                            <span className="inline-flex items-center gap-1 rounded-full bg-brand-blue-hover/80 backdrop-blur-sm px-2 py-1 text-[10px] font-semibold text-primary-foreground">
                             🔒 Miembros
                         </span>
                     )}
@@ -126,7 +126,7 @@ export function PublicCatalogCard({
                 {/* Member badge */}
                 {memberFree && (
                     <div className="absolute right-3 top-3">
-                        <span className="inline-flex items-center gap-1 rounded-full bg-brand-brown/90 px-2.5 py-1 text-[11px] font-semibold text-white">
+                            <span className="inline-flex items-center gap-1 rounded-full bg-brand-blue-hover/90 px-2.5 py-1 text-[11px] font-semibold text-primary-foreground">
                             <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z" /></svg>
                             Incluido
                         </span>
@@ -136,7 +136,7 @@ export function PublicCatalogCard({
                 {/* Date badge - bottom left on image */}
                 <div className="absolute bottom-3 left-3 flex items-center gap-2">
                     <div className="flex items-center gap-1.5 rounded-lg bg-white/95 px-2.5 py-1.5 shadow-sm">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-brand-yellow">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-brand-blue">
                             <rect width="18" height="18" x="3" y="4" rx="2" ry="2" /><line x1="16" x2="16" y1="2" y2="6" /><line x1="8" x2="8" y1="2" y2="6" /><line x1="3" x2="21" y1="10" y2="10" />
                         </svg>
                         <span className="text-xs font-semibold text-neutral-800">{dateInfo.day} {dateInfo.month}</span>
@@ -169,7 +169,7 @@ export function PublicCatalogCard({
                                     style={{ backgroundImage: `url("${speakerAvatar}")` }}
                                 />
                             ) : (
-                                <div className="flex h-5 w-5 items-center justify-center rounded-full bg-brand-yellow text-[9px] font-bold text-brand-yellow">
+                                <div className="flex h-5 w-5 items-center justify-center rounded-full bg-brand-blue text-[9px] font-bold text-brand-blue">
                                     {speakerName.charAt(0)}
                                 </div>
                             )}
@@ -180,7 +180,7 @@ export function PublicCatalogCard({
 
                 <div className={fixedLayout ? 'min-h-[5.75rem]' : ''}>
                     {/* Title */}
-                    <h3 className="line-clamp-2 text-lg font-semibold leading-snug text-foreground transition-colors group-hover:text-brand-yellow">
+                    <h3 className="line-clamp-2 text-lg font-semibold leading-snug text-foreground transition-colors group-hover:text-brand-blue">
                         {event.title}
                     </h3>
 
@@ -202,7 +202,7 @@ export function PublicCatalogCard({
                     {!hidePrice && (
                         <div>
                             {isFree ? (
-                                <span className="inline-flex items-center gap-1 text-sm font-bold text-brand-brown">
+                                <span className="inline-flex items-center gap-1 text-sm font-bold text-brand-blue-hover">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
                                     Gratis
                                 </span>
@@ -211,7 +211,7 @@ export function PublicCatalogCard({
                             )}
                         </div>
                     )}
-                    <span className="inline-flex items-center gap-1 rounded-full bg-brand-yellow px-3 py-1.5 text-xs font-semibold text-brand-yellow transition-colors group-hover:bg-brand-yellow group-hover:text-white dark:bg-brand-yellow dark:text-brand-yellow dark:group-hover:bg-brand-yellow dark:group-hover:text-white">
+                    <span className="inline-flex items-center gap-1 rounded-full bg-brand-blue px-3 py-1.5 text-xs font-semibold text-white transition-colors group-hover:bg-brand-blue-hover group-hover:text-white">
                         Ver detalles
                         <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14" /><path d="m12 5 7 7-7 7" /></svg>
                     </span>

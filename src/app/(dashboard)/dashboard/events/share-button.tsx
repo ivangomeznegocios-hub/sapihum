@@ -124,7 +124,7 @@ export function ShareEventButton({
                                 href={shareLinks.facebook}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="flex min-w-[4rem] flex-1 items-center justify-center gap-2 rounded-lg bg-brand-yellow/10 p-2.5 text-sm font-medium text-brand-yellow transition-colors hover:bg-brand-yellow/20"
+                                className="flex min-w-[4rem] flex-1 items-center justify-center gap-2 rounded-lg bg-brand-blue/10 p-2.5 text-sm font-medium text-brand-blue transition-colors hover:bg-brand-blue/20"
                             >
                                 <Facebook className="h-4 w-4" />
                             </a>
@@ -132,7 +132,7 @@ export function ShareEventButton({
                                 href={shareLinks.twitter}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="flex min-w-[4rem] flex-1 items-center justify-center gap-2 rounded-lg bg-brand-yellow/10 p-2.5 text-sm font-medium text-brand-yellow transition-colors hover:bg-brand-yellow/20"
+                                className="flex min-w-[4rem] flex-1 items-center justify-center gap-2 rounded-lg bg-brand-blue/10 p-2.5 text-sm font-medium text-brand-blue transition-colors hover:bg-brand-blue/20"
                             >
                                 X
                             </a>
@@ -140,7 +140,7 @@ export function ShareEventButton({
                                 href={shareLinks.linkedin}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="flex min-w-[4rem] flex-1 items-center justify-center gap-2 rounded-lg bg-brand-yellow/10 p-2.5 text-sm font-medium text-brand-yellow transition-colors hover:bg-brand-yellow/20"
+                                className="flex min-w-[4rem] flex-1 items-center justify-center gap-2 rounded-lg bg-brand-blue/10 p-2.5 text-sm font-medium text-brand-blue transition-colors hover:bg-brand-blue/20"
                             >
                                 <Linkedin className="h-4 w-4" />
                             </a>

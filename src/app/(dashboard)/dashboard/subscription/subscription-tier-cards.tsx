@@ -253,19 +253,19 @@ export function SubscriptionTierCards({
             )}
 
             {level3Visible && level3Plan && (
-                <Card className={currentLevel >= 3 ? 'border-green-500' : 'border-brand-yellow/40'}>
+                <Card className={currentLevel >= 3 ? 'border-green-500' : 'border-brand-blue/40'}>
                     <CardHeader>
                         <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                             <div>
                                 <CardTitle className="flex items-center gap-2">
-                                    <Sparkles className="h-5 w-5 text-brand-yellow" />
+                                    <Sparkles className="h-5 w-5 text-brand-blue" />
                                     {PRICING_PLAN_COPY.level3.title}
                                 </CardTitle>
                                 <CardDescription>
                                     {PRICING_PLAN_COPY.level3.description}
                                 </CardDescription>
                             </div>
-                            <Badge className="self-start bg-brand-yellow hover:bg-brand-yellow">Desbloqueado</Badge>
+                            <Badge className="self-start bg-brand-blue hover:bg-brand-blue">Desbloqueado</Badge>
                         </div>
                         <div className="mt-2">
                             <span className="text-3xl font-bold">

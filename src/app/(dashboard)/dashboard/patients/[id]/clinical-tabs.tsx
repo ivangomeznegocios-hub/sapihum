@@ -57,12 +57,12 @@ function getNoteTypeLabel(type: string) {
 
 function getNoteTypeColor(type: string) {
     const colors: Record<string, string> = {
-        session_note: 'bg-brand-yellow text-brand-yellow',
-        assessment: 'bg-brand-brown text-brand-brown',
-        treatment_plan: 'bg-brand-brown text-brand-brown',
-        progress_note: 'bg-brand-yellow text-brand-yellow',
-        intake: 'bg-brand-yellow/20 text-brand-yellow',
-        discharge: 'bg-rose-100 text-brand-brown'
+        session_note: 'bg-brand-blue text-brand-blue',
+        assessment: 'bg-brand-blue-hover text-brand-blue-hover',
+        treatment_plan: 'bg-brand-blue-hover text-brand-blue-hover',
+        progress_note: 'bg-brand-blue text-brand-blue',
+        intake: 'bg-brand-blue/20 text-brand-blue',
+        discharge: 'bg-rose-100 text-brand-blue-hover'
     }
     return colors[type] || 'bg-gray-100 text-gray-800'
 }
@@ -81,11 +81,11 @@ function getDocCategoryLabel(cat: string) {
 
 function getDocCategoryColor(cat: string) {
     const colors: Record<string, string> = {
-        test_result: 'bg-brand-brown text-brand-brown',
-        referral: 'bg-brand-yellow/20 text-brand-yellow',
+        test_result: 'bg-brand-blue-hover text-brand-blue-hover',
+        referral: 'bg-brand-blue/20 text-brand-blue',
         consent: 'surface-alert-success',
         report: 'bg-orange-100 text-orange-800',
-        intake_form: 'bg-brand-yellow text-brand-yellow',
+        intake_form: 'bg-brand-blue text-brand-blue',
         other: 'bg-gray-100 text-gray-800'
     }
     return colors[cat] || 'bg-gray-100 text-gray-800'
@@ -178,8 +178,8 @@ export function ClinicalTabs({ notes, documents, appointments, sessionSummaries,
                         <Card>
                             <CardContent className="pt-6">
                                 <div className="flex items-center gap-3">
-                                    <div className="h-10 w-10 rounded-lg bg-brand-yellow flex items-center justify-center">
-                                        <ClipboardList className="h-5 w-5 text-brand-yellow" />
+                                    <div className="h-10 w-10 rounded-lg bg-brand-blue flex items-center justify-center">
+                                        <ClipboardList className="h-5 w-5 text-brand-blue" />
                                     </div>
                                     <div>
                                         <p className="text-2xl font-bold">{totalSessions}</p>
@@ -191,8 +191,8 @@ export function ClinicalTabs({ notes, documents, appointments, sessionSummaries,
                         <Card>
                             <CardContent className="pt-6">
                                 <div className="flex items-center gap-3">
-                                    <div className="h-10 w-10 rounded-lg bg-brand-brown flex items-center justify-center">
-                                        <FileText className="h-5 w-5 text-brand-brown" />
+                                    <div className="h-10 w-10 rounded-lg bg-brand-blue-hover flex items-center justify-center">
+                                        <FileText className="h-5 w-5 text-brand-blue-hover" />
                                     </div>
                                     <div>
                                         <p className="text-2xl font-bold">{notes.length}</p>
@@ -217,8 +217,8 @@ export function ClinicalTabs({ notes, documents, appointments, sessionSummaries,
                         <Card>
                             <CardContent className="pt-6">
                                 <div className="flex items-center gap-3">
-                                    <div className="h-10 w-10 rounded-lg bg-brand-yellow flex items-center justify-center">
-                                        <Calendar className="h-5 w-5 text-brand-yellow" />
+                                    <div className="h-10 w-10 rounded-lg bg-brand-blue flex items-center justify-center">
+                                        <Calendar className="h-5 w-5 text-brand-blue" />
                                     </div>
                                     <div>
                                         <p className="text-sm font-medium">
@@ -291,8 +291,8 @@ export function ClinicalTabs({ notes, documents, appointments, sessionSummaries,
                                 <div className="space-y-3">
                                     {notes.slice(0, 5).map((note: any) => (
                                         <div key={note.id} className="flex items-start gap-3 text-sm">
-                                            <div className="h-8 w-8 rounded-full bg-brand-yellow flex items-center justify-center flex-shrink-0 mt-0.5">
-                                                <FileText className="h-3.5 w-3.5 text-brand-yellow" />
+                                            <div className="h-8 w-8 rounded-full bg-brand-blue flex items-center justify-center flex-shrink-0 mt-0.5">
+                                                <FileText className="h-3.5 w-3.5 text-brand-blue" />
                                             </div>
                                             <div className="flex-1 min-w-0">
                                                 <p className="font-medium text-sm">
@@ -423,7 +423,7 @@ export function ClinicalTabs({ notes, documents, appointments, sessionSummaries,
                                                 <div className="grid gap-3 text-sm">
                                                     {content.subjective && (
                                                         <div className="flex gap-2">
-                                                            <span className="w-6 h-6 rounded bg-brand-yellow flex items-center justify-center text-xs font-bold text-brand-yellow flex-shrink-0">S</span>
+                                                            <span className="w-6 h-6 rounded bg-brand-blue flex items-center justify-center text-xs font-bold text-brand-blue flex-shrink-0">S</span>
                                                             <p className="whitespace-pre-wrap text-sm">{content.subjective}</p>
                                                         </div>
                                                     )}
@@ -435,13 +435,13 @@ export function ClinicalTabs({ notes, documents, appointments, sessionSummaries,
                                                     )}
                                                     {content.assessment && (
                                                         <div className="flex gap-2">
-                                                            <span className="w-6 h-6 rounded bg-brand-yellow flex items-center justify-center text-xs font-bold text-brand-yellow flex-shrink-0">A</span>
+                                                            <span className="w-6 h-6 rounded bg-brand-blue flex items-center justify-center text-xs font-bold text-brand-blue flex-shrink-0">A</span>
                                                             <p className="whitespace-pre-wrap text-sm">{content.assessment}</p>
                                                         </div>
                                                     )}
                                                     {content.plan && (
                                                         <div className="flex gap-2">
-                                                            <span className="w-6 h-6 rounded bg-brand-brown flex items-center justify-center text-xs font-bold text-brand-brown flex-shrink-0">P</span>
+                                                            <span className="w-6 h-6 rounded bg-brand-blue-hover flex items-center justify-center text-xs font-bold text-brand-blue-hover flex-shrink-0">P</span>
                                                             <p className="whitespace-pre-wrap text-sm">{content.plan}</p>
                                                         </div>
                                                     )}
@@ -548,7 +548,7 @@ export function ClinicalTabs({ notes, documents, appointments, sessionSummaries,
                                     pending: 'bg-yellow-100 text-yellow-800',
                                     confirmed: 'surface-alert-success',
                                     cancelled: 'surface-alert-error',
-                                    scheduled: 'bg-brand-yellow text-brand-yellow',
+                                    scheduled: 'bg-brand-blue text-brand-blue',
                                     completed: 'bg-gray-100 text-gray-800'
                                 }
 
@@ -573,12 +573,12 @@ export function ClinicalTabs({ notes, documents, appointments, sessionSummaries,
 
                                             {/* Session Summary */}
                                             {linkedSummary && (
-                                                <div className="p-3 rounded-lg bg-brand-yellow border border-brand-yellow mb-3">
+                                                <div className="p-3 rounded-lg bg-brand-blue border border-brand-blue mb-3">
                                                     <div className="flex items-center gap-2 mb-2">
-                                                        <Star className="h-3.5 w-3.5 text-brand-yellow" />
-                                                        <span className="text-xs font-semibold text-brand-yellow">Resumen de Sesión</span>
+                                                        <Star className="h-3.5 w-3.5 text-brand-blue" />
+                                                        <span className="text-xs font-semibold text-brand-blue">Resumen de Sesión</span>
                                                         {linkedSummary.mood_rating && (
-                                                            <span className="text-[10px] bg-brand-yellow text-brand-yellow px-1.5 py-0.5 rounded">
+                                                            <span className="text-[10px] bg-brand-blue text-brand-blue px-1.5 py-0.5 rounded">
                                                                 Ánimo: {linkedSummary.mood_rating}/10
                                                             </span>
                                                         )}
@@ -592,7 +592,7 @@ export function ClinicalTabs({ notes, documents, appointments, sessionSummaries,
                                                     {linkedSummary.key_topics?.length > 0 && (
                                                         <div className="flex flex-wrap gap-1 mt-2">
                                                             {linkedSummary.key_topics.map((topic: string) => (
-                                                                <span key={topic} className="text-[10px] px-1.5 py-0.5 rounded bg-brand-yellow text-brand-yellow">
+                                                                <span key={topic} className="text-[10px] px-1.5 py-0.5 rounded bg-brand-blue text-brand-blue">
                                                                     {topic}
                                                                 </span>
                                                             ))}
@@ -600,8 +600,8 @@ export function ClinicalTabs({ notes, documents, appointments, sessionSummaries,
                                                     )}
                                                     {linkedSummary.homework && (
                                                         <div className="mt-2 text-xs">
-                                                            <span className="font-medium text-brand-yellow">Tarea:</span>{' '}
-                                                            <span className="text-brand-yellow">{linkedSummary.homework}</span>
+                                                            <span className="font-medium text-brand-blue">Tarea:</span>{' '}
+                                                            <span className="text-brand-blue">{linkedSummary.homework}</span>
                                                         </div>
                                                     )}
                                                 </div>

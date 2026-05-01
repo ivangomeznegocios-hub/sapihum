@@ -48,28 +48,28 @@ const roleLabels: Record<string, string> = {
 const campaignTypeConfig: Record<string, { icon: LucideIcon; color: string; bg: string }> = {
     referral_boost: {
         icon: Zap,
-        color: 'text-brand-yellow dark:text-brand-yellow',
-        bg: 'bg-brand-yellow/80 border-brand-yellow dark:bg-brand-yellow/20 dark:border-brand-yellow',
+        color: 'text-brand-blue dark:text-brand-blue',
+        bg: 'bg-brand-blue/80 border-brand-blue dark:bg-brand-blue/20 dark:border-brand-blue',
     },
     milestone: {
         icon: Trophy,
-        color: 'text-brand-brown dark:text-brand-brown',
-        bg: 'bg-brand-brown/80 border-brand-brown dark:bg-brand-brown/20 dark:border-brand-brown',
+        color: 'text-brand-blue-hover dark:text-brand-blue-hover',
+        bg: 'bg-brand-blue-hover/80 border-brand-blue-hover dark:bg-brand-blue-hover/20 dark:border-brand-blue-hover',
     },
     promo: {
         icon: Gift,
-        color: 'text-brand-brown dark:text-brand-brown',
-        bg: 'bg-brand-brown/80 border-brand-brown dark:bg-brand-brown/20 dark:border-brand-brown',
+        color: 'text-brand-blue-hover dark:text-brand-blue-hover',
+        bg: 'bg-brand-blue-hover/80 border-brand-blue-hover dark:bg-brand-blue-hover/20 dark:border-brand-blue-hover',
     },
     challenge: {
         icon: Target,
-        color: 'text-brand-brown dark:text-brand-brown',
+        color: 'text-brand-blue-hover dark:text-brand-blue-hover',
         bg: 'bg-rose-50/80 border-rose-200 dark:bg-rose-950/20 dark:border-rose-900',
     },
     custom: {
         icon: Sparkles,
-        color: 'text-brand-yellow dark:text-brand-yellow',
-        bg: 'bg-brand-yellow/80 border-brand-yellow dark:bg-brand-yellow/20 dark:border-brand-yellow',
+        color: 'text-brand-blue dark:text-brand-blue',
+        bg: 'bg-brand-blue/80 border-brand-blue dark:bg-brand-blue/20 dark:border-brand-blue',
     },
 }
 
@@ -147,7 +147,7 @@ export function CopyCodeButton({ code }: { code: string }) {
         <Button variant="outline" size="sm" onClick={handleCopy} className="gap-1.5">
             {copied ? (
                 <>
-                    <Check className="h-3.5 w-3.5 text-brand-brown" />
+                    <Check className="h-3.5 w-3.5 text-brand-blue-hover" />
                     Copiado
                 </>
             ) : (
@@ -220,7 +220,7 @@ export function CopyLinkButton({ code, baseUrl }: { code: string; baseUrl: strin
         <Button variant="ghost" size="sm" onClick={handleCopy} className="gap-1.5 text-xs">
             {copied ? (
                 <>
-                    <Check className="h-3 w-3 text-brand-brown" />
+                    <Check className="h-3 w-3 text-brand-blue-hover" />
                     Link copiado
                 </>
             ) : (
@@ -379,7 +379,7 @@ export function LeaderboardTable({
         )
     }
 
-    const medalColors = ['text-brand-yellow', 'text-neutral-500', 'text-orange-600']
+    const medalColors = ['text-brand-blue', 'text-neutral-500', 'text-orange-600']
 
     return (
         <div className="space-y-2">
@@ -461,8 +461,8 @@ export function RewardTimeline({ rewards }: { rewards: InviteRewardEvent[] }) {
                             className={cn(
                                 'mt-0.5 rounded-full p-1.5',
                                 reward.processed
-                                    ? 'bg-brand-brown text-brand-brown dark:bg-brand-brown/30 dark:text-brand-brown'
-                                    : 'bg-brand-yellow text-brand-yellow dark:bg-brand-yellow/30 dark:text-brand-yellow'
+                                    ? 'bg-brand-blue-hover text-brand-blue-hover dark:bg-brand-blue-hover/30 dark:text-brand-blue-hover'
+                                    : 'bg-brand-blue text-brand-blue dark:bg-brand-blue/30 dark:text-brand-blue'
                             )}
                         >
                             {reward.processed ? (
@@ -499,8 +499,8 @@ export function RewardTimeline({ rewards }: { rewards: InviteRewardEvent[] }) {
                             className={cn(
                                 'shrink-0 rounded-full px-2 py-0.5 text-[10px] font-medium',
                                 reward.processed
-                                    ? 'bg-brand-brown text-brand-brown dark:bg-brand-brown/30 dark:text-brand-brown'
-                                    : 'bg-brand-yellow text-brand-yellow dark:bg-brand-yellow/30 dark:text-brand-yellow'
+                                    ? 'bg-brand-blue-hover text-brand-blue-hover dark:bg-brand-blue-hover/30 dark:text-brand-blue-hover'
+                                    : 'bg-brand-blue text-brand-blue dark:bg-brand-blue/30 dark:text-brand-blue'
                             )}
                         >
                             {reward.processed ? 'Entregada' : 'Pendiente'}

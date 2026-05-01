@@ -97,10 +97,10 @@ function getStatusClasses(status: string) {
     switch (status) {
         case 'pending':
         case 'draft':
-            return 'border-brand-yellow/30 bg-brand-yellow/12 text-brand-yellow'
+            return 'border-brand-blue/30 bg-brand-blue/12 text-brand-blue'
         case 'confirmed':
         case 'upcoming':
-            return 'border-brand-brown/30 bg-brand-brown/12 text-brand-brown'
+            return 'border-brand-blue-hover/30 bg-brand-blue-hover/12 text-brand-blue-hover'
         case 'live':
             return 'border-emerald-500/30 bg-emerald-500/10 text-emerald-600'
         case 'completed':
@@ -123,7 +123,7 @@ function getKindClasses(kind: ScheduleCalendarItem['kind']) {
         return 'border-sky-500/20 bg-sky-500/10 text-sky-700'
     }
 
-    return 'border-brand-brown/20 bg-brand-brown/10 text-brand-brown'
+    return 'border-brand-blue-hover/20 bg-brand-blue-hover/10 text-brand-blue-hover'
 }
 
 function EmptyState({ message }: { message: string }) {

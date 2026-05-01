@@ -140,7 +140,7 @@ export function HomeSpeakersSettings({
         <Card>
             <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                    <Star className="h-5 w-5 text-brand-yellow" />
+                    <Star className="h-5 w-5 text-brand-blue" />
                     Ponentes del Home
                 </CardTitle>
                 <CardDescription>
@@ -169,9 +169,9 @@ export function HomeSpeakersSettings({
                     <div className="rounded-xl border border-border/80 bg-muted/15 p-4">
                         <div className="flex items-center gap-2 text-sm font-medium">
                             {mode === 'rotating' ? (
-                                <Shuffle className="h-4 w-4 text-brand-yellow" />
+                                <Shuffle className="h-4 w-4 text-brand-blue" />
                             ) : (
-                                <Sparkles className="h-4 w-4 text-brand-yellow" />
+                                <Sparkles className="h-4 w-4 text-brand-blue" />
                             )}
                             Vista previa de criterio
                         </div>

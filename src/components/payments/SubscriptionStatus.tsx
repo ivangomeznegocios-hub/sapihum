@@ -116,7 +116,7 @@ export function SubscriptionStatus({
         ? 'border-yellow-500/50'
         : isCancelled
             ? 'border-red-500/50'
-            : 'border-brand-brown/40'
+            : 'border-brand-blue-hover/40'
 
     return (
         <Card className={borderClass}>
@@ -124,7 +124,7 @@ export function SubscriptionStatus({
                 <div className="flex items-start justify-between gap-4">
                     <div>
                         <CardTitle className="flex items-center gap-2">
-                            <Receipt className="h-5 w-5 text-brand-brown" />
+                            <Receipt className="h-5 w-5 text-brand-blue-hover" />
                             Gestionar suscripcion y facturacion
                         </CardTitle>
                         <CardDescription className="mt-1">
@@ -170,7 +170,7 @@ export function SubscriptionStatus({
                         </div>
 
                         {subscription.status === 'trialing' && subscription.trial_end && (
-                            <div className="rounded-lg border border-brand-yellow/40 bg-brand-yellow/10 p-3 text-sm">
+                            <div className="rounded-lg border border-brand-blue/40 bg-brand-blue/10 p-3 text-sm">
                                 Tu prueba termina el {formatDate(subscription.trial_end)}.
                             </div>
                         )}

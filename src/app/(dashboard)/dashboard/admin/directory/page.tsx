@@ -85,7 +85,7 @@ export default async function AdminDirectoryPage() {
 
                             <CardHeader className="pb-3">
                                 <div className="flex items-start gap-3">
-                                    <div className="h-12 w-12 rounded-full bg-gradient-to-br from-brand-yellow to-brand-yellow flex items-center justify-center text-white font-bold text-lg shrink-0">
+                                    <div className="h-12 w-12 rounded-full bg-gradient-to-br from-brand-blue to-brand-blue flex items-center justify-center text-white font-bold text-lg shrink-0">
                                         {psychologist.full_name?.charAt(0) || '?'}
                                     </div>
                                     <div className="min-w-0">
@@ -133,7 +133,7 @@ export default async function AdminDirectoryPage() {
                                         </p>
                                         <div className="flex flex-wrap gap-1">
                                             {psychologist.populations_served.map((population: string) => (
-                                                <span key={population} className="text-xs px-1.5 py-0.5 bg-brand-yellow dark:bg-brand-yellow/20 text-brand-yellow dark:text-brand-yellow rounded">
+                                                <span key={population} className="text-xs px-1.5 py-0.5 bg-brand-blue dark:bg-brand-blue/20 text-brand-blue dark:text-brand-blue rounded">
                                                     {population}
                                                 </span>
                                             ))}
@@ -148,7 +148,7 @@ export default async function AdminDirectoryPage() {
                                         </p>
                                         <div className="flex flex-wrap gap-1">
                                             {psychologist.therapeutic_approaches.map((approach: string) => (
-                                                <span key={approach} className="text-xs px-1.5 py-0.5 bg-brand-brown dark:bg-brand-brown/20 text-brand-brown dark:text-brand-brown rounded">
+                                                <span key={approach} className="text-xs px-1.5 py-0.5 bg-brand-blue-hover dark:bg-brand-blue-hover/20 text-brand-blue-hover dark:text-brand-blue-hover rounded">
                                                     {approach}
                                                 </span>
                                             ))}

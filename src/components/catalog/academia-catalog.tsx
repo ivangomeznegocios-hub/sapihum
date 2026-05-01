@@ -147,8 +147,8 @@ export function AcademiaCatalog({ events }: AcademiaCatalogProps) {
                             onClick={() => setAreaFilter(filter.value)}
                             className={`inline-flex items-center rounded-full px-4 py-2.5 text-sm font-semibold tracking-[0.01em] transition-all duration-200 ${
                                 isActive
-                                    ? 'scale-[1.03] border border-primary/20 bg-primary text-primary-foreground shadow-[0_14px_32px_rgba(246,174,2,0.16)]'
-                                    : 'border border-white/12 bg-white/[0.03] text-foreground/80 hover:border-primary/30 hover:bg-white/[0.05] hover:text-foreground'
+                                    ? 'scale-[1.03] border border-primary/20 bg-primary text-primary-foreground shadow-[0_14px_32px_rgba(37,99,235,0.16)]'
+                                    : 'border border-border/12 bg-white/[0.03] text-foreground/80 hover:border-primary/30 hover:bg-white/[0.05] hover:text-foreground'
                             }`}
                         >
                             {filter.label}
@@ -171,7 +171,7 @@ export function AcademiaCatalog({ events }: AcademiaCatalogProps) {
                                     className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-all ${
                                         formatFilter === option.value
                                             ? 'border border-primary/20 bg-primary text-primary-foreground'
-                                            : 'border border-white/10 bg-white/[0.03] text-muted-foreground hover:bg-white/[0.05] hover:text-foreground'
+                                            : 'border border-border/10 bg-white/[0.03] text-muted-foreground hover:bg-white/[0.05] hover:text-foreground'
                                     }`}
                                 >
                                     {option.label}
@@ -228,7 +228,7 @@ export function AcademiaCatalog({ events }: AcademiaCatalogProps) {
             ) : (
                 <div className="rounded-3xl border-2 border-dashed border-border/40 bg-gradient-to-br from-muted/30 to-muted/10 px-6 py-20 text-center">
                     <div className="mx-auto max-w-sm space-y-4">
-                        <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-sm font-semibold text-primary">
+                        <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl border border-border/10 bg-white/5 text-sm font-semibold text-primary">
                             S
                         </div>
                         <h2 className="text-xl font-bold">Sin resultados</h2>
@@ -240,7 +240,7 @@ export function AcademiaCatalog({ events }: AcademiaCatalogProps) {
                         {hasActiveFilters && (
                             <button
                                 onClick={clearAllFilters}
-                                className="mt-2 inline-flex items-center gap-1.5 rounded-full border border-primary/20 bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-[0_14px_32px_rgba(246,174,2,0.16)] transition-all hover:-translate-y-0.5 hover:bg-[#e7a103]"
+                                className="mt-2 inline-flex items-center gap-1.5 rounded-full border border-primary/20 bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-[0_14px_32px_rgba(37,99,235,0.16)] transition-all hover:-translate-y-0.5 hover:bg-[#1E3A8A]"
                             >
                                 Limpiar filtros
                             </button>

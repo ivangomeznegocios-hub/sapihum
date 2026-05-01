@@ -112,7 +112,7 @@ export default async function GrowthHubPage() {
             <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
                 <div>
                     <div className="mb-2 flex items-center gap-3">
-                        <div className="rounded-2xl bg-gradient-to-br from-brand-brown to-brand-brown p-2.5 text-white shadow-lg shadow-brand-brown/20">
+                        <div className="rounded-2xl bg-gradient-to-br from-brand-blue-hover to-brand-blue-hover p-2.5 text-white shadow-lg shadow-brand-blue-hover/20">
                             <Rocket className="h-6 w-6" />
                         </div>
                         <div>
@@ -132,10 +132,10 @@ export default async function GrowthHubPage() {
                 </div>
             </div>
 
-            <div className="rounded-2xl border bg-gradient-to-r from-brand-brown via-white to-brand-brown p-5 dark:from-brand-brown/10 dark:via-background dark:to-brand-brown/10">
+            <div className="rounded-2xl border bg-gradient-to-r from-brand-blue-hover via-white to-brand-blue-hover p-5 dark:from-brand-blue-hover/10 dark:via-background dark:to-brand-blue-hover/10">
                 <div className="grid gap-4 lg:grid-cols-[1.4fr_1fr]">
                     <div className="flex items-start gap-3">
-                        <div className="rounded-xl bg-brand-brown p-2 text-brand-brown dark:bg-brand-brown/40 dark:text-brand-brown">
+                        <div className="rounded-xl bg-brand-blue-hover p-2 text-brand-blue-hover dark:bg-brand-blue-hover/40 dark:text-brand-blue-hover">
                             <BriefcaseBusiness className="h-5 w-5" />
                         </div>
                         <div>
@@ -196,28 +196,28 @@ export default async function GrowthHubPage() {
                         label="Invitados totales"
                         value={stats?.totalInvites ?? 0}
                         icon={Users}
-                        color="text-brand-yellow dark:text-brand-yellow"
+                        color="text-brand-blue dark:text-brand-blue"
                         description="Psicologos y ponentes vinculados con tu codigo"
                     />
                     <StatCard
                         label="Activados"
                         value={stats?.completedInvites ?? 0}
                         icon={TrendingUp}
-                        color="text-brand-brown dark:text-brand-brown"
+                        color="text-brand-blue-hover dark:text-brand-blue-hover"
                         description="Registros ya validados o recompensados"
                     />
                     <StatCard
                         label="Rewards generados"
                         value={stats?.rewardedInvites ?? 0}
                         icon={Gift}
-                        color="text-brand-brown dark:text-brand-brown"
+                        color="text-brand-blue-hover dark:text-brand-blue-hover"
                         description="Invitaciones que ya detonaron valor economico"
                     />
                     <StatCard
                         label="Pendientes"
                         value={stats?.pendingInvites ?? 0}
                         icon={Clock}
-                        color="text-brand-yellow dark:text-brand-yellow"
+                        color="text-brand-blue dark:text-brand-blue"
                         description="Esperando activacion o trigger economico"
                     />
                 </div>
@@ -243,7 +243,7 @@ export default async function GrowthHubPage() {
             {rewardProgress.length > 0 && (
                 <div>
                     <div className="mb-4 flex items-center gap-2">
-                        <Award className="h-5 w-5 text-brand-brown" />
+                        <Award className="h-5 w-5 text-brand-blue-hover" />
                         <h2 className="text-lg font-semibold">Progreso de recompensas</h2>
                     </div>
                     <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
@@ -297,7 +297,7 @@ export default async function GrowthHubPage() {
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
                 <div className="rounded-2xl border bg-card p-5">
                     <div className="mb-4 flex items-center gap-2">
-                        <Trophy className="h-5 w-5 text-brand-yellow" />
+                        <Trophy className="h-5 w-5 text-brand-blue" />
                         <h2 className="text-lg font-semibold">Embajadores</h2>
                         <span className="ml-auto text-xs text-muted-foreground">Top {topReferrers.length}</span>
                     </div>
@@ -306,7 +306,7 @@ export default async function GrowthHubPage() {
 
                 <div className="rounded-2xl border bg-card p-5">
                     <div className="mb-4 flex items-center gap-2">
-                        <Award className="h-5 w-5 text-brand-brown" />
+                        <Award className="h-5 w-5 text-brand-blue-hover" />
                         <h2 className="text-lg font-semibold">Mis rewards</h2>
                         <span className="ml-auto text-xs text-muted-foreground">{rewards.length} total</span>
                     </div>
@@ -322,7 +322,7 @@ export default async function GrowthHubPage() {
 
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
                     <div className="rounded-xl border bg-background/70 p-4 text-center">
-                        <div className="mx-auto mb-2 flex h-10 w-10 items-center justify-center rounded-full bg-brand-yellow text-lg font-bold text-brand-yellow dark:bg-brand-yellow/40 dark:text-brand-yellow">
+                        <div className="mx-auto mb-2 flex h-10 w-10 items-center justify-center rounded-full bg-brand-blue text-lg font-bold text-brand-blue dark:bg-brand-blue/40 dark:text-brand-blue">
                             1
                         </div>
                         <h3 className="text-sm font-semibold">Invita al profesional correcto</h3>
@@ -332,7 +332,7 @@ export default async function GrowthHubPage() {
                     </div>
 
                     <div className="rounded-xl border bg-background/70 p-4 text-center">
-                        <div className="mx-auto mb-2 flex h-10 w-10 items-center justify-center rounded-full bg-brand-brown text-lg font-bold text-brand-brown dark:bg-brand-brown/40 dark:text-brand-brown">
+                        <div className="mx-auto mb-2 flex h-10 w-10 items-center justify-center rounded-full bg-brand-blue-hover text-lg font-bold text-brand-blue-hover dark:bg-brand-blue-hover/40 dark:text-brand-blue-hover">
                             2
                         </div>
                         <h3 className="text-sm font-semibold">Activa triggers de valor</h3>
@@ -342,7 +342,7 @@ export default async function GrowthHubPage() {
                     </div>
 
                     <div className="rounded-xl border bg-background/70 p-4 text-center">
-                        <div className="mx-auto mb-2 flex h-10 w-10 items-center justify-center rounded-full bg-brand-brown text-lg font-bold text-brand-brown dark:bg-brand-brown/40 dark:text-brand-brown">
+                        <div className="mx-auto mb-2 flex h-10 w-10 items-center justify-center rounded-full bg-brand-blue-hover text-lg font-bold text-brand-blue-hover dark:bg-brand-blue-hover/40 dark:text-brand-blue-hover">
                             3
                         </div>
                         <h3 className="text-sm font-semibold">Escala con bonos</h3>
@@ -352,7 +352,7 @@ export default async function GrowthHubPage() {
                     </div>
 
                     <div className="rounded-xl border bg-background/70 p-4 text-center">
-                        <div className="mx-auto mb-2 flex h-10 w-10 items-center justify-center rounded-full bg-brand-yellow text-lg font-bold text-brand-yellow dark:bg-brand-yellow/40 dark:text-brand-yellow">
+                        <div className="mx-auto mb-2 flex h-10 w-10 items-center justify-center rounded-full bg-brand-blue text-lg font-bold text-brand-blue dark:bg-brand-blue/40 dark:text-brand-blue">
                             4
                         </div>
                         <h3 className="text-sm font-semibold">Mantente en el ranking</h3>

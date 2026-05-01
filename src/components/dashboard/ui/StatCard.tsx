@@ -37,20 +37,20 @@ const colorStyles: Record<ColorVariant, {
     trendColor: string
 }> = {
     primary: {
-        bg: 'bg-brand-yellow/50 dark:bg-brand-yellow/20',
-        border: 'border-brand-yellow/60 dark:border-brand-yellow/40',
-        iconBg: 'bg-brand-yellow dark:bg-brand-yellow/50',
-        iconColor: 'text-brand-yellow dark:text-brand-yellow',
-        valueColor: 'text-brand-yellow dark:text-brand-yellow',
-        trendColor: 'text-brand-yellow/70 dark:text-brand-yellow/70',
+        bg: 'bg-brand-blue/50 dark:bg-brand-blue/20',
+        border: 'border-brand-blue/60 dark:border-brand-blue/40',
+        iconBg: 'bg-brand-blue dark:bg-brand-blue/50',
+        iconColor: 'text-brand-blue dark:text-brand-blue',
+        valueColor: 'text-brand-blue dark:text-brand-blue',
+        trendColor: 'text-brand-blue/70 dark:text-brand-blue/70',
     },
     secondary: {
-        bg: 'bg-brand-brown/50 dark:bg-brand-brown/20',
-        border: 'border-brand-brown/60 dark:border-brand-brown/40',
-        iconBg: 'bg-brand-brown dark:bg-brand-brown/50',
-        iconColor: 'text-brand-brown dark:text-brand-brown',
-        valueColor: 'text-brand-brown dark:text-brand-brown',
-        trendColor: 'text-brand-brown/70 dark:text-brand-brown/70',
+        bg: 'bg-brand-blue-hover/50 dark:bg-brand-blue-hover/20',
+        border: 'border-brand-blue-hover/60 dark:border-brand-blue-hover/40',
+        iconBg: 'bg-brand-blue-hover dark:bg-brand-blue-hover/50',
+        iconColor: 'text-brand-blue-hover dark:text-brand-blue-hover',
+        valueColor: 'text-brand-blue-hover dark:text-brand-blue-hover',
+        trendColor: 'text-brand-blue-hover/70 dark:text-brand-blue-hover/70',
     },
 }
 
@@ -70,7 +70,7 @@ export function StatCard({
 
     let finalValueColor = styles.valueColor
     if (statusIndicator === 'good') finalValueColor = 'text-green-600 dark:text-green-400'
-    if (statusIndicator === 'warning') finalValueColor = 'text-brand-yellow dark:text-brand-yellow'
+    if (statusIndicator === 'warning') finalValueColor = 'text-brand-blue dark:text-brand-blue'
     if (statusIndicator === 'critical') finalValueColor = 'text-red-600 dark:text-red-400'
 
     return (

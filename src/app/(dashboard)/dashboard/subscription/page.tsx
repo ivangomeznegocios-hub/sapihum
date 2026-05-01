@@ -45,7 +45,7 @@ export default async function SubscriptionPage() {
                 </p>
             </div>
 
-            <Card className="border-brand-yellow bg-gradient-to-r from-brand-yellow to-brand-brown dark:border-brand-yellow dark:from-brand-yellow/30 dark:to-brand-brown/30">
+            <Card className="border-brand-blue bg-gradient-to-r from-brand-blue to-brand-blue-hover dark:border-brand-blue dark:from-brand-blue/30 dark:to-brand-blue-hover/30">
                 <CardContent className="pt-6">
                     <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                         <div>
@@ -103,10 +103,10 @@ export default async function SubscriptionPage() {
             </Card>
 
             {!isAdmin && currentLevel >= 2 && (
-                <Card className="border-brand-brown bg-gradient-to-r from-brand-brown to-pink-50 dark:border-brand-brown dark:from-brand-brown/30 dark:to-pink-950/30">
+                <Card className="border-brand-blue-hover bg-gradient-to-r from-brand-blue-hover to-pink-50 dark:border-brand-blue-hover dark:from-brand-blue-hover/30 dark:to-pink-950/30">
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2">
-                            <Zap className="h-5 w-5 text-brand-brown" />
+                            <Zap className="h-5 w-5 text-brand-blue-hover" />
                             Recargas de Inteligencia Artificial
                         </CardTitle>
                         <CardDescription>

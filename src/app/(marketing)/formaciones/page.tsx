@@ -67,57 +67,57 @@ export default async function FormationsCatalogPage() {
     const formations = await getPublicFormations()
 
     return (
-        <div className="min-h-screen bg-[#030303] text-white">
-            <section className="relative overflow-hidden bg-gradient-to-b from-[#050505] via-[#0a0a0a] to-[#030303] py-24 text-white">
+        <div className="min-h-screen bg-background text-foreground">
+            <section className="relative overflow-hidden bg-gradient-to-b from-background via-brand-blue-soft/60 to-background py-24 text-foreground">
                 <div className="sapihum-grid-bg pointer-events-none absolute inset-0 opacity-10" />
-                <div className="pointer-events-none absolute left-0 top-0 h-[420px] w-[420px] rounded-full bg-brand-yellow/10 blur-[130px]" />
-                <div className="pointer-events-none absolute bottom-0 right-0 h-[360px] w-[360px] rounded-full bg-brand-brown/10 blur-[120px]" />
+                <div className="pointer-events-none absolute left-0 top-0 h-[420px] w-[420px] rounded-full bg-brand-blue/10 blur-[130px]" />
+                <div className="pointer-events-none absolute bottom-0 right-0 h-[360px] w-[360px] rounded-full bg-brand-blue-hover/10 blur-[120px]" />
 
                 <div className="relative mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
                     <div className="grid gap-12 lg:grid-cols-[minmax(0,1fr)_340px] lg:items-end">
                         <div className="max-w-3xl space-y-6">
-                            <Badge variant="outline" className="gap-2 border-brand-yellow/30 bg-brand-yellow/10 text-brand-yellow">
+                            <Badge variant="outline" className="gap-2 border-brand-blue/30 bg-brand-blue/10 text-brand-blue">
                                 <GraduationCap className="h-4 w-4" />
                                 Academia SAPIHUM
                             </Badge>
 
                             <div className="space-y-4">
-                                <h1 className="text-4xl font-bold leading-[1.05] tracking-tight md:text-5xl lg:text-6xl">
+                                <h1 className="font-serif text-4xl font-bold leading-[1.05] tracking-normal text-brand-text-strong md:text-5xl lg:text-6xl">
                                     Formaciones
-                                    <span className="block font-serif text-[#c0bfbc] italic font-normal">
+                                    <span className="block italic font-bold text-brand-blue-dark">
                                         completas y comprables
                                     </span>
                                 </h1>
 
-                                <p className="max-w-2xl text-lg leading-relaxed text-neutral-400 md:text-xl">
+                                <p className="max-w-2xl text-lg leading-relaxed text-brand-text-muted md:text-xl">
                                     Programas pensados como una ruta real: una sola compra, un orden claro de avance,
                                     materiales complementarios y una experiencia coherente con el nivel profesional de SAPIHUM.
                                 </p>
                             </div>
                         </div>
 
-                        <div className="grid gap-4 rounded-3xl border border-white/10 bg-white/[0.03] p-6 backdrop-blur-sm">
+                        <div className="grid gap-4 rounded-3xl border border-brand-border bg-white/85 p-6 shadow-[0_20px_60px_rgba(15,23,42,0.08)] backdrop-blur-sm">
                             <div>
-                                <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-brand-yellow">
+                                <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-brand-blue">
                                     Lo que encuentras aqui
                                 </p>
-                                <p className="mt-3 text-sm leading-relaxed text-neutral-400">
+                                <p className="mt-3 text-sm leading-relaxed text-brand-text-muted">
                                     Rutas premium con acceso inmediato, bloques organizados por modulo y beneficios claros para miembros.
                                 </p>
                             </div>
 
                             <div className="grid gap-3">
-                                <div className="rounded-2xl border border-white/10 bg-black/40 p-4">
-                                    <p className="text-xs font-semibold uppercase tracking-[0.15em] text-neutral-500">Compra</p>
-                                    <p className="mt-2 text-sm text-neutral-200">Un solo pago por programa completo, sin perder el detalle de cada modulo.</p>
+                                <div className="rounded-2xl border border-brand-border bg-brand-surface-soft p-4">
+                                    <p className="text-xs font-semibold uppercase tracking-[0.15em] text-brand-text-muted">Compra</p>
+                                    <p className="mt-2 text-sm text-brand-text">Un solo pago por programa completo, sin perder el detalle de cada modulo.</p>
                                 </div>
-                                <div className="rounded-2xl border border-white/10 bg-black/40 p-4">
-                                    <p className="text-xs font-semibold uppercase tracking-[0.15em] text-neutral-500">Ruta</p>
-                                    <p className="mt-2 text-sm text-neutral-200">Secuencia clara de eventos y materiales para avanzar con orden.</p>
+                                <div className="rounded-2xl border border-brand-border bg-brand-surface-soft p-4">
+                                    <p className="text-xs font-semibold uppercase tracking-[0.15em] text-brand-text-muted">Ruta</p>
+                                    <p className="mt-2 text-sm text-brand-text">Secuencia clara de eventos y materiales para avanzar con orden.</p>
                                 </div>
-                                <div className="rounded-2xl border border-white/10 bg-black/40 p-4">
-                                    <p className="text-xs font-semibold uppercase tracking-[0.15em] text-neutral-500">Beneficios</p>
-                                    <p className="mt-2 text-sm text-neutral-200">Certificacion final y acceso preferencial para miembros cuando aplica.</p>
+                                <div className="rounded-2xl border border-brand-border bg-brand-surface-soft p-4">
+                                    <p className="text-xs font-semibold uppercase tracking-[0.15em] text-brand-text-muted">Beneficios</p>
+                                    <p className="mt-2 text-sm text-brand-text">Certificacion final y acceso preferencial para miembros cuando aplica.</p>
                                 </div>
                             </div>
                         </div>
@@ -128,10 +128,10 @@ export default async function FormationsCatalogPage() {
             <section className="px-4 py-16 sm:px-6 md:py-20 lg:px-8">
                 <div className="mx-auto w-full max-w-7xl">
                     {formations.length === 0 ? (
-                        <div className="rounded-[32px] border border-white/10 bg-white/[0.03] py-20 text-center shadow-2xl shadow-black/30">
-                            <GraduationCap className="mx-auto mb-4 h-12 w-12 text-brand-yellow" />
-                            <h3 className="text-2xl font-bold text-white">Proximamente</h3>
-                            <p className="mt-2 text-neutral-400">
+                        <div className="rounded-[32px] border border-brand-border bg-white py-20 text-center shadow-sm">
+                            <GraduationCap className="mx-auto mb-4 h-12 w-12 text-brand-blue" />
+                            <h3 className="text-2xl font-bold text-brand-text-strong">Proximamente</h3>
+                            <p className="mt-2 text-brand-text-muted">
                                 Estamos construyendo nuevos programas formativos completos.
                             </p>
                         </div>
@@ -147,9 +147,9 @@ export default async function FormationsCatalogPage() {
                                 return (
                                     <article
                                         key={formation.id}
-                                        className="group overflow-hidden rounded-[32px] border border-white/10 bg-white/[0.03] shadow-2xl shadow-black/30 transition-all duration-300 hover:-translate-y-1 hover:border-brand-yellow/20"
+                                        className="group overflow-hidden rounded-[32px] border border-brand-border bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-brand-blue/30 hover:shadow-[0_24px_70px_rgba(15,23,42,0.12)]"
                                     >
-                                        <div className="relative aspect-[16/10] overflow-hidden border-b border-white/10 bg-gradient-to-br from-brand-yellow/20 via-black to-brand-brown/30">
+                                        <div className="relative aspect-[16/10] overflow-hidden border-b border-border/10 bg-gradient-to-br from-brand-blue/20 via-background to-brand-blue-hover/30">
                                             {formation.image_url ? (
                                                 <Image
                                                     src={formation.image_url}
@@ -161,17 +161,17 @@ export default async function FormationsCatalogPage() {
                                                 />
                                             ) : (
                                                 <div className="absolute inset-0 flex items-center justify-center">
-                                                    <PlayCircle className="h-16 w-16 text-white/20" />
+                                                    <PlayCircle className="h-16 w-16 text-foreground/20" />
                                                 </div>
                                             )}
-                                            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                                            <div className="absolute inset-0 bg-gradient-to-t from-slate-950/78 via-slate-950/18 to-transparent" />
 
                                             <div className="absolute left-5 top-5 flex flex-wrap gap-2">
-                                                <span className="inline-flex rounded-full bg-brand-yellow px-3 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-black">
+                                                <span className="inline-flex rounded-full bg-brand-blue px-3 py-1 text-[10px] font-bold uppercase tracking-[0.2em] text-white">
                                                     Formacion
                                                 </span>
                                                 {specialization && (
-                                                    <span className="inline-flex rounded-full border border-white/15 bg-black/40 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.15em] text-white">
+                                                    <span className="inline-flex rounded-full border border-white/30 bg-white/88 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.15em] text-brand-text-strong">
                                                         {specialization.name}
                                                     </span>
                                                 )}
@@ -180,16 +180,16 @@ export default async function FormationsCatalogPage() {
 
                                         <div className="flex flex-col gap-6 p-6 md:p-8">
                                             <div className="space-y-3">
-                                                <h2 className="text-3xl font-bold leading-tight tracking-tight text-white">
+                                                <h2 className="font-serif text-3xl font-bold leading-tight tracking-normal text-brand-text-strong">
                                                     {formation.title}
                                                 </h2>
                                                 {formation.subtitle && (
-                                                    <p className="text-base font-medium leading-relaxed text-neutral-300">
+                                                    <p className="text-base font-medium leading-relaxed text-brand-text-muted">
                                                         {formation.subtitle}
                                                     </p>
                                                 )}
                                                 {formation.description && (
-                                                    <p className="line-clamp-3 text-sm leading-relaxed text-neutral-400">
+                                                    <p className="line-clamp-3 text-sm leading-relaxed text-brand-text-muted">
                                                         {formation.description}
                                                     </p>
                                                 )}
@@ -197,64 +197,64 @@ export default async function FormationsCatalogPage() {
 
                                             <div className="flex flex-wrap gap-2">
                                                 {totalHours && (
-                                                    <Badge variant="outline" className="border-white/10 bg-white/5 text-neutral-200">
+                                                    <Badge variant="outline" className="border-brand-border bg-brand-surface-soft text-brand-text">
                                                         {totalHours}
                                                     </Badge>
                                                 )}
-                                                <Badge variant="outline" className="border-white/10 bg-white/5 text-neutral-200">
+                                                <Badge variant="outline" className="border-brand-border bg-brand-surface-soft text-brand-text">
                                                     Programa completo
                                                 </Badge>
-                                                <Badge variant="outline" className="border-white/10 bg-white/5 text-neutral-200">
+                                                <Badge variant="outline" className="border-brand-border bg-brand-surface-soft text-brand-text">
                                                     {materialCount > 0 ? `${materialCount} materiales` : 'Ruta guiada'}
                                                 </Badge>
                                             </div>
 
                                             <div className="grid gap-3 sm:grid-cols-2">
-                                                <div className="rounded-2xl border border-white/10 bg-black/35 p-4">
-                                                    <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.15em] text-neutral-500">
-                                                        <Clock3 className="h-4 w-4 text-brand-yellow" />
+                                                <div className="rounded-2xl border border-brand-border bg-brand-surface-soft p-4">
+                                                    <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.15em] text-brand-text-muted">
+                                                        <Clock3 className="h-4 w-4 text-brand-blue" />
                                                         Duracion
                                                     </div>
-                                                    <p className="mt-3 text-sm font-medium text-white">{totalHours || 'Ruta por modulos'}</p>
+                                                    <p className="mt-3 text-sm font-medium text-brand-text">{totalHours || 'Ruta por modulos'}</p>
                                                 </div>
 
-                                                <div className="rounded-2xl border border-white/10 bg-black/35 p-4">
-                                                    <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.15em] text-neutral-500">
-                                                        <Award className="h-4 w-4 text-brand-yellow" />
+                                                <div className="rounded-2xl border border-brand-border bg-brand-surface-soft p-4">
+                                                    <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.15em] text-brand-text-muted">
+                                                        <Award className="h-4 w-4 text-brand-blue" />
                                                         Certificacion
                                                     </div>
-                                                    <p className="mt-3 text-sm font-medium text-white">{certificateLabel}</p>
+                                                    <p className="mt-3 text-sm font-medium text-brand-text">{certificateLabel}</p>
                                                 </div>
 
-                                                <div className="rounded-2xl border border-white/10 bg-black/35 p-4">
-                                                    <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.15em] text-neutral-500">
-                                                        <Sparkles className="h-4 w-4 text-brand-yellow" />
+                                                <div className="rounded-2xl border border-brand-border bg-brand-surface-soft p-4">
+                                                    <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.15em] text-brand-text-muted">
+                                                        <Sparkles className="h-4 w-4 text-brand-blue" />
                                                         Membresia
                                                     </div>
-                                                    <p className="mt-3 text-sm font-medium text-white">{memberBenefit}</p>
+                                                    <p className="mt-3 text-sm font-medium text-brand-text">{memberBenefit}</p>
                                                 </div>
 
-                                                <div className="rounded-2xl border border-white/10 bg-black/35 p-4">
-                                                    <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.15em] text-neutral-500">
+                                                <div className="rounded-2xl border border-brand-border bg-brand-surface-soft p-4">
+                                                    <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.15em] text-brand-text-muted">
                                                         {materialCount > 0 ? (
-                                                            <LibraryBig className="h-4 w-4 text-brand-yellow" />
+                                                            <LibraryBig className="h-4 w-4 text-brand-blue" />
                                                         ) : (
-                                                            <Layers3 className="h-4 w-4 text-brand-yellow" />
+                                                            <Layers3 className="h-4 w-4 text-brand-blue" />
                                                         )}
                                                         Recursos
                                                     </div>
-                                                    <p className="mt-3 text-sm font-medium text-white">
+                                                    <p className="mt-3 text-sm font-medium text-brand-text">
                                                         {materialCount > 0 ? `${materialCount} enlaces incluidos` : 'Acceso por modulos'}
                                                     </p>
                                                 </div>
                                             </div>
 
-                                            <div className="flex flex-col gap-4 border-t border-white/10 pt-5 sm:flex-row sm:items-end sm:justify-between">
+                                            <div className="flex flex-col gap-4 border-t border-border/10 pt-5 sm:flex-row sm:items-end sm:justify-between">
                                                 <div>
-                                                    <p className="text-xs font-semibold uppercase tracking-[0.15em] text-neutral-500">
+                                                    <p className="text-xs font-semibold uppercase tracking-[0.15em] text-brand-text-muted">
                                                         Inversion completa
                                                     </p>
-                                                    <p className="mt-2 text-3xl font-black text-white">
+                                                    <p className="mt-2 text-3xl font-black text-brand-text-strong">
                                                         {formatCurrency(formation.bundle_price)}
                                                     </p>
                                                 </div>

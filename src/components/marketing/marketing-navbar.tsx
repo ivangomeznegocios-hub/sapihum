@@ -36,7 +36,7 @@ const NAV_ITEMS = [
 
 export function MarketingNavbar() {
     return (
-        <header className="sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur-lg supports-[backdrop-filter]:bg-background/60">
+        <header className="sticky top-0 z-50 w-full border-b border-brand-border bg-brand-surface/95 shadow-sm backdrop-blur-lg supports-[backdrop-filter]:bg-brand-surface/90">
             <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
                 <Link href="/" className="flex shrink-0 items-center" aria-label="SAPIHUM">
                     <BrandWordmark className="text-sm sm:text-base lg:text-lg lg:tracking-[0.16em]" />
@@ -46,14 +46,14 @@ export function MarketingNavbar() {
                     {NAV_ITEMS.map((item) =>
                         item.children ? (
                             <div key={item.label} className="group relative">
-                                <button className="flex items-center gap-1 rounded-sm px-3 py-2 text-sm font-semibold text-muted-foreground transition-colors hover:text-foreground">
+                                <button className="flex items-center gap-1 rounded-sm px-3 py-2 text-sm font-semibold text-muted-foreground transition-colors hover:bg-brand-blue-soft hover:text-brand-blue-hover">
                                     {item.label}
                                     <svg className="ml-0.5 h-3.5 w-3.5 transition-transform group-hover:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
                                         <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
                                     </svg>
                                 </button>
-                                <div className={`invisible absolute left-0 top-full pt-2 opacity-0 transition-all duration-200 group-hover:visible group-hover:opacity-100 ${item.label === 'Especialidades' ? 'w-[38rem]' : 'w-72'}`}>
-                                    <div className={`${item.label === 'Especialidades' ? 'grid grid-cols-2 gap-1' : 'flex flex-col'} rounded-sm border bg-popover p-2 shadow-xl shadow-black/5 ring-1 ring-black/5`}>
+                                <div className={`invisible absolute left-0 top-full z-[80] pt-2 opacity-0 transition-opacity duration-100 group-hover:visible group-hover:opacity-100 ${item.label === 'Especialidades' ? 'w-[38rem]' : 'w-72'}`}>
+                                    <div className={`${item.label === 'Especialidades' ? 'grid grid-cols-2 gap-1' : 'flex flex-col'} rounded-md border border-brand-border bg-brand-surface p-2 shadow-[0_24px_70px_rgba(15,23,42,0.14)] ring-1 ring-brand-blue-border/80`}>
                                         {item.children.map((child) => (
                                             <Link
                                                 key={child.href + child.label}
@@ -62,10 +62,10 @@ export function MarketingNavbar() {
                                                 data-analytics-label={child.label}
                                                 data-analytics-surface="marketing_nav_dropdown"
                                                 data-analytics-funnel="landing"
-                                                className={`flex flex-col gap-1 rounded-sm px-3 py-3 transition-colors hover:bg-accent ${item.label === 'Especialidades' ? 'min-h-[5rem]' : ''}`}
+                                                className={`group/drop flex flex-col gap-1 rounded-sm px-3 py-3 transition-colors hover:bg-brand-blue-soft ${item.label === 'Especialidades' ? 'min-h-[5rem]' : ''}`}
                                             >
-                                                <span className="text-sm font-semibold text-foreground">{child.label}</span>
-                                                <span className="text-xs leading-snug text-muted-foreground">{child.description}</span>
+                                                <span className="text-sm font-semibold text-brand-text-strong group-hover/drop:text-brand-blue-hover">{child.label}</span>
+                                                <span className="text-xs leading-snug text-brand-text-muted group-hover/drop:text-brand-text">{child.description}</span>
                                             </Link>
                                         ))}
                                     </div>
@@ -79,7 +79,7 @@ export function MarketingNavbar() {
                                 data-analytics-label={item.label}
                                 data-analytics-surface="marketing_nav"
                                 data-analytics-funnel="landing"
-                                className="rounded-sm px-3 py-2 text-sm font-semibold text-muted-foreground transition-colors hover:text-foreground"
+                                className="rounded-sm px-3 py-2 text-sm font-semibold text-muted-foreground transition-colors hover:bg-brand-blue-soft hover:text-brand-blue-hover"
                             >
                                 {item.label}
                             </Link>

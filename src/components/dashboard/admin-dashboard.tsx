@@ -47,10 +47,10 @@ function getGreeting(): string {
 }
 
 const roleLabels: Record<string, { label: string; color: string }> = {
-    psychologist: { label: 'Psicólogo', color: 'bg-brand-yellow text-brand-yellow dark:bg-brand-yellow/40 dark:text-brand-yellow' },
+    psychologist: { label: 'Psicólogo', color: 'bg-brand-blue text-brand-blue dark:bg-brand-blue/40 dark:text-brand-blue' },
     patient: { label: 'Paciente', color: 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300' },
-    admin: { label: 'Admin', color: 'bg-brand-brown text-brand-brown dark:bg-brand-brown/40 dark:text-brand-brown' },
-    ponente: { label: 'Ponente', color: 'bg-brand-yellow text-brand-yellow dark:bg-brand-yellow/40 dark:text-brand-yellow' },
+    admin: { label: 'Admin', color: 'bg-brand-blue-hover text-brand-blue-hover dark:bg-brand-blue-hover/40 dark:text-brand-blue-hover' },
+    ponente: { label: 'Ponente', color: 'bg-brand-blue text-brand-blue dark:bg-brand-blue/40 dark:text-brand-blue' },
 }
 
 export function AdminDashboard({
@@ -76,7 +76,7 @@ export function AdminDashboard({
     return (
         <div className="space-y-8 dashboard-stagger">
             {/* Hero Banner */}
-            <div className="rounded-2xl border bg-gradient-to-br from-card to-brand-brown/30 dark:from-card dark:to-brand-brown/10 p-6 sm:p-8">
+            <div className="rounded-2xl border bg-gradient-to-br from-card to-brand-blue-hover/30 dark:from-card dark:to-brand-blue-hover/10 p-6 sm:p-8">
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                     <div>
                         <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
@@ -91,7 +91,7 @@ export function AdminDashboard({
                                 Sistema Operativo
                             </span>
                             {pendingReferrals > 0 && (
-                                <span className="text-xs px-2 py-0.5 rounded-full bg-brand-yellow text-brand-yellow dark:bg-brand-yellow/30 dark:text-brand-yellow font-medium">
+                                <span className="text-xs px-2 py-0.5 rounded-full bg-brand-blue text-brand-blue dark:bg-brand-blue/30 dark:text-brand-blue font-medium">
                                     {pendingReferrals} referencia{pendingReferrals > 1 ? 's' : ''} pendiente{pendingReferrals > 1 ? 's' : ''}
                                 </span>
                             )}

@@ -60,23 +60,23 @@ export default async function EventosPage({ searchParams }: EventosPageProps) {
 
     return (
         <div className="relative flex w-full flex-1 flex-col items-center bg-background">
-            <section className="relative w-full overflow-hidden bg-gradient-to-b from-[#0a0a0a] to-background">
+            <section className="relative w-full overflow-hidden bg-gradient-to-b from-background to-brand-blue-soft/50">
                 <div className="sapihum-grid-bg absolute inset-0 opacity-15" />
-                <div className="pointer-events-none absolute left-1/3 top-0 h-[400px] w-[400px] rounded-full bg-brand-yellow/8 blur-[120px]" />
+                <div className="pointer-events-none absolute left-1/3 top-0 h-[400px] w-[400px] rounded-full bg-brand-blue/8 blur-[120px]" />
 
                 <div className="relative z-10 mx-auto max-w-7xl px-4 py-16 sm:px-6 md:py-20 lg:px-8">
                     <div className="max-w-4xl space-y-5">
-                        <div className="inline-flex items-center gap-2 rounded-full border border-brand-yellow/20 bg-brand-yellow/10 px-3.5 py-1.5 text-xs font-semibold uppercase tracking-[0.15em] text-brand-yellow">
+                        <div className="inline-flex items-center gap-2 rounded-full border border-brand-blue/20 bg-brand-blue/10 px-3.5 py-1.5 text-xs font-semibold uppercase tracking-[0.15em] text-brand-blue">
                             <span className="relative flex h-1.5 w-1.5">
-                                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-brand-yellow opacity-75" />
-                                <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-brand-yellow" />
+                                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-brand-blue opacity-75" />
+                                <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-brand-blue" />
                             </span>
-                            Agenda secundaria
+                            Agenda activa
                         </div>
-                        <h1 className="text-4xl font-bold tracking-tight text-white sm:text-5xl">
+                        <h1 className="font-serif text-4xl font-bold tracking-normal text-brand-text-strong sm:text-5xl">
                             Eventos en Vivo
                         </h1>
-                        <p className="max-w-3xl text-lg leading-relaxed text-neutral-400">
+                        <p className="max-w-3xl text-lg leading-relaxed text-brand-text-muted">
                             Esta ruta funciona como vista complementaria para enlaces compartidos, filtros y agenda puntual. La experiencia principal de descubrimiento y conversion vive ahora en Academia.
                         </p>
                         <div className="flex flex-wrap gap-3">
@@ -92,7 +92,7 @@ export default async function EventosPage({ searchParams }: EventosPageProps) {
                                     </Button>
                                 </Link>
                             ))}
-                            <Link href="/academia" className="inline-flex items-center gap-1.5 text-sm font-medium text-brand-yellow transition-colors hover:text-brand-yellow">
+                            <Link href="/academia" className="inline-flex items-center gap-1.5 text-sm font-medium text-brand-blue transition-colors hover:text-brand-blue">
                                 &larr; Ir al hub principal en Academia
                             </Link>
                         </div>
@@ -125,7 +125,7 @@ export default async function EventosPage({ searchParams }: EventosPageProps) {
                         <>
                             <div className="mb-6 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
                                 <div>
-                                    <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-brand-yellow">
+                                    <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-brand-blue">
                                         {activeCampaign ? 'Filtro activo' : 'Agenda general'}
                                     </p>
                                     <h2 className="mt-2 text-2xl font-bold tracking-tight text-foreground">

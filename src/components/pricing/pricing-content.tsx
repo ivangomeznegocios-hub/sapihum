@@ -76,13 +76,13 @@ function BillingToggle({
   savingsPercent: number
 }) {
   return (
-    <div className="inline-flex items-center rounded-full border border-white/10 bg-white/[0.03] p-1">
+    <div className="inline-flex items-center rounded-full border border-border/10 bg-white/[0.03] p-1">
       <button
         onClick={() => !isAnnual || onToggle()}
         className={`rounded-full px-5 py-2.5 text-sm font-semibold transition-all ${
           !isAnnual
             ? 'bg-white text-black shadow-sm'
-            : 'text-[#c0bfbc]/70 hover:text-white'
+            : 'text-[#6B7280]/70 hover:text-foreground'
         }`}
       >
         Mensual
@@ -92,12 +92,12 @@ function BillingToggle({
         className={`inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold transition-all ${
           isAnnual
             ? 'bg-white text-black shadow-sm'
-            : 'text-[#c0bfbc]/70 hover:text-white'
+            : 'text-[#6B7280]/70 hover:text-foreground'
         }`}
       >
         Anual
         {savingsPercent > 0 && (
-          <span className="rounded-full bg-[#f6ae02]/15 px-2 py-0.5 text-[11px] font-bold text-[#f6ae02]">
+          <span className="rounded-full bg-[#2563EB]/15 px-2 py-0.5 text-[11px] font-bold text-[#2563EB]">
             -{savingsPercent}%
           </span>
         )}
@@ -117,12 +117,12 @@ function PriceDisplay({
     return (
       <div>
         <div className="flex items-baseline gap-1.5">
-          <span className="text-4xl font-bold tracking-tight text-white sm:text-5xl">
+          <span className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
             {currency(plan.annual.monthlyEquivalent)}
           </span>
-          <span className="text-sm text-[#c0bfbc]/50">/mes</span>
+          <span className="text-sm text-[#6B7280]/50">/mes</span>
         </div>
-        <p className="mt-2 text-xs text-[#c0bfbc]/45">
+        <p className="mt-2 text-xs text-[#6B7280]/45">
           <span className="line-through">{currency(plan.monthly.amount)}/mes</span>
           {' · '}
           {currency(plan.annual.amount)} facturado anualmente
@@ -133,21 +133,21 @@ function PriceDisplay({
 
   return (
     <div className="flex items-baseline gap-1.5">
-      <span className="text-4xl font-bold tracking-tight text-white sm:text-5xl">
+      <span className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
         {currency(plan.monthly.amount)}
       </span>
-      <span className="text-sm text-[#c0bfbc]/50">/mes</span>
+      <span className="text-sm text-[#6B7280]/50">/mes</span>
     </div>
   )
 }
 
 function ComparisonCell({ included }: { included: boolean }) {
   return included ? (
-    <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-[#f6ae02]/12 text-[#f6ae02]">
+    <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-[#2563EB]/12 text-[#2563EB]">
       <Check className="h-3.5 w-3.5" />
     </span>
   ) : (
-    <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-white/[0.04] text-white/20">
+    <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-white/[0.04] text-foreground/20">
       <X className="h-3.5 w-3.5" />
     </span>
   )
@@ -183,7 +183,7 @@ export function PricingContent({
       icon: Users,
       featureIds: LEVEL_1_FEATURE_IDS,
       accent: false,
-      cardClassName: 'border-white/[0.08] bg-[#0a0a0a]',
+      cardClassName: 'border-border/[0.08] bg-background',
     },
     {
       key: 'level2' as const,
@@ -192,7 +192,7 @@ export function PricingContent({
       featureIds: LEVEL_2_CARD_FEATURE_IDS,
       accent: true,
       cardClassName:
-        'border-[#f6ae02]/20 bg-gradient-to-b from-[#0d0b04] to-[#0a0a0a] shadow-[0_0_80px_rgba(246,174,2,0.06)]',
+        'border-brand-blue-border bg-gradient-to-b from-card to-brand-blue-soft shadow-[0_0_80px_rgba(37,99,235,0.08)]',
     },
     {
       key: 'level3' as const,
@@ -200,30 +200,30 @@ export function PricingContent({
       icon: Crown,
       featureIds: LEVEL_3_CARD_FEATURE_IDS,
       accent: false,
-      cardClassName: 'border-white/[0.08] bg-[#0a0a0a]',
+      cardClassName: 'border-border/[0.08] bg-background',
     },
   ]
 
   return (
     <>
-      <div className="flex w-full flex-col bg-black text-white">
+      <div className="flex w-full flex-col bg-background text-foreground">
         {/* ── Hero ── */}
-        <section className="relative w-full overflow-hidden border-b border-white/[0.06] bg-black">
+        <section className="relative w-full overflow-hidden border-b border-border/[0.06] bg-background">
           <div className="absolute inset-0 sapihum-grid-bg opacity-20" />
-          <div className="absolute left-1/2 top-0 h-[540px] w-[540px] -translate-x-1/2 rounded-full bg-[#f6ae02]/6 blur-[140px]" />
+          <div className="absolute left-1/2 top-0 h-[540px] w-[540px] -translate-x-1/2 rounded-full bg-[#2563EB]/6 blur-[140px]" />
 
           <div className="relative z-10 mx-auto max-w-5xl px-4 py-24 sm:px-6 lg:px-8 lg:py-32">
             <div className="mx-auto max-w-4xl text-center">
-              <div className="sapihum-fade-up inline-flex items-center gap-2 rounded-sm border border-[#f6ae02]/20 bg-[#f6ae02]/5 px-4 py-1.5 text-[10px] font-bold uppercase tracking-[0.2em] text-[#f6ae02]">
+              <div className="sapihum-fade-up inline-flex items-center gap-2 rounded-sm border border-[#2563EB]/20 bg-[#2563EB]/5 px-4 py-1.5 text-[10px] font-bold uppercase tracking-[0.2em] text-[#2563EB]">
                 Membresía SAPIHUM
               </div>
-              <h1 className="sapihum-fade-up mt-8 text-3xl font-bold leading-[1.1] tracking-tight text-white sm:text-4xl md:text-5xl lg:text-6xl">
+              <h1 className="sapihum-fade-up mt-8 font-serif text-3xl font-bold leading-[1.06] tracking-normal text-brand-text-strong sm:text-4xl md:text-5xl lg:text-6xl">
                 Una membresía. Una comunidad.{' '}
-                <span className="font-serif font-normal italic text-[#c0bfbc]">
+                <span className="font-bold italic text-brand-blue-dark">
                   Todo lo que necesitas para crecer como psicólogo.
                 </span>
               </h1>
-              <p className="sapihum-fade-up mx-auto mt-8 max-w-2xl text-base font-light leading-relaxed text-[#c0bfbc]/65 md:text-lg">
+              <p className="sapihum-fade-up mx-auto mt-8 max-w-2xl text-base font-light leading-relaxed text-[#6B7280]/65 md:text-lg">
                 Accede a formación continua, red de profesionales, recursos clínicos y eventos.
                 Para quienes quieren más, hay expansiones opcionales.
               </p>
@@ -236,7 +236,7 @@ export function PricingContent({
                 />
               </div>
 
-              <p className="mt-5 text-xs text-[#c0bfbc]/40">
+              <p className="mt-5 text-xs text-[#6B7280]/40">
                 Montos en MXN · La expansión de Consultorio Digital es para Psicología Clínica
               </p>
             </div>
@@ -244,7 +244,7 @@ export function PricingContent({
         </section>
 
         {/* ── Pricing Cards ── */}
-        <section className="w-full bg-black py-16 sm:py-20">
+        <section className="w-full bg-background py-16 sm:py-20">
           <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
             <div className="mx-auto mb-16 max-w-2xl">
               {cardConfigs.filter(c => c.key === 'level1').map((card) => {
@@ -260,7 +260,7 @@ export function PricingContent({
                   >
                     {/* Accent top bar for level 2 */}
                     {card.accent && (
-                      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#f6ae02]/50 to-transparent" />
+                      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#2563EB]/50 to-transparent" />
                     )}
 
                     <CardContent className="flex h-full flex-col p-0">
@@ -268,11 +268,11 @@ export function PricingContent({
                       <div className="px-6 pt-6 pb-5 sm:px-7">
                         {/* Badges row */}
                         <div className="flex flex-wrap items-center gap-2">
-                          <Badge className="border border-white/10 bg-white/[0.04] text-[10px] uppercase tracking-[0.18em] text-[#c0bfbc]/70 hover:bg-white/[0.04]">
+                          <Badge className="border border-border/10 bg-white/[0.04] text-[10px] uppercase tracking-[0.18em] text-[#6B7280]/70 hover:bg-white/[0.04]">
                             {copy.levelLabel}
                           </Badge>
                           {copy.badge && (
-                            <Badge className="border border-[#f6ae02]/15 bg-[#f6ae02]/8 text-[10px] uppercase tracking-[0.18em] text-[#f6ae02] hover:bg-[#f6ae02]/8">
+                            <Badge className="border border-[#2563EB]/15 bg-[#2563EB]/8 text-[10px] uppercase tracking-[0.18em] text-[#2563EB] hover:bg-[#2563EB]/8">
                               {copy.badge}
                             </Badge>
                           )}
@@ -280,27 +280,27 @@ export function PricingContent({
 
                         {/* Icon + Title + Description */}
                         <div className="mt-5 flex items-center gap-3">
-                          <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${card.accent ? 'bg-[#f6ae02]/12 text-[#f6ae02]' : 'bg-white/[0.04] text-[#f6ae02]'}`}>
+                          <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${card.accent ? 'bg-[#2563EB]/12 text-[#2563EB]' : 'bg-white/[0.04] text-[#2563EB]'}`}>
                             <Icon className="h-5 w-5" />
                           </div>
-                          <h2 className="text-xl font-bold text-white sm:text-2xl">
+                          <h2 className="text-xl font-bold text-foreground sm:text-2xl">
                             {copy.title}
                           </h2>
                         </div>
 
-                        <p className="mt-3 text-sm leading-relaxed text-[#c0bfbc]/55">
+                        <p className="mt-3 text-sm leading-relaxed text-[#6B7280]/55">
                           {copy.description}
                         </p>
 
                         {/* Price — own row, clean and prominent */}
-                        <div className="mt-5 border-t border-white/[0.06] pt-5">
+                        <div className="mt-5 border-t border-border/[0.06] pt-5">
                           <PriceDisplay plan={card.plan} isAnnual={isAnnual} />
                         </div>
                       </div>
 
                       {/* Feature list */}
-                      <div className="flex flex-1 flex-col border-t border-white/[0.06] px-6 py-5 sm:px-7">
-                        <p className="mb-4 flex items-center justify-between text-[10px] font-bold uppercase tracking-[0.18em] text-[#c0bfbc]/40">
+                      <div className="flex flex-1 flex-col border-t border-border/[0.06] px-6 py-5 sm:px-7">
+                        <p className="mb-4 flex items-center justify-between text-[10px] font-bold uppercase tracking-[0.18em] text-[#6B7280]/40">
                           <span>Lo que incluye</span>
                         </p>
 
@@ -309,11 +309,11 @@ export function PricingContent({
                             const feature = PRICING_FEATURES_BY_ID[featureId]
                             return (
                               <li key={featureId} className="group/feat flex items-center gap-3">
-                                <Check className="h-4 w-4 shrink-0 text-[#f6ae02]/70" />
+                                <Check className="h-4 w-4 shrink-0 text-[#2563EB]/70" />
                                 <button
                                   type="button"
                                   onClick={() => setSelectedFeatureId(feature.id)}
-                                  className="text-left text-sm font-medium text-[#c0bfbc]/70 transition-colors hover:text-[#f6ae02]"
+                                  className="text-left text-sm font-medium text-[#6B7280]/70 transition-colors hover:text-[#2563EB]"
                                 >
                                   {feature.title}
                                 </button>
@@ -323,7 +323,7 @@ export function PricingContent({
                         </ul>
 
                         {/* Note */}
-                        <p className="mt-5 border-t border-white/[0.06] pt-4 text-xs leading-relaxed text-[#c0bfbc]/40">
+                        <p className="mt-5 border-t border-border/[0.06] pt-4 text-xs leading-relaxed text-[#6B7280]/40">
                           {copy.note}
                         </p>
 
@@ -360,10 +360,10 @@ export function PricingContent({
             {/* Separator */}
             <div className="relative mb-16 flex items-center justify-center">
               <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-white/[0.06]"></div>
+                <div className="w-full border-t border-border/[0.06]"></div>
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="bg-black px-4 font-medium tracking-wide text-[#c0bfbc]/50 uppercase text-[10px]">Expansiones opcionales</span>
+                <span className="bg-background px-4 font-medium tracking-wide text-[#6B7280]/50 uppercase text-[10px]">Expansiones opcionales</span>
               </div>
             </div>
 
@@ -378,43 +378,43 @@ export function PricingContent({
                     className={`relative flex h-full flex-col overflow-hidden rounded-2xl ${card.cardClassName}`}
                   >
                     {card.accent && (
-                      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#f6ae02]/50 to-transparent" />
+                      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#2563EB]/50 to-transparent" />
                     )}
                     <CardContent className="flex h-full flex-col p-0">
                       <div className="px-6 pt-6 pb-5 sm:px-7">
                         <div className="flex flex-wrap items-center gap-2">
-                          <Badge className="border border-white/10 bg-white/[0.04] text-[10px] uppercase tracking-[0.18em] text-[#c0bfbc]/70 hover:bg-white/[0.04]">
+                          <Badge className="border border-border/10 bg-white/[0.04] text-[10px] uppercase tracking-[0.18em] text-[#6B7280]/70 hover:bg-white/[0.04]">
                             {copy.levelLabel}
                           </Badge>
                           {copy.badge && (
-                            <Badge className="border border-[#f6ae02]/15 bg-[#f6ae02]/8 text-[10px] uppercase tracking-[0.18em] text-[#f6ae02] hover:bg-[#f6ae02]/8">
+                            <Badge className="border border-[#2563EB]/15 bg-[#2563EB]/8 text-[10px] uppercase tracking-[0.18em] text-[#2563EB] hover:bg-[#2563EB]/8">
                               {copy.badge}
                             </Badge>
                           )}
                         </div>
                         <div className="mt-5 flex items-center gap-3">
-                          <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${card.accent ? 'bg-[#f6ae02]/12 text-[#f6ae02]' : 'bg-white/[0.04] text-[#f6ae02]'}`}>
+                          <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${card.accent ? 'bg-[#2563EB]/12 text-[#2563EB]' : 'bg-white/[0.04] text-[#2563EB]'}`}>
                             <Icon className="h-5 w-5" />
                           </div>
-                          <h2 className="text-xl font-bold text-white sm:text-2xl">
+                          <h2 className="text-xl font-bold text-foreground sm:text-2xl">
                             {copy.title}
                           </h2>
                         </div>
-                        <p className="mt-3 text-sm leading-relaxed text-[#c0bfbc]/55">
+                        <p className="mt-3 text-sm leading-relaxed text-[#6B7280]/55">
                           {copy.description}
                         </p>
-                        <div className="mt-5 border-t border-white/[0.06] pt-5">
+                        <div className="mt-5 border-t border-border/[0.06] pt-5">
                           <PriceDisplay plan={card.plan} isAnnual={isAnnual} />
                         </div>
                       </div>
-                      <div className="flex flex-1 flex-col border-t border-white/[0.06] px-6 py-5 sm:px-7">
-                        <p className="mb-4 flex items-center justify-between text-[10px] font-bold uppercase tracking-[0.18em] text-[#c0bfbc]/40">
+                      <div className="flex flex-1 flex-col border-t border-border/[0.06] px-6 py-5 sm:px-7">
+                        <p className="mb-4 flex items-center justify-between text-[10px] font-bold uppercase tracking-[0.18em] text-[#6B7280]/40">
                           <span>Lo que incluye</span>
                           {card.key === 'level2' && (
-                            <span className="text-[#f6ae02]/70">+ toda la Membresía</span>
+                            <span className="text-[#2563EB]/70">+ toda la Membresía</span>
                           )}
                           {card.key === 'level3' && (
-                            <span className="text-[#f6ae02]/70">+ todo Consultorio Digital</span>
+                            <span className="text-[#2563EB]/70">+ todo Consultorio Digital</span>
                           )}
                         </p>
                         <ul className="flex-1 space-y-2.5">
@@ -424,14 +424,14 @@ export function PricingContent({
                             return (
                               <li key={featureId} className="group/feat flex items-center gap-3">
                                 {carryover ? (
-                                  <PlusCircle className="h-4 w-4 shrink-0 text-[#f6ae02]" />
+                                  <PlusCircle className="h-4 w-4 shrink-0 text-[#2563EB]" />
                                 ) : (
-                                  <Check className="h-4 w-4 shrink-0 text-[#f6ae02]/70" />
+                                  <Check className="h-4 w-4 shrink-0 text-[#2563EB]/70" />
                                 )}
                                 <button
                                   type="button"
                                   onClick={() => setSelectedFeatureId(feature.id)}
-                                  className={`text-left text-sm transition-colors hover:text-[#f6ae02] ${carryover ? 'font-medium text-white' : 'text-[#c0bfbc]/70'}`}
+                                  className={`text-left text-sm transition-colors hover:text-[#2563EB] ${carryover ? 'font-medium text-foreground' : 'text-[#6B7280]/70'}`}
                                 >
                                   {feature.title}
                                 </button>
@@ -439,7 +439,7 @@ export function PricingContent({
                             )
                           })}
                         </ul>
-                        <p className="mt-5 border-t border-white/[0.06] pt-4 text-xs leading-relaxed text-[#c0bfbc]/40">
+                        <p className="mt-5 border-t border-border/[0.06] pt-4 text-xs leading-relaxed text-[#6B7280]/40">
                           {copy.note}
                         </p>
                         <div className="mt-5">
@@ -486,7 +486,7 @@ export function PricingContent({
                           )}
                         </div>
                         {card.key === 'level3' && (
-                          <p className="mt-3 text-center text-[11px] text-[#c0bfbc]/40">
+                          <p className="mt-3 text-center text-[11px] text-[#6B7280]/40">
                             Se habilita una vez que ya tienes activo Consultorio Digital.
                           </p>
                         )}
@@ -500,19 +500,19 @@ export function PricingContent({
         </section>
 
         {/* ── Comparison toggle ── */}
-        <section className="w-full border-y border-white/[0.06] bg-[#030303] py-16 sm:py-20">
+        <section className="w-full border-y border-border/[0.06] bg-background py-16 sm:py-20">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="mx-auto max-w-2xl text-center">
-              <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#f6ae02]">
+              <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#2563EB]">
                 Comparativa
               </p>
-              <h2 className="mt-4 text-2xl font-bold tracking-tight text-white sm:text-3xl">
+              <h2 className="mt-4 text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
                 Detalle por beneficio y{' '}
-                <span className="font-serif font-normal italic text-[#c0bfbc]">
+                <span className="font-serif font-normal italic text-[#6B7280]">
                   expansión
                 </span>
               </h2>
-              <p className="mx-auto mt-4 max-w-xl text-sm font-light leading-relaxed text-[#c0bfbc]/55">
+              <p className="mx-auto mt-4 max-w-xl text-sm font-light leading-relaxed text-[#6B7280]/55">
                 Toca cualquier beneficio para ver la explicación completa.
               </p>
             </div>
@@ -535,18 +535,18 @@ export function PricingContent({
             </div>
 
             {comparisonOpen && (
-              <div className="mt-10 overflow-x-auto rounded-2xl border border-white/[0.08] bg-[#070707]">
-                <Table className="w-full min-w-[640px] text-white">
+              <div className="mt-10 overflow-x-auto rounded-2xl border border-border/[0.08] bg-[#070707]">
+                <Table className="w-full min-w-[640px] text-foreground">
                   <TableHeader>
-                    <TableRow className="border-white/[0.08] bg-white/[0.03] hover:bg-white/[0.03]">
-                      <TableHead className="w-[40%] text-[#c0bfbc]/60 text-xs">Beneficio</TableHead>
-                      <TableHead className="w-[20%] text-center text-[#c0bfbc]/60 text-xs">
+                    <TableRow className="border-border/[0.08] bg-white/[0.03] hover:bg-white/[0.03]">
+                      <TableHead className="w-[40%] text-[#6B7280]/60 text-xs">Beneficio</TableHead>
+                      <TableHead className="w-[20%] text-center text-[#6B7280]/60 text-xs">
                         Comunidad
                       </TableHead>
-                      <TableHead className="w-[20%] text-center text-[#c0bfbc]/60 text-xs">
+                      <TableHead className="w-[20%] text-center text-[#6B7280]/60 text-xs">
                         + Consultorio
                       </TableHead>
-                      <TableHead className="w-[20%] text-center text-[#c0bfbc]/60 text-xs">
+                      <TableHead className="w-[20%] text-center text-[#6B7280]/60 text-xs">
                         + Marketing
                       </TableHead>
                     </TableRow>
@@ -554,23 +554,23 @@ export function PricingContent({
                   <TableBody>
                     {comparisonGroups.map((group) => (
                       <Fragment key={group.group}>
-                        <TableRow className="border-white/[0.06] bg-[#0d0d0d] hover:bg-[#0d0d0d]">
-                          <TableCell colSpan={4} className="py-2.5 text-[10px] font-bold uppercase tracking-[0.2em] text-[#f6ae02]">
+                        <TableRow className="border-border/[0.06] bg-[#0d0d0d] hover:bg-[#0d0d0d]">
+                          <TableCell colSpan={4} className="py-2.5 text-[10px] font-bold uppercase tracking-[0.2em] text-[#2563EB]">
                             {group.label}
                           </TableCell>
                         </TableRow>
                         {group.rows.map((feature, index) => (
                           <TableRow
                             key={feature.id}
-                            className={`cursor-pointer border-white/[0.05] transition-colors hover:bg-white/[0.04] ${
+                            className={`cursor-pointer border-border/[0.05] transition-colors hover:bg-white/[0.04] ${
                               index % 2 === 0 ? 'bg-transparent' : 'bg-white/[0.015]'
                             }`}
                             onClick={() => setSelectedFeatureId(feature.id)}
                           >
                             <TableCell className="align-middle">
                               <div className="min-w-0">
-                                <p className="text-sm font-medium text-white">{feature.title}</p>
-                                <p className="mt-0.5 text-xs text-[#c0bfbc]/45">{feature.description}</p>
+                                <p className="text-sm font-medium text-foreground">{feature.title}</p>
+                                <p className="mt-0.5 text-xs text-[#6B7280]/45">{feature.description}</p>
                               </div>
                             </TableCell>
                             <TableCell className="text-center align-middle">
@@ -594,7 +594,7 @@ export function PricingContent({
         </section>
 
         {/* ── Bottom info cards ── */}
-        <section className="w-full bg-black py-16 sm:py-20">
+        <section className="w-full bg-background py-16 sm:py-20">
           <div className="mx-auto grid max-w-5xl gap-5 px-4 sm:px-6 md:grid-cols-3 lg:px-8">
             {[
               {
@@ -615,13 +615,13 @@ export function PricingContent({
             ].map((item) => (
               <div
                 key={item.title}
-                className="rounded-xl border border-white/[0.08] bg-[#0a0a0a] p-6"
+                className="rounded-xl border border-border/[0.08] bg-background p-6"
               >
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/[0.04] text-[#f6ae02]">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/[0.04] text-[#2563EB]">
                   <item.icon className="h-4.5 w-4.5" />
                 </div>
-                <h3 className="mt-4 text-base font-semibold text-white">{item.title}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-[#c0bfbc]/50">
+                <h3 className="mt-4 text-base font-semibold text-foreground">{item.title}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-[#6B7280]/50">
                   {item.text}
                 </p>
               </div>
@@ -632,28 +632,28 @@ export function PricingContent({
 
       {/* ── Feature Detail Dialog — Minimalist ── */}
       <Dialog open={!!selectedFeature} onOpenChange={(open) => !open && setSelectedFeatureId(null)}>
-        <DialogContent className="max-w-md border-white/[0.08] bg-[#0a0a0a] text-white sm:rounded-2xl">
+        <DialogContent className="max-w-md border-border/[0.08] bg-background text-foreground sm:rounded-2xl">
           {selectedFeature && (
             <div className="space-y-4">
               <DialogHeader className="space-y-2 text-left">
-                <Badge className="w-fit border border-[#f6ae02]/15 bg-[#f6ae02]/8 text-[10px] uppercase tracking-[0.18em] text-[#f6ae02] hover:bg-[#f6ae02]/8">
+                <Badge className="w-fit border border-[#2563EB]/15 bg-[#2563EB]/8 text-[10px] uppercase tracking-[0.18em] text-[#2563EB] hover:bg-[#2563EB]/8">
                   {PRICING_GROUP_LABELS[selectedFeature.group]}
                 </Badge>
-                <DialogTitle className="text-xl font-bold tracking-tight text-white">
+                <DialogTitle className="text-xl font-bold tracking-tight text-foreground">
                   {selectedFeature.title}
                 </DialogTitle>
-                <DialogDescription className="text-sm text-[#c0bfbc]/60">
+                <DialogDescription className="text-sm text-[#6B7280]/60">
                   {selectedFeature.description}
                 </DialogDescription>
               </DialogHeader>
 
-              <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-4 text-sm leading-relaxed text-[#c0bfbc]/70">
+              <div className="rounded-xl border border-border/[0.06] bg-white/[0.02] p-4 text-sm leading-relaxed text-[#6B7280]/70">
                 {selectedFeature.details}
               </div>
 
               {/* Simple availability row — compact */}
               <div className="flex items-center gap-3 pt-1">
-                <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-[#c0bfbc]/35">
+                <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-[#6B7280]/35">
                   Disponible en:
                 </span>
                 <div className="flex items-center gap-2">
@@ -664,8 +664,8 @@ export function PricingContent({
                         key={level}
                         className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider ${
                           enabled
-                            ? 'border border-[#f6ae02]/20 bg-[#f6ae02]/8 text-[#f6ae02]'
-                            : 'border border-white/[0.06] bg-white/[0.02] text-[#c0bfbc]/30'
+                            ? 'border border-[#2563EB]/20 bg-[#2563EB]/8 text-[#2563EB]'
+                            : 'border border-border/[0.06] bg-white/[0.02] text-[#6B7280]/30'
                         }`}
                       >
                         {enabled && <Check className="h-3 w-3" />}

@@ -15,17 +15,17 @@ export default function EspecialidadesIndexPage() {
 
   return (
     <div className="flex flex-1 w-full flex-col items-center">
-      <section className="relative w-full overflow-hidden bg-[#0a0a0a] py-20 md:py-28">
+      <section className="relative w-full overflow-hidden bg-background py-20 md:py-28">
         <div className="absolute inset-0 sapihum-grid-bg opacity-10" />
-        <div className="absolute left-1/2 top-0 h-[500px] w-[500px] -translate-x-1/2 rounded-full bg-brand-yellow/3 blur-[120px]" />
+        <div className="absolute left-1/2 top-0 h-[500px] w-[500px] -translate-x-1/2 rounded-full bg-brand-blue/3 blur-[120px]" />
 
         <div className="relative z-10 mx-auto w-full max-w-4xl px-4 text-center sm:px-6 lg:px-8">
-          <p className="mb-4 text-[10px] font-bold uppercase tracking-[0.2em] text-brand-yellow">
+          <p className="mb-4 text-[10px] font-bold uppercase tracking-[0.2em] text-brand-blue">
             {SPECIALIZATION_COUNT} areas activas de especializacion
           </p>
-          <h1 className="mb-6 text-4xl font-bold leading-tight tracking-tight text-white md:text-5xl lg:text-6xl">
+          <h1 className="mb-6 text-4xl font-bold leading-tight tracking-tight text-foreground md:text-5xl lg:text-6xl">
             Especialidades con{' '}
-            <span className="font-serif font-normal italic text-[#c0bfbc]">
+            <span className="font-serif font-normal italic text-[#6B7280]">
               eventos, cursos y Nivel 2
             </span>
           </h1>
@@ -43,17 +43,17 @@ export default function EspecialidadesIndexPage() {
               href={`/especialidades/${spec.slug}`}
               className="group relative overflow-hidden rounded-2xl border bg-card p-7 sapihum-card-glow"
             >
-              <div className="absolute left-0 top-0 bottom-0 w-px bg-brand-yellow opacity-0 transition-opacity group-hover:opacity-100" />
+              <div className="absolute left-0 top-0 bottom-0 w-px bg-brand-blue opacity-0 transition-opacity group-hover:opacity-100" />
 
-              <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-sm bg-brand-yellow/5 text-3xl">
+              <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-sm bg-brand-blue/5 text-3xl">
                 {spec.icon}
               </div>
 
-              <h2 className="mb-2 text-lg font-bold transition-colors group-hover:text-brand-yellow">
+              <h2 className="mb-2 text-lg font-bold transition-colors group-hover:text-brand-blue">
                 {spec.name}
               </h2>
 
-              <p className="mb-3 text-xs font-medium uppercase tracking-wider text-brand-yellow">
+              <p className="mb-3 text-xs font-medium uppercase tracking-wider text-brand-blue">
                 {spec.tagline}
               </p>
 
@@ -76,7 +76,7 @@ export default function EspecialidadesIndexPage() {
               <div className="mb-5 space-y-1.5">
                 {spec.tools.slice(0, 3).map((tool) => (
                   <div key={tool} className="flex items-center gap-2 text-xs text-muted-foreground">
-                    <span className="h-1 w-1 shrink-0 rounded-full bg-brand-yellow" />
+                    <span className="h-1 w-1 shrink-0 rounded-full bg-brand-blue" />
                     {tool}
                   </div>
                 ))}
@@ -87,7 +87,7 @@ export default function EspecialidadesIndexPage() {
                 )}
               </div>
 
-              <div className="flex items-center text-[10px] font-bold uppercase tracking-[0.15em] text-brand-yellow">
+              <div className="flex items-center text-[10px] font-bold uppercase tracking-[0.15em] text-brand-blue">
                 Explorar especialidad <span className="ml-1 transition-transform group-hover:translate-x-1">→</span>
               </div>
             </Link>

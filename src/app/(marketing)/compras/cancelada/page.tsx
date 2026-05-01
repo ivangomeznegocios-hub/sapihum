@@ -47,9 +47,9 @@ export default async function PurchaseCancelledPage({ searchParams }: PageProps)
 
     return (
         <section className="mx-auto flex w-full max-w-3xl flex-1 items-center px-4 py-12 sm:px-6 lg:px-8">
-            <Card className="w-full border-brand-yellow/20 shadow-xl">
+            <Card className="w-full border-brand-blue/20 shadow-xl">
                 <CardHeader className="space-y-4 text-center">
-                    <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-brand-yellow/10 text-brand-yellow">
+                    <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-brand-blue/10 text-brand-blue">
                         <XCircle className="h-8 w-8" />
                     </div>
                     <div className="space-y-2">

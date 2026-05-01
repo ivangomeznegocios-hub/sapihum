@@ -280,7 +280,7 @@ export function MembershipChangeForm({ user, onClose }: MembershipChangeFormProp
                         </div>
                     )}
 
-                    <div className="rounded-lg border border-brand-yellow bg-brand-yellow px-3 py-3 text-sm text-brand-yellow">
+                    <div className="rounded-lg border border-brand-blue bg-brand-blue px-3 py-3 text-sm text-brand-blue">
                         Este cambio sincroniza tanto el perfil como la suscripcion operativa para que accesos y permisos queden alineados.
                     </div>
 
@@ -367,7 +367,7 @@ export function UserEditForm({ user, onClose }: UserEditFormProps) {
                         />
                     </div>
 
-                    <div className="rounded-lg border border-brand-yellow bg-brand-yellow px-3 py-3 text-sm text-brand-yellow">
+                    <div className="rounded-lg border border-brand-blue bg-brand-blue px-3 py-3 text-sm text-brand-blue">
                         Los cambios avanzados de compras, relinks y grants manuales siguen en{' '}
                         <Link href="/dashboard/admin/operations" className="font-medium underline underline-offset-4">
                             Operaciones

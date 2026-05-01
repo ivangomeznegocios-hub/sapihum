@@ -81,9 +81,9 @@ export default async function PurchaseSuccessPage({ searchParams }: PageProps) {
 
         return (
             <section className="mx-auto flex w-full max-w-3xl flex-1 items-center px-4 py-12 sm:px-6 lg:px-8">
-                <Card className="w-full border-brand-brown/20 shadow-xl">
+                <Card className="w-full border-brand-blue-hover/20 shadow-xl">
                     <CardHeader className="space-y-4 text-center">
-                        <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-brand-brown/10 text-brand-brown">
+                        <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-brand-blue-hover/10 text-brand-blue-hover">
                             <CheckCircle2 className="h-8 w-8" />
                         </div>
                         <div className="space-y-2">
@@ -103,7 +103,7 @@ export default async function PurchaseSuccessPage({ searchParams }: PageProps) {
                         </div>
 
                         {!profile && recoveryEmail ? (
-                            <div className="rounded-xl border border-brand-yellow/20 bg-brand-yellow/10 p-4 text-sm text-brand-yellow">
+                            <div className="rounded-xl border border-brand-blue/20 bg-brand-blue/10 p-4 text-sm text-brand-blue">
                                 Si aun no te llega el acceso, usa <strong>{recoveryEmail}</strong> para recibir tu magic link.
                             </div>
                         ) : null}
@@ -139,9 +139,9 @@ export default async function PurchaseSuccessPage({ searchParams }: PageProps) {
 
     return (
         <section className="mx-auto flex w-full max-w-3xl flex-1 items-center px-4 py-12 sm:px-6 lg:px-8">
-            <Card className="w-full border-brand-brown/20 shadow-xl">
+            <Card className="w-full border-brand-blue-hover/20 shadow-xl">
                 <CardHeader className="space-y-4 text-center">
-                    <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-brand-brown/10 text-brand-brown">
+                    <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-brand-blue-hover/10 text-brand-blue-hover">
                         <CheckCircle2 className="h-8 w-8" />
                     </div>
                     <div className="space-y-2">

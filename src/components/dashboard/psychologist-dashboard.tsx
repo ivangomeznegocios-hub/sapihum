@@ -108,7 +108,7 @@ export function PsychologistDashboard({
                                 Tu espacio de crecimiento profesional en SAPIHUM
                             </p>
                             <div className="flex items-center gap-2 mt-3">
-                                <span className="text-xs px-2.5 py-1 rounded-full bg-brand-brown text-brand-brown dark:bg-brand-brown/30 dark:text-brand-brown font-medium">
+                                <span className="text-xs px-2.5 py-1 rounded-full bg-brand-blue-hover text-brand-blue-hover dark:bg-brand-blue-hover/30 dark:text-brand-blue-hover font-medium">
                                     Nivel 1 · Comunidad y Crecimiento
                                 </span>
                             </div>
@@ -170,7 +170,7 @@ export function PsychologistDashboard({
                     </div>
 
                     {/* Upgrade CTA */}
-                    <Card className="bg-gradient-to-br from-primary/5 via-primary/10 to-brand-brown/10 border-primary/20 backdrop-blur-sm">
+                    <Card className="bg-gradient-to-br from-primary/5 via-primary/10 to-brand-blue-hover/10 border-primary/20 backdrop-blur-sm">
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2">
                                 <Sparkles className="h-5 w-5 text-primary" />
@@ -187,15 +187,15 @@ export function PsychologistDashboard({
                             </p>
                             <ul className="space-y-1.5 text-xs text-muted-foreground">
                                 <li className="flex items-center gap-2">
-                                    <CheckCircle2 className="h-3.5 w-3.5 text-brand-brown" />
+                                    <CheckCircle2 className="h-3.5 w-3.5 text-brand-blue-hover" />
                                     Página web profesional
                                 </li>
                                 <li className="flex items-center gap-2">
-                                    <CheckCircle2 className="h-3.5 w-3.5 text-brand-brown" />
+                                    <CheckCircle2 className="h-3.5 w-3.5 text-brand-blue-hover" />
                                     Agenda online 24/7
                                 </li>
                                 <li className="flex items-center gap-2">
-                                    <CheckCircle2 className="h-3.5 w-3.5 text-brand-brown" />
+                                    <CheckCircle2 className="h-3.5 w-3.5 text-brand-blue-hover" />
                                     Pagos y dashboard financiero
                                 </li>
                             </ul>
@@ -263,8 +263,8 @@ export function PsychologistDashboard({
                         </p>
                         <div className="flex items-center gap-2 mt-3">
                             <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${membershipLevel === 3
-                                    ? 'bg-brand-yellow text-brand-yellow dark:bg-brand-yellow/30 dark:text-brand-yellow'
-                                    : 'bg-brand-yellow text-brand-yellow dark:bg-brand-yellow/30 dark:text-brand-yellow'
+                                    ? 'bg-brand-blue text-brand-blue dark:bg-brand-blue/30 dark:text-brand-blue'
+                                    : 'bg-brand-blue text-brand-blue dark:bg-brand-blue/30 dark:text-brand-blue'
                                 }`}>
                                 Nivel {membershipLevel} · {membershipLevel === 3 ? 'Gestión y Marketing Premium' : 'Consultorio Digital'}
                             </span>
@@ -273,7 +273,7 @@ export function PsychologistDashboard({
                     <div className="flex w-full flex-col gap-2 flex-shrink-0 sm:w-auto sm:flex-row">
                         {membershipLevel === 3 && (
                             <Link href="/dashboard/marketing">
-                                <Button variant="outline" className="w-full border-brand-yellow/50 text-brand-yellow hover:bg-brand-yellow dark:hover:bg-brand-yellow sm:w-auto">
+                                <Button variant="outline" className="w-full border-brand-blue/50 text-brand-blue hover:bg-brand-blue dark:hover:bg-brand-blue sm:w-auto">
                                     <TrendingUp className="mr-2 h-4 w-4" />
                                     Agencia
                                 </Button>
@@ -405,7 +405,7 @@ export function PsychologistDashboard({
                                             <span className={`text-xs font-medium px-2 py-1 rounded-full self-start sm:self-auto ${diffMs < 0
                                                     ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
                                                     : diffHrs < 1
-                                                        ? 'bg-brand-yellow text-brand-yellow dark:bg-brand-yellow/30 dark:text-brand-yellow'
+                                                        ? 'bg-brand-blue text-brand-blue dark:bg-brand-blue/30 dark:text-brand-blue'
                                                         : 'bg-muted text-muted-foreground'
                                                 }`}>
                                                 {timeLabel}

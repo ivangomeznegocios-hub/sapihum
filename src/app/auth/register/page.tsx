@@ -288,7 +288,7 @@ function RegisterForm() {
                 <CardDescription>Únete a {brandCommunityLabel}</CardDescription>
 
                 {(preselectedPlan || preselectedSpecialization) && (
-                    <div className="mt-3 rounded-md border border-brand-yellow bg-brand-yellow px-3 py-2 text-left text-xs text-brand-yellow">
+                    <div className="mt-3 rounded-md border border-brand-blue bg-brand-blue px-3 py-2 text-left text-xs text-brand-blue">
                         {preselectedPlan && <p>Plan sugerido: {preselectedPlan}</p>}
                         {preselectedSpecialization && <p>Especializacion sugerida: {preselectedSpecialization}</p>}
                     </div>

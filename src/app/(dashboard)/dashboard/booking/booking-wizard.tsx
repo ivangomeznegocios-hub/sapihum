@@ -154,8 +154,8 @@ export function BookingWizard({ psychologist, existingAppointments }: BookingWiz
         return (
             <Card className="max-w-lg mx-auto">
                 <CardContent className="pt-10 pb-8 text-center space-y-6">
-                    <div className="mx-auto w-20 h-20 bg-brand-brown dark:bg-brand-brown/30 rounded-full flex items-center justify-center">
-                        <CheckCircle2 className="h-10 w-10 text-brand-brown" />
+                    <div className="mx-auto w-20 h-20 bg-brand-blue-hover dark:bg-brand-blue-hover/30 rounded-full flex items-center justify-center">
+                        <CheckCircle2 className="h-10 w-10 text-brand-blue-hover" />
                     </div>
                     <div>
                         <h2 className="text-2xl font-bold mb-2">¡Cita Solicitada!</h2>

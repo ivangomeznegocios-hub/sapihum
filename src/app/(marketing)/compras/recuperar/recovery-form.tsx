@@ -53,7 +53,7 @@ export function RecoveryForm() {
     if (success) {
         return (
             <div className="space-y-4">
-                <div className="rounded-xl border border-brand-brown/20 bg-brand-brown/10 p-4 text-sm text-brand-brown">
+                <div className="rounded-xl border border-brand-blue-hover/20 bg-brand-blue-hover/10 p-4 text-sm text-brand-blue-hover">
                     Enviamos un magic link a <strong>{email}</strong>. Ábrelo desde tu correo para entrar directo a tu acceso.
                 </div>
                 <Button asChild variant="outline" className="w-full">

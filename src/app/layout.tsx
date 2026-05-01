@@ -21,7 +21,7 @@ const playfair = Playfair_Display({
 })
 
 export const viewport: Viewport = {
-    themeColor: '#000000',
+    themeColor: '#FAFAF9',
 }
 
 export const metadata: Metadata = {
@@ -62,7 +62,7 @@ export default function RootLayout({
                 <TrackingBootstrap />
                 <ThemeProvider
                     attribute="class"
-                    defaultTheme="dark"
+                    defaultTheme="light"
                     enableSystem={false}
                     disableTransitionOnChange
                 >

@@ -188,8 +188,8 @@ export function getStatusLabel(status: string): string {
  */
 export function getStatusColor(status: string): string {
     const colors: Record<string, string> = {
-        pending: 'bg-brand-yellow text-brand-yellow dark:bg-brand-yellow/30 dark:text-brand-yellow',
-        in_progress: 'bg-brand-yellow text-brand-yellow dark:bg-brand-yellow/30 dark:text-brand-yellow',
+        pending: 'bg-brand-blue text-brand-blue dark:bg-brand-blue/30 dark:text-brand-blue',
+        in_progress: 'bg-brand-blue text-brand-blue dark:bg-brand-blue/30 dark:text-brand-blue',
         completed: 'surface-alert-success dark:bg-green-900/30 dark:text-green-400',
         expired: 'surface-alert-error dark:bg-red-900/30 dark:text-red-400'
     }

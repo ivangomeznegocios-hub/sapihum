@@ -161,7 +161,7 @@ export function PublicAccessCta({
                     {loading ? 'Procesando...' : label}
                 </Button>
                 {statusMessage && (
-                    <p className="rounded-lg border border-brand-brown bg-brand-brown px-3 py-2 text-sm text-brand-brown">
+                    <p className="rounded-lg border border-brand-blue-hover bg-brand-blue-hover px-3 py-2 text-sm text-brand-blue-hover">
                         {statusMessage}
                     </p>
                 )}
