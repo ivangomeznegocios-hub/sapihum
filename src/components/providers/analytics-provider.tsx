@@ -135,6 +135,7 @@ export function AnalyticsProvider() {
         const canLoadGtm =
             Boolean(googleTagManagerId)
             && routeContext.destinations.gtm
+            && hasMeasurementConsent(consentState)
 
         if (!canLoadGtm || typeof window === 'undefined') {
             return
@@ -157,7 +158,7 @@ export function AnalyticsProvider() {
         script.src = `https://www.googletagmanager.com/gtm.js?id=${encodeURIComponent(googleTagManagerId!)}`
         script.dataset.sapihumTracking = 'gtm'
         document.head.appendChild(script)
-    }, [routeContext.destinations.gtm])
+    }, [consentState, routeContext.destinations.gtm])
 
     useEffect(() => {
         startedForms.current.clear()

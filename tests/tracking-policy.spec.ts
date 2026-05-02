@@ -1,6 +1,17 @@
 import { expect, test } from '@playwright/test'
-import { buildGoogleConsentModeState, createStoredConsentState } from '../src/lib/consent'
-import { getAllowedTrackingDestinations, getCanonicalTrackingEventName } from '../src/lib/tracking/catalog'
+import {
+  buildGoogleConsentModeState,
+  CONSENT_CHANGE_EVENT,
+  CONSENT_COOKIE_NAME,
+  createStoredConsentState,
+  parseConsentCookie,
+  setConsentState,
+} from '../src/lib/consent'
+import {
+  getAllowedTrackingDestinations,
+  getCanonicalTrackingEventName,
+  getConsentAllowedTrackingDestinations,
+} from '../src/lib/tracking/catalog'
 import { resolveTrackingRouteContext } from '../src/lib/tracking/policy'
 import { sanitizeTrackingProperties } from '../src/lib/tracking/sanitize'
 
@@ -88,5 +99,111 @@ test.describe('tracking policy', () => {
       ad_user_data: 'granted',
       ad_personalization: 'granted',
     })
+  })
+
+  test('normalizes legacy Cookiebot consent cookies to the owned banner source', () => {
+    const legacyCookie = encodeURIComponent(JSON.stringify({
+      necessary: true,
+      analytics: true,
+      marketing: false,
+      acceptedAt: '2026-03-18T00:00:00.000Z',
+      version: '2026-03-18',
+      source: 'cookiebot',
+    }))
+
+    expect(parseConsentCookie(legacyCookie)).toMatchObject({
+      necessary: true,
+      analytics: true,
+      marketing: false,
+      source: 'cookie-banner',
+    })
+  })
+
+  test('persists browser consent and updates Google Consent Mode', () => {
+    let cookieValue = ''
+    const storage = new Map<string, string>()
+    const gtagCalls: unknown[][] = []
+    const dispatchedEvents: string[] = []
+
+    Object.defineProperty(globalThis, 'document', {
+      configurable: true,
+      value: {
+        get cookie() {
+          return cookieValue
+        },
+        set cookie(value: string) {
+          cookieValue = value
+        },
+      },
+    })
+
+    Object.defineProperty(globalThis, 'localStorage', {
+      configurable: true,
+      value: {
+        getItem: (key: string) => storage.get(key) ?? null,
+        setItem: (key: string, value: string) => storage.set(key, value),
+      },
+    })
+
+    Object.defineProperty(globalThis, 'window', {
+      configurable: true,
+      value: {
+        gtag: (...args: unknown[]) => gtagCalls.push(args),
+        dispatchEvent: (event: Event) => {
+          dispatchedEvents.push(event.type)
+          return true
+        },
+      },
+    })
+
+    const state = setConsentState({
+      analytics: true,
+      marketing: true,
+      acceptedAt: '2026-03-18T00:00:00.000Z',
+      source: 'consent-center',
+    })
+
+    expect(cookieValue).toContain(`${CONSENT_COOKIE_NAME}=`)
+    expect(storage.get(CONSENT_COOKIE_NAME)).toContain('"source":"consent-center"')
+    expect(gtagCalls).toContainEqual([
+      'consent',
+      'update',
+      expect.objectContaining({
+        analytics_storage: 'granted',
+        ad_storage: 'granted',
+      }),
+    ])
+    expect(dispatchedEvents).toContain(CONSENT_CHANGE_EVENT)
+    expect(state.source).toBe('consent-center')
+
+    Reflect.deleteProperty(globalThis, 'document')
+    Reflect.deleteProperty(globalThis, 'localStorage')
+    Reflect.deleteProperty(globalThis, 'window')
+  })
+
+  test('filters destination registry by consent category', () => {
+    const publicContext = resolveTrackingRouteContext('/precios')
+    const noConsent = getConsentAllowedTrackingDestinations('waitlist_joined', publicContext, null)
+    const analyticsOnly = getConsentAllowedTrackingDestinations(
+      'waitlist_joined',
+      publicContext,
+      createStoredConsentState({ analytics: true, marketing: false })
+    )
+    const marketingOnly = getConsentAllowedTrackingDestinations(
+      'waitlist_joined',
+      publicContext,
+      createStoredConsentState({ analytics: false, marketing: true })
+    )
+
+    expect(noConsent).toEqual([])
+    expect(analyticsOnly).toEqual(['first_party_analytics', 'gtm', 'ga4'])
+    expect(marketingOnly).toEqual([
+      'first_party_analytics',
+      'gtm',
+      'meta_pixel',
+      'meta_capi',
+      'tiktok_pixel',
+      'tiktok_events_api',
+    ])
   })
 })

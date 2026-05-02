@@ -1,8 +1,9 @@
 import { getAppUrl } from '@/lib/config/app-url'
 import type { AttributionTouch, AnalyticsConsentSnapshot, AnalyticsEventName } from '@/lib/analytics/types'
-import { getAllowedTrackingDestinations, getCanonicalTrackingEventName } from './catalog'
+import { getConsentAllowedTrackingDestinations, getCanonicalTrackingEventName } from './catalog'
 import { resolveTrackingRouteContext } from './policy'
 import { sanitizeTrackingProperties } from './sanitize'
+import { createStoredConsentState, type StoredConsentState } from '@/lib/consent'
 
 interface DispatchExternalTrackingEventInput {
     eventName: AnalyticsEventName
@@ -43,6 +44,17 @@ function buildEventSourceUrl(pathname: string | null | undefined) {
     } catch {
         return baseUrl
     }
+}
+
+function toStoredConsentState(consent: AnalyticsConsentSnapshot | null | undefined): StoredConsentState | null {
+    if (!consent) return null
+
+    return createStoredConsentState({
+        analytics: consent.analytics,
+        marketing: consent.marketing,
+        version: consent.version,
+        source: consent.source === 'consent-center' ? 'consent-center' : 'cookie-banner',
+    })
 }
 
 function normalizeItems(properties: Record<string, unknown>) {
@@ -293,7 +305,11 @@ export async function dispatchExternalTrackingEvent(input: DispatchExternalTrack
 
     const routePath = input.touch?.landingPath ?? '/'
     const routeContext = resolveTrackingRouteContext(routePath)
-    const allowedDestinations = getAllowedTrackingDestinations(input.eventName, routeContext)
+    const allowedDestinations = getConsentAllowedTrackingDestinations(
+        input.eventName,
+        routeContext,
+        toStoredConsentState(input.consent)
+    )
     const properties = sanitizeTrackingProperties(input.properties)
 
     const tasks: Array<Promise<void>> = []

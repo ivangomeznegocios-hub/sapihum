@@ -5,7 +5,7 @@ Arquitectura privacy-first para SAPIHUM sobre Next.js + Vercel.
 ## Principios
 
 - `Supabase analytics` es la fuente canonica de medicion.
-- `Cookiebot` controla consentimiento y sincroniza el estado interno `cp_consent_status`.
+- El runtime propio de consentimiento controla el banner y persiste el estado interno `cp_consent_status`.
 - `Google Consent Mode v2` arranca en modo `denied` para `analytics_storage`, `ad_storage`, `ad_user_data` y `ad_personalization`.
 - `GTM` solo puede cargarse en `public_safe` y debe usar triggers por `custom event`, no `All Pages`, `History Change` ni listeners globales.
 - `Clarity`, `Meta Pixel`, `TikTok Pixel`, `LinkedIn Insight Tag` y `Google Ads` se activan via `GTM` solo en `public_safe`.
@@ -83,21 +83,27 @@ Rutas privadas o clinicas donde no se cargan terceros y solo se permite first-pa
   - Define `window.gtag`.
   - Aplica `Consent Mode v2` con defaults `denied`.
 
-- `src/components/providers/cookiebot-provider.tsx`
-  - Carga `Cookiebot` cuando existe `NEXT_PUBLIC_COOKIEBOT_DOMAIN_GROUP_ID`.
+- `src/components/providers/consent-provider.tsx`
+  - Marca si la ruta muestra controles de cookies.
+  - Rehidrata `cp_consent_status` en Google Consent Mode al cargar el runtime cliente.
 
-- `src/components/providers/cookiebot-bridge.tsx`
-  - Escucha eventos de Cookiebot.
-  - Espeja el consentimiento a `cp_consent_status`.
+- `src/components/gdpr/cookie-consent-banner.tsx`
+  - Muestra el banner propio en rutas `public_safe`.
+  - Guarda `cp_consent_status` en cookie y `localStorage`.
   - Actualiza `gtag('consent', 'update', ...)`.
   - Persiste consentimientos autenticados con `recordCookieConsent`.
 
 - `src/components/providers/analytics-provider.tsx`
   - Clasifica la ruta con `src/lib/tracking/policy.ts`.
   - Publica `tracking_context` al `dataLayer`.
-  - Carga `GTM` solo en `public_safe` con consentimiento no esencial.
+  - Carga `GTM` solo en `public_safe` con consentimiento de analitica o marketing.
   - Emite `page_view`, `view_content`, `click_whatsapp`, `click_phone`, `form_start`, `form_submit`.
   - Marca `data-tracking-zone`, `data-tracking-page-type` y `data-tracking-content-type` en `<html>` para QA.
+
+- `src/lib/tracking/destinations.ts`
+  - Define la registry interna de destinos futuros.
+  - Declara tipo de destino, categorias de consentimiento, zonas permitidas y env flag.
+  - Permite filtrar destinos por consentimiento antes de llegar a `dataLayer` o APIs server-side.
 
 - `src/components/providers/onesignal-provider.tsx`
   - Quedo gateado por consentimiento de marketing y por politica de ruta.
@@ -188,7 +194,6 @@ Rutas privadas o clinicas donde no se cargan terceros y solo se permite first-pa
 
 ### Requeridas para la base privacy-first
 
-- `NEXT_PUBLIC_COOKIEBOT_DOMAIN_GROUP_ID`
 - `NEXT_PUBLIC_GOOGLE_TAG_MANAGER_ID`
 - `NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION`
 
@@ -212,12 +217,12 @@ Rutas privadas o clinicas donde no se cargan terceros y solo se permite first-pa
 - Cargar las variables nuevas en `Preview` y `Production`.
 - Verificar que `NEXT_PUBLIC_APP_URL` sea el dominio correcto en cada entorno.
 
-### Cookiebot
+### Consentimiento propio
 
-- Crear el dominio del proyecto.
-- Publicar el `Domain Group ID`.
-- Definir categorias al menos para `necessary`, `statistics`, `marketing`.
-- Confirmar que el banner aparezca y persista estado correctamente.
+- Confirmar que el banner aparece en rutas `public_safe`.
+- Confirmar que `cp_consent_status` se guarda en cookie y `localStorage`.
+- Confirmar que Google Consent Mode inicia en `denied` y cambia solo tras consentimiento.
+- Confirmar que la registry de destinos refleja cualquier pixel o API nueva antes de activarla.
 
 ### GTM
 

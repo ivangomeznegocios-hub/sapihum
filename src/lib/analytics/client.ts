@@ -3,10 +3,10 @@
 import {
     hasAnalyticsConsent,
     hasMeasurementConsent,
-    parseConsentCookieFromDocumentCookie,
+    getConsentState,
     type StoredConsentState,
 } from '@/lib/consent'
-import { getAllowedTrackingDestinations, getCanonicalTrackingEventName } from '@/lib/tracking/catalog'
+import { getConsentAllowedTrackingDestinations, getCanonicalTrackingEventName } from '@/lib/tracking/catalog'
 import { resolveTrackingRouteContext, type TrackingRouteContext } from '@/lib/tracking/policy'
 import { sanitizeTrackingProperties } from '@/lib/tracking/sanitize'
 import { deriveAnalyticsChannel, normalizeAttributionTouch } from './attribution'
@@ -88,7 +88,7 @@ function getCurrentRouteContext() {
 
 function getCurrentConsentState(): StoredConsentState | null {
     if (typeof document === 'undefined') return null
-    return parseConsentCookieFromDocumentCookie(document.cookie)
+    return getConsentState()
 }
 
 function toConsentSnapshot(state: StoredConsentState | null | undefined): AnalyticsConsentSnapshot | null {
@@ -126,7 +126,8 @@ function shouldPushToDataLayer(eventName: AnalyticsEventName, routeContext: Trac
         return false
     }
 
-    return getAllowedTrackingDestinations(eventName, routeContext).some((destination) => destination !== 'first_party_analytics')
+    return getConsentAllowedTrackingDestinations(eventName, routeContext, getCurrentConsentState())
+        .some((destination) => destination !== 'first_party_analytics')
 }
 
 export function getBrowserAnalyticsConsent(): boolean {

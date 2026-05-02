@@ -12,7 +12,7 @@ export type ConsentType =
     | 'cookies_functional'
     | 'international_transfer'
 
-export type ConsentSource = 'registration' | 'cookie-banner' | 'cookiebot' | 'telehealth-recorder' | 'system'
+export type ConsentSource = 'registration' | 'cookie-banner' | 'consent-center' | 'telehealth-recorder' | 'system'
 
 export type StoredConsentState = {
     necessary: true
@@ -21,6 +21,14 @@ export type StoredConsentState = {
     acceptedAt: string
     version: string
     source: ConsentSource
+}
+
+export type SetConsentStateInput = {
+    analytics: boolean
+    marketing: boolean
+    acceptedAt?: string
+    version?: string
+    source?: ConsentSource
 }
 
 export type RegistrationConsentChoice = {
@@ -38,6 +46,12 @@ export type ConsentRecordPayload = {
     source: ConsentSource
     granted_at?: string
     revoked_at?: string | null
+}
+
+declare global {
+    interface Window {
+        gtag?: (...args: unknown[]) => void
+    }
 }
 
 type ConsentRecordMetadata = {
@@ -82,6 +96,20 @@ export function createStoredConsentState(input: {
     }
 }
 
+function normalizeConsentSource(source: unknown): ConsentSource {
+    if (
+        source === 'registration'
+        || source === 'cookie-banner'
+        || source === 'consent-center'
+        || source === 'telehealth-recorder'
+        || source === 'system'
+    ) {
+        return source
+    }
+
+    return 'cookie-banner'
+}
+
 export function serializeConsentCookie(state: StoredConsentState): string {
     return encodeURIComponent(JSON.stringify(state))
 }
@@ -106,7 +134,7 @@ export function parseConsentCookie(raw: string | null | undefined): StoredConsen
                 marketing: parsed.marketing,
                 acceptedAt: parsed.acceptedAt,
                 version: parsed.version,
-                source: parsed.source ?? 'cookie-banner',
+                source: normalizeConsentSource(parsed.source),
             }
         }
     } catch {
@@ -180,6 +208,48 @@ export function buildGoogleConsentModeState(state: StoredConsentState | null | u
         personalization_storage: 'denied',
         security_storage: 'granted',
     } as const
+}
+
+function buildBrowserConsentStorageValue(state: StoredConsentState) {
+    return {
+        necessary: true,
+        analytics: state.analytics,
+        marketing: state.marketing,
+        accepted_at: state.acceptedAt,
+        version: state.version,
+        source: state.source,
+    }
+}
+
+export function getConsentState(): StoredConsentState | null {
+    if (typeof document === 'undefined') return null
+    return parseConsentCookieFromDocumentCookie(document.cookie)
+}
+
+export function setConsentState(input: SetConsentStateInput): StoredConsentState {
+    const state = createStoredConsentState({
+        analytics: input.analytics,
+        marketing: input.marketing,
+        acceptedAt: input.acceptedAt,
+        version: input.version,
+        source: input.source ?? 'cookie-banner',
+    })
+
+    if (typeof document !== 'undefined') {
+        const cookieOptions = buildConsentCookieOptions()
+        document.cookie = `${CONSENT_COOKIE_NAME}=${serializeConsentCookie(state)}; path=/; max-age=${cookieOptions.maxAge}; samesite=lax${cookieOptions.secure ? '; secure' : ''}`
+    }
+
+    if (typeof localStorage !== 'undefined') {
+        localStorage.setItem(CONSENT_COOKIE_NAME, JSON.stringify(buildBrowserConsentStorageValue(state)))
+    }
+
+    if (typeof window !== 'undefined') {
+        window.gtag?.('consent', 'update', buildGoogleConsentModeState(state))
+        window.dispatchEvent(new Event(CONSENT_CHANGE_EVENT))
+    }
+
+    return state
 }
 
 export function buildRegistrationConsentMetadata(

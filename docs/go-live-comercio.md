@@ -73,7 +73,8 @@ Documento operativo para decidir si la plataforma puede salir al publico con pag
 - Revisar Resend, `RESEND_FROM_EMAIL` verificado y/o Auth email delivery.
 - Revisar tablero interno de analytics y queue de compras pendientes.
 - Confirmar que `NEXT_PUBLIC_APP_URL` apunta al dominio live.
-- Confirmar que `NEXT_PUBLIC_COOKIEBOT_DOMAIN_GROUP_ID` y `NEXT_PUBLIC_GOOGLE_TAG_MANAGER_ID` son los de produccion.
+- Confirmar que `NEXT_PUBLIC_GOOGLE_TAG_MANAGER_ID` es el de produccion.
+- Confirmar que el banner propio guarda `cp_consent_status` y actualiza Google Consent Mode.
 - Confirmar en el navegador que rutas sensibles (`/dashboard/patients`, `/dashboard/session`, `/dashboard/messages`, `/dashboard/documents`) no cargan GTM ni trackers de marketing.
 
 ### Cada Hora

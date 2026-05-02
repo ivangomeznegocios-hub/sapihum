@@ -29,13 +29,13 @@ export function DeferredClientRuntime() {
                 || window.location.hostname === '127.0.0.1'
                 || window.location.hostname === '::1'
             const imports: Array<Promise<RuntimeComponent>> = [
+                import('@/components/providers/consent-provider').then((module) => module.ConsentProvider),
                 import('@/components/providers/analytics-provider').then((module) => module.AnalyticsProvider),
                 import('@/components/gdpr/cookie-consent-banner').then((module) => module.CookieConsentBanner),
             ]
 
             if (!isLocalhost) {
                 imports.push(
-                    import('@/components/providers/cookiebot-provider').then((module) => module.CookiebotProvider),
                     import('@/components/providers/onesignal-provider').then((module) => module.OneSignalSetup),
                     import('@vercel/analytics/next').then((module) => module.Analytics),
                     import('@vercel/speed-insights/next').then((module) => module.SpeedInsights)

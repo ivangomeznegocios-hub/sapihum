@@ -1,4 +1,9 @@
 import type { AnalyticsEventName } from '@/lib/analytics/types'
+import type { StoredConsentState } from '@/lib/consent'
+import {
+    getTrackingDestinationDefinition,
+    isTrackingDestinationAllowedByConsent,
+} from './destinations'
 import type { TrackingDestination, TrackingRouteContext, TrackingZone } from './policy'
 
 export type CanonicalTrackingEventName =
@@ -314,6 +319,11 @@ export function getTrackingEventDefinition(eventName: AnalyticsEventName) {
 }
 
 function isDestinationEnabledForRoute(destination: TrackingDestination, routeContext: TrackingRouteContext) {
+    const definition = getTrackingDestinationDefinition(destination)
+    if (!definition.allowedZones.includes(routeContext.zone)) {
+        return false
+    }
+
     switch (destination) {
         case 'first_party_analytics':
             return routeContext.destinations.firstPartyAnalytics
@@ -354,4 +364,13 @@ export function getAllowedTrackingDestinations(eventName: AnalyticsEventName, ro
     }
 
     return definition.allowedDestinations.filter((destination) => isDestinationEnabledForRoute(destination, routeContext))
+}
+
+export function getConsentAllowedTrackingDestinations(
+    eventName: AnalyticsEventName,
+    routeContext: TrackingRouteContext,
+    consent: StoredConsentState | null | undefined
+) {
+    return getAllowedTrackingDestinations(eventName, routeContext)
+        .filter((destination) => isTrackingDestinationAllowedByConsent(destination, consent))
 }

@@ -23,7 +23,6 @@ For a public go-live, read this first: [go-live-comercio.md](./go-live-comercio.
 
 Set staging-specific values for:
 - `NEXT_PUBLIC_APP_URL`
-- `NEXT_PUBLIC_COOKIEBOT_DOMAIN_GROUP_ID`
 - `NEXT_PUBLIC_GOOGLE_TAG_MANAGER_ID`
 - `NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION`
 - `NEXT_PUBLIC_SUPABASE_URL`
@@ -59,7 +58,6 @@ Use staging/test integrations only. Do not reuse production secrets in staging.
 
 Set production-specific values for the same variables:
 - `NEXT_PUBLIC_APP_URL`
-- `NEXT_PUBLIC_COOKIEBOT_DOMAIN_GROUP_ID`
 - `NEXT_PUBLIC_GOOGLE_TAG_MANAGER_ID`
 - `NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION`
 - `NEXT_PUBLIC_SUPABASE_URL`
@@ -96,7 +94,6 @@ For Resend, make sure `RESEND_FROM_EMAIL` is a verified sender in the target env
 
 For the base app:
 - `NEXT_PUBLIC_APP_URL`
-- `NEXT_PUBLIC_COOKIEBOT_DOMAIN_GROUP_ID`
 - `NEXT_PUBLIC_GOOGLE_TAG_MANAGER_ID`
 - `NEXT_PUBLIC_SUPABASE_URL`
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
@@ -143,13 +140,13 @@ These can stay unset until the related feature is intentionally enabled:
 - `.env.staging` is not auto-loaded by this project today; use provider-level staging variables unless you later add explicit tooling for it.
 - Keep staging and production fully separated.
 - Never expose `SUPABASE_SERVICE_ROLE_KEY` or any other server secret through `NEXT_PUBLIC_*`.
-- Keep `NEXT_PUBLIC_COOKIEBOT_DOMAIN_GROUP_ID` and `NEXT_PUBLIC_GOOGLE_TAG_MANAGER_ID` different between staging and production if you use different CMP / GTM workspaces.
+- Keep `NEXT_PUBLIC_GOOGLE_TAG_MANAGER_ID` different between staging and production if you use different GTM workspaces.
 - Do not enable `ENABLE_META_SERVER_TRACKING` or `ENABLE_TIKTOK_SERVER_TRACKING` until the corresponding test events validate correctly in staging.
 
 ## Analytics Stack
 
 The production tracking stack is now:
-- `Cookiebot` as the CMP.
+- Owned consent runtime with `cp_consent_status` as the browser consent source.
 - `Google Consent Mode v2` with denied defaults until consent updates.
 - `Google Tag Manager` as the only client-side tag container on `public_safe` routes.
 - `GA4 Measurement Protocol` for optional server-side confirmation of `generate_lead` and `purchase`.

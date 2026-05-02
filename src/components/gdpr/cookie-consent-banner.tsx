@@ -4,20 +4,17 @@ import { useEffect, useMemo, useState } from 'react'
 import { usePathname } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import {
-    buildConsentCookieOptions,
-    buildGoogleConsentModeState,
-    CONSENT_CHANGE_EVENT,
     CONSENT_COOKIE_NAME,
     CONSENT_POLICY_VERSION,
-    createStoredConsentState,
+    getConsentState,
     parseConsentCookieFromDocumentCookie,
-    serializeConsentCookie,
+    setConsentState,
+    type StoredConsentState,
 } from '@/lib/consent'
 import { shouldDisplayCookieControls } from '@/lib/tracking/policy'
 import { recordCookieConsent } from '@/actions/consent'
 
 const COOKIE_STORAGE_KEY = CONSENT_COOKIE_NAME
-const hasCookiebot = Boolean(process.env.NEXT_PUBLIC_COOKIEBOT_DOMAIN_GROUP_ID?.trim())
 
 type ConsentStatus = {
     necessary: true
@@ -28,14 +25,20 @@ type ConsentStatus = {
     source?: string
 }
 
-declare global {
-    interface Window {
-        gtag?: (...args: unknown[]) => void
-    }
-}
-
 function getStoredConsent(): ConsentStatus | null {
     if (typeof window === 'undefined') return null
+    const browserConsent = getConsentState()
+    if (browserConsent?.version === CONSENT_POLICY_VERSION) {
+        return {
+            necessary: true,
+            analytics: browserConsent.analytics,
+            marketing: browserConsent.marketing,
+            accepted_at: browserConsent.acceptedAt,
+            version: browserConsent.version,
+            source: browserConsent.source,
+        }
+    }
+
     const stored = localStorage.getItem(COOKIE_STORAGE_KEY)
     const cookieConsent = parseConsentCookieFromDocumentCookie(document.cookie)
 
@@ -73,35 +76,19 @@ function getStoredConsent(): ConsentStatus | null {
     }
 }
 
-const consentCookieOptions = buildConsentCookieOptions()
-
-function setStoredConsent(consent: ConsentStatus) {
-    localStorage.setItem(COOKIE_STORAGE_KEY, JSON.stringify(consent))
-
-    const state = createStoredConsentState({
+function commitStoredConsent(consent: ConsentStatus): StoredConsentState {
+    return setConsentState({
         analytics: consent.analytics,
         marketing: consent.marketing,
         acceptedAt: consent.accepted_at,
         version: CONSENT_POLICY_VERSION,
         source: 'cookie-banner',
     })
-
-    document.cookie = `${CONSENT_COOKIE_NAME}=${serializeConsentCookie(state)}; path=/; max-age=${consentCookieOptions.maxAge}; samesite=lax${consentCookieOptions.secure ? '; secure' : ''}`
-    window.gtag?.('consent', 'update', buildGoogleConsentModeState(state))
-    window.dispatchEvent(new Event(CONSENT_CHANGE_EVENT))
 }
 
-async function saveConsentToDatabase(consent: ConsentStatus) {
+async function saveConsentToDatabase(consent: StoredConsentState) {
     try {
-        await recordCookieConsent(
-            createStoredConsentState({
-                analytics: consent.analytics,
-                marketing: consent.marketing,
-                acceptedAt: consent.accepted_at,
-                version: CONSENT_POLICY_VERSION,
-                source: 'cookie-banner',
-            })
-        )
+        await recordCookieConsent(consent)
     } catch (error) {
         console.error('Error saving consent:', error)
     }
@@ -123,7 +110,7 @@ export function CookieConsentBanner() {
             return
         }
 
-        if (hasCookiebot || existingConsent) {
+        if (existingConsent) {
             return
         }
 
@@ -131,11 +118,11 @@ export function CookieConsentBanner() {
         return () => clearTimeout(timer)
     }, [existingConsent, hasCookieControls])
 
-    if (!hasCookieControls || hasCookiebot || !isVisible) return null
+    if (!hasCookieControls || !isVisible) return null
 
     const commitConsent = async (nextConsent: ConsentStatus) => {
-        setStoredConsent(nextConsent)
-        await saveConsentToDatabase(nextConsent)
+        const consent = commitStoredConsent(nextConsent)
+        await saveConsentToDatabase(consent)
         setIsVisible(false)
     }
 
