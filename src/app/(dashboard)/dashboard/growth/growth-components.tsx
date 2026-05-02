@@ -6,10 +6,14 @@ import { Button } from '@/components/ui/button'
 import {
     Check,
     CheckCircle2,
+    ClipboardList,
     Clock,
     Copy,
     Crown,
+    ExternalLink,
     Gift,
+    Mail,
+    MessageCircle,
     Share2,
     Sparkles,
     Target,
@@ -123,6 +127,16 @@ function getTimeLabel(endsAt: string | null): string {
     return `${months} mes${months === 1 ? '' : 'es'} restantes`
 }
 
+function getInviteLinks(code: string, baseUrl: string) {
+    const encodedCode = encodeURIComponent(code)
+
+    return {
+        register: `${baseUrl}/auth/register?ref=${encodedCode}&plan=level1`,
+        pricing: `${baseUrl}/precios?ref=${encodedCode}`,
+        consultorio: `${baseUrl}/precios?ref=${encodedCode}&plan=level2`,
+    }
+}
+
 export function CopyCodeButton({ code }: { code: string }) {
     const [copied, setCopied] = useState(false)
 
@@ -160,9 +174,56 @@ export function CopyCodeButton({ code }: { code: string }) {
     )
 }
 
+function CopyTextButton({
+    text,
+    label = 'Copiar',
+    copiedLabel = 'Copiado',
+    variant = 'outline',
+}: {
+    text: string
+    label?: string
+    copiedLabel?: string
+    variant?: 'default' | 'outline' | 'ghost'
+}) {
+    const [copied, setCopied] = useState(false)
+
+    async function handleCopy() {
+        try {
+            await navigator.clipboard.writeText(text)
+            setCopied(true)
+            setTimeout(() => setCopied(false), 2000)
+        } catch {
+            const input = document.createElement('textarea')
+            input.value = text
+            document.body.appendChild(input)
+            input.select()
+            document.execCommand('copy')
+            document.body.removeChild(input)
+            setCopied(true)
+            setTimeout(() => setCopied(false), 2000)
+        }
+    }
+
+    return (
+        <Button type="button" variant={variant} size="sm" onClick={handleCopy} className="gap-1.5">
+            {copied ? (
+                <>
+                    <Check className="h-3.5 w-3.5" />
+                    {copiedLabel}
+                </>
+            ) : (
+                <>
+                    <Copy className="h-3.5 w-3.5" />
+                    {label}
+                </>
+            )}
+        </Button>
+    )
+}
+
 export function ShareLinkButton({ code, baseUrl }: { code: string; baseUrl: string }) {
     const [shared, setShared] = useState(false)
-    const inviteLink = `${baseUrl}/auth/register?ref=${code}`
+    const inviteLink = getInviteLinks(code, baseUrl).register
 
     async function handleShare() {
         const shareData: ShareData = {
@@ -204,7 +265,7 @@ export function ShareLinkButton({ code, baseUrl }: { code: string; baseUrl: stri
 
 export function CopyLinkButton({ code, baseUrl }: { code: string; baseUrl: string }) {
     const [copied, setCopied] = useState(false)
-    const inviteLink = `${baseUrl}/auth/register?ref=${code}`
+    const inviteLink = getInviteLinks(code, baseUrl).register
 
     async function handleCopy() {
         try {
@@ -230,6 +291,116 @@ export function CopyLinkButton({ code, baseUrl }: { code: string; baseUrl: strin
                 </>
             )}
         </Button>
+    )
+}
+
+export function SalesLaunchKit({ code, baseUrl }: { code: string; baseUrl: string }) {
+    const links = getInviteLinks(code, baseUrl)
+    const whatsappMessage = `Te recomiendo SAPIHUM porque esta pensada para psicologos que quieren comunidad, formacion y crecimiento profesional. Puedes revisar la membresia aqui: ${links.pricing} y usar mi codigo ${code}.`
+    const emailMessage = `Hola,\n\nTe comparto SAPIHUM porque creo que puede servirte para crecer profesionalmente: comunidad, formacion continua, eventos y opciones para digitalizar tu practica.\n\nPuedes revisar la membresia aqui:\n${links.pricing}\n\nMi codigo de invitacion es ${code}.\n\nSi te interesa, registrate desde este enlace:\n${links.register}`
+    const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(whatsappMessage)}`
+
+    const launchSteps = [
+        'Lista 20 psicologos con practica activa o interes en crecer.',
+        'Envia 10 mensajes directos con el link de precios.',
+        'Da seguimiento a las 48 horas con una pregunta concreta.',
+        'Prioriza a quien pregunte por membresia, consultorio o eventos.',
+    ]
+
+    const linkCards = [
+        {
+            title: 'Venta directa',
+            description: 'Para quien ya esta evaluando pagar membresia.',
+            href: links.pricing,
+            label: 'Precios',
+        },
+        {
+            title: 'Registro profesional',
+            description: 'Para colegas que primero quieren crear cuenta.',
+            href: links.register,
+            label: 'Registro',
+        },
+        {
+            title: 'Consultorio digital',
+            description: 'Para psicologos que quieren agenda, pagos y operacion.',
+            href: links.consultorio,
+            label: 'Nivel 2',
+        },
+    ]
+
+    return (
+        <div className="rounded-2xl border bg-card p-5">
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                <div>
+                    <div className="flex items-center gap-2">
+                        <ClipboardList className="h-5 w-5 text-primary" />
+                        <h2 className="text-lg font-semibold">Kit para iniciar ventas hoy</h2>
+                    </div>
+                    <p className="mt-1 text-sm text-muted-foreground">
+                        Usa estos enlaces para vender membresia y registrar recomendaciones sin perder atribucion.
+                    </p>
+                </div>
+
+                <div className="flex flex-wrap gap-2">
+                    <Button asChild size="sm" className="gap-1.5">
+                        <a href={whatsappUrl} target="_blank" rel="noopener noreferrer">
+                            <MessageCircle className="h-3.5 w-3.5" />
+                            WhatsApp
+                        </a>
+                    </Button>
+                    <CopyTextButton text={emailMessage} label="Copiar email" />
+                </div>
+            </div>
+
+            <div className="mt-5 grid gap-3 lg:grid-cols-3">
+                {linkCards.map((item) => (
+                    <div key={item.title} className="rounded-xl border bg-muted/20 p-4">
+                        <div className="flex items-start justify-between gap-3">
+                            <div>
+                                <h3 className="text-sm font-semibold">{item.title}</h3>
+                                <p className="mt-1 text-xs text-muted-foreground">{item.description}</p>
+                            </div>
+                            <a href={item.href} target="_blank" rel="noopener noreferrer" aria-label={`Abrir ${item.label}`}>
+                                <ExternalLink className="h-4 w-4 text-muted-foreground transition-colors hover:text-primary" />
+                            </a>
+                        </div>
+                        <div className="mt-3 flex flex-wrap gap-2">
+                            <CopyTextButton text={item.href} label={`Copiar ${item.label}`} />
+                        </div>
+                    </div>
+                ))}
+            </div>
+
+            <div className="mt-5 grid gap-4 lg:grid-cols-[1fr_1.1fr]">
+                <div className="rounded-xl border bg-muted/20 p-4">
+                    <div className="mb-3 flex items-center gap-2">
+                        <MessageCircle className="h-4 w-4 text-brand-blue" />
+                        <h3 className="text-sm font-semibold">Mensaje corto</h3>
+                    </div>
+                    <p className="text-sm leading-relaxed text-muted-foreground">{whatsappMessage}</p>
+                    <div className="mt-3">
+                        <CopyTextButton text={whatsappMessage} label="Copiar mensaje" variant="ghost" />
+                    </div>
+                </div>
+
+                <div className="rounded-xl border bg-muted/20 p-4">
+                    <div className="mb-3 flex items-center gap-2">
+                        <Mail className="h-4 w-4 text-brand-blue-hover" />
+                        <h3 className="text-sm font-semibold">Cadencia de lanzamiento</h3>
+                    </div>
+                    <div className="grid gap-2 sm:grid-cols-2">
+                        {launchSteps.map((step, index) => (
+                            <div key={step} className="flex gap-2 rounded-lg bg-background/70 p-3 text-xs text-muted-foreground">
+                                <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary/10 text-[10px] font-bold text-primary">
+                                    {index + 1}
+                                </span>
+                                <span>{step}</span>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </div>
+        </div>
     )
 }
 

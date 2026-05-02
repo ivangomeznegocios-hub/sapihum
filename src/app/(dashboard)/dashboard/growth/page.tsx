@@ -28,6 +28,7 @@ import {
     CopyLinkButton,
     LeaderboardTable,
     RewardTimeline,
+    SalesLaunchKit,
     ShareLinkButton,
 } from './growth-components'
 
@@ -222,6 +223,10 @@ export default async function GrowthHubPage() {
                     />
                 </div>
             </div>
+
+            {stats?.code && (
+                <SalesLaunchKit code={stats.code} baseUrl={baseUrl} />
+            )}
 
             {campaigns.length > 0 && (
                 <div>

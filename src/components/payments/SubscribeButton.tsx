@@ -16,6 +16,35 @@ import {
     DialogTitle,
 } from '@/components/ui/dialog'
 
+const INVITE_REF_CODE_KEY = 'invite_ref_code'
+const ANALYTICS_LAST_TOUCH_KEY = 'cp_analytics_last_touch'
+
+function getStoredInviteRefCode() {
+    if (typeof window === 'undefined') return null
+
+    const urlRef = new URL(window.location.href).searchParams.get('ref')
+    if (urlRef) {
+        const normalized = urlRef.trim().toUpperCase()
+        window.localStorage.setItem(INVITE_REF_CODE_KEY, normalized)
+        return normalized
+    }
+
+    const explicitRef = window.localStorage.getItem(INVITE_REF_CODE_KEY)
+    if (explicitRef) return explicitRef.trim().toUpperCase()
+
+    const rawTouch = window.localStorage.getItem(ANALYTICS_LAST_TOUCH_KEY)
+    if (!rawTouch) return null
+
+    try {
+        const touch = JSON.parse(rawTouch) as { ref?: unknown }
+        return typeof touch.ref === 'string' && touch.ref.trim()
+            ? touch.ref.trim().toUpperCase()
+            : null
+    } catch {
+        return null
+    }
+}
+
 interface SubscribeButtonProps {
     membershipLevel: number
     specializationCode?: string
@@ -53,6 +82,7 @@ export function SubscribeButton({
                 targetPlan: `level_${membershipLevel}`,
                 targetSpecialization: specializationCode,
             })
+            const inviteRefCode = getStoredInviteRefCode()
 
             await collectAnalyticsEvent('checkout_started', {
                 properties: {
@@ -77,6 +107,7 @@ export function SubscribeButton({
                     specializationCode,
                     analyticsContext,
                     successPath,
+                    inviteRefCode,
                     ...(withGuestDetails ? { email, fullName } : {}),
                 }),
             })

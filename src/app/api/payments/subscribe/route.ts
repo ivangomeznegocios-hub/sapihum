@@ -34,6 +34,7 @@ export async function POST(request: NextRequest) {
             email,
             fullName,
             offerCode,
+            inviteRefCode,
         } = body as {
             membershipLevel: number
             billingInterval?: BillingInterval
@@ -54,6 +55,7 @@ export async function POST(request: NextRequest) {
             email?: string
             fullName?: string
             offerCode?: string
+            inviteRefCode?: string | null
         }
 
         if (!membershipLevel || typeof membershipLevel !== 'number') {
@@ -152,6 +154,9 @@ export async function POST(request: NextRequest) {
         const nextPath = successPath?.startsWith('/') ? successPath : '/dashboard/subscription'
         const customerEmail = user?.email || normalizedGuestEmail
         let customerId = profile.data?.stripe_customer_id || undefined
+        const normalizedInviteRefCode = (inviteRefCode || (analyticsContext?.touch as any)?.ref || '')
+            .trim()
+            .toUpperCase()
 
         if (!customerEmail) {
             return NextResponse.json({ error: 'Correo requerido para continuar' }, { status: 400 })
@@ -215,6 +220,7 @@ export async function POST(request: NextRequest) {
             guest_checkout: user ? 'false' : 'true',
             buyer_full_name: fullName?.trim() || '',
             post_checkout_path: nextPath,
+            invite_ref_code: normalizedInviteRefCode,
             offer_code: isFounderOffer ? offerCode : '',
             offer_name: isFounderOffer ? 'Primeros 100 Miembros Fundadores SAPIHUM Mexico' : '',
             founder_price_locked: isFounderOffer ? 'true' : 'false',

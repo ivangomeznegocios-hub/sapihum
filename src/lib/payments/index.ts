@@ -10,6 +10,11 @@ import { getActiveEntitlementForEvent } from '@/lib/events/access'
 import { grantEventEntitlements, revokeEventEntitlementsBySourceReference } from '@/lib/events/entitlements'
 import { upsertAutomaticEventSpeakerEarnings } from '@/lib/earnings/compensation'
 import { reconcileGrowthRewards } from '@/lib/growth/reward-engine'
+import {
+    PROFESSIONAL_INVITE_PROGRAM_TYPE,
+    isProfessionalInviteReferredRole,
+    isProfessionalInviteReferrerRole,
+} from '@/lib/growth/programs'
 import { logCommerceOperationalEvent, sendEventPurchaseConfirmation, sendFormationPurchaseConfirmation } from '@/lib/payments/commerce'
 import { syncMembershipEntitlementsForUser } from '@/lib/membership-entitlements'
 import { createUserNotification } from '@/lib/notifications'
@@ -64,6 +69,89 @@ async function reconcileGrowthRewardsAfterSubscriptionChange(userId: string | nu
             trigger,
             message: error instanceof Error ? error.message : String(error),
         })
+    }
+}
+
+async function applyInviteCodeFromSubscriptionCheckout(params: {
+    supabase: ReturnType<typeof getServiceSupabase>
+    referredUserId: string
+    inviteRefCode?: string | null
+}) {
+    const code = normalizeWebhookValue(params.inviteRefCode)?.toUpperCase()
+    if (!code) return
+
+    const { data: validation, error: validationError } = await (params.supabase as any)
+        .rpc('validate_invite_code', { p_code: code })
+
+    if (validationError || !validation || validation.length === 0) {
+        console.error('[Payment] Failed to validate invite code from subscription checkout:', validationError)
+        return
+    }
+
+    const result = validation[0]
+    if (!result?.is_valid || !result.code_owner_id || !result.code_id) return
+    if (result.code_owner_id === params.referredUserId) return
+
+    const { data: profileRoles, error: profileRolesError } = await (params.supabase as any)
+        .from('profiles')
+        .select('id, role')
+        .in('id', [params.referredUserId, result.code_owner_id])
+
+    if (profileRolesError) {
+        console.error('[Payment] Failed to load invite participant roles:', profileRolesError)
+        return
+    }
+
+    const referredProfile = (profileRoles || []).find((profile: any) => profile.id === params.referredUserId)
+    const referrerProfile = (profileRoles || []).find((profile: any) => profile.id === result.code_owner_id)
+
+    if (
+        !isProfessionalInviteReferredRole(referredProfile?.role) ||
+        !isProfessionalInviteReferrerRole(referrerProfile?.role)
+    ) {
+        return
+    }
+
+    const { data: existingAttribution, error: existingAttributionError } = await (params.supabase as any)
+        .from('invite_attributions')
+        .select('id, status')
+        .eq('referred_id', params.referredUserId)
+        .eq('program_type', PROFESSIONAL_INVITE_PROGRAM_TYPE)
+        .maybeSingle()
+
+    if (existingAttributionError) {
+        console.error('[Payment] Failed to check existing invite attribution:', existingAttributionError)
+        return
+    }
+
+    const completedAt = new Date().toISOString()
+
+    if (existingAttribution?.id) {
+        if (existingAttribution.status === 'pending') {
+            await (params.supabase as any)
+                .from('invite_attributions')
+                .update({
+                    status: 'completed',
+                    completed_at: completedAt,
+                })
+                .eq('id', existingAttribution.id)
+        }
+        return
+    }
+
+    const { error: insertError } = await (params.supabase as any)
+        .from('invite_attributions')
+        .insert({
+            invite_code_id: result.code_id,
+            referrer_id: result.code_owner_id,
+            referred_id: params.referredUserId,
+            program_type: PROFESSIONAL_INVITE_PROGRAM_TYPE,
+            status: 'completed',
+            completed_at: completedAt,
+        })
+
+    if (insertError) {
+        console.error('[Payment] Failed to create invite attribution from subscription checkout:', insertError)
     }
 }
 
@@ -1116,6 +1204,11 @@ export async function fulfillSubscriptionCreated(data: SubscriptionWebhookData):
 
     await supabase.from('profiles').update(profileUpdate).eq('id', profileId)
     await syncMembershipEntitlementsForUser(profileId)
+    await applyInviteCodeFromSubscriptionCheckout({
+        supabase,
+        referredUserId: profileId,
+        inviteRefCode: data.metadata?.invite_ref_code,
+    })
     await reconcileGrowthRewardsAfterSubscriptionChange(profileId, 'subscription_created')
 
     console.log(`[Payment] Subscription activated: user=${profileId}, level=${membershipLevel}`)
