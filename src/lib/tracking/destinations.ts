@@ -99,6 +99,10 @@ export function getTrackingDestinationDefinition(destination: TrackingDestinatio
     return TRACKING_DESTINATION_REGISTRY[destination]
 }
 
+export function getTrackingDestinationEnvFlag(destination: TrackingDestination) {
+    return getTrackingDestinationDefinition(destination).envFlag ?? null
+}
+
 export function isTrackingDestinationAllowedByConsent(
     destination: TrackingDestination,
     consent: StoredConsentState | null | undefined

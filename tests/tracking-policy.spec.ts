@@ -12,6 +12,7 @@ import {
   getCanonicalTrackingEventName,
   getConsentAllowedTrackingDestinations,
 } from '../src/lib/tracking/catalog'
+import { TRACKING_DESTINATION_REGISTRY } from '../src/lib/tracking/destinations'
 import { resolveTrackingRouteContext } from '../src/lib/tracking/policy'
 import { sanitizeTrackingProperties } from '../src/lib/tracking/sanitize'
 
@@ -205,5 +206,27 @@ test.describe('tracking policy', () => {
       'tiktok_pixel',
       'tiktok_events_api',
     ])
+  })
+
+  test('defines extensibility metadata for every tracking destination', () => {
+    expect(Object.keys(TRACKING_DESTINATION_REGISTRY).sort()).toEqual([
+      'clarity',
+      'first_party_analytics',
+      'ga4',
+      'google_ads',
+      'gtm',
+      'linkedin_insight',
+      'meta_capi',
+      'meta_pixel',
+      'onesignal',
+      'tiktok_events_api',
+      'tiktok_pixel',
+    ])
+
+    for (const definition of Object.values(TRACKING_DESTINATION_REGISTRY)) {
+      expect(definition.consentCategories.length).toBeGreaterThan(0)
+      expect(definition.allowedZones.length).toBeGreaterThan(0)
+      expect(['first-party', 'tag-manager', 'client-pixel', 'server-api']).toContain(definition.kind)
+    }
   })
 })

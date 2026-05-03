@@ -64,6 +64,7 @@ fix_*.js
 
 # Playwright artifacts
 test-results/
+test-results-*/
 playwright-report/
 e2e/
 tests/.auth/
