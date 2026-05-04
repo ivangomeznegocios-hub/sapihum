@@ -9,6 +9,7 @@ import { CheckoutButton } from '@/components/payments/CheckoutButton'
 import { AddToCalendarButton } from '@/components/add-to-calendar'
 import { RecordingCountdown } from './recordings/recording-countdown'
 import { EventsCategoryNav } from './events-filter'
+import { ScheduleCalendar, type ScheduleCalendarItem } from '@/components/calendar/schedule-calendar'
 import type { EventWithRegistration } from '@/types/database'
 import { DEFAULT_TIMEZONE, formatEventDateTimeWithZone, isEventPast } from '@/lib/timezone'
 import {
@@ -20,6 +21,42 @@ import { getCommercialAccessContext, isCommunityReadOnlyViewer } from '@/lib/acc
 
 function formatEventDate(dateStr: string, timezone: string = DEFAULT_TIMEZONE) {
     return formatEventDateTimeWithZone(dateStr, timezone)
+}
+
+function getEventStatusLabel(status: string) {
+    switch (status) {
+        case 'draft':
+            return 'Borrador'
+        case 'upcoming':
+            return 'Programado'
+        case 'live':
+            return 'En vivo'
+        case 'completed':
+            return 'Finalizado'
+        case 'cancelled':
+            return 'Cancelado'
+        default:
+            return status
+    }
+}
+
+function getAgendaEndTime(event: EventWithRegistration) {
+    if (event.end_time) {
+        return event.end_time
+    }
+
+    const fallbackEnd = new Date(event.start_time)
+    fallbackEnd.setMinutes(fallbackEnd.getMinutes() + 90)
+    return fallbackEnd.toISOString()
+}
+
+function getAgendaModality(event: EventWithRegistration): ScheduleCalendarItem['modality'] {
+    const sessionModality = event.session_config?.modality
+    if (sessionModality) {
+        return sessionModality
+    }
+
+    return event.event_type === 'presencial' ? 'presencial' : 'online'
 }
 
 // Status badge component
@@ -491,6 +528,51 @@ export default async function EventsPage() {
         if (e.status === 'draft' || e.status === 'cancelled') return false
         return e.status === 'upcoming' && isEventPast(e.start_time)
     })
+    const canSeeDraftAgenda = profile?.role === 'admin' || profile?.role === 'ponente'
+    const draftCreatorIds = Array.from(new Set(
+        drafts
+            .map((event) => event.created_by)
+            .filter((creatorId): creatorId is string => typeof creatorId === 'string' && creatorId.length > 0)
+    ))
+    const draftCreatorLabels = new Map<string, string>()
+
+    if (canSeeDraftAgenda && supabase && draftCreatorIds.length > 0) {
+        const { data: draftCreators } = await (supabase
+            .from('profiles') as any)
+            .select('id, full_name, role')
+            .in('id', draftCreatorIds)
+
+        for (const creator of draftCreators || []) {
+            const name = creator.full_name || 'Sin nombre'
+            draftCreatorLabels.set(
+                creator.id,
+                creator.role === 'ponente' ? `Ponente: ${name}` : `Creado por: ${name}`
+            )
+        }
+    }
+
+    const draftAgendaItems: ScheduleCalendarItem[] = canSeeDraftAgenda
+        ? drafts.map((event) => {
+            const modality = getAgendaModality(event)
+
+            return {
+                id: event.id,
+                kind: 'event',
+                title: event.title || 'Evento en borrador',
+                subtitle: event.created_by ? draftCreatorLabels.get(event.created_by) ?? 'Borrador pendiente de publicar' : 'Borrador pendiente de publicar',
+                startTime: event.start_time,
+                endTime: getAgendaEndTime(event),
+                status: event.status,
+                statusLabel: getEventStatusLabel(event.status),
+                href: canEditListedEvent(event) ? `/dashboard/events/${event.id}` : null,
+                modality,
+                location: modality === 'presencial' || modality === 'hibrido'
+                    ? event.location || (modality === 'hibrido' ? 'Hibrido' : 'Presencial')
+                    : null,
+                sourceLabel: 'Borrador',
+            }
+        })
+        : []
 
     return (
         <div className="space-y-8">
@@ -594,6 +676,48 @@ export default async function EventsPage() {
                         </Button>
                     </CardContent>
                 </Card>
+            )}
+
+            {/* Draft Agenda */}
+            {draftAgendaItems.length > 0 && (
+                <section className="space-y-4">
+                    <div className="space-y-1">
+                        <h2 className="flex min-w-0 items-center gap-2 text-2xl font-bold tracking-tight">
+                            <div className="flex items-center justify-center rounded-xl bg-primary/10 p-2 text-primary">
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    width="20"
+                                    height="20"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth="2.5"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                >
+                                    <rect width="18" height="18" x="3" y="4" rx="2" ry="2" />
+                                    <line x1="16" x2="16" y1="2" y2="6" />
+                                    <line x1="8" x2="8" y1="2" y2="6" />
+                                    <line x1="3" x2="21" y1="10" y2="10" />
+                                    <path d="M8 14h.01" />
+                                    <path d="M12 14h.01" />
+                                    <path d="M16 14h.01" />
+                                    <path d="M8 18h.01" />
+                                    <path d="M12 18h.01" />
+                                </svg>
+                            </div>
+                            Agenda de borradores
+                        </h2>
+                        <p className="text-sm text-muted-foreground md:ml-12">
+                            Vista por fecha para revisar rapido los eventos que todavia estan pendientes de publicar.
+                        </p>
+                    </div>
+                    <ScheduleCalendar
+                        items={draftAgendaItems}
+                        title="Calendario de borradores"
+                        description="Selecciona un dia para ver los borradores programados y abrir el detalle del evento."
+                    />
+                </section>
             )}
 
             {/* Draft Events */}
