@@ -9,7 +9,7 @@ import { CheckoutButton } from '@/components/payments/CheckoutButton'
 import { AddToCalendarButton } from '@/components/add-to-calendar'
 import { RecordingCountdown } from './recordings/recording-countdown'
 import { EventsCategoryNav } from './events-filter'
-import { ScheduleCalendar, type ScheduleCalendarItem } from '@/components/calendar/schedule-calendar'
+import { DraftEventsWorkspace, type DraftEventsWorkspaceItem } from './draft-events-workspace'
 import type { EventWithRegistration } from '@/types/database'
 import { DEFAULT_TIMEZONE, formatEventDateTimeWithZone, isEventPast } from '@/lib/timezone'
 import {
@@ -50,13 +50,44 @@ function getAgendaEndTime(event: EventWithRegistration) {
     return fallbackEnd.toISOString()
 }
 
-function getAgendaModality(event: EventWithRegistration): ScheduleCalendarItem['modality'] {
+function getAgendaModality(event: EventWithRegistration): DraftEventsWorkspaceItem['modality'] {
     const sessionModality = event.session_config?.modality
     if (sessionModality) {
         return sessionModality
     }
 
     return event.event_type === 'presencial' ? 'presencial' : 'online'
+}
+
+const CATEGORY_LABELS: Record<string, string> = {
+    general: 'General',
+    networking: 'Networking',
+    clinical: 'Clinico',
+    business: 'Negocios',
+}
+
+const SUBCATEGORY_LABELS: Record<string, string> = {
+    curso: 'Curso',
+    diplomado: 'Diplomado',
+    clase: 'Clase',
+    taller: 'Taller',
+    conferencia: 'Conferencia',
+    seminario: 'Seminario',
+    congreso: 'Congreso',
+    meetup: 'Meetup',
+    otro: 'Otro',
+}
+
+function getDraftMissingDetails(event: EventWithRegistration, modality: DraftEventsWorkspaceItem['modality']) {
+    const missingDetails: string[] = []
+
+    if (!event.image_url) missingDetails.push('imagen')
+    if (!event.description) missingDetails.push('descripcion')
+    if (!event.end_time) missingDetails.push('hora final')
+    if ((modality === 'presencial' || modality === 'hibrido') && !event.location) missingDetails.push('lugar')
+    if (modality === 'online' && !event.meeting_link) missingDetails.push('link online')
+
+    return missingDetails
 }
 
 // Status badge component
@@ -551,15 +582,18 @@ export default async function EventsPage() {
         }
     }
 
-    const draftAgendaItems: ScheduleCalendarItem[] = canSeeDraftAgenda
+    const draftAgendaItems: DraftEventsWorkspaceItem[] = canSeeDraftAgenda
         ? drafts.map((event) => {
             const modality = getAgendaModality(event)
+            const speakerLabel = event.created_by
+                ? draftCreatorLabels.get(event.created_by) ?? 'Ponente sin nombre'
+                : 'Sin ponente'
 
             return {
                 id: event.id,
                 kind: 'event',
                 title: event.title || 'Evento en borrador',
-                subtitle: event.created_by ? draftCreatorLabels.get(event.created_by) ?? 'Borrador pendiente de publicar' : 'Borrador pendiente de publicar',
+                subtitle: speakerLabel,
                 startTime: event.start_time,
                 endTime: getAgendaEndTime(event),
                 status: event.status,
@@ -570,6 +604,10 @@ export default async function EventsPage() {
                     ? event.location || (modality === 'hibrido' ? 'Hibrido' : 'Presencial')
                     : null,
                 sourceLabel: 'Borrador',
+                speakerLabel,
+                categoryLabel: event.category ? CATEGORY_LABELS[event.category] ?? event.category : null,
+                subcategoryLabel: event.subcategory ? SUBCATEGORY_LABELS[event.subcategory] ?? event.subcategory : null,
+                missingDetails: getDraftMissingDetails(event, modality),
             }
         })
         : []
@@ -680,85 +718,7 @@ export default async function EventsPage() {
 
             {/* Draft Agenda */}
             {draftAgendaItems.length > 0 && (
-                <section className="space-y-4">
-                    <div className="space-y-1">
-                        <h2 className="flex min-w-0 items-center gap-2 text-2xl font-bold tracking-tight">
-                            <div className="flex items-center justify-center rounded-xl bg-primary/10 p-2 text-primary">
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    width="20"
-                                    height="20"
-                                    viewBox="0 0 24 24"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    strokeWidth="2.5"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                >
-                                    <rect width="18" height="18" x="3" y="4" rx="2" ry="2" />
-                                    <line x1="16" x2="16" y1="2" y2="6" />
-                                    <line x1="8" x2="8" y1="2" y2="6" />
-                                    <line x1="3" x2="21" y1="10" y2="10" />
-                                    <path d="M8 14h.01" />
-                                    <path d="M12 14h.01" />
-                                    <path d="M16 14h.01" />
-                                    <path d="M8 18h.01" />
-                                    <path d="M12 18h.01" />
-                                </svg>
-                            </div>
-                            Agenda de borradores
-                        </h2>
-                        <p className="text-sm text-muted-foreground md:ml-12">
-                            Vista por fecha para revisar rapido los eventos que todavia estan pendientes de publicar.
-                        </p>
-                    </div>
-                    <ScheduleCalendar
-                        items={draftAgendaItems}
-                        title="Calendario de borradores"
-                        description="Selecciona un dia para ver los borradores programados y abrir el detalle del evento."
-                    />
-                </section>
-            )}
-
-            {/* Draft Events */}
-            {drafts.length > 0 && (
-                <section>
-                    <h2 className="mb-4 flex min-w-0 items-center gap-2 text-xl font-semibold">
-                        <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="20"
-                            height="20"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            className="text-muted-foreground"
-                        >
-                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
-                        </svg>
-                        Borradores Pendientes
-                    </h2>
-                    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                        {drafts.map(event => (
-                            <EventCard
-                                key={event.id}
-                                event={event}
-                                userId={profile?.id}
-                                canEditEvent={canEditListedEvent(event)}
-                                commercialAccess={commercialAccess ? {
-                                    role: commercialAccess.role,
-                                    membershipLevel: commercialAccess.membershipLevel,
-                                    hasActiveMembership: commercialAccess.hasActiveMembership,
-                                } : undefined}
-                                isReadOnly={isReadOnly}
-                                timezone={userTimezone}
-                            />
-                        ))}
-                    </div>
-                </section>
+                <DraftEventsWorkspace items={draftAgendaItems} />
             )}
 
             {/* Upcoming Events */}
