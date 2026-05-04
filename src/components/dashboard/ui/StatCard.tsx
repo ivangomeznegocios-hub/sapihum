@@ -37,20 +37,20 @@ const colorStyles: Record<ColorVariant, {
     trendColor: string
 }> = {
     primary: {
-        bg: 'bg-brand-blue/50 dark:bg-brand-blue/20',
-        border: 'border-brand-blue/60 dark:border-brand-blue/40',
-        iconBg: 'bg-brand-blue dark:bg-brand-blue/50',
-        iconColor: 'text-brand-blue dark:text-brand-blue',
-        valueColor: 'text-brand-blue dark:text-brand-blue',
-        trendColor: 'text-brand-blue/70 dark:text-brand-blue/70',
+        bg: 'bg-brand-blue-soft',
+        border: 'border-brand-blue-border',
+        iconBg: 'bg-brand-blue',
+        iconColor: 'text-white',
+        valueColor: 'text-brand-blue-dark',
+        trendColor: 'text-brand-blue-dark',
     },
     secondary: {
-        bg: 'bg-brand-blue-hover/50 dark:bg-brand-blue-hover/20',
-        border: 'border-brand-blue-hover/60 dark:border-brand-blue-hover/40',
-        iconBg: 'bg-brand-blue-hover dark:bg-brand-blue-hover/50',
-        iconColor: 'text-brand-blue-hover dark:text-brand-blue-hover',
-        valueColor: 'text-brand-blue-hover dark:text-brand-blue-hover',
-        trendColor: 'text-brand-blue-hover/70 dark:text-brand-blue-hover/70',
+        bg: 'bg-brand-teal-soft',
+        border: 'border-emerald-200',
+        iconBg: 'bg-emerald-600',
+        iconColor: 'text-white',
+        valueColor: 'text-emerald-700',
+        trendColor: 'text-emerald-700',
     },
 }
 
@@ -70,14 +70,14 @@ export function StatCard({
 
     let finalValueColor = styles.valueColor
     if (statusIndicator === 'good') finalValueColor = 'text-green-600 dark:text-green-400'
-    if (statusIndicator === 'warning') finalValueColor = 'text-brand-blue dark:text-brand-blue'
+    if (statusIndicator === 'warning') finalValueColor = 'text-amber-700'
     if (statusIndicator === 'critical') finalValueColor = 'text-red-600 dark:text-red-400'
 
     return (
         <div
             className={`
                 relative min-w-0 overflow-visible rounded-xl border p-4 sm:p-5 transition-all duration-300
-                hover:shadow-lg hover:scale-[1.02] bg-card
+                bg-card hover:shadow-lg hover:scale-[1.02]
                 ${styles.bg} ${styles.border}
                 animate-[slide-up_0.5s_ease-out_both]
             `}

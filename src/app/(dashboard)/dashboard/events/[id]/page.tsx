@@ -281,7 +281,7 @@ export default async function EventDetailPage({ params }: PageProps) {
 
     const getStatusBadge = (status: string) => {
         switch (status) {
-            case 'upcoming': return 'bg-brand-blue text-brand-blue'
+            case 'upcoming': return 'bg-brand-blue text-white'
             case 'live': return 'surface-alert-success animate-pulse'
             case 'completed': return 'bg-gray-100 text-gray-800'
             case 'cancelled': return 'surface-alert-error'
@@ -351,7 +351,7 @@ export default async function EventDetailPage({ params }: PageProps) {
                                                     event.status === 'completed' ? 'Finalizado' : 'Cancelado'}
                                         </span>
                                         {event.is_members_only && (
-                                            <span className="text-xs px-2 py-1 rounded-full bg-brand-blue text-brand-blue flex items-center gap-1">
+                                            <span className="text-xs px-2 py-1 rounded-full bg-brand-blue text-white flex items-center gap-1">
                                                 <Lock className="h-3 w-3" />
                                                 Solo Miembros
                                             </span>
@@ -433,7 +433,7 @@ export default async function EventDetailPage({ params }: PageProps) {
                                             Grabación del Evento
                                         </h3>
                                         {event.recording_expires_at && (
-                                            <span className="text-xs px-2 py-1 bg-brand-blue-hover text-brand-blue-hover rounded-full">
+                                            <span className="text-xs px-2 py-1 bg-brand-blue-hover text-white rounded-full">
                                                 Disponible hasta: {formatDate(event.recording_expires_at)}
                                             </span>
                                         )}

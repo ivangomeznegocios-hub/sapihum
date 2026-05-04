@@ -80,7 +80,7 @@ export function BrandBriefModal({ existingBrief, onClose }: BrandBriefModalProps
             <Card className="w-full max-w-2xl my-8">
                 <CardHeader className="relative">
                     <div className="flex items-center gap-2 mb-1">
-                        <div className="p-2 rounded-lg bg-brand-blue dark:bg-brand-blue/50 text-brand-blue dark:text-brand-blue">
+                <div className="p-2 rounded-lg bg-brand-blue text-white">
                             <FileEdit className="w-5 h-5" />
                         </div>
                         <CardTitle className="text-xl">

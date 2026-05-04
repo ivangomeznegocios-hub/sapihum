@@ -200,7 +200,7 @@ export function NotificationSettings() {
                     </button>
                 </div>
 
-                <div className="flex items-center justify-between rounded-lg border bg-brand-blue/50 p-3 dark:bg-brand-blue/20">
+                    <div className="flex items-center justify-between rounded-lg border border-brand-blue-border bg-brand-blue-soft p-3">
                     <div>
                         <p className="flex items-center gap-2 font-medium text-brand-blue dark:text-brand-blue">
                             Notificaciones Push (Navegador)

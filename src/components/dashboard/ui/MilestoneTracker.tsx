@@ -44,9 +44,9 @@ export function MilestoneTracker({ milestones, title }: MilestoneTrackerProps) {
                                     className={`
                                         relative flex items-center justify-center w-10 h-10 rounded-full border-2 transition-all duration-500
                                         ${milestone.completed
-                                            ? 'bg-brand-blue-hover/15 border-brand-blue-hover text-brand-blue-hover'
+                                            ? 'bg-emerald-50 border-emerald-500 text-emerald-700'
                                             : milestone.current
-                                                ? 'bg-brand-blue/15 border-brand-blue text-brand-blue shadow-[0_0_12px_rgba(59,130,246,0.4)] animate-[glow-pulse_2s_ease-in-out_infinite]'
+                                                ? 'bg-brand-blue-soft border-brand-blue text-brand-blue-dark shadow-[0_0_12px_rgba(37,99,235,0.22)] animate-[glow-pulse_2s_ease-in-out_infinite]'
                                                 : 'bg-muted/50 border-muted-foreground/25 text-muted-foreground/50'
                                         }
                                     `}
@@ -61,9 +61,9 @@ export function MilestoneTracker({ milestones, title }: MilestoneTrackerProps) {
                                 </div>
                                 <span
                                     className={`text-xs text-left md:text-center max-w-[140px] md:max-w-[80px] leading-tight ${milestone.completed
-                                            ? 'text-brand-blue-hover dark:text-brand-blue-hover font-medium'
+                                            ? 'text-emerald-700 font-medium'
                                             : milestone.current
-                                                ? 'text-brand-blue dark:text-brand-blue font-medium'
+                                                ? 'text-brand-blue-dark font-medium'
                                                 : 'text-muted-foreground'
                                         }`}
                                 >
@@ -75,7 +75,7 @@ export function MilestoneTracker({ milestones, title }: MilestoneTrackerProps) {
                                 <div className="hidden md:block flex-1 min-w-4 mt-5 mx-1">
                                     <div
                                         className={`h-0.5 w-full rounded-full transition-all duration-700 ${milestone.completed
-                                                ? 'bg-brand-blue-hover'
+                                                ? 'bg-emerald-500'
                                                 : 'bg-muted-foreground/15'
                                             }`}
                                     />

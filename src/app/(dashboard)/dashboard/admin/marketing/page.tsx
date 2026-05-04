@@ -226,7 +226,7 @@ export default async function AdminMarketingPage() {
                                                 <div key={service.id} className="px-5 py-3">
                                                     <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                                                         <div className="flex items-start gap-3">
-                                                            <div className="p-1.5 rounded-md bg-brand-blue dark:bg-brand-blue/50 text-brand-blue dark:text-brand-blue">
+                                                <div className="p-1.5 rounded-md bg-brand-blue text-white">
                                                                 <Icon className="w-4 h-4" />
                                                             </div>
                                                             <div>

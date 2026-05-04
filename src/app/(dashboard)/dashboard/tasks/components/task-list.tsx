@@ -77,7 +77,7 @@ function TaskCard({ task }: { task: Task }) {
     const getStatusColor = (status: string) => {
         switch (status) {
             case 'completed': return 'surface-alert-success border-green-200'
-            case 'reviewed': return 'bg-brand-blue text-brand-blue border-brand-blue'
+            case 'reviewed': return 'bg-brand-blue text-white border-brand-blue'
             case 'pending': return 'bg-yellow-100 text-yellow-800 border-yellow-200'
             default: return 'bg-neutral-100 text-neutral-800'
         }

@@ -40,9 +40,9 @@ function EventStatusBadge({ status }: { status: string }) {
 }
 
 const CATEGORY_BADGES: Record<string, { label: string; className: string }> = {
-    networking: { label: 'Networking', className: 'bg-brand-blue text-brand-blue dark:bg-brand-blue/30 dark:text-brand-blue' },
-    clinical: { label: 'Clínico', className: 'bg-brand-blue-hover text-brand-blue-hover dark:bg-brand-blue-hover/30 dark:text-brand-blue-hover' },
-    business: { label: 'Negocios', className: 'bg-brand-blue-hover text-brand-blue-hover dark:bg-brand-blue-hover/30 dark:text-brand-blue-hover' },
+    networking: { label: 'Networking', className: 'bg-brand-blue text-white' },
+    clinical: { label: 'Clínico', className: 'bg-brand-blue-hover text-white' },
+    business: { label: 'Negocios', className: 'bg-brand-blue-hover text-white' },
 }
 
 const SUBCATEGORY_LABELS: Record<string, string> = {

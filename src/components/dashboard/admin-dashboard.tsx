@@ -47,10 +47,10 @@ function getGreeting(): string {
 }
 
 const roleLabels: Record<string, { label: string; color: string }> = {
-    psychologist: { label: 'Psicólogo', color: 'bg-brand-blue text-brand-blue dark:bg-brand-blue/40 dark:text-brand-blue' },
+    psychologist: { label: 'Psicólogo', color: 'bg-brand-blue text-white' },
     patient: { label: 'Paciente', color: 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300' },
-    admin: { label: 'Admin', color: 'bg-brand-blue-hover text-brand-blue-hover dark:bg-brand-blue-hover/40 dark:text-brand-blue-hover' },
-    ponente: { label: 'Ponente', color: 'bg-brand-blue text-brand-blue dark:bg-brand-blue/40 dark:text-brand-blue' },
+    admin: { label: 'Admin', color: 'bg-brand-blue-hover text-white' },
+    ponente: { label: 'Ponente', color: 'bg-brand-blue text-white' },
 }
 
 export function AdminDashboard({
@@ -91,7 +91,7 @@ export function AdminDashboard({
                                 Sistema Operativo
                             </span>
                             {pendingReferrals > 0 && (
-                                <span className="text-xs px-2 py-0.5 rounded-full bg-brand-blue text-brand-blue dark:bg-brand-blue/30 dark:text-brand-blue font-medium">
+                                <span className="text-xs px-2 py-0.5 rounded-full bg-brand-blue text-white font-medium">
                                     {pendingReferrals} referencia{pendingReferrals > 1 ? 's' : ''} pendiente{pendingReferrals > 1 ? 's' : ''}
                                 </span>
                             )}

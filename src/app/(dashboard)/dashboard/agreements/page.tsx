@@ -33,8 +33,8 @@ export default async function AgreementsPage() {
 
     const CATEGORY_COLORS: Record<string, string> = {
         salud: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400',
-        educacion: 'bg-brand-blue text-brand-blue dark:bg-brand-blue/30 dark:text-brand-blue',
-        tecnologia: 'bg-brand-blue-hover text-brand-blue-hover dark:bg-brand-blue-hover/30 dark:text-brand-blue-hover',
+        educacion: 'bg-brand-blue text-white',
+        tecnologia: 'bg-brand-blue-hover text-white',
         bienestar: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
         servicios: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400',
         otro: 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-400',

@@ -50,10 +50,10 @@ export default async function AdminReferralsPage() {
     const getStatusBadge = (status: string) => {
         const badges: Record<string, { cls: string, label: string }> = {
             pending: { cls: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-200', label: 'Pendiente' },
-            assigned: { cls: 'bg-brand-blue text-brand-blue dark:bg-brand-blue/30 dark:text-brand-blue', label: 'Asignada' },
+            assigned: { cls: 'bg-brand-blue text-white', label: 'Asignada' },
             accepted: { cls: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-200', label: 'Aceptada' },
             rejected: { cls: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-200', label: 'Rechazada' },
-            handoff_completed: { cls: 'bg-brand-blue-hover text-brand-blue-hover dark:bg-brand-blue-hover/30 dark:text-brand-blue-hover', label: 'Transferencia clinica' },
+            handoff_completed: { cls: 'bg-brand-blue-hover text-white', label: 'Transferencia clinica' },
             completed: { cls: 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-200', label: 'Completada' },
             cancelled: { cls: 'bg-gray-100 text-gray-500 dark:bg-gray-900/30 dark:text-gray-400', label: 'Cancelada' },
         }

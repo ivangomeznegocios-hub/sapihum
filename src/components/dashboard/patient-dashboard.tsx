@@ -167,25 +167,25 @@ export function PatientDashboard({
                     </CardHeader>
                     <CardContent>
                         {nextAppointment ? (
-                            <div className="bg-gradient-to-br from-brand-blue to-brand-blue/50 dark:from-brand-blue/30 dark:to-brand-blue/20 rounded-xl p-5">
+                            <div className="rounded-xl bg-gradient-to-br from-brand-blue to-brand-blue-hover p-5 text-white">
                                 <div className="flex items-start gap-4">
-                                    <div className="p-3 bg-brand-blue dark:bg-brand-blue/50 rounded-xl">
-                                        <Calendar className="h-6 w-6 text-brand-blue dark:text-brand-blue" />
+                                    <div className="rounded-xl bg-white/15 p-3">
+                                        <Calendar className="h-6 w-6 text-white" />
                                     </div>
                                     <div className="flex-1 min-w-0">
-                                        <p className="font-semibold text-brand-blue dark:text-brand-blue">
+                                        <p className="font-semibold text-white">
                                             {new Date(nextAppointment.start_time).toLocaleDateString('es-MX', {
                                                 weekday: 'long', day: 'numeric', month: 'long'
                                             })}
                                         </p>
-                                        <p className="mt-0.5 break-words whitespace-normal text-sm text-brand-blue dark:text-brand-blue">
+                                        <p className="mt-0.5 break-words whitespace-normal text-sm text-white/85">
                                             {new Date(nextAppointment.start_time).toLocaleTimeString('es-MX', {
                                                 hour: '2-digit', minute: '2-digit'
                                             })}
                                             {' · '}con {nextAppointment.psychologist_name}
                                         </p>
                                         <div className="mt-3">
-                                            <Button asChild size="sm" className="min-h-11 bg-brand-blue hover:bg-brand-blue sm:min-h-8">
+                                            <Button asChild size="sm" className="min-h-11 border-white bg-white text-brand-blue-dark hover:bg-brand-blue-soft hover:text-brand-blue-dark sm:min-h-8">
                                                 <Link href="/dashboard/calendar">
                                                     Ver Detalles
                                                 </Link>
@@ -294,16 +294,16 @@ export function PatientDashboard({
             </Card>
 
             {/* Wellness Tip */}
-            <div className="rounded-xl bg-gradient-to-r from-green-50 to-brand-dark dark:from-green-950/20 dark:to-brand-dark/20 border border-green-200 dark:border-green-800 p-5">
+            <div className="rounded-xl border border-emerald-200 bg-gradient-to-r from-emerald-50 to-brand-blue-soft p-5">
                 <div className="flex items-start gap-4">
-                    <div className="p-2.5 bg-green-100 dark:bg-green-900 rounded-full flex-shrink-0">
-                        <Sparkles className="h-5 w-5 text-green-600 dark:text-green-400" />
+                    <div className="p-2.5 bg-emerald-100 rounded-full flex-shrink-0">
+                        <Sparkles className="h-5 w-5 text-emerald-700" />
                     </div>
                     <div>
-                        <h3 className="font-semibold text-green-800 dark:text-green-200">
+                        <h3 className="font-semibold text-emerald-900">
                             Tip del día: {tip.title}
                         </h3>
-                        <p className="text-sm text-green-700 dark:text-green-300 mt-1">
+                        <p className="text-sm text-emerald-800 mt-1">
                             {tip.text}
                         </p>
                     </div>

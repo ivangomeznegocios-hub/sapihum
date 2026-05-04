@@ -57,10 +57,10 @@ function getNoteTypeLabel(type: string) {
 
 function getNoteTypeColor(type: string) {
     const colors: Record<string, string> = {
-        session_note: 'bg-brand-blue text-brand-blue',
-        assessment: 'bg-brand-blue-hover text-brand-blue-hover',
-        treatment_plan: 'bg-brand-blue-hover text-brand-blue-hover',
-        progress_note: 'bg-brand-blue text-brand-blue',
+        session_note: 'bg-brand-blue text-white',
+        assessment: 'bg-brand-blue-hover text-white',
+        treatment_plan: 'bg-brand-blue-hover text-white',
+        progress_note: 'bg-brand-blue text-white',
         intake: 'bg-brand-blue/20 text-brand-blue',
         discharge: 'bg-rose-100 text-brand-blue-hover'
     }
@@ -81,11 +81,11 @@ function getDocCategoryLabel(cat: string) {
 
 function getDocCategoryColor(cat: string) {
     const colors: Record<string, string> = {
-        test_result: 'bg-brand-blue-hover text-brand-blue-hover',
+        test_result: 'bg-brand-blue-hover text-white',
         referral: 'bg-brand-blue/20 text-brand-blue',
         consent: 'surface-alert-success',
         report: 'bg-orange-100 text-orange-800',
-        intake_form: 'bg-brand-blue text-brand-blue',
+        intake_form: 'bg-brand-blue text-white',
         other: 'bg-gray-100 text-gray-800'
     }
     return colors[cat] || 'bg-gray-100 text-gray-800'
@@ -548,7 +548,7 @@ export function ClinicalTabs({ notes, documents, appointments, sessionSummaries,
                                     pending: 'bg-yellow-100 text-yellow-800',
                                     confirmed: 'surface-alert-success',
                                     cancelled: 'surface-alert-error',
-                                    scheduled: 'bg-brand-blue text-brand-blue',
+                                    scheduled: 'bg-brand-blue text-white',
                                     completed: 'bg-gray-100 text-gray-800'
                                 }
 
@@ -578,7 +578,7 @@ export function ClinicalTabs({ notes, documents, appointments, sessionSummaries,
                                                         <Star className="h-3.5 w-3.5 text-brand-blue" />
                                                         <span className="text-xs font-semibold text-brand-blue">Resumen de Sesión</span>
                                                         {linkedSummary.mood_rating && (
-                                                            <span className="text-[10px] bg-brand-blue text-brand-blue px-1.5 py-0.5 rounded">
+                                                            <span className="text-[10px] bg-brand-blue text-white px-1.5 py-0.5 rounded">
                                                                 Ánimo: {linkedSummary.mood_rating}/10
                                                             </span>
                                                         )}
@@ -592,7 +592,7 @@ export function ClinicalTabs({ notes, documents, appointments, sessionSummaries,
                                                     {linkedSummary.key_topics?.length > 0 && (
                                                         <div className="flex flex-wrap gap-1 mt-2">
                                                             {linkedSummary.key_topics.map((topic: string) => (
-                                                                <span key={topic} className="text-[10px] px-1.5 py-0.5 rounded bg-brand-blue text-brand-blue">
+                                                                <span key={topic} className="text-[10px] px-1.5 py-0.5 rounded bg-brand-blue text-white">
                                                                     {topic}
                                                                 </span>
                                                             ))}

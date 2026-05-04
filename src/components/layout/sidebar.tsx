@@ -219,8 +219,8 @@ function NavGroupSection({
                                         className={cn(
                                             'h-4 w-4 shrink-0',
                                             isActive
-                                                ? 'text-sidebar-primary'
-                                                : 'text-sidebar-foreground/60 group-hover:text-sidebar-primary'
+                                                ? 'text-sidebar-primary-foreground'
+                                                : 'text-sidebar-foreground/70 group-hover:text-sidebar-primary-foreground'
                                         )}
                                     />
                                     <span className="truncate">{item.name}</span>
@@ -367,8 +367,8 @@ export function Sidebar({
                                                     className={cn(
                                                         'h-4 w-4 shrink-0',
                                                         isActive
-                                                            ? 'text-sidebar-primary'
-                                                            : 'text-sidebar-foreground/60 group-hover:text-sidebar-primary'
+                                                            ? 'text-sidebar-primary-foreground'
+                                                            : 'text-sidebar-foreground/70 group-hover:text-sidebar-primary-foreground'
                                                     )}
                                                 />
                                                 <span className="truncate">{item.name}</span>

@@ -63,11 +63,11 @@ function ResourceTypeIcon({ type }: { type: string }) {
 
 const typeColors: Record<string, string> = {
     pdf: 'bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-300',
-    video: 'bg-brand-blue-hover text-brand-blue-hover dark:bg-brand-blue-hover dark:text-brand-blue-hover',
-    audio: 'bg-brand-blue text-brand-blue dark:bg-brand-blue dark:text-brand-blue',
+    video: 'bg-brand-blue-hover text-white',
+    audio: 'bg-brand-blue text-white',
     link: 'bg-green-100 text-green-700 dark:bg-green-950 dark:text-green-300',
-    document: 'bg-brand-blue text-brand-blue dark:bg-brand-blue dark:text-brand-blue',
-    tool: 'bg-brand-blue text-brand-blue dark:bg-brand-blue dark:text-brand-blue'
+    document: 'bg-brand-blue text-white',
+    tool: 'bg-brand-blue text-white'
 }
 
 const typeLabels: Record<string, string> = {

@@ -43,10 +43,10 @@ export default async function ReferralsPage() {
     const getStatusBadge = (status: string) => {
         const badges: Record<string, { class: string, icon: any, label: string }> = {
             pending: { class: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-200', icon: <Clock className="h-3 w-3" />, label: 'Pendiente' },
-            assigned: { class: 'bg-brand-blue text-brand-blue dark:bg-brand-blue/30 dark:text-brand-blue', icon: <User className="h-3 w-3" />, label: 'Asignada' },
+            assigned: { class: 'bg-brand-blue text-white', icon: <User className="h-3 w-3" />, label: 'Asignada' },
             accepted: { class: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-200', icon: <CheckCircle2 className="h-3 w-3" />, label: 'Aceptada' },
             rejected: { class: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-200', icon: <XCircle className="h-3 w-3" />, label: 'Rechazada' },
-            handoff_completed: { class: 'bg-brand-blue-hover text-brand-blue-hover dark:bg-brand-blue-hover/30 dark:text-brand-blue-hover', icon: <CheckCircle2 className="h-3 w-3" />, label: 'Transferencia clinica' },
+            handoff_completed: { class: 'bg-brand-blue-hover text-white', icon: <CheckCircle2 className="h-3 w-3" />, label: 'Transferencia clinica' },
             completed: { class: 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-200', icon: <CheckCircle2 className="h-3 w-3" />, label: 'Completada' },
             cancelled: { class: 'bg-gray-100 text-gray-500 dark:bg-gray-900/30 dark:text-gray-400', icon: <XCircle className="h-3 w-3" />, label: 'Cancelada' },
         }

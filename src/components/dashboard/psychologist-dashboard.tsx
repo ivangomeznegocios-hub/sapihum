@@ -108,7 +108,7 @@ export function PsychologistDashboard({
                                 Tu espacio de crecimiento profesional en SAPIHUM
                             </p>
                             <div className="flex items-center gap-2 mt-3">
-                                <span className="text-xs px-2.5 py-1 rounded-full bg-brand-blue-hover text-brand-blue-hover dark:bg-brand-blue-hover/30 dark:text-brand-blue-hover font-medium">
+                                <span className="text-xs px-2.5 py-1 rounded-full bg-brand-blue-hover text-white font-medium">
                                     Nivel 1 · Comunidad y Crecimiento
                                 </span>
                             </div>
@@ -263,8 +263,8 @@ export function PsychologistDashboard({
                         </p>
                         <div className="flex items-center gap-2 mt-3">
                             <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${membershipLevel === 3
-                                    ? 'bg-brand-blue text-brand-blue dark:bg-brand-blue/30 dark:text-brand-blue'
-                                    : 'bg-brand-blue text-brand-blue dark:bg-brand-blue/30 dark:text-brand-blue'
+                                    ? 'bg-brand-blue text-white'
+                                    : 'bg-brand-blue text-white'
                                 }`}>
                                 Nivel {membershipLevel} · {membershipLevel === 3 ? 'Gestión y Marketing Premium' : 'Consultorio Digital'}
                             </span>
@@ -405,7 +405,7 @@ export function PsychologistDashboard({
                                             <span className={`text-xs font-medium px-2 py-1 rounded-full self-start sm:self-auto ${diffMs < 0
                                                     ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
                                                     : diffHrs < 1
-                                                        ? 'bg-brand-blue text-brand-blue dark:bg-brand-blue/30 dark:text-brand-blue'
+                                                        ? 'bg-brand-blue text-white'
                                                         : 'bg-muted text-muted-foreground'
                                                 }`}>
                                                 {timeLabel}

@@ -198,7 +198,7 @@ export default async function MyPsychologistPage() {
                                             </span>
                                         </div>
                                         <div className="pt-2">
-                                            <span className="text-xs px-2 py-1 bg-brand-blue text-brand-blue rounded-full">
+                                            <span className="text-xs px-2 py-1 bg-brand-blue text-white rounded-full">
                                                 {nextAppointment.type === 'video' ? 'Videollamada' : 'Presencial'}
                                             </span>
                                         </div>

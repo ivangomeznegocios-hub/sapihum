@@ -110,9 +110,9 @@ export default async function MarketingHubPage() {
                                 <span className="text-brand-blue">· {inProgressCount} en progreso</span>
                             )}
                         </div>
-                        <div className="w-full h-2 bg-brand-blue/50 rounded-full overflow-hidden">
+                                    <div className="w-full h-2 bg-brand-blue-soft rounded-full overflow-hidden">
                             <div
-                                className="h-full bg-gradient-to-r from-brand-blue-hover to-brand-dark rounded-full transition-all duration-500"
+                                        className="h-full bg-gradient-to-r from-brand-blue to-emerald-600 rounded-full transition-all duration-500"
                                 style={{ width: `${Math.max((activeCount / totalServices) * 100, 5)}%` }}
                             />
                         </div>
@@ -155,7 +155,7 @@ export default async function MarketingHubPage() {
                                     <Card key={service.id} className="flex flex-col h-full border-neutral-200 dark:border-neutral-800 overflow-hidden group hover:shadow-md transition-all">
                                         <CardHeader className="pb-3">
                                             <div className="flex justify-between items-start mb-2">
-                                                <div className="p-2.5 rounded-lg bg-brand-blue dark:bg-brand-blue/50 text-brand-blue dark:text-brand-blue group-hover:scale-110 transition-transform">
+                                <div className="p-2.5 rounded-lg bg-brand-blue text-white group-hover:scale-110 transition-transform">
                                                     <Icon className="w-5 h-5" />
                                                 </div>
                                                 <div className={`px-2.5 py-1 text-xs font-medium rounded-full border ${statusCfg.color}`}>
@@ -226,7 +226,7 @@ export default async function MarketingHubPage() {
                 {/* Right Sidebar */}
                 <div className="space-y-6">
                     {/* Próximos Pasos — Dynamic */}
-                    <Card className="border-brand-blue dark:border-brand-blue bg-brand-blue/50 dark:bg-brand-blue/20 shadow-sm">
+                    <Card className="border-brand-blue-border bg-brand-blue-soft shadow-sm">
                         <CardHeader>
                             <CardTitle className="text-lg flex items-center gap-2">
                                 <CheckCircle2 className="text-brand-blue dark:text-brand-blue w-5 h-5" />
@@ -309,7 +309,7 @@ export default async function MarketingHubPage() {
 
                     {/* Brief Status Card (if submitted) */}
                     {brief && (
-                        <Card className="border-brand-blue-hover dark:border-brand-blue-hover bg-brand-blue-hover/50 dark:bg-brand-blue-hover/20">
+                <Card className="border-emerald-200 bg-brand-teal-soft">
                             <CardHeader className="pb-3">
                                 <CardTitle className="text-sm flex items-center gap-2">
                                     <FileEdit className="w-4 h-4 text-brand-blue-hover dark:text-brand-blue-hover" />

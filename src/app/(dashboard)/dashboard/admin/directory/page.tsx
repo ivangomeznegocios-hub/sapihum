@@ -133,7 +133,7 @@ export default async function AdminDirectoryPage() {
                                         </p>
                                         <div className="flex flex-wrap gap-1">
                                             {psychologist.populations_served.map((population: string) => (
-                                                <span key={population} className="text-xs px-1.5 py-0.5 bg-brand-blue dark:bg-brand-blue/20 text-brand-blue dark:text-brand-blue rounded">
+                                                            <span key={population} className="text-xs px-1.5 py-0.5 bg-brand-blue-soft text-brand-blue-dark rounded">
                                                     {population}
                                                 </span>
                                             ))}
@@ -148,7 +148,7 @@ export default async function AdminDirectoryPage() {
                                         </p>
                                         <div className="flex flex-wrap gap-1">
                                             {psychologist.therapeutic_approaches.map((approach: string) => (
-                                                <span key={approach} className="text-xs px-1.5 py-0.5 bg-brand-blue-hover dark:bg-brand-blue-hover/20 text-brand-blue-hover dark:text-brand-blue-hover rounded">
+                                                            <span key={approach} className="text-xs px-1.5 py-0.5 bg-brand-teal-soft text-emerald-700 rounded">
                                                     {approach}
                                                 </span>
                                             ))}

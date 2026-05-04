@@ -21,28 +21,28 @@ const communityLinks = [
         description: 'Talleres en vivo, masterclasses y formaciones para tu crecimiento profesional',
         href: '/dashboard/events',
         icon: CalendarDays,
-        color: 'bg-brand-blue text-brand-blue dark:bg-brand-blue/30 dark:text-brand-blue',
+        color: 'bg-brand-blue text-white',
     },
     {
         title: 'Networking',
         description: 'Conecta con colegas, comparte experiencias y amplía tu red profesional',
         href: '/dashboard/events/networking',
         icon: Users2,
-        color: 'bg-brand-blue text-brand-blue dark:bg-brand-blue/30 dark:text-brand-blue',
+        color: 'bg-brand-blue text-white',
     },
     {
         title: 'Escuela Clínica',
         description: 'Formaciones clínicas especializadas y supervisión grupal',
         href: '/dashboard/events/clinical',
         icon: GraduationCap,
-        color: 'bg-brand-blue-hover text-brand-blue-hover dark:bg-brand-blue-hover/30 dark:text-brand-blue-hover',
+        color: 'bg-brand-blue-hover text-white',
     },
     {
         title: 'Negocios',
         description: 'Estrategias y herramientas para hacer crecer tu consulta',
         href: '/dashboard/events/business',
         icon: Briefcase,
-        color: 'bg-brand-blue-hover text-brand-blue-hover dark:bg-brand-blue-hover/30 dark:text-brand-blue-hover',
+        color: 'bg-brand-blue-hover text-white',
     },
     {
         title: 'Grabaciones',
@@ -56,7 +56,7 @@ const communityLinks = [
         description: 'Conoce a los expertos que comparten su conocimiento con la comunidad',
         href: '/dashboard/speakers',
         icon: Mic2,
-        color: 'bg-brand-blue text-brand-blue dark:bg-brand-blue/30 dark:text-brand-blue',
+        color: 'bg-brand-blue text-white',
     },
     {
         title: 'Recursos',
@@ -77,7 +77,7 @@ const communityLinks = [
         description: 'Beneficios y descuentos exclusivos para miembros de la comunidad',
         href: '/dashboard/agreements',
         icon: Handshake,
-        color: 'bg-brand-blue text-brand-blue dark:bg-brand-blue/30 dark:text-brand-blue',
+        color: 'bg-brand-blue text-white',
     },
 ]
 

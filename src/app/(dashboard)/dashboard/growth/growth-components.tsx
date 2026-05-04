@@ -632,8 +632,8 @@ export function RewardTimeline({ rewards }: { rewards: InviteRewardEvent[] }) {
                             className={cn(
                                 'mt-0.5 rounded-full p-1.5',
                                 reward.processed
-                                    ? 'bg-brand-blue-hover text-brand-blue-hover dark:bg-brand-blue-hover/30 dark:text-brand-blue-hover'
-                                    : 'bg-brand-blue text-brand-blue dark:bg-brand-blue/30 dark:text-brand-blue'
+                                    ? 'bg-brand-blue-hover text-white'
+                                    : 'bg-brand-blue text-white'
                             )}
                         >
                             {reward.processed ? (
@@ -670,8 +670,8 @@ export function RewardTimeline({ rewards }: { rewards: InviteRewardEvent[] }) {
                             className={cn(
                                 'shrink-0 rounded-full px-2 py-0.5 text-[10px] font-medium',
                                 reward.processed
-                                    ? 'bg-brand-blue-hover text-brand-blue-hover dark:bg-brand-blue-hover/30 dark:text-brand-blue-hover'
-                                    : 'bg-brand-blue text-brand-blue dark:bg-brand-blue/30 dark:text-brand-blue'
+                                    ? 'bg-brand-blue-hover text-white'
+                                    : 'bg-brand-blue text-white'
                             )}
                         >
                             {reward.processed ? 'Entregada' : 'Pendiente'}

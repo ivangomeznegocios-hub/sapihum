@@ -47,7 +47,7 @@ function getSpeakerMilestones(profileComplete: number, totalEvents: number, tota
 
 const statusBadges: Record<string, { label: string; color: string }> = {
     draft: { label: 'Borrador', color: 'bg-muted text-muted-foreground' },
-    upcoming: { label: 'Próximo', color: 'bg-brand-blue text-brand-blue dark:bg-brand-blue/40 dark:text-brand-blue' },
+    upcoming: { label: 'Próximo', color: 'bg-brand-blue text-white' },
     live: { label: 'En Vivo', color: 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300' },
     completed: { label: 'Finalizado', color: 'bg-muted text-muted-foreground' },
     cancelled: { label: 'Cancelado', color: 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300' },
@@ -131,7 +131,7 @@ export function PonenteDashboard({
                     </Button>
                 </div>
                 <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-                    <div className="p-3 rounded-lg bg-brand-blue/50 dark:bg-brand-blue/20 border border-brand-blue/50 dark:border-brand-blue/30">
+                    <div className="p-3 rounded-lg bg-brand-blue-soft border border-brand-blue-border">
                         <div className="flex items-center gap-2 mb-1">
                             <TrendingUp className="h-3.5 w-3.5 text-brand-blue" />
                             <span className="text-xs text-muted-foreground">Total Acumulado</span>
@@ -140,27 +140,27 @@ export function PonenteDashboard({
                             {new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(totalAccumulated)}
                         </p>
                     </div>
-                    <div className="p-3 rounded-lg bg-brand-blue-hover/50 dark:bg-brand-blue-hover/20 border border-brand-blue-hover/50 dark:border-brand-blue-hover/30">
+                    <div className="p-3 rounded-lg bg-brand-teal-soft border border-emerald-200">
                         <div className="flex items-center gap-2 mb-1">
-                            <CheckCircle2 className="h-3.5 w-3.5 text-brand-blue-hover" />
+                            <CheckCircle2 className="h-3.5 w-3.5 text-emerald-700" />
                             <span className="text-xs text-muted-foreground">Disponible</span>
                         </div>
-                        <p className="text-lg font-bold text-brand-blue-hover dark:text-brand-blue-hover">
+                        <p className="text-lg font-bold text-emerald-700">
                             {new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(availableForPayment)}
                         </p>
                     </div>
-                    <div className="p-3 rounded-lg bg-brand-blue/50 dark:bg-brand-blue/20 border border-brand-blue/50 dark:border-brand-blue/30">
+                    <div className="p-3 rounded-lg bg-amber-50 border border-amber-200">
                         <div className="flex items-center gap-2 mb-1">
-                            <Clock className="h-3.5 w-3.5 text-brand-blue" />
+                            <Clock className="h-3.5 w-3.5 text-amber-700" />
                             <span className="text-xs text-muted-foreground">En Garantía (30d)</span>
                         </div>
-                        <p className="text-lg font-bold text-brand-blue dark:text-brand-blue">
+                        <p className="text-lg font-bold text-amber-800">
                             {new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(pendingAmount)}
                         </p>
                     </div>
-                    <div className="p-3 rounded-lg bg-brand-blue-hover/50 dark:bg-brand-blue-hover/20 border border-brand-blue-hover/50 dark:border-brand-blue-hover/30">
+                    <div className="p-3 rounded-lg bg-brand-teal-soft border border-emerald-200">
                         <div className="flex items-center gap-2 mb-1">
-                            <CalendarDays className="h-3.5 w-3.5 text-brand-blue-hover" />
+                            <CalendarDays className="h-3.5 w-3.5 text-emerald-700" />
                             <span className="text-xs text-muted-foreground">Este Mes</span>
                         </div>
                         <p className="text-lg font-bold">

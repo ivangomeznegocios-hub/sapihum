@@ -75,7 +75,7 @@ export default async function EarningsDashboardPage() {
                             {courses.slice(0, 8).map((course: any) => {
                                 const statusColors: Record<string, string> = {
                                     draft: 'bg-muted text-muted-foreground',
-                                    upcoming: 'bg-brand-blue text-brand-blue dark:bg-brand-blue/40 dark:text-brand-blue',
+                                    upcoming: 'bg-brand-blue text-white',
                                     live: 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300',
                                     completed: 'bg-muted text-muted-foreground',
                                     cancelled: 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300',
