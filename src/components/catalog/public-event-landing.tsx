@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { getEffectiveEventPriceForProfile, getEventMemberAccessMessage, isEventIncludedForMatchingSpecialization } from '@/lib/events/pricing'
 import { getEventCampaignForEvent } from '@/lib/events/campaigns'
 import { getDefaultPublicCtaLabel, getEventTypeLabel, getPublicEventPath } from '@/lib/events/public'
+import { getEventSessionOccurrences } from '@/lib/events/sessions'
 import { brandName } from '@/lib/brand'
 import { getSpecializationByCode } from '@/lib/specializations'
 import { DEFAULT_TIMEZONE } from '@/lib/timezone'
@@ -350,6 +351,7 @@ export function PublicEventLanding({
             }]
             : []),
     ]
+    const sessionOccurrences = getEventSessionOccurrences(event)
 
     return (
         <div className="pb-28">
@@ -448,6 +450,15 @@ export function PublicEventLanding({
                                 <div>
                                     <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-brand-text-muted">Fecha y Hora</p>
                                     <p className="mt-2 text-sm font-medium text-brand-text-strong">{formatEventDate(event.start_time)}</p>
+                                    {sessionOccurrences.length > 1 && (
+                                        <div className="mt-3 space-y-1 text-xs text-brand-text-muted">
+                                            {sessionOccurrences.slice(1).map((session) => (
+                                                <p key={`${event.id}-${session.index}`}>
+                                                    Sesion {session.index}: {formatEventDate(session.start_time)}
+                                                </p>
+                                            ))}
+                                        </div>
+                                    )}
                                 </div>
                                 <div>
                                     <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-brand-text-muted">Formato</p>

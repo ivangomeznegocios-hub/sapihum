@@ -13,6 +13,7 @@ import { grantEventEntitlements } from '@/lib/events/entitlements'
 import { getMembershipEntitlementEndsAt } from '@/lib/events/access'
 import { slugifyCatalogText } from '@/lib/events/public'
 import { getEventEditorAccessForUser } from '@/lib/events/permissions'
+import { getEventSessionOccurrences } from '@/lib/events/sessions'
 import { audienceAllowsAccess, getCommercialAccessContext } from '@/lib/access/commercial'
 import { sendEmail } from '@/lib/email/index'
 import { buildEventRegistrationEmail } from '@/lib/email/templates'
@@ -257,6 +258,14 @@ function parseSessionConfig(formData: FormData, eventType: string, location: str
     }
 }
 
+type ParsedSessionSchedule = {
+    sessionConfig: ReturnType<typeof parseSessionConfig> & {
+        sessions: { start_time: string; end_time: string }[]
+    }
+    firstSession: { startTimeIso: string; endTimeIso: string; safeDuration: number }
+    sessions: { startTimeIso: string; endTimeIso: string }[]
+}
+
 function buildEventDateRange(dateValue: string, timeValue: string, durationMinutes: number) {
     const startTimeIso = zonedDateTimeToUtcIso(dateValue, timeValue, DEFAULT_TIMEZONE)
     if (!startTimeIso) return null
@@ -274,6 +283,90 @@ function buildEventDateRange(dateValue: string, timeValue: string, durationMinut
     }
 }
 
+function buildWeeklySessionSchedule(
+    firstSession: { startTimeIso: string; endTimeIso: string; safeDuration: number },
+    totalSessions: number
+) {
+    return Array.from({ length: totalSessions }, (_, index) => {
+        const startTime = new Date(new Date(firstSession.startTimeIso).getTime() + index * 7 * 24 * 60 * 60 * 1000)
+        const endTime = new Date(startTime.getTime() + firstSession.safeDuration * 60000)
+
+        return {
+            startTimeIso: startTime.toISOString(),
+            endTimeIso: endTime.toISOString(),
+        }
+    })
+}
+
+function parseSessionSchedule(
+    formData: FormData,
+    eventType: string,
+    location: string | null,
+    date: string | null,
+    time: string | null,
+    duration: number
+): ParsedSessionSchedule | { error: string } {
+    const sessionConfig = parseSessionConfig(formData, eventType, location)
+
+    if (!date || !time) {
+        return { error: 'Faltan campos requeridos' }
+    }
+
+    const firstSession = buildEventDateRange(date, time, duration)
+    if (!firstSession) {
+        return { error: 'La fecha u hora del evento no son validas' }
+    }
+
+    const rawSchedule = parseJsonValue<unknown[]>(formData.get('sessionSchedule'), [])
+    const parsedSchedule = rawSchedule
+        .map((session) => {
+            if (!session || typeof session !== 'object') return null
+
+            const sessionDate = typeof (session as any).date === 'string' ? (session as any).date.trim() : ''
+            const sessionTime = typeof (session as any).time === 'string' ? (session as any).time.trim() : ''
+            const range = buildEventDateRange(sessionDate, sessionTime, sessionConfig.session_duration_minutes)
+
+            return range
+                ? {
+                    startTimeIso: range.startTimeIso,
+                    endTimeIso: range.endTimeIso,
+                }
+                : null
+        })
+        .filter((session): session is { startTimeIso: string; endTimeIso: string } => Boolean(session))
+
+    let sessions = parsedSchedule
+    if (sessions.length === 0) {
+        sessions = sessionConfig.total_sessions > 1 && sessionConfig.recurrence
+            ? buildWeeklySessionSchedule(firstSession, sessionConfig.total_sessions)
+            : [{ startTimeIso: firstSession.startTimeIso, endTimeIso: firstSession.endTimeIso }]
+    }
+
+    if (sessions.length !== sessionConfig.total_sessions) {
+        return { error: `Completa las ${sessionConfig.total_sessions} fechas de sesiones antes de guardar.` }
+    }
+
+    const orderedSessions = [...sessions].sort(
+        (a, b) => new Date(a.startTimeIso).getTime() - new Date(b.startTimeIso).getTime()
+    )
+
+    return {
+        sessionConfig: {
+            ...sessionConfig,
+            sessions: orderedSessions.map((session) => ({
+                start_time: session.startTimeIso,
+                end_time: session.endTimeIso,
+            })),
+        },
+        firstSession: {
+            startTimeIso: orderedSessions[0].startTimeIso,
+            endTimeIso: orderedSessions[0].endTimeIso,
+            safeDuration: sessionConfig.session_duration_minutes,
+        },
+        sessions: orderedSessions,
+    }
+}
+
 function formatConflictDateLabel(dateValue: string) {
     return `${formatDateInTimezone(dateValue, {
         day: 'numeric',
@@ -288,6 +381,42 @@ type EventScheduleConflict = {
     title: string | null
     start_time: string
     source: 'creator' | 'speaker'
+}
+
+function addExpandedScheduleConflicts({
+    conflicts,
+    events,
+    startTimeIso,
+    endTimeIso,
+    source,
+}: {
+    conflicts: Map<string, EventScheduleConflict>
+    events: any[] | null | undefined
+    startTimeIso: string
+    endTimeIso: string
+    source: EventScheduleConflict['source']
+}) {
+    const requestedStart = new Date(startTimeIso).getTime()
+    const requestedEnd = new Date(endTimeIso).getTime()
+
+    for (const event of events || []) {
+        if (conflicts.has(event.id)) continue
+
+        const overlappingSession = getEventSessionOccurrences(event).find((session) => {
+            const sessionStart = new Date(session.start_time).getTime()
+            const sessionEnd = new Date(session.end_time).getTime()
+            return sessionStart < requestedEnd && sessionEnd > requestedStart
+        })
+
+        if (overlappingSession) {
+            conflicts.set(event.id, {
+                id: event.id,
+                title: event.title || null,
+                start_time: overlappingSession.start_time,
+                source,
+            })
+        }
+    }
 }
 
 async function findEventScheduleConflict({
@@ -310,12 +439,10 @@ async function findEventScheduleConflict({
     if (ownerId) {
         let creatorQuery = (supabase
             .from('events') as any)
-            .select('id, title, start_time')
+            .select('id, title, start_time, end_time, session_config')
             .eq('created_by', ownerId)
             .neq('status', 'cancelled')
-            .lt('start_time', endTimeIso)
-            .gt('end_time', startTimeIso)
-            .limit(5)
+            .limit(500)
 
         if (excludeEventId) {
             creatorQuery = creatorQuery.neq('id', excludeEventId)
@@ -323,14 +450,13 @@ async function findEventScheduleConflict({
 
         const { data: creatorConflicts } = await creatorQuery
 
-        for (const conflict of creatorConflicts || []) {
-            conflicts.set(conflict.id, {
-                id: conflict.id,
-                title: conflict.title || null,
-                start_time: conflict.start_time,
-                source: 'creator',
-            })
-        }
+        addExpandedScheduleConflicts({
+            conflicts,
+            events: creatorConflicts,
+            startTimeIso,
+            endTimeIso,
+            source: 'creator',
+        })
     }
 
     const normalizedSpeakerIds = Array.from(new Set((speakerIds || []).filter(Boolean)))
@@ -349,23 +475,18 @@ async function findEventScheduleConflict({
         if (relatedEventIds.length > 0) {
             const { data: speakerConflicts } = await (supabase
                 .from('events') as any)
-                .select('id, title, start_time')
+                .select('id, title, start_time, end_time, session_config')
                 .in('id', relatedEventIds)
                 .neq('status', 'cancelled')
-                .lt('start_time', endTimeIso)
-                .gt('end_time', startTimeIso)
-                .limit(5)
+                .limit(500)
 
-            for (const conflict of speakerConflicts || []) {
-                if (!conflicts.has(conflict.id)) {
-                    conflicts.set(conflict.id, {
-                        id: conflict.id,
-                        title: conflict.title || null,
-                        start_time: conflict.start_time,
-                        source: 'speaker',
-                    })
-                }
-            }
+            addExpandedScheduleConflicts({
+                conflicts,
+                events: speakerConflicts,
+                startTimeIso,
+                endTimeIso,
+                source: 'speaker',
+            })
         }
     }
 
@@ -374,6 +495,37 @@ async function findEventScheduleConflict({
     )
 
     return orderedConflicts[0] || null
+}
+
+async function findEventScheduleConflictForSessions({
+    supabase,
+    ownerId,
+    speakerIds,
+    sessions,
+    excludeEventId,
+}: {
+    supabase: any
+    ownerId?: string | null
+    speakerIds?: string[]
+    sessions: { startTimeIso: string; endTimeIso: string }[]
+    excludeEventId?: string
+}) {
+    for (const session of sessions) {
+        const conflict = await findEventScheduleConflict({
+            supabase,
+            ownerId,
+            speakerIds,
+            startTimeIso: session.startTimeIso,
+            endTimeIso: session.endTimeIso,
+            excludeEventId,
+        })
+
+        if (conflict) {
+            return conflict
+        }
+    }
+
+    return null
 }
 
 function buildEventScheduleConflictMessage(conflict: EventScheduleConflict) {
@@ -701,23 +853,22 @@ export async function createEvent(formData: FormData) {
         return { error: 'Ingresa un precio preferencial para miembros o cambia el tipo de acceso' }
     }
 
-    const dateRange = buildEventDateRange(date, time, duration)
-    if (!dateRange) {
-        return { error: 'La fecha u hora del evento no son validas' }
-    }
-
     const speakerAssignments = parseSpeakerAssignments(formData)
     const speakerAssignmentError = validateSpeakerAssignments(speakerAssignments)
     if (speakerAssignmentError) {
         return { error: speakerAssignmentError }
     }
 
-    const scheduleConflict = await findEventScheduleConflict({
+    const sessionSchedule = parseSessionSchedule(formData, eventType, location, date, time, duration)
+    if ('error' in sessionSchedule) {
+        return sessionSchedule
+    }
+
+    const scheduleConflict = await findEventScheduleConflictForSessions({
         supabase,
         ownerId: profile.role === 'ponente' ? user.id : null,
         speakerIds: speakerAssignments.map((assignment) => assignment.speakerId),
-        startTimeIso: dateRange.startTimeIso,
-        endTimeIso: dateRange.endTimeIso,
+        sessions: sessionSchedule.sessions,
     })
 
     if (scheduleConflict) {
@@ -729,11 +880,16 @@ export async function createEvent(formData: FormData) {
             ...(profile.role === 'ponente' ? [user.id] : []),
             ...speakerAssignments.map((assignment) => assignment.speakerId),
         ]))
-        const externalConflict = await findExternalCalendarConflictForUsers(
-            externalConflictUserIds,
-            dateRange.startTimeIso,
-            dateRange.endTimeIso
-        )
+        let externalConflict: Awaited<ReturnType<typeof findExternalCalendarConflictForUsers>> = null
+        for (const session of sessionSchedule.sessions) {
+            externalConflict = await findExternalCalendarConflictForUsers(
+                externalConflictUserIds,
+                session.startTimeIso,
+                session.endTimeIso
+            )
+
+            if (externalConflict) break
+        }
 
         if (externalConflict) {
             const conflictKind = externalConflict.userId === user.id ? 'owner' : 'speaker'
@@ -746,7 +902,7 @@ export async function createEvent(formData: FormData) {
         }
     }
 
-    const sessionConfig = parseSessionConfig(formData, eventType, location)
+    const sessionConfig = sessionSchedule.sessionConfig
     const idealFor = parseListField(formData, 'idealFor') ?? null
     const learningOutcomes = parseListField(formData, 'learningOutcomes') ?? null
     const includedResources = parseListField(formData, 'includedResources') ?? null
@@ -782,8 +938,8 @@ export async function createEvent(formData: FormData) {
             subtitle,
             description,
             image_url: imageUrl,
-            start_time: dateRange.startTimeIso,
-            end_time: dateRange.endTimeIso,
+            start_time: sessionSchedule.firstSession.startTimeIso,
+            end_time: sessionSchedule.firstSession.endTimeIso,
             event_type: eventType,
             status: profile.role === 'admin' ? 'upcoming' : 'draft',
             meeting_link: meetingLink,
@@ -947,6 +1103,7 @@ export async function updateEvent(eventId: string, formData: FormData) {
 
     let nextStartTimeIso = event.start_time
     let nextEndTimeIso = event.end_time
+    let sessionSchedule: ParsedSessionSchedule | null = null
 
     const updates: Record<string, any> = {}
 
@@ -955,23 +1112,25 @@ export async function updateEvent(eventId: string, formData: FormData) {
     if (imageUrl !== undefined) updates.image_url = imageUrl || null
 
     if (date && time) {
-        const dateRange = buildEventDateRange(date, time, duration)
-        if (!dateRange) {
-            return { error: 'La fecha u hora del evento no son validas' }
+        const nextEventType = eventType || 'live'
+        const nextLocation = location === undefined ? null : location
+        const parsedSchedule = parseSessionSchedule(formData, nextEventType, nextLocation, date, time, duration)
+        if ('error' in parsedSchedule) {
+            return parsedSchedule
         }
 
-        nextStartTimeIso = dateRange.startTimeIso
-        nextEndTimeIso = dateRange.endTimeIso
+        sessionSchedule = parsedSchedule
+        nextStartTimeIso = parsedSchedule.firstSession.startTimeIso
+        nextEndTimeIso = parsedSchedule.firstSession.endTimeIso
         updates.start_time = nextStartTimeIso
         updates.end_time = nextEndTimeIso
     }
 
-    const scheduleConflict = await findEventScheduleConflict({
+    const scheduleConflict = await findEventScheduleConflictForSessions({
         supabase,
         ownerId: profile?.role === 'ponente' ? user.id : null,
         speakerIds: speakerAssignments.map((assignment) => assignment.speakerId),
-        startTimeIso: nextStartTimeIso,
-        endTimeIso: nextEndTimeIso,
+        sessions: sessionSchedule?.sessions ?? [{ startTimeIso: nextStartTimeIso, endTimeIso: nextEndTimeIso }],
         excludeEventId: eventId,
     })
 
@@ -984,11 +1143,16 @@ export async function updateEvent(eventId: string, formData: FormData) {
             ...(profile?.role === 'ponente' ? [user.id] : []),
             ...speakerAssignments.map((assignment) => assignment.speakerId),
         ]))
-        const externalConflict = await findExternalCalendarConflictForUsers(
-            externalConflictUserIds,
-            nextStartTimeIso,
-            nextEndTimeIso
-        )
+        let externalConflict: Awaited<ReturnType<typeof findExternalCalendarConflictForUsers>> = null
+        for (const session of sessionSchedule?.sessions ?? [{ startTimeIso: nextStartTimeIso, endTimeIso: nextEndTimeIso }]) {
+            externalConflict = await findExternalCalendarConflictForUsers(
+                externalConflictUserIds,
+                session.startTimeIso,
+                session.endTimeIso
+            )
+
+            if (externalConflict) break
+        }
 
         if (externalConflict) {
             const conflictKind = externalConflict.userId === user.id ? 'owner' : 'speaker'
@@ -1023,7 +1187,7 @@ export async function updateEvent(eventId: string, formData: FormData) {
     if (formData.has('recordingDays')) updates.recording_available_days = recordingDays
     if (recordingUrl !== undefined) updates.recording_url = recordingUrl || null
     if (eventType) {
-        updates.session_config = parseSessionConfig(formData, eventType, updates.location)
+        updates.session_config = sessionSchedule?.sessionConfig ?? parseSessionConfig(formData, eventType, updates.location)
     }
 
     if (targetAudience) {
@@ -1307,7 +1471,7 @@ export async function addSpeakerToEvent(eventId: string, speakerId: string, role
     if (!user) return { error: 'No autenticado' }
 
     const [{ data: event }, { data: profile }] = await Promise.all([
-        (supabase.from('events') as any).select('created_by, start_time, end_time').eq('id', eventId).single(),
+        (supabase.from('events') as any).select('created_by, start_time, end_time, session_config').eq('id', eventId).single(),
         (supabase.from('profiles') as any).select('role').eq('id', user.id).single()
     ])
 
@@ -1315,12 +1479,17 @@ export async function addSpeakerToEvent(eventId: string, speakerId: string, role
         return { error: 'No tienes permisos para modificar este evento' }
     }
 
-    if (event.start_time && event.end_time) {
-        const scheduleConflict = await findEventScheduleConflict({
+    if (event.start_time) {
+        const eventSessions = getEventSessionOccurrences(event)
+            .map((session) => ({
+                startTimeIso: session.start_time,
+                endTimeIso: session.end_time,
+            }))
+
+        const scheduleConflict = await findEventScheduleConflictForSessions({
             supabase,
             speakerIds: [speakerId],
-            startTimeIso: event.start_time,
-            endTimeIso: event.end_time,
+            sessions: eventSessions,
             excludeEventId: eventId,
         })
 
@@ -1329,11 +1498,16 @@ export async function addSpeakerToEvent(eventId: string, speakerId: string, role
         }
 
         try {
-            const externalConflict = await findExternalCalendarConflictForUsers(
-                [speakerId],
-                event.start_time,
-                event.end_time
-            )
+            let externalConflict: Awaited<ReturnType<typeof findExternalCalendarConflictForUsers>> = null
+            for (const session of eventSessions) {
+                externalConflict = await findExternalCalendarConflictForUsers(
+                    [speakerId],
+                    session.startTimeIso,
+                    session.endTimeIso
+                )
+
+                if (externalConflict) break
+            }
 
             if (externalConflict) {
                 return { error: buildExternalEventConflictMessage(externalConflict, 'speaker') }

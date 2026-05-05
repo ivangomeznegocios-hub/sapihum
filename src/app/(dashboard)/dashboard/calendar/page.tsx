@@ -4,6 +4,7 @@ import { Calendar, CalendarCheck2, CalendarDays, Plus, RefreshCcw, ShieldCheck }
 import { getCurrentInternalAccessContext } from '@/lib/access/internal-server'
 import { canAccessCalendarModule } from '@/lib/access/internal-modules'
 import { getGoogleCalendarEventsForUser, getGoogleIntegrationForUser, isGoogleCalendarSyncAvailable } from '@/lib/calendar-sync'
+import { getEventSessionOccurrences } from '@/lib/events/sessions'
 import { ScheduleCalendar, type ScheduleCalendarItem } from '@/components/calendar/schedule-calendar'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -230,9 +231,8 @@ export default async function CalendarPage({ searchParams }: { searchParams: Sea
     } else if (userRole === 'ponente') {
         const { data: createdEvents } = await (supabase
             .from('events') as any)
-            .select('id, title, start_time, end_time, status, event_type, location')
+            .select('id, title, start_time, end_time, status, event_type, location, session_config')
             .eq('created_by', profile.id)
-            .gte('end_time', monthStart)
             .neq('status', 'cancelled')
             .order('start_time', { ascending: true })
             .limit(200)
@@ -251,9 +251,8 @@ export default async function CalendarPage({ searchParams }: { searchParams: Sea
         if (relatedEventIds.length > 0) {
             const { data } = await (supabase
                 .from('events') as any)
-                .select('id, title, start_time, end_time, status, event_type, location')
+                .select('id, title, start_time, end_time, status, event_type, location, session_config')
                 .in('id', relatedEventIds)
-                .gte('end_time', monthStart)
                 .neq('status', 'cancelled')
                 .order('start_time', { ascending: true })
                 .limit(200)
@@ -288,20 +287,25 @@ export default async function CalendarPage({ searchParams }: { searchParams: Sea
         }
 
         scheduleItems = Array.from(mergedEvents.values())
-            .sort((a, b) => new Date(a.start_time).getTime() - new Date(b.start_time).getTime())
-            .map((event) => ({
-                id: event.id,
-                kind: 'event',
-                title: event.title || 'Evento',
-                subtitle: event.subtitle,
-                startTime: event.start_time,
-                endTime: event.end_time,
-                status: event.status,
-                statusLabel: getEventStatusLabel(event.status),
-                modality: event.event_type === 'presencial' ? 'presencial' : 'online',
-                location: event.event_type === 'presencial' ? (event.location || 'Presencial') : null,
-                href: `/dashboard/events/${event.id}`,
-            }))
+            .flatMap((event) => {
+                const sessions = getEventSessionOccurrences(event)
+                    .filter((session) => session.end_time >= monthStart && session.start_time <= scheduleWindowEnd)
+
+                return sessions.map((session) => ({
+                    id: `${event.id}-${session.index}`,
+                    kind: 'event' as const,
+                    title: event.title || 'Evento',
+                    subtitle: sessions.length > 1 ? `${event.subtitle} - Sesion ${session.index}` : event.subtitle,
+                    startTime: session.start_time,
+                    endTime: session.end_time,
+                    status: event.status,
+                    statusLabel: getEventStatusLabel(event.status),
+                    modality: event.event_type === 'presencial' ? 'presencial' as const : 'online' as const,
+                    location: event.event_type === 'presencial' ? (event.location || 'Presencial') : null,
+                    href: `/dashboard/events/${event.id}`,
+                }))
+            })
+            .sort((a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime())
     }
 
     if (googleSyncAvailable) {

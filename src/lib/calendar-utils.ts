@@ -1,4 +1,5 @@
 import { buildIcsCalendar } from "@/lib/calendar-feed";
+import { getEventSessionOccurrences } from "@/lib/events/sessions";
 import { Event } from "@/types/database";
 
 function formatDate(date: Date): string {
@@ -42,25 +43,20 @@ export function getOutlookCalendarUrl(event: Event) {
 }
 
 export function downloadIcsFile(event: Event) {
-    const start = new Date(event.start_time);
-    const end = event.end_time
-        ? new Date(event.end_time)
-        : new Date(start.getTime() + 60 * 60 * 1000);
+    const sessions = getEventSessionOccurrences(event);
 
     const icsContent = buildIcsCalendar({
         name: event.title,
         prodId: "-//SAPIHUM//Single Event//ES",
-        events: [
-            {
-                uid: `${event.id}@comunidadpsicologia.com`,
-                title: event.title,
-                start,
-                end,
-                description: event.description || "",
-                location: event.location || event.meeting_link || "Online",
-                url: event.meeting_link || undefined,
-            },
-        ],
+        events: sessions.map((session) => ({
+            uid: `${event.id}-${session.index}@comunidadpsicologia.com`,
+            title: sessions.length > 1 ? `${event.title} - Sesion ${session.index}` : event.title,
+            start: session.start_time,
+            end: session.end_time,
+            description: event.description || "",
+            location: event.location || event.meeting_link || "Online",
+            url: event.meeting_link || undefined,
+        })),
     });
 
     const blob = new Blob([icsContent], { type: "text/calendar;charset=utf-8" });

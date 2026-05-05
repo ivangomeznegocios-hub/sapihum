@@ -2,6 +2,7 @@ import { NextRequest } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/service'
 import { buildIcsCalendar, type CalendarFeedScope, type IcsCalendarEvent } from '@/lib/calendar-feed'
 import { getAppUrl } from '@/lib/config/app-url'
+import { getEventSessionOccurrences } from '@/lib/events/sessions'
 
 export const dynamic = 'force-dynamic'
 
@@ -174,11 +175,10 @@ async function getSpeakerEvents(admin: ReturnType<typeof createServiceClient>, p
     const [createdResult, linkedResult] = await Promise.all([
         (admin
             .from('events') as any)
-            .select('id, title, subtitle, description, start_time, end_time, status, event_type, location, meeting_link, slug')
+            .select('id, title, subtitle, description, start_time, end_time, status, event_type, location, meeting_link, slug, session_config')
             .eq('created_by', profile.id)
             .neq('status', 'cancelled')
             .neq('status', 'draft')
-            .gte('start_time', windowStart)
             .lte('start_time', windowEnd)
             .order('start_time', { ascending: true }),
         (admin
@@ -206,11 +206,10 @@ async function getSpeakerEvents(admin: ReturnType<typeof createServiceClient>, p
     if (linkedIds.length > 0) {
         const { data, error } = await (admin
             .from('events') as any)
-            .select('id, title, subtitle, description, start_time, end_time, status, event_type, location, meeting_link, slug')
+            .select('id, title, subtitle, description, start_time, end_time, status, event_type, location, meeting_link, slug, session_config')
             .in('id', linkedIds)
             .neq('status', 'cancelled')
             .neq('status', 'draft')
-            .gte('start_time', windowStart)
             .lte('start_time', windowEnd)
             .order('start_time', { ascending: true })
 
@@ -229,21 +228,26 @@ async function getSpeakerEvents(admin: ReturnType<typeof createServiceClient>, p
     )
 
     const appUrl = getAppUrl()
-    const events = dedupedEvents.map((event: any) => ({
-        uid: `speaker-event-${event.id}@comunidadpsicologia.app`,
-        title: event.title,
-        start: event.start_time,
-        end: event.end_time || new Date(new Date(event.start_time).getTime() + 60 * 60 * 1000).toISOString(),
-        description: joinDescription([
-            event.subtitle,
-            `Tipo: ${formatEventType(event.event_type)}`,
-            `Estado: ${formatEventStatus(event.status)}`,
-            event.description,
-            event.meeting_link ? `Enlace de acceso: ${event.meeting_link}` : null,
-        ]),
-        location: event.location || event.meeting_link || 'Online',
-        url: event.slug ? `${appUrl}/dashboard/events/${event.id}` : undefined,
-    } satisfies IcsCalendarEvent))
+    const events = dedupedEvents.flatMap((event: any) => {
+        const sessions = getEventSessionOccurrences(event)
+            .filter((session) => session.end_time >= windowStart && session.start_time <= windowEnd)
+
+        return sessions.map((session) => ({
+            uid: `speaker-event-${event.id}-${session.index}@comunidadpsicologia.app`,
+            title: sessions.length > 1 ? `${event.title} - Sesion ${session.index}` : event.title,
+            start: session.start_time,
+            end: session.end_time,
+            description: joinDescription([
+                event.subtitle,
+                `Tipo: ${formatEventType(event.event_type)}`,
+                `Estado: ${formatEventStatus(event.status)}`,
+                event.description,
+                event.meeting_link ? `Enlace de acceso: ${event.meeting_link}` : null,
+            ]),
+            location: event.location || event.meeting_link || 'Online',
+            url: event.slug ? `${appUrl}/dashboard/events/${event.id}` : undefined,
+        } satisfies IcsCalendarEvent))
+    })
 
     return {
         name: 'Cursos y eventos',

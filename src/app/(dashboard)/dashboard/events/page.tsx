@@ -13,6 +13,7 @@ import { DraftEventsWorkspace, type DraftEventsWorkspaceItem } from './draft-eve
 import { EVENTS_LIST_SELECT } from './event-list-select'
 import type { EventWithRegistration } from '@/types/database'
 import { DEFAULT_TIMEZONE, formatEventDateTimeWithZone, isEventPast } from '@/lib/timezone'
+import { getNextEventSessionOccurrence, isEventSessionSeriesPast } from '@/lib/events/sessions'
 import {
     getEffectiveEventPriceForProfile,
     getEventTypePurchaseLabel,
@@ -526,18 +527,29 @@ export default async function EventsPage() {
         : Boolean(isPsychologist)
     const userTimezone = (profile as any)?.timezone || DEFAULT_TIMEZONE
 
+    const displayEvents = events.map((event) => {
+        const nextSession = getNextEventSessionOccurrence(event)
+        return nextSession
+            ? {
+                ...event,
+                start_time: nextSession.start_time,
+                end_time: nextSession.end_time,
+            }
+            : event
+    })
+
     // Separate events by status AND date
     // Events with status 'upcoming' but start_time in the past should go to past section
-    const drafts = events.filter(e => e.status === 'draft')
-    const upcoming = events.filter(e => {
+    const drafts = displayEvents.filter(e => e.status === 'draft')
+    const upcoming = displayEvents.filter(e => {
         if (e.status === 'completed' || e.status === 'draft' || e.status === 'cancelled') return false
         if (e.status === 'live') return true
-        return !isEventPast(e.start_time)
+        return !isEventSessionSeriesPast(e) && !isEventPast(e.start_time)
     })
-    const past = events.filter(e => {
+    const past = displayEvents.filter(e => {
         if (e.status === 'completed') return true
         if (e.status === 'draft' || e.status === 'cancelled') return false
-        return e.status === 'upcoming' && isEventPast(e.start_time)
+        return e.status === 'upcoming' && isEventSessionSeriesPast(e)
     })
     const canSeeDraftAgenda = profile?.role === 'admin' || profile?.role === 'ponente'
     const draftCreatorIds = Array.from(new Set(
@@ -823,7 +835,7 @@ export default async function EventsPage() {
             )}
 
             {/* Empty State */}
-            {events.length === 0 && (
+            {displayEvents.length === 0 && (
                 <Card className="border-dashed">
                     <CardContent className="flex flex-col items-center justify-center py-12">
                         <svg

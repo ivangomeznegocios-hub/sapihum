@@ -198,6 +198,12 @@ type SpeakerOption = {
     avatar: string | null
 }
 
+type ManualSessionInput = {
+    id: number
+    date: string
+    time: string
+}
+
 function formatSpeakerCompensationInputValue(
     compensationType: SpeakerCompensationType,
     compensationValue: number | null
@@ -491,6 +497,18 @@ function formatInputTime(dateStr?: string | null) {
     return getEventInputTimeValue(dateStr, DEFAULT_TIMEZONE)
 }
 
+function getInitialManualSessions(initialData: any): ManualSessionInput[] {
+    const sessions = Array.isArray(initialData?.session_config?.sessions)
+        ? initialData.session_config.sessions
+        : []
+
+    return sessions.slice(1).map((session: any, index: number) => ({
+        id: Date.now() + index,
+        date: formatInputDate(session?.start_time),
+        time: formatInputTime(session?.start_time),
+    }))
+}
+
 function getAudienceLabel(value: string) {
     return AUDIENCE_OPTIONS.find((option) => option.value === value)?.label || value
 }
@@ -555,6 +573,7 @@ export function CreateEventForm({
     const [totalSessions, setTotalSessions] = useState(initialData?.session_config?.total_sessions || 1)
     const [sessionDuration, setSessionDuration] = useState(initialData?.session_config?.session_duration_minutes || 60)
     const [recurrence, setRecurrence] = useState(initialData?.session_config?.recurrence || 'none')
+    const [manualSessions, setManualSessions] = useState<ManualSessionInput[]>(() => getInitialManualSessions(initialData))
     const [modality, setModality] = useState(
         initialData?.session_config?.modality || (initialData?.event_type === 'presencial' ? 'presencial' : 'online')
     )
@@ -619,6 +638,28 @@ export function CreateEventForm({
     const [registrationFields, setRegistrationFields] = useState<{ id: number; label: string; required: boolean }[]>(
         (initialData?.registration_fields || []).map((f: any) => ({ ...f, id: questionIdCounter.current++ }))
     )
+
+    useEffect(() => {
+        setManualSessions((current) => {
+            const desiredCount = Math.max(0, totalSessions - 1)
+
+            if (current.length === desiredCount) {
+                return current
+            }
+
+            if (current.length > desiredCount) {
+                return current.slice(0, desiredCount)
+            }
+
+            const additions = Array.from({ length: desiredCount - current.length }, (_, index) => ({
+                id: Date.now() + current.length + index,
+                date: '',
+                time: timeValue,
+            }))
+
+            return [...current, ...additions]
+        })
+    }, [totalSessions, timeValue])
     const [idealForItems, setIdealForItems] = useState<{ id: number; value: string }[]>(
         (initialData?.ideal_for || []).map((value: string) => ({ id: listIdCounter.current++, value }))
     )
@@ -1195,6 +1236,28 @@ export function CreateEventForm({
             .map(({ label, required }) => ({ label, required }))
         formData.set('registrationFields', JSON.stringify(validFields))
 
+        if (totalSessions > 1 && recurrence === 'none') {
+            const hasIncompleteSession = manualSessions
+                .slice(0, totalSessions - 1)
+                .some((session) => !session.date || !session.time)
+
+            if (hasIncompleteSession) {
+                setError('Completa la fecha y hora de todas las sesiones manuales.')
+                setIsLoading(false)
+                return
+            }
+
+            formData.set('sessionSchedule', JSON.stringify([
+                { date: dateValue, time: timeValue },
+                ...manualSessions.slice(0, totalSessions - 1).map((session) => ({
+                    date: session.date,
+                    time: session.time,
+                })),
+            ]))
+        } else if (totalSessions === 1) {
+            formData.set('sessionSchedule', JSON.stringify([{ date: dateValue, time: timeValue }]))
+        }
+
         // Add session configuration
         formData.set('sessionConfig', JSON.stringify({
             total_sessions: totalSessions,
@@ -1527,6 +1590,53 @@ export function CreateEventForm({
                                         </option>
                                     ))}
                                 </select>
+                            </div>
+                        )}
+
+                        {totalSessions > 1 && recurrence === 'none' && (
+                            <div className="space-y-3 rounded-xl border bg-muted/10 p-4">
+                                <div>
+                                    <p className="text-sm font-medium">Fechas manuales de sesiones</p>
+                                    <p className="mt-1 text-xs text-muted-foreground">
+                                        La primera sesion usa la fecha principal de arriba. Agrega aqui las siguientes sesiones.
+                                    </p>
+                                </div>
+
+                                <div className="space-y-2">
+                                    {manualSessions.slice(0, totalSessions - 1).map((session, index) => (
+                                        <div key={session.id} className="grid gap-2 rounded-lg border bg-background p-3 sm:grid-cols-[auto_1fr_1fr] sm:items-end">
+                                            <div className="text-sm font-medium text-muted-foreground">
+                                                Sesion {index + 2}
+                                            </div>
+                                            <label className="text-sm">
+                                                Fecha
+                                                <input
+                                                    type="date"
+                                                    value={session.date}
+                                                    onChange={(e) => {
+                                                        setManualSessions((current) => current.map((item) => (
+                                                            item.id === session.id ? { ...item, date: e.target.value } : item
+                                                        )))
+                                                    }}
+                                                    className="mt-1 w-full rounded-lg border bg-background px-3 py-2"
+                                                />
+                                            </label>
+                                            <label className="text-sm">
+                                                Hora
+                                                <input
+                                                    type="time"
+                                                    value={session.time}
+                                                    onChange={(e) => {
+                                                        setManualSessions((current) => current.map((item) => (
+                                                            item.id === session.id ? { ...item, time: e.target.value } : item
+                                                        )))
+                                                    }}
+                                                    className="mt-1 w-full rounded-lg border bg-background px-3 py-2"
+                                                />
+                                            </label>
+                                        </div>
+                                    ))}
+                                </div>
                             </div>
                         )}
                     </div>

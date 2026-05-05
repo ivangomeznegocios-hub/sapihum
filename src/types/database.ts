@@ -669,12 +669,18 @@ export type TargetAudience = 'public' | 'members' | 'psychologists' | 'patients'
 
 export type EventModality = 'online' | 'presencial' | 'hibrido'
 
+export interface EventSessionSchedule {
+    start_time: string
+    end_time: string
+}
+
 export interface SessionConfig {
     total_sessions: number
     session_duration_minutes: number
     recurrence?: string
     modality: EventModality
     location?: string
+    sessions?: EventSessionSchedule[]
 }
 export type EventCategory = 'general' | 'networking' | 'clinical' | 'business'
 export type EventSubcategory = 'curso' | 'diplomado' | 'clase' | 'taller' | 'conferencia' | 'seminario' | 'congreso' | 'meetup' | 'otro'

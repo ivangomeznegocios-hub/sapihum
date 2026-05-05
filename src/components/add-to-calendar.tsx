@@ -10,6 +10,7 @@ import {
 import { Calendar } from "lucide-react"
 import { Event } from "@/types/database"
 import { getGoogleCalendarUrl, getOutlookCalendarUrl, downloadIcsFile } from "@/lib/calendar-utils"
+import { getEventSessionOccurrences } from "@/lib/events/sessions"
 
 interface AddToCalendarButtonProps {
     event: Event
@@ -19,6 +20,8 @@ interface AddToCalendarButtonProps {
 }
 
 export function AddToCalendarButton({ event, variant = "outline", size = "sm", className }: AddToCalendarButtonProps) {
+    const sessionCount = getEventSessionOccurrences(event).length
+
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -35,7 +38,7 @@ export function AddToCalendarButton({ event, variant = "outline", size = "sm", c
                     Outlook
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => downloadIcsFile(event)}>
-                    Descargar .ICS (Apple/Otros)
+                    Descargar .ICS{sessionCount > 1 ? ` (${sessionCount} sesiones)` : ' (Apple/Otros)'}
                 </DropdownMenuItem>
             </DropdownMenuContent>
         </DropdownMenu>

@@ -20,6 +20,7 @@ import {
 } from '@/lib/events/access'
 import { getUniqueEventAccessCount } from '@/lib/events/attendance'
 import { getEventEditorAccessForUser } from '@/lib/events/permissions'
+import { getEventSessionOccurrences } from '@/lib/events/sessions'
 import {
     getEffectiveEventPriceForProfile,
     getEventMemberAccessMessage,
@@ -221,8 +222,14 @@ export default async function EventDetailPage({ params }: PageProps) {
 
     // Check if user can see meeting link
     const now = new Date()
-    const eventDate = new Date(event.start_time)
-    const eventEndDate = event.end_time ? new Date(event.end_time) : new Date(eventDate.getTime() + 2 * 60 * 60000) // 2 hours after start
+    const sessionOccurrences = getEventSessionOccurrences(event)
+    const currentSession = sessionOccurrences.find((session) => new Date(session.end_time) >= now)
+        ?? sessionOccurrences[0]
+        ?? { start_time: event.start_time, end_time: event.end_time }
+    const eventDate = new Date(currentSession.start_time)
+    const eventEndDate = currentSession.end_time
+        ? new Date(currentSession.end_time)
+        : new Date(eventDate.getTime() + 2 * 60 * 60000) // 2 hours after start
     const hubPath = `/hub/${event.slug}`
     const userTimezone = (profile as any).timezone || DEFAULT_TIMEZONE
 
@@ -361,7 +368,7 @@ export default async function EventDetailPage({ params }: PageProps) {
                                     <Calendar className="h-5 w-5 text-muted-foreground" />
                                     <div>
                                         <p className="text-sm text-muted-foreground">Fecha</p>
-                                        <p className="font-medium">{formatDate(event.start_time)}</p>
+                                        <p className="font-medium">{formatDate(currentSession.start_time)}</p>
                                     </div>
                                 </div>
                                 <div className="flex items-center gap-3 p-3 bg-muted rounded-lg">
@@ -369,8 +376,8 @@ export default async function EventDetailPage({ params }: PageProps) {
                                     <div>
                                         <p className="text-sm text-muted-foreground">Hora</p>
                                         <p className="font-medium">
-                                            {formatTime(event.start_time)}
-                                            {event.end_time && ` - ${formatTime(event.end_time)}`}
+                                            {formatTime(currentSession.start_time)}
+                                            {currentSession.end_time && ` - ${formatTime(currentSession.end_time)}`}
                                         </p>
                                     </div>
                                 </div>
@@ -392,6 +399,23 @@ export default async function EventDetailPage({ params }: PageProps) {
                                     </div>
                                 </div>
                             </div>
+
+                            {sessionOccurrences.length > 1 && (
+                                <div className="rounded-lg border bg-muted/30 p-4">
+                                    <h3 className="font-semibold">Calendario de sesiones</h3>
+                                    <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                                        {sessionOccurrences.map((session) => (
+                                            <div key={`${event.id}-${session.index}`} className="rounded-lg bg-background p-3 text-sm">
+                                                <p className="font-medium">Sesion {session.index}</p>
+                                                <p className="mt-1 text-muted-foreground">
+                                                    {formatDate(session.start_time)} · {formatTime(session.start_time)}
+                                                    {session.end_time && ` - ${formatTime(session.end_time)}`}
+                                                </p>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
 
                             {/* Meeting Link Section - ONLY VISIBLE DAY OF EVENT */}
                             {canSeeMeetingLink && (

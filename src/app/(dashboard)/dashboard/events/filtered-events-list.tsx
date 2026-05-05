@@ -5,6 +5,7 @@ import { SubcategoryFilter, ModalityFilter } from './events-filter'
 import { EventCard } from './event-card'
 import type { EventWithRegistration } from '@/types/database'
 import { DEFAULT_TIMEZONE, isEventPast } from '@/lib/timezone'
+import { getNextEventSessionOccurrence, isEventSessionSeriesPast } from '@/lib/events/sessions'
 
 export function FilteredEventsList({
     events,
@@ -29,10 +30,21 @@ export function FilteredEventsList({
             .filter(Boolean)
     )] as string[]
 
+    const displayEvents = events.map((event) => {
+        const nextSession = getNextEventSessionOccurrence(event)
+        return nextSession
+            ? {
+                ...event,
+                start_time: nextSession.start_time,
+                end_time: nextSession.end_time,
+            }
+            : event
+    })
+
     // Apply subcategory filter
     let filtered = selectedSub
-        ? events.filter((e: any) => e.subcategory === selectedSub)
-        : events
+        ? displayEvents.filter((e: any) => e.subcategory === selectedSub)
+        : displayEvents
 
     // Apply modality filter
     if (selectedModality !== 'all') {
@@ -52,14 +64,14 @@ export function FilteredEventsList({
         if (e.status === 'completed' || e.status === 'cancelled') return false
         if (e.status === 'live') return true
         // Even if status is 'upcoming', check if date has passed
-        return !isEventPast(e.start_time)
+        return !isEventSessionSeriesPast(e) && !isEventPast(e.start_time)
     })
 
     const past = filtered.filter(e => {
         if (e.status === 'completed') return true
         if (e.status === 'cancelled') return false
         // Status is 'upcoming' but date already passed
-        return e.status === 'upcoming' && isEventPast(e.start_time)
+        return e.status === 'upcoming' && isEventSessionSeriesPast(e)
     })
 
     return (
