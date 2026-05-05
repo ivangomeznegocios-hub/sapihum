@@ -334,7 +334,7 @@ export default async function NosotrosPage() {
                           src={image}
                           alt={name}
                           fill
-                          unoptimized
+                                quality={58}
                           sizes="(min-width: 1280px) 25vw, (min-width: 768px) 50vw, 100vw"
                           className="object-cover opacity-80 transition-transform duration-700 group-hover:scale-105 group-hover:opacity-100"
                         />

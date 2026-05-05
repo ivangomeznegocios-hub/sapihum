@@ -2,9 +2,9 @@
 
 import { useEffect, useState } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
+import dynamic from 'next/dynamic'
 import Link from 'next/link'
-import { CreditCard, Library, LogOut, Menu, Search, User } from 'lucide-react'
-import { createClient } from '@/lib/supabase/client'
+import { Bell, CreditCard, Library, LogOut, Menu, Search, User } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
@@ -18,9 +18,26 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog'
 import { getMembershipLabel } from '@/lib/membership'
-import { NotificationsBell } from './notifications-bell'
 import { Sidebar } from './sidebar'
 import type { UserRole } from '@/types/database'
+
+const NotificationsBell = dynamic(
+    () => import('./notifications-bell').then((module) => module.NotificationsBell),
+    {
+        ssr: false,
+        loading: () => (
+            <Button
+                variant="ghost"
+                size="icon"
+                className="relative h-9 w-9 shrink-0"
+                disabled
+                aria-label="Cargando notificaciones"
+            >
+                <Bell className="h-4 w-4" />
+            </Button>
+        ),
+    }
+)
 
 export interface HeaderProps {
     user?: {
@@ -43,15 +60,28 @@ export function Header({
     membershipSpecializationCode = null,
 }: HeaderProps) {
     const router = useRouter()
-    const [supabase] = useState(() => createClient())
     const pathname = usePathname()
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+    const [shouldLoadNotifications, setShouldLoadNotifications] = useState(false)
 
     useEffect(() => {
         setIsMobileMenuOpen(false)
     }, [pathname])
 
+    useEffect(() => {
+        const requestIdle =
+            window.requestIdleCallback ??
+            ((callback: IdleRequestCallback) =>
+                window.setTimeout(() => callback({ didTimeout: false, timeRemaining: () => 0 }), 1500))
+        const cancelIdle = window.cancelIdleCallback ?? window.clearTimeout
+        const idleId = requestIdle(() => setShouldLoadNotifications(true), { timeout: 3500 })
+
+        return () => cancelIdle(idleId)
+    }, [])
+
     const handleLogout = async () => {
+        const { createClient } = await import('@/lib/supabase/client')
+        const supabase = createClient()
         await supabase.auth.signOut()
         router.push('/auth/login')
         router.refresh()
@@ -95,7 +125,21 @@ export function Header({
                     </div>
 
                     <div className="ml-auto flex shrink-0 items-center gap-x-2 sm:gap-x-3">
-                        <NotificationsBell userId={user?.id ?? null} />
+                        {shouldLoadNotifications ? (
+                            <NotificationsBell userId={user?.id ?? null} />
+                        ) : (
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                className="relative h-9 w-9 shrink-0"
+                                disabled={!user?.id}
+                                aria-label="Ver notificaciones"
+                                onPointerEnter={() => setShouldLoadNotifications(true)}
+                                onFocus={() => setShouldLoadNotifications(true)}
+                            >
+                                <Bell className="h-4 w-4" />
+                            </Button>
+                        )}
 
                         <div className="hidden lg:block lg:h-5 lg:w-px lg:bg-border" />
 

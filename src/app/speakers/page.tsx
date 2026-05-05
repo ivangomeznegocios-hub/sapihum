@@ -67,7 +67,7 @@ export default async function PonentesPage() {
                                             src={speakerImage}
                                             alt={speakerName}
                                             fill
-                                            unoptimized
+                                    quality={58}
                                             sizes="(min-width: 1280px) 25vw, (min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"
                                             className="object-cover opacity-90 transition-all duration-700 group-hover:scale-105 group-hover:opacity-100"
                                         />

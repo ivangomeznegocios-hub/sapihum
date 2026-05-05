@@ -4,7 +4,6 @@ import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { CreditCard, Loader2, ExternalLink } from 'lucide-react'
 import type { AICreditPackageKey } from '@/lib/payments/config'
-import { collectAnalyticsEvent, getClientAnalyticsContext } from '@/lib/analytics/client'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import {
@@ -49,7 +48,7 @@ export function CheckoutButton({
 
         try {
             const funnelType = purchaseType === 'event_purchase' || purchaseType === 'formation_purchase' ? 'event' : 'ai_credits'
-            
+            const { collectAnalyticsEvent, getClientAnalyticsContext } = await import('@/lib/analytics/client')
             const analyticsContext = getClientAnalyticsContext({
                 funnel: funnelType,
             })

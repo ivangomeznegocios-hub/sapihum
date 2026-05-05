@@ -28,11 +28,24 @@ interface NotificationsBellProps {
     userId?: string | null
 }
 
+function scheduleIdle(callback: () => void) {
+    if (typeof window === 'undefined') return undefined
+
+    const requestIdle =
+        window.requestIdleCallback ??
+        ((handler: IdleRequestCallback) =>
+            window.setTimeout(() => handler({ didTimeout: false, timeRemaining: () => 0 }), 1200))
+    const cancelIdle = window.cancelIdleCallback ?? window.clearTimeout
+    const idleId = requestIdle(callback, { timeout: 3000 })
+
+    return () => cancelIdle(idleId)
+}
+
 async function readNotificationSnapshot(supabase: ReturnType<typeof createClient>, userId: string) {
     const [listResult, countResult] = await Promise.all([
         (supabase
             .from('user_notifications') as any)
-            .select('*')
+            .select('id, user_id, category, level, title, body, action_url, is_read, read_at, created_at')
             .eq('user_id', userId)
             .order('created_at', { ascending: false })
             .limit(12),
@@ -210,29 +223,26 @@ export function NotificationsBell({ userId }: NotificationsBellProps) {
             }
         }
 
-        void loadInitialUnreadCount()
+        const cancel = scheduleIdle(() => {
+            void loadInitialUnreadCount()
+        })
 
         return () => {
             isActive = false
+            cancel?.()
         }
     }, [supabase, userId])
 
     useEffect(() => {
-        if (!userId) {
+        if (!userId || !isOpen) {
             return
         }
 
         const syncFromRealtime = async () => {
             try {
-                if (isOpen) {
-                    const snapshot = await readNotificationSnapshot(supabase, userId)
-                    setNotifications(snapshot.notifications)
-                    setUnreadCount(snapshot.unreadCount)
-                    return
-                }
-
-                const count = await readUnreadNotificationCount(supabase, userId)
-                setUnreadCount(count)
+                const snapshot = await readNotificationSnapshot(supabase, userId)
+                setNotifications(snapshot.notifications)
+                setUnreadCount(snapshot.unreadCount)
             } catch (error) {
                 console.error('Error syncing internal notifications:', error)
             }

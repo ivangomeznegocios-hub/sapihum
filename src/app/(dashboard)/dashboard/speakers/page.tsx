@@ -50,7 +50,7 @@ export default async function SpeakersPage() {
                                                 src={speakerImage}
                                                 alt={speakerName}
                                                 fill
-                                                unoptimized
+                                            quality={58}
                                                 className="object-cover group-hover:scale-105 transition-transform duration-500"
                                                 sizes="(max-width: 1024px) 100vw, 33vw"
                                             />

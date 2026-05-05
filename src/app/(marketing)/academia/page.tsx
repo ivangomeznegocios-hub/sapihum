@@ -286,7 +286,7 @@ export default async function AcademiaPage({ searchParams }: AcademiaPageProps) 
                                                         src={formation.image_url}
                                                         alt={formation.title}
                                                         fill
-                                                        unoptimized
+                                                        quality={58}
                                                         sizes="(min-width: 1024px) 50vw, 100vw"
                                                         className="object-cover transition-transform duration-500 group-hover:scale-105"
                                                     />
@@ -722,7 +722,7 @@ function FeaturedEventCard({ event }: { event: any }) {
                         src={event.image_url}
                         alt={event.title}
                         fill
-                        unoptimized
+                        quality={58}
                         sizes="(min-width: 1024px) 50vw, 100vw"
                         className="object-cover transition-transform duration-700 group-hover:scale-105"
                     />
@@ -775,7 +775,7 @@ function FeaturedEventCard({ event }: { event: any }) {
                                 alt=""
                                 width={24}
                                 height={24}
-                                unoptimized
+                                quality={58}
                                 className="h-6 w-6 rounded-full object-cover ring-1 ring-white/20"
                             />
                         ) : (

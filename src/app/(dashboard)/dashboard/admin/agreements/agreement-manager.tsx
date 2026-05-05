@@ -125,7 +125,7 @@ export function AgreementManager({ agreements }: { agreements: any[] }) {
                                         alt={ag.company_name ? `Logo de ${ag.company_name}` : 'Logo del convenio'}
                                         width={64}
                                         height={40}
-                                        unoptimized
+                                                        quality={58}
                                         className="h-10 w-16 object-contain rounded"
                                     />
                                 )}

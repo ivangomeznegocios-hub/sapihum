@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { createPublicClient } from '@/lib/supabase/public'
+import { unstable_cache } from 'next/cache'
 import type {
     Event,
     EventStatus,
@@ -33,6 +34,49 @@ export type PublicCatalogEvent = EventWithSpeakers & {
     attendee_count: number
     public_kind: ReturnType<typeof getPublicCatalogKindForEvent>
 }
+
+const PUBLIC_CATALOG_REVALIDATE_SECONDS = 300
+const PUBLIC_CATALOG_EVENT_SELECT = [
+    'id',
+    'slug',
+    'status',
+    'title',
+    'subtitle',
+    'description',
+    'image_url',
+    'start_time',
+    'end_time',
+    'event_type',
+    'recording_url',
+    'price',
+    'member_access_type',
+    'specialization_code',
+    'subcategory',
+    'target_audience',
+    'hero_badge',
+    'public_cta_label',
+    'formation_track',
+    'ideal_for',
+    'learning_outcomes',
+    'seo_description',
+    'og_description',
+].join(', ')
+
+const PUBLIC_CATALOG_SPEAKER_SELECT = `
+    event_id,
+    display_order,
+    speaker:speakers (
+        id,
+        slug,
+        display_name,
+        photo_url,
+        profile:profiles (
+            id,
+            full_name,
+            avatar_url
+        )
+    )
+`
 
 async function getRegisteredEventCounts(supabase: any, eventIds: string[]) {
     if (eventIds.length === 0) {
@@ -436,12 +480,12 @@ export async function getPublicEventBySlug(slug: string): Promise<any | null> {
     }
 }
 
-export async function getPublicCatalogEvents(kind: 'eventos' | 'cursos' | 'grabaciones'): Promise<PublicCatalogEvent[]> {
+async function fetchPublicCatalogEvents(kind: 'eventos' | 'cursos' | 'grabaciones'): Promise<PublicCatalogEvent[]> {
     const supabase = createPublicClient()
 
     let query = (supabase
         .from('events') as any)
-        .select('*')
+        .select(PUBLIC_CATALOG_EVENT_SELECT)
         .not('status', 'eq', 'draft')
         .not('status', 'eq', 'cancelled')
 
@@ -466,17 +510,7 @@ export async function getPublicCatalogEvents(kind: 'eventos' | 'cursos' | 'graba
     const [{ data: speakers }, attendeeCounts] = await Promise.all([
         (supabase
             .from('event_speakers') as any)
-            .select(`
-                *,
-                speaker:speakers (
-                    *,
-                    profile:profiles (
-                        id,
-                        full_name,
-                        avatar_url
-                    )
-                )
-            `)
+            .select(PUBLIC_CATALOG_SPEAKER_SELECT)
             .in('event_id', ids)
             .order('display_order', { ascending: true }),
         getUniqueEventAccessCounts(supabase, ids),
@@ -497,16 +531,25 @@ export async function getPublicCatalogEvents(kind: 'eventos' | 'cursos' | 'graba
     }))
 }
 
+export const getPublicCatalogEvents = unstable_cache(
+    fetchPublicCatalogEvents,
+    ['public-catalog-events'],
+    {
+        revalidate: PUBLIC_CATALOG_REVALIDATE_SECONDS,
+        tags: ['public-events'],
+    }
+)
+
 /**
  * Get ALL published events (excluding on_demand recordings) — unified catalog for Academia.
  * Sorts upcoming first (by start_time ASC), completed last.
  */
-export async function getUnifiedCatalogEvents(): Promise<PublicCatalogEvent[]> {
+async function fetchUnifiedCatalogEvents(): Promise<PublicCatalogEvent[]> {
     const supabase = createPublicClient()
 
     const { data, error } = await (supabase
         .from('events') as any)
-        .select('*')
+        .select(PUBLIC_CATALOG_EVENT_SELECT)
         .not('status', 'eq', 'draft')
         .not('status', 'eq', 'cancelled')
         .not('event_type', 'eq', 'on_demand')
@@ -523,17 +566,7 @@ export async function getUnifiedCatalogEvents(): Promise<PublicCatalogEvent[]> {
     const [{ data: speakers }, attendeeCounts] = await Promise.all([
         (supabase
             .from('event_speakers') as any)
-            .select(`
-                *,
-                speaker:speakers (
-                    *,
-                    profile:profiles (
-                        id,
-                        full_name,
-                        avatar_url
-                    )
-                )
-            `)
+            .select(PUBLIC_CATALOG_SPEAKER_SELECT)
             .in('event_id', ids)
             .order('display_order', { ascending: true }),
         getUniqueEventAccessCounts(supabase, ids),
@@ -563,3 +596,12 @@ export async function getUnifiedCatalogEvents(): Promise<PublicCatalogEvent[]> {
         return new Date(a.start_time).getTime() - new Date(b.start_time).getTime()
     })
 }
+
+export const getUnifiedCatalogEvents = unstable_cache(
+    fetchUnifiedCatalogEvents,
+    ['unified-catalog-events'],
+    {
+        revalidate: PUBLIC_CATALOG_REVALIDATE_SECONDS,
+        tags: ['public-events'],
+    }
+)
