@@ -362,6 +362,16 @@ export default async function EventDetailPage({ params }: PageProps) {
                             </div>
                         </CardHeader>
                         <CardContent className="space-y-6">
+                            {/* Description - show it immediately in the event detail view */}
+                            {event.description && (
+                                <div className="rounded-2xl border border-brand-blue-border bg-brand-blue-soft/60 p-4">
+                                    <h3 className="mb-2 font-semibold text-brand-text-strong">Descripción</h3>
+                                    <p className="whitespace-pre-wrap text-sm leading-relaxed text-brand-text-muted">
+                                        {event.description}
+                                    </p>
+                                </div>
+                            )}
+
                             {/* Event Details Grid */}
                             <div className="grid gap-4 md:grid-cols-2">
                                 <div className="flex items-center gap-3 p-3 bg-muted rounded-lg">
@@ -463,29 +473,19 @@ export default async function EventDetailPage({ params }: PageProps) {
 
                             {/* Recording pending message */}
                             {event.status === 'completed' && !event.recording_url && hasEventAccess && (
-                                <div className="p-4 bg-brand-blue dark:bg-brand-blue/30 border border-brand-blue dark:border-brand-blue rounded-lg">
+                                <div className="rounded-lg border border-brand-blue-border bg-brand-blue-soft p-4">
                                     <div className="flex items-start gap-3">
-                                        <Video className="h-5 w-5 text-brand-blue flex-shrink-0 mt-0.5" />
+                                        <Video className="mt-0.5 h-5 w-5 flex-shrink-0 text-brand-blue-hover" />
                                         <div>
-                                            <p className="font-medium text-brand-blue dark:text-brand-blue">
+                                            <p className="font-medium text-brand-blue-hover">
                                                 Grabación en proceso
                                             </p>
-                                            <p className="text-sm text-brand-blue dark:text-brand-blue mt-1">
+                                            <p className="mt-1 text-sm text-brand-text-muted">
                                                 La grabación estará disponible en un plazo de hasta 24 horas.
                                                 Te notificaremos cuando esté lista.
                                             </p>
                                         </div>
                                     </div>
-                                </div>
-                            )}
-
-                            {/* Description */}
-                            {event.description && (
-                                <div>
-                                    <h3 className="font-semibold mb-2">Descripción</h3>
-                                    <p className="text-muted-foreground whitespace-pre-wrap">
-                                        {event.description}
-                                    </p>
                                 </div>
                             )}
 
@@ -688,7 +688,7 @@ export default async function EventDetailPage({ params }: PageProps) {
                                 </div>
                             ) : hasEventAccess ? (
                                 <>
-                                    <div className="rounded-lg border border-brand-blue-hover bg-brand-blue-hover p-3 text-center text-sm text-brand-blue-hover">
+                                    <div className="rounded-lg border border-brand-blue-border bg-brand-blue-soft p-3 text-center text-sm font-medium text-brand-blue-hover">
                                         Ya tienes acceso activo a este contenido.
                                     </div>
                                     <Button asChild className="w-full">
@@ -786,8 +786,8 @@ export default async function EventDetailPage({ params }: PageProps) {
                                 </div>
                             )}
                             {!eventSpecialization && normalizeMemberAccessType(event.member_access_type) === 'discounted' && (
-                                <div className="p-2 bg-brand-blue dark:bg-brand-blue rounded-lg border border-brand-blue dark:border-brand-blue text-center">
-                                    <p className="text-sm font-medium text-brand-blue dark:text-brand-blue">
+                                <div className="rounded-lg border border-brand-blue-border bg-brand-blue-soft p-2 text-center">
+                                    <p className="text-sm font-medium text-brand-blue-hover">
                                         ✨ Miembros: ${event.member_price?.toFixed(2)} MXN
                                     </p>
                                 </div>
