@@ -4,6 +4,7 @@ import { getConsentAllowedTrackingDestinations, getCanonicalTrackingEventName } 
 import { resolveTrackingRouteContext } from './policy'
 import { sanitizeTrackingProperties } from './sanitize'
 import { createStoredConsentState, type StoredConsentState } from '@/lib/consent'
+import { createTimeoutFetch, withTimeout } from '@/lib/http/timeout-fetch'
 
 interface DispatchExternalTrackingEventInput {
     eventName: AnalyticsEventName
@@ -20,6 +21,8 @@ interface DispatchExternalTrackingEventInput {
 function isEnabled(value: string | undefined | null) {
     return value?.trim().toLowerCase() === 'true'
 }
+
+const trackingFetch = createTimeoutFetch(2_500, 'External tracking request')
 
 function asString(value: unknown) {
     if (typeof value !== 'string') return null
@@ -215,7 +218,7 @@ async function sendGa4MeasurementProtocolEvent(input: {
         ],
     }
 
-    const response = await fetch(
+    const response = await trackingFetch(
         `https://www.google-analytics.com/mp/collect?measurement_id=${encodeURIComponent(measurementId)}&api_secret=${encodeURIComponent(apiSecret)}`,
         {
             method: 'POST',
@@ -247,7 +250,7 @@ async function sendMetaConversionsApiEvent(input: {
         return
     }
 
-    const response = await fetch(`https://graph.facebook.com/v23.0/${encodeURIComponent(pixelId)}/events`, {
+    const response = await trackingFetch(`https://graph.facebook.com/v23.0/${encodeURIComponent(pixelId)}/events`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -280,7 +283,7 @@ async function sendTikTokEventsApiEvent(input: {
         return
     }
 
-    const response = await fetch('https://business-api.tiktok.com/open_api/v1.3/event/track/', {
+    const response = await trackingFetch('https://business-api.tiktok.com/open_api/v1.3/event/track/', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -355,7 +358,14 @@ export async function dispatchExternalTrackingEvent(input: DispatchExternalTrack
         }))
     }
 
-    const results = await Promise.allSettled(tasks)
+    const results = await withTimeout(
+        Promise.allSettled(tasks),
+        3_000,
+        'External tracking dispatch'
+    ).catch((error) => {
+        console.error('[Tracking] External destination dispatch timed out:', error)
+        return []
+    })
     for (const result of results) {
         if (result.status === 'rejected') {
             console.error('[Tracking] External destination dispatch failed:', result.reason)

@@ -1,5 +1,8 @@
 import { createClient } from '@supabase/supabase-js'
+import { createTimeoutFetch } from '@/lib/http/timeout-fetch'
 import type { Database } from '@/types/database'
+
+const supabaseServiceFetch = createTimeoutFetch(12_000, 'Supabase service request')
 
 export function createServiceClient() {
     const url = process.env.NEXT_PUBLIC_SUPABASE_URL
@@ -13,6 +16,9 @@ export function createServiceClient() {
         auth: {
             autoRefreshToken: false,
             persistSession: false,
+        },
+        global: {
+            fetch: supabaseServiceFetch,
         },
     })
 }

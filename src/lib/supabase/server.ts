@@ -3,7 +3,10 @@ import type { User } from '@supabase/supabase-js'
 import { cookies } from 'next/headers'
 import { cache } from 'react'
 import { getCommercialAccessContext, type CommercialAccessSnapshot } from '@/lib/access/commercial'
+import { createTimeoutFetch } from '@/lib/http/timeout-fetch'
 import type { Profile, UserRole, Database } from '@/types/database'
+
+const supabaseServerFetch = createTimeoutFetch(12_000, 'Supabase server request')
 
 export async function createClient() {
     const cookieStore = await cookies()
@@ -27,6 +30,9 @@ export async function createClient() {
                         // user sessions.
                     }
                 },
+            },
+            global: {
+                fetch: supabaseServerFetch,
             },
         }
     )
@@ -73,6 +79,9 @@ export async function createAdminClient() {
                         // user sessions.
                     }
                 },
+            },
+            global: {
+                fetch: supabaseServerFetch,
             },
         }
     )

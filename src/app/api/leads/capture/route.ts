@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
-import { recordAnalyticsServerEvent, resolveAttributionSnapshot } from '@/lib/analytics/server'
+import { recordAnalyticsServerEventBestEffort, resolveAttributionSnapshot } from '@/lib/analytics/server'
 import { getAppUrl } from '@/lib/config/app-url'
 import { sendEmail } from '@/lib/email/index'
 import { buildCampaignLeadMagnetEmail } from '@/lib/email/templates'
+import { withTimeout } from '@/lib/http/timeout-fetch'
 import {
     buildCampaignTemarioPath,
     getCampaignPrimaryEvent,
@@ -13,6 +14,8 @@ import {
     getEventCampaignEventBySlug,
 } from '@/lib/events/campaigns'
 import { createAdminClient, createClient } from '@/lib/supabase/server'
+
+export const maxDuration = 15
 
 const LeadCaptureSchema = z.object({
     name: z.string().trim().min(2),
@@ -111,7 +114,7 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'No fue posible guardar el lead' }, { status: 500 })
         }
 
-        await recordAnalyticsServerEvent({
+        recordAnalyticsServerEventBestEffort({
             eventName: 'generate_lead',
             eventSource: 'server',
             visitorId: data.analyticsContext?.visitorId ?? null,
@@ -150,10 +153,16 @@ export async function POST(request: NextRequest) {
                 relatedEvents,
             })
 
-            await sendEmail({
-                to: data.email,
-                subject: emailContent.subject,
-                html: emailContent.html,
+            void withTimeout(
+                sendEmail({
+                    to: data.email,
+                    subject: emailContent.subject,
+                    html: emailContent.html,
+                }),
+                5_000,
+                'Lead magnet email'
+            ).catch((error) => {
+                console.error('[Leads] lead magnet email failed:', error)
             })
         } catch (emailError) {
             console.error('[Leads] lead magnet email failed:', emailError)

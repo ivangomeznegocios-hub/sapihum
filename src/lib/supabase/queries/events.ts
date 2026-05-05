@@ -33,6 +33,39 @@ export type PublicCatalogEvent = EventWithSpeakers & {
     public_kind: ReturnType<typeof getPublicCatalogKindForEvent>
 }
 
+async function getRegisteredEventCounts(supabase: any, eventIds: string[]) {
+    if (eventIds.length === 0) {
+        return {} as Record<string, number>
+    }
+
+    const { data: rpcCounts, error: rpcError } = await (supabase as any)
+        .rpc('get_event_registered_counts', { p_event_ids: eventIds })
+
+    if (!rpcError && Array.isArray(rpcCounts)) {
+        const attendeeCounts: Record<string, number> = {}
+        for (const row of rpcCounts) {
+            attendeeCounts[row.event_id] = Number(row.attendee_count || 0)
+        }
+        return attendeeCounts
+    }
+
+    if (rpcError?.code && rpcError.code !== 'PGRST202') {
+        console.error('Error fetching event registration counts:', rpcError.message || rpcError)
+    }
+
+    const { data: counts } = await (supabase
+        .from('event_registrations') as any)
+        .select('event_id')
+        .in('event_id', eventIds)
+        .eq('status', 'registered')
+
+    const attendeeCounts: Record<string, number> = {}
+    for (const row of counts ?? []) {
+        attendeeCounts[row.event_id] = (attendeeCounts[row.event_id] || 0) + 1
+    }
+    return attendeeCounts
+}
+
 
 /**
  * Get events with user's registration status
@@ -43,11 +76,10 @@ export async function getEventsWithRegistration(
     const supabase = options?.supabase ?? await createClient()
     let userId = options?.userId ?? options?.profile?.id ?? null
     const statuses = options?.statuses ?? ['draft', 'upcoming', 'live', 'completed', 'cancelled']
-
-    if (userId === null && options?.userId === undefined && !options?.profile) {
-        const { data: { user } } = await supabase.auth.getUser()
-        userId = user?.id ?? null
-    }
+    const shouldResolveUser = userId === null && options?.userId === undefined && !options?.profile
+    const userPromise = shouldResolveUser
+        ? supabase.auth.getUser()
+        : Promise.resolve(null)
 
     let eventsQuery = (supabase
         .from('events') as any)
@@ -59,7 +91,14 @@ export async function getEventsWithRegistration(
         eventsQuery = eventsQuery.limit(options.limit)
     }
 
-    const { data: events, error: eventsError } = await eventsQuery
+    const [{ data: events, error: eventsError }, userResult] = await Promise.all([
+        eventsQuery,
+        userPromise,
+    ])
+
+    if (shouldResolveUser) {
+        userId = userResult?.data.user?.id ?? null
+    }
 
     if (eventsError || !events) {
         console.error('Error fetching events:', eventsError?.message || eventsError)
@@ -72,28 +111,65 @@ export async function getEventsWithRegistration(
         return []
     }
 
-    const { data: registrations } = userId && options?.includeRegistrations !== false
-        ? await (supabase
+    const registrationsPromise = userId && options?.includeRegistrations !== false
+        ? (supabase
             .from('event_registrations') as any)
             .select('*')
             .eq('user_id', userId)
             .in('event_id', eventIds)
-        : { data: [] }
+        : Promise.resolve({ data: [] })
 
     // Get attendee counts
-    const { data: counts } = options?.includeAttendeeCounts === false
-        ? { data: [] }
-        : await (supabase
-            .from('event_registrations') as any)
-            .select('event_id')
-            .in('event_id', eventIds)
-            .eq('status', 'registered')
+    const countsPromise = options?.includeAttendeeCounts === false
+        ? Promise.resolve({} as Record<string, number>)
+        : getRegisteredEventCounts(supabase, eventIds)
 
-    // Count attendees per event
-    const attendeeCounts: Record<string, number> = {}
-    counts?.forEach((c: any) => {
-        attendeeCounts[c.event_id] = (attendeeCounts[c.event_id] || 0) + 1
-    })
+    const accessPromise = (async () => {
+        if (!userId) {
+            return {
+                profile: null,
+                commercialAccess: null,
+            }
+        }
+
+        const profile = options?.profile ?? await (async () => {
+            const { data: profileData } = await (supabase
+                .from('profiles') as any)
+                .select('id, role, email, membership_level, subscription_status, membership_specialization_code')
+                .eq('id', userId)
+                .maybeSingle()
+
+            return (profileData as EventViewerOptions['profile']) ?? null
+        })()
+
+        if (!profile) {
+            return {
+                profile: null,
+                commercialAccess: null,
+            }
+        }
+
+        const commercialAccess = options?.commercialAccess ?? await getCommercialAccessContext({
+            supabase,
+            userId,
+            profile,
+        })
+
+        return {
+            profile,
+            commercialAccess,
+        }
+    })()
+
+    const [
+        { data: registrations },
+        attendeeCounts,
+        { profile, commercialAccess },
+    ] = await Promise.all([
+        registrationsPromise,
+        countsPromise,
+        accessPromise,
+    ])
 
     // Merge data
     const allEvents = events.map((event: any) => ({
@@ -106,23 +182,7 @@ export async function getEventsWithRegistration(
         return allEvents.filter((event) => canViewerSeeCatalogEvent(event as any, null))
     }
 
-    const profile = options?.profile ?? await (async () => {
-        const { data: profileData } = await (supabase
-            .from('profiles') as any)
-            .select('id, role, email, membership_level, subscription_status, membership_specialization_code')
-            .eq('id', userId)
-            .maybeSingle()
-
-        return (profileData as EventViewerOptions['profile']) ?? null
-    })()
-
     if (!profile) return []
-
-    const commercialAccess = options?.commercialAccess ?? await getCommercialAccessContext({
-        supabase,
-        userId,
-        profile,
-    })
 
     if (!commercialAccess) return []
 

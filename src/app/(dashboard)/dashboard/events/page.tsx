@@ -1,7 +1,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { getEventsWithRegistration } from '@/lib/supabase/queries/events'
-import { createClient, getUserProfile } from '@/lib/supabase/server'
+import { getViewerContext } from '@/lib/supabase/server'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -10,6 +10,7 @@ import { AddToCalendarButton } from '@/components/add-to-calendar'
 import { RecordingCountdown } from './recordings/recording-countdown'
 import { EventsCategoryNav } from './events-filter'
 import { DraftEventsWorkspace, type DraftEventsWorkspaceItem } from './draft-events-workspace'
+import { EVENTS_LIST_SELECT } from './event-list-select'
 import type { EventWithRegistration } from '@/types/database'
 import { DEFAULT_TIMEZONE, formatEventDateTimeWithZone, isEventPast } from '@/lib/timezone'
 import {
@@ -17,7 +18,7 @@ import {
     getEventTypePurchaseLabel,
     isPurchasableRecordingEvent,
 } from '@/lib/events/pricing'
-import { getCommercialAccessContext, isCommunityReadOnlyViewer } from '@/lib/access/commercial'
+import { isCommunityReadOnlyViewer } from '@/lib/access/commercial'
 
 function formatEventDate(dateStr: string, timezone: string = DEFAULT_TIMEZONE) {
     return formatEventDateTimeWithZone(dateStr, timezone)
@@ -504,16 +505,15 @@ function EventCard({
 }
 
 export default async function EventsPage() {
-    const events = await getEventsWithRegistration()
-    const profile = await getUserProfile()
-    const supabase = profile ? await createClient() : null
-    const commercialAccess = profile && supabase
-        ? await getCommercialAccessContext({
-            supabase,
-            userId: profile.id,
-            profile,
-        })
-        : null
+    const viewer = await getViewerContext({ includeCommercialAccess: true })
+    const { supabase, profile, commercialAccess } = viewer
+    const events = await getEventsWithRegistration({
+        supabase,
+        userId: viewer.user?.id ?? null,
+        profile,
+        commercialAccess,
+        select: EVENTS_LIST_SELECT,
+    })
 
     const isPsychologist = profile?.role === 'psychologist'
     const isActiveMember = Boolean(
@@ -525,26 +525,6 @@ export default async function EventsPage() {
         ? isCommunityReadOnlyViewer(commercialAccess)
         : Boolean(isPsychologist)
     const userTimezone = (profile as any)?.timezone || DEFAULT_TIMEZONE
-    let assignedEventIds = new Set<string>()
-
-    if (profile?.role === 'ponente' && supabase) {
-        const { data: speakerLinks } = await (supabase
-            .from('event_speakers') as any)
-            .select('event_id')
-            .eq('speaker_id', profile.id)
-
-        assignedEventIds = new Set(
-            (speakerLinks || [])
-                .map((link: any) => link.event_id)
-                .filter((eventId: string | null): eventId is string => typeof eventId === 'string')
-        )
-    }
-
-    const canEditListedEvent = (event: EventWithRegistration) => Boolean(
-        profile?.role === 'admin'
-        || profile?.id === event.created_by
-        || assignedEventIds.has(event.id)
-    )
 
     // Separate events by status AND date
     // Events with status 'upcoming' but start_time in the past should go to past section
@@ -565,22 +545,52 @@ export default async function EventsPage() {
             .map((event) => event.created_by)
             .filter((creatorId): creatorId is string => typeof creatorId === 'string' && creatorId.length > 0)
     ))
-    const draftCreatorLabels = new Map<string, string>()
+    const [assignedEventIds, draftCreatorLabels] = await Promise.all([
+        (async () => {
+            if (profile?.role !== 'ponente') {
+                return new Set<string>()
+            }
 
-    if (canSeeDraftAgenda && supabase && draftCreatorIds.length > 0) {
-        const { data: draftCreators } = await (supabase
-            .from('profiles') as any)
-            .select('id, full_name, role')
-            .in('id', draftCreatorIds)
+            const { data: speakerLinks } = await (supabase
+                .from('event_speakers') as any)
+                .select('event_id')
+                .eq('speaker_id', profile.id)
 
-        for (const creator of draftCreators || []) {
-            const name = creator.full_name || 'Sin nombre'
-            draftCreatorLabels.set(
-                creator.id,
-                creator.role === 'ponente' ? `Ponente: ${name}` : `Creado por: ${name}`
+            return new Set(
+                (speakerLinks || [])
+                    .map((link: any) => link.event_id)
+                    .filter((eventId: string | null): eventId is string => typeof eventId === 'string')
             )
-        }
-    }
+        })(),
+        (async () => {
+            const labels = new Map<string, string>()
+
+            if (!canSeeDraftAgenda || draftCreatorIds.length === 0) {
+                return labels
+            }
+
+            const { data: draftCreators } = await (supabase
+                .from('profiles') as any)
+                .select('id, full_name, role')
+                .in('id', draftCreatorIds)
+
+            for (const creator of draftCreators || []) {
+                const name = creator.full_name || 'Sin nombre'
+                labels.set(
+                    creator.id,
+                    creator.role === 'ponente' ? `Ponente: ${name}` : `Creado por: ${name}`
+                )
+            }
+
+            return labels
+        })(),
+    ])
+
+    const canEditListedEvent = (event: EventWithRegistration) => Boolean(
+        profile?.role === 'admin'
+        || profile?.id === event.created_by
+        || assignedEventIds.has(event.id)
+    )
 
     const draftAgendaItems: DraftEventsWorkspaceItem[] = canSeeDraftAgenda
         ? drafts.map((event) => {

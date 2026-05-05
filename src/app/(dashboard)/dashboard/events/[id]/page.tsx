@@ -1,11 +1,11 @@
 import Image from 'next/image'
-import { createClient, getUserProfile } from '@/lib/supabase/server'
+import { getViewerContext } from '@/lib/supabase/server'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { VideoPlayer } from '@/components/ui/video-player'
 import { ShareEventButton } from '../share-button'
-import { getAllSpeakers, getEventSpeakers } from '@/lib/supabase/queries/speakers'
+import { getEventSpeakerOptions, getEventSpeakers } from '@/lib/supabase/queries/speakers'
 import { getResourcesByEvent } from '@/lib/supabase/queries/resources'
 import { redirect, notFound } from 'next/navigation'
 import Link from 'next/link'
@@ -26,7 +26,7 @@ import {
     isPurchasableRecordingEvent,
     normalizeMemberAccessType,
 } from '@/lib/events/pricing'
-import { audienceAllowsAccess, getCommercialAccessContext, isCommunityReadOnlyViewer } from '@/lib/access/commercial'
+import { audienceAllowsAccess, isCommunityReadOnlyViewer } from '@/lib/access/commercial'
 import { getSpecializationByCode } from '@/lib/specializations'
 import { DEFAULT_TIMEZONE, formatDateInTimezone, getTimezoneShortLabel } from '@/lib/timezone'
 import {
@@ -48,18 +48,13 @@ interface PageProps {
 
 export default async function EventDetailPage({ params }: PageProps) {
     const { id } = await params
-    const supabase = await createClient()
-    const profile = await getUserProfile()
+    const viewer = await getViewerContext({ includeCommercialAccess: true })
+    const { supabase, profile, commercialAccess } = viewer
 
     if (!profile) {
         redirect('/auth/login')
     }
 
-    const commercialAccess = await getCommercialAccessContext({
-        supabase,
-        userId: profile.id,
-        profile,
-    })
     const isReadOnly = isCommunityReadOnlyViewer(commercialAccess)
 
     // Get event details
@@ -96,11 +91,7 @@ export default async function EventDetailPage({ params }: PageProps) {
     })
 
     const speakerOptions = canEditEvent
-        ? (await getAllSpeakers()).map((speaker) => ({
-            id: speaker.id,
-            name: speaker.profile?.full_name || 'Desconocido',
-            avatar: speaker.profile?.avatar_url || null,
-        }))
+        ? await getEventSpeakerOptions()
         : []
 
     const accessEntitlement = canEditEvent

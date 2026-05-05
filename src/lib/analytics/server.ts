@@ -2,6 +2,7 @@ import { createAdminClient, createClient } from '@/lib/supabase/server'
 import { dispatchExternalTrackingEvent } from '@/lib/tracking/server-destinations'
 import { sanitizeTrackingProperties } from '@/lib/tracking/sanitize'
 import { createAttributionSnapshot, hasMeaningfulTouch, normalizeAttributionTouch, touchToDbFields } from './attribution'
+import { withTimeout } from '@/lib/http/timeout-fetch'
 import type {
     AnalyticsCollectRequest,
     AnalyticsConsentSnapshot,
@@ -311,4 +312,17 @@ export async function recordAnalyticsServerEvent(input: {
     })
 
     return snapshot
+}
+
+export function recordAnalyticsServerEventBestEffort(
+    input: Parameters<typeof recordAnalyticsServerEvent>[0],
+    timeoutMs = 3_000
+) {
+    void withTimeout(
+        recordAnalyticsServerEvent(input),
+        timeoutMs,
+        'Analytics server event'
+    ).catch((error) => {
+        console.error('[Analytics] best-effort server event failed:', error)
+    })
 }

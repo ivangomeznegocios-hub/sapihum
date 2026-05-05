@@ -3,7 +3,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { recordAnalyticsServerEvent, resolveAttributionSnapshot } from '@/lib/analytics/server'
+import { recordAnalyticsServerEventBestEffort, resolveAttributionSnapshot } from '@/lib/analytics/server'
 import { getAppUrl } from '@/lib/config/app-url'
 import { getPaymentProvider } from '@/lib/payments'
 import { compactAttributionSnapshotForStripe } from '@/lib/payments/stripe-metadata'
@@ -14,6 +14,8 @@ import {
     type BillingInterval,
 } from '@/lib/payments/config'
 import { canUserSeeLevel3Offer, getSpecializationByCode } from '@/lib/specializations'
+
+export const maxDuration = 30
 
 function normalizeEmail(value: string | null | undefined) {
     return value?.trim().toLowerCase() || ''
@@ -186,7 +188,7 @@ export async function POST(request: NextRequest) {
             customerId = undefined
         }
 
-        await recordAnalyticsServerEvent({
+        recordAnalyticsServerEventBestEffort({
             eventName: 'checkout_started',
             eventSource: 'server',
             visitorId: analyticsContext?.visitorId ?? null,

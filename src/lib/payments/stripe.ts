@@ -22,7 +22,10 @@ export function getStripeInstance(): Stripe {
     if (!key) {
         throw new Error('STRIPE_SECRET_KEY is not configured')
     }
-    return new Stripe(key)
+    return new Stripe(key, {
+        timeout: 10_000,
+        maxNetworkRetries: 1,
+    })
 }
 
 export async function ensureGrowthRewardCoupon(discountPercent: number): Promise<string> {

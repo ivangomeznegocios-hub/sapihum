@@ -1,21 +1,21 @@
 import { getEventsWithRegistration } from '@/lib/supabase/queries/events'
-import { createClient, getUserProfile } from '@/lib/supabase/server'
+import { getViewerContext } from '@/lib/supabase/server'
 import { EventsCategoryNav } from '../events-filter'
 import { FilteredEventsList } from '../filtered-events-list'
-import { getCommercialAccessContext, isCommunityReadOnlyViewer } from '@/lib/access/commercial'
+import { isCommunityReadOnlyViewer } from '@/lib/access/commercial'
 import { DEFAULT_TIMEZONE } from '@/lib/timezone'
+import { EVENTS_LIST_SELECT } from '../event-list-select'
 
 export default async function NetworkingEventsPage() {
-    const events = await getEventsWithRegistration()
-    const profile = await getUserProfile()
-    const supabase = profile ? await createClient() : null
-    const commercialAccess = profile && supabase
-        ? await getCommercialAccessContext({
-            supabase,
-            userId: profile.id,
-            profile,
-        })
-        : null
+    const viewer = await getViewerContext({ includeCommercialAccess: true })
+    const { supabase, profile, commercialAccess } = viewer
+    const events = await getEventsWithRegistration({
+        supabase,
+        userId: viewer.user?.id ?? null,
+        profile,
+        commercialAccess,
+        select: EVENTS_LIST_SELECT,
+    })
     const isActiveMember = Boolean(
         commercialAccess?.hasActiveMembership ||
         profile?.role === 'patient' ||

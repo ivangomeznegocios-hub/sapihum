@@ -9,6 +9,7 @@ import {
 import { getConsentAllowedTrackingDestinations, getCanonicalTrackingEventName } from '@/lib/tracking/catalog'
 import { resolveTrackingRouteContext, type TrackingRouteContext } from '@/lib/tracking/policy'
 import { sanitizeTrackingProperties } from '@/lib/tracking/sanitize'
+import { createTimeoutFetch } from '@/lib/http/timeout-fetch'
 import { deriveAnalyticsChannel, normalizeAttributionTouch } from './attribution'
 import type {
     AnalyticsCollectRequest,
@@ -22,6 +23,7 @@ import type {
 export const ANALYTICS_VISITOR_KEY = 'cp_analytics_visitor_id'
 export const ANALYTICS_SESSION_KEY = 'cp_analytics_session_id'
 export const ANALYTICS_LAST_TOUCH_KEY = 'cp_analytics_last_touch'
+const analyticsCollectFetch = createTimeoutFetch(3_000, 'Analytics collect request')
 
 type DataLayerEvent = {
     event: string
@@ -320,7 +322,7 @@ export async function collectAnalyticsEvent(
         touch: buildBrowserTouch(input?.touch),
     }
 
-    const response = await fetch('/api/analytics/collect', {
+    const response = await analyticsCollectFetch('/api/analytics/collect', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),

@@ -346,6 +346,48 @@ export async function getAllSpeakers(): Promise<SpeakerWithProfile[]> {
     return attachProfilesToSpeakers(speakers, profileMap) as SpeakerWithProfile[]
 }
 
+export interface EventSpeakerOption {
+    id: string
+    name: string
+    avatar: string | null
+}
+
+/**
+ * Lightweight speaker selector data for event forms.
+ * Avoids loading the full speaker profile payload and auth fallback data during route navigation.
+ */
+export async function getEventSpeakerOptions(): Promise<EventSpeakerOption[]> {
+    const supabase = await createClient()
+
+    const { data, error } = await (supabase
+        .from('speakers') as any)
+        .select(`
+            id,
+            profile:profiles!speakers_id_fkey (
+                full_name,
+                avatar_url
+            )
+        `)
+        .order('created_at', { ascending: false })
+
+    if (error) {
+        console.error('Error fetching event speaker options:', error)
+        return []
+    }
+
+    return (data ?? []).map((speaker: any) => {
+        const profile = Array.isArray(speaker.profile)
+            ? speaker.profile[0]
+            : speaker.profile
+
+        return {
+            id: speaker.id,
+            name: profile?.full_name || 'Desconocido',
+            avatar: profile?.avatar_url || null,
+        }
+    })
+}
+
 /**
  * Update speaker profile
  */

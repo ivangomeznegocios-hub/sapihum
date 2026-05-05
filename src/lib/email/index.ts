@@ -1,5 +1,6 @@
 import { Resend } from 'resend'
 import { getResendFromEmail } from './config'
+import { withTimeout } from '@/lib/http/timeout-fetch'
 
 let resendInstance: Resend | null = null
 
@@ -25,13 +26,17 @@ export async function sendEmail({ to, subject, html, replyTo }: SendEmailParams)
     try {
         const resend = getResend()
         const from = getResendFromEmail()
-        const { data, error } = await resend.emails.send({
-            from,
-            to,
-            subject,
-            html,
-            replyTo,
-        })
+        const { data, error } = await withTimeout(
+            resend.emails.send({
+                from,
+                to,
+                subject,
+                html,
+                replyTo,
+            }),
+            8_000,
+            'Resend email'
+        )
 
         if (error) {
             console.error('[Email] Failed to send:', error)

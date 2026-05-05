@@ -3,7 +3,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { recordAnalyticsServerEvent, resolveAttributionSnapshot } from '@/lib/analytics/server'
+import { recordAnalyticsServerEventBestEffort, resolveAttributionSnapshot } from '@/lib/analytics/server'
 import { getAppUrl } from '@/lib/config/app-url'
 import { getPaymentProvider } from '@/lib/payments'
 import { compactAttributionSnapshotForStripe } from '@/lib/payments/stripe-metadata'
@@ -27,6 +27,8 @@ import { sendFormationPurchaseConfirmation } from '@/lib/payments/commerce'
 import { createServiceClient } from '@/lib/supabase/service'
 
 const EVENT_CHECKOUT_RESERVATION_MINUTES = 30
+
+export const maxDuration = 30
 
 function isUuid(value: string | null | undefined): value is string {
     return Boolean(value && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value))
@@ -878,7 +880,7 @@ export async function POST(request: NextRequest) {
             )
         }
 
-        await recordAnalyticsServerEvent({
+        recordAnalyticsServerEventBestEffort({
             eventName: 'checkout_started',
             eventSource: 'server',
             visitorId: analyticsContext?.visitorId ?? null,

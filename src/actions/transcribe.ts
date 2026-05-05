@@ -3,10 +3,12 @@
 import { createClient } from '@/lib/supabase/server'
 import { getViewerCommercialAccessContext } from '@/lib/access/commercial'
 import { canUseClinicalAi } from '@/lib/access/internal-modules'
+import { createTimeoutFetch } from '@/lib/http/timeout-fetch'
 import type { SOAPContent, ClinicalRecord } from '@/types/database'
 
 const GROQ_API_URL = 'https://api.groq.com/openai/v1'
 const AI_CONSENT_MAX_AGE_MS = 365 * 24 * 60 * 60 * 1000
+const aiFetch = createTimeoutFetch(60_000, 'Clinical AI request')
 
 function scrubPII(text: string): string {
     let scrubbed = text
@@ -67,7 +69,7 @@ async function transcribeAudio(audioBlob: Blob): Promise<string> {
     formData.append('language', 'es')
     formData.append('response_format', 'text')
 
-    const response = await fetch(`${GROQ_API_URL}/audio/transcriptions`, {
+    const response = await aiFetch(`${GROQ_API_URL}/audio/transcriptions`, {
         method: 'POST',
         headers: {
             Authorization: `Bearer ${groqApiKey}`,
@@ -91,7 +93,7 @@ async function generateSOAPNotes(transcription: string, includeActionPlan: boole
         throw new Error('GROQ API key not configured')
     }
 
-    const response = await fetch(`${GROQ_API_URL}/chat/completions`, {
+    const response = await aiFetch(`${GROQ_API_URL}/chat/completions`, {
         method: 'POST',
         headers: {
             Authorization: `Bearer ${groqApiKey}`,

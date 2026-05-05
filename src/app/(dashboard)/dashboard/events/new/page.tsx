@@ -1,5 +1,5 @@
-import { getUserProfile } from '@/lib/supabase/server'
-import { getAllSpeakers } from '@/lib/supabase/queries/speakers'
+import { getViewerContext } from '@/lib/supabase/server'
+import { getEventSpeakerOptions } from '@/lib/supabase/queries/speakers'
 import { redirect } from 'next/navigation'
 import { CreateEventForm } from '../event-forms'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -7,7 +7,7 @@ import { ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
 
 export default async function NewEventPage() {
-    const profile = await getUserProfile()
+    const { profile } = await getViewerContext()
 
     if (!profile) {
         redirect('/auth/login')
@@ -18,11 +18,7 @@ export default async function NewEventPage() {
         redirect('/dashboard/events')
     }
 
-    const speakerOptions = (await getAllSpeakers()).map((speaker) => ({
-        id: speaker.id,
-        name: speaker.profile?.full_name || 'Desconocido',
-        avatar: speaker.profile?.avatar_url || null,
-    }))
+    const speakerOptions = await getEventSpeakerOptions()
 
     return (
         <div className="space-y-8">

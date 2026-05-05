@@ -2,7 +2,10 @@ import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { hasMeasurementConsent, parseConsentCookieFromCookieHeader } from '@/lib/consent'
 import { ingestAnalyticsEvent } from '@/lib/analytics/server'
+import { RequestTimeoutError, withTimeout } from '@/lib/http/timeout-fetch'
 import type { AnalyticsCollectRequest } from '@/lib/analytics/types'
+
+export const maxDuration = 10
 
 const AnalyticsEventNameSchema = z.enum([
     'page_view',
@@ -77,9 +80,18 @@ export async function POST(request: NextRequest) {
 
         const payload = parsedPayload.data as AnalyticsCollectRequest
         payload.consent = consent
-        const result = await ingestAnalyticsEvent(payload)
+        const result = await withTimeout(
+            ingestAnalyticsEvent(payload),
+            8_000,
+            'Analytics ingestion'
+        )
         return NextResponse.json(result)
     } catch (error) {
+        if (error instanceof RequestTimeoutError) {
+            console.error('[Analytics] collect timeout:', error)
+            return NextResponse.json({ accepted: false, timedOut: true }, { status: 202 })
+        }
+
         console.error('[Analytics] collect error:', error)
         return NextResponse.json({ error: 'collect_failed' }, { status: 500 })
     }

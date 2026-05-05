@@ -1,9 +1,11 @@
 import { getAppUrl } from '@/lib/config/app-url'
 import { createServiceClient } from '@/lib/supabase/service'
+import { createTimeoutFetch } from '@/lib/http/timeout-fetch'
 
 export const GOOGLE_CALENDAR_PROVIDER = 'google'
 export const GOOGLE_CALENDAR_SCOPES = ['https://www.googleapis.com/auth/calendar.readonly']
 export const GOOGLE_CALENDAR_FEATURE_KEY = 'enable_google_calendar_sync'
+const googleCalendarFetch = createTimeoutFetch(8_000, 'Google Calendar request')
 
 type CalendarIntegrationProvider = typeof GOOGLE_CALENDAR_PROVIDER
 type CalendarIntegrationStatus = 'connected' | 'error' | 'disconnected'
@@ -180,7 +182,7 @@ export async function exchangeGoogleCodeForTokens(code: string) {
         grant_type: 'authorization_code',
     })
 
-    const response = await fetch('https://oauth2.googleapis.com/token', {
+    const response = await googleCalendarFetch('https://oauth2.googleapis.com/token', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -201,7 +203,7 @@ export async function revokeGoogleToken(token: string) {
     if (!token) return
 
     try {
-        await fetch('https://oauth2.googleapis.com/revoke', {
+        await googleCalendarFetch('https://oauth2.googleapis.com/revoke', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
@@ -226,7 +228,7 @@ async function refreshGoogleAccessToken(refreshToken: string) {
         grant_type: 'refresh_token',
     })
 
-    const response = await fetch('https://oauth2.googleapis.com/token', {
+    const response = await googleCalendarFetch('https://oauth2.googleapis.com/token', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -306,7 +308,7 @@ export async function fetchGoogleCalendarList(accessToken: string, selectedCalen
     url.searchParams.set('showHidden', 'false')
     url.searchParams.set('maxResults', '250')
 
-    const response = await fetch(url, {
+    const response = await googleCalendarFetch(url, {
         headers: {
             Authorization: `Bearer ${accessToken}`,
         },
@@ -377,7 +379,7 @@ export async function fetchGoogleCalendarEvents(
         url.searchParams.set('orderBy', 'startTime')
         url.searchParams.set('maxResults', '100')
 
-        const response = await fetch(url, {
+        const response = await googleCalendarFetch(url, {
             headers: {
                 Authorization: `Bearer ${accessToken}`,
             },
@@ -428,7 +430,7 @@ export async function queryGoogleFreeBusy(
     startTimeIso: string,
     endTimeIso: string
 ) {
-    const response = await fetch('https://www.googleapis.com/calendar/v3/freeBusy', {
+    const response = await googleCalendarFetch('https://www.googleapis.com/calendar/v3/freeBusy', {
         method: 'POST',
         headers: {
             Authorization: `Bearer ${accessToken}`,
