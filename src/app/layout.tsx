@@ -3,6 +3,7 @@ import { Manrope, Playfair_Display } from 'next/font/google'
 import { ThemeProvider } from '@/components/theme-provider'
 import { TrackingBootstrap } from '@/components/providers/tracking-bootstrap'
 import { DeferredClientRuntime } from '@/components/providers/deferred-client-runtime'
+import { ServiceWorkerRegister } from '@/components/providers/service-worker-register'
 import { brandFullName, brandName, brandShortDescription } from '@/lib/brand'
 import { getAppUrl } from '@/lib/config/app-url'
 import './globals.css'
@@ -67,6 +68,7 @@ export default function RootLayout({
                     disableTransitionOnChange
                 >
                     {children}
+                    <ServiceWorkerRegister />
                     <DeferredClientRuntime />
                 </ThemeProvider>
             </body>
