@@ -23,39 +23,13 @@ import {
     ToggleCampaignButton,
 } from './admin-growth-forms'
 import { cn } from '@/lib/utils'
-
-const campaignTypeLabels: Record<string, string> = {
-    referral_boost: 'Referral boost',
-    milestone: 'Milestone',
-    promo: 'Promocion',
-    challenge: 'Reto',
-    custom: 'Custom',
-}
-
-const rewardTypeLabels: Record<string, string> = {
-    credit: 'Credito',
-    discount: 'Descuento',
-    unlock: 'Unlock',
-    commission: 'Comision',
-    cash_bonus: 'Bono en efectivo',
-    membership_benefit: 'Beneficio de membresia',
-    custom: 'Reward especial',
-}
-
-const triggerLabels: Record<string, string> = {
-    signup: 'Registro validado',
-    profile_completed: 'Perfil completo',
-    subscription: 'Primera suscripcion',
-    first_purchase: 'Primera compra',
-    event_purchase: 'Compra de evento',
-}
-
-const roleLabels: Record<string, string> = {
-    psychologist: 'Psicologos',
-    ponente: 'Ponentes',
-    patient: 'Pacientes',
-    admin: 'Admins',
-}
+import {
+    campaignTypeLabels,
+    professionalProgramLabel,
+    rewardTypeLabels,
+    roleLabels,
+    triggerLabels,
+} from './labels'
 
 function formatCurrency(value: unknown): string {
     const amount = Number(value)
@@ -79,7 +53,7 @@ function formatRewardValue(config?: Record<string, any> | null): string {
     if (config.label) return String(config.label)
     if (config.amount !== undefined && config.amount !== null) return formatCurrency(config.amount)
     if (config.percentage !== undefined && config.percentage !== null) return `${config.percentage}%`
-    return rewardTypeLabels[config.reward_type] || 'Reward'
+    return rewardTypeLabels[config.reward_type] || 'Beneficio'
 }
 
 function formatRoleList(roles?: string[] | null): string {
@@ -155,7 +129,7 @@ export default async function AdminGrowthPage() {
                     <div>
                         <h1 className="text-3xl font-bold tracking-tight">Programa de Invitacion Profesional</h1>
                         <p className="text-sm text-muted-foreground">
-                            Growth monetizable para adquisicion de psicologos y ponentes, separado de la canalizacion clinica.
+                            Crecimiento monetizable para captar psicologos y ponentes, separado de la canalizacion clinica.
                         </p>
                     </div>
                 </div>
@@ -166,13 +140,13 @@ export default async function AdminGrowthPage() {
             <div className="rounded-2xl border bg-gradient-to-r from-brand-blue-hover via-white to-brand-blue-hover p-5 dark:from-brand-blue-hover/10 dark:via-background dark:to-brand-blue-hover/10">
                 <div className="grid gap-4 lg:grid-cols-[1.3fr_1fr]">
                     <div className="flex items-start gap-3">
-                        <div className="rounded-xl bg-brand-blue-hover p-2 text-brand-blue-hover dark:bg-brand-blue-hover/40 dark:text-brand-blue-hover">
+                    <div className="rounded-xl bg-brand-blue-hover p-2 text-brand-blue-hover dark:bg-brand-blue-hover/40 dark:text-brand-blue-hover">
                             <BriefcaseBusiness className="h-5 w-5" />
                         </div>
                         <div>
-                            <h2 className="text-lg font-semibold">Motor economico permitido</h2>
+                            <h2 className="text-lg font-semibold">Modulo economico del programa</h2>
                             <p className="mt-1 text-sm text-muted-foreground">
-                                Aqui si se empujan payouts, boosts, hitos y rewards duales para atraer profesionales a la plataforma. El modulo clinico queda excluido por diseno.
+                                Aqui si se configuran pagos, impulsos, metas y recompensas dobles para atraer profesionales a la plataforma. El modulo clinico queda excluido por diseno.
                             </p>
                         </div>
                     </div>
@@ -181,9 +155,9 @@ export default async function AdminGrowthPage() {
                         <div className="flex items-start gap-2">
                             <ShieldCheck className="mt-0.5 h-4 w-4 text-primary" />
                             <div>
-                                <p className="font-medium">Enforcement activo</p>
+                                <p className="font-medium">Regla activa</p>
                                 <p className="text-muted-foreground">
-                                    Todas las campanas y reward events de este panel se fijan a <code>professional_invite</code>. Ninguna accion clinica puede escribir aqui.
+                                    Todas las campanas y eventos de recompensa de este panel se fijan a {professionalProgramLabel}. Ninguna accion clinica puede escribir aqui.
                                 </p>
                             </div>
                         </div>
@@ -205,32 +179,32 @@ export default async function AdminGrowthPage() {
                         description="Base de embajadores con codigo disponible"
                     />
                     <MetricCard
-                        label="Invitados psicologos"
+                        label="Psicologos invitados"
                         value={systemStats?.psychologistAttributions ?? 0}
                         icon={Users}
                         color="text-brand-blue-hover dark:text-brand-blue-hover"
                         description="Adquisicion del target principal"
                     />
                     <MetricCard
-                        label="Invitados ponentes"
+                        label="Ponentes invitados"
                         value={systemStats?.ponenteAttributions ?? 0}
                         icon={Megaphone}
                         color="text-brand-blue-hover dark:text-brand-blue-hover"
-                        description="Expansion de speakers y visibilidad"
+                        description="Expansion de ponentes y visibilidad"
                     />
                     <MetricCard
                         label="Conversion"
                         value={`${conversionRate}%`}
                         icon={CheckCircle2}
                         color="text-brand-blue dark:text-brand-blue"
-                        description="Invitaciones completadas o recompensadas"
+                        description="Invitaciones completadas o con recompensa"
                     />
                     <MetricCard
-                        label="Rewards pendientes"
+                        label="Recompensas pendientes"
                         value={systemStats?.pendingRewards ?? 0}
                         icon={Gift}
                         color="text-brand-blue-hover dark:text-brand-blue-hover"
-                        description="Eventos listos para procesar payout"
+                        description="Eventos listos para procesar el pago"
                     />
                 </div>
             </div>
@@ -249,7 +223,7 @@ export default async function AdminGrowthPage() {
                         <Megaphone className="mx-auto mb-2 h-8 w-8 text-muted-foreground/40" />
                         <p className="text-sm text-muted-foreground">Aun no hay campanas de invitacion profesional.</p>
                         <p className="mt-1 text-xs text-muted-foreground">
-                            Crea retos agresivos de activacion, volumen y suscripcion para mover el programa.
+                            Crea retos de activacion, volumen y suscripcion para mover el programa.
                         </p>
                     </div>
                 ) : (
@@ -281,7 +255,7 @@ export default async function AdminGrowthPage() {
                                                     {campaignTypeLabels[campaign.campaign_type] || campaign.campaign_type}
                                                 </span>
                                                 <span className="rounded-full bg-brand-blue-hover px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-brand-blue-hover dark:bg-brand-blue-hover/30 dark:text-brand-blue-hover">
-                                                    professional_invite
+                                                    {professionalProgramLabel}
                                                 </span>
                                             </div>
 
@@ -292,7 +266,7 @@ export default async function AdminGrowthPage() {
                                             <div className="mt-4 grid gap-3 lg:grid-cols-2">
                                                 <div className="rounded-xl border bg-background/70 p-3">
                                                     <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-                                                        Regla economica
+                                                        Regla de negocio
                                                     </p>
                                                     <div className="mt-2 space-y-1.5 text-xs text-muted-foreground">
                                                         <p>Hito: {rewardConfig.threshold_count ?? 0} invitados activos</p>
@@ -318,7 +292,7 @@ export default async function AdminGrowthPage() {
                                                         <p>Orden: {campaign.sort_order}</p>
                                                         {dualReward && (
                                                             <p>
-                                                                Reward dual: <span className="font-medium text-foreground">{formatRewardValue(dualReward)}</span>
+                                                                Recompensa adicional: <span className="font-medium text-foreground">{formatRewardValue(dualReward)}</span>
                                                             </p>
                                                         )}
                                                     </div>
@@ -327,13 +301,13 @@ export default async function AdminGrowthPage() {
 
                                             {(stageEntries.length > 0 || milestoneEntries.length > 0) && (
                                                 <div className="mt-4 grid gap-3 lg:grid-cols-2">
-                                                    <div className="rounded-xl border bg-background/70 p-3">
-                                                        <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-                                                            Bonos por activacion
+                                                <div className="rounded-xl border bg-background/70 p-3">
+                                                    <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+                                                            Bonos por evento
                                                         </p>
                                                         <div className="mt-2 flex flex-wrap gap-1.5">
                                                             {stageEntries.length === 0 ? (
-                                                                <span className="text-xs text-muted-foreground">Sin bonos por etapa</span>
+                                                                <span className="text-xs text-muted-foreground">Sin bonos por evento</span>
                                                             ) : (
                                                                 stageEntries.map(([trigger, value]) => (
                                                                     <span key={trigger} className="rounded-full bg-muted px-2 py-1 text-xs">
@@ -380,13 +354,13 @@ export default async function AdminGrowthPage() {
                 <div className="rounded-2xl border bg-card p-5">
                     <h2 className="mb-4 flex items-center gap-2 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
                         <ShieldCheck className="h-4 w-4" />
-                        Grants automaticos ({rewardGrants.length})
+                        Recompensas automaticas ({rewardGrants.length})
                     </h2>
 
                     {rewardGrants.length === 0 ? (
                         <div className="py-6 text-center text-muted-foreground">
                             <ShieldCheck className="mx-auto mb-2 h-6 w-6 opacity-40" />
-                            <p className="text-sm">Aun no hay grants evaluados.</p>
+                            <p className="text-sm">Aun no hay recompensas evaluadas.</p>
                         </div>
                     ) : (
                         <div className="space-y-2">
@@ -418,7 +392,7 @@ export default async function AdminGrowthPage() {
                                     )}
                                     {grant.lastStripeSyncAt && (
                                         <p className="text-[10px] text-muted-foreground">
-                                            Stripe sync: {new Date(grant.lastStripeSyncAt).toLocaleString('es-MX')}
+                                            Sincronizacion con Stripe: {new Date(grant.lastStripeSyncAt).toLocaleString('es-MX')}
                                         </p>
                                     )}
                                     {grant.lastError && (
@@ -433,13 +407,13 @@ export default async function AdminGrowthPage() {
                 <div className="rounded-2xl border bg-card p-5">
                     <h2 className="mb-4 flex items-center gap-2 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
                         <Award className="h-4 w-4" />
-                        Rewards pendientes ({unprocessedRewards.length})
+                        Recompensas pendientes ({unprocessedRewards.length})
                     </h2>
 
                     {unprocessedRewards.length === 0 ? (
                         <div className="py-6 text-center text-muted-foreground">
                             <CheckCircle2 className="mx-auto mb-2 h-6 w-6 opacity-40" />
-                            <p className="text-sm">No hay payouts pendientes.</p>
+                            <p className="text-sm">No hay pagos pendientes.</p>
                         </div>
                     ) : (
                         <div className="space-y-2">
@@ -452,7 +426,7 @@ export default async function AdminGrowthPage() {
                                             {reward.reward_value ? ` - ${formatRewardValue(reward.reward_value)}` : ''}
                                         </p>
                                         <p className="text-[10px] text-muted-foreground">
-                                            Trigger: {triggerLabels[reward.trigger_event] || reward.trigger_event}
+                                            Evento: {triggerLabels[reward.trigger_event] || reward.trigger_event}
                                         </p>
                                         <p className="text-[10px] text-muted-foreground">
                                             {new Date(reward.created_at).toLocaleDateString('es-MX')}

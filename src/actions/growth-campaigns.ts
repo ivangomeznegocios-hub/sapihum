@@ -18,7 +18,7 @@ async function reconcileAfterCampaignChange() {
 
 function validateCampaignPayload(data: GrowthCampaignInsert | GrowthCampaignUpdate) {
     if ('title' in data && typeof data.title === 'string' && !data.title.trim()) {
-        return 'El titulo es requerido'
+        return 'El titulo de la campana es requerido'
     }
 
     if (Array.isArray(data.target_roles) && data.target_roles.length === 0) {
@@ -28,7 +28,7 @@ function validateCampaignPayload(data: GrowthCampaignInsert | GrowthCampaignUpda
         return 'Define al menos un rol que puede invitar'
     }
     if (Array.isArray(data.eligible_referred_roles) && data.eligible_referred_roles.length === 0) {
-        return 'Define al menos un rol invitable'
+        return 'Define al menos un rol invitado'
     }
 
     if (data.starts_at && data.ends_at) {
@@ -45,7 +45,7 @@ function validateCampaignPayload(data: GrowthCampaignInsert | GrowthCampaignUpda
     if (data.reward_config) {
         const config = normalizeGrowthRewardConfig(data.reward_config)
         if (!config) return 'La configuracion de recompensa no es valida'
-        if (config.threshold_count < 1) return 'El hito debe ser mayor a cero'
+        if (config.threshold_count < 1) return 'La meta debe ser mayor a cero'
         if (!allowedMembershipTargets.has(config.target_membership_level)) return 'El nivel objetivo no es valido'
         if ((config.discount_percent ?? 0) < 1 || (config.discount_percent ?? 0) > 100) {
             return 'El descuento debe estar entre 1% y 100%'
@@ -71,7 +71,6 @@ export async function createCampaign(data: GrowthCampaignInsert): Promise<{
             return { success: false, error: 'Usuario no autenticado' }
         }
 
-        // Verify admin role
         const { data: profile } = await supabase
             .from('profiles')
             .select('role')
@@ -79,7 +78,7 @@ export async function createCampaign(data: GrowthCampaignInsert): Promise<{
             .single()
 
         if ((profile as any)?.role !== 'admin') {
-            return { success: false, error: 'Solo administradores pueden crear campañas' }
+            return { success: false, error: 'Solo administradores pueden crear campanas' }
         }
 
         const validationError = validateCampaignPayload(data)
@@ -99,7 +98,7 @@ export async function createCampaign(data: GrowthCampaignInsert): Promise<{
 
         if (error) {
             console.error('Error creating campaign:', error)
-            return { success: false, error: 'Error al crear campaña' }
+            return { success: false, error: 'Error al crear campana' }
         }
 
         revalidatePath('/dashboard/admin/growth')
@@ -138,7 +137,7 @@ export async function updateCampaign(
             .single()
 
         if ((profile as any)?.role !== 'admin') {
-            return { success: false, error: 'Solo administradores pueden editar campañas' }
+            return { success: false, error: 'Solo administradores pueden editar campanas' }
         }
 
         const validationError = validateCampaignPayload(data)
@@ -156,7 +155,7 @@ export async function updateCampaign(
 
         if (error) {
             console.error('Error updating campaign:', error)
-            return { success: false, error: 'Error al actualizar campaña' }
+            return { success: false, error: 'Error al actualizar campana' }
         }
 
         revalidatePath('/dashboard/admin/growth')
@@ -205,7 +204,7 @@ export async function deleteCampaign(campaignId: string): Promise<{
             .single()
 
         if ((profile as any)?.role !== 'admin') {
-            return { success: false, error: 'Solo administradores pueden eliminar campañas' }
+            return { success: false, error: 'Solo administradores pueden eliminar campanas' }
         }
 
         const { error } = await (supabase as any)
@@ -215,7 +214,7 @@ export async function deleteCampaign(campaignId: string): Promise<{
 
         if (error) {
             console.error('Error deleting campaign:', error)
-            return { success: false, error: 'Error al eliminar campaña' }
+            return { success: false, error: 'Error al eliminar campana' }
         }
 
         revalidatePath('/dashboard/admin/growth')

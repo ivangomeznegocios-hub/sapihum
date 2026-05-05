@@ -12,24 +12,24 @@ import { cn } from '@/lib/utils'
 import { PROFESSIONAL_INVITE_PROGRAM_TYPE } from '@/lib/growth/programs'
 import { createCampaign, updateCampaign, toggleCampaignActive, deleteCampaign } from '@/actions/growth-campaigns'
 import { processRewardEvent } from './actions'
+import {
+    campaignTypeDescriptions,
+    campaignTypeLabels,
+    professionalProgramLabel,
+    triggerLabels,
+    roleLabels,
+} from './labels'
 import type { GrowthCampaign, GrowthCampaignType } from '@/types/database'
 
 const visibilityRoleLabels: Record<string, string> = {
-    psychologist: 'Psicologos',
-    ponente: 'Ponentes',
-    patient: 'Pacientes',
+    psychologist: roleLabels.psychologist,
+    ponente: roleLabels.ponente,
+    patient: roleLabels.patient,
 }
 
 const professionalRoleLabels: Record<string, string> = {
-    psychologist: 'Psicologos',
-    ponente: 'Ponentes',
-}
-
-const triggerLabels: Record<string, string> = {
-    signup: 'Registro validado',
-    profile_completed: 'Perfil completo',
-    subscription: 'Primera suscripcion',
-    first_purchase: 'Primera compra',
+    psychologist: roleLabels.psychologist,
+    ponente: roleLabels.ponente,
 }
 
 function toggleSelection(list: string[], value: string): string[] {
@@ -68,12 +68,12 @@ export function CampaignForm({
     async function handleSubmit(e: React.FormEvent) {
         e.preventDefault()
         if (!title.trim()) {
-            setMessage({ type: 'error', text: 'El titulo es requerido' })
+            setMessage({ type: 'error', text: 'El titulo de la campana es requerido' })
             return
         }
 
         if (targetRoles.length === 0 || eligibleReferrerRoles.length === 0 || eligibleReferredRoles.length === 0) {
-            setMessage({ type: 'error', text: 'Define roles elegibles' })
+            setMessage({ type: 'error', text: 'Selecciona al menos un rol en cada bloque' })
             return
         }
 
@@ -84,12 +84,12 @@ export function CampaignForm({
             : rawDiscount
 
         if (!Number.isFinite(parsedThreshold) || parsedThreshold < 1 || !Number.isFinite(parsedDiscount) || parsedDiscount < 1 || parsedDiscount > 100) {
-            setMessage({ type: 'error', text: 'Define hito y descuento validos' })
+            setMessage({ type: 'error', text: 'Revisa la meta y el descuento' })
             return
         }
 
         if (!['current', '1', '2', '3'].includes(targetMembershipLevel)) {
-            setMessage({ type: 'error', text: 'El nivel objetivo no es valido' })
+            setMessage({ type: 'error', text: 'El nivel elegido no es valido' })
             return
         }
 
@@ -147,20 +147,20 @@ export function CampaignForm({
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <h3 className="font-semibold text-sm flex items-center gap-2">
                     {isEditing ? <Pencil className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
-                    {isEditing ? 'Editar Campana' : 'Nueva Campana'}
+                    {isEditing ? 'Editar campana' : 'Nueva campana'}
                 </h3>
                 <span className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                    Programa: invitacion profesional
+                    Programa: {professionalProgramLabel}
                 </span>
             </div>
 
             <div className="rounded-lg border border-brand-blue-hover bg-brand-blue-hover/70 p-3 text-xs text-brand-blue-hover dark:border-brand-blue-hover dark:bg-brand-blue-hover/20 dark:text-brand-blue-hover">
-                Este formulario solo configura incentivos para adquisicion de psicologos y ponentes. No aplica a canalizacion clinica de pacientes.
+                Este formulario solo configura incentivos para captar psicologos y ponentes. No aplica a la canalizacion clinica de pacientes.
             </div>
 
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <div>
-                    <label className="text-xs font-medium">Titulo *</label>
+                    <label className="text-xs font-medium">Titulo de la campana *</label>
                     <Input
                         value={title}
                         onChange={(event) => setTitle(event.target.value)}
@@ -169,38 +169,41 @@ export function CampaignForm({
                     />
                 </div>
                 <div>
-                    <label className="text-xs font-medium">Tipo de Campana</label>
+                    <label className="text-xs font-medium">Tipo de campana</label>
                     <select
                         value={campaignType}
                         onChange={(event) => setCampaignType(event.target.value as GrowthCampaignType)}
                         className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
                     >
-                        <option value="referral_boost">Referral Boost</option>
-                        <option value="milestone">Milestone</option>
-                        <option value="promo">Promocion</option>
-                        <option value="challenge">Reto</option>
-                        <option value="custom">Custom</option>
+                        <option value="referral_boost">{campaignTypeLabels.referral_boost}</option>
+                        <option value="milestone">{campaignTypeLabels.milestone}</option>
+                        <option value="promo">{campaignTypeLabels.promo}</option>
+                        <option value="challenge">{campaignTypeLabels.challenge}</option>
+                        <option value="custom">{campaignTypeLabels.custom}</option>
                     </select>
+                    <p className="mt-1 text-[11px] text-muted-foreground">
+                        {campaignTypeDescriptions[campaignType]}
+                    </p>
                 </div>
             </div>
 
             <div>
-                <label className="text-xs font-medium">Descripcion</label>
+                <label className="text-xs font-medium">Descripcion breve</label>
                 <Textarea
                     value={description}
                     onChange={(event) => setDescription(event.target.value)}
-                    placeholder="Describe la propuesta de valor, payout y reglas de elegibilidad..."
+                    placeholder="Explica a quien va dirigida, que gana y bajo que condiciones."
                     className="mt-1 h-20 resize-none"
                 />
             </div>
 
             <div className="rounded-lg border p-4 space-y-3">
                 <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                    Alcance y Elegibilidad
+                    A quien aplica
                 </p>
 
                 <div>
-                    <label className="text-xs font-medium">Visible para</label>
+                    <label className="text-xs font-medium">Visible para estos roles</label>
                     <div className="mt-2 flex flex-wrap gap-2">
                         {Object.entries(visibilityRoleLabels).map(([role, label]) => (
                             <button
@@ -222,7 +225,7 @@ export function CampaignForm({
 
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <div>
-                        <label className="text-xs font-medium">Roles que pueden invitar</label>
+                        <label className="text-xs font-medium">Quienes pueden invitar</label>
                         <div className="mt-2 flex flex-wrap gap-2">
                             {Object.entries(professionalRoleLabels).map(([role, label]) => (
                                 <button
@@ -242,7 +245,7 @@ export function CampaignForm({
                         </div>
                     </div>
                     <div>
-                        <label className="text-xs font-medium">Roles invitables con reward</label>
+                        <label className="text-xs font-medium">Roles que pueden ser invitados</label>
                         <div className="mt-2 flex flex-wrap gap-2">
                             {Object.entries(professionalRoleLabels).map(([role, label]) => (
                                 <button
@@ -264,7 +267,7 @@ export function CampaignForm({
                 </div>
 
                 <div>
-                    <label className="text-xs font-medium">Triggers economicos habilitados</label>
+                    <label className="text-xs font-medium">Acciones que activan la recompensa</label>
                     <div className="mt-2 flex flex-wrap gap-2">
                         {Object.entries(triggerLabels).map(([trigger, label]) => (
                             <button
@@ -287,11 +290,11 @@ export function CampaignForm({
 
             <div className="rounded-lg border p-4 space-y-3">
                 <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                    Recompensa automatica Stripe
+                    Recompensa automatica de Stripe
                 </p>
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
                     <div>
-                        <label className="text-xs font-medium">Hito de invitados activos</label>
+                        <label className="text-xs font-medium">Meta de invitados activos</label>
                         <Input
                             type="number"
                             value={thresholdCount}
@@ -301,7 +304,7 @@ export function CampaignForm({
                         />
                     </div>
                     <div>
-                        <label className="text-xs font-medium">Beneficio</label>
+                        <label className="text-xs font-medium">Tipo de beneficio</label>
                         <select
                             value={benefitKind}
                             onChange={(event) => setBenefitKind(event.target.value)}
@@ -324,7 +327,7 @@ export function CampaignForm({
                         />
                     </div>
                     <div>
-                        <label className="text-xs font-medium">Nivel objetivo</label>
+                        <label className="text-xs font-medium">Nivel que se otorga</label>
                         <select
                             value={targetMembershipLevel}
                             onChange={(event) => setTargetMembershipLevel(event.target.value)}
@@ -339,7 +342,7 @@ export function CampaignForm({
                 </div>
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
                     <div>
-                        <label className="text-xs font-medium">Prioridad</label>
+                        <label className="text-xs font-medium">Prioridad de aplicacion</label>
                         <Input type="number" value={priority} onChange={(event) => setPriority(event.target.value)} className="mt-1" />
                     </div>
                 </div>
@@ -347,15 +350,15 @@ export function CampaignForm({
 
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
                 <div>
-                    <label className="text-xs font-medium">Inicio</label>
+                    <label className="text-xs font-medium">Fecha de inicio</label>
                     <Input type="datetime-local" value={startsAt} onChange={(event) => setStartsAt(event.target.value)} className="mt-1 text-xs" />
                 </div>
                 <div>
-                    <label className="text-xs font-medium">Fin</label>
+                    <label className="text-xs font-medium">Fecha de fin</label>
                     <Input type="datetime-local" value={endsAt} onChange={(event) => setEndsAt(event.target.value)} className="mt-1 text-xs" />
                 </div>
                 <div>
-                    <label className="text-xs font-medium">Orden</label>
+                    <label className="text-xs font-medium">Orden de aparicion</label>
                     <Input type="number" value={sortOrder} onChange={(event) => setSortOrder(event.target.value)} className="mt-1" />
                 </div>
             </div>
@@ -391,7 +394,7 @@ export function CampaignForm({
                         ? <Loader2 className="h-3.5 w-3.5 animate-spin" />
                         : <Save className="h-3.5 w-3.5" />
                     }
-                    {isEditing ? 'Guardar' : 'Crear Campana'}
+                    {isEditing ? 'Guardar cambios' : 'Crear campana'}
                 </Button>
                 {onDone && (
                     <Button type="button" variant="ghost" size="sm" onClick={onDone} className="w-full sm:w-auto">
@@ -429,7 +432,7 @@ export function ToggleCampaignButton({ campaignId, isActive }: { campaignId: str
             ) : (
                 <PowerOff className="h-3 w-3" />
             )}
-            {active ? 'Activa' : 'Inactiva'}
+            {active ? 'Activa' : 'Pausada'}
         </Button>
     )
 }
@@ -439,7 +442,7 @@ export function DeleteCampaignButton({ campaignId }: { campaignId: string }) {
     const [deleted, setDeleted] = useState(false)
 
     async function handleDelete() {
-        if (!confirm('Eliminar esta campana? Esta accion no se puede deshacer.')) return
+        if (!confirm('Eliminar esta campana? No podras recuperarla.')) return
         setLoading(true)
         const result = await deleteCampaign(campaignId)
         if (result.success) setDeleted(true)
@@ -500,7 +503,7 @@ export function CreateCampaignSection() {
         return (
             <Button onClick={() => setShowForm(true)} className="w-full gap-1.5 sm:w-auto">
                 <Plus className="h-4 w-4" />
-                Nueva Campana
+                Nueva campana
             </Button>
         )
     }

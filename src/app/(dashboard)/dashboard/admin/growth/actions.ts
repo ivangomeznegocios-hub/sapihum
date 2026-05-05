@@ -26,7 +26,7 @@ export async function processRewardEvent(rewardEventId: string): Promise<{
             .single()
 
         if ((profile as any)?.role !== 'admin') {
-            return { success: false, error: 'Solo administradores' }
+            return { success: false, error: 'Solo administradores pueden procesar recompensas' }
         }
 
         const { error } = await (supabase as any)
