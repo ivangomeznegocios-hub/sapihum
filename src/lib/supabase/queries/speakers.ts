@@ -93,11 +93,11 @@ async function createSpeakerProfileClient() {
     return await createClient()
 }
 
-async function loadSpeakerProfiles(speakerIds: string[]) {
+async function loadSpeakerProfiles(speakerIds: string[], options?: { publicOnly?: boolean }) {
     const uniqueIds = Array.from(new Set(speakerIds.filter(Boolean)))
     if (uniqueIds.length === 0) return new Map<string, SpeakerProfileSummary>()
 
-    const supabase = await createSpeakerProfileClient()
+    const supabase = options?.publicOnly ? createPublicClient() : await createSpeakerProfileClient()
     const { data, error } = await (supabase
         .from('profiles') as any)
         .select('id, full_name, avatar_url, role')
@@ -125,7 +125,7 @@ async function loadSpeakerProfiles(speakerIds: string[]) {
         return !profile || !profile.full_name
     })
 
-    if (incompleteIds.length > 0) {
+    if (!options?.publicOnly && incompleteIds.length > 0) {
         const authFallbackMap = await loadAuthProfileFallbacks(incompleteIds)
 
         for (const speakerId of incompleteIds) {
@@ -173,7 +173,7 @@ export async function getPublicSpeakers(): Promise<SpeakerWithProfile[]> {
     }
 
     const speakers = (data ?? []) as Speaker[]
-    const profileMap = await loadSpeakerProfiles(speakers.map((speaker) => speaker.id))
+    const profileMap = await loadSpeakerProfiles(speakers.map((speaker) => speaker.id), { publicOnly: true })
     return sortSpeakersByMerit(
         attachProfilesToSpeakers(speakers, profileMap) as SpeakerWithProfile[]
     )

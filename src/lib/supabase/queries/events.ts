@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { createPublicClient } from '@/lib/supabase/public'
 import type {
     Event,
     EventStatus,
@@ -355,7 +356,7 @@ export async function getEventRegistrations(eventId: string): Promise<EventRegis
  * Filters out Draft and Cancelled events.
  */
 export async function getPublicEventById(eventId: string): Promise<any | null> {
-    const supabase = await createClient()
+    const supabase = createPublicClient()
 
     const { data: event, error } = await (supabase
         .from('events') as any)
@@ -401,7 +402,7 @@ async function getPublicEventAttendeeCount(supabase: any, eventId: string) {
 }
 
 export async function getPublicEventBySlug(slug: string): Promise<any | null> {
-    const supabase = await createClient()
+    const supabase = createPublicClient()
 
     const { data: event, error } = await (supabase
         .from('events') as any)
@@ -436,7 +437,7 @@ export async function getPublicEventBySlug(slug: string): Promise<any | null> {
 }
 
 export async function getPublicCatalogEvents(kind: 'eventos' | 'cursos' | 'grabaciones'): Promise<PublicCatalogEvent[]> {
-    const supabase = await createClient()
+    const supabase = createPublicClient()
 
     let query = (supabase
         .from('events') as any)
@@ -501,7 +502,7 @@ export async function getPublicCatalogEvents(kind: 'eventos' | 'cursos' | 'graba
  * Sorts upcoming first (by start_time ASC), completed last.
  */
 export async function getUnifiedCatalogEvents(): Promise<PublicCatalogEvent[]> {
-    const supabase = await createClient()
+    const supabase = createPublicClient()
 
     const { data, error } = await (supabase
         .from('events') as any)

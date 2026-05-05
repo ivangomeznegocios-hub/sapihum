@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import { getPublicEventPath, isPastPublicCatalogEvent } from '@/lib/events/public'
 import { getSpecializationByCode } from '@/lib/specializations'
 import { DEFAULT_TIMEZONE } from '@/lib/timezone'
@@ -74,11 +75,13 @@ export function PublicCatalogCard({
             {/* Image Section */}
             <div className="relative aspect-[16/9] overflow-hidden bg-gradient-to-br from-neutral-900 via-neutral-800 to-brand-blue-hover/40">
                 {event.image_url ? (
-                    <div
-                        role="img"
-                        aria-label={event.title}
-                        className="absolute inset-0 h-full w-full bg-cover bg-center transition-transform duration-500 group-hover:scale-105"
-                        style={{ backgroundImage: `url("${event.image_url}")` }}
+                    <Image
+                        src={event.image_url}
+                        alt={event.title}
+                        fill
+                        quality={58}
+                        sizes="(min-width: 1280px) 33vw, (min-width: 640px) 50vw, 100vw"
+                        className="object-cover transition-transform duration-500 group-hover:scale-105"
                     />
                 ) : (
                     <div className="absolute inset-0 flex items-center justify-center">
