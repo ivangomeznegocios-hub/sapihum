@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import Link from 'next/link'
 import { useMemo, useState } from 'react'
 import {
@@ -7,6 +8,7 @@ import {
     ArrowRight,
     CalendarDays,
     Clock,
+    ImageIcon,
     ListFilter,
     MapPin,
     Search,
@@ -40,6 +42,7 @@ export interface DraftEventsWorkspaceItem extends ScheduleCalendarItem {
     categoryLabel: string | null
     subcategoryLabel: string | null
     missingDetails: string[]
+    imageUrl?: string | null
 }
 
 function startOfDay(value: Date) {
@@ -148,9 +151,44 @@ function DraftQualityBadge({ item }: { item: DraftEventsWorkspaceItem }) {
     )
 }
 
+function DraftImagePreview({ item, size = 'list' }: { item: DraftEventsWorkspaceItem; size?: 'list' | 'table' }) {
+    const className = size === 'table'
+        ? 'h-14 w-20 rounded-lg'
+        : 'h-24 w-full rounded-xl sm:h-20 sm:w-32 lg:w-28'
+
+    return (
+        <div className={cn(
+            'relative shrink-0 overflow-hidden border bg-muted/40',
+            className,
+            item.imageUrl ? 'border-border' : 'border-dashed'
+        )}>
+            {item.imageUrl ? (
+                <>
+                    <Image
+                        src={item.imageUrl}
+                        alt={`Imagen de ${item.title}`}
+                        fill
+                        quality={54}
+                        className="object-cover"
+                        sizes={size === 'table' ? '80px' : '(max-width: 640px) 100vw, 128px'}
+                    />
+                    <span className="absolute bottom-1 left-1 rounded-full bg-black/60 px-1.5 py-0.5 text-[10px] font-medium text-white">
+                        Imagen
+                    </span>
+                </>
+            ) : (
+                <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 px-2 text-center text-muted-foreground">
+                    <ImageIcon className="h-5 w-5" />
+                    <span className="text-[10px] font-medium uppercase tracking-[0.08em]">Sin imagen</span>
+                </div>
+            )}
+        </div>
+    )
+}
+
 function DraftListItem({ item }: { item: DraftEventsWorkspaceItem }) {
     return (
-        <div className="grid gap-4 rounded-xl border bg-card p-4 transition-colors hover:bg-accent/20 lg:grid-cols-[minmax(120px,0.24fr)_minmax(0,1fr)_auto] lg:items-center">
+        <div className="grid gap-4 rounded-xl border bg-card p-4 transition-colors hover:bg-accent/20 lg:grid-cols-[minmax(120px,0.2fr)_auto_minmax(0,1fr)_auto] lg:items-center">
             <div className="min-w-0">
                 <p className="text-sm font-semibold capitalize text-foreground">{formatDate(item.startTime)}</p>
                 <p className="mt-1 flex items-center gap-1.5 text-xs text-muted-foreground">
@@ -158,6 +196,8 @@ function DraftListItem({ item }: { item: DraftEventsWorkspaceItem }) {
                     {formatTimeRange(item.startTime, item.endTime, item.isAllDay)}
                 </p>
             </div>
+
+            <DraftImagePreview item={item} />
 
             <div className="min-w-0 space-y-2">
                 <div className="flex flex-wrap items-center gap-2">
@@ -427,6 +467,7 @@ export function DraftEventsWorkspace({ items }: { items: DraftEventsWorkspaceIte
                                     <TableHeader>
                                         <TableRow>
                                             <TableHead>Fecha</TableHead>
+                                            <TableHead>Imagen</TableHead>
                                             <TableHead>Evento</TableHead>
                                             <TableHead>Ponente</TableHead>
                                             <TableHead>Modalidad</TableHead>
@@ -442,6 +483,9 @@ export function DraftEventsWorkspace({ items }: { items: DraftEventsWorkspaceIte
                                                     <div className="mt-1 text-xs text-muted-foreground">
                                                         {formatTimeRange(item.startTime, item.endTime, item.isAllDay)}
                                                     </div>
+                                                </TableCell>
+                                                <TableCell className="align-top">
+                                                    <DraftImagePreview item={item} size="table" />
                                                 </TableCell>
                                                 <TableCell className="min-w-[240px] align-top">
                                                     <div className="font-medium">{item.title}</div>

@@ -630,6 +630,7 @@ export default async function EventsPage() {
                 categoryLabel: event.category ? CATEGORY_LABELS[event.category] ?? event.category : null,
                 subcategoryLabel: event.subcategory ? SUBCATEGORY_LABELS[event.subcategory] ?? event.subcategory : null,
                 missingDetails: getDraftMissingDetails(event, modality),
+                imageUrl: event.image_url,
             }
         })
         : []
