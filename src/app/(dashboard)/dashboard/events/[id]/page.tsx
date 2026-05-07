@@ -28,6 +28,7 @@ import {
     normalizeMemberAccessType,
 } from '@/lib/events/pricing'
 import { audienceAllowsAccess, isCommunityReadOnlyViewer } from '@/lib/access/commercial'
+import { contentBelongsToActiveVertical, getRelatedVerticalIds } from '@/lib/supabase/vertical-content'
 import { getSpecializationByCode } from '@/lib/specializations'
 import { DEFAULT_TIMEZONE, formatDateInTimezone, getTimezoneShortLabel } from '@/lib/timezone'
 import {
@@ -71,7 +72,13 @@ export default async function EventDetailPage({ params }: PageProps) {
         notFound()
     }
 
-    if (viewer.activeVertical?.id && event.content_scope !== 'global' && event.primary_vertical_id !== viewer.activeVertical.id) {
+    const canUseActiveVertical = await contentBelongsToActiveVertical(
+        supabase,
+        { table: 'event_verticals', contentIdColumn: 'event_id' },
+        event,
+        viewer.activeVertical?.id
+    )
+    if (!canUseActiveVertical) {
         notFound()
     }
 
@@ -97,6 +104,13 @@ export default async function EventDetailPage({ params }: PageProps) {
 
     const speakerOptions = canEditEvent
         ? await getEventSpeakerOptions()
+        : []
+    const relatedVerticalIds = canEditEvent && event.content_scope !== 'global'
+        ? await getRelatedVerticalIds(
+            supabase,
+            { table: 'event_verticals', contentIdColumn: 'event_id' },
+            id
+        )
         : []
 
     const accessEntitlement = canEditEvent
@@ -318,7 +332,12 @@ export default async function EventDetailPage({ params }: PageProps) {
 
                 {canEditEvent && (
                     <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:justify-end">
-                        <EditEventButton event={event} userRole={profile.role || ''} speakerOptions={speakerOptions} />
+                        <EditEventButton
+                            event={{ ...event, related_vertical_ids: relatedVerticalIds }}
+                            userRole={profile.role || ''}
+                            speakerOptions={speakerOptions}
+                            availableVerticals={viewer.availableVerticals}
+                        />
                         {canManageEvent && <DuplicateEventButton eventId={event.id} />}
                         {canManageEvent && <DeleteEventButton eventId={event.id} />}
                     </div>

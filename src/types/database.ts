@@ -123,6 +123,31 @@ export interface UserVerticalAccessUpdate {
 }
 
 // ============================================
+// TABLES: event_verticals, formation_verticals
+// ============================================
+export interface EventVertical {
+    event_id: string
+    vertical_id: string
+    created_at: string
+}
+
+export interface EventVerticalInsert {
+    event_id: string
+    vertical_id: string
+}
+
+export interface FormationVertical {
+    formation_id: string
+    vertical_id: string
+    created_at: string
+}
+
+export interface FormationVerticalInsert {
+    formation_id: string
+    vertical_id: string
+}
+
+// ============================================
 // TABLE: profiles
 // ============================================
 export interface Profile {

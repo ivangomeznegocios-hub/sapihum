@@ -24,6 +24,7 @@ import {
 import { isValidMaterialLinkUrl } from '@/lib/material-links'
 import { getMembershipSpecializations } from '@/lib/specializations'
 import { Plus, X, Loader2, Check, UserPlus, UserMinus, Users, Lock, Globe, Stethoscope, Heart, Pencil, Trash2, AlertTriangle, GripVertical, Copy, Code2, Link2, Calendar, Clock, GraduationCap, Award, Mic2, ChevronDown } from 'lucide-react'
+import type { ContentScope, Vertical } from '@/types/database'
 
 interface Event {
     id: string
@@ -184,6 +185,8 @@ interface CreateEventFormProps {
     eventId?: string
     userRole?: string
     speakerOptions?: SpeakerOption[]
+    availableVerticals?: Pick<Vertical, 'id' | 'code' | 'name' | 'slug'>[]
+    activeVertical?: Pick<Vertical, 'id' | 'code' | 'name' | 'slug'> | null
 }
 
 type SpeakerAssignmentState = {
@@ -545,6 +548,8 @@ export function CreateEventForm({
     eventId,
     userRole,
     speakerOptions,
+    availableVerticals = [],
+    activeVertical = null,
 }: CreateEventFormProps) {
     const router = useRouter()
     const isAdmin = userRole === 'admin'
@@ -568,6 +573,20 @@ export function CreateEventForm({
     const [subtitleValue, setSubtitleValue] = useState(initialData?.subtitle || '')
     const [dateValue, setDateValue] = useState(formatInputDate(initialData?.start_time))
     const [timeValue, setTimeValue] = useState(formatInputTime(initialData?.start_time))
+    const fallbackPrimaryVerticalId =
+        initialData?.primary_vertical_id ||
+        activeVertical?.id ||
+        availableVerticals[0]?.id ||
+        ''
+    const [contentScopeValue, setContentScopeValue] = useState<ContentScope>(initialData?.content_scope || 'vertical')
+    const [primaryVerticalIdValue, setPrimaryVerticalIdValue] = useState(fallbackPrimaryVerticalId)
+    const [relatedVerticalIds, setRelatedVerticalIds] = useState<string[]>(
+        initialData?.related_vertical_ids?.length
+            ? initialData.related_vertical_ids
+            : fallbackPrimaryVerticalId
+                ? [fallbackPrimaryVerticalId]
+                : []
+    )
 
     // Session configuration state
     const [totalSessions, setTotalSessions] = useState(initialData?.session_config?.total_sessions || 1)
@@ -784,6 +803,23 @@ export function CreateEventForm({
             }
 
             return [...prev, createDefaultSpeakerAssignment(speakerId)]
+        })
+    }
+
+    function updatePrimaryVertical(nextVerticalId: string) {
+        setPrimaryVerticalIdValue(nextVerticalId)
+        setRelatedVerticalIds((current) => Array.from(new Set([nextVerticalId, ...current.filter(Boolean)])))
+    }
+
+    function toggleRelatedVertical(verticalId: string) {
+        setRelatedVerticalIds((current) => {
+            if (verticalId === primaryVerticalIdValue) {
+                return Array.from(new Set([primaryVerticalIdValue, ...current]))
+            }
+
+            return current.includes(verticalId)
+                ? current.filter((id) => id !== verticalId)
+                : [...current, verticalId]
         })
     }
 
@@ -1063,6 +1099,75 @@ export function CreateEventForm({
 
                 {showAdvancedSettings && (
                     <div className="space-y-4">
+                        {availableVerticals.length > 0 && (
+                            <div className="space-y-4 rounded-xl border bg-muted/20 p-4">
+                                <div>
+                                    <label className="text-sm font-medium" htmlFor="contentScope">
+                                        Alcance por vertical
+                                    </label>
+                                    <select
+                                        id="contentScope"
+                                        name="contentScope"
+                                        value={contentScopeValue}
+                                        onChange={(e) => setContentScopeValue(e.target.value as ContentScope)}
+                                        className="mt-1 w-full rounded-lg border bg-background px-3 py-2"
+                                    >
+                                        <option value="vertical">Una vertical</option>
+                                        <option value="cross_vertical">Compartido entre verticales</option>
+                                        <option value="global">Global SAPIHUM</option>
+                                    </select>
+                                </div>
+
+                                {contentScopeValue !== 'global' && (
+                                    <>
+                                        <div>
+                                            <label className="text-sm font-medium" htmlFor="primaryVerticalId">
+                                                Vertical principal
+                                            </label>
+                                            <select
+                                                id="primaryVerticalId"
+                                                name="primaryVerticalId"
+                                                value={primaryVerticalIdValue}
+                                                onChange={(e) => updatePrimaryVertical(e.target.value)}
+                                                className="mt-1 w-full rounded-lg border bg-background px-3 py-2"
+                                            >
+                                                {availableVerticals.map((vertical) => (
+                                                    <option key={vertical.id} value={vertical.id}>
+                                                        {vertical.name}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                        </div>
+
+                                        {contentScopeValue === 'cross_vertical' && (
+                                            <div>
+                                                <p className="text-sm font-medium">Visible tambien en</p>
+                                                <div className="mt-2 grid gap-2 md:grid-cols-2">
+                                                    {availableVerticals.map((vertical) => {
+                                                        const checked = relatedVerticalIds.includes(vertical.id) || vertical.id === primaryVerticalIdValue
+                                                        return (
+                                                            <label key={vertical.id} className="flex items-center gap-2 rounded-lg border bg-background px-3 py-2 text-sm">
+                                                                <input
+                                                                    type="checkbox"
+                                                                    name="relatedVerticalIds"
+                                                                    value={vertical.id}
+                                                                    checked={checked}
+                                                                    disabled={vertical.id === primaryVerticalIdValue}
+                                                                    onChange={() => toggleRelatedVertical(vertical.id)}
+                                                                    className="rounded"
+                                                                />
+                                                                <span>{vertical.name}</span>
+                                                            </label>
+                                                        )
+                                                    })}
+                                                </div>
+                                            </div>
+                                        )}
+                                    </>
+                                )}
+                            </div>
+                        )}
+
                         <div className="grid gap-4 md:grid-cols-2">
                             <div>
                                 <label className="text-sm font-medium" htmlFor="slug">
@@ -1334,6 +1439,17 @@ export function CreateEventForm({
 
         if (isAdmin) {
             formData.set('isEmbeddable', isEmbeddable ? 'on' : 'off')
+            formData.set('contentScope', contentScopeValue)
+            formData.delete('relatedVerticalIds')
+            if (contentScopeValue !== 'global') {
+                formData.set('primaryVerticalId', primaryVerticalIdValue)
+                const nextRelatedIds = contentScopeValue === 'cross_vertical'
+                    ? Array.from(new Set([primaryVerticalIdValue, ...relatedVerticalIds]))
+                    : [primaryVerticalIdValue]
+                nextRelatedIds.filter(Boolean).forEach((verticalId) => {
+                    formData.append('relatedVerticalIds', verticalId)
+                })
+            }
         }
 
         let result;
@@ -2080,7 +2196,15 @@ export function CreateEventForm({
     )
 }
 
-export function CreateEventButton({ speakerOptions }: { speakerOptions?: SpeakerOption[] } = {}) {
+export function CreateEventButton({
+    speakerOptions,
+    availableVerticals,
+    activeVertical,
+}: {
+    speakerOptions?: SpeakerOption[]
+    availableVerticals?: Pick<Vertical, 'id' | 'code' | 'name' | 'slug'>[]
+    activeVertical?: Pick<Vertical, 'id' | 'code' | 'name' | 'slug'> | null
+} = {}) {
     const [showForm, setShowForm] = useState(false)
 
     return (
@@ -2089,7 +2213,14 @@ export function CreateEventButton({ speakerOptions }: { speakerOptions?: Speaker
                 <Plus className="mr-2 h-4 w-4" />
                 Nuevo Evento
             </Button>
-            {showForm && <CreateEventForm onClose={() => setShowForm(false)} speakerOptions={speakerOptions} />}
+            {showForm && (
+                <CreateEventForm
+                    onClose={() => setShowForm(false)}
+                    speakerOptions={speakerOptions}
+                    availableVerticals={availableVerticals}
+                    activeVertical={activeVertical}
+                />
+            )}
         </>
     )
 }
@@ -2098,10 +2229,12 @@ export function EditEventButton({
     event,
     userRole,
     speakerOptions,
+    availableVerticals,
 }: {
     event: any
     userRole?: string
     speakerOptions?: SpeakerOption[]
+    availableVerticals?: Pick<Vertical, 'id' | 'code' | 'name' | 'slug'>[]
 }) {
     const [showForm, setShowForm] = useState(false)
 
@@ -2118,6 +2251,7 @@ export function EditEventButton({
                     eventId={event.id}
                     userRole={userRole}
                     speakerOptions={speakerOptions}
+                    availableVerticals={availableVerticals}
                 />
             )}
         </>

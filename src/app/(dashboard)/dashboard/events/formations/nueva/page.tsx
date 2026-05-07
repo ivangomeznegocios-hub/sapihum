@@ -1,22 +1,15 @@
 import { notFound } from 'next/navigation'
 import { FormationForm } from '@/components/formations/formation-form'
-import { createClient } from '@/lib/supabase/server'
+import { getViewerContext } from '@/lib/supabase/server'
+import { applyVerticalContentFilter } from '@/lib/supabase/vertical-content'
 
 export const metadata = {
     title: 'Crear Formacion | SAPIHUM Admin',
 }
 
 export default async function NewFormationPage() {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-
-    const { data: profile } = user
-        ? await (supabase
-            .from('profiles') as any)
-            .select('role')
-            .eq('id', user.id)
-            .single()
-        : { data: null }
+    const viewer = await getViewerContext()
+    const { supabase, user, profile, availableVerticals, activeVertical } = viewer
 
     if (!profile || !['admin', 'ponente'].includes(profile.role)) {
         notFound()
@@ -34,6 +27,13 @@ export default async function NewFormationPage() {
         eventsQuery = eventsQuery.eq('created_by', user.id)
     }
 
+    eventsQuery = await applyVerticalContentFilter(
+        supabase,
+        eventsQuery,
+        { table: 'event_verticals', contentIdColumn: 'event_id' },
+        activeVertical?.id
+    )
+
     const { data: events } = await eventsQuery
 
     return (
@@ -45,7 +45,12 @@ export default async function NewFormationPage() {
                 </p>
             </div>
 
-            <FormationForm availableEvents={events || []} canPublish={isAdmin} />
+            <FormationForm
+                availableEvents={events || []}
+                canPublish={isAdmin}
+                availableVerticals={availableVerticals}
+                activeVertical={activeVertical}
+            />
         </div>
     )
 }

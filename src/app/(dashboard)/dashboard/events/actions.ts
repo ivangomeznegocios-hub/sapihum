@@ -28,6 +28,12 @@ import {
     type SpeakerCompensationType,
 } from '@/lib/earnings/compensation'
 import { sanitizeMaterialLinks } from '@/lib/material-links'
+import {
+    contentBelongsToActiveVertical,
+    getRelatedVerticalIds,
+    replaceContentVerticals,
+    resolveVerticalVisibilityInput,
+} from '@/lib/supabase/vertical-content'
 
 async function resolveUniqueEventSlug(supabase: any, baseValue: string, eventId?: string) {
     const fallbackBase = slugifyCatalogText(baseValue) || `evento-${crypto.randomUUID().slice(0, 8)}`
@@ -588,7 +594,7 @@ export async function registerForEvent(eventId: string, registrationData: Record
     // Get event to check audience requirements and pricing
     const { data: event } = await (supabase
         .from('events') as any)
-        .select('title, slug, start_time, target_audience, required_subscription, max_attendees, price, member_access_type, member_price, specialization_code, event_type, recording_expires_at, primary_vertical_id, content_scope')
+        .select('id, title, slug, start_time, target_audience, required_subscription, max_attendees, price, member_access_type, member_price, specialization_code, event_type, recording_expires_at, primary_vertical_id, content_scope')
         .eq('id', eventId)
         .single()
 
@@ -597,7 +603,13 @@ export async function registerForEvent(eventId: string, registrationData: Record
     }
 
     const viewer = await getViewerContext()
-    if (viewer.activeVertical?.id && (event as any).content_scope !== 'global' && (event as any).primary_vertical_id !== viewer.activeVertical.id) {
+    const canUseActiveVertical = await contentBelongsToActiveVertical(
+        supabase,
+        { table: 'event_verticals', contentIdColumn: 'event_id' },
+        event as any,
+        viewer.activeVertical?.id
+    )
+    if (!canUseActiveVertical) {
         return { error: 'Este evento no pertenece a la vertical activa' }
     }
 
@@ -947,6 +959,18 @@ export async function createEvent(formData: FormData) {
             public_cta_label: null,
         }
 
+    const verticalVisibility = resolveVerticalVisibilityInput({
+        requestedScope: formData.get('contentScope'),
+        requestedPrimaryVerticalId: formData.get('primaryVerticalId'),
+        requestedRelatedVerticalIds: formData.getAll('relatedVerticalIds'),
+        fallbackPrimaryVerticalId: primaryVerticalId,
+        isAdmin,
+    })
+
+    if ('error' in verticalVisibility) {
+        return { error: verticalVisibility.error }
+    }
+
     const { data: newEvent, error } = await (supabase
         .from('events') as any)
         .insert({
@@ -982,14 +1006,29 @@ export async function createEvent(formData: FormData) {
             specialization_code: specializationCode,
             formation_track: formationTrack,
             recording_url: recordingUrl,
-            primary_vertical_id: primaryVerticalId,
-            content_scope: 'vertical',
+            primary_vertical_id: verticalVisibility.primaryVerticalId,
+            content_scope: verticalVisibility.contentScope,
         })
         .select('id')
         .single()
 
     if (error) {
         return { error: error.message }
+    }
+
+    if (newEvent) {
+        try {
+            await replaceContentVerticals(
+                supabase,
+                { table: 'event_verticals', contentIdColumn: 'event_id' },
+                newEvent.id,
+                verticalVisibility.contentScope,
+                verticalVisibility.relatedVerticalIds
+            )
+        } catch (verticalError: any) {
+            await (supabase.from('events') as any).delete().eq('id', newEvent.id)
+            return { error: verticalError.message || 'No fue posible guardar las verticales del evento' }
+        }
     }
 
     if (speakerAssignments.length > 0 && newEvent) {
@@ -1021,7 +1060,7 @@ export async function updateEvent(eventId: string, formData: FormData) {
     const [{ data: event }, { data: profile }] = await Promise.all([
         (supabase
             .from('events') as any)
-            .select('created_by, status, formation_id, start_time, end_time, primary_vertical_id, content_scope')
+        .select('id, created_by, status, formation_id, start_time, end_time, primary_vertical_id, content_scope')
             .eq('id', eventId)
             .single(),
         (supabase
@@ -1046,7 +1085,13 @@ export async function updateEvent(eventId: string, formData: FormData) {
     }
 
     const viewer = await getViewerContext()
-    if (viewer.activeVertical?.id && event.content_scope !== 'global' && event.primary_vertical_id !== viewer.activeVertical.id) {
+    const canUseActiveVertical = await contentBelongsToActiveVertical(
+        supabase,
+        { table: 'event_verticals', contentIdColumn: 'event_id' },
+        event,
+        viewer.activeVertical?.id
+    )
+    if (!canUseActiveVertical) {
         return { error: 'Este evento no pertenece a la vertical activa' }
     }
 
@@ -1243,6 +1288,25 @@ export async function updateEvent(eventId: string, formData: FormData) {
         if (formData.has('publicCtaLabel')) updates.public_cta_label = readTrimmedString(formData.get('publicCtaLabel')) || null
     }
 
+    const shouldUpdateVerticalVisibility = isAdmin && formData.has('contentScope')
+    let verticalVisibility: ReturnType<typeof resolveVerticalVisibilityInput> | null = null
+    if (shouldUpdateVerticalVisibility) {
+        verticalVisibility = resolveVerticalVisibilityInput({
+            requestedScope: formData.get('contentScope'),
+            requestedPrimaryVerticalId: formData.get('primaryVerticalId'),
+            requestedRelatedVerticalIds: formData.getAll('relatedVerticalIds'),
+            fallbackPrimaryVerticalId: event.primary_vertical_id ?? viewer.activeVertical?.id ?? await getDefaultPrimaryVerticalId(supabase),
+            isAdmin,
+        })
+
+        if ('error' in verticalVisibility) {
+            return { error: verticalVisibility.error }
+        }
+
+        updates.primary_vertical_id = verticalVisibility.primaryVerticalId
+        updates.content_scope = verticalVisibility.contentScope
+    }
+
     if (isAdmin && customSlug !== null) {
         const normalizedSlug = slugifyCatalogText(customSlug)
         if (normalizedSlug) {
@@ -1257,6 +1321,20 @@ export async function updateEvent(eventId: string, formData: FormData) {
 
     if (error) {
         return { error: error.message }
+    }
+
+    if (verticalVisibility && !('error' in verticalVisibility)) {
+        try {
+            await replaceContentVerticals(
+                supabase,
+                { table: 'event_verticals', contentIdColumn: 'event_id' },
+                eventId,
+                verticalVisibility.contentScope,
+                verticalVisibility.relatedVerticalIds
+            )
+        } catch (verticalError: any) {
+            return { error: verticalError.message || 'No fue posible guardar las verticales del evento' }
+        }
     }
 
     // Handle speaker assignments on update
@@ -1380,7 +1458,13 @@ export async function duplicateEvent(eventId: string) {
     }
 
     const viewer = await getViewerContext()
-    if (viewer.activeVertical?.id && event.content_scope !== 'global' && event.primary_vertical_id !== viewer.activeVertical.id) {
+    const canUseActiveVertical = await contentBelongsToActiveVertical(
+        supabase,
+        { table: 'event_verticals', contentIdColumn: 'event_id' },
+        event,
+        viewer.activeVertical?.id
+    )
+    if (!canUseActiveVertical) {
         return { error: 'Este evento no pertenece a la vertical activa' }
     }
 
@@ -1438,6 +1522,29 @@ export async function duplicateEvent(eventId: string) {
 
     if (duplicateError || !duplicatedEvent) {
         return { error: duplicateError?.message || 'No fue posible duplicar el evento' }
+    }
+
+    const relatedVerticalIds = event.content_scope === 'global'
+        ? []
+        : await getRelatedVerticalIds(
+            supabase,
+            { table: 'event_verticals', contentIdColumn: 'event_id' },
+            eventId
+        )
+
+    try {
+        await replaceContentVerticals(
+            supabase,
+            { table: 'event_verticals', contentIdColumn: 'event_id' },
+            duplicatedEvent.id,
+            event.content_scope ?? 'vertical',
+            relatedVerticalIds.length > 0
+                ? relatedVerticalIds
+                : [event.primary_vertical_id].filter((id: string | null): id is string => Boolean(id))
+        )
+    } catch (verticalError: any) {
+        await (supabase.from('events') as any).delete().eq('id', duplicatedEvent.id)
+        return { error: verticalError.message || 'No fue posible duplicar las verticales del evento' }
     }
 
     const [{ data: speakerAssignments }, { data: resourceLinks }] = await Promise.all([

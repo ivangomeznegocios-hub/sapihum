@@ -8,6 +8,13 @@ import {
     markFormationCourseCompletedRecord,
 } from '@/lib/formations/service'
 import { sanitizeMaterialLinks } from '@/lib/material-links'
+import {
+    applyVerticalContentFilter,
+    contentBelongsToActiveVertical,
+    getRelatedVerticalIds,
+    replaceContentVerticals,
+    resolveVerticalVisibilityInput,
+} from '@/lib/supabase/vertical-content'
 
 type FormationEditorRole = 'admin' | 'ponente'
 
@@ -72,7 +79,13 @@ async function requireFormationAccess(supabase: any, formationId: string) {
         throw new Error('No tienes permisos para editar esta formacion')
     }
 
-    if (editor.activeVerticalId && formation.content_scope !== 'global' && formation.primary_vertical_id !== editor.activeVerticalId) {
+    const canUseActiveVertical = await contentBelongsToActiveVertical(
+        supabase,
+        { table: 'formation_verticals', contentIdColumn: 'formation_id' },
+        formation,
+        editor.activeVerticalId
+    )
+    if (!canUseActiveVertical) {
         throw new Error('Esta formacion no pertenece a la vertical activa')
     }
 
@@ -100,9 +113,12 @@ async function validateCourseSelection(
         query = query.eq('created_by', editor.userId)
     }
 
-    if (editor.activeVerticalId) {
-        query = query.or(`content_scope.eq.global,primary_vertical_id.eq.${editor.activeVerticalId}`)
-    }
+    query = await applyVerticalContentFilter(
+        supabase,
+        query,
+        { table: 'event_verticals', contentIdColumn: 'event_id' },
+        editor.activeVerticalId
+    )
 
     const { data: events, error } = await query
 
@@ -129,7 +145,18 @@ export async function createFormation(formation: FormationInsert, courseIds: str
     const supabase = await createClient()
     const editor = await requireFormationEditor(supabase)
     const validatedCourseIds = await validateCourseSelection(supabase, editor, courseIds)
-    const primaryVerticalId = formation.primary_vertical_id ?? editor.activeVerticalId ?? await getDefaultFormationVerticalId(supabase)
+    const fallbackPrimaryVerticalId = formation.primary_vertical_id ?? editor.activeVerticalId ?? await getDefaultFormationVerticalId(supabase)
+    const verticalVisibility = resolveVerticalVisibilityInput({
+        requestedScope: formation.content_scope,
+        requestedPrimaryVerticalId: formation.primary_vertical_id,
+        requestedRelatedVerticalIds: (formation as any).related_vertical_ids ?? [],
+        fallbackPrimaryVerticalId,
+        isAdmin: editor.isAdmin,
+    })
+
+    if ('error' in verticalVisibility) {
+        throw new Error(verticalVisibility.error)
+    }
 
     const { data: newFormation, error: formationError } = await (supabase
         .from('formations') as any)
@@ -138,14 +165,27 @@ export async function createFormation(formation: FormationInsert, courseIds: str
             material_links: sanitizeMaterialLinks(formation.material_links),
             status: editor.isAdmin ? (formation.status || 'draft') : 'draft',
             created_by: editor.userId,
-            primary_vertical_id: primaryVerticalId,
-            content_scope: formation.content_scope ?? 'vertical',
+            primary_vertical_id: verticalVisibility.primaryVerticalId,
+            content_scope: verticalVisibility.contentScope,
         })
         .select()
         .single()
 
     if (formationError) {
         throw new Error(`Error al crear la formacion: ${formationError.message}`)
+    }
+
+    try {
+        await replaceContentVerticals(
+            supabase,
+            { table: 'formation_verticals', contentIdColumn: 'formation_id' },
+            newFormation.id,
+            verticalVisibility.contentScope,
+            verticalVisibility.relatedVerticalIds
+        )
+    } catch (verticalError: any) {
+        await (supabase.from('formations') as any).delete().eq('id', newFormation.id)
+        throw new Error(verticalError.message || 'Error al guardar verticales de la formacion')
     }
 
     if (validatedCourseIds.length > 0) {
@@ -182,11 +222,31 @@ export async function updateFormation(formationId: string, updates: FormationUpd
     const normalizedMaterialLinks = updates.material_links !== undefined
         ? sanitizeMaterialLinks(updates.material_links)
         : undefined
+    const requestedVisibility = updates.content_scope !== undefined || updates.primary_vertical_id !== undefined || Array.isArray((updates as any).related_vertical_ids)
+        ? resolveVerticalVisibilityInput({
+            requestedScope: updates.content_scope,
+            requestedPrimaryVerticalId: updates.primary_vertical_id,
+            requestedRelatedVerticalIds: (updates as any).related_vertical_ids ?? [],
+            fallbackPrimaryVerticalId: updates.primary_vertical_id ?? editor.activeVerticalId ?? await getDefaultFormationVerticalId(supabase),
+            isAdmin: editor.isAdmin,
+        })
+        : null
+
+    if (requestedVisibility && 'error' in requestedVisibility) {
+        throw new Error(requestedVisibility.error)
+    }
+
+    const cleanUpdates = { ...updates } as any
+    delete cleanUpdates.related_vertical_ids
+    if (requestedVisibility && !('error' in requestedVisibility)) {
+        cleanUpdates.primary_vertical_id = requestedVisibility.primaryVerticalId
+        cleanUpdates.content_scope = requestedVisibility.contentScope
+    }
 
     const { error: updateError } = await (supabase
         .from('formations') as any)
         .update({
-            ...updates,
+            ...cleanUpdates,
             ...(normalizedMaterialLinks !== undefined ? { material_links: normalizedMaterialLinks } : {}),
             status: editor.isAdmin ? updates.status : 'draft',
         })
@@ -194,6 +254,16 @@ export async function updateFormation(formationId: string, updates: FormationUpd
 
     if (updateError) {
         throw new Error(`Error al actualizar la formacion: ${updateError.message}`)
+    }
+
+    if (requestedVisibility && !('error' in requestedVisibility)) {
+        await replaceContentVerticals(
+            supabase,
+            { table: 'formation_verticals', contentIdColumn: 'formation_id' },
+            formationId,
+            requestedVisibility.contentScope,
+            requestedVisibility.relatedVerticalIds
+        )
     }
 
     const { data: existingCourses } = await (supabase
@@ -296,9 +366,12 @@ export async function getFormationsForAdmin() {
         query = query.eq('created_by', editor.userId)
     }
 
-    if (editor.activeVerticalId) {
-        query = query.or(`content_scope.eq.global,primary_vertical_id.eq.${editor.activeVerticalId}`)
-    }
+    query = await applyVerticalContentFilter(
+        supabase,
+        query,
+        { table: 'formation_verticals', contentIdColumn: 'formation_id' },
+        editor.activeVerticalId
+    )
 
     const { data, error } = await query.order('created_at', { ascending: false })
 
@@ -327,9 +400,12 @@ export async function getFormationById(id: string) {
         query = query.eq('created_by', editor.userId)
     }
 
-    if (editor.activeVerticalId) {
-        query = query.or(`content_scope.eq.global,primary_vertical_id.eq.${editor.activeVerticalId}`)
-    }
+    query = await applyVerticalContentFilter(
+        supabase,
+        query,
+        { table: 'formation_verticals', contentIdColumn: 'formation_id' },
+        editor.activeVerticalId
+    )
 
     const { data: formation, error } = await query.single()
 
@@ -351,6 +427,13 @@ export async function getFormationById(id: string) {
 
     return {
         ...formation,
+        related_vertical_ids: formation.content_scope === 'global'
+            ? []
+            : await getRelatedVerticalIds(
+                supabase,
+                { table: 'formation_verticals', contentIdColumn: 'formation_id' },
+                id
+            ),
         courses: courses || [],
     }
 }

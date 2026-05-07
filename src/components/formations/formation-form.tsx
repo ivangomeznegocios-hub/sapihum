@@ -9,11 +9,14 @@ import { createFormation, updateFormation } from '@/app/(dashboard)/dashboard/ev
 import { MaterialLinksEditor, type EditableMaterialLink } from '@/components/materials/material-links-editor'
 import { isValidMaterialLinkUrl } from '@/lib/material-links'
 import { getMembershipSpecializations } from '@/lib/specializations'
+import type { ContentScope, Vertical } from '@/types/database'
 
 interface FormationFormProps {
     initialData?: any
     availableEvents: any[]
     canPublish?: boolean
+    availableVerticals?: Pick<Vertical, 'id' | 'code' | 'name' | 'slug'>[]
+    activeVertical?: Pick<Vertical, 'id' | 'code' | 'name' | 'slug'> | null
 }
 
 const STATUS_OPTIONS = [
@@ -40,7 +43,13 @@ const MEMBERSHIP_SPECIALIZATION_OPTIONS = getMembershipSpecializations().map((sp
     label: specialization.name,
 }))
 
-export function FormationForm({ initialData, availableEvents, canPublish = true }: FormationFormProps) {
+export function FormationForm({
+    initialData,
+    availableEvents,
+    canPublish = true,
+    availableVerticals = [],
+    activeVertical = null,
+}: FormationFormProps) {
     const router = useRouter()
     const isEdit = Boolean(initialData)
 
@@ -60,6 +69,20 @@ export function FormationForm({ initialData, availableEvents, canPublish = true 
     const [individualCert, setIndividualCert] = useState(initialData?.individual_certificate_type || 'participation')
     const [fullCert, setFullCert] = useState(initialData?.full_certificate_type || 'specialized')
     const [fullCertLabel, setFullCertLabel] = useState(initialData?.full_certificate_label || 'Certificacion de Formacion Completa')
+    const fallbackPrimaryVerticalId =
+        initialData?.primary_vertical_id ||
+        activeVertical?.id ||
+        availableVerticals[0]?.id ||
+        ''
+    const [contentScope, setContentScope] = useState<ContentScope>(initialData?.content_scope || 'vertical')
+    const [primaryVerticalId, setPrimaryVerticalId] = useState(fallbackPrimaryVerticalId)
+    const [relatedVerticalIds, setRelatedVerticalIds] = useState<string[]>(
+        initialData?.related_vertical_ids?.length
+            ? initialData.related_vertical_ids
+            : fallbackPrimaryVerticalId
+                ? [fallbackPrimaryVerticalId]
+                : []
+    )
     const [materialLinkItems, setMaterialLinkItems] = useState<EditableMaterialLink[]>(
         (initialData?.material_links || []).map((item: any, index: number) => ({
             id: typeof item?.id === 'string' ? item.id : `material-${index}`,
@@ -139,6 +162,23 @@ export function FormationForm({ initialData, availableEvents, canPublish = true 
         )
     }
 
+    const updatePrimaryVertical = (nextVerticalId: string) => {
+        setPrimaryVerticalId(nextVerticalId)
+        setRelatedVerticalIds((current) => Array.from(new Set([nextVerticalId, ...current.filter(Boolean)])))
+    }
+
+    const toggleRelatedVertical = (verticalId: string) => {
+        setRelatedVerticalIds((current) => {
+            if (verticalId === primaryVerticalId) {
+                return Array.from(new Set([primaryVerticalId, ...current]))
+            }
+
+            return current.includes(verticalId)
+                ? current.filter((id) => id !== verticalId)
+                : [...current, verticalId]
+        })
+    }
+
     const handleSubmit = async (event: React.FormEvent) => {
         event.preventDefault()
         setError(null)
@@ -203,6 +243,13 @@ export function FormationForm({ initialData, availableEvents, canPublish = true 
             individual_certificate_type: individualCert,
             full_certificate_type: fullCert,
             full_certificate_label: fullCertLabel || null,
+            content_scope: contentScope,
+            primary_vertical_id: contentScope === 'global' ? null : primaryVerticalId,
+            related_vertical_ids: contentScope === 'global'
+                ? []
+                : contentScope === 'cross_vertical'
+                    ? Array.from(new Set([primaryVerticalId, ...relatedVerticalIds])).filter(Boolean)
+                    : [primaryVerticalId].filter(Boolean),
         }
 
         const courseIds = selectedCourses.map((course) => course.eventId).filter(Boolean)
@@ -322,6 +369,73 @@ export function FormationForm({ initialData, availableEvents, canPublish = true 
                         </div>
                     </CardContent>
                 </Card>
+
+                {canPublish && availableVerticals.length > 0 && (
+                    <Card className="md:col-span-2">
+                        <CardHeader>
+                            <CardTitle>Verticales</CardTitle>
+                            <CardDescription>
+                                Define donde vive esta formacion dentro de SAPIHUM.
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                            <div>
+                                <label className="text-sm font-medium">Alcance</label>
+                                <select
+                                    value={contentScope}
+                                    onChange={(event) => setContentScope(event.target.value as ContentScope)}
+                                    className="mt-1 w-full rounded-md border bg-background px-3 py-2 text-sm"
+                                >
+                                    <option value="vertical">Una vertical</option>
+                                    <option value="cross_vertical">Compartida entre verticales</option>
+                                    <option value="global">Global SAPIHUM</option>
+                                </select>
+                            </div>
+
+                            {contentScope !== 'global' && (
+                                <>
+                                    <div>
+                                        <label className="text-sm font-medium">Vertical principal</label>
+                                        <select
+                                            value={primaryVerticalId}
+                                            onChange={(event) => updatePrimaryVertical(event.target.value)}
+                                            className="mt-1 w-full rounded-md border bg-background px-3 py-2 text-sm"
+                                        >
+                                            {availableVerticals.map((vertical) => (
+                                                <option key={vertical.id} value={vertical.id}>
+                                                    {vertical.name}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
+
+                                    {contentScope === 'cross_vertical' && (
+                                        <div>
+                                            <p className="text-sm font-medium">Visible tambien en</p>
+                                            <div className="mt-2 grid gap-2 md:grid-cols-2">
+                                                {availableVerticals.map((vertical) => {
+                                                    const checked = relatedVerticalIds.includes(vertical.id) || vertical.id === primaryVerticalId
+                                                    return (
+                                                        <label key={vertical.id} className="flex items-center gap-2 rounded-md border bg-background px-3 py-2 text-sm">
+                                                            <input
+                                                                type="checkbox"
+                                                                checked={checked}
+                                                                disabled={vertical.id === primaryVerticalId}
+                                                                onChange={() => toggleRelatedVertical(vertical.id)}
+                                                                className="rounded"
+                                                            />
+                                                            <span>{vertical.name}</span>
+                                                        </label>
+                                                    )
+                                                })}
+                                            </div>
+                                        </div>
+                                    )}
+                                </>
+                            )}
+                        </CardContent>
+                    </Card>
+                )}
 
                 <Card>
                     <CardHeader>

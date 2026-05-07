@@ -7,7 +7,7 @@ import { ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
 
 export default async function NewEventPage() {
-    const { profile } = await getViewerContext()
+    const { profile, availableVerticals, activeVertical } = await getViewerContext()
 
     if (!profile) {
         redirect('/auth/login')
@@ -47,6 +47,8 @@ export default async function NewEventPage() {
                         isEmbedded
                         userRole={profile.role || ''}
                         speakerOptions={speakerOptions}
+                        availableVerticals={availableVerticals}
+                        activeVertical={activeVertical}
                     />
                 </CardContent>
             </Card>

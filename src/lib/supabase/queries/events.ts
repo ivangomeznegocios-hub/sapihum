@@ -14,6 +14,7 @@ import { getPublicCatalogKindForEvent } from '@/lib/events/public'
 import { getUniqueEventAccessCount, getUniqueEventAccessCounts } from '@/lib/events/attendance'
 import { audienceAllowsAccess, getCommercialAccessContext, type CommercialAccessSnapshot } from '@/lib/access/commercial'
 import { canViewerSeeCatalogEvent } from '@/lib/access/catalog'
+import { applyVerticalContentFilter } from '@/lib/supabase/vertical-content'
 
 interface EventViewerOptions {
     supabase?: any
@@ -133,9 +134,12 @@ export async function getEventsWithRegistration(
         .in('status', statuses)
         .order('start_time', { ascending: true })
 
-    if (options?.activeVerticalId) {
-        eventsQuery = eventsQuery.or(`content_scope.eq.global,primary_vertical_id.eq.${options.activeVerticalId}`)
-    }
+    eventsQuery = await applyVerticalContentFilter(
+        supabase,
+        eventsQuery,
+        { table: 'event_verticals', contentIdColumn: 'event_id' },
+        options?.activeVerticalId
+    )
 
     if (options?.limit) {
         eventsQuery = eventsQuery.limit(options.limit)

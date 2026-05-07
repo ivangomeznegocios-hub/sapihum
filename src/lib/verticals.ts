@@ -54,6 +54,7 @@ export function contentBelongsToVertical(
     content: {
         content_scope?: ContentScope | null
         primary_vertical_id?: string | null
+        related_vertical_ids?: string[] | null
     },
     activeVerticalId: string | null | undefined
 ) {
@@ -62,5 +63,5 @@ export function contentBelongsToVertical(
     if (scope === 'global') return true
     if (!activeVerticalId) return true
 
-    return content.primary_vertical_id === activeVerticalId
+    return content.primary_vertical_id === activeVerticalId || Boolean(content.related_vertical_ids?.includes(activeVerticalId))
 }
