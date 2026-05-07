@@ -20,7 +20,7 @@ import { getUnifiedCatalogEvents } from '@/lib/supabase/queries/events'
 import { getPublicFormations } from '@/app/(marketing)/formaciones/actions'
 import { DEFAULT_TIMEZONE, formatEventDate, formatEventTime } from '@/lib/timezone'
 import { normalizeVerticalCode } from '@/lib/verticals'
-import { VERTICAL_EXPERIENCE_LIST, getVerticalExperience } from '@/lib/vertical-experience'
+import { getVerticalExperience } from '@/lib/vertical-experience'
 
 export const metadata: Metadata = {
     title: 'Academia SAPIHUM | Formacion Continua en Psicologia',
@@ -169,37 +169,16 @@ export default async function AcademiaPage({ searchParams }: AcademiaPageProps) 
                     </div>
 
                     <div className="mb-8 flex flex-wrap gap-2">
-                        <Link href="/academia#catalogo">
-                            <Badge
-                                variant={!activeVerticalCode ? 'default' : 'outline'}
-                                className={!activeVerticalCode ? 'bg-brand-blue text-white hover:bg-brand-blue-hover px-4 py-1.5' : 'border-brand-border hover:bg-brand-surface-soft px-4 py-1.5'}
-                            >
-                                Todas las areas
-                            </Badge>
-                        </Link>
-                        {VERTICAL_EXPERIENCE_LIST.map((area) => (
-                            <Link key={area.code} href={`/academia?vertical=${area.code}#catalogo`}>
-                                <Badge
-                                    variant={activeVerticalCode === area.code ? 'default' : 'outline'}
-                                    className={activeVerticalCode === area.code ? 'bg-brand-blue text-white hover:bg-brand-blue-hover px-4 py-1.5' : 'border-brand-border hover:bg-brand-surface-soft px-4 py-1.5'}
-                                >
-                                    {area.name}
-                                </Badge>
-                            </Link>
-                        ))}
-                    </div>
-
-                    <div className="mb-8 flex flex-wrap gap-2">
-                        <Link href="/academia#catalogo">
+                        <Link href={activeVerticalCode ? `/academia?vertical=${activeVerticalCode}#catalogo` : '/academia#catalogo'}>
                             <Badge 
                                 variant={!activeCampaign ? 'default' : 'outline'} 
                                 className={!activeCampaign ? 'bg-brand-blue text-white hover:bg-brand-blue-hover px-4 py-1.5' : 'border-brand-border hover:bg-brand-surface-soft px-4 py-1.5'}
                             >
-                                Toda la agenda
+                                {activeVerticalExperience ? `Agenda ${activeVerticalExperience.shortName}` : 'Toda la agenda'}
                             </Badge>
                         </Link>
                         {campaignBlocks.map(({ campaign }) => (
-                            <Link key={campaign.key} href={`/academia?track=${campaign.key}#catalogo`}>
+                            <Link key={campaign.key} href={activeVerticalCode ? `/academia?vertical=${activeVerticalCode}&track=${campaign.key}#catalogo` : `/academia?track=${campaign.key}#catalogo`}>
                                 <Badge 
                                     variant={activeCampaign?.key === campaign.key ? 'default' : 'outline'} 
                                     className={activeCampaign?.key === campaign.key ? 'bg-brand-blue text-white hover:bg-brand-blue-hover px-4 py-1.5' : 'border-brand-border hover:bg-brand-surface-soft px-4 py-1.5'}

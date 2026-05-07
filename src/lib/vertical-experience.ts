@@ -12,6 +12,13 @@ export interface VerticalExperienceModule {
     href: string
 }
 
+export interface VerticalExperiencePlan {
+    name: string
+    price: string
+    description: string
+    includes: string[]
+}
+
 export interface VerticalExperience {
     code: VerticalCode
     slug: string
@@ -29,6 +36,7 @@ export interface VerticalExperience {
     dashboardDescription: string
     dashboardModules: VerticalExperienceModule[]
     publicModules: VerticalExperienceModule[]
+    pricingPlans: VerticalExperiencePlan[]
 }
 
 export const VERTICAL_EXPERIENCES: Record<VerticalCode, VerticalExperience> = {
@@ -101,6 +109,26 @@ export const VERTICAL_EXPERIENCES: Record<VerticalCode, VerticalExperience> = {
                 href: '/precios',
             },
         ],
+        pricingPlans: [
+            {
+                name: 'Comunidad Psicologia',
+                price: '$250 MXN/mes',
+                description: 'Acceso base a comunidad, eventos y recursos de actualizacion psicologica.',
+                includes: ['Comunidad profesional', 'Eventos y grabaciones seleccionadas', 'Recursos de psicologia', 'Precios preferenciales'],
+            },
+            {
+                name: 'Consultorio Digital',
+                price: '$400 MXN/mes',
+                description: 'Capa avanzada para operar consulta, seguimiento y documentacion clinica.',
+                includes: ['Todo Comunidad Psicologia', 'Agenda y gestion clinica', 'Expedientes y documentos', 'Herramientas de IA clinica'],
+            },
+            {
+                name: 'Gestion Premium',
+                price: 'A medida',
+                description: 'Acompanamiento para crecimiento, posicionamiento y operacion profesional.',
+                includes: ['Todo Consultorio Digital', 'Marketing y crecimiento', 'Soporte operativo', 'Prioridad en nuevas funciones'],
+            },
+        ],
     },
     ciencias_forenses: {
         code: 'ciencias_forenses',
@@ -169,6 +197,26 @@ export const VERTICAL_EXPERIENCES: Record<VerticalCode, VerticalExperience> = {
                 title: 'Formaciones forenses',
                 description: 'Programas completos de actualizacion, diplomados y rutas periciales.',
                 href: '/formaciones?vertical=ciencias_forenses',
+            },
+        ],
+        pricingPlans: [
+            {
+                name: 'Comunidad Forense',
+                price: '$250 MXN/mes',
+                description: 'Acceso base a agenda forense, comunidad pericial y recursos de actualizacion.',
+                includes: ['Eventos forenses seleccionados', 'Comunidad pericial', 'Biblioteca tecnica inicial', 'Precios preferenciales en diplomados'],
+            },
+            {
+                name: 'Forense Pro',
+                price: '$400 MXN/mes',
+                description: 'Plan para estudiantes avanzados, peritos y profesionales que quieren una ruta mas completa.',
+                includes: ['Todo Comunidad Forense', 'Diplomados con beneficios', 'Materiales tecnicos avanzados', 'Casos practicos y sesiones aplicadas'],
+            },
+            {
+                name: 'Institucional Forense',
+                price: 'A medida',
+                description: 'Paquete para equipos, escuelas, despachos o instituciones con varios accesos.',
+                includes: ['Accesos multiusuario', 'Rutas por equipo', 'Reportes y soporte', 'Condiciones comerciales especiales'],
             },
         ],
     },

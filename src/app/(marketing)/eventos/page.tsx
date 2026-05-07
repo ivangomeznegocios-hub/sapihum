@@ -13,7 +13,7 @@ import {
 import { splitPublicCatalogEvents } from '@/lib/events/public'
 import { getUnifiedCatalogEvents } from '@/lib/supabase/queries/events'
 import { normalizeVerticalCode } from '@/lib/verticals'
-import { VERTICAL_EXPERIENCE_LIST, getVerticalExperience } from '@/lib/vertical-experience'
+import { getVerticalExperience } from '@/lib/vertical-experience'
 
 const eventosDescription =
     'Eventos en vivo, conferencias, talleres y webinars de la comunidad SAPIHUM. Formacion continua para profesionales de la psicologia.'
@@ -86,26 +86,19 @@ export default async function EventosPage({ searchParams }: EventosPageProps) {
                                 : 'Esta ruta funciona como vista complementaria para enlaces compartidos, filtros y agenda puntual. La experiencia principal de descubrimiento y conversion vive ahora en Academia.'}
                         </p>
                         <div className="flex flex-wrap gap-3">
-                            <Link href="/eventos">
+                            <Link href={activeVerticalCode ? `/eventos?vertical=${activeVerticalCode}` : '/eventos'}>
                                 <Button variant={!activeCampaign ? 'default' : 'outline'}>
-                                    Ver todo
+                                    {activeVerticalExperience ? `Todo ${activeVerticalExperience.shortName}` : 'Ver todo'}
                                 </Button>
                             </Link>
-                            {VERTICAL_EXPERIENCE_LIST.map((area) => (
-                                <Link key={area.code} href={`/eventos?vertical=${area.code}`}>
-                                    <Button variant={activeVerticalCode === area.code ? 'default' : 'outline'}>
-                                        {area.name}
-                                    </Button>
-                                </Link>
-                            ))}
                             {getAllEventCampaigns().map((campaign) => (
-                                <Link key={campaign.key} href={`/eventos?track=${campaign.key}`}>
+                                <Link key={campaign.key} href={activeVerticalCode ? `/eventos?vertical=${activeVerticalCode}&track=${campaign.key}` : `/eventos?track=${campaign.key}`}>
                                     <Button variant={activeCampaign?.key === campaign.key ? 'default' : 'outline'}>
                                         {campaign.title}
                                     </Button>
                                 </Link>
                             ))}
-                            <Link href="/academia" className="inline-flex items-center gap-1.5 text-sm font-medium text-brand-blue transition-colors hover:text-brand-blue">
+                            <Link href={activeVerticalCode ? `/academia?vertical=${activeVerticalCode}` : '/academia'} className="inline-flex items-center gap-1.5 text-sm font-medium text-brand-blue transition-colors hover:text-brand-blue">
                                 &larr; Ir al hub principal en Academia
                             </Link>
                         </div>

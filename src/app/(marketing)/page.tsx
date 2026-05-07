@@ -227,28 +227,29 @@ export default async function LandingPage() {
 
             <div className="mt-14 flex w-full flex-col gap-5 text-sm sm:w-auto sm:flex-row">
               <Link
-                href="/areas"
+                href="/psicologia"
                 className="w-full sm:w-auto"
                 data-analytics-cta
-                data-analytics-label="Hero Elegir Area"
+                data-analytics-label="Hero Psicologia"
                 data-analytics-surface="home_hero"
                 data-analytics-funnel="landing"
               >
                 <Button size="lg" className="h-14 w-full px-10 text-base font-bold normal-case tracking-normal">
-                  Elegir mi area
+                  Entrar a Psicologia
                   <ArrowRight className="h-4 w-4" />
                 </Button>
               </Link>
               <Link
-                href="/auth/register"
+                href="/ciencias-forenses"
                 className="w-full sm:w-auto"
                 data-analytics-cta
-                data-analytics-label="Hero Crear Cuenta"
+                data-analytics-label="Hero Ciencias Forenses"
                 data-analytics-surface="home_hero"
-                data-analytics-funnel="registration"
+                data-analytics-funnel="landing"
               >
                 <Button size="lg" variant="outline" className="h-14 w-full px-10 text-base font-bold normal-case tracking-normal">
-                  Crear cuenta
+                  Entrar a Forense
+                  <ArrowRight className="h-4 w-4" />
                 </Button>
               </Link>
             </div>

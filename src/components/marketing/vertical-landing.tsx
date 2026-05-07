@@ -50,7 +50,7 @@ export function VerticalLanding({ experience }: VerticalLandingProps) {
                 </div>
             </section>
 
-            <section className="border-b border-border bg-white px-4 py-12 sm:px-6 lg:px-8">
+            <section id="comunidad" className="border-b border-border bg-white px-4 py-12 sm:px-6 lg:px-8">
                 <div className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-[0.9fr_1.1fr] lg:items-start">
                     <div>
                         <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-brand-blue">
@@ -75,7 +75,7 @@ export function VerticalLanding({ experience }: VerticalLandingProps) {
                 </div>
             </section>
 
-            <section className="px-4 py-16 sm:px-6 md:py-20 lg:px-8">
+            <section id="modulos" className="px-4 py-16 sm:px-6 md:py-20 lg:px-8">
                 <div className="mx-auto max-w-7xl">
                     <div className="mb-8 max-w-2xl">
                         <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-brand-blue">
@@ -108,7 +108,7 @@ export function VerticalLanding({ experience }: VerticalLandingProps) {
                 </div>
             </section>
 
-            <section className="border-y border-border bg-brand-surface-soft px-4 py-14 sm:px-6 lg:px-8">
+            <section id="tracks" className="border-y border-border bg-brand-surface-soft px-4 py-14 sm:px-6 lg:px-8">
                 <div className="mx-auto max-w-7xl">
                     <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-brand-blue">
                         Tracks y lineas tematicas
@@ -118,6 +118,50 @@ export function VerticalLanding({ experience }: VerticalLandingProps) {
                             <span key={specialty} className="rounded-full border border-brand-border bg-white px-4 py-2 text-sm font-medium text-brand-text">
                                 {specialty}
                             </span>
+                        ))}
+                    </div>
+                </div>
+            </section>
+
+            <section id="planes" className="px-4 py-16 sm:px-6 md:py-20 lg:px-8">
+                <div className="mx-auto max-w-7xl">
+                    <div className="mb-8 max-w-2xl">
+                        <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-brand-blue">
+                            Planes de {experience.shortName}
+                        </p>
+                        <h2 className="mt-3 text-3xl font-bold tracking-tight text-foreground">
+                            Precios y beneficios separados por vertical
+                        </h2>
+                        <p className="mt-3 text-sm leading-relaxed text-brand-text-muted">
+                            Estos planes pertenecen a {experience.name}. La cuenta sigue siendo SAPIHUM, pero los beneficios,
+                            contenidos y accesos se aplican dentro de esta experiencia.
+                        </p>
+                    </div>
+
+                    <div className="grid gap-5 md:grid-cols-3">
+                        {experience.pricingPlans.map((plan) => (
+                            <div key={plan.name} className="rounded-md border border-brand-border bg-white p-6 shadow-sm">
+                                <p className="text-sm font-semibold text-brand-blue">{plan.name}</p>
+                                <div className="mt-3 text-3xl font-bold tracking-tight text-brand-text-strong">
+                                    {plan.price}
+                                </div>
+                                <p className="mt-3 min-h-[4.5rem] text-sm leading-relaxed text-brand-text-muted">
+                                    {plan.description}
+                                </p>
+                                <ul className="mt-5 space-y-3">
+                                    {plan.includes.map((item) => (
+                                        <li key={item} className="flex gap-3 text-sm text-brand-text">
+                                            <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-brand-blue" />
+                                            <span>{item}</span>
+                                        </li>
+                                    ))}
+                                </ul>
+                                <Link href={`/auth/register?vertical=${experience.code}`} className="mt-6 inline-flex w-full">
+                                    <Button className="w-full font-semibold">
+                                        Elegir plan
+                                    </Button>
+                                </Link>
+                            </div>
                         ))}
                     </div>
                 </div>
