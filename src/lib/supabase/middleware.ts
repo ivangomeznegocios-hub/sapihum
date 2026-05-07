@@ -1,6 +1,7 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 import { ensureProfileForAuthUser } from '@/lib/supabase/profile-provisioning'
+import { isPsychologyOnlyDashboardPath } from '@/lib/access/internal-modules'
 
 const AUTH_CALLBACK_QUERY_KEYS = new Set([
     'code',
@@ -73,6 +74,17 @@ export async function updateSession(request: NextRequest) {
         return NextResponse.next({
             request,
         })
+    }
+
+    if (
+        pathname.startsWith('/dashboard') &&
+        request.cookies.get('sapihum_active_vertical')?.value === 'ciencias_forenses' &&
+        isPsychologyOnlyDashboardPath(pathname)
+    ) {
+        const url = request.nextUrl.clone()
+        url.pathname = '/dashboard'
+        url.searchParams.set('blocked', 'psychology_only')
+        return NextResponse.redirect(url)
     }
 
     let supabaseResponse = NextResponse.next({

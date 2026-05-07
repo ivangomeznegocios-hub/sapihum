@@ -12,6 +12,8 @@ import {
 } from '@/lib/events/campaigns'
 import { splitPublicCatalogEvents } from '@/lib/events/public'
 import { getUnifiedCatalogEvents } from '@/lib/supabase/queries/events'
+import { normalizeVerticalCode } from '@/lib/verticals'
+import { VERTICAL_EXPERIENCE_LIST, getVerticalExperience } from '@/lib/vertical-experience'
 
 const eventosDescription =
     'Eventos en vivo, conferencias, talleres y webinars de la comunidad SAPIHUM. Formacion continua para profesionales de la psicologia.'
@@ -36,13 +38,15 @@ export const metadata: Metadata = {
 }
 
 interface EventosPageProps {
-    searchParams?: Promise<{ track?: string }>
+    searchParams?: Promise<{ track?: string; vertical?: string }>
 }
 
 export default async function EventosPage({ searchParams }: EventosPageProps) {
     const params = (await searchParams) ?? {}
     const activeCampaign = getEventCampaignByKey(params.track)
-    const allItems = (await getUnifiedCatalogEvents()).map((item: any) => applyEventCampaignCopy(item))
+    const activeVerticalCode = normalizeVerticalCode(params.vertical)
+    const activeVerticalExperience = activeVerticalCode ? getVerticalExperience(activeVerticalCode) : null
+    const allItems = (await getUnifiedCatalogEvents(activeVerticalCode)).map((item: any) => applyEventCampaignCopy(item))
     const items = splitPublicCatalogEvents(allItems).upcoming.filter((event: any) =>
         event.event_type !== 'course' &&
         event.event_type !== 'on_demand'
@@ -71,13 +75,15 @@ export default async function EventosPage({ searchParams }: EventosPageProps) {
                                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-brand-blue opacity-75" />
                                 <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-brand-blue" />
                             </span>
-                            Agenda activa
+                            {activeVerticalExperience ? activeVerticalExperience.eyebrow : 'Agenda activa'}
                         </div>
                         <h1 className="font-serif text-4xl font-bold tracking-normal text-brand-text-strong sm:text-5xl">
-                            Eventos en Vivo
+                            {activeVerticalExperience ? `Eventos de ${activeVerticalExperience.name}` : 'Eventos en Vivo'}
                         </h1>
                         <p className="max-w-3xl text-lg leading-relaxed text-brand-text-muted">
-                            Esta ruta funciona como vista complementaria para enlaces compartidos, filtros y agenda puntual. La experiencia principal de descubrimiento y conversion vive ahora en Academia.
+                            {activeVerticalExperience
+                                ? activeVerticalExperience.description
+                                : 'Esta ruta funciona como vista complementaria para enlaces compartidos, filtros y agenda puntual. La experiencia principal de descubrimiento y conversion vive ahora en Academia.'}
                         </p>
                         <div className="flex flex-wrap gap-3">
                             <Link href="/eventos">
@@ -85,6 +91,13 @@ export default async function EventosPage({ searchParams }: EventosPageProps) {
                                     Ver todo
                                 </Button>
                             </Link>
+                            {VERTICAL_EXPERIENCE_LIST.map((area) => (
+                                <Link key={area.code} href={`/eventos?vertical=${area.code}`}>
+                                    <Button variant={activeVerticalCode === area.code ? 'default' : 'outline'}>
+                                        {area.name}
+                                    </Button>
+                                </Link>
+                            ))}
                             {getAllEventCampaigns().map((campaign) => (
                                 <Link key={campaign.key} href={`/eventos?track=${campaign.key}`}>
                                     <Button variant={activeCampaign?.key === campaign.key ? 'default' : 'outline'}>

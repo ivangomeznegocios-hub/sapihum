@@ -149,6 +149,26 @@ const bottomNav: NavItem[] = [
     { name: 'Configuracion', href: '/dashboard/settings', icon: Settings, roles: ['admin', 'support', 'psychologist', 'patient', 'ponente'] },
 ]
 
+const FORENSIC_GROUP_LABELS: Record<string, string> = {
+    Comunidad: 'Ciencias Forenses',
+    'Gestion de Eventos': 'Gestion Forense',
+}
+
+const FORENSIC_ITEM_LABELS: Record<string, string> = {
+    '/dashboard/events': 'Eventos Forenses',
+    '/dashboard/events/networking': 'Comunidad Pericial',
+    '/dashboard/events/formations': 'Diplomados',
+    '/dashboard/events/recordings': 'Grabaciones Forenses',
+    '/dashboard/speakers': 'Ponentes Forenses',
+    '/dashboard/resources': 'Biblioteca Forense',
+    '/dashboard/newsletter': 'Boletin Forense',
+    '/dashboard/agreements': 'Convenios Periciales',
+    '/dashboard/mi-acceso': 'Mi Acceso Forense',
+    '/dashboard/growth': 'Invitacion Forense',
+    '/dashboard/earnings': 'Ganancias',
+    '/dashboard/events/new': 'Crear Evento Forense',
+}
+
 function NavGroupSection({
     group,
     userRole,
@@ -172,9 +192,12 @@ function NavGroupSection({
         membershipSpecializationCode,
         activeVerticalCode: activeVertical?.code,
     }))
+    const displayGroupLabel = activeVertical?.code === 'ciencias_forenses'
+        ? FORENSIC_GROUP_LABELS[group.label] ?? group.label
+        : group.label
     const hasActiveItem = visibleItems.some((item) => pathname === item.href)
     const [isOpen, setIsOpen] = useState(true)
-    const groupId = group.label.toLowerCase().replace(/[^a-z0-9]+/g, '-')
+    const groupId = displayGroupLabel.toLowerCase().replace(/[^a-z0-9]+/g, '-')
 
     useEffect(() => {
         if (hasActiveItem) {
@@ -193,7 +216,7 @@ function NavGroupSection({
                 onClick={() => setIsOpen(!isOpen)}
                 className="flex w-full items-center justify-between px-2 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-sidebar-foreground/50 transition-colors hover:text-sidebar-foreground/70"
             >
-                {group.label}
+                {displayGroupLabel}
                 <ChevronDown
                     className={cn(
                         'h-3 w-3 transition-transform duration-200',
@@ -206,6 +229,9 @@ function NavGroupSection({
                 <ul id={`nav-group-${groupId}`} className="mt-0.5 space-y-0.5">
                     {visibleItems.map((item) => {
                         const isActive = pathname === item.href
+                        const itemName = activeVertical?.code === 'ciencias_forenses'
+                            ? FORENSIC_ITEM_LABELS[item.href] ?? item.name
+                            : item.name
 
                         return (
                             <li key={item.name}>
@@ -227,7 +253,7 @@ function NavGroupSection({
                                                 : 'text-sidebar-foreground/70 group-hover:text-sidebar-primary-foreground'
                                         )}
                                     />
-                                    <span className="truncate">{item.name}</span>
+                                    <span className="truncate">{itemName}</span>
                                 </Link>
                             </li>
                         )

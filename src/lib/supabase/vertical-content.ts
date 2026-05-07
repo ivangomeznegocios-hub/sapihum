@@ -105,7 +105,7 @@ export async function applyVerticalContentFilter(
     bridge: VerticalContentBridge,
     activeVerticalId: string | null | undefined
 ) {
-    if (!activeVerticalId) return query
+    if (!activeVerticalId) return { query }
 
     const relatedContentIds = await getContentIdsForVertical(supabase, bridge, activeVerticalId)
     const filters = [
@@ -117,7 +117,7 @@ export async function applyVerticalContentFilter(
         filters.push(`id.in.(${relatedContentIds.join(',')})`)
     }
 
-    return query.or(filters.join(','))
+    return { query: query.or(filters.join(',')) }
 }
 
 export async function contentBelongsToActiveVertical(

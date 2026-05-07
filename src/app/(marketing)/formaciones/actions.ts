@@ -6,6 +6,8 @@ import { getCommercialAccessContext } from '@/lib/access/commercial'
 import { claimFormationRecordsByEmail } from '@/lib/formations/service'
 import { getFormationCommercialState, getFormationMemberAccessMessage } from '@/lib/formations/pricing'
 import { claimEventEntitlementsByEmail } from '@/lib/events/access'
+import { applyVerticalContentFilter } from '@/lib/supabase/vertical-content'
+import { normalizeVerticalCode } from '@/lib/verticals'
 import type { Formation } from '@/types/database'
 
 async function getFormationRecord(supabase: any, slug: string) {
@@ -55,13 +57,37 @@ async function getPublicFormationSeoData(supabase: any, slug: string) {
     }
 }
 
-export async function getPublicFormations(): Promise<Formation[]> {
-    const supabase = createPublicClient()
+async function getPublicVerticalId(supabase: any, verticalCode?: string | null) {
+    const normalizedCode = normalizeVerticalCode(verticalCode)
+    if (!normalizedCode) return null
 
-    const { data: formations, error } = await (supabase
+    const { data } = await (supabase
+        .from('verticals') as any)
+        .select('id')
+        .eq('code', normalizedCode)
+        .eq('status', 'active')
+        .maybeSingle()
+
+    return data?.id ?? null
+}
+
+export async function getPublicFormations(verticalCode?: string | null): Promise<Formation[]> {
+    const supabase = createPublicClient()
+    const activeVerticalId = await getPublicVerticalId(supabase, verticalCode)
+
+    let query = (supabase
         .from('formations') as any)
         .select('*')
         .eq('status', 'active')
+
+    query = (await applyVerticalContentFilter(
+        supabase,
+        query,
+        { table: 'formation_verticals', contentIdColumn: 'formation_id' },
+        activeVerticalId
+    )).query
+
+    const { data: formations, error } = await query
         .order('created_at', { ascending: false })
 
     if (error) {

@@ -113,12 +113,12 @@ async function validateCourseSelection(
         query = query.eq('created_by', editor.userId)
     }
 
-    query = await applyVerticalContentFilter(
+    query = (await applyVerticalContentFilter(
         supabase,
         query,
         { table: 'event_verticals', contentIdColumn: 'event_id' },
         editor.activeVerticalId
-    )
+    )).query
 
     const { data: events, error } = await query
 
@@ -366,12 +366,12 @@ export async function getFormationsForAdmin() {
         query = query.eq('created_by', editor.userId)
     }
 
-    query = await applyVerticalContentFilter(
+    query = (await applyVerticalContentFilter(
         supabase,
         query,
         { table: 'formation_verticals', contentIdColumn: 'formation_id' },
         editor.activeVerticalId
-    )
+    )).query
 
     const { data, error } = await query.order('created_at', { ascending: false })
 
@@ -400,12 +400,12 @@ export async function getFormationById(id: string) {
         query = query.eq('created_by', editor.userId)
     }
 
-    query = await applyVerticalContentFilter(
+    query = (await applyVerticalContentFilter(
         supabase,
         query,
         { table: 'formation_verticals', contentIdColumn: 'formation_id' },
         editor.activeVerticalId
-    )
+    )).query
 
     const { data: formation, error } = await query.single()
 

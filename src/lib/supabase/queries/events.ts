@@ -15,6 +15,7 @@ import { getUniqueEventAccessCount, getUniqueEventAccessCounts } from '@/lib/eve
 import { audienceAllowsAccess, getCommercialAccessContext, type CommercialAccessSnapshot } from '@/lib/access/commercial'
 import { canViewerSeeCatalogEvent } from '@/lib/access/catalog'
 import { applyVerticalContentFilter } from '@/lib/supabase/vertical-content'
+import { normalizeVerticalCode } from '@/lib/verticals'
 
 interface EventViewerOptions {
     supabase?: any
@@ -62,6 +63,8 @@ const PUBLIC_CATALOG_EVENT_SELECT = [
     'learning_outcomes',
     'seo_description',
     'og_description',
+    'primary_vertical_id',
+    'content_scope',
 ].join(', ')
 
 const PUBLIC_CATALOG_SPEAKER_SELECT = `
@@ -134,12 +137,12 @@ export async function getEventsWithRegistration(
         .in('status', statuses)
         .order('start_time', { ascending: true })
 
-    eventsQuery = await applyVerticalContentFilter(
+    eventsQuery = (await applyVerticalContentFilter(
         supabase,
         eventsQuery,
         { table: 'event_verticals', contentIdColumn: 'event_id' },
         options?.activeVerticalId
-    )
+    )).query
 
     if (options?.limit) {
         eventsQuery = eventsQuery.limit(options.limit)
@@ -454,6 +457,25 @@ async function getPublicEventAttendeeCount(supabase: any, eventId: string) {
     return getUniqueEventAccessCount(supabase, eventId)
 }
 
+async function getPublicVerticalId(supabase: any, verticalCode?: string | null) {
+    const normalizedCode = normalizeVerticalCode(verticalCode)
+    if (!normalizedCode) return null
+
+    const { data, error } = await (supabase
+        .from('verticals') as any)
+        .select('id')
+        .eq('code', normalizedCode)
+        .eq('status', 'active')
+        .maybeSingle()
+
+    if (error || !data) {
+        console.error('Error resolving public vertical:', error)
+        return null
+    }
+
+    return data.id as string
+}
+
 export async function getPublicEventBySlug(slug: string): Promise<any | null> {
     const supabase = createPublicClient()
 
@@ -489,8 +511,12 @@ export async function getPublicEventBySlug(slug: string): Promise<any | null> {
     }
 }
 
-async function fetchPublicCatalogEvents(kind: 'eventos' | 'cursos' | 'grabaciones'): Promise<PublicCatalogEvent[]> {
+async function fetchPublicCatalogEvents(
+    kind: 'eventos' | 'cursos' | 'grabaciones',
+    verticalCode?: string | null
+): Promise<PublicCatalogEvent[]> {
     const supabase = createPublicClient()
+    const activeVerticalId = await getPublicVerticalId(supabase, verticalCode)
 
     let query = (supabase
         .from('events') as any)
@@ -505,6 +531,13 @@ async function fetchPublicCatalogEvents(kind: 'eventos' | 'cursos' | 'grabacione
     } else {
         query = query.not('event_type', 'eq', 'course').not('event_type', 'eq', 'on_demand')
     }
+
+    query = (await applyVerticalContentFilter(
+        supabase,
+        query,
+        { table: 'event_verticals', contentIdColumn: 'event_id' },
+        activeVerticalId
+    )).query
 
     const { data, error } = await query.order('start_time', { ascending: true })
 
@@ -553,15 +586,25 @@ export const getPublicCatalogEvents = unstable_cache(
  * Get ALL published events (excluding on_demand recordings) — unified catalog for Academia.
  * Sorts upcoming first (by start_time ASC), completed last.
  */
-async function fetchUnifiedCatalogEvents(): Promise<PublicCatalogEvent[]> {
+async function fetchUnifiedCatalogEvents(verticalCode?: string | null): Promise<PublicCatalogEvent[]> {
     const supabase = createPublicClient()
+    const activeVerticalId = await getPublicVerticalId(supabase, verticalCode)
 
-    const { data, error } = await (supabase
+    let query = (supabase
         .from('events') as any)
         .select(PUBLIC_CATALOG_EVENT_SELECT)
         .not('status', 'eq', 'draft')
         .not('status', 'eq', 'cancelled')
         .not('event_type', 'eq', 'on_demand')
+
+    query = (await applyVerticalContentFilter(
+        supabase,
+        query,
+        { table: 'event_verticals', contentIdColumn: 'event_id' },
+        activeVerticalId
+    )).query
+
+    const { data, error } = await query
         .order('start_time', { ascending: true })
 
     if (error || !data) {

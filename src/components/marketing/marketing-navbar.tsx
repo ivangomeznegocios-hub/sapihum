@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button'
 import { BrandWordmark } from '@/components/brand/brand-wordmark'
 import { getMarketingSpecializations } from '@/lib/specializations'
 import { MobileMarketingMenu } from '@/components/marketing/mobile-marketing-menu'
+import { VERTICAL_EXPERIENCE_LIST } from '@/lib/vertical-experience'
 
 const SPECIALIZATION_ITEMS = getMarketingSpecializations().map((spec) => ({
     label: spec.name,
@@ -11,6 +12,17 @@ const SPECIALIZATION_ITEMS = getMarketingSpecializations().map((spec) => ({
 }))
 
 const NAV_ITEMS = [
+    {
+        label: 'Areas',
+        children: [
+            { label: 'Todas las areas', href: '/areas', description: 'Psicologia y Ciencias Forenses en una sola plataforma' },
+            ...VERTICAL_EXPERIENCE_LIST.map((area) => ({
+                label: area.name,
+                href: area.primaryAction.href,
+                description: area.description,
+            })),
+        ],
+    },
     {
         label: 'Especialidades',
         children: SPECIALIZATION_ITEMS,

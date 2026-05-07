@@ -16,6 +16,7 @@ import { DEFAULT_TIMEZONE, getGreetingForTimezone } from '@/lib/timezone'
 import { ArrowRight, CalendarDays, GraduationCap, Library, ShieldCheck } from 'lucide-react'
 import { createInterestedVerticalAccess, setActiveVertical } from '@/actions/verticals'
 import { normalizeVerticalCode } from '@/lib/verticals'
+import { getVerticalExperience } from '@/lib/vertical-experience'
 import type { Vertical } from '@/types/database'
 
 const DASHBOARD_EVENT_SELECT = [
@@ -107,79 +108,84 @@ function ForensicVerticalDashboard({
     userName: string
 }) {
     const displayName = userName || 'Hola'
+    const experience = getVerticalExperience('ciencias_forenses')
 
     return (
         <div className="space-y-6">
             <DashboardAccessShortcut />
 
-            <div className="space-y-2">
-                <p className="text-sm font-medium text-primary">Ciencias Forenses</p>
-                <h1 className="text-2xl font-bold tracking-tight">
-                    {displayName}, tu area forense
+            <div className="rounded-md border border-primary/20 bg-primary/5 p-5">
+                <p className="text-sm font-medium text-primary">{experience.eyebrow}</p>
+                <h1 className="mt-2 text-2xl font-bold tracking-tight">
+                    {displayName}, estas en {experience.dashboardTitle}
                 </h1>
-                <p className="max-w-2xl text-sm text-muted-foreground">
-                    Consulta eventos, formaciones y materiales activos de la vertical forense sin mezclar modulos clinicos de psicologia.
+                <p className="mt-2 max-w-3xl text-sm leading-relaxed text-muted-foreground">
+                    {experience.dashboardDescription}
+                </p>
+                <p className="mt-3 text-xs font-medium text-primary">
+                    Los modulos clinicos de Psicologia no aparecen en esta vertical.
                 </p>
             </div>
 
+            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+                {experience.dashboardModules.map((module, index) => {
+                    const Icon = index === 0 ? CalendarDays : index === 1 ? GraduationCap : index === 2 ? ShieldCheck : Library
+
+                    return (
+                        <Card key={module.href}>
+                            <CardContent className="flex h-full flex-col space-y-4 p-5">
+                                <div className="flex h-10 w-10 items-center justify-center rounded-md bg-primary/10 text-primary">
+                                    <Icon className="h-5 w-5" />
+                                </div>
+                                <div>
+                                    <h2 className="font-semibold">{module.title}</h2>
+                                    <p className="mt-1 text-sm text-muted-foreground">
+                                        {module.description}
+                                    </p>
+                                </div>
+                                <Button asChild variant="outline" className="mt-auto w-full">
+                                    <Link href={module.href}>
+                                        Abrir
+                                        <ArrowRight className="ml-2 h-4 w-4" />
+                                    </Link>
+                                </Button>
+                            </CardContent>
+                        </Card>
+                    )
+                })}
+            </div>
+
             <div className="grid gap-4 md:grid-cols-3">
-                <Card>
+                <Card className="border-dashed">
                     <CardContent className="space-y-4 p-5">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-md bg-primary/10 text-primary">
-                            <CalendarDays className="h-5 w-5" />
-                        </div>
                         <div>
-                            <h2 className="font-semibold">Eventos forenses</h2>
+                            <h2 className="font-semibold">Criminalistica</h2>
                             <p className="mt-1 text-sm text-muted-foreground">
-                                Conferencias, sesiones y actividades filtradas para Ciencias Forenses.
+                                Track preparado para cursos, diplomados y eventos tecnicos.
                             </p>
                         </div>
-                        <Button asChild variant="outline" className="w-full">
-                            <Link href="/dashboard/events">
-                                Ver eventos
-                                <ArrowRight className="ml-2 h-4 w-4" />
-                            </Link>
-                        </Button>
                     </CardContent>
                 </Card>
 
-                <Card>
+                <Card className="border-dashed">
                     <CardContent className="space-y-4 p-5">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-md bg-primary/10 text-primary">
-                            <GraduationCap className="h-5 w-5" />
-                        </div>
                         <div>
-                            <h2 className="font-semibold">Formaciones</h2>
+                            <h2 className="font-semibold">Psicologia forense</h2>
                             <p className="mt-1 text-sm text-muted-foreground">
-                                Diplomados y rutas formativas disponibles para tu acceso actual.
+                                Contenido compartible entre Psicologia y Ciencias Forenses sin duplicar registros.
                             </p>
                         </div>
-                        <Button asChild variant="outline" className="w-full">
-                            <Link href="/dashboard/events/formations">
-                                Ver formaciones
-                                <ArrowRight className="ml-2 h-4 w-4" />
-                            </Link>
-                        </Button>
                     </CardContent>
                 </Card>
 
-                <Card>
+                <Card className="border-dashed">
                     <CardContent className="space-y-4 p-5">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-md bg-primary/10 text-primary">
-                            <ShieldCheck className="h-5 w-5" />
-                        </div>
                         <div>
-                            <h2 className="font-semibold">Acceso activo</h2>
+                            <h2 className="font-semibold">Perfilacion criminal</h2>
                             <p className="mt-1 text-sm text-muted-foreground">
-                                Revisa compras, grabaciones y beneficios asignados a esta vertical.
+                                Linea lista para catalogo forense, comunidad y formacion especializada.
                             </p>
                         </div>
-                        <Button asChild variant="outline" className="w-full">
-                            <Link href="/dashboard/mi-acceso">
-                                Abrir mi acceso
-                                <ArrowRight className="ml-2 h-4 w-4" />
-                            </Link>
-                        </Button>
                     </CardContent>
                 </Card>
             </div>

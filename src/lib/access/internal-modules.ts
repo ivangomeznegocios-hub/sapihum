@@ -30,7 +30,13 @@ const PSYCHOLOGY_ONLY_HREFS = new Set([
     '/dashboard/analytics',
     '/dashboard/marketing',
     '/dashboard/tools',
+    '/dashboard/events/clinical',
+    '/dashboard/events/business',
 ])
+
+export function isPsychologyOnlyDashboardPath(pathname: string) {
+    return Array.from(PSYCHOLOGY_ONLY_HREFS).some((href) => pathname === href || pathname.startsWith(`${href}/`))
+}
 
 function getEffectiveMembershipLevel(viewer: InternalModuleViewer) {
     return Number(viewer.membershipLevel ?? 0)

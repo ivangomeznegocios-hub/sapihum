@@ -30,12 +30,12 @@ export default async function EditFormationPage({ params }: { params: Promise<{ 
         eventsQuery = eventsQuery.eq('created_by', user.id)
     }
 
-    eventsQuery = await applyVerticalContentFilter(
+    eventsQuery = (await applyVerticalContentFilter(
         supabase,
         eventsQuery,
         { table: 'event_verticals', contentIdColumn: 'event_id' },
         activeVertical?.id
-    )
+    )).query
 
     const [formation, learners, eventsResult] = await Promise.all([
         getFormationById(id),

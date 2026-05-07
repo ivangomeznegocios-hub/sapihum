@@ -7,6 +7,8 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { getPublicFormations } from './actions'
 import { getSpecializationByCode } from '@/lib/specializations'
+import { normalizeVerticalCode } from '@/lib/verticals'
+import { VERTICAL_EXPERIENCE_LIST, getVerticalExperience } from '@/lib/vertical-experience'
 
 const formacionesDescription = 'Rutas de formacion profesional integral en psicologia clinica.'
 
@@ -63,8 +65,15 @@ function getMemberBenefitLabel(formation: Formation) {
     return 'Compra directa disponible'
 }
 
-export default async function FormationsCatalogPage() {
-    const formations = await getPublicFormations()
+interface FormationsCatalogPageProps {
+    searchParams?: Promise<{ vertical?: string }>
+}
+
+export default async function FormationsCatalogPage({ searchParams }: FormationsCatalogPageProps) {
+    const params = (await searchParams) ?? {}
+    const activeVerticalCode = normalizeVerticalCode(params.vertical)
+    const activeVerticalExperience = activeVerticalCode ? getVerticalExperience(activeVerticalCode) : null
+    const formations = await getPublicFormations(activeVerticalCode)
 
     return (
         <div className="min-h-screen bg-background text-foreground">
@@ -83,15 +92,16 @@ export default async function FormationsCatalogPage() {
 
                             <div className="space-y-4">
                                 <h1 className="font-serif text-4xl font-bold leading-[1.05] tracking-normal text-brand-text-strong md:text-5xl lg:text-6xl">
-                                    Formaciones
+                                    {activeVerticalExperience ? `Formaciones de ${activeVerticalExperience.name}` : 'Formaciones'}
                                     <span className="block italic font-bold text-brand-blue-dark">
                                         completas y comprables
                                     </span>
                                 </h1>
 
                                 <p className="max-w-2xl text-lg leading-relaxed text-brand-text-muted md:text-xl">
-                                    Programas pensados como una ruta real: una sola compra, un orden claro de avance,
-                                    materiales complementarios y una experiencia coherente con el nivel profesional de SAPIHUM.
+                                    {activeVerticalExperience
+                                        ? activeVerticalExperience.description
+                                        : 'Programas pensados como una ruta real: una sola compra, un orden claro de avance, materiales complementarios y una experiencia coherente con el nivel profesional de SAPIHUM.'}
                                 </p>
                             </div>
                         </div>
@@ -127,6 +137,27 @@ export default async function FormationsCatalogPage() {
 
             <section className="px-4 py-16 sm:px-6 md:py-20 lg:px-8">
                 <div className="mx-auto w-full max-w-7xl">
+                    <div className="mb-8 flex flex-wrap gap-2">
+                        <Link href="/formaciones">
+                            <Badge
+                                variant={!activeVerticalCode ? 'default' : 'outline'}
+                                className={!activeVerticalCode ? 'bg-brand-blue text-white hover:bg-brand-blue-hover px-4 py-1.5' : 'border-brand-border hover:bg-brand-surface-soft px-4 py-1.5'}
+                            >
+                                Todas las areas
+                            </Badge>
+                        </Link>
+                        {VERTICAL_EXPERIENCE_LIST.map((area) => (
+                            <Link key={area.code} href={`/formaciones?vertical=${area.code}`}>
+                                <Badge
+                                    variant={activeVerticalCode === area.code ? 'default' : 'outline'}
+                                    className={activeVerticalCode === area.code ? 'bg-brand-blue text-white hover:bg-brand-blue-hover px-4 py-1.5' : 'border-brand-border hover:bg-brand-surface-soft px-4 py-1.5'}
+                                >
+                                    {area.name}
+                                </Badge>
+                            </Link>
+                        ))}
+                    </div>
+
                     {formations.length === 0 ? (
                         <div className="rounded-[32px] border border-brand-border bg-white py-20 text-center shadow-sm">
                             <GraduationCap className="mx-auto mb-4 h-12 w-12 text-brand-blue" />

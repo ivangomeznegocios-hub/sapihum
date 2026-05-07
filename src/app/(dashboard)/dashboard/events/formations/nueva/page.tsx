@@ -27,12 +27,12 @@ export default async function NewFormationPage() {
         eventsQuery = eventsQuery.eq('created_by', user.id)
     }
 
-    eventsQuery = await applyVerticalContentFilter(
+    eventsQuery = (await applyVerticalContentFilter(
         supabase,
         eventsQuery,
         { table: 'event_verticals', contentIdColumn: 'event_id' },
         activeVertical?.id
-    )
+    )).query
 
     const { data: events } = await eventsQuery
 
