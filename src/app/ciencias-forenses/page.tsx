@@ -32,7 +32,7 @@ export default function CienciasForensesPage() {
         <main className="min-h-screen bg-background text-brand-text">
             <header className="sticky top-0 z-40 border-b border-brand-border bg-brand-surface/95 backdrop-blur">
                 <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-                    <Link href="/areas" aria-label="SAPIHUM">
+                    <Link href="/" aria-label="SAPIHUM">
                         <BrandWordmark className="text-base" />
                     </Link>
                     <nav className="hidden items-center gap-5 text-sm font-semibold text-brand-text-muted md:flex">
@@ -77,7 +77,7 @@ export default function CienciasForensesPage() {
                                     <ArrowRight className="h-4 w-4" />
                                 </Button>
                             </Link>
-                            <Link href="/areas">
+                            <Link href="/">
                                 <Button size="lg" variant="outline" className="h-12 w-full border-white/30 bg-white/10 px-7 font-semibold text-white hover:bg-white hover:text-slate-950 sm:w-auto">
                                     Cambiar area
                                 </Button>

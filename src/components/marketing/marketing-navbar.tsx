@@ -38,7 +38,7 @@ export function MarketingNavbar() {
     return (
         <header className="sticky top-0 z-50 w-full border-b border-brand-border bg-brand-surface/95 shadow-sm backdrop-blur-lg supports-[backdrop-filter]:bg-brand-surface/90">
             <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-                <Link href="/" className="flex shrink-0 items-center" aria-label="SAPIHUM">
+                <Link href="/psicologia" className="flex shrink-0 items-center" aria-label="SAPIHUM Psicologia">
                     <BrandWordmark className="text-sm sm:text-base lg:text-lg lg:tracking-[0.16em]" />
                 </Link>
 
