@@ -1,6 +1,16 @@
 export type SpecializationStatus = 'active' | 'coming_soon' | 'hidden'
 
 export type SpecializationCode =
+    // Vertical: Psicología Clínica (8 especialidades activas en marketing)
+    | 'evaluacion_clinica'
+    | 'tcc'
+    | 'terapias_contextuales'
+    | 'regulacion_emocional'
+    | 'trauma'
+    | 'ansiedad_depresion'
+    | 'pareja_familia'
+    | 'supervision_clinica'
+    // Vertical: Catálogo interno (no visible en marketing)
     | 'clinica'
     | 'forense'
     | 'educacion'
@@ -36,6 +46,228 @@ export interface SpecializationConfig {
  * Los precios se definen conforme se activan comercialmente.
  */
 export const SPECIALIZATION_CATALOG: Record<SpecializationCode, SpecializationConfig> = {
+    // ─────────────────────────────────────────────────────────────────────────
+    // VERTICAL: PSICOLOGÍA CLÍNICA (Marketing-visible)
+    // ─────────────────────────────────────────────────────────────────────────
+    evaluacion_clinica: {
+        code: 'evaluacion_clinica',
+        name: 'Evaluación Clínica',
+        slug: 'evaluacion-clinica',
+        status: 'active',
+        level2PriceMonthly: null,
+        includesSoftware: false,
+        includesEvents: true,
+        level3Available: false,
+        tagline: 'Base diagnóstica para la práctica clínica seria',
+        description: 'Entrevista clínica, historia clínica, formulación de caso, diagnóstico diferencial, pruebas psicológicas e hipótesis clínicas para un plan de intervención fundamentado.',
+        icon: '📋',
+        tools: [
+            'Entrevista clínica estructurada',
+            'Formulación de caso',
+            'Diagnóstico diferencial',
+            'Pruebas y baterías estandarizadas',
+        ],
+        benefits: [
+            'Protocolos de entrevista clínica por motivo de consulta',
+            'Guías de formulación de caso (CBT, ACT, sistémica)',
+            'Árbol de decisión diagnóstica DSM-5 / CIE-11',
+            'Banco de pruebas psicológicas estandarizadas',
+            'Plantillas de historia clínica con campos estructurados',
+            'Supervisión de casos con retroalimentación clínica',
+        ],
+    },
+    tcc: {
+        code: 'tcc',
+        name: 'Terapia Cognitivo-Conductual',
+        slug: 'terapia-cognitivo-conductual',
+        status: 'active',
+        level2PriceMonthly: null,
+        includesSoftware: false,
+        includesEvents: true,
+        level3Available: false,
+        tagline: 'El enfoque con mayor respaldo empírico',
+        description: 'Fundamentos y aplicación clínica de la TCC: reestructuración cognitiva, activación conductual, exposición, prevención de recaídas y protocolos basados en evidencia.',
+        icon: '🔄',
+        tools: [
+            'Protocolos TCC por trastorno',
+            'Registros de pensamientos automáticos',
+            'Técnicas de exposición',
+            'Prevención de recaídas',
+        ],
+        benefits: [
+            'Protocolos TCC validados para trastornos frecuentes',
+            'Registros conductuales y hojas de trabajo para pacientes',
+            'Guías de reestructuración cognitiva paso a paso',
+            'Técnicas de exposición gradual y en imaginería',
+            'Estrategias de prevención de recaídas',
+            'Casos clínicos ilustrativos resueltos',
+        ],
+    },
+    terapias_contextuales: {
+        code: 'terapias_contextuales',
+        name: 'Terapias Contextuales',
+        slug: 'terapias-contextuales',
+        status: 'active',
+        level2PriceMonthly: null,
+        includesSoftware: false,
+        includesEvents: true,
+        level3Available: false,
+        tagline: 'ACT, mindfulness clínico y tercera generación',
+        description: 'Terapias de tercera generación: ACT, mindfulness clínico, análisis funcional de la conducta, flexibilidad psicológica y defusión cognitiva en contexto clínico real.',
+        icon: '🌿',
+        tools: [
+            'Ejercicios de ACT y defusión',
+            'Protocolos de mindfulness clínico',
+            'Análisis funcional de la conducta',
+            'Matrices de flexibilidad psicológica',
+        ],
+        benefits: [
+            'Protocolos ACT estructurados por fase terapéutica',
+            'Ejercicios de defusión cognitiva listos para sesión',
+            'Prácticas guiadas de mindfulness clínico',
+            'Análisis funcional de conducta (ABC ampliado)',
+            'Hojas de trabajo de valores y compromiso',
+            'Supervisión de casos ACT con retroalimentación',
+        ],
+    },
+    regulacion_emocional: {
+        code: 'regulacion_emocional',
+        name: 'Regulación Emocional',
+        slug: 'regulacion-emocional',
+        status: 'active',
+        level2PriceMonthly: null,
+        includesSoftware: false,
+        includesEvents: true,
+        level3Available: false,
+        tagline: 'DBT, tolerancia al malestar y habilidades clínicas',
+        description: 'Intervención en desregulación emocional severa: DBT, manejo de impulsividad, crisis, autolesiones, tolerancia al malestar y habilidades interpersonales para la práctica clínica.',
+        icon: '💠',
+        tools: [
+            'Módulos de habilidades DBT',
+            'Protocolos de intervención en crisis',
+            'Registro emocional y análisis en cadena',
+            'Técnicas de tolerancia al malestar',
+        ],
+        benefits: [
+            'Módulos DBT completos (mindfulness, tolerancia, regulación, interpersonal)',
+            'Guías de intervención en crisis no suicidas y suicidas',
+            'Análisis en cadena conductual para conductas problema',
+            'Técnicas de tolerancia al malestar TIPP, ACCEPTS, IMPROVE',
+            'Registro de emociones y seguimiento de intensidad',
+            'Formación en habilidades interpersonales DEAR MAN / GIVE / FAST',
+        ],
+    },
+    trauma: {
+        code: 'trauma',
+        name: 'Trauma Psicológico',
+        slug: 'trauma-psicologico',
+        status: 'active',
+        level2PriceMonthly: null,
+        includesSoftware: false,
+        includesEvents: true,
+        level3Available: false,
+        tagline: 'TEPT, EMDR y trauma complejo basado en evidencia',
+        description: 'Evaluación e intervención en trauma, TEPT y trauma complejo. Protocolos EMDR, TCC enfocada en trauma, intervención en crisis, abuso, violencia y duelo traumático.',
+        icon: '🌱',
+        tools: [
+            'Protocolos EMDR',
+            'TCC enfocada en trauma',
+            'Evaluación de síntomas TEPT',
+            'Intervención en crisis postraumática',
+        ],
+        benefits: [
+            'Protocolos EMDR fase 1-8 con guía clínica',
+            'TCC enfocada en trauma (CPT, PE) estructurada',
+            'Escalas de evaluación TEPT: PCL-5, CAPS-5',
+            'Protocolos de primeros auxilios psicológicos',
+            'Abordaje de trauma complejo y disociación',
+            'Guías de intervención en duelo traumático',
+        ],
+    },
+    ansiedad_depresion: {
+        code: 'ansiedad_depresion',
+        name: 'Ansiedad y Depresión',
+        slug: 'ansiedad-depresion',
+        status: 'active',
+        level2PriceMonthly: null,
+        includesSoftware: false,
+        includesEvents: true,
+        level3Available: false,
+        tagline: 'Intervención en los trastornos más prevalentes',
+        description: 'Abordaje clínico de ansiedad generalizada, pánico, fobias, depresión mayor y distimia. Activación conductual, prevención de recaídas y estrategias de intervención escalonada.',
+        icon: '🧩',
+        tools: [
+            'Protocolos de ansiedad y pánico',
+            'Activación conductual para depresión',
+            'Escalas GAD-7, PHQ-9, BDI-II',
+            'Prevención de recaídas',
+        ],
+        benefits: [
+            'Protocolos estructurados para TAG, pánico y fobias',
+            'Intervención escalonada basada en guías NICE y APA',
+            'Activación conductual en depresión: programación y registro',
+            'Instrumentos de screening y seguimiento clínico',
+            'Prevención de recaídas con plan personalizado',
+            'Psicoeducación de pacientes con material editable',
+        ],
+    },
+    pareja_familia: {
+        code: 'pareja_familia',
+        name: 'Pareja y Familia',
+        slug: 'pareja-familia',
+        status: 'active',
+        level2PriceMonthly: null,
+        includesSoftware: false,
+        includesEvents: true,
+        level3Available: false,
+        tagline: 'Terapia sistémica, vínculos y dinámicas familiares',
+        description: 'Terapia de pareja y familia: enfoque sistémico, apego, comunicación, gestión del conflicto, separación, crianza y patrones vinculares disfuncionales.',
+        icon: '🫂',
+        tools: [
+            'Evaluación sistémica de pareja y familia',
+            'Genograma y mapa relacional',
+            'Técnicas de comunicación no violenta',
+            'Protocolos de mediación familiar',
+        ],
+        benefits: [
+            'Guías de evaluación sistémica familiar y de pareja',
+            'Genograma digital y mapas de relación',
+            'Protocolos de terapia de pareja basada en apego (EFT)',
+            'Técnicas de comunicación y resolución de conflicto',
+            'Abordaje de separación, divorcio y co-parentalidad',
+            'Intervención en crianza y patrones de apego temprano',
+        ],
+    },
+    supervision_clinica: {
+        code: 'supervision_clinica',
+        name: 'Supervisión Clínica',
+        slug: 'supervision-clinica',
+        status: 'active',
+        level2PriceMonthly: null,
+        includesSoftware: false,
+        includesEvents: true,
+        level3Available: false,
+        tagline: 'Casos clínicos, formulación y decisiones terapéuticas',
+        description: 'Supervisión y análisis de casos clínicos reales: formulación, hipótesis, errores frecuentes, toma de decisiones terapéuticas, ética clínica y práctica profesional aplicada.',
+        icon: '🔍',
+        tools: [
+            'Análisis de casos clínicos',
+            'Formulación supervisada',
+            'Revisión de decisiones terapéuticas',
+            'Ética clínica aplicada',
+        ],
+        benefits: [
+            'Sesiones de supervisión grupal en vivo',
+            'Análisis de casos con formulación guiada',
+            'Revisión de errores clínicos frecuentes',
+            'Toma de decisiones en situaciones de riesgo',
+            'Ética profesional y límites terapéuticos',
+            'Registro de horas de supervisión para acreditación',
+        ],
+    },
+    // ─────────────────────────────────────────────────────────────────────────
+    // CATÁLOGO INTERNO (no visible en marketing — conservado para uso interno)
+    // ─────────────────────────────────────────────────────────────────────────
     clinica: {
         code: 'clinica',
         name: 'Psicología Clínica',
@@ -367,15 +599,19 @@ export const SPECIALIZATION_CATALOG: Record<SpecializationCode, SpecializationCo
 
 export const LEVEL_2_DEFAULT_SPECIALIZATION: SpecializationCode = 'clinica'
 
+/**
+ * Especialidades visibles en el marketing de la vertical Psicología Clínica.
+ * El orden aquí determina el orden en navbar, footer, home y página /especialidades.
+ */
 export const MARKETING_SPECIALIZATION_CODES = [
-    'clinica',
-    'neuropsicologia',
-    'forense',
-    'organizacional',
-    'educacion',
-    'psicogerontologia',
-    'deportiva',
-    'sexologia_clinica',
+    'evaluacion_clinica',
+    'tcc',
+    'terapias_contextuales',
+    'regulacion_emocional',
+    'trauma',
+    'ansiedad_depresion',
+    'pareja_familia',
+    'supervision_clinica',
 ] as const
 
 export const MEMBERSHIP_SPECIALIZATION_CODES = [

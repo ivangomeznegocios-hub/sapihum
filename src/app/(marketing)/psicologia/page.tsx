@@ -24,48 +24,68 @@ export const revalidate = 3600
 const SPECIALTIES = getMarketingSpecializations()
 
 type SpecialtyBackground = {
-  image: string
+  /**
+   * URL de Cloudinary para producción.
+   * Cuando esté disponible, se usa sobre el placeholder.
+   * Formato recomendado: f_auto,q_auto,w_1400
+   */
+  cloudinaryUrl?: string
+  /** Imagen placeholder de Unsplash (temporal hasta tener imagen propia en Cloudinary) */
+  placeholder: string
   position?: string
 }
 
-const PLATFORM_SECTION_BACKGROUND: SpecialtyBackground = {
-  image: "https://images.unsplash.com/photo-1758273241086-f3585ef8c2f8?auto=format&fit=crop&w=2400&q=80",
-  position: "center 34%",
+/**
+ * Imágenes de fondo por especialidad.
+ * Para migrar a Cloudinary: añade `cloudinaryUrl` en cada entrada.
+ * El componente usará cloudinaryUrl si existe, si no cae al placeholder.
+ */
+const SPECIALTY_BACKGROUNDS: Record<string, SpecialtyBackground> = {
+  evaluacion_clinica: {
+    placeholder: 'https://images.unsplash.com/photo-1576091160550-2173dba999ef?auto=format&fit=crop&w=1400&q=80',
+    position: 'center 30%',
+    // cloudinaryUrl: 'https://res.cloudinary.com/dguo9gbxd/image/upload/f_auto,q_auto,w_1400/v1/sapihum/especialidades/evaluacion-clinica',
+  },
+  tcc: {
+    placeholder: 'https://images.unsplash.com/photo-1590650153855-d9e808231d41?auto=format&fit=crop&w=1400&q=80',
+    position: 'center 40%',
+    // cloudinaryUrl: 'https://res.cloudinary.com/dguo9gbxd/image/upload/f_auto,q_auto,w_1400/v1/sapihum/especialidades/tcc',
+  },
+  terapias_contextuales: {
+    placeholder: 'https://images.unsplash.com/photo-1518241353330-0f7941c2d9b5?auto=format&fit=crop&w=1400&q=80',
+    position: 'center',
+    // cloudinaryUrl: 'https://res.cloudinary.com/dguo9gbxd/image/upload/f_auto,q_auto,w_1400/v1/sapihum/especialidades/terapias-contextuales',
+  },
+  regulacion_emocional: {
+    placeholder: 'https://images.unsplash.com/photo-1499209974431-9dddcece7f88?auto=format&fit=crop&w=1400&q=80',
+    position: 'center 35%',
+    // cloudinaryUrl: 'https://res.cloudinary.com/dguo9gbxd/image/upload/f_auto,q_auto,w_1400/v1/sapihum/especialidades/regulacion-emocional',
+  },
+  trauma: {
+    placeholder: 'https://images.unsplash.com/photo-1508672019048-805c876b67e2?auto=format&fit=crop&w=1400&q=80',
+    position: 'center 45%',
+    // cloudinaryUrl: 'https://res.cloudinary.com/dguo9gbxd/image/upload/f_auto,q_auto,w_1400/v1/sapihum/especialidades/trauma-psicologico',
+  },
+  ansiedad_depresion: {
+    placeholder: 'https://images.unsplash.com/photo-1474631245212-32dc3c8310c6?auto=format&fit=crop&w=1400&q=80',
+    position: 'center 25%',
+    // cloudinaryUrl: 'https://res.cloudinary.com/dguo9gbxd/image/upload/f_auto,q_auto,w_1400/v1/sapihum/especialidades/ansiedad-depresion',
+  },
+  pareja_familia: {
+    placeholder: 'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=1400&q=80',
+    position: 'center',
+    // cloudinaryUrl: 'https://res.cloudinary.com/dguo9gbxd/image/upload/f_auto,q_auto,w_1400/v1/sapihum/especialidades/pareja-familia',
+  },
+  supervision_clinica: {
+    placeholder: 'https://images.unsplash.com/photo-1517048676732-d65bc937f952?auto=format&fit=crop&w=1400&q=80',
+    position: 'center 30%',
+    // cloudinaryUrl: 'https://res.cloudinary.com/dguo9gbxd/image/upload/f_auto,q_auto,w_1400/v1/sapihum/especialidades/supervision-clinica',
+  },
 }
 
-const SPECIALTY_BACKGROUNDS: Record<string, SpecialtyBackground> = {
-  clinica: {
-    image: "https://unsplash.com/photos/K_MSe-zglGI/download?force=true&w=1400&q=80",
-    position: "center",
-  },
-  neuropsicologia: {
-    image: "https://unsplash.com/photos/AB0r9z7eRYg/download?force=true&w=1400&q=80",
-    position: "center",
-  },
-  forense: {
-    image: "https://unsplash.com/photos/KJgkqQcdynQ/download?force=true&w=1400&q=80",
-    position: "center",
-  },
-  organizacional: {
-    image: "https://unsplash.com/photos/VBLHICVh-lI/download?force=true&w=1400&q=80",
-    position: "center",
-  },
-  educacion: {
-    image: "https://unsplash.com/photos/M92wusZZ_qg/download?force=true&w=1400&q=80",
-    position: "center",
-  },
-  psicogerontologia: {
-    image: "https://unsplash.com/photos/bSXk1lOp8T0/download?force=true&w=1400&q=80",
-    position: "center",
-  },
-  deportiva: {
-    image: "https://unsplash.com/photos/9orpQvNujSM/download?force=true&w=1400&q=80",
-    position: "center",
-  },
-  sexologia_clinica: {
-    image: "https://unsplash.com/photos/K_MSe-zglGI/download?force=true&w=1400&q=80",
-    position: "center",
-  },
+const PLATFORM_SECTION_BACKGROUND = {
+  image: "https://images.unsplash.com/photo-1758273241086-f3585ef8c2f8?auto=format&fit=crop&w=2400&q=80",
+  position: "center 34%",
 }
 
 const CREDIBILITY_PILLS = [
@@ -170,7 +190,7 @@ const FAQS = [
   },
   {
     q: "¿Qué especialidades incluye?",
-    a: "Actualmente la experiencia pública destaca 8 áreas activas de especialización: Psicología Clínica, Neuropsicología, Psicología Forense, Psicología Organizacional, Psicología Educativa, Psicogerontología, Psicología Deportiva y Sexología Clínica."
+    a: "La vertical de Psicología Clínica integra 8 áreas de formación continua: Evaluación Clínica, Terapia Cognitivo-Conductual, Terapias Contextuales (ACT y mindfulness), Regulación Emocional, Trauma Psicológico, Ansiedad y Depresión, Pareja y Familia, y Supervisión Clínica. Cada área ofrece eventos, cursos y formaciones con enfoque aplicado."
   },
   {
     q: "¿SAPIHUM incluye herramientas para la práctica profesional?",
@@ -328,7 +348,7 @@ export default async function LandingPage() {
                   className="group relative isolate min-h-[320px] overflow-hidden bg-background"
                 >
                   <Image
-                    src={background?.image ?? SPECIALTY_BACKGROUNDS.clinica.image}
+                    src={background?.cloudinaryUrl ?? background?.placeholder ?? SPECIALTY_BACKGROUNDS.evaluacion_clinica.placeholder}
                     alt=""
                     fill
                     sizes="(min-width: 1280px) 25vw, (min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"

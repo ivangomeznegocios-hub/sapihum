@@ -12,7 +12,7 @@ const SPECIALIZATION_ITEMS = getMarketingSpecializations().map((spec) => ({
 
 const NAV_ITEMS = [
     {
-        label: 'Especialidades',
+        label: 'Psicología Clínica',
         children: SPECIALIZATION_ITEMS,
     },
     {
@@ -52,8 +52,8 @@ export function MarketingNavbar() {
                                         <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
                                     </svg>
                                 </button>
-                                <div className={`invisible absolute left-0 top-full z-[80] pt-2 opacity-0 transition-opacity duration-100 group-hover:visible group-hover:opacity-100 ${item.label === 'Especialidades' ? 'w-[38rem]' : 'w-72'}`}>
-                                    <div className={`${item.label === 'Especialidades' ? 'grid grid-cols-2 gap-1' : 'flex flex-col'} rounded-md border border-brand-border bg-brand-surface p-2 shadow-[0_24px_70px_rgba(15,23,42,0.14)] ring-1 ring-brand-blue-border/80`}>
+                                <div className={`invisible absolute left-0 top-full z-[80] pt-2 opacity-0 transition-opacity duration-100 group-hover:visible group-hover:opacity-100 ${item.label === 'Psicología Clínica' ? 'w-[38rem]' : 'w-72'}`}>
+                                    <div className={`${item.label === 'Psicología Clínica' ? 'grid grid-cols-2 gap-1' : 'flex flex-col'} rounded-md border border-brand-border bg-brand-surface p-2 shadow-[0_24px_70px_rgba(15,23,42,0.14)] ring-1 ring-brand-blue-border/80`}>
                                         {item.children.map((child) => (
                                             <Link
                                                 key={child.href + child.label}
@@ -62,7 +62,7 @@ export function MarketingNavbar() {
                                                 data-analytics-label={child.label}
                                                 data-analytics-surface="marketing_nav_dropdown"
                                                 data-analytics-funnel="landing"
-                                                className={`group/drop flex flex-col gap-1 rounded-sm px-3 py-3 transition-colors hover:bg-brand-blue-soft ${item.label === 'Especialidades' ? 'min-h-[5rem]' : ''}`}
+                                                className={`group/drop flex flex-col gap-1 rounded-sm px-3 py-3 transition-colors hover:bg-brand-blue-soft ${item.label === 'Psicología Clínica' ? 'min-h-[5rem]' : ''}`}
                                             >
                                                 <span className="text-sm font-semibold text-brand-text-strong group-hover/drop:text-brand-blue-hover">{child.label}</span>
                                                 <span className="text-xs leading-snug text-brand-text-muted group-hover/drop:text-brand-text">{child.description}</span>
