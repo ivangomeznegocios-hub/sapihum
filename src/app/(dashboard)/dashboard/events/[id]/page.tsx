@@ -71,6 +71,10 @@ export default async function EventDetailPage({ params }: PageProps) {
         notFound()
     }
 
+    if (viewer.activeVertical?.id && event.content_scope !== 'global' && event.primary_vertical_id !== viewer.activeVertical.id) {
+        notFound()
+    }
+
     // Check if user is registered
     const { data: registrationData } = await supabase
         .from('event_registrations' as any)

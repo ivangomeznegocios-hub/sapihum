@@ -38,9 +38,10 @@ import {
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { getMembershipTier } from '@/lib/membership'
-import type { UserRole } from '@/types/database'
+import type { UserRole, Vertical } from '@/types/database'
 import { canSeeSidebarItem } from '@/lib/access/internal-modules'
 import { BrandWordmark } from '@/components/brand/brand-wordmark'
+import { VerticalSwitcher } from './vertical-switcher'
 
 interface NavItem {
     name: string
@@ -153,6 +154,7 @@ function NavGroupSection({
     userRole,
     membershipLevel,
     membershipSpecializationCode,
+    activeVertical,
     pathname,
     onNavigate,
 }: {
@@ -160,6 +162,7 @@ function NavGroupSection({
     userRole: UserRole
     membershipLevel: number
     membershipSpecializationCode?: string | null
+    activeVertical?: Vertical | null
     pathname: string
     onNavigate?: () => void
 }) {
@@ -167,6 +170,7 @@ function NavGroupSection({
         role: userRole,
         membershipLevel,
         membershipSpecializationCode,
+        activeVerticalCode: activeVertical?.code,
     }))
     const hasActiveItem = visibleItems.some((item) => pathname === item.href)
     const [isOpen, setIsOpen] = useState(true)
@@ -280,6 +284,8 @@ interface SidebarProps {
     userRole?: UserRole | null
     membershipLevel?: number
     membershipSpecializationCode?: string | null
+    activeVertical?: Vertical | null
+    availableVerticals?: Vertical[]
     isMobile?: boolean
     onNavigate?: () => void
 }
@@ -288,6 +294,8 @@ export function Sidebar({
     userRole,
     membershipLevel = 0,
     membershipSpecializationCode = null,
+    activeVertical = null,
+    availableVerticals = [],
     isMobile,
     onNavigate,
 }: SidebarProps) {
@@ -311,6 +319,16 @@ export function Sidebar({
                     <BrandWordmark className="text-sm tracking-[0.14em]" />
                 </div>
 
+                {isMobile && (
+                    <div className="mb-4">
+                        <VerticalSwitcher
+                            activeVertical={activeVertical}
+                            availableVerticals={availableVerticals}
+                            compact
+                        />
+                    </div>
+                )}
+
                 {userRole === 'psychologist' && (
                     <div className="mb-4">
                         <MembershipBadge level={membershipLevel} onNavigate={onNavigate} />
@@ -327,6 +345,7 @@ export function Sidebar({
                                     userRole={userRole}
                                     membershipLevel={membershipLevel}
                                     membershipSpecializationCode={membershipSpecializationCode}
+                                    activeVertical={activeVertical}
                                     pathname={pathname}
                                     onNavigate={onNavigate}
                                 />
@@ -340,6 +359,7 @@ export function Sidebar({
                                     userRole={userRole}
                                     membershipLevel={membershipLevel}
                                     membershipSpecializationCode={membershipSpecializationCode}
+                                    activeVertical={activeVertical}
                                     pathname={pathname}
                                     onNavigate={onNavigate}
                                 />

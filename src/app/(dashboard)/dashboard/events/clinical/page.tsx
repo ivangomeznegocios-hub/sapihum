@@ -15,6 +15,7 @@ export default async function ClinicalEventsPage() {
         userId: viewer.user?.id ?? null,
         profile,
         commercialAccess,
+        activeVerticalId: viewer.activeVertical?.id ?? null,
         select: EVENTS_LIST_SELECT,
     })
     const isActiveMember = Boolean(

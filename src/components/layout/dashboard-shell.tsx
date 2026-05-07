@@ -1,6 +1,6 @@
 import { Sidebar } from './sidebar'
 import { Header } from './header'
-import type { UserRole } from '@/types/database'
+import type { UserRole, Vertical } from '@/types/database'
 
 interface DashboardShellProps {
     children: React.ReactNode
@@ -15,6 +15,8 @@ interface DashboardShellProps {
     userRole?: UserRole | null
     membershipLevel?: number
     membershipSpecializationCode?: string | null
+    activeVertical?: Vertical | null
+    availableVerticals?: Vertical[]
 }
 
 export function DashboardShell({
@@ -23,6 +25,8 @@ export function DashboardShell({
     userRole,
     membershipLevel = 0,
     membershipSpecializationCode = null,
+    activeVertical = null,
+    availableVerticals = [],
 }: DashboardShellProps) {
     return (
         <div className="min-h-[100dvh] overflow-x-hidden bg-background">
@@ -31,6 +35,8 @@ export function DashboardShell({
                 userRole={userRole}
                 membershipLevel={membershipLevel}
                 membershipSpecializationCode={membershipSpecializationCode}
+                activeVertical={activeVertical}
+                availableVerticals={availableVerticals}
             />
 
             {/* Main content area */}
@@ -41,6 +47,8 @@ export function DashboardShell({
                     userRole={userRole}
                     membershipLevel={membershipLevel}
                     membershipSpecializationCode={membershipSpecializationCode}
+                    activeVertical={activeVertical}
+                    availableVerticals={availableVerticals}
                 />
 
                 {/* Page content */}

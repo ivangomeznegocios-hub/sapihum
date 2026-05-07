@@ -1,6 +1,6 @@
 'use server'
 
-import { createClient } from '@/lib/supabase/server'
+import { createClient, getViewerContext } from '@/lib/supabase/server'
 import { recordAnalyticsServerEvent } from '@/lib/analytics/server'
 import { revalidatePath } from 'next/cache'
 import type { TargetAudience } from '@/types/database'
@@ -256,6 +256,16 @@ function parseSessionConfig(formData: FormData, eventType: string, location: str
         modality,
         ...(location ? { location } : {}),
     }
+}
+
+async function getDefaultPrimaryVerticalId(supabase: any) {
+    const { data } = await (supabase
+        .from('verticals') as any)
+        .select('id')
+        .eq('code', 'psicologia')
+        .maybeSingle()
+
+    return data?.id ?? null
 }
 
 type ParsedSessionSchedule = {
@@ -578,12 +588,17 @@ export async function registerForEvent(eventId: string, registrationData: Record
     // Get event to check audience requirements and pricing
     const { data: event } = await (supabase
         .from('events') as any)
-        .select('title, slug, start_time, target_audience, required_subscription, max_attendees, price, member_access_type, member_price, specialization_code, event_type, recording_expires_at')
+        .select('title, slug, start_time, target_audience, required_subscription, max_attendees, price, member_access_type, member_price, specialization_code, event_type, recording_expires_at, primary_vertical_id, content_scope')
         .eq('id', eventId)
         .single()
 
     if (!event) {
         return { error: 'Evento no encontrado' }
+    }
+
+    const viewer = await getViewerContext()
+    if (viewer.activeVertical?.id && (event as any).content_scope !== 'global' && (event as any).primary_vertical_id !== viewer.activeVertical.id) {
+        return { error: 'Este evento no pertenece a la vertical activa' }
     }
 
     // Get user profile
@@ -796,6 +811,8 @@ export async function cancelEventRegistration(eventId: string) {
 
 export async function createEvent(formData: FormData) {
     const supabase = await createClient()
+    const viewer = await getViewerContext()
+    const primaryVerticalId = viewer.activeVertical?.id ?? await getDefaultPrimaryVerticalId(supabase)
 
     const { data: { user } } = await supabase.auth.getUser()
 
@@ -965,6 +982,8 @@ export async function createEvent(formData: FormData) {
             specialization_code: specializationCode,
             formation_track: formationTrack,
             recording_url: recordingUrl,
+            primary_vertical_id: primaryVerticalId,
+            content_scope: 'vertical',
         })
         .select('id')
         .single()
@@ -1002,7 +1021,7 @@ export async function updateEvent(eventId: string, formData: FormData) {
     const [{ data: event }, { data: profile }] = await Promise.all([
         (supabase
             .from('events') as any)
-            .select('created_by, status, formation_id, start_time, end_time')
+            .select('created_by, status, formation_id, start_time, end_time, primary_vertical_id, content_scope')
             .eq('id', eventId)
             .single(),
         (supabase
@@ -1024,6 +1043,11 @@ export async function updateEvent(eventId: string, formData: FormData) {
 
     if (!event || !canEditEvent) {
         return { error: 'No tienes permisos para editar este evento' }
+    }
+
+    const viewer = await getViewerContext()
+    if (viewer.activeVertical?.id && event.content_scope !== 'global' && event.primary_vertical_id !== viewer.activeVertical.id) {
+        return { error: 'Este evento no pertenece a la vertical activa' }
     }
 
     const isAdmin = profile?.role === 'admin'
@@ -1355,6 +1379,11 @@ export async function duplicateEvent(eventId: string) {
         return { error: 'No tienes permisos para duplicar este evento' }
     }
 
+    const viewer = await getViewerContext()
+    if (viewer.activeVertical?.id && event.content_scope !== 'global' && event.primary_vertical_id !== viewer.activeVertical.id) {
+        return { error: 'Este evento no pertenece a la vertical activa' }
+    }
+
     const duplicateTitle = buildDuplicateEventTitle(event.title || 'Evento')
     const slug = await resolveUniqueEventSlug(supabase, duplicateTitle)
 
@@ -1401,6 +1430,8 @@ export async function duplicateEvent(eventId: string) {
             specialization_code: event.specialization_code,
             formation_track: event.formation_track,
             formation_id: null,
+            primary_vertical_id: event.primary_vertical_id ?? viewer.activeVertical?.id ?? await getDefaultPrimaryVerticalId(supabase),
+            content_scope: event.content_scope ?? 'vertical',
         })
         .select('id')
         .single()

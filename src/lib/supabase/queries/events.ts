@@ -18,6 +18,7 @@ import { canViewerSeeCatalogEvent } from '@/lib/access/catalog'
 interface EventViewerOptions {
     supabase?: any
     userId?: string | null
+    activeVerticalId?: string | null
     statuses?: EventStatus[]
     limit?: number
     select?: string
@@ -131,6 +132,10 @@ export async function getEventsWithRegistration(
         .select(options?.select ?? '*')
         .in('status', statuses)
         .order('start_time', { ascending: true })
+
+    if (options?.activeVerticalId) {
+        eventsQuery = eventsQuery.or(`content_scope.eq.global,primary_vertical_id.eq.${options.activeVerticalId}`)
+    }
 
     if (options?.limit) {
         eventsQuery = eventsQuery.limit(options.limit)

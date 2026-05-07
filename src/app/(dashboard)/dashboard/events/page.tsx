@@ -513,6 +513,7 @@ export default async function EventsPage() {
         userId: viewer.user?.id ?? null,
         profile,
         commercialAccess,
+        activeVerticalId: viewer.activeVertical?.id ?? null,
         select: EVENTS_LIST_SELECT,
     })
 

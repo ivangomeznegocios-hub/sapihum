@@ -6,6 +6,18 @@ export type UserRole = 'admin' | 'support' | 'psychologist' | 'patient' | 'ponen
 
 export type SubscriptionStatus = 'trial' | 'active' | 'past_due' | 'cancelled' | 'inactive'
 
+export type VerticalCode = 'psicologia' | 'ciencias_forenses'
+
+export type VerticalSlug = 'psicologia' | 'ciencias-forenses'
+
+export type VerticalStatus = 'active' | 'hidden' | 'archived'
+
+export type VerticalRole = 'member' | 'instructor' | 'admin' | 'support'
+
+export type VerticalAccessStatus = 'interested' | 'active' | 'inactive' | 'suspended'
+
+export type ContentScope = 'global' | 'vertical' | 'cross_vertical'
+
 export type RelationshipStatus = 'active' | 'inactive' | 'pending'
 
 export type RecordType = 'nota' | 'historia_clinica'
@@ -50,6 +62,65 @@ export type WaitlistSource = 'landing' | 'app'
 export type NotificationCategory = 'system' | 'messages' | 'calendar' | 'events' | 'payments'
 
 export type NotificationLevel = 'info' | 'success' | 'warning' | 'error'
+
+// ============================================
+// TABLE: verticals
+// ============================================
+export interface Vertical {
+    id: string
+    code: VerticalCode
+    slug: VerticalSlug
+    name: string
+    status: VerticalStatus
+    created_at: string
+    updated_at: string
+}
+
+export interface VerticalInsert {
+    code: VerticalCode
+    slug: VerticalSlug
+    name: string
+    status?: VerticalStatus
+}
+
+export interface VerticalUpdate {
+    code?: VerticalCode
+    slug?: VerticalSlug
+    name?: string
+    status?: VerticalStatus
+}
+
+// ============================================
+// TABLE: user_vertical_access
+// ============================================
+export interface UserVerticalAccess {
+    id: string
+    user_id: string
+    vertical_id: string
+    vertical_role: VerticalRole
+    access_status: VerticalAccessStatus
+    membership_level: number
+    is_default: boolean
+    created_at: string
+    updated_at: string
+    vertical?: Vertical
+}
+
+export interface UserVerticalAccessInsert {
+    user_id: string
+    vertical_id: string
+    vertical_role?: VerticalRole
+    access_status?: VerticalAccessStatus
+    membership_level?: number
+    is_default?: boolean
+}
+
+export interface UserVerticalAccessUpdate {
+    vertical_role?: VerticalRole
+    access_status?: VerticalAccessStatus
+    membership_level?: number
+    is_default?: boolean
+}
 
 // ============================================
 // TABLE: profiles
@@ -745,6 +816,8 @@ export interface Event {
     specialization_code: SpecializationCode | null
     formation_track: string | null
     formation_id: string | null
+    primary_vertical_id?: string | null
+    content_scope?: ContentScope
 }
 
 export interface EventInsert {
@@ -789,6 +862,8 @@ export interface EventInsert {
     specialization_code?: SpecializationCode | null
     formation_track?: string | null
     formation_id?: string | null
+    primary_vertical_id?: string | null
+    content_scope?: ContentScope
 }
 
 export interface EventUpdate {
@@ -829,6 +904,8 @@ export interface EventUpdate {
     specialization_code?: SpecializationCode | null
     formation_track?: string | null
     formation_id?: string | null
+    primary_vertical_id?: string | null
+    content_scope?: ContentScope
 }
 
 export interface EventRegistration {
@@ -954,6 +1031,8 @@ export interface EventPurchase {
     analytics_visitor_id?: string | null
     analytics_session_id?: string | null
     attribution_snapshot?: Record<string, any>
+    primary_vertical_id?: string | null
+    content_scope?: ContentScope
 }
 
 export interface EventPurchaseInsert {
@@ -968,6 +1047,8 @@ export interface EventPurchaseInsert {
     provider_session_id?: string | null
     provider_payment_id?: string | null
     metadata?: Record<string, any>
+    primary_vertical_id?: string | null
+    content_scope?: ContentScope
 }
 
 export interface EventPurchaseUpdate {
@@ -977,6 +1058,8 @@ export interface EventPurchaseUpdate {
     provider_payment_id?: string | null
     metadata?: Record<string, any>
     confirmed_at?: string | null
+    primary_vertical_id?: string | null
+    content_scope?: ContentScope
 }
 
 // ============================================
@@ -1432,6 +1515,16 @@ export interface UserNotificationUpdate {
 export interface Database {
     public: {
         Tables: {
+            verticals: {
+                Row: Vertical
+                Insert: VerticalInsert
+                Update: VerticalUpdate
+            }
+            user_vertical_access: {
+                Row: UserVerticalAccess
+                Insert: UserVerticalAccessInsert
+                Update: UserVerticalAccessUpdate
+            }
             profiles: {
                 Row: Profile
                 Insert: ProfileInsert
@@ -1658,6 +1751,8 @@ export interface Subscription {
     trial_end: string | null
     created_at: string
     updated_at: string
+    primary_vertical_id?: string | null
+    content_scope?: ContentScope
 }
 
 export interface SubscriptionInsert {
@@ -1674,6 +1769,8 @@ export interface SubscriptionInsert {
     current_period_end?: string | null
     trial_start?: string | null
     trial_end?: string | null
+    primary_vertical_id?: string | null
+    content_scope?: ContentScope
 }
 
 export interface SubscriptionUpdate {
@@ -1683,6 +1780,8 @@ export interface SubscriptionUpdate {
     current_period_end?: string | null
     cancel_at_period_end?: boolean
     cancelled_at?: string | null
+    primary_vertical_id?: string | null
+    content_scope?: ContentScope
 }
 
 // ============================================
@@ -2272,6 +2371,8 @@ export interface Formation {
     created_by: string | null
     created_at: string
     updated_at: string
+    primary_vertical_id?: string | null
+    content_scope?: ContentScope
 }
 
 export interface FormationInsert {
@@ -2291,6 +2392,8 @@ export interface FormationInsert {
     full_certificate_label?: string
     status?: FormationStatus
     created_by?: string
+    primary_vertical_id?: string | null
+    content_scope?: ContentScope
 }
 
 export interface FormationUpdate {
@@ -2309,6 +2412,8 @@ export interface FormationUpdate {
     full_certificate_type?: FormationCertificateType
     full_certificate_label?: string
     status?: FormationStatus
+    primary_vertical_id?: string | null
+    content_scope?: ContentScope
 }
 
 // ============================================
@@ -2351,6 +2456,8 @@ export interface FormationPurchase {
     metadata: Record<string, any>
     purchased_at: string
     confirmed_at: string | null
+    primary_vertical_id?: string | null
+    content_scope?: ContentScope
 }
 
 export interface FormationPurchaseInsert {
@@ -2364,6 +2471,8 @@ export interface FormationPurchaseInsert {
     provider_session_id?: string | null
     provider_payment_id?: string | null
     metadata?: Record<string, any>
+    primary_vertical_id?: string | null
+    content_scope?: ContentScope
 }
 
 // ============================================

@@ -2,6 +2,7 @@ import { getViewerContext } from '@/lib/supabase/server'
 import { PsychologistDashboard, PatientDashboard, AdminDashboard, PonenteDashboard } from '@/components/dashboard'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
+import { cookies } from 'next/headers'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import type { ActivityItem } from '@/components/dashboard/ui/ActivityFeed'
@@ -12,7 +13,10 @@ import { getEventsWithRegistration } from '@/lib/supabase/queries/events'
 import { getUniqueEventAccessCounts } from '@/lib/events/attendance'
 import { getVisibleResources } from '@/lib/supabase/queries/resources'
 import { DEFAULT_TIMEZONE, getGreetingForTimezone } from '@/lib/timezone'
-import { ArrowRight, Library } from 'lucide-react'
+import { ArrowRight, CalendarDays, GraduationCap, Library, ShieldCheck } from 'lucide-react'
+import { createInterestedVerticalAccess, setActiveVertical } from '@/actions/verticals'
+import { normalizeVerticalCode } from '@/lib/verticals'
+import type { Vertical } from '@/types/database'
 
 const DASHBOARD_EVENT_SELECT = [
     'id',
@@ -97,15 +101,170 @@ function DashboardAccessShortcut() {
     )
 }
 
-export default async function DashboardPage() {
+function ForensicVerticalDashboard({
+    userName,
+}: {
+    userName: string
+}) {
+    const displayName = userName || 'Hola'
+
+    return (
+        <div className="space-y-6">
+            <DashboardAccessShortcut />
+
+            <div className="space-y-2">
+                <p className="text-sm font-medium text-primary">Ciencias Forenses</p>
+                <h1 className="text-2xl font-bold tracking-tight">
+                    {displayName}, tu area forense
+                </h1>
+                <p className="max-w-2xl text-sm text-muted-foreground">
+                    Consulta eventos, formaciones y materiales activos de la vertical forense sin mezclar modulos clinicos de psicologia.
+                </p>
+            </div>
+
+            <div className="grid gap-4 md:grid-cols-3">
+                <Card>
+                    <CardContent className="space-y-4 p-5">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-md bg-primary/10 text-primary">
+                            <CalendarDays className="h-5 w-5" />
+                        </div>
+                        <div>
+                            <h2 className="font-semibold">Eventos forenses</h2>
+                            <p className="mt-1 text-sm text-muted-foreground">
+                                Conferencias, sesiones y actividades filtradas para Ciencias Forenses.
+                            </p>
+                        </div>
+                        <Button asChild variant="outline" className="w-full">
+                            <Link href="/dashboard/events">
+                                Ver eventos
+                                <ArrowRight className="ml-2 h-4 w-4" />
+                            </Link>
+                        </Button>
+                    </CardContent>
+                </Card>
+
+                <Card>
+                    <CardContent className="space-y-4 p-5">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-md bg-primary/10 text-primary">
+                            <GraduationCap className="h-5 w-5" />
+                        </div>
+                        <div>
+                            <h2 className="font-semibold">Formaciones</h2>
+                            <p className="mt-1 text-sm text-muted-foreground">
+                                Diplomados y rutas formativas disponibles para tu acceso actual.
+                            </p>
+                        </div>
+                        <Button asChild variant="outline" className="w-full">
+                            <Link href="/dashboard/events/formations">
+                                Ver formaciones
+                                <ArrowRight className="ml-2 h-4 w-4" />
+                            </Link>
+                        </Button>
+                    </CardContent>
+                </Card>
+
+                <Card>
+                    <CardContent className="space-y-4 p-5">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-md bg-primary/10 text-primary">
+                            <ShieldCheck className="h-5 w-5" />
+                        </div>
+                        <div>
+                            <h2 className="font-semibold">Acceso activo</h2>
+                            <p className="mt-1 text-sm text-muted-foreground">
+                                Revisa compras, grabaciones y beneficios asignados a esta vertical.
+                            </p>
+                        </div>
+                        <Button asChild variant="outline" className="w-full">
+                            <Link href="/dashboard/mi-acceso">
+                                Abrir mi acceso
+                                <ArrowRight className="ml-2 h-4 w-4" />
+                            </Link>
+                        </Button>
+                    </CardContent>
+                </Card>
+            </div>
+        </div>
+    )
+}
+
+async function selectDashboardVertical(verticalCode: string) {
+    'use server'
+    await setActiveVertical(verticalCode)
+}
+
+async function createDashboardVerticalAccess(verticalCode: string) {
+    'use server'
+    await createInterestedVerticalAccess(verticalCode)
+}
+
+function VerticalChoicePanel({
+    title,
+    description,
+    verticals,
+    mode,
+}: {
+    title: string
+    description: string
+    verticals: Vertical[]
+    mode: 'select' | 'onboard'
+}) {
+    return (
+        <div className="mx-auto flex min-h-[calc(100dvh-8rem)] w-full max-w-3xl items-center justify-center py-10">
+            <div className="w-full space-y-6">
+                <div className="space-y-2 text-center">
+                    <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">{title}</h1>
+                    <p className="text-sm text-muted-foreground">{description}</p>
+                </div>
+                <div className="grid gap-4 sm:grid-cols-2">
+                    {verticals.map((vertical) => {
+                        const action = mode === 'onboard'
+                            ? createDashboardVerticalAccess.bind(null, vertical.code)
+                            : selectDashboardVertical.bind(null, vertical.code)
+
+                        return (
+                            <form key={vertical.code} action={action}>
+                                <Card className="h-full transition-colors hover:border-primary/50">
+                                    <CardContent className="flex h-full flex-col gap-4 p-5">
+                                        <div className="space-y-1">
+                                            <h2 className="text-lg font-semibold">{vertical.name}</h2>
+                                            <p className="text-sm text-muted-foreground">
+                                                {vertical.code === 'ciencias_forenses'
+                                                    ? 'Eventos, diplomados y recursos forenses dentro del mismo SAPIHUM.'
+                                                    : 'Comunidad, eventos, recursos y herramientas para psicologia.'}
+                                            </p>
+                                        </div>
+                                        <Button type="submit" className="mt-auto w-full">
+                                            Entrar a {vertical.name}
+                                        </Button>
+                                    </CardContent>
+                                </Card>
+                            </form>
+                        )
+                    })}
+                </div>
+            </div>
+        </div>
+    )
+}
+
+export default async function DashboardPage({
+    searchParams,
+}: {
+    searchParams?: Promise<{ vertical?: string }>
+}) {
+    const params = await searchParams
+    const requestedVerticalCode = normalizeVerticalCode(params?.vertical)
     const {
         supabase,
         user,
         profile,
         commercialAccess,
         membershipLevel: effectiveMembershipLevel,
+        activeVertical,
+        availableVerticals,
     } = await getViewerContext({
         includeCommercialAccess: true,
+        activeVerticalCode: requestedVerticalCode,
     })
 
     if (!user) {
@@ -114,6 +273,35 @@ export default async function DashboardPage() {
 
     if (!profile) {
         redirect('/auth/login?error=profile_not_found&next=/dashboard')
+    }
+
+    if (availableVerticals.length === 0) {
+        const { data: verticals } = await (supabase
+            .from('verticals') as any)
+            .select('*')
+            .eq('status', 'active')
+            .order('name', { ascending: true })
+
+        return (
+            <VerticalChoicePanel
+                title="Elige tu area inicial"
+                description="Selecciona donde quieres empezar. Tu cuenta seguira siendo una sola dentro de SAPIHUM."
+                verticals={(verticals ?? []) as Vertical[]}
+                mode="onboard"
+            />
+        )
+    }
+
+    const activeVerticalCookie = (await cookies()).get('sapihum_active_vertical')?.value
+    if (availableVerticals.length > 1 && !requestedVerticalCode && !activeVerticalCookie) {
+        return (
+            <VerticalChoicePanel
+                title="En que area quieres trabajar hoy?"
+                description="Tu usuario puede tener acceso a varias areas. Elige la experiencia activa para este dashboard."
+                verticals={availableVerticals}
+                mode="select"
+            />
+        )
     }
 
     const viewerQueryOptions = {
@@ -192,6 +380,10 @@ export default async function DashboardPage() {
         )
     }
 
+    if (activeVertical?.code === 'ciencias_forenses') {
+        return <ForensicVerticalDashboard userName={userName} />
+    }
+
     if (userRole === 'psychologist') {
         const psychologistViewer = {
             role: userRole,
@@ -223,6 +415,7 @@ export default async function DashboardPage() {
         ] = await Promise.all([
             getEventsWithRegistration({
                 ...viewerQueryOptions,
+                activeVerticalId: activeVertical?.id ?? null,
                 statuses: ['upcoming', 'live'],
                 select: DASHBOARD_EVENT_SELECT,
                 includeRegistrations: false,
@@ -385,6 +578,7 @@ export default async function DashboardPage() {
             getAssignedPsychologistForPatient(profile.id, { supabase }),
             getEventsWithRegistration({
                 ...viewerQueryOptions,
+                activeVerticalId: activeVertical?.id ?? null,
                 statuses: ['upcoming', 'live'],
                 limit: 8,
                 select: DASHBOARD_EVENT_SELECT,

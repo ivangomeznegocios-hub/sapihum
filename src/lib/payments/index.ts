@@ -58,6 +58,20 @@ function getServiceSupabase() {
     return createServiceClient(url, key)
 }
 
+async function getVerticalIdForCommerce(
+    supabase: ReturnType<typeof getServiceSupabase>,
+    specializationCode?: string | null
+) {
+    const verticalCode = specializationCode === 'forense' ? 'ciencias_forenses' : 'psicologia'
+    const { data } = await supabase
+        .from('verticals')
+        .select('id')
+        .eq('code', verticalCode)
+        .maybeSingle()
+
+    return data?.id ?? null
+}
+
 async function reconcileGrowthRewardsAfterSubscriptionChange(userId: string | null | undefined, trigger: any) {
     if (!userId) return
 
@@ -1160,6 +1174,7 @@ export async function fulfillSubscriptionCreated(data: SubscriptionWebhookData):
     })
     const profileId = identity.profileId
     const userId = identity.userId
+    const primaryVerticalId = await getVerticalIdForCommerce(supabase, specializationCode)
 
     if (!profileId || !userId) {
         console.error('[Payment] Could not find user for subscription:', data)
@@ -1186,9 +1201,29 @@ export async function fulfillSubscriptionCreated(data: SubscriptionWebhookData):
                 analytics_visitor_id: analyticsVisitorId,
                 analytics_session_id: analyticsSessionId,
                 attribution_snapshot: attributionSnapshot,
+                primary_vertical_id: primaryVerticalId,
+                content_scope: 'vertical',
             },
             { onConflict: 'provider_subscription_id' }
         )
+
+    if (primaryVerticalId) {
+        await supabase
+            .from('user_vertical_access')
+            .update({ is_default: false })
+            .eq('user_id', userId)
+
+        await supabase
+            .from('user_vertical_access')
+            .upsert({
+                user_id: userId,
+                vertical_id: primaryVerticalId,
+                vertical_role: 'member',
+                access_status: 'active',
+                membership_level: Math.min(Math.max(membershipLevel, 0), 3),
+                is_default: true,
+            }, { onConflict: 'user_id,vertical_id' })
+    }
 
     const profileUpdate: Record<string, any> = {
         membership_level: membershipLevel,

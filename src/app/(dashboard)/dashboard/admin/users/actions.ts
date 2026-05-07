@@ -53,6 +53,17 @@ function mapProfileStatusToSubscriptionStatus(status: AdminMembershipStatus, mem
     return 'active'
 }
 
+async function getVerticalIdForMembership(adminSupabase: Awaited<ReturnType<typeof createAdminClient>>, specializationCode?: string | null) {
+    const verticalCode = specializationCode === 'forense' ? 'ciencias_forenses' : 'psicologia'
+    const { data } = await (adminSupabase
+        .from('verticals') as any)
+        .select('id')
+        .eq('code', verticalCode)
+        .maybeSingle()
+
+    return data?.id ?? null
+}
+
 async function syncAdminMembershipState(params: {
     adminSupabase: Awaited<ReturnType<typeof createAdminClient>>
     userId: string
@@ -73,6 +84,7 @@ async function syncAdminMembershipState(params: {
         : null
     const profileStatus: AdminMembershipStatus = membershipLevel <= 0 ? 'inactive' : params.subscriptionStatus
     const subscriptionStatus = mapProfileStatusToSubscriptionStatus(profileStatus, membershipLevel)
+    const primaryVerticalId = await getVerticalIdForMembership(params.adminSupabase, specializationCode)
 
     const { error: profileError } = await ((params.adminSupabase
         .from('profiles') as any) as any)
@@ -108,6 +120,8 @@ async function syncAdminMembershipState(params: {
                 cancel_at_period_end: false,
                 cancelled_at: hasMembershipAccess ? null : now,
                 updated_at: now,
+                primary_vertical_id: primaryVerticalId,
+                content_scope: 'vertical',
             })
             .eq('id', existingSubscription.id)
 
@@ -129,11 +143,31 @@ async function syncAdminMembershipState(params: {
                 current_period_end: null,
                 cancel_at_period_end: false,
                 cancelled_at: null,
+                primary_vertical_id: primaryVerticalId,
+                content_scope: 'vertical',
             })
 
         if (insertSubscriptionError) {
             throw new Error(`Error al crear suscripcion manual: ${insertSubscriptionError.message}`)
         }
+    }
+
+    if (primaryVerticalId) {
+        await (params.adminSupabase
+            .from('user_vertical_access') as any)
+            .update({ is_default: false })
+            .eq('user_id', params.userId)
+
+        await (params.adminSupabase
+            .from('user_vertical_access') as any)
+            .upsert({
+                user_id: params.userId,
+                vertical_id: primaryVerticalId,
+                vertical_role: 'member',
+                access_status: hasMembershipAccess ? 'active' : 'inactive',
+                membership_level: membershipLevel,
+                is_default: true,
+            }, { onConflict: 'user_id,vertical_id' })
     }
 
     await syncMembershipEntitlementsForUser(params.userId)

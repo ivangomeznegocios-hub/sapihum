@@ -1,7 +1,7 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { createClient } from '@/lib/supabase/server'
+import { createClient, getViewerContext } from '@/lib/supabase/server'
 import type { FormationInsert, FormationUpdate } from '@/types/database'
 import {
     issueFormationFullCertificateRecord,
@@ -15,6 +15,7 @@ type FormationEditorContext = {
     userId: string
     role: FormationEditorRole
     isAdmin: boolean
+    activeVerticalId: string | null
 }
 
 async function requireFormationEditor(supabase: any): Promise<FormationEditorContext> {
@@ -34,11 +35,24 @@ async function requireFormationEditor(supabase: any): Promise<FormationEditorCon
         throw new Error('No tienes permisos para gestionar formaciones')
     }
 
+    const viewer = await getViewerContext()
+
     return {
         userId: user.id,
         role: profile.role as FormationEditorRole,
         isAdmin: profile.role === 'admin',
+        activeVerticalId: viewer.activeVertical?.id ?? null,
     }
+}
+
+async function getDefaultFormationVerticalId(supabase: any) {
+    const { data } = await (supabase
+        .from('verticals') as any)
+        .select('id')
+        .eq('code', 'psicologia')
+        .maybeSingle()
+
+    return data?.id ?? null
 }
 
 async function requireFormationAccess(supabase: any, formationId: string) {
@@ -46,7 +60,7 @@ async function requireFormationAccess(supabase: any, formationId: string) {
 
     const { data: formation } = await (supabase
         .from('formations') as any)
-        .select('id, created_by')
+        .select('id, created_by, primary_vertical_id, content_scope')
         .eq('id', formationId)
         .single()
 
@@ -56,6 +70,10 @@ async function requireFormationAccess(supabase: any, formationId: string) {
 
     if (!editor.isAdmin && formation.created_by !== editor.userId) {
         throw new Error('No tienes permisos para editar esta formacion')
+    }
+
+    if (editor.activeVerticalId && formation.content_scope !== 'global' && formation.primary_vertical_id !== editor.activeVerticalId) {
+        throw new Error('Esta formacion no pertenece a la vertical activa')
     }
 
     return { editor, formation }
@@ -80,6 +98,10 @@ async function validateCourseSelection(
 
     if (!editor.isAdmin) {
         query = query.eq('created_by', editor.userId)
+    }
+
+    if (editor.activeVerticalId) {
+        query = query.or(`content_scope.eq.global,primary_vertical_id.eq.${editor.activeVerticalId}`)
     }
 
     const { data: events, error } = await query
@@ -107,6 +129,7 @@ export async function createFormation(formation: FormationInsert, courseIds: str
     const supabase = await createClient()
     const editor = await requireFormationEditor(supabase)
     const validatedCourseIds = await validateCourseSelection(supabase, editor, courseIds)
+    const primaryVerticalId = formation.primary_vertical_id ?? editor.activeVerticalId ?? await getDefaultFormationVerticalId(supabase)
 
     const { data: newFormation, error: formationError } = await (supabase
         .from('formations') as any)
@@ -115,6 +138,8 @@ export async function createFormation(formation: FormationInsert, courseIds: str
             material_links: sanitizeMaterialLinks(formation.material_links),
             status: editor.isAdmin ? (formation.status || 'draft') : 'draft',
             created_by: editor.userId,
+            primary_vertical_id: primaryVerticalId,
+            content_scope: formation.content_scope ?? 'vertical',
         })
         .select()
         .single()
@@ -271,6 +296,10 @@ export async function getFormationsForAdmin() {
         query = query.eq('created_by', editor.userId)
     }
 
+    if (editor.activeVerticalId) {
+        query = query.or(`content_scope.eq.global,primary_vertical_id.eq.${editor.activeVerticalId}`)
+    }
+
     const { data, error } = await query.order('created_at', { ascending: false })
 
     if (error) {
@@ -296,6 +325,10 @@ export async function getFormationById(id: string) {
 
     if (!editor.isAdmin) {
         query = query.eq('created_by', editor.userId)
+    }
+
+    if (editor.activeVerticalId) {
+        query = query.or(`content_scope.eq.global,primary_vertical_id.eq.${editor.activeVerticalId}`)
     }
 
     const { data: formation, error } = await query.single()

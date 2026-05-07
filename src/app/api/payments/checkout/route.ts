@@ -120,6 +120,7 @@ async function reserveEventCheckoutPurchase(params: {
 
 async function syncPendingEventCheckoutPurchase(params: {
     purchaseId: string
+    eventId: string
     userId?: string | null
     email: string
     fullName?: string | null
@@ -134,6 +135,11 @@ async function syncPendingEventCheckoutPurchase(params: {
     const normalizedEmail = normalizeCheckoutEmail(params.email)
     const analyticsVisitorId = isUuid(params.analyticsContext?.visitorId) ? params.analyticsContext.visitorId : null
     const analyticsSessionId = isUuid(params.analyticsContext?.sessionId) ? params.analyticsContext.sessionId : null
+    const { data: eventVertical } = await (db
+        .from('events') as any)
+        .select('primary_vertical_id, content_scope')
+        .eq('id', params.eventId)
+        .maybeSingle()
 
     const { data: existingPurchase, error: existingPurchaseError } = await (db
         .from('event_purchases') as any)
@@ -172,6 +178,8 @@ async function syncPendingEventCheckoutPurchase(params: {
             metadata: mergedMetadata,
             purchased_at: new Date().toISOString(),
             status: 'pending',
+            primary_vertical_id: eventVertical?.primary_vertical_id ?? null,
+            content_scope: eventVertical?.content_scope ?? 'global',
         })
         .eq('id', params.purchaseId)
 
@@ -502,6 +510,11 @@ async function createPendingFormationPurchase(params: {
     const db = createServiceClient()
     const purchaseId = crypto.randomUUID()
     const normalizedEmail = params.email.trim().toLowerCase()
+    const { data: formationVertical } = await (db
+        .from('formations') as any)
+        .select('primary_vertical_id, content_scope')
+        .eq('id', params.formationId)
+        .maybeSingle()
 
     const { error } = await (db
         .from('formation_purchases') as any)
@@ -519,6 +532,8 @@ async function createPendingFormationPurchase(params: {
                 attribution_snapshot: params.attributionSnapshot ?? null,
                 full_name: params.fullName ?? null,
             },
+            primary_vertical_id: formationVertical?.primary_vertical_id ?? null,
+            content_scope: formationVertical?.content_scope ?? 'global',
         })
 
     if (error) {
@@ -664,6 +679,7 @@ export async function POST(request: NextRequest) {
         const customerEmail = user?.email || profile.data?.email || email || ''
         let customerId = profile.data?.stripe_customer_id || undefined
         let pendingEventPurchaseId = ''
+        let pendingEventId = ''
         let pendingFormationPurchaseId = ''
         let checkoutExpiresAt: string | undefined
 
@@ -740,6 +756,7 @@ export async function POST(request: NextRequest) {
             }
 
             pendingEventPurchaseId = reservation.purchase.purchaseId
+            pendingEventId = resolvedEventPurchase.event.id
             checkoutExpiresAt = new Date(Date.now() + EVENT_CHECKOUT_RESERVATION_MINUTES * 60_000).toISOString()
 
             metadata = {
@@ -982,6 +999,7 @@ export async function POST(request: NextRequest) {
             try {
                 await syncPendingEventCheckoutPurchase({
                     purchaseId: pendingEventPurchaseId,
+                    eventId: pendingEventId,
                     userId: user?.id ?? null,
                     email: customerEmail,
                     fullName: fullName || profile.data?.full_name || null,

@@ -19,7 +19,8 @@ import {
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog'
 import { getMembershipLabel } from '@/lib/membership'
 import { Sidebar } from './sidebar'
-import type { UserRole } from '@/types/database'
+import { VerticalSwitcher } from './vertical-switcher'
+import type { UserRole, Vertical } from '@/types/database'
 
 const NotificationsBell = dynamic(
     () => import('./notifications-bell').then((module) => module.NotificationsBell),
@@ -51,6 +52,8 @@ export interface HeaderProps {
     userRole?: UserRole | null
     membershipLevel?: number
     membershipSpecializationCode?: string | null
+    activeVertical?: Vertical | null
+    availableVerticals?: Vertical[]
 }
 
 export function Header({
@@ -58,6 +61,8 @@ export function Header({
     userRole,
     membershipLevel = 0,
     membershipSpecializationCode = null,
+    activeVertical = null,
+    availableVerticals = [],
 }: HeaderProps) {
     const router = useRouter()
     const pathname = usePathname()
@@ -125,6 +130,14 @@ export function Header({
                     </div>
 
                     <div className="ml-auto flex shrink-0 items-center gap-x-2 sm:gap-x-3">
+                        <div className="hidden sm:block">
+                            <VerticalSwitcher
+                                activeVertical={activeVertical}
+                                availableVerticals={availableVerticals}
+                                compact
+                            />
+                        </div>
+
                         {shouldLoadNotifications ? (
                             <NotificationsBell userId={user?.id ?? null} />
                         ) : (
@@ -215,6 +228,8 @@ export function Header({
                         userRole={userRole}
                         membershipLevel={membershipLevel}
                         membershipSpecializationCode={membershipSpecializationCode}
+                        activeVertical={activeVertical}
+                        availableVerticals={availableVerticals}
                         isMobile
                         onNavigate={() => setIsMobileMenuOpen(false)}
                     />

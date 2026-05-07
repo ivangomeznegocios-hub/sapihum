@@ -1,10 +1,11 @@
 import { canUserSeeLevel3Offer } from '@/lib/specializations'
-import type { UserRole } from '@/types/database'
+import type { UserRole, VerticalCode } from '@/types/database'
 
 export interface InternalModuleViewer {
     role?: UserRole | null
     membershipLevel?: number | null
     membershipSpecializationCode?: string | null
+    activeVerticalCode?: VerticalCode | null
 }
 
 const CLINICAL_SUITE_HREFS = new Set([
@@ -15,6 +16,20 @@ const CLINICAL_SUITE_HREFS = new Set([
     '/dashboard/documents',
     '/dashboard/referrals',
     '/dashboard/analytics',
+])
+
+const PSYCHOLOGY_ONLY_HREFS = new Set([
+    '/dashboard/calendar',
+    '/dashboard/messages',
+    '/dashboard/booking',
+    '/dashboard/my-psychologist',
+    '/dashboard/patients',
+    '/dashboard/tasks',
+    '/dashboard/documents',
+    '/dashboard/referrals',
+    '/dashboard/analytics',
+    '/dashboard/marketing',
+    '/dashboard/tools',
 ])
 
 function getEffectiveMembershipLevel(viewer: InternalModuleViewer) {
@@ -70,6 +85,10 @@ export function canAccessMarketingHub(viewer: InternalModuleViewer) {
 }
 
 export function canSeeSidebarItem(href: string, viewer: InternalModuleViewer) {
+    if (viewer.activeVerticalCode === 'ciencias_forenses' && PSYCHOLOGY_ONLY_HREFS.has(href)) {
+        return viewer.role === 'admin'
+    }
+
     if (href === '/dashboard/growth') {
         return canAccessGrowthHub(viewer)
     }

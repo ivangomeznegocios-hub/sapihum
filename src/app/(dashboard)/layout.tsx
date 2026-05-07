@@ -12,6 +12,8 @@ export default async function DashboardLayout({
         role,
         membershipLevel,
         membershipSpecializationCode,
+        activeVertical,
+        availableVerticals,
     } = await getViewerContext({
         includeCommercialAccess: true,
     })
@@ -22,6 +24,8 @@ export default async function DashboardLayout({
             userRole={role}
             membershipLevel={membershipLevel}
             membershipSpecializationCode={membershipSpecializationCode}
+            activeVertical={activeVertical}
+            availableVerticals={availableVerticals}
         >
             <SessionTimeout />
             {children}

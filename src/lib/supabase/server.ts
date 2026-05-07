@@ -1,10 +1,15 @@
 import { createServerClient } from '@supabase/ssr'
-import type { User } from '@supabase/supabase-js'
+import { createClient as createSupabaseClient, type User } from '@supabase/supabase-js'
 import { cookies } from 'next/headers'
 import { cache } from 'react'
 import { getCommercialAccessContext, type CommercialAccessSnapshot } from '@/lib/access/commercial'
 import { createTimeoutFetch } from '@/lib/http/timeout-fetch'
-import type { Profile, UserRole, Database } from '@/types/database'
+import {
+    DEFAULT_VERTICAL_CODE,
+    getDefaultVerticalRole,
+    normalizeVerticalCode,
+} from '@/lib/verticals'
+import type { Profile, UserRole, Database, UserVerticalAccess, Vertical, VerticalCode } from '@/types/database'
 
 const supabaseServerFetch = createTimeoutFetch(12_000, 'Supabase server request')
 
@@ -49,10 +54,13 @@ export interface ViewerContext {
     membershipLevel: number
     membershipSpecializationCode: Profile['membership_specialization_code']
     commercialAccess: CommercialAccessSnapshot | null
+    availableVerticals: Vertical[]
+    activeVertical: Vertical | null
+    activeVerticalAccess: UserVerticalAccess | null
+    verticalAccess: UserVerticalAccess[]
 }
 
 export async function createAdminClient() {
-    const cookieStore = await cookies()
     const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
 
     if (!serviceRoleKey) {
@@ -60,25 +68,13 @@ export async function createAdminClient() {
         throw new Error('Server misconfiguration: Missing Service Role Key')
     }
 
-    return createServerClient<Database>(
+    return createSupabaseClient<Database>(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
         serviceRoleKey,
         {
-            cookies: {
-                getAll() {
-                    return cookieStore.getAll()
-                },
-                setAll(cookiesToSet) {
-                    try {
-                        cookiesToSet.forEach(({ name, value, options }) =>
-                            cookieStore.set(name, value, options)
-                        )
-                    } catch {
-                        // The `setAll` method was called from a Server Component.
-                        // This can be ignored if you have middleware refreshing
-                        // user sessions.
-                    }
-                },
+            auth: {
+                autoRefreshToken: false,
+                persistSession: false,
             },
             global: {
                 fetch: supabaseServerFetch,
@@ -127,10 +123,27 @@ const getBaseViewerContext = cache(async () => {
             role: null,
             profileMembershipLevel: 0,
             membershipSpecializationCode: null,
+            availableVerticals: [],
+            activeVertical: null,
+            activeVerticalAccess: null,
+            verticalAccess: [],
         }
     }
 
     const profile = await getProfileByUserId(supabase, user.id)
+
+    const verticalContext = profile
+        ? await resolveUserVerticalContext({
+            supabase,
+            userId: user.id,
+            profile,
+        })
+        : {
+            availableVerticals: [],
+            activeVertical: null,
+            activeVerticalAccess: null,
+            verticalAccess: [],
+        }
 
     return {
         supabase,
@@ -139,15 +152,132 @@ const getBaseViewerContext = cache(async () => {
         role: profile?.role ?? null,
         profileMembershipLevel: Number(profile?.membership_level ?? 0),
         membershipSpecializationCode: profile?.membership_specialization_code ?? null,
+        ...verticalContext,
     }
 })
 
-const getViewerContextCached = cache(async (includeCommercialAccess: boolean): Promise<ViewerContext> => {
+async function getActiveVerticalCookieCode() {
+    const cookieStore = await cookies()
+    return normalizeVerticalCode(cookieStore.get('sapihum_active_vertical')?.value)
+}
+
+async function resolveUserVerticalContext(params: {
+    supabase: ServerSupabaseClient
+    userId: string
+    profile: Profile
+    requestedVerticalCode?: VerticalCode | null
+}) {
+    const { data: activeVerticalRows } = await (params.supabase
+        .from('verticals') as any)
+        .select('*')
+        .eq('status', 'active')
+        .order('name', { ascending: true })
+
+    const allActiveVerticals = ((activeVerticalRows ?? []) as Vertical[])
+        .filter((vertical) => vertical.code === 'psicologia' || vertical.code === 'ciencias_forenses')
+
+    const { data: accessRows } = await (params.supabase
+        .from('user_vertical_access') as any)
+        .select('*, vertical:verticals(*)')
+        .eq('user_id', params.userId)
+        .neq('access_status', 'suspended')
+        .order('is_default', { ascending: false })
+        .order('created_at', { ascending: true })
+
+    const storedAccess = ((accessRows ?? []) as UserVerticalAccess[])
+        .filter((row) => row.vertical && row.vertical.status === 'active')
+
+    const hasGlobalScope = params.profile.role === 'admin' || params.profile.role === 'support'
+    const verticalAccess = hasGlobalScope
+        ? mergeGlobalVerticalAccess({
+            userId: params.userId,
+            profile: params.profile,
+            allActiveVerticals,
+            storedAccess,
+        })
+        : storedAccess
+
+    const availableVerticals = verticalAccess
+        .map((row) => row.vertical)
+        .filter((vertical): vertical is Vertical => Boolean(vertical))
+
+    const requestedVerticalCode = params.requestedVerticalCode ?? await getActiveVerticalCookieCode()
+    const requestedAccess = requestedVerticalCode
+        ? verticalAccess.find((row) => row.vertical?.code === requestedVerticalCode)
+        : null
+    const defaultAccess = verticalAccess.find((row) => row.is_default) ?? null
+    const singleAccess = verticalAccess.length === 1 ? verticalAccess[0] : null
+    const fallbackAccess = verticalAccess.find((row) => row.vertical?.code === DEFAULT_VERTICAL_CODE) ?? verticalAccess[0] ?? null
+    const activeVerticalAccess = requestedAccess ?? defaultAccess ?? singleAccess ?? fallbackAccess
+
+    return {
+        availableVerticals,
+        activeVertical: activeVerticalAccess?.vertical ?? null,
+        activeVerticalAccess: activeVerticalAccess ?? null,
+        verticalAccess,
+    }
+}
+
+function mergeGlobalVerticalAccess(params: {
+    userId: string
+    profile: Profile
+    allActiveVerticals: Vertical[]
+    storedAccess: UserVerticalAccess[]
+}) {
+    const storedByCode = new Map(
+        params.storedAccess
+            .filter((row) => row.vertical)
+            .map((row) => [row.vertical!.code, row])
+    )
+
+    return params.allActiveVerticals.map((vertical) => {
+        const existing = storedByCode.get(vertical.code)
+        if (existing) {
+            return {
+                ...existing,
+                vertical_role: getDefaultVerticalRole(params.profile.role),
+                access_status: 'active' as const,
+            }
+        }
+
+        return {
+            id: `global-${params.userId}-${vertical.code}`,
+            user_id: params.userId,
+            vertical_id: vertical.id,
+            vertical_role: getDefaultVerticalRole(params.profile.role),
+            access_status: 'active' as const,
+            membership_level: Number(params.profile.membership_level ?? 0),
+            is_default: vertical.code === DEFAULT_VERTICAL_CODE,
+            created_at: new Date(0).toISOString(),
+            updated_at: new Date(0).toISOString(),
+            vertical,
+        } satisfies UserVerticalAccess
+    })
+}
+
+const getViewerContextCached = cache(async (
+    includeCommercialAccess: boolean,
+    requestedVerticalCode: VerticalCode | null
+): Promise<ViewerContext> => {
     const base = await getBaseViewerContext()
+    const verticalContext = base.user && base.profile && requestedVerticalCode
+        ? await resolveUserVerticalContext({
+            supabase: base.supabase,
+            userId: base.user.id,
+            profile: base.profile,
+            requestedVerticalCode,
+        })
+        : {
+            availableVerticals: base.availableVerticals,
+            activeVertical: base.activeVertical,
+            activeVerticalAccess: base.activeVerticalAccess,
+            verticalAccess: base.verticalAccess,
+        }
 
     if (!includeCommercialAccess || !base.user || !base.profile) {
         return {
             ...base,
+            ...verticalContext,
             membershipLevel: base.profileMembershipLevel,
             commercialAccess: null,
         }
@@ -158,18 +288,44 @@ const getViewerContextCached = cache(async (includeCommercialAccess: boolean): P
         userId: base.user.id,
         profile: base.profile,
     })
+    const verticalMembershipLevel = verticalContext.activeVerticalAccess
+        ? Number(verticalContext.activeVerticalAccess.membership_level ?? 0)
+        : null
+    const verticalHasActiveMembership = Boolean(
+        verticalContext.activeVerticalAccess?.access_status === 'active' &&
+        verticalMembershipLevel !== null &&
+        verticalMembershipLevel > 0
+    )
+    const effectiveMembershipLevel = verticalMembershipLevel ?? commercialAccess?.membershipLevel ?? base.profileMembershipLevel
+    const effectiveCommercialAccess = commercialAccess
+        ? {
+            ...commercialAccess,
+            membershipLevel: effectiveMembershipLevel,
+            hasActiveMembership: commercialAccess.hasActiveMembership || verticalHasActiveMembership,
+            viewer: {
+                ...commercialAccess.viewer,
+                membershipLevel: effectiveMembershipLevel,
+                membershipActive: commercialAccess.viewer.membershipActive || verticalHasActiveMembership,
+            },
+        }
+        : null
 
     return {
         ...base,
-        membershipLevel: commercialAccess?.membershipLevel ?? base.profileMembershipLevel,
-        commercialAccess,
+        ...verticalContext,
+        membershipLevel: effectiveMembershipLevel,
+        commercialAccess: effectiveCommercialAccess,
     }
 })
 
 export async function getViewerContext(options?: {
     includeCommercialAccess?: boolean
+    activeVerticalCode?: string | null
 }): Promise<ViewerContext> {
-    return getViewerContextCached(Boolean(options?.includeCommercialAccess))
+    return getViewerContextCached(
+        Boolean(options?.includeCommercialAccess),
+        normalizeVerticalCode(options?.activeVerticalCode)
+    )
 }
 
 /**
