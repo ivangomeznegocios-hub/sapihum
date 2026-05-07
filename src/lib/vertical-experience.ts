@@ -1,10 +1,4 @@
-import { SAPIHUM_VERTICALS } from '@/lib/verticals'
 import type { VerticalCode } from '@/types/database'
-
-export interface VerticalExperienceAction {
-    label: string
-    href: string
-}
 
 export interface VerticalExperienceModule {
     title: string
@@ -12,53 +6,23 @@ export interface VerticalExperienceModule {
     href: string
 }
 
-export interface VerticalExperiencePlan {
-    name: string
-    price: string
-    description: string
-    includes: string[]
-}
-
 export interface VerticalExperience {
     code: VerticalCode
-    slug: string
     name: string
     shortName: string
     eyebrow: string
-    headline: string
-    description: string
-    heroImage: string
-    primaryAction: VerticalExperienceAction
-    secondaryAction: VerticalExperienceAction
-    audience: string[]
     specialties: string[]
     dashboardTitle: string
     dashboardDescription: string
     dashboardModules: VerticalExperienceModule[]
-    publicModules: VerticalExperienceModule[]
-    pricingPlans: VerticalExperiencePlan[]
 }
 
 export const VERTICAL_EXPERIENCES: Record<VerticalCode, VerticalExperience> = {
     psicologia: {
         code: 'psicologia',
-        slug: SAPIHUM_VERTICALS.psicologia.slug,
         name: 'Psicologia',
         shortName: 'Psicologia',
         eyebrow: 'SAPIHUM Psicologia',
-        headline: 'Formacion, comunidad y herramientas para profesionales de la psicologia.',
-        description:
-            'Una experiencia enfocada en salud mental, practica clinica, especialidades psicologicas, investigacion aplicada y crecimiento profesional.',
-        heroImage: 'https://images.unsplash.com/photo-1559757175-5700dde675bc?auto=format&fit=crop&w=1800&q=80',
-        primaryAction: {
-            label: 'Entrar a Psicologia',
-            href: '/psicologia',
-        },
-        secondaryAction: {
-            label: 'Ver academia',
-            href: '/academia?vertical=psicologia',
-        },
-        audience: ['Psicologos', 'Estudiantes', 'Terapeutas', 'Docentes', 'Investigadores'],
         specialties: [
             'Psicologia clinica',
             'Neuropsicologia',
@@ -92,63 +56,12 @@ export const VERTICAL_EXPERIENCES: Record<VerticalCode, VerticalExperience> = {
                 href: '/dashboard/patients',
             },
         ],
-        publicModules: [
-            {
-                title: 'Academia psicologica',
-                description: 'Eventos, talleres y formaciones para fortalecer criterio clinico y profesional.',
-                href: '/academia?vertical=psicologia',
-            },
-            {
-                title: 'Especialidades',
-                description: 'Ramas psicologicas organizadas como tracks dentro de la vertical.',
-                href: '/especialidades',
-            },
-            {
-                title: 'Membresia',
-                description: 'Beneficios, comunidad y herramientas para crecer dentro de SAPIHUM.',
-                href: '/precios',
-            },
-        ],
-        pricingPlans: [
-            {
-                name: 'Comunidad Psicologia',
-                price: '$250 MXN/mes',
-                description: 'Acceso base a comunidad, eventos y recursos de actualizacion psicologica.',
-                includes: ['Comunidad profesional', 'Eventos y grabaciones seleccionadas', 'Recursos de psicologia', 'Precios preferenciales'],
-            },
-            {
-                name: 'Consultorio Digital',
-                price: '$400 MXN/mes',
-                description: 'Capa avanzada para operar consulta, seguimiento y documentacion clinica.',
-                includes: ['Todo Comunidad Psicologia', 'Agenda y gestion clinica', 'Expedientes y documentos', 'Herramientas de IA clinica'],
-            },
-            {
-                name: 'Gestion Premium',
-                price: 'A medida',
-                description: 'Acompanamiento para crecimiento, posicionamiento y operacion profesional.',
-                includes: ['Todo Consultorio Digital', 'Marketing y crecimiento', 'Soporte operativo', 'Prioridad en nuevas funciones'],
-            },
-        ],
     },
     ciencias_forenses: {
         code: 'ciencias_forenses',
-        slug: SAPIHUM_VERTICALS.ciencias_forenses.slug,
         name: 'Ciencias Forenses',
         shortName: 'Forense',
         eyebrow: 'SAPIHUM Ciencias Forenses',
-        headline: 'Formacion y comunidad para ciencias forenses, criminalistica y trabajo pericial.',
-        description:
-            'Una experiencia separada para perfiles forenses: diplomados, eventos, casos, materiales tecnicos y rutas de actualizacion profesional.',
-        heroImage: 'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=1800&q=80',
-        primaryAction: {
-            label: 'Entrar a Ciencias Forenses',
-            href: '/ciencias-forenses',
-        },
-        secondaryAction: {
-            label: 'Ver agenda forense',
-            href: '/academia?vertical=ciencias_forenses',
-        },
-        audience: ['Peritos', 'Criminologos', 'Criminalistas', 'Abogados', 'Investigadores', 'Estudiantes'],
         specialties: [
             'Criminalistica',
             'Criminologia',
@@ -182,50 +95,8 @@ export const VERTICAL_EXPERIENCES: Record<VerticalCode, VerticalExperience> = {
                 href: '/dashboard/speakers',
             },
         ],
-        publicModules: [
-            {
-                title: 'Academia forense',
-                description: 'Eventos y diplomados para ciencias forenses, criminalistica y criminologia.',
-                href: '/academia?vertical=ciencias_forenses',
-            },
-            {
-                title: 'Eventos forenses',
-                description: 'Agenda publica filtrada por la vertical de Ciencias Forenses.',
-                href: '/eventos?vertical=ciencias_forenses',
-            },
-            {
-                title: 'Formaciones forenses',
-                description: 'Programas completos de actualizacion, diplomados y rutas periciales.',
-                href: '/formaciones?vertical=ciencias_forenses',
-            },
-        ],
-        pricingPlans: [
-            {
-                name: 'Comunidad Forense',
-                price: '$250 MXN/mes',
-                description: 'Acceso base a agenda forense, comunidad pericial y recursos de actualizacion.',
-                includes: ['Eventos forenses seleccionados', 'Comunidad pericial', 'Biblioteca tecnica inicial', 'Precios preferenciales en diplomados'],
-            },
-            {
-                name: 'Forense Pro',
-                price: '$400 MXN/mes',
-                description: 'Plan para estudiantes avanzados, peritos y profesionales que quieren una ruta mas completa.',
-                includes: ['Todo Comunidad Forense', 'Diplomados con beneficios', 'Materiales tecnicos avanzados', 'Casos practicos y sesiones aplicadas'],
-            },
-            {
-                name: 'Institucional Forense',
-                price: 'A medida',
-                description: 'Paquete para equipos, escuelas, despachos o instituciones con varios accesos.',
-                includes: ['Accesos multiusuario', 'Rutas por equipo', 'Reportes y soporte', 'Condiciones comerciales especiales'],
-            },
-        ],
     },
 }
-
-export const VERTICAL_EXPERIENCE_LIST = [
-    VERTICAL_EXPERIENCES.psicologia,
-    VERTICAL_EXPERIENCES.ciencias_forenses,
-]
 
 export function getVerticalExperience(code: VerticalCode | null | undefined) {
     return code ? VERTICAL_EXPERIENCES[code] ?? VERTICAL_EXPERIENCES.psicologia : VERTICAL_EXPERIENCES.psicologia

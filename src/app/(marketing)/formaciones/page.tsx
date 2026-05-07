@@ -7,8 +7,6 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { getPublicFormations } from './actions'
 import { getSpecializationByCode } from '@/lib/specializations'
-import { normalizeVerticalCode } from '@/lib/verticals'
-import { getVerticalExperience } from '@/lib/vertical-experience'
 
 const formacionesDescription = 'Rutas de formacion profesional integral en psicologia clinica.'
 
@@ -65,15 +63,8 @@ function getMemberBenefitLabel(formation: Formation) {
     return 'Compra directa disponible'
 }
 
-interface FormationsCatalogPageProps {
-    searchParams?: Promise<{ vertical?: string }>
-}
-
-export default async function FormationsCatalogPage({ searchParams }: FormationsCatalogPageProps) {
-    const params = (await searchParams) ?? {}
-    const activeVerticalCode = normalizeVerticalCode(params.vertical)
-    const activeVerticalExperience = activeVerticalCode ? getVerticalExperience(activeVerticalCode) : null
-    const formations = await getPublicFormations(activeVerticalCode)
+export default async function FormationsCatalogPage() {
+    const formations = await getPublicFormations()
 
     return (
         <div className="min-h-screen bg-background text-foreground">
@@ -92,16 +83,15 @@ export default async function FormationsCatalogPage({ searchParams }: Formations
 
                             <div className="space-y-4">
                                 <h1 className="font-serif text-4xl font-bold leading-[1.05] tracking-normal text-brand-text-strong md:text-5xl lg:text-6xl">
-                                    {activeVerticalExperience ? `Formaciones de ${activeVerticalExperience.name}` : 'Formaciones'}
+                                    Formaciones
                                     <span className="block italic font-bold text-brand-blue-dark">
                                         completas y comprables
                                     </span>
                                 </h1>
 
                                 <p className="max-w-2xl text-lg leading-relaxed text-brand-text-muted md:text-xl">
-                                    {activeVerticalExperience
-                                        ? activeVerticalExperience.description
-                                        : 'Programas pensados como una ruta real: una sola compra, un orden claro de avance, materiales complementarios y una experiencia coherente con el nivel profesional de SAPIHUM.'}
+                                    Programas pensados como una ruta real: una sola compra, un orden claro de avance,
+                                    materiales complementarios y una experiencia coherente con el nivel profesional de SAPIHUM.
                                 </p>
                             </div>
                         </div>

@@ -8,14 +8,13 @@ import { splitPublicCatalogEvents } from "@/lib/events/public"
 import { LEVEL_2_CARD_FEATURE_IDS, PRICING_PLAN_COPY, getPricingFeatureTitles } from "@/lib/pricing-catalog"
 import { getFeaturedPublicSpeakers } from "@/lib/supabase/queries/speakers"
 import { Shield, Users, BookOpen, Scaling, Beaker, FileText, Smartphone, ArrowRight } from "lucide-react"
-import { VERTICAL_EXPERIENCE_LIST } from "@/lib/vertical-experience"
 
 export const metadata = {
-  title: "SAPIHUM | Psicologia y Ciencias Forenses",
-  description: "Una sola plataforma para investigacion humana, psicologia, ciencias forenses, formacion especializada y comunidad profesional.",
+  title: "SAPIHUM | Comunidad Profesional de Psicología Avanzada",
+  description: "Cursos y formaciones especializadas para psicólogos que buscan crecer con más estructura, criterio y respaldo profesional.",
   openGraph: {
-    title: "SAPIHUM | Psicologia y Ciencias Forenses",
-    description: "Academia SAPIHUM: verticales internas para psicologia, ciencias forenses e investigacion humana.",
+    title: "SAPIHUM | Comunidad Profesional de Psicología Avanzada",
+    description: "Academia SAPIHUM: cursos, formaciones, membresía profesional y herramientas para fortalecer la práctica psicológica.",
     type: "website",
   },
 }
@@ -208,74 +207,49 @@ export default async function LandingPage() {
           <div className="mx-auto flex max-w-7xl flex-col items-center text-center">
             <div className="mb-12 inline-flex items-center gap-2 rounded-full border border-brand-blue-border bg-brand-blue-soft/80 px-5 py-2 text-[11px] font-extrabold uppercase tracking-[0.16em] text-brand-blue-dark shadow-sm">
               <Shield className="h-3.5 w-3.5 fill-brand-blue text-brand-blue" />
-              Psicologia y Ciencias Forenses
+              Para profesionales de la salud mental
             </div>
 
             <h1 className="font-serif text-[clamp(2.85rem,4.65vw,5.85rem)] font-bold leading-[1.04] tracking-normal text-brand-text-strong">
-              <span className="block md:whitespace-nowrap">SAPIHUM para</span>
-              <span className="block md:whitespace-nowrap">investigacion y ciencias del</span>
+              <span className="block md:whitespace-nowrap">La comunidad para los</span>
+              <span className="block md:whitespace-nowrap">profesionales del</span>
               <span className="block pt-2 text-[0.88em] italic font-bold text-brand-text md:whitespace-nowrap">
                 comportamiento <span className="text-brand-blue-dark">humano.</span>
               </span>
             </h1>
 
             <div className="mt-10 max-w-3xl text-xl leading-relaxed text-brand-text-muted md:text-2xl">
-              <p>Elige Psicologia o Ciencias Forenses.</p>
-              <p className="font-semibold text-brand-text">Misma cuenta, mismo core tecnologico, experiencias separadas.</p>
-              <p>Formacion, comunidad y recursos segun tu area profesional.</p>
+              <p>Psicólogos, Terapeutas, Consultores y Educadores.</p>
+              <p className="font-semibold text-brand-text">Diferentes trincheras, una misma misión:</p>
+              <p>Impactar vidas con ética y rigor.</p>
             </div>
 
             <div className="mt-14 flex w-full flex-col gap-5 text-sm sm:w-auto sm:flex-row">
               <Link
-                href="/psicologia"
+                href="/auth/register"
                 className="w-full sm:w-auto"
                 data-analytics-cta
-                data-analytics-label="Hero Psicologia"
+                data-analytics-label="Hero Unirme Comunidad"
                 data-analytics-surface="home_hero"
-                data-analytics-funnel="landing"
+                data-analytics-funnel="registration"
               >
                 <Button size="lg" className="h-14 w-full px-10 text-base font-bold normal-case tracking-normal">
-                  Entrar a Psicologia
+                  Unirme a la Comunidad
                   <ArrowRight className="h-4 w-4" />
                 </Button>
               </Link>
               <Link
-                href="/ciencias-forenses"
+                href="/nosotros"
                 className="w-full sm:w-auto"
                 data-analytics-cta
-                data-analytics-label="Hero Ciencias Forenses"
+                data-analytics-label="Hero Conocer Mas"
                 data-analytics-surface="home_hero"
                 data-analytics-funnel="landing"
               >
                 <Button size="lg" variant="outline" className="h-14 w-full px-10 text-base font-bold normal-case tracking-normal">
-                  Entrar a Forense
-                  <ArrowRight className="h-4 w-4" />
+                  Conocer Más
                 </Button>
               </Link>
-            </div>
-
-            <div className="mt-10 grid w-full max-w-5xl gap-4 text-left md:grid-cols-2">
-              {VERTICAL_EXPERIENCE_LIST.map((area) => (
-                <Link
-                  key={area.code}
-                  href={area.primaryAction.href}
-                  className="group rounded-md border border-brand-border bg-white/82 p-5 shadow-sm transition-colors hover:border-brand-blue/40"
-                >
-                  <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-brand-blue">
-                    {area.eyebrow}
-                  </p>
-                  <h2 className="mt-2 text-xl font-bold text-brand-text-strong group-hover:text-brand-blue">
-                    {area.name}
-                  </h2>
-                  <p className="mt-2 text-sm leading-relaxed text-brand-text-muted">
-                    {area.description}
-                  </p>
-                  <span className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-brand-blue">
-                    Entrar
-                    <ArrowRight className="h-4 w-4" />
-                  </span>
-                </Link>
-              ))}
             </div>
           </div>
         </div>

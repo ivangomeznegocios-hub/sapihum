@@ -19,8 +19,6 @@ import { getSpecializationByCode } from '@/lib/specializations'
 import { getUnifiedCatalogEvents } from '@/lib/supabase/queries/events'
 import { getPublicFormations } from '@/app/(marketing)/formaciones/actions'
 import { DEFAULT_TIMEZONE, formatEventDate, formatEventTime } from '@/lib/timezone'
-import { normalizeVerticalCode } from '@/lib/verticals'
-import { getVerticalExperience } from '@/lib/vertical-experience'
 
 export const metadata: Metadata = {
     title: 'Academia SAPIHUM | Formacion Continua en Psicologia',
@@ -52,16 +50,14 @@ function formatHours(value: number | null | undefined) {
 }
 
 interface AcademiaPageProps {
-    searchParams?: Promise<{ track?: string; vertical?: string }>
+    searchParams?: Promise<{ track?: string }>
 }
 
 export default async function AcademiaPage({ searchParams }: AcademiaPageProps) {
     const params = (await searchParams) ?? {}
-    const activeVerticalCode = normalizeVerticalCode(params.vertical)
-    const activeVerticalExperience = activeVerticalCode ? getVerticalExperience(activeVerticalCode) : null
     const [allEvents, formations] = await Promise.all([
-        getUnifiedCatalogEvents(activeVerticalCode),
-        getPublicFormations(activeVerticalCode),
+        getUnifiedCatalogEvents(),
+        getPublicFormations(),
     ])
 
     const normalizedEvents = allEvents.map((event: any) => applyEventCampaignCopy(event))
@@ -105,20 +101,14 @@ export default async function AcademiaPage({ searchParams }: AcademiaPageProps) 
                             </div>
 
                             <h1 className="mb-6 font-serif text-4xl font-bold leading-[1.05] tracking-normal text-brand-text-strong md:text-5xl lg:text-6xl">
-                                {activeVerticalExperience
-                                    ? `Academia para ${activeVerticalExperience.name}`
-                                    : activeCampaign ? 'La ruta recomendada para avanzar en' : 'Formacion continua para psicologos que quieren avanzar con mas'}{' '}
+                                {activeCampaign ? 'La ruta recomendada para avanzar en' : 'Formacion continua para psicologos que quieren avanzar con mas'}{' '}
                                 <span className="italic font-bold text-brand-blue-dark">
-                                    {activeVerticalExperience
-                                        ? 'con contenido filtrado por area'
-                                        : activeCampaign ? activeCampaign.title.toLowerCase() : 'criterio, profundidad y aplicacion real'}
+                                    {activeCampaign ? activeCampaign.title.toLowerCase() : 'criterio, profundidad y aplicacion real'}
                                 </span>
                             </h1>
 
                             <p className="mb-8 max-w-2xl text-lg leading-relaxed text-brand-text-muted md:text-xl">
-                                {activeVerticalExperience
-                                    ? activeVerticalExperience.description
-                                    : activeCampaign
+                                {activeCampaign
                                     ? activeCampaign.promise
                                     : 'Encuentros en vivo y programas completos para seguir formandote con claridad, respaldo academico y una siguiente accion evidente en cada paso.'}
                             </p>
@@ -169,16 +159,16 @@ export default async function AcademiaPage({ searchParams }: AcademiaPageProps) 
                     </div>
 
                     <div className="mb-8 flex flex-wrap gap-2">
-                        <Link href={activeVerticalCode ? `/academia?vertical=${activeVerticalCode}#catalogo` : '/academia#catalogo'}>
+                        <Link href="/academia#catalogo">
                             <Badge 
                                 variant={!activeCampaign ? 'default' : 'outline'} 
                                 className={!activeCampaign ? 'bg-brand-blue text-white hover:bg-brand-blue-hover px-4 py-1.5' : 'border-brand-border hover:bg-brand-surface-soft px-4 py-1.5'}
                             >
-                                {activeVerticalExperience ? `Agenda ${activeVerticalExperience.shortName}` : 'Toda la agenda'}
+                                Toda la agenda
                             </Badge>
                         </Link>
                         {campaignBlocks.map(({ campaign }) => (
-                            <Link key={campaign.key} href={activeVerticalCode ? `/academia?vertical=${activeVerticalCode}&track=${campaign.key}#catalogo` : `/academia?track=${campaign.key}#catalogo`}>
+                            <Link key={campaign.key} href={`/academia?track=${campaign.key}#catalogo`}>
                                 <Badge 
                                     variant={activeCampaign?.key === campaign.key ? 'default' : 'outline'} 
                                     className={activeCampaign?.key === campaign.key ? 'bg-brand-blue text-white hover:bg-brand-blue-hover px-4 py-1.5' : 'border-brand-border hover:bg-brand-surface-soft px-4 py-1.5'}

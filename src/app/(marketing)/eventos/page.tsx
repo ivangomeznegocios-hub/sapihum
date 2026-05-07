@@ -12,8 +12,6 @@ import {
 } from '@/lib/events/campaigns'
 import { splitPublicCatalogEvents } from '@/lib/events/public'
 import { getUnifiedCatalogEvents } from '@/lib/supabase/queries/events'
-import { normalizeVerticalCode } from '@/lib/verticals'
-import { getVerticalExperience } from '@/lib/vertical-experience'
 
 const eventosDescription =
     'Eventos en vivo, conferencias, talleres y webinars de la comunidad SAPIHUM. Formacion continua para profesionales de la psicologia.'
@@ -38,15 +36,13 @@ export const metadata: Metadata = {
 }
 
 interface EventosPageProps {
-    searchParams?: Promise<{ track?: string; vertical?: string }>
+    searchParams?: Promise<{ track?: string }>
 }
 
 export default async function EventosPage({ searchParams }: EventosPageProps) {
     const params = (await searchParams) ?? {}
     const activeCampaign = getEventCampaignByKey(params.track)
-    const activeVerticalCode = normalizeVerticalCode(params.vertical)
-    const activeVerticalExperience = activeVerticalCode ? getVerticalExperience(activeVerticalCode) : null
-    const allItems = (await getUnifiedCatalogEvents(activeVerticalCode)).map((item: any) => applyEventCampaignCopy(item))
+    const allItems = (await getUnifiedCatalogEvents()).map((item: any) => applyEventCampaignCopy(item))
     const items = splitPublicCatalogEvents(allItems).upcoming.filter((event: any) =>
         event.event_type !== 'course' &&
         event.event_type !== 'on_demand'
@@ -75,30 +71,28 @@ export default async function EventosPage({ searchParams }: EventosPageProps) {
                                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-brand-blue opacity-75" />
                                 <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-brand-blue" />
                             </span>
-                            {activeVerticalExperience ? activeVerticalExperience.eyebrow : 'Agenda activa'}
+                            Agenda activa
                         </div>
                         <h1 className="font-serif text-4xl font-bold tracking-normal text-brand-text-strong sm:text-5xl">
-                            {activeVerticalExperience ? `Eventos de ${activeVerticalExperience.name}` : 'Eventos en Vivo'}
+                            Eventos en Vivo
                         </h1>
                         <p className="max-w-3xl text-lg leading-relaxed text-brand-text-muted">
-                            {activeVerticalExperience
-                                ? activeVerticalExperience.description
-                                : 'Esta ruta funciona como vista complementaria para enlaces compartidos, filtros y agenda puntual. La experiencia principal de descubrimiento y conversion vive ahora en Academia.'}
+                            Esta ruta funciona como vista complementaria para enlaces compartidos, filtros y agenda puntual. La experiencia principal de descubrimiento y conversion vive ahora en Academia.
                         </p>
                         <div className="flex flex-wrap gap-3">
-                            <Link href={activeVerticalCode ? `/eventos?vertical=${activeVerticalCode}` : '/eventos'}>
+                            <Link href="/eventos">
                                 <Button variant={!activeCampaign ? 'default' : 'outline'}>
-                                    {activeVerticalExperience ? `Todo ${activeVerticalExperience.shortName}` : 'Ver todo'}
+                                    Ver todo
                                 </Button>
                             </Link>
                             {getAllEventCampaigns().map((campaign) => (
-                                <Link key={campaign.key} href={activeVerticalCode ? `/eventos?vertical=${activeVerticalCode}&track=${campaign.key}` : `/eventos?track=${campaign.key}`}>
+                                <Link key={campaign.key} href={`/eventos?track=${campaign.key}`}>
                                     <Button variant={activeCampaign?.key === campaign.key ? 'default' : 'outline'}>
                                         {campaign.title}
                                     </Button>
                                 </Link>
                             ))}
-                            <Link href={activeVerticalCode ? `/academia?vertical=${activeVerticalCode}` : '/academia'} className="inline-flex items-center gap-1.5 text-sm font-medium text-brand-blue transition-colors hover:text-brand-blue">
+                            <Link href="/academia" className="inline-flex items-center gap-1.5 text-sm font-medium text-brand-blue transition-colors hover:text-brand-blue">
                                 &larr; Ir al hub principal en Academia
                             </Link>
                         </div>
