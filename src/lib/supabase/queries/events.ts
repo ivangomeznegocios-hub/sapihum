@@ -476,7 +476,7 @@ async function getPublicVerticalId(supabase: any, verticalCode?: string | null) 
     return data.id as string
 }
 
-export async function getPublicEventBySlug(slug: string): Promise<any | null> {
+async function fetchPublicEventBySlug(slug: string): Promise<any | null> {
     const supabase = createPublicClient()
 
     const { data: event, error } = await (supabase
@@ -510,6 +510,15 @@ export async function getPublicEventBySlug(slug: string): Promise<any | null> {
         public_kind: getPublicCatalogKindForEvent(hydrated),
     }
 }
+
+export const getPublicEventBySlug = unstable_cache(
+    fetchPublicEventBySlug,
+    ['public-event-by-slug'],
+    {
+        revalidate: 120,
+        tags: ['public-events'],
+    }
+)
 
 async function fetchPublicCatalogEvents(
     kind: 'eventos' | 'cursos' | 'grabaciones',

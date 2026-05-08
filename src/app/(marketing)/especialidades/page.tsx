@@ -10,6 +10,9 @@ export const metadata = {
   description: 'Explora 8 especialidades de psicologia con eventos, cursos, formaciones, membresia y rutas de Nivel 2 en SAPIHUM.',
 }
 
+// PERF: ISR — page data comes from static config; 300s keeps it fresh.
+export const revalidate = 300
+
 export default function EspecialidadesIndexPage() {
   const specializations = SPECIALIZATIONS
 

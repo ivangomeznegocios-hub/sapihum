@@ -3,6 +3,7 @@ import { z } from 'zod'
 import { recordAnalyticsServerEvent, resolveAttributionSnapshot } from '@/lib/analytics/server'
 import { createClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
+import { checkRateLimit, rateLimitResponse } from '@/lib/rate-limit'
 
 const FounderLeadSchema = z.object({
     fullName: z.string().trim().min(2),
@@ -16,6 +17,13 @@ const FounderLeadSchema = z.object({
 })
 
 export async function POST(request: NextRequest) {
+    // Rate limiting: 5 req/min + 20 req/hour per IP
+    const rlMinute = await checkRateLimit(request, { namespace: 'leads:founders:minute', limit: 5, window: '1 m' })
+    if (!rlMinute.success) return rateLimitResponse(rlMinute)
+
+    const rlHour = await checkRateLimit(request, { namespace: 'leads:founders:hour', limit: 20, window: '1 h' })
+    if (!rlHour.success) return rateLimitResponse(rlHour)
+
     try {
         const payload = FounderLeadSchema.safeParse(await request.json())
         if (!payload.success) {

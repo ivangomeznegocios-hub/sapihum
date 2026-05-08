@@ -39,6 +39,9 @@ export const metadata: Metadata = {
     },
 }
 
+// PERF: ISR — serve cached HTML for 5 minutes per variant.
+export const revalidate = 300
+
 function formatCurrency(value: number | null | undefined) {
     return `$${Number(value || 0)} MXN`
 }

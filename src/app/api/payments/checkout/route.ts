@@ -25,6 +25,8 @@ import { getFormationCommercialState } from '@/lib/formations/pricing'
 import { createConfirmedFormationPurchaseAndGrantAccess } from '@/lib/formations/service'
 import { sendFormationPurchaseConfirmation } from '@/lib/payments/commerce'
 import { createServiceClient } from '@/lib/supabase/service'
+import { checkRateLimit, rateLimitResponse } from '@/lib/rate-limit'
+
 
 const EVENT_CHECKOUT_RESERVATION_MINUTES = 30
 
@@ -631,6 +633,13 @@ async function cancelPendingFormationPurchase(params: {
 }
 
 export async function POST(request: NextRequest) {
+    // Rate limiting: 5 req/min + 20 req/hour per IP (protects Stripe from bulk abuse)
+    const rlMinute = await checkRateLimit(request, { namespace: 'payments:checkout:minute', limit: 5, window: '1 m' })
+    if (!rlMinute.success) return rateLimitResponse(rlMinute)
+
+    const rlHour = await checkRateLimit(request, { namespace: 'payments:checkout:hour', limit: 20, window: '1 h' })
+    if (!rlHour.success) return rateLimitResponse(rlHour)
+
     try {
         const supabase = await createClient()
         const { data: { user } } = await supabase.auth.getUser()

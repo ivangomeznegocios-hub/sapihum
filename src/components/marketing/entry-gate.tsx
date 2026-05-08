@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import Link from 'next/link'
 import { ArrowRight } from 'lucide-react'
 import { BrandWordmark } from '@/components/brand/brand-wordmark'
@@ -39,16 +40,20 @@ export function EntryGate() {
         <section className="flex flex-col md:flex-row gap-4 sm:gap-6 w-full max-w-5xl mx-auto">
           
           {/* Psicología Card */}
+          {/* PERF: priority=true — this is the LCP image on mobile (above the fold) */}
           <Link 
             href="/psicologia" 
             className="group relative flex-1 flex flex-col overflow-hidden rounded-[2rem] sm:rounded-[3rem] shadow-sm transition-all duration-500 hover:shadow-brand-luxury hover:-translate-y-2 min-h-[220px] sm:min-h-[460px]"
           >
-            {/* Full Background Image */}
-            <div 
-              className="absolute inset-0 bg-cover bg-center transition-transform duration-[800ms] ease-out group-hover:scale-105"
-              style={{
-                backgroundImage: 'url("https://images.unsplash.com/photo-1559757175-0eb30cd8c063?auto=format&fit=crop&w=1300&q=90")',
-              }}
+            {/* Full Background Image via next/image (enables preload, WebP, srcset) */}
+            <Image
+              src="https://images.unsplash.com/photo-1559757175-0eb30cd8c063?auto=format&fit=crop&w=1300&q=90"
+              alt=""
+              fill
+              priority
+              quality={75}
+              sizes="(min-width: 768px) 50vw, 100vw"
+              className="absolute inset-0 object-cover object-center transition-transform duration-[800ms] ease-out group-hover:scale-105"
             />
             {/* Base darkening overlay + strong gradients for maximum text legibility */}
             <div className="absolute inset-0 bg-black/30 transition-opacity duration-500 group-hover:bg-black/40" />
@@ -85,16 +90,19 @@ export function EntryGate() {
           </Link>
 
           {/* Ciencias Forenses Card */}
+          {/* PERF: no priority — second card, below fold on mobile, loads after LCP */}
           <Link 
             href="/ciencias-forenses" 
             className="group relative flex-1 flex flex-col overflow-hidden rounded-[2rem] sm:rounded-[3rem] shadow-sm transition-all duration-500 hover:shadow-brand-luxury hover:-translate-y-2 min-h-[220px] sm:min-h-[460px]"
           >
-            {/* Full Background Image */}
-            <div 
-              className="absolute inset-0 bg-cover bg-center transition-transform duration-[800ms] ease-out group-hover:scale-105"
-              style={{
-                backgroundImage: 'url("https://images.unsplash.com/photo-1532187863486-abf9dbad1b69?auto=format&fit=crop&w=1300&q=90")',
-              }}
+            {/* Full Background Image via next/image (enables WebP, srcset) */}
+            <Image
+              src="https://images.unsplash.com/photo-1532187863486-abf9dbad1b69?auto=format&fit=crop&w=1300&q=90"
+              alt=""
+              fill
+              quality={75}
+              sizes="(min-width: 768px) 50vw, 100vw"
+              className="absolute inset-0 object-cover object-center transition-transform duration-[800ms] ease-out group-hover:scale-105"
             />
             {/* Base darkening overlay + strong gradients for maximum text legibility */}
             <div className="absolute inset-0 bg-black/30 transition-opacity duration-500 group-hover:bg-black/40" />

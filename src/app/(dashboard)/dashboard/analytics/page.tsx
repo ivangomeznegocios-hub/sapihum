@@ -13,7 +13,7 @@ import {
 } from 'lucide-react'
 import { getAnalytics } from '@/lib/supabase/queries/analytics'
 import { getAdminSettings } from './actions'
-import { AnalyticsCharts } from './analytics-charts'
+import { DynamicAnalyticsCharts } from './dynamic-analytics-charts'
 import { StatCard } from '@/components/dashboard/ui/StatCard'
 import { AdminSettingsModal } from './admin-settings-modal'
 
@@ -333,7 +333,7 @@ export default async function AnalyticsPage() {
 
             <div className="grid gap-6 lg:grid-cols-3">
                 {/* Charts */}
-                <AnalyticsCharts appointmentsByMonth={stats.chartData} />
+                <DynamicAnalyticsCharts appointmentsByMonth={stats.chartData} />
 
                 {/* Recent Activity */}
                 <Card>

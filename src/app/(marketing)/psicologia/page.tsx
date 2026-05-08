@@ -19,7 +19,8 @@ export const metadata = {
   },
 }
 
-export const revalidate = 3600
+// PERF: ISR — reduced from 3600s to 300s to match catalog event TTL.
+export const revalidate = 300
 
 const SPECIALTIES = getMarketingSpecializations()
 

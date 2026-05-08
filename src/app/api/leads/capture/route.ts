@@ -14,6 +14,7 @@ import {
     getEventCampaignEventBySlug,
 } from '@/lib/events/campaigns'
 import { createAdminClient, createClient } from '@/lib/supabase/server'
+import { checkRateLimit, rateLimitResponse } from '@/lib/rate-limit'
 
 export const maxDuration = 15
 
@@ -31,6 +32,13 @@ const LeadCaptureSchema = z.object({
 })
 
 export async function POST(request: NextRequest) {
+    // Rate limiting: 5 req/min + 30 req/hour per IP
+    const rlMinute = await checkRateLimit(request, { namespace: 'leads:capture:minute', limit: 5, window: '1 m' })
+    if (!rlMinute.success) return rateLimitResponse(rlMinute)
+
+    const rlHour = await checkRateLimit(request, { namespace: 'leads:capture:hour', limit: 30, window: '1 h' })
+    if (!rlHour.success) return rateLimitResponse(rlHour)
+
     try {
         const payload = LeadCaptureSchema.safeParse(await request.json())
         if (!payload.success) {

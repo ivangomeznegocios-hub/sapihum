@@ -167,22 +167,24 @@ async function resolveUserVerticalContext(params: {
     profile: Profile
     requestedVerticalCode?: VerticalCode | null
 }) {
-    const { data: activeVerticalRows } = await (params.supabase
-        .from('verticals') as any)
-        .select('*')
-        .eq('status', 'active')
-        .order('name', { ascending: true })
+    // PERF: Run both independent queries in parallel instead of sequentially.
+    const [{ data: activeVerticalRows }, { data: accessRows }] = await Promise.all([
+        (params.supabase
+            .from('verticals') as any)
+            .select('*')
+            .eq('status', 'active')
+            .order('name', { ascending: true }),
+        (params.supabase
+            .from('user_vertical_access') as any)
+            .select('*, vertical:verticals(*)')
+            .eq('user_id', params.userId)
+            .neq('access_status', 'suspended')
+            .order('is_default', { ascending: false })
+            .order('created_at', { ascending: true }),
+    ])
 
     const allActiveVerticals = ((activeVerticalRows ?? []) as Vertical[])
         .filter((vertical) => vertical.code === 'psicologia' || vertical.code === 'ciencias_forenses')
-
-    const { data: accessRows } = await (params.supabase
-        .from('user_vertical_access') as any)
-        .select('*, vertical:verticals(*)')
-        .eq('user_id', params.userId)
-        .neq('access_status', 'suspended')
-        .order('is_default', { ascending: false })
-        .order('created_at', { ascending: true })
 
     const storedAccess = ((accessRows ?? []) as UserVerticalAccess[])
         .filter((row) => row.vertical && row.vertical.status === 'active')
@@ -217,6 +219,7 @@ async function resolveUserVerticalContext(params: {
         verticalAccess,
     }
 }
+
 
 function mergeGlobalVerticalAccess(params: {
     userId: string

@@ -14,6 +14,7 @@ import {
     type BillingInterval,
 } from '@/lib/payments/config'
 import { canUserSeeLevel3Offer, getSpecializationByCode } from '@/lib/specializations'
+import { checkRateLimit, rateLimitResponse } from '@/lib/rate-limit'
 
 export const maxDuration = 30
 
@@ -22,6 +23,13 @@ function normalizeEmail(value: string | null | undefined) {
 }
 
 export async function POST(request: NextRequest) {
+    // Rate limiting: 5 req/min + 20 req/hour per IP
+    const rlMinute = await checkRateLimit(request, { namespace: 'payments:subscribe:minute', limit: 5, window: '1 m' })
+    if (!rlMinute.success) return rateLimitResponse(rlMinute)
+
+    const rlHour = await checkRateLimit(request, { namespace: 'payments:subscribe:hour', limit: 20, window: '1 h' })
+    if (!rlHour.success) return rateLimitResponse(rlHour)
+
     try {
         const supabase = await createClient()
         const { data: { user } } = await supabase.auth.getUser()

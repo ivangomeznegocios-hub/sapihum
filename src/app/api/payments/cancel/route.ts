@@ -7,8 +7,16 @@ import { getSubscriptionManagementSnapshot } from '@/lib/payments/subscription-m
 import { syncMembershipEntitlementsForUser } from '@/lib/membership-entitlements'
 import { createServiceClient } from '@/lib/supabase/service'
 import { createClient, getUserProfile } from '@/lib/supabase/server'
+import { checkRateLimit, rateLimitResponse } from '@/lib/rate-limit'
 
 export async function POST(request: NextRequest) {
+    // Rate limiting: 3 req/min + 10 req/hour per IP (cancel is low-frequency by design)
+    const rlMinute = await checkRateLimit(request, { namespace: 'payments:cancel:minute', limit: 3, window: '1 m' })
+    if (!rlMinute.success) return rateLimitResponse(rlMinute)
+
+    const rlHour = await checkRateLimit(request, { namespace: 'payments:cancel:hour', limit: 10, window: '1 h' })
+    if (!rlHour.success) return rateLimitResponse(rlHour)
+
     try {
         const supabase = await createClient()
         const { data: { user } } = await supabase.auth.getUser()

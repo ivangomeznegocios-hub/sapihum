@@ -1,6 +1,5 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
-import { ensureProfileForAuthUser } from '@/lib/supabase/profile-provisioning'
 import { isPsychologyOnlyDashboardPath } from '@/lib/access/internal-modules'
 
 const AUTH_CALLBACK_QUERY_KEYS = new Set([
@@ -121,28 +120,6 @@ export async function updateSession(request: NextRequest) {
     const {
         data: { user },
     } = await supabase.auth.getUser()
-    const needsProfileGuard = pathname.startsWith('/dashboard') || pathname.startsWith('/auth')
-    const { data: existingProfile } =
-        user && needsProfileGuard
-            ? await (supabase
-                .from('profiles') as any)
-                .select('id')
-                .eq('id', user.id)
-                .maybeSingle()
-            : { data: null }
-    let profile = existingProfile
-
-    if (user && needsProfileGuard && !profile) {
-        const provisioned = await ensureProfileForAuthUser(user)
-
-        if (provisioned) {
-            profile = { id: user.id }
-            console.info('Provisioned missing profile for authenticated user during middleware guard', {
-                userId: user.id,
-                pathname,
-            })
-        }
-    }
 
     // Protected routes - redirect to login if no user
     if (
@@ -155,22 +132,9 @@ export async function updateSession(request: NextRequest) {
         return NextResponse.redirect(url)
     }
 
-    if (
-        user &&
-        !profile &&
-        pathname.startsWith('/dashboard')
-    ) {
-        const url = request.nextUrl.clone()
-        url.pathname = '/auth/login'
-        url.searchParams.set('next', pathname)
-        url.searchParams.set('error', 'profile_not_found')
-        return NextResponse.redirect(url)
-    }
-
     // Redirect authenticated users away from auth pages
     if (
         user &&
-        profile &&
         pathname.startsWith('/auth') &&
         pathname !== '/auth/callback' &&
         pathname !== '/auth/update-password' &&

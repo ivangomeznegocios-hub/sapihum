@@ -35,6 +35,10 @@ export const metadata: Metadata = {
     },
 }
 
+// PERF: ISR — serve cached HTML for 5 minutes. Content freshness is also
+// guaranteed by unstable_cache in getUnifiedCatalogEvents (TTL 300s).
+export const revalidate = 300
+
 interface EventosPageProps {
     searchParams?: Promise<{ track?: string }>
 }

@@ -91,6 +91,17 @@ const nextConfig: NextConfig = {
                 source: '/:path*',
                 headers: securityHeaders,
             },
+            // PERF: Cache only public, non-personalized GET endpoints at the CDN layer.
+            // DO NOT add payments/auth/leads/admin/webhook here — those must never be cached.
+            {
+                source: '/api/events/public-access/:path*',
+                headers: [
+                    {
+                        key: 'Cache-Control',
+                        value: 's-maxage=60, stale-while-revalidate=300',
+                    },
+                ],
+            },
         ]
     },
 }

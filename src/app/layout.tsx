@@ -59,6 +59,13 @@ export default function RootLayout({
 }>) {
     return (
         <html lang="es" suppressHydrationWarning>
+            {/* PERF: Preconnect to external image hosts used for critical above-the-fold images */}
+            <head>
+                <link rel="preconnect" href="https://images.unsplash.com" />
+                <link rel="dns-prefetch" href="https://images.unsplash.com" />
+                <link rel="preconnect" href="https://res.cloudinary.com" crossOrigin="anonymous" />
+                <link rel="dns-prefetch" href="https://res.cloudinary.com" />
+            </head>
             <body className={`${manrope.variable} ${playfair.variable} antialiased`}>
                 <TrackingBootstrap />
                 <ThemeProvider
