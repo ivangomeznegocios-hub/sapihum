@@ -60,7 +60,7 @@ export function getSpeakerFirstName(speaker?: SpeakerLike | null) {
 }
 
 export function isSpeakerProfileReadyForPublication(speaker?: SpeakerLike | null) {
-    return Boolean(normalizeText(speaker?.profile?.full_name) && getSpeakerImage(speaker))
+    return Boolean(getSpeakerName(speaker) !== 'Ponente' && getSpeakerImage(speaker))
 }
 
 export function isSpeakerVisibleToPublic(speaker?: (SpeakerLike & { is_public?: boolean }) | null) {

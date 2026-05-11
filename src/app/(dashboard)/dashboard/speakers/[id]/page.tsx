@@ -57,7 +57,7 @@ export default async function SpeakerDetailPage({ params }: PageProps) {
     const speakerFirstName = getSpeakerFirstName(speaker)
     const speakerImage = getSpeakerImage(speaker)
     const isReadyToPublish = isSpeakerProfileReadyForPublication(speaker)
-    const isPublic = isSpeakerVisibleToPublic(speaker)
+    const isPublished = speaker.is_public
     const canEditSpeakerProfile = currentUser?.role === 'admin' || currentUser?.id === speaker.id
     const canEditSpeakerEvents = canEditSpeakerProfile
 
@@ -75,14 +75,14 @@ export default async function SpeakerDetailPage({ params }: PageProps) {
                     {currentUser?.role === 'admin' && (
                         <form action={adminSetSpeakerPublication}>
                             <input type="hidden" name="speakerId" value={speaker.id} />
-                            <input type="hidden" name="isPublic" value={isPublic ? 'false' : 'true'} />
+                            <input type="hidden" name="isPublic" value={isPublished ? 'false' : 'true'} />
                             <Button
                                 type="submit"
-                                variant={isPublic ? 'outline' : 'default'}
+                                variant={isPublished ? 'outline' : 'default'}
                                 size="sm"
-                                disabled={!isReadyToPublish && !isPublic}
+                                disabled={!isReadyToPublish && !isPublished}
                             >
-                                {isPublic ? 'Pasar a borrador' : 'Publicar'}
+                                {isPublished ? 'Pasar a borrador' : 'Publicar'}
                             </Button>
                         </form>
                     )}

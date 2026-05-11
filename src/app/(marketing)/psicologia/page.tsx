@@ -7,6 +7,7 @@ import { getPublicCatalogEvents } from "@/lib/supabase/queries/events"
 import { splitPublicCatalogEvents } from "@/lib/events/public"
 import { LEVEL_2_CARD_FEATURE_IDS, PRICING_PLAN_COPY, getPricingFeatureTitles } from "@/lib/pricing-catalog"
 import { getFeaturedPublicSpeakers } from "@/lib/supabase/queries/speakers"
+import { getSpeakerHeadline, getSpeakerImage, getSpeakerName } from "@/lib/speakers/display"
 import { Shield, Users, BookOpen, Scaling, Beaker, FileText, Smartphone, ArrowRight } from "lucide-react"
 
 export const metadata = {
@@ -603,10 +604,11 @@ export default async function LandingPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {featuredSpeakers.map((speaker) => {
-              const name = speaker.profile?.full_name || 'Ponente'
-              const photoUrl = speaker.photo_url || speaker.profile?.avatar_url
+              const name = getSpeakerName(speaker)
+              const photoUrl = getSpeakerImage(speaker)
+              const headline = getSpeakerHeadline(speaker)
               const mainSpecialty = speaker.specialties?.[0]
-              const credential = speaker.credentials?.length > 0 ? speaker.credentials.join(' · ') : speaker.headline
+              const credential = speaker.credentials?.length > 0 ? speaker.credentials.join(' · ') : headline
 
               return (
                 <Link
@@ -660,9 +662,9 @@ export default async function LandingPage() {
                         {credential}
                       </p>
                     )}
-                    {speaker.headline && speaker.credentials?.length > 0 && (
+                    {headline && speaker.credentials?.length > 0 && (
                       <p className="text-[10px] uppercase tracking-wide text-brand-text-muted">
-                        {speaker.headline}
+                        {headline}
                       </p>
                     )}
                   </div>
