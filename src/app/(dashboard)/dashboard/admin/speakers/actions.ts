@@ -1,8 +1,19 @@
 'use server'
 
 import { createClient, createAdminClient } from '@/lib/supabase/server'
-import { revalidatePath } from 'next/cache'
+import { revalidatePath, updateTag } from 'next/cache'
+import { redirect } from 'next/navigation'
 import { requireAdminAction } from '@/lib/admin/guard'
+import { isLikelyDirectImageUrl, isSpeakerProfileReadyForPublication } from '@/lib/speakers/display'
+
+function revalidateSpeakerSurfaces(speakerId: string) {
+    revalidatePath('/speakers')
+    revalidatePath(`/speakers/${speakerId}`)
+    revalidatePath('/dashboard/speakers')
+    revalidatePath(`/dashboard/speakers/${speakerId}`)
+    revalidatePath(`/dashboard/admin/speakers/${speakerId}/edit`)
+    updateTag('public-events')
+}
 
 export async function adminCreateSpeaker(formData: FormData) {
     try {
@@ -22,6 +33,9 @@ export async function adminCreateSpeaker(formData: FormData) {
 
     if (!email || !fullName) {
         return { error: 'El correo y nombre son obligatorios' }
+    }
+    if (formData.get('is_public') === 'on' && !isLikelyDirectImageUrl(photoUrl)) {
+        return { error: 'Para publicar, agrega una URL directa de foto del ponente.' }
     }
 
     try {
@@ -68,6 +82,7 @@ export async function adminCreateSpeaker(formData: FormData) {
         const credentialsRaw = formData.get('credentials') as string
         const specialtiesRaw = formData.get('specialties') as string
 
+        const shouldPublish = formData.get('is_public') === 'on'
         const speakerUpdates: any = {
             headline: headline || null,
             bio: bio || null,
@@ -76,7 +91,7 @@ export async function adminCreateSpeaker(formData: FormData) {
                 website: website || undefined,
                 linkedin: linkedin || undefined
             },
-            is_public: true
+            is_public: shouldPublish
         }
 
         if (credentialsRaw) speakerUpdates.credentials = credentialsRaw.split('\n').map(s => s.trim()).filter(Boolean)
@@ -92,7 +107,7 @@ export async function adminCreateSpeaker(formData: FormData) {
                 .insert({ id: newUserId, ...speakerUpdates })
         }
 
-        revalidatePath('/dashboard/speakers')
+        revalidateSpeakerSurfaces(newUserId)
         return { success: true }
     } catch (err: any) {
         return { error: `Error inesperado: ${err.message}` }
@@ -161,6 +176,14 @@ export async function adminUpdateSpeaker(speakerId: string, formData: FormData) 
             social_links_enabled: socialLinksEnabled,
         }
 
+        if (isAdmin) {
+            const shouldPublish = formData.get('is_public') === 'on'
+            if (shouldPublish && (!fullName.trim() || !isLikelyDirectImageUrl(photoUrl))) {
+                return { error: 'Para publicar, el ponente necesita nombre completo y una URL directa de foto.' }
+            }
+            speakerUpdates.is_public = shouldPublish
+        }
+
         // Parse social links from JSON
         if (socialLinksJson) {
             try {
@@ -188,10 +211,68 @@ export async function adminUpdateSpeaker(speakerId: string, formData: FormData) 
             return { error: `Error actualizando ponente: ${speakerError.message}` }
         }
 
-        revalidatePath('/dashboard/speakers')
-        revalidatePath(`/dashboard/speakers/${speakerId}`)
+        revalidateSpeakerSurfaces(speakerId)
         return { success: true }
     } catch (err: any) {
         return { error: `Error inesperado: ${err.message}` }
     }
+}
+
+export async function adminSetSpeakerPublication(formData: FormData): Promise<void> {
+    try {
+        await requireAdminAction()
+    } catch (error) {
+        console.error('Unauthorized speaker publication attempt:', error)
+        redirect('/dashboard/speakers')
+    }
+
+    const speakerId = formData.get('speakerId') as string
+    const shouldPublish = formData.get('isPublic') === 'true'
+
+    if (!speakerId) {
+        redirect('/dashboard/speakers')
+    }
+
+    try {
+        const adminAuthClient = await createAdminClient()
+        let canUpdate = true
+
+        if (shouldPublish) {
+            const { data: speaker, error: speakerFetchError } = await (adminAuthClient.from('speakers') as any)
+                .select(`
+                    *,
+                    profile:profiles!speakers_id_fkey (
+                        id,
+                        full_name,
+                        avatar_url,
+                        role
+                    )
+                `)
+                .eq('id', speakerId)
+                .maybeSingle()
+
+            if (speakerFetchError || !speaker) {
+                console.error('Speaker publication failed: speaker not found', speakerFetchError)
+                canUpdate = false
+            } else if (!isSpeakerProfileReadyForPublication(speaker)) {
+                canUpdate = false
+            }
+        }
+
+        if (canUpdate) {
+            const { error } = await (adminAuthClient.from('speakers') as any)
+                .update({ is_public: shouldPublish })
+                .eq('id', speakerId)
+
+            if (error) {
+                console.error('Error updating speaker publication status:', error)
+            }
+
+            revalidateSpeakerSurfaces(speakerId)
+        }
+    } catch (err: any) {
+        console.error('Unexpected speaker publication error:', err)
+    }
+
+    redirect(`/dashboard/speakers/${speakerId}`)
 }

@@ -58,3 +58,11 @@ export function getSpeakerFirstName(speaker?: SpeakerLike | null) {
     const fullName = normalizeText(speaker?.profile?.full_name)
     return fullName ? fullName.split(/\s+/)[0] : null
 }
+
+export function isSpeakerProfileReadyForPublication(speaker?: SpeakerLike | null) {
+    return Boolean(normalizeText(speaker?.profile?.full_name) && getSpeakerImage(speaker))
+}
+
+export function isSpeakerVisibleToPublic(speaker?: (SpeakerLike & { is_public?: boolean }) | null) {
+    return Boolean(speaker?.is_public && isSpeakerProfileReadyForPublication(speaker))
+}

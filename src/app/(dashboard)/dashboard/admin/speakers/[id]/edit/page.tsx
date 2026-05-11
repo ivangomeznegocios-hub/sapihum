@@ -21,5 +21,5 @@ export default async function EditSpeakerPage({ params }: PageProps) {
         redirect('/dashboard/speakers')
     }
 
-    return <EditSpeakerForm speaker={speaker} />
+    return <EditSpeakerForm speaker={speaker} canPublish={currentUser?.role === 'admin'} />
 }

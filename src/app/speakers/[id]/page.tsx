@@ -7,7 +7,7 @@ import { isEventPast } from '@/lib/timezone'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { getSpeakerFirstName, getSpeakerHeadline, getSpeakerImage, getSpeakerName } from '@/lib/speakers/display'
+import { getSpeakerFirstName, getSpeakerHeadline, getSpeakerImage, getSpeakerName, isSpeakerVisibleToPublic } from '@/lib/speakers/display'
 import {
     ArrowLeft,
     Award,
@@ -50,7 +50,7 @@ export default async function PublicSpeakerDetailPage({ params, searchParams }: 
     const { returnTo } = await searchParams
     const speaker = await getSpeakerById(id)
 
-    if (!speaker || !speaker.is_public) {
+    if (!speaker || !isSpeakerVisibleToPublic(speaker)) {
         notFound()
     }
 

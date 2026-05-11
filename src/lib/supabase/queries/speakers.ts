@@ -2,6 +2,7 @@ import { createAdminClient, createClient } from '@/lib/supabase/server'
 import { createPublicClient } from '@/lib/supabase/public'
 import { getHomeFeaturedSpeakersSettings } from '@/lib/home/featured-speakers'
 import { selectFeaturedSpeakers, selectRotatingFeaturedSpeakers, sortSpeakersByMerit } from '@/lib/speakers/ranking'
+import { isSpeakerVisibleToPublic } from '@/lib/speakers/display'
 import type {
     Speaker,
     SpeakerWithProfile,
@@ -174,9 +175,8 @@ export async function getPublicSpeakers(): Promise<SpeakerWithProfile[]> {
 
     const speakers = (data ?? []) as Speaker[]
     const profileMap = await loadSpeakerProfiles(speakers.map((speaker) => speaker.id), { publicOnly: true })
-    return sortSpeakersByMerit(
-        attachProfilesToSpeakers(speakers, profileMap) as SpeakerWithProfile[]
-    )
+    const speakersWithProfiles = attachProfilesToSpeakers(speakers, profileMap) as SpeakerWithProfile[]
+    return sortSpeakersByMerit(speakersWithProfiles.filter(isSpeakerVisibleToPublic))
 }
 
 export async function getFeaturedPublicSpeakers(limit = 4): Promise<SpeakerWithProfile[]> {
@@ -232,7 +232,8 @@ export async function getSpeakersByIds(speakerIds: string[]): Promise<SpeakerWit
 
     const speakers = (data ?? []) as Speaker[]
     const profileMap = await loadSpeakerProfiles(speakers.map((speaker) => speaker.id))
-    const speakersWithProfiles = attachProfilesToSpeakers(speakers, profileMap) as SpeakerWithProfile[]
+    const speakersWithProfiles = (attachProfilesToSpeakers(speakers, profileMap) as SpeakerWithProfile[])
+        .filter(isSpeakerVisibleToPublic)
 
     // Preserve the order from the input IDs array
     const speakerMap = new Map(speakersWithProfiles.map((speaker) => [speaker.id, speaker]))

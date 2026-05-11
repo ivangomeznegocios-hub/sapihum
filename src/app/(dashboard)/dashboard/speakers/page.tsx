@@ -1,16 +1,17 @@
 import Image from 'next/image'
 import Link from 'next/link'
-import { getPublicSpeakers } from '@/lib/supabase/queries/speakers'
+import { getAllSpeakers, getPublicSpeakers } from '@/lib/supabase/queries/speakers'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Mic2, Globe, ExternalLink, Plus } from 'lucide-react'
 import { getUserProfile } from '@/lib/supabase/server'
 import { Button } from '@/components/ui/button'
-import { getSpeakerHeadline, getSpeakerImage, getSpeakerName } from '@/lib/speakers/display'
+import { getSpeakerHeadline, getSpeakerImage, getSpeakerName, isSpeakerProfileReadyForPublication, isSpeakerVisibleToPublic } from '@/lib/speakers/display'
 
 export default async function SpeakersPage() {
     const profile = await getUserProfile()
-    const speakers = await getPublicSpeakers()
+    const isAdmin = profile?.role === 'admin'
+    const speakers = isAdmin ? await getAllSpeakers() : await getPublicSpeakers()
 
     return (
         <div className="space-y-8">
@@ -24,7 +25,7 @@ export default async function SpeakersPage() {
                         Conoce a los expertos que lideran nuestros eventos y talleres
                     </p>
                 </div>
-                {profile?.role === 'admin' && (
+                {isAdmin && (
                     <Button asChild>
                         <Link href="/dashboard/admin/speakers/new">
                             <Plus className="h-4 w-4 mr-2" />
@@ -40,6 +41,8 @@ export default async function SpeakersPage() {
                         const speakerImage = getSpeakerImage(speaker)
                         const speakerName = getSpeakerName(speaker)
                         const speakerHeadline = getSpeakerHeadline(speaker)
+                        const isReady = isSpeakerProfileReadyForPublication(speaker)
+                        const isPublic = isSpeakerVisibleToPublic(speaker)
 
                         return (
                             <Link key={speaker.id} href={`/dashboard/speakers/${speaker.id}`}>
@@ -62,6 +65,18 @@ export default async function SpeakersPage() {
                                             </div>
                                         )}
                                         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                                        {isAdmin && (
+                                            <div className="absolute left-3 top-3 flex flex-wrap gap-2">
+                                                <Badge className={isPublic ? 'bg-green-600 text-white hover:bg-green-600' : 'bg-amber-500 text-white hover:bg-amber-500'}>
+                                                    {isPublic ? 'Publico' : 'Borrador'}
+                                                </Badge>
+                                                {!isReady && (
+                                                    <Badge variant="secondary" className="bg-background/90 text-foreground">
+                                                        Incompleto
+                                                    </Badge>
+                                                )}
+                                            </div>
+                                        )}
                                         <div className="absolute bottom-0 left-0 right-0 p-4">
                                             <h3 className="text-lg font-bold text-white">
                                                 {speakerName}

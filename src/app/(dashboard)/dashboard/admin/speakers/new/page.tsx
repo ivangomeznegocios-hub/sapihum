@@ -139,6 +139,25 @@ export default function NewSpeakerPage() {
                             />
                         </div>
 
+                        <div className="rounded-xl border border-brand-border bg-card p-4">
+                            <div className="flex items-start gap-3">
+                                <input
+                                    id="is_public"
+                                    name="is_public"
+                                    type="checkbox"
+                                    className="mt-1 rounded"
+                                />
+                                <div>
+                                    <label className="text-sm font-medium cursor-pointer" htmlFor="is_public">
+                                        Publicar al guardar
+                                    </label>
+                                    <p className="text-xs leading-relaxed text-muted-foreground">
+                                        Dejalo en borrador si aun falta foto, nombre profesional o biografia. Solo administradores pueden publicar.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
                         <div className="grid gap-6 sm:grid-cols-2">
                             {/* Credentials */}
                             <div className="space-y-2">

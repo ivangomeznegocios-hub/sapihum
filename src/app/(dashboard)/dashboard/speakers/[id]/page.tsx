@@ -3,11 +3,12 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { getSpeakerById, getSpeakerEvents } from '@/lib/supabase/queries/speakers'
 import { getUserProfile } from '@/lib/supabase/server'
+import { adminSetSpeakerPublication } from '@/app/(dashboard)/dashboard/admin/speakers/actions'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { isEventPast } from '@/lib/timezone'
-import { getSpeakerFirstName, getSpeakerHeadline, getSpeakerImage, getSpeakerName } from '@/lib/speakers/display'
+import { getSpeakerFirstName, getSpeakerHeadline, getSpeakerImage, getSpeakerName, isSpeakerProfileReadyForPublication, isSpeakerVisibleToPublic } from '@/lib/speakers/display'
 import {
     ArrowLeft,
     Mic2,
@@ -34,6 +35,9 @@ export default async function SpeakerDetailPage({ params }: PageProps) {
     if (!speaker) {
         notFound()
     }
+    if (currentUser?.role !== 'admin' && currentUser?.id !== speaker.id && !isSpeakerVisibleToPublic(speaker)) {
+        notFound()
+    }
 
     const events = await getSpeakerEvents(id)
     const upcomingEvents = events.filter((e: any) => {
@@ -52,6 +56,8 @@ export default async function SpeakerDetailPage({ params }: PageProps) {
     const speakerHeadline = getSpeakerHeadline(speaker)
     const speakerFirstName = getSpeakerFirstName(speaker)
     const speakerImage = getSpeakerImage(speaker)
+    const isReadyToPublish = isSpeakerProfileReadyForPublication(speaker)
+    const isPublic = isSpeakerVisibleToPublic(speaker)
     const canEditSpeakerProfile = currentUser?.role === 'admin' || currentUser?.id === speaker.id
     const canEditSpeakerEvents = canEditSpeakerProfile
 
@@ -65,14 +71,30 @@ export default async function SpeakerDetailPage({ params }: PageProps) {
                     </Link>
                 </Button>
 
-                {canEditSpeakerProfile && (
-                    <Button variant="outline" size="sm" asChild>
-                        <Link href={`/dashboard/admin/speakers/${id}/edit`}>
-                            <Edit className="h-4 w-4 mr-2" />
-                            {currentUser?.id === speaker.id ? 'Editar Mi Perfil' : 'Editar Ponente'}
-                        </Link>
-                    </Button>
-                )}
+                <div className="flex flex-wrap items-center gap-2">
+                    {currentUser?.role === 'admin' && (
+                        <form action={adminSetSpeakerPublication}>
+                            <input type="hidden" name="speakerId" value={speaker.id} />
+                            <input type="hidden" name="isPublic" value={isPublic ? 'false' : 'true'} />
+                            <Button
+                                type="submit"
+                                variant={isPublic ? 'outline' : 'default'}
+                                size="sm"
+                                disabled={!isReadyToPublish && !isPublic}
+                            >
+                                {isPublic ? 'Pasar a borrador' : 'Publicar'}
+                            </Button>
+                        </form>
+                    )}
+                    {canEditSpeakerProfile && (
+                        <Button variant="outline" size="sm" asChild>
+                            <Link href={`/dashboard/admin/speakers/${id}/edit`}>
+                                <Edit className="h-4 w-4 mr-2" />
+                                {currentUser?.id === speaker.id ? 'Editar Mi Perfil' : 'Editar Ponente'}
+                            </Link>
+                        </Button>
+                    )}
+                </div>
             </div>
 
             <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary/20 via-primary/5 to-background border">

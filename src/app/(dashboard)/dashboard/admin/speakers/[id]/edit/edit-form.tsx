@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { adminUpdateSpeaker } from '../../actions'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { Switch } from '@/components/ui/switch'
 import { ArrowLeft, Save, Shield, Mic2, Globe, Trash2 } from 'lucide-react'
 
 // Social network definitions (same as speaker-profile-form)
@@ -70,13 +71,15 @@ function extractUsername(network: string, value: string): string {
 
 interface EditSpeakerPageProps {
     speaker: any
+    canPublish?: boolean
 }
 
-export default function EditSpeakerForm({ speaker }: EditSpeakerPageProps) {
+export default function EditSpeakerForm({ speaker, canPublish = false }: EditSpeakerPageProps) {
     const router = useRouter()
     const [isPending, startTransition] = useTransition()
     const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
     const [socialLinksEnabled, setSocialLinksEnabled] = useState(!!speaker.social_links_enabled)
+    const [isPublic, setIsPublic] = useState(!!speaker.is_public)
 
     // Initialize social networks from existing data
     const existingLinks = speaker.social_links || {}
@@ -238,6 +241,34 @@ export default function EditSpeakerForm({ speaker }: EditSpeakerPageProps) {
                                 className="w-full px-3 py-2 border rounded-lg bg-background resize-y"
                             />
                         </div>
+
+                        {canPublish && (
+                            <div className="rounded-xl border border-brand-border bg-card p-4">
+                                <input type="hidden" name="is_public" value={isPublic ? 'on' : 'off'} />
+                                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                                    <div className="space-y-1">
+                                        <label className="flex items-center gap-2 text-sm font-medium" htmlFor="is_public_switch">
+                                            <Shield className="h-4 w-4 text-brand-blue" />
+                                            Estado del perfil
+                                        </label>
+                                        <p className="text-xs leading-relaxed text-muted-foreground">
+                                            En borrador solo lo puede ver administracion. Publico aparece en /speakers y en eventos.
+                                        </p>
+                                    </div>
+                                    <div className="flex items-center gap-3">
+                                        <span className="text-sm font-medium text-muted-foreground">
+                                            {isPublic ? 'Publico' : 'Borrador'}
+                                        </span>
+                                        <Switch
+                                            id="is_public_switch"
+                                            checked={isPublic}
+                                            onCheckedChange={setIsPublic}
+                                            aria-label="Cambiar estado publico del ponente"
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        )}
 
                         <div className="grid gap-6 sm:grid-cols-2">
                             {/* Credentials */}
