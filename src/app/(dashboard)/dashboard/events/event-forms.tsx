@@ -219,15 +219,6 @@ function formatSpeakerCompensationInputValue(
 
     if (compensationType === 'percentage') {
         const percentValue = Math.round(compensationValue * 10000) / 100
-    compensationType: SpeakerCompensationType,
-    compensationValue: number | null
-) {
-    if (compensationType === 'variable' || compensationValue == null) {
-        return ''
-    }
-
-    if (compensationType === 'percentage') {
-        const percentValue = Math.round(compensationValue * 10000) / 100
         return Number.isInteger(percentValue) ? String(percentValue) : String(percentValue)
     }
 
@@ -2362,6 +2353,7 @@ export function DuplicateEventButton({ eventId }: { eventId: string }) {
         </Button>
     )
 }
+
 
 
 
