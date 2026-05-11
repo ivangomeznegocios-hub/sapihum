@@ -1,6 +1,20 @@
 import type { Event, EventType } from '@/types/database'
 import { getSpecializationByCode } from '@/lib/specializations'
 
+/**
+ * Returns the display label for an event's price, considering whether the
+ * event is restricted to members only (is_members_only / audience without 'public').
+ * When an event is members-only and free, it returns "Incluido con Membresía"
+ * instead of "Gratis" to avoid implying open public access.
+ */
+export function getEventPriceDisplayLabel(
+    price: number,
+    isMembersOnly: boolean
+): string {
+    if (price > 0) return `$${price.toFixed(0)} MXN`
+    return isMembersOnly ? 'Incluido con Membresía' : 'Gratis'
+}
+
 export type NormalizedMemberAccessType = 'free' | 'discounted' | 'full_price'
 
 export type EventPricingContext = {
@@ -41,13 +55,23 @@ export function isEventIncludedForMatchingSpecialization(
     return context.membershipSpecializationCode === event.specialization_code
 }
 
-export function getEventMemberAccessMessage(event: EventPricingEvent) {
+export function getEventMemberAccessMessage(
+    event: EventPricingEvent,
+    options?: { isMembersOnly?: boolean }
+) {
     const publicPrice = Number(event.price || 0)
     const memberPrice = Number(event.member_price ?? publicPrice)
     const accessType = normalizeMemberAccessType(event.member_access_type)
     const specialization = getSpecializationByCode(event.specialization_code)
+    const isMembersOnly = options?.isMembersOnly ?? false
 
     if (publicPrice <= 0) {
+        if (isMembersOnly) {
+            return {
+                label: 'Incluido con Membresía',
+                note: 'Este evento es exclusivo para miembros con suscripción activa.' as string | null,
+            }
+        }
         return {
             label: 'Gratis',
             note: null as string | null,

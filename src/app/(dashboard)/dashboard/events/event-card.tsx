@@ -149,6 +149,8 @@ export function EventCard({
                         </span>
                         {event.price > 0 ? (
                             <span className="shrink-0 font-semibold text-primary">${event.price.toFixed(2)} MXN</span>
+                        ) : event.is_members_only ? (
+                            <span className="shrink-0 font-medium text-brand-blue-hover">Incluido con Membresía</span>
                         ) : (
                             <span className="shrink-0 font-medium text-green-600">Gratis</span>
                         )}
@@ -246,6 +248,8 @@ export function EventCard({
                     </span>
                     {event.price > 0 ? (
                         <span className="shrink-0 font-semibold text-primary">${event.price.toFixed(2)} MXN</span>
+                    ) : event.is_members_only ? (
+                        <span className="shrink-0 font-medium text-brand-blue-hover">Incluido con Membresía</span>
                     ) : (
                         <span className="shrink-0 font-medium text-green-600">Gratis</span>
                     )}

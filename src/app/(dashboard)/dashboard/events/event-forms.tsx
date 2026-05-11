@@ -707,11 +707,14 @@ export function CreateEventForm({
         : null
     const publicUrl = typeof window !== 'undefined' && publicPath ? `${window.location.origin}${publicPath}` : publicPath
     const statusLabel = STATUS_LABELS[statusPreview] || statusPreview
-    const summaryPrice = numericPrice > 0 ? `$${numericPrice.toFixed(0)} MXN` : 'Gratis'
+    const isMembersOnlyEvent = normalizedAudience.includes('members') && !normalizedAudience.includes('public')
+    const summaryPrice = numericPrice > 0 ? `$${numericPrice.toFixed(0)} MXN` : (isMembersOnlyEvent ? 'Incluido con Membresía' : 'Gratis')
     const summaryAudience = normalizedAudience.map(getAudienceLabel).join(', ')
     const memberAccessSummary =
         numericPrice <= 0
-            ? 'Los miembros entran sin costo porque el evento es gratuito.'
+            ? (isMembersOnlyEvent
+                ? 'Este evento es exclusivo para miembros con suscripción activa.'
+                : 'Los miembros entran sin costo porque el evento es gratuito.')
             : selectedSpecializationCode
                 ? memberAccessType === 'discounted'
                     ? `${selectedSpecializationLabel || 'La especialidad seleccionada'} entra incluida con membresia activa Nivel 2+. Otros miembros pagan $${numericMemberPrice.toFixed(0)} MXN y publico ${summaryPrice}.`

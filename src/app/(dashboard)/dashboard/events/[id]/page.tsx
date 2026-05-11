@@ -752,8 +752,8 @@ export default async function EventDetailPage({ params }: PageProps) {
                             ) : (
                                 <>
                                     <div className="text-center mb-4">
-                                        <span className="text-2xl font-bold text-green-600">
-                                            {currentPrice > 0 ? `$${currentPrice} MXN` : 'Gratis'}
+                                        <span className={`text-2xl font-bold ${currentPrice > 0 ? 'text-green-600' : event.is_members_only ? 'text-brand-blue-hover' : 'text-green-600'}`}>
+                                            {currentPrice > 0 ? `$${currentPrice} MXN` : (event.is_members_only ? 'Incluido con Membresía' : 'Gratis')}
                                         </span>
                                     </div>
                                     {needsToPay ? (
@@ -816,7 +816,7 @@ export default async function EventDetailPage({ params }: PageProps) {
                                 </div>
                             )}
                             <div className="rounded-lg border bg-muted/30 p-3 text-sm text-muted-foreground">
-                                {getEventMemberAccessMessage(event).note || 'Compra individual disponible cuando el evento tiene precio.'}
+                                {getEventMemberAccessMessage(event, { isMembersOnly: event.is_members_only }).note || 'Compra individual disponible cuando el evento tiene precio.'}
                             </div>
                             <ShareEventButton
                                 eventSlug={event.slug}

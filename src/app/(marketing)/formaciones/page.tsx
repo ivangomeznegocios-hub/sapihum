@@ -8,6 +8,8 @@ import { Badge } from '@/components/ui/badge'
 import { getPublicFormations } from './actions'
 import { getSpecializationByCode } from '@/lib/specializations'
 
+export const revalidate = 60
+
 const formacionesDescription = 'Rutas de formacion profesional integral en psicologia clinica.'
 
 export const metadata: Metadata = {

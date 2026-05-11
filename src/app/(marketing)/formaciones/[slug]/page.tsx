@@ -23,6 +23,8 @@ import { getPublicEventPath } from '@/lib/events/public'
 import { getSpecializationByCode } from '@/lib/specializations'
 import { DEFAULT_TIMEZONE } from '@/lib/timezone'
 
+export const revalidate = 60
+
 const appUrl = getAppUrl()
 
 function formatHours(hours: number | null | undefined) {

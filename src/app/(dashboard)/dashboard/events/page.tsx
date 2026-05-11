@@ -202,7 +202,7 @@ function EventCard({
                             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M22 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>
                             {event.attendee_count || 0} inscritos{event.max_attendees && ` / ${event.max_attendees}`}
                         </span>
-                        {effectivePrice > 0 ? <span className="font-semibold text-primary">${effectivePrice.toFixed(2)} MXN</span> : <span className="text-green-600 font-medium">Gratis</span>}
+                        {effectivePrice > 0 ? <span className="font-semibold text-primary">${effectivePrice.toFixed(2)} MXN</span> : event.is_members_only ? <span className="text-brand-blue-hover font-medium">Incluido con Membresía</span> : <span className="text-green-600 font-medium">Gratis</span>}
                     </div>
                     <div className="pt-3">
                         {recordingProductAvailable && effectivePrice > 0 ? (
@@ -370,7 +370,7 @@ function EventCard({
                             ${effectivePrice.toFixed(2)} MXN
                         </span>
                     ) : (
-                        <span className="shrink-0 font-medium text-green-600">Gratis</span>
+                        event.is_members_only ? <span className="shrink-0 font-medium text-brand-blue-hover">Incluido con Membresía</span> : <span className="shrink-0 font-medium text-green-600">Gratis</span>
                     )}
                 </div>
 

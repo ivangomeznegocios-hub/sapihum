@@ -43,6 +43,9 @@ function getAudienceLabel(audience: string[] | null | undefined): string {
 }
 
 function buildFaq(event: any) {
+    const isMembersOnly = Array.isArray(event.target_audience)
+        ? event.target_audience.includes('members') && !event.target_audience.includes('public')
+        : false
     const items = [
         {
             question: 'Como funciona el acceso despues de registrarme o comprar?',
@@ -57,7 +60,12 @@ function buildFaq(event: any) {
     if (Number(event.price || 0) > 0) {
         items.push({
             question: 'Que obtengo si ya soy miembro?',
-            answer: getEventMemberAccessMessage(event).note || 'La membresia puede incluir acceso o precio preferencial segun la oferta de este evento.',
+            answer: getEventMemberAccessMessage(event, { isMembersOnly }).note || 'La membresia puede incluir acceso o precio preferencial segun la oferta de este evento.',
+        })
+    } else if (isMembersOnly) {
+        items.push({
+            question: 'Quien puede acceder a este evento?',
+            answer: 'Este evento es exclusivo para miembros con suscripcion activa.',
         })
     }
 
@@ -502,7 +510,7 @@ export function PublicEventLanding({
                                         <div>
                                             <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-brand-text-muted">Inversion</p>
                                             <p className="mt-1 text-3xl font-bold tracking-tight text-brand-text-strong">
-                                                {finalPrice > 0 ? `$${finalPrice.toFixed(0)} MXN` : 'Gratis'}
+                                            {finalPrice > 0 ? `$${finalPrice.toFixed(0)} MXN` : (isMembersOnly ? 'Incluido con Membresía' : 'Gratis')}
                                             </p>
                                         </div>
                                         {finalPrice > 0 && finalPrice < Number(event.price || 0) && (
