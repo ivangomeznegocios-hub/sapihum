@@ -1048,7 +1048,7 @@ export function CreateEventForm({
                                                 </div>
                                             ) : assignment.compensationType === 'percentage_default' ? (
                                                 <div className="rounded-xl border border-muted bg-muted/20 p-4 text-sm text-muted-foreground">
-                                                    Se calculará automáticamente usando la tasa configurada en el perfil de este ponente (o en su defecto el 50%).
+                                                    Se calculará automáticamente usando la tasa configurada en el perfil de este ponente (o en su defecto el 20%).
                                                 </div>
                                             ) : (
                                                 <div>

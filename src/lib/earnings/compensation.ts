@@ -1,7 +1,7 @@
 import type { EarningType } from '@/types/database'
 
 export const DEFAULT_SPEAKER_COMPENSATION_TYPE = 'percentage'
-export const DEFAULT_SPEAKER_PERCENTAGE_RATE = 0.5
+export const DEFAULT_SPEAKER_PERCENTAGE_RATE = 0.2
 
 export type SpeakerCompensationType = 'percentage' | 'fixed' | 'variable'
 
