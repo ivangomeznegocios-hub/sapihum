@@ -189,9 +189,11 @@ interface CreateEventFormProps {
     activeVertical?: Pick<Vertical, 'id' | 'code' | 'name' | 'slug'> | null
 }
 
+type UISpeakerCompensationType = SpeakerCompensationType | 'percentage_default'
+
 type SpeakerAssignmentState = {
     speakerId: string
-    compensationType: SpeakerCompensationType
+    compensationType: UISpeakerCompensationType
     compensationValue: string
 }
 
@@ -217,6 +219,15 @@ function formatSpeakerCompensationInputValue(
 
     if (compensationType === 'percentage') {
         const percentValue = Math.round(compensationValue * 10000) / 100
+    compensationType: SpeakerCompensationType,
+    compensationValue: number | null
+) {
+    if (compensationType === 'variable' || compensationValue == null) {
+        return ''
+    }
+
+    if (compensationType === 'percentage') {
+        const percentValue = Math.round(compensationValue * 10000) / 100
         return Number.isInteger(percentValue) ? String(percentValue) : String(percentValue)
     }
 
@@ -226,8 +237,8 @@ function formatSpeakerCompensationInputValue(
 function createDefaultSpeakerAssignment(speakerId: string): SpeakerAssignmentState {
     return {
         speakerId,
-        compensationType: 'percentage',
-        compensationValue: String(DEFAULT_SPEAKER_PERCENTAGE_RATE * 100),
+        compensationType: 'percentage_default',
+        compensationValue: '',
     }
 }
 
@@ -241,6 +252,8 @@ function mapSpeakerAssignmentFromSource(source: any): SpeakerAssignmentState | n
     if (!speakerId) return null
 
     const compensationType = normalizeSpeakerCompensationType(source?.compensation_type ?? source?.compensationType)
+    const isPercentageDefault = compensationType === 'percentage' && (source?.compensation_value == null && source?.compensationValue == null)
+
     const compensationValue = normalizeSpeakerCompensationValue(
         compensationType,
         source?.compensation_value ?? source?.compensationValue
@@ -248,8 +261,8 @@ function mapSpeakerAssignmentFromSource(source: any): SpeakerAssignmentState | n
 
     return {
         speakerId,
-        compensationType,
-        compensationValue: formatSpeakerCompensationInputValue(compensationType, compensationValue),
+        compensationType: isPercentageDefault ? 'percentage_default' : compensationType,
+        compensationValue: isPercentageDefault ? '' : formatSpeakerCompensationInputValue(compensationType, compensationValue),
     }
 }
 
@@ -842,7 +855,7 @@ export function CreateEventForm({
         }))
     }
 
-    function updateSpeakerCompensationType(speakerId: string, nextType: SpeakerCompensationType) {
+    function updateSpeakerCompensationType(speakerId: string, nextType: UISpeakerCompensationType) {
         setSelectedSpeakerAssignments((prev) => prev.map((assignment) => {
             if (assignment.speakerId !== speakerId) {
                 return assignment
@@ -1027,11 +1040,12 @@ export function CreateEventForm({
                                                     value={assignment.compensationType}
                                                     onChange={(e) => updateSpeakerCompensationType(
                                                         assignment.speakerId,
-                                                        e.target.value as SpeakerCompensationType
+                                                        e.target.value as UISpeakerCompensationType
                                                     )}
                                                     className="mt-1 w-full rounded-lg border bg-background px-3 py-2"
                                                 >
-                                                    <option value="percentage">% del evento</option>
+                                                    <option value="percentage_default">% predeterminado del ponente</option>
+                                                    <option value="percentage">% personalizado</option>
                                                     <option value="fixed">Monto fijo por venta</option>
                                                     <option value="variable">Variable / manual</option>
                                                 </select>
@@ -1040,6 +1054,10 @@ export function CreateEventForm({
                                             {assignment.compensationType === 'variable' ? (
                                                 <div className="rounded-xl border border-brand-blue bg-brand-blue p-4 text-sm text-brand-blue">
                                                     Este esquema no genera la ganancia automaticamente. Se deja para ajuste manual despues.
+                                                </div>
+                                            ) : assignment.compensationType === 'percentage_default' ? (
+                                                <div className="rounded-xl border border-muted bg-muted/20 p-4 text-sm text-muted-foreground">
+                                                    Se calculará automáticamente usando la tasa configurada en el perfil de este ponente (o en su defecto el 50%).
                                                 </div>
                                             ) : (
                                                 <div>
@@ -1377,7 +1395,7 @@ export function CreateEventForm({
 
         // Add selected speakers and their payout configuration
         const invalidSpeakerAssignment = selectedSpeakerAssignments.find((assignment) => {
-            if (assignment.compensationType === 'variable') {
+            if (assignment.compensationType === 'variable' || assignment.compensationType === 'percentage_default') {
                 return false
             }
 
@@ -1386,19 +1404,25 @@ export function CreateEventForm({
         })
 
         if (invalidSpeakerAssignment) {
-            setError('Cada ponente con esquema fijo o porcentual necesita un valor mayor a 0.')
+            setError('Cada ponente con esquema fijo o porcentual personalizado necesita un valor mayor a 0.')
             setIsLoading(false)
             return
         }
 
         const serializedSpeakerAssignments = selectedSpeakerAssignments.map((assignment) => {
-            const normalizedType = normalizeSpeakerCompensationType(assignment.compensationType)
+            const normalizedType = assignment.compensationType === 'percentage_default'
+                ? 'percentage'
+                : normalizeSpeakerCompensationType(assignment.compensationType)
             const parsedValue = Number.parseFloat(assignment.compensationValue)
-            const normalizedValue = normalizedType === 'variable'
-                ? null
-                : normalizedType === 'percentage'
-                    ? Math.max(0, parsedValue / 100)
-                    : normalizeSpeakerCompensationValue(normalizedType, assignment.compensationValue)
+            
+            let normalizedValue: number | null = null;
+            if (assignment.compensationType === 'percentage_default' || assignment.compensationType === 'variable') {
+                normalizedValue = null
+            } else if (assignment.compensationType === 'percentage') {
+                normalizedValue = Math.max(0, parsedValue / 100)
+            } else {
+                normalizedValue = normalizeSpeakerCompensationValue(normalizedType, assignment.compensationValue)
+            }
 
             return {
                 speakerId: assignment.speakerId,
