@@ -1,7 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
-import { createPublicClient } from '@/lib/supabase/public'
+import { createServiceClient } from '@/lib/supabase/service'
 import { getCommercialAccessContext } from '@/lib/access/commercial'
 import { claimFormationRecordsByEmail } from '@/lib/formations/service'
 import { getFormationCommercialState, getFormationMemberAccessMessage } from '@/lib/formations/pricing'
@@ -72,7 +72,7 @@ async function getPublicVerticalId(supabase: any, verticalCode?: string | null) 
 }
 
 export async function getPublicFormations(verticalCode?: string | null): Promise<Formation[]> {
-    const supabase = createPublicClient()
+    const supabase = createServiceClient()
     const activeVerticalId = await getPublicVerticalId(supabase, verticalCode)
 
     let query = (supabase

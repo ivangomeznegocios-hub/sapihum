@@ -1,5 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
-import { createPublicClient } from '@/lib/supabase/public'
+import { createServiceClient } from '@/lib/supabase/service'
 import { unstable_cache } from 'next/cache'
 import type {
     Event,
@@ -424,7 +424,7 @@ export async function getEventRegistrations(eventId: string): Promise<EventRegis
  * Filters out Draft and Cancelled events.
  */
 export async function getPublicEventById(eventId: string): Promise<any | null> {
-    const supabase = createPublicClient()
+    const supabase = createServiceClient()
 
     const { data: event, error } = await (supabase
         .from('events') as any)
@@ -489,7 +489,7 @@ async function getPublicVerticalId(supabase: any, verticalCode?: string | null) 
 }
 
 async function fetchPublicEventBySlug(slug: string): Promise<any | null> {
-    const supabase = createPublicClient()
+    const supabase = createServiceClient()
 
     const { data: event, error } = await (supabase
         .from('events') as any)
@@ -536,7 +536,7 @@ async function fetchPublicCatalogEvents(
     kind: 'eventos' | 'cursos' | 'grabaciones',
     verticalCode?: string | null
 ): Promise<PublicCatalogEvent[]> {
-    const supabase = createPublicClient()
+    const supabase = createServiceClient()
     const activeVerticalId = await getPublicVerticalId(supabase, verticalCode)
 
     let query = (supabase
@@ -608,7 +608,7 @@ export const getPublicCatalogEvents = unstable_cache(
  * Sorts upcoming first (by start_time ASC), completed last.
  */
 async function fetchUnifiedCatalogEvents(verticalCode?: string | null): Promise<PublicCatalogEvent[]> {
-    const supabase = createPublicClient()
+    const supabase = createServiceClient()
     const activeVerticalId = await getPublicVerticalId(supabase, verticalCode)
 
     let query = (supabase
