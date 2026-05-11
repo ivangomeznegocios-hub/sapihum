@@ -482,7 +482,7 @@ export function PublicEventLanding({
                         {/* RIGHT: Image & CTA */}
                         <aside className="space-y-6 lg:sticky lg:top-24">
                             {event.image_url && (
-                                <div className="aspect-[4/3] sm:aspect-video lg:aspect-[4/5] w-full rounded-[32px] overflow-hidden border border-brand-border shadow-2xl relative group">
+                                <div className="aspect-video w-full rounded-[32px] overflow-hidden border border-brand-border shadow-2xl relative group">
                                     <div 
                                         role="img" 
                                         aria-label={event.title}
