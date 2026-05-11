@@ -123,7 +123,7 @@ function SectionHeader({
                     {eyebrow}
                 </p>
             )}
-            <h2 className="mt-3 text-3xl font-semibold tracking-tight text-foreground md:text-5xl">
+            <h2 className="mt-3 text-3xl font-semibold tracking-tight text-stone-50 md:text-5xl">
                 {title}
             </h2>
             {text && <p className="mt-5 text-base leading-7 text-stone-300/75 md:text-lg">{text}</p>}
@@ -226,8 +226,8 @@ function FounderCheckoutButton({
             </div>
 
             {guestOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/70 px-4 backdrop-blur-sm">
-                    <div className="w-full max-w-md rounded-3xl border border-border/10 bg-[#11100d] p-6 text-foreground shadow-2xl">
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4 backdrop-blur-sm">
+                    <div className="w-full max-w-md rounded-3xl border border-white/10 bg-[#11100d] p-6 text-stone-50 shadow-2xl">
                         <div className="flex items-start justify-between gap-4">
                             <div>
                                 <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#d89f2b]">
@@ -240,7 +240,7 @@ function FounderCheckoutButton({
                             </div>
                             <button
                                 type="button"
-                                className="rounded-full border border-border/10 p-2 text-stone-300 hover:text-foreground"
+                                className="rounded-full border border-white/10 p-2 text-stone-300 hover:text-stone-50"
                                 onClick={() => setGuestOpen(false)}
                                 aria-label="Cerrar"
                             >
@@ -258,7 +258,7 @@ function FounderCheckoutButton({
                             <label className="block text-sm font-medium text-stone-200">
                                 Nombre completo
                                 <Input
-                                    className="mt-2 border-border/10 bg-white/[0.04] text-foreground"
+                                    className="mt-2 border-white/10 bg-white/[0.04] text-stone-50"
                                     value={fullName}
                                     onChange={(event) => setFullName(event.target.value)}
                                     required
@@ -267,7 +267,7 @@ function FounderCheckoutButton({
                             <label className="block text-sm font-medium text-stone-200">
                                 Correo electronico
                                 <Input
-                                    className="mt-2 border-border/10 bg-white/[0.04] text-foreground"
+                                    className="mt-2 border-white/10 bg-white/[0.04] text-stone-50"
                                     type="email"
                                     value={email}
                                     onChange={(event) => setEmail(event.target.value)}
@@ -365,26 +365,26 @@ function CalendarLeadForm() {
             <div className="grid gap-4 md:grid-cols-2">
                 <label className="text-sm font-medium text-stone-100">
                     Nombre completo
-                    <Input name="fullName" required className="mt-2 border-border/10 bg-white/[0.04] text-foreground" />
+                    <Input name="fullName" required className="mt-2 border-white/10 bg-white/[0.04] text-stone-50" />
                 </label>
                 <label className="text-sm font-medium text-stone-100">
                     Correo electronico
-                    <Input name="email" type="email" required className="mt-2 border-border/10 bg-white/[0.04] text-foreground" />
+                    <Input name="email" type="email" required className="mt-2 border-white/10 bg-white/[0.04] text-stone-50" />
                 </label>
                 <label className="text-sm font-medium text-stone-100">
                     WhatsApp
-                    <Input name="whatsapp" required className="mt-2 border-border/10 bg-white/[0.04] text-foreground" />
+                    <Input name="whatsapp" required className="mt-2 border-white/10 bg-white/[0.04] text-stone-50" />
                 </label>
                 <label className="text-sm font-medium text-stone-100">
                     Ciudad / Estado
-                    <Input name="location" required className="mt-2 border-border/10 bg-white/[0.04] text-foreground" />
+                    <Input name="location" required className="mt-2 border-white/10 bg-white/[0.04] text-stone-50" />
                 </label>
                 <label className="text-sm font-medium text-stone-100">
                     Perfil profesional
                     <select
                         name="professionalProfile"
                         required
-                        className="mt-2 h-11 w-full rounded-xl border border-border/10 bg-[#171510] px-3.5 text-sm text-foreground outline-none focus:border-[#f1b541]"
+                        className="mt-2 h-11 w-full rounded-xl border border-white/10 bg-[#171510] px-3.5 text-sm text-stone-50 outline-none focus:border-[#f1b541]"
                         defaultValue=""
                     >
                         <option value="" disabled>Selecciona una opcion</option>
@@ -396,7 +396,7 @@ function CalendarLeadForm() {
                     <select
                         name="interestArea"
                         required
-                        className="mt-2 h-11 w-full rounded-xl border border-border/10 bg-[#171510] px-3.5 text-sm text-foreground outline-none focus:border-[#f1b541]"
+                        className="mt-2 h-11 w-full rounded-xl border border-white/10 bg-[#171510] px-3.5 text-sm text-stone-50 outline-none focus:border-[#f1b541]"
                         defaultValue=""
                     >
                         <option value="" disabled>Selecciona una opcion</option>
@@ -405,7 +405,7 @@ function CalendarLeadForm() {
                 </label>
             </div>
 
-            <label className="flex items-start gap-3 rounded-2xl border border-border/10 bg-white/[0.03] p-4 text-sm leading-6 text-stone-300">
+            <label className="flex items-start gap-3 rounded-2xl border border-white/10 bg-white/[0.03] p-4 text-sm leading-6 text-stone-300">
                 <input name="consent" type="checkbox" required className="mt-1 h-4 w-4 accent-[#f1b541]" />
                 Acepto recibir informacion de SAPIHUM sobre el calendario de mayo, sesiones y acceso fundador.
             </label>
@@ -447,14 +447,14 @@ export function FundadoresMexicoLanding() {
     }
 
     return (
-        <main className="min-h-screen overflow-hidden bg-[#090806] text-foreground">
+        <main className="min-h-screen overflow-hidden bg-[#090806] text-stone-50">
             <div className="pointer-events-none fixed inset-0 z-0 bg-[radial-gradient(circle_at_top_left,rgba(241,181,65,0.18),transparent_34%),radial-gradient(circle_at_80%_10%,rgba(255,255,255,0.08),transparent_30%),linear-gradient(180deg,#090806,#11100d_38%,#070706)]" />
             <div className="pointer-events-none fixed inset-0 z-0 opacity-[0.08] [background-image:linear-gradient(rgba(255,255,255,.9)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,.9)_1px,transparent_1px)] [background-size:64px_64px]" />
 
             <header className="relative z-10 mx-auto flex max-w-7xl items-center justify-between px-5 py-5 md:px-8">
                 <Link
                     href="/fundadores-mexico"
-                    className="text-sm font-black uppercase tracking-[0.28em] text-foreground transition-colors hover:text-[#f1b541]"
+                    className="text-sm font-black uppercase tracking-[0.28em] text-stone-50 transition-colors hover:text-[#f1b541]"
                     aria-label="Volver al inicio de Miembros Fundadores SAPIHUM Mexico"
                 >
                     SAPIHUM
@@ -471,7 +471,7 @@ export function FundadoresMexicoLanding() {
                     <div className="w-fit rounded-full border border-[#f1b541]/30 bg-[#f1b541]/10 px-4 py-2 text-xs font-bold uppercase tracking-[0.22em] text-[#f1b541]">
                         Lanzamiento nacional · Mayo 2026 · Mexico
                     </div>
-                    <h1 className="mt-7 max-w-4xl text-4xl font-semibold leading-[1.02] tracking-[-0.05em] text-foreground md:text-7xl">
+                    <h1 className="mt-7 max-w-4xl text-4xl font-semibold leading-[1.02] tracking-[-0.05em] text-stone-50 md:text-7xl">
                         Se parte de los primeros 100 miembros fundadores de SAPIHUM Mexico
                     </h1>
                     <p className="mt-7 max-w-2xl text-lg leading-8 text-stone-200/80 md:text-xl">
@@ -487,7 +487,7 @@ export function FundadoresMexicoLanding() {
                             type="button"
                             size="lg"
                             variant="outline"
-                            className="rounded-full border-border/15 bg-white/[0.03]"
+                            className="rounded-full border-white/15 bg-white/[0.03]"
                             onClick={scrollToLeadForm}
                         >
                             <CalendarDays className="h-4 w-4" />
@@ -500,7 +500,7 @@ export function FundadoresMexicoLanding() {
                 </div>
 
                 <aside className="relative">
-                    <div className="rounded-[2rem] border border-border/12 bg-white/[0.07] p-6 shadow-[0_30px_120px_rgba(0,0,0,0.45)] backdrop-blur-xl md:sticky md:top-8">
+                    <div className="rounded-[2rem] border border-white/12 bg-white/[0.07] p-6 shadow-[0_30px_120px_rgba(0,0,0,0.45)] backdrop-blur-xl md:sticky md:top-8">
                         <div className="flex items-start justify-between gap-4">
                             <div>
                                 <p className="text-xs font-bold uppercase tracking-[0.22em] text-[#f1b541]">Oferta fundadora</p>
@@ -510,7 +510,7 @@ export function FundadoresMexicoLanding() {
                                 <Crown className="h-6 w-6" />
                             </div>
                         </div>
-                        <div className="mt-7 rounded-3xl bg-background/35 p-5">
+                        <div className="mt-7 rounded-3xl bg-black/35 p-5">
                             <div className="flex items-end gap-2">
                                 <span className="text-5xl font-semibold tracking-tight">$250</span>
                                 <span className="pb-2 text-stone-300">MXN/mes</span>
@@ -530,7 +530,7 @@ export function FundadoresMexicoLanding() {
                 </aside>
             </section>
 
-            <section className="relative z-10 border-y border-border/10 bg-background/20 px-5 py-20 md:px-8">
+            <section className="relative z-10 border-y border-white/10 bg-black/20 px-5 py-20 md:px-8">
                 <div className="mx-auto max-w-6xl">
                     <SectionHeader title="La formacion profesional no deberia sentirse tan aislada" />
                     <div className="mt-12 grid gap-8 md:grid-cols-[0.95fr_1.05fr]">
@@ -539,7 +539,7 @@ export function FundadoresMexicoLanding() {
                         </p>
                         <div className="grid gap-3 sm:grid-cols-2">
                             {['Hay cursos sueltos, pero poca continuidad.', 'Hay informacion dispersa, pero poca curaduria profesional.', 'Hay muchos profesionales avanzando solos.', 'Hay pocas comunidades activas con agenda real.'].map((item) => (
-                                <div key={item} className="rounded-3xl border border-border/10 bg-white/[0.04] p-5 text-stone-200">
+                                <div key={item} className="rounded-3xl border border-white/10 bg-white/[0.04] p-5 text-stone-200">
                                     {item}
                                 </div>
                             ))}
@@ -565,7 +565,7 @@ export function FundadoresMexicoLanding() {
                             ['Agenda activa', 'Actividades mensuales para que siempre haya algo nuevo que aprender o explorar.'],
                             ['Especializacion', 'Areas como psicologia clinica, forense, duelo, trauma, adicciones, memoria, vejez, intervencion y mas.'],
                         ].map(([title, text], index) => (
-                            <div key={title} className="rounded-3xl border border-border/10 bg-white/[0.045] p-6">
+                            <div key={title} className="rounded-3xl border border-white/10 bg-white/[0.045] p-6">
                                 <span className="text-sm font-bold text-[#f1b541]">0{index + 1}</span>
                                 <h3 className="mt-5 text-xl font-semibold">{title}</h3>
                                 <p className="mt-3 text-sm leading-6 text-stone-300/70">{text}</p>
@@ -596,12 +596,12 @@ export function FundadoresMexicoLanding() {
                             ['Renovacion', 'Mensual'],
                             ['Cancelacion', 'Disponible cuando el usuario lo necesite'],
                         ].map(([label, value]) => (
-                            <div key={label} className="rounded-3xl border border-black/10 bg-background/8 p-5">
+                            <div key={label} className="rounded-3xl border border-black/10 bg-black/8 p-5">
                                 <p className="text-xs font-black uppercase tracking-[0.18em] text-black/50">{label}</p>
                                 <p className="mt-3 text-lg font-semibold">{value}</p>
                             </div>
                         ))}
-                        <div className="rounded-3xl border border-black/10 bg-background p-5 text-foreground sm:col-span-2">
+                        <div className="rounded-3xl border border-black/10 bg-black p-5 text-stone-50 sm:col-span-2">
                             El precio fundador se conserva mientras la membresia siga activa. Si cancelas y deseas volver mas adelante, aplicaras al precio vigente de ese momento.
                         </div>
                     </div>
@@ -613,7 +613,7 @@ export function FundadoresMexicoLanding() {
                     <SectionHeader title="¿Que incluye ser miembro SAPIHUM?" text="El valor mensual esta concentrado en comunidad, agenda, sesiones, recursos y prioridad de acceso." />
                     <div className="mt-12 grid gap-4 md:grid-cols-4">
                         {benefits.map(([title, text, Icon]) => (
-                            <div key={title} className="rounded-3xl border border-border/10 bg-white/[0.04] p-6">
+                            <div key={title} className="rounded-3xl border border-white/10 bg-white/[0.04] p-6">
                                 <Icon className="h-6 w-6 text-[#f1b541]" />
                                 <h3 className="mt-5 text-lg font-semibold">{title}</h3>
                                 <p className="mt-3 text-sm leading-6 text-stone-300/70">{text}</p>
@@ -623,7 +623,7 @@ export function FundadoresMexicoLanding() {
                 </div>
             </section>
 
-            <section className="relative z-10 border-y border-border/10 bg-white/[0.03] px-5 py-20 md:px-8">
+            <section className="relative z-10 border-y border-white/10 bg-white/[0.03] px-5 py-20 md:px-8">
                 <div className="mx-auto max-w-6xl">
                     <SectionHeader
                         title="Una comunidad con agenda real desde el primer mes"
@@ -632,13 +632,13 @@ export function FundadoresMexicoLanding() {
                     <div className="mt-12 grid gap-8 md:grid-cols-[0.9fr_1.1fr]">
                         <div className="grid grid-cols-2 gap-3">
                             {areas.map((area) => (
-                                <div key={area} className="rounded-2xl border border-border/10 bg-background/25 px-4 py-3 text-sm text-stone-200">
+                                <div key={area} className="rounded-2xl border border-white/10 bg-black/25 px-4 py-3 text-sm text-stone-200">
                                     {area}
                                 </div>
                             ))}
                         </div>
-                        <div className="rounded-[2rem] border border-border/10 bg-[#15130f] p-6">
-                            <div className="flex items-center justify-between gap-4 border-b border-border/10 pb-5">
+                        <div className="rounded-[2rem] border border-white/10 bg-[#15130f] p-6">
+                            <div className="flex items-center justify-between gap-4 border-b border-white/10 pb-5">
                                 <div>
                                     <p className="text-xs font-bold uppercase tracking-[0.22em] text-[#f1b541]">Calendario de mayo</p>
                                     <h3 className="mt-2 text-2xl font-semibold">Vista preliminar</h3>
@@ -679,7 +679,7 @@ export function FundadoresMexicoLanding() {
                 </div>
             </section>
 
-            <section className="relative z-10 border-y border-border/10 bg-background/25 px-5 py-20 md:px-8">
+            <section className="relative z-10 border-y border-white/10 bg-black/25 px-5 py-20 md:px-8">
                 <div className="mx-auto max-w-6xl">
                     <SectionHeader title="¿Para quien es SAPIHUM?" text="SAPIHUM esta disenado para profesionales y estudiantes que quieren seguir creciendo dentro del campo de la psicologia y areas afines." />
                     <div className="mt-12 grid gap-6 md:grid-cols-2">
@@ -713,7 +713,7 @@ export function FundadoresMexicoLanding() {
                             ['Participas en la agenda mensual', 'Podras revisar el calendario, elegir sesiones y participar en actividades seleccionadas.'],
                             ['Accedes a beneficios fundadores', 'Tendras prioridad en cupos limitados, sesiones premium incluidas durante mayo y beneficios preferenciales en formaciones futuras.'],
                         ].map(([title, text], index) => (
-                            <div key={title} className="rounded-3xl border border-border/10 bg-white/[0.04] p-6">
+                            <div key={title} className="rounded-3xl border border-white/10 bg-white/[0.04] p-6">
                                 <span className="text-5xl font-semibold text-[#f1b541]/70">{index + 1}</span>
                                 <h3 className="mt-6 text-xl font-semibold">{title}</h3>
                                 <p className="mt-3 text-sm leading-6 text-stone-300/70">{text}</p>
@@ -735,13 +735,13 @@ export function FundadoresMexicoLanding() {
                     <p className="mt-2 text-sm text-black/55">Precio regular: $290 MXN/mes</p>
                     <div className="mt-7 grid gap-3 sm:grid-cols-2">
                         {['Comunidad privada.', 'Agenda mensual.', 'Sesiones seleccionadas.', 'Networking profesional.', 'Recursos y materiales.', 'Prioridad en cupos limitados.', '2 sesiones premium incluidas durante mayo.', 'Beneficios preferenciales en formaciones premium.', 'Participacion como primera generacion nacional.'].map((item) => (
-                            <div key={item} className="flex gap-3 rounded-2xl bg-background/5 p-3 text-sm">
+                            <div key={item} className="flex gap-3 rounded-2xl bg-black/5 p-3 text-sm">
                                 <Check className="h-4 w-4 shrink-0 text-black" />
                                 {item}
                             </div>
                         ))}
                     </div>
-                    <p className="mt-6 rounded-2xl bg-background p-4 text-sm text-foreground">
+                    <p className="mt-6 rounded-2xl bg-black p-4 text-sm text-stone-50">
                         Disponible durante mayo o hasta llenar los primeros 100 lugares.
                     </p>
                     <FounderCheckoutButton location="pricing_card" label="Asegurar mi lugar fundador" className="mt-6" />
@@ -760,18 +760,18 @@ export function FundadoresMexicoLanding() {
                             Dejanos tus datos y te enviaremos el calendario de mayo, informacion de las sesiones y detalles del acceso fundador.
                         </p>
                     </div>
-                    <div className="rounded-[2rem] border border-border/10 bg-white/[0.055] p-6">
+                    <div className="rounded-[2rem] border border-white/10 bg-white/[0.055] p-6">
                         <CalendarLeadForm />
                     </div>
                 </div>
             </section>
 
-            <section className="relative z-10 border-y border-border/10 bg-background/25 px-5 py-20 md:px-8">
+            <section className="relative z-10 border-y border-white/10 bg-black/25 px-5 py-20 md:px-8">
                 <div className="mx-auto max-w-4xl">
                     <SectionHeader title="Preguntas frecuentes" />
                     <div className="mt-10 space-y-3">
                         {faqs.map(([question, answer]) => (
-                            <details key={question} className="group rounded-3xl border border-border/10 bg-white/[0.04] p-5">
+                            <details key={question} className="group rounded-3xl border border-white/10 bg-white/[0.04] p-5">
                                 <summary className="flex cursor-pointer list-none items-center justify-between gap-4 text-lg font-semibold">
                                     {question}
                                     <ChevronDown className="h-5 w-5 shrink-0 text-[#f1b541] transition group-open:rotate-180" />
@@ -797,7 +797,7 @@ export function FundadoresMexicoLanding() {
                 </div>
             </section>
 
-            <footer className="relative z-10 border-t border-border/10 px-5 py-8 text-center text-xs text-stone-500 md:px-8">
+            <footer className="relative z-10 border-t border-white/10 px-5 py-8 text-center text-xs text-stone-500 md:px-8">
                 <div>SAPIHUM Mexico · Comunidad profesional online · Membresia mensual cancelable</div>
                 <Link
                     href="/"
@@ -807,7 +807,7 @@ export function FundadoresMexicoLanding() {
                 </Link>
             </footer>
 
-            <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border/10 bg-[#090806]/92 p-3 backdrop-blur-xl md:hidden">
+            <div className="fixed inset-x-0 bottom-0 z-40 border-t border-white/10 bg-[#090806]/92 p-3 backdrop-blur-xl md:hidden">
                 <FounderCheckoutButton location="mobile_sticky" label="Entrar por $250 MXN/mes" />
             </div>
         </main>
