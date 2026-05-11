@@ -174,7 +174,7 @@ export async function getPublicSpeakers(): Promise<SpeakerWithProfile[]> {
     }
 
     const speakers = (data ?? []) as Speaker[]
-    const profileMap = await loadSpeakerProfiles(speakers.map((speaker) => speaker.id), { publicOnly: true })
+    const profileMap = await loadSpeakerProfiles(speakers.map((speaker) => speaker.id))
     const speakersWithProfiles = attachProfilesToSpeakers(speakers, profileMap) as SpeakerWithProfile[]
     return sortSpeakersByMerit(speakersWithProfiles.filter(isSpeakerVisibleToPublic))
 }

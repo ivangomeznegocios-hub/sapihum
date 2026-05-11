@@ -45,6 +45,8 @@ function getSafeReturnTo(value?: string) {
     return value
 }
 
+export const revalidate = 60
+
 export default async function PublicSpeakerDetailPage({ params, searchParams }: PageProps) {
     const { id } = await params
     const { returnTo } = await searchParams

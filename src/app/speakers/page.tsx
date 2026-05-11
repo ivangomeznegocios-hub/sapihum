@@ -10,6 +10,8 @@ export const metadata = {
     description: 'Conoce a los expertos y ponentes que imparten nuestros eventos y talleres.',
 }
 
+export const revalidate = 60
+
 export default async function PonentesPage() {
     const speakers = await getPublicSpeakers()
 
