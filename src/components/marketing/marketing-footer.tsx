@@ -83,7 +83,7 @@ export function MarketingFooter() {
               <BrandWordmark className="text-sm sm:text-base lg:tracking-[0.16em]" />
             </Link>
             <p className="text-sm leading-relaxed text-muted-foreground">
-              {"Psicolog\u00EDa Avanzada e Investigaci\u00F3n Humana. La plataforma integral para profesionales de la psicolog\u00EDa."}
+              {"Sistemas Avanzados e Investigaci\u00F3n Humana."}
             </p>
             <div className="mt-6">
               <p className="mb-3 text-[10px] font-bold uppercase tracking-[0.2em] text-foreground">
@@ -134,7 +134,7 @@ export function MarketingFooter() {
 
         <div className="flex flex-col items-center justify-between gap-3 border-t py-6 text-center sm:flex-row sm:text-left">
           <p className="text-xs font-semibold text-muted-foreground">
-            &copy; {new Date().getFullYear()} SAPIHUM &mdash; {"Psicolog\u00EDa Avanzada e Investigaci\u00F3n Humana. Todos los derechos reservados."}
+            &copy; {new Date().getFullYear()} SAPIHUM &mdash; {"Sistemas Avanzados e Investigaci\u00F3n Humana. Todos los derechos reservados."}
           </p>
           <p className="text-xs text-muted-foreground">
             Construido con ciencia para la comunidad de salud mental
