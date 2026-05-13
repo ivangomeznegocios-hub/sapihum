@@ -12,7 +12,6 @@ import {
     getAllEventCampaigns,
     getCampaignEventsFromCatalog,
     getEventCampaignByKey,
-    type EventCampaignConfig,
 } from '@/lib/events/campaigns'
 import { getPublicEventPath, splitPublicCatalogEvents } from '@/lib/events/public'
 import { getSpecializationByCode } from '@/lib/specializations'

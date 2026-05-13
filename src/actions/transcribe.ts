@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { createServiceClient } from '@/lib/supabase/service'
 import { getViewerCommercialAccessContext } from '@/lib/access/commercial'
 import { canUseClinicalAi } from '@/lib/access/internal-modules'
 import { createTimeoutFetch } from '@/lib/http/timeout-fetch'
@@ -229,11 +230,12 @@ async function validateClinicalAiAccess(
     }
 }
 
-async function consumeAiMinutes(consumedMinutes: number) {
-    const supabase = await createClient()
+async function consumeAiMinutes(userId: string, consumedMinutes: number) {
+    const supabase = createServiceClient()
     const { data, error } = await (supabase as any).rpc('consume_ai_minutes', {
         p_minutes: consumedMinutes,
         p_description: `Uso de IA clinica (${consumedMinutes} min)`,
+        p_profile_id: userId,
     })
 
     if (error || !data) {
@@ -246,11 +248,12 @@ async function consumeAiMinutes(consumedMinutes: number) {
     return { success: true }
 }
 
-async function refundAiMinutes(consumedMinutes: number) {
-    const supabase = await createClient()
+async function refundAiMinutes(userId: string, consumedMinutes: number) {
+    const supabase = createServiceClient()
     await (supabase as any).rpc('refund_ai_minutes', {
         p_minutes: consumedMinutes,
         p_description: `Reembolso automatico de IA clinica (${consumedMinutes} min)`,
+        p_profile_id: userId,
     })
 }
 
@@ -357,7 +360,7 @@ export async function processSessionRecording(
         }
     }
 
-    const creditConsumption = await consumeAiMinutes(access.consumedMinutes)
+    const creditConsumption = await consumeAiMinutes(access.userId, access.consumedMinutes)
     if (!creditConsumption.success) {
         return {
             success: false,
@@ -368,7 +371,7 @@ export async function processSessionRecording(
     const result = await transcribeAndGenerateSOAP(audioData, options)
 
     if (!result.success || !result.transcription) {
-        await refundAiMinutes(access.consumedMinutes)
+        await refundAiMinutes(access.userId, access.consumedMinutes)
         return {
             success: false,
             error: result.error || 'Failed to generate transcription',

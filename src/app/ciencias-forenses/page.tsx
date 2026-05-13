@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import Image from 'next/image'
 import Link from 'next/link'
-import { ArrowRight, Calendar, Users, GraduationCap, Briefcase, Microscope, Scale, FileSignature, Shield, Beaker } from 'lucide-react'
+import { ArrowRight, Shield } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { getPublicCatalogEvents } from '@/lib/supabase/queries/events'
 import { getFeaturedPublicSpeakers } from '@/lib/supabase/queries/speakers'
