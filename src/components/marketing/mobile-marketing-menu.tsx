@@ -65,7 +65,7 @@ export function MobileMarketingMenu({ navItems }: MobileMarketingMenuProps) {
             <button
                 type="button"
                 onClick={() => setMobileOpen((open) => !open)}
-                className="inline-flex h-10 w-10 items-center justify-center rounded-md border border-transparent text-foreground transition-colors hover:border-brand-blue-border hover:bg-brand-blue-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/80 lg:hidden"
+                className="inline-flex h-10 w-10 items-center justify-center rounded-md border border-transparent text-foreground transition-colors hover:border-brand-blue-border hover:bg-brand-blue-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/80 xl:hidden"
                 aria-label={mobileOpen ? 'Cerrar menú' : 'Abrir menú'}
                 aria-controls="marketing-mobile-menu"
                 aria-expanded={mobileOpen}
@@ -74,7 +74,7 @@ export function MobileMarketingMenu({ navItems }: MobileMarketingMenuProps) {
             </button>
 
             {mobileOpen && (
-                <div className="fixed inset-x-0 top-16 z-[90] lg:hidden">
+                <div className="fixed inset-x-0 top-16 z-[90] xl:hidden">
                     <button
                         type="button"
                         aria-label="Cerrar menú"

@@ -29,7 +29,7 @@ export function MarketingDesktopNav({ navItems }: MarketingDesktopNavProps) {
     }, [])
 
     return (
-        <nav ref={navRef} className="hidden items-center gap-1 lg:flex" aria-label="Navegación principal">
+        <nav ref={navRef} className="hidden items-center gap-1 xl:flex" aria-label="Navegación principal">
             {navItems.map((item) => {
                 if (!item.children) {
                     return (
