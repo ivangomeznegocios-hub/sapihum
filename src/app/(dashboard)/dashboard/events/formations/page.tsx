@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { createClient } from '@/lib/supabase/server'
 import { getFormationsForAdmin } from '../formation-actions'
+import { canCreateEvent } from '@/lib/events/permissions'
 
 export const metadata = {
     title: 'Programas de Formacion | SAPIHUM Admin',
@@ -35,7 +36,7 @@ export default async function FormationsAdminPage() {
             .single()
         : { data: null }
 
-    if (!profile || !['admin', 'ponente'].includes(profile.role)) {
+    if (!profile || !canCreateEvent(profile.role)) {
         notFound()
     }
 
@@ -98,10 +99,12 @@ export default async function FormationsAdminPage() {
                                         <span className="mb-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Cursos</span>
                                         <span className="font-medium">{formation.total_courses || 0} vinculados</span>
                                     </div>
-                                    <div className="flex flex-col">
-                                        <span className="mb-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Ventas completas</span>
-                                        <span className="font-medium">{formation.total_purchases || 0} programas completos</span>
-                                    </div>
+                                    {formation.total_purchases !== null ? (
+                                        <div className="flex flex-col">
+                                            <span className="mb-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Ventas completas</span>
+                                            <span className="font-medium">{formation.total_purchases || 0} programas completos</span>
+                                        </div>
+                                    ) : null}
                                     <div className="col-span-2 mt-1 flex flex-col">
                                         <span className="mb-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Precio Programa Completo</span>
                                         <span className="font-semibold text-primary">${formation.bundle_price} MXN</span>

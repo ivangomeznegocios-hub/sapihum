@@ -19,7 +19,7 @@ import {
     getActiveEntitlementForEvent,
 } from '@/lib/events/access'
 import { getUniqueEventAccessCount } from '@/lib/events/attendance'
-import { getEventEditorAccessForUser } from '@/lib/events/permissions'
+import { canDeleteEvent, getEventEditorAccessForUser } from '@/lib/events/permissions'
 import { getEventSessionOccurrences } from '@/lib/events/sessions'
 import {
     getEffectiveEventPriceForProfile,
@@ -339,7 +339,7 @@ export default async function EventDetailPage({ params }: PageProps) {
                             availableVerticals={viewer.availableVerticals}
                         />
                         {canManageEvent && <DuplicateEventButton eventId={event.id} />}
-                        {canManageEvent && <DeleteEventButton eventId={event.id} />}
+                        {canManageEvent && canDeleteEvent(profile.role) && <DeleteEventButton eventId={event.id} />}
                     </div>
                 )}
             </div>

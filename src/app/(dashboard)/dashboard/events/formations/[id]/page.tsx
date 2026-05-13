@@ -4,6 +4,7 @@ import { getFormationById, getFormationLearnerProgress } from '../../formation-a
 import { FormationForm } from '@/components/formations/formation-form'
 import { FormationProgressManager } from '@/components/formations/formation-progress-manager'
 import { applyVerticalContentFilter } from '@/lib/supabase/vertical-content'
+import { canCreateEvent, canManageAnyEvent, canPublishEvent } from '@/lib/events/permissions'
 
 export const metadata = {
     title: 'Editar Formacion | SAPIHUM Admin',
@@ -14,11 +15,13 @@ export default async function EditFormationPage({ params }: { params: Promise<{ 
     const { supabase, user, profile, availableVerticals, activeVertical } = viewer
     const { id } = await params
 
-    if (!profile || !['admin', 'ponente'].includes(profile.role)) {
+    if (!profile || !canCreateEvent(profile.role)) {
         notFound()
     }
 
-    const isAdmin = profile?.role === 'admin'
+    const isPlatformAdmin = profile?.role === 'admin'
+    const canManageAllEvents = canManageAnyEvent(profile?.role)
+    const canPublish = canPublishEvent(profile?.role)
 
     let eventsQuery = supabase
         .from('events')
@@ -26,7 +29,7 @@ export default async function EditFormationPage({ params }: { params: Promise<{ 
         .or(`formation_id.is.null,formation_id.eq.${id}`)
         .order('created_at', { ascending: false })
 
-    if (!isAdmin && user) {
+    if (!canManageAllEvents && user) {
         eventsQuery = eventsQuery.eq('created_by', user.id)
     }
 
@@ -39,7 +42,7 @@ export default async function EditFormationPage({ params }: { params: Promise<{ 
 
     const [formation, learners, eventsResult] = await Promise.all([
         getFormationById(id),
-        isAdmin ? getFormationLearnerProgress(id) : Promise.resolve([]),
+        isPlatformAdmin ? getFormationLearnerProgress(id) : Promise.resolve([]),
         eventsQuery,
     ])
 
@@ -59,12 +62,12 @@ export default async function EditFormationPage({ params }: { params: Promise<{ 
             <FormationForm
                 initialData={formation}
                 availableEvents={eventsResult.data || []}
-                canPublish={isAdmin}
+                canPublish={canPublish}
                 availableVerticals={availableVerticals}
                 activeVertical={activeVertical}
             />
 
-            {isAdmin ? <FormationProgressManager formationId={id} learners={learners} /> : null}
+            {isPlatformAdmin ? <FormationProgressManager formationId={id} learners={learners} /> : null}
         </div>
     )
 }

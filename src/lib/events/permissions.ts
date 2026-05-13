@@ -5,13 +5,45 @@ type ResolveEventEditorAccessParams = {
   isAssignedSpeaker?: boolean
 }
 
+export function canManageAnyEvent(role?: string | null) {
+  return role === 'admin' || role === 'event_manager'
+}
+
+export function canCreateEvent(role?: string | null) {
+  return canManageAnyEvent(role) || role === 'ponente'
+}
+
+export function canPublishEvent(role?: string | null) {
+  return canManageAnyEvent(role)
+}
+
+export function canDeleteEvent(role?: string | null) {
+  return role === 'admin'
+}
+
+export function canViewEventStats(role?: string | null) {
+  return role === 'admin'
+}
+
+export function canManageEventAdvancedSettings(role?: string | null) {
+  return canManageAnyEvent(role)
+}
+
+export function canManageOwnedEvent({
+  userId,
+  role,
+  createdBy,
+}: Pick<ResolveEventEditorAccessParams, 'userId' | 'role' | 'createdBy'>) {
+  return canManageAnyEvent(role) || createdBy === userId
+}
+
 export function resolveEventEditorAccess({
   userId,
   role,
   createdBy,
   isAssignedSpeaker = false,
 }: ResolveEventEditorAccessParams) {
-  const canManageEvent = role === 'admin' || createdBy === userId
+  const canManageEvent = canManageOwnedEvent({ userId, role, createdBy })
   const canEditEvent = canManageEvent || isAssignedSpeaker
 
   return {

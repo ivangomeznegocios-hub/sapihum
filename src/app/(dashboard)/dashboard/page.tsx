@@ -325,6 +325,60 @@ export default async function DashboardPage({
         redirect('/dashboard/admin/operations')
     }
 
+    if (userRole === 'event_manager') {
+        return (
+            <div className="space-y-6">
+                <div>
+                    <h1 className="text-3xl font-bold tracking-tight">
+                        {greeting ? `${greeting}, ${userName}` : 'Gestion de eventos'}
+                    </h1>
+                    <p className="mt-1 text-muted-foreground">
+                        Administra eventos, borradores y formaciones sin acceso a estadisticas administrativas.
+                    </p>
+                </div>
+
+                <div className="grid gap-4 md:grid-cols-3">
+                    <Card>
+                        <CardContent className="flex h-full flex-col gap-4 p-5">
+                            <CalendarDays className="h-6 w-6 text-primary" />
+                            <div>
+                                <h2 className="font-semibold">Eventos</h2>
+                                <p className="mt-1 text-sm text-muted-foreground">Revisa y edita eventos publicados o en borrador.</p>
+                            </div>
+                            <Button asChild className="mt-auto">
+                                <Link href="/dashboard/events">Abrir eventos</Link>
+                            </Button>
+                        </CardContent>
+                    </Card>
+                    <Card>
+                        <CardContent className="flex h-full flex-col gap-4 p-5">
+                            <GraduationCap className="h-6 w-6 text-primary" />
+                            <div>
+                                <h2 className="font-semibold">Formaciones</h2>
+                                <p className="mt-1 text-sm text-muted-foreground">Gestiona programas formativos y sus cursos vinculados.</p>
+                            </div>
+                            <Button asChild variant="outline" className="mt-auto">
+                                <Link href="/dashboard/events/formations">Abrir formaciones</Link>
+                            </Button>
+                        </CardContent>
+                    </Card>
+                    <Card>
+                        <CardContent className="flex h-full flex-col gap-4 p-5">
+                            <ArrowRight className="h-6 w-6 text-primary" />
+                            <div>
+                                <h2 className="font-semibold">Nuevo evento</h2>
+                                <p className="mt-1 text-sm text-muted-foreground">Crea un evento y preparalo para publicacion.</p>
+                            </div>
+                            <Button asChild variant="outline" className="mt-auto">
+                                <Link href="/dashboard/events/new">Crear evento</Link>
+                            </Button>
+                        </CardContent>
+                    </Card>
+                </div>
+            </div>
+        )
+    }
+
     if (userRole === 'admin') {
         const { getAnalytics } = await import('@/lib/supabase/queries/analytics')
         const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()

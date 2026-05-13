@@ -15,13 +15,17 @@ import {
     replaceContentVerticals,
     resolveVerticalVisibilityInput,
 } from '@/lib/supabase/vertical-content'
+import { canCreateEvent, canManageAnyEvent, canPublishEvent } from '@/lib/events/permissions'
+import type { UserRole } from '@/types/database'
 
-type FormationEditorRole = 'admin' | 'ponente'
+type FormationEditorRole = UserRole
 
 type FormationEditorContext = {
     userId: string
     role: FormationEditorRole
-    isAdmin: boolean
+    isPlatformAdmin: boolean
+    canManageAll: boolean
+    canPublish: boolean
     activeVerticalId: string | null
 }
 
@@ -38,7 +42,7 @@ async function requireFormationEditor(supabase: any): Promise<FormationEditorCon
         .eq('id', user.id)
         .single()
 
-    if (!profile || !['admin', 'ponente'].includes(profile.role)) {
+    if (!profile || !canCreateEvent(profile.role)) {
         throw new Error('No tienes permisos para gestionar formaciones')
     }
 
@@ -47,7 +51,9 @@ async function requireFormationEditor(supabase: any): Promise<FormationEditorCon
     return {
         userId: user.id,
         role: profile.role as FormationEditorRole,
-        isAdmin: profile.role === 'admin',
+        isPlatformAdmin: profile.role === 'admin',
+        canManageAll: canManageAnyEvent(profile.role),
+        canPublish: canPublishEvent(profile.role),
         activeVerticalId: viewer.activeVertical?.id ?? null,
     }
 }
@@ -75,7 +81,7 @@ async function requireFormationAccess(supabase: any, formationId: string) {
         throw new Error('Formacion no encontrada')
     }
 
-    if (!editor.isAdmin && formation.created_by !== editor.userId) {
+    if (!editor.canManageAll && formation.created_by !== editor.userId) {
         throw new Error('No tienes permisos para editar esta formacion')
     }
 
@@ -109,7 +115,7 @@ async function validateCourseSelection(
         .select('id, created_by, formation_id')
         .in('id', uniqueCourseIds)
 
-    if (!editor.isAdmin) {
+    if (!editor.canManageAll) {
         query = query.eq('created_by', editor.userId)
     }
 
@@ -151,7 +157,7 @@ export async function createFormation(formation: FormationInsert, courseIds: str
         requestedPrimaryVerticalId: formation.primary_vertical_id,
         requestedRelatedVerticalIds: (formation as any).related_vertical_ids ?? [],
         fallbackPrimaryVerticalId,
-        isAdmin: editor.isAdmin,
+        isAdmin: editor.canManageAll,
     })
 
     if ('error' in verticalVisibility) {
@@ -163,7 +169,7 @@ export async function createFormation(formation: FormationInsert, courseIds: str
         .insert({
             ...formation,
             material_links: sanitizeMaterialLinks(formation.material_links),
-            status: editor.isAdmin ? (formation.status || 'draft') : 'draft',
+            status: editor.canPublish ? (formation.status || 'draft') : 'draft',
             created_by: editor.userId,
             primary_vertical_id: verticalVisibility.primaryVerticalId,
             content_scope: verticalVisibility.contentScope,
@@ -228,7 +234,7 @@ export async function updateFormation(formationId: string, updates: FormationUpd
             requestedPrimaryVerticalId: updates.primary_vertical_id,
             requestedRelatedVerticalIds: (updates as any).related_vertical_ids ?? [],
             fallbackPrimaryVerticalId: updates.primary_vertical_id ?? editor.activeVerticalId ?? await getDefaultFormationVerticalId(supabase),
-            isAdmin: editor.isAdmin,
+            isAdmin: editor.canManageAll,
         })
         : null
 
@@ -248,7 +254,7 @@ export async function updateFormation(formationId: string, updates: FormationUpd
         .update({
             ...cleanUpdates,
             ...(normalizedMaterialLinks !== undefined ? { material_links: normalizedMaterialLinks } : {}),
-            status: editor.isAdmin ? updates.status : 'draft',
+            status: editor.canPublish ? updates.status : 'draft',
         })
         .eq('id', formationId)
 
@@ -347,10 +353,8 @@ export async function deleteFormation(formationId: string) {
 export async function getFormationsForAdmin() {
     const supabase = await createClient()
     const editor = await requireFormationEditor(supabase)
-
-    let query = (supabase
-        .from('formations') as any)
-        .select(`
+    const select = editor.isPlatformAdmin
+        ? `
             id,
             slug,
             title,
@@ -360,9 +364,23 @@ export async function getFormationsForAdmin() {
             created_at,
             courses:formation_courses(count),
             purchases:formation_purchases(count)
-        `)
+        `
+        : `
+            id,
+            slug,
+            title,
+            status,
+            bundle_price,
+            total_hours,
+            created_at,
+            courses:formation_courses(count)
+        `
 
-    if (!editor.isAdmin) {
+    let query = (supabase
+        .from('formations') as any)
+        .select(select)
+
+    if (!editor.canManageAll) {
         query = query.eq('created_by', editor.userId)
     }
 
@@ -383,7 +401,7 @@ export async function getFormationsForAdmin() {
     return data.map((formation: any) => ({
         ...formation,
         total_courses: formation.courses?.[0]?.count || 0,
-        total_purchases: formation.purchases?.[0]?.count || 0,
+        total_purchases: editor.isPlatformAdmin ? formation.purchases?.[0]?.count || 0 : null,
     }))
 }
 
@@ -396,7 +414,7 @@ export async function getFormationById(id: string) {
         .select('*')
         .eq('id', id)
 
-    if (!editor.isAdmin) {
+    if (!editor.canManageAll) {
         query = query.eq('created_by', editor.userId)
     }
 
@@ -442,7 +460,7 @@ export async function getFormationLearnerProgress(formationId: string) {
     const supabase = await createClient()
     const editor = await requireFormationEditor(supabase)
 
-    if (!editor.isAdmin) {
+    if (!editor.isPlatformAdmin) {
         throw new Error('Solo el administrador puede revisar el avance de alumnos')
     }
 
@@ -532,7 +550,7 @@ export async function markCourseCompleted(formationId: string, eventId: string, 
     const supabase = await createClient()
     const editor = await requireFormationEditor(supabase)
 
-    if (!editor.isAdmin) {
+    if (!editor.isPlatformAdmin) {
         throw new Error('Solo el administrador puede marcar cursos como completados')
     }
 
@@ -555,7 +573,7 @@ export async function issueFullCertificate(formationId: string, email: string) {
     const supabase = await createClient()
     const editor = await requireFormationEditor(supabase)
 
-    if (!editor.isAdmin) {
+    if (!editor.isPlatformAdmin) {
         throw new Error('Solo el administrador puede emitir certificados finales')
     }
 

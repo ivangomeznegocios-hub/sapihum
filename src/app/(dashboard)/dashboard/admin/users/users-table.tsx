@@ -29,6 +29,7 @@ interface UsersTableProps {
 const ROLE_BADGES: Record<string, string> = {
     admin: 'surface-alert-error dark:bg-red-900 dark:text-red-200',
     support: 'bg-brand-blue text-white',
+    event_manager: 'bg-cyan-100 text-cyan-800 dark:bg-cyan-900/40 dark:text-cyan-200',
     psychologist: 'bg-brand-blue text-white',
     patient: 'surface-alert-success dark:bg-green-900 dark:text-green-200',
     ponente: 'bg-brand-blue-hover text-white',
@@ -37,6 +38,7 @@ const ROLE_BADGES: Record<string, string> = {
 const ROLE_LABELS: Record<string, string> = {
     admin: 'Admin',
     support: 'Soporte',
+    event_manager: 'Gestor de eventos',
     psychologist: 'Psicologo',
     patient: 'Paciente',
     ponente: 'Ponente',
@@ -99,6 +101,7 @@ export function UsersTable({ users }: UsersTableProps) {
                         <option value="patient">Pacientes</option>
                         <option value="psychologist">Psicologos</option>
                         <option value="ponente">Ponentes</option>
+                        <option value="event_manager">Gestores de eventos</option>
                         <option value="support">Soporte</option>
                         <option value="admin">Administradores</option>
                     </select>

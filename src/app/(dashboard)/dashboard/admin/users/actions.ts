@@ -7,6 +7,7 @@ import { syncMembershipEntitlementsForUser } from '@/lib/membership-entitlements
 import { LEVEL_2_DEFAULT_SPECIALIZATION, getMembershipSpecializations } from '@/lib/specializations'
 
 type AdminMembershipStatus = 'inactive' | 'trial' | 'active' | 'past_due' | 'cancelled'
+const VALID_USER_ROLES = ['admin', 'support', 'event_manager', 'psychologist', 'patient', 'ponente'] as const
 
 function revalidateAdminUsersViews() {
     revalidatePath('/dashboard')
@@ -179,7 +180,7 @@ export async function updateUserRole(userId: string, newRole: string) {
         return { error: context.error }
     }
 
-    if (!['admin', 'support', 'psychologist', 'patient', 'ponente'].includes(newRole)) {
+    if (!VALID_USER_ROLES.includes(newRole as (typeof VALID_USER_ROLES)[number])) {
         return { error: 'Rol invalido' }
     }
 
@@ -381,6 +382,10 @@ export async function adminCreateUser(data: { email: string, password?: string, 
     const context = await getAdminContext()
     if ('error' in context) {
         return { error: context.error }
+    }
+
+    if (!VALID_USER_ROLES.includes(data.role as (typeof VALID_USER_ROLES)[number])) {
+        return { error: 'Rol invalido' }
     }
 
     const { data: newAuthUser, error: createError } = await context.adminSupabase.auth.admin.createUser({

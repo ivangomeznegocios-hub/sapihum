@@ -59,9 +59,9 @@ interface NavGroup {
 const navGroups: NavGroup[] = [
     {
         label: 'Principal',
-        roles: ['admin', 'psychologist', 'patient', 'ponente'],
+        roles: ['admin', 'event_manager', 'psychologist', 'patient', 'ponente'],
         items: [
-            { name: 'Inicio', href: '/dashboard', icon: Home, roles: ['admin', 'psychologist', 'patient', 'ponente'] },
+            { name: 'Inicio', href: '/dashboard', icon: Home, roles: ['admin', 'event_manager', 'psychologist', 'patient', 'ponente'] },
             { name: 'Mi Acceso', href: '/dashboard/mi-acceso', icon: Library, roles: ['admin', 'psychologist', 'patient', 'ponente'] },
             { name: 'Calendario', href: '/dashboard/calendar', icon: Calendar, roles: ['admin', 'patient'] },
             { name: 'Mensajes', href: '/dashboard/messages', icon: MessageSquare, roles: ['admin', 'psychologist', 'patient'] },
@@ -115,12 +115,12 @@ const navGroups: NavGroup[] = [
     },
     {
         label: 'Gestion de Eventos',
-        roles: ['admin', 'ponente'],
+        roles: ['admin', 'event_manager', 'ponente'],
         items: [
-            { name: 'Mis Eventos', href: '/dashboard/events', icon: CalendarDays, roles: ['admin', 'ponente'] },
-            { name: 'Formaciones', href: '/dashboard/events/formations', icon: GraduationCap, roles: ['admin', 'ponente'] },
+            { name: 'Mis Eventos', href: '/dashboard/events', icon: CalendarDays, roles: ['admin', 'event_manager', 'ponente'] },
+            { name: 'Formaciones', href: '/dashboard/events/formations', icon: GraduationCap, roles: ['admin', 'event_manager', 'ponente'] },
             { name: 'Ganancias', href: '/dashboard/earnings', icon: DollarSign, roles: ['admin', 'ponente'] },
-            { name: 'Crear Evento', href: '/dashboard/events/new', icon: CalendarPlus, roles: ['admin', 'ponente'] },
+            { name: 'Crear Evento', href: '/dashboard/events/new', icon: CalendarPlus, roles: ['admin', 'event_manager', 'ponente'] },
             { name: 'Mi Perfil Ponente', href: '/dashboard/settings', icon: Mic2, roles: ['admin', 'ponente'] },
         ],
     },
@@ -146,7 +146,7 @@ const adminGroup: NavGroup = {
 
 const bottomNav: NavItem[] = [
     { name: 'Suscripcion', href: '/dashboard/subscription', icon: CreditCard, roles: ['admin', 'psychologist'] },
-    { name: 'Configuracion', href: '/dashboard/settings', icon: Settings, roles: ['admin', 'support', 'psychologist', 'patient', 'ponente'] },
+    { name: 'Configuracion', href: '/dashboard/settings', icon: Settings, roles: ['admin', 'support', 'event_manager', 'psychologist', 'patient', 'ponente'] },
 ]
 
 const FORENSIC_GROUP_LABELS: Record<string, string> = {

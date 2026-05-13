@@ -12,7 +12,14 @@ import { getUniqueEventAccessCount } from '@/lib/events/attendance'
 import { grantEventEntitlements } from '@/lib/events/entitlements'
 import { getMembershipEntitlementEndsAt } from '@/lib/events/access'
 import { slugifyCatalogText } from '@/lib/events/public'
-import { getEventEditorAccessForUser } from '@/lib/events/permissions'
+import {
+    canCreateEvent,
+    canDeleteEvent,
+    canManageEventAdvancedSettings,
+    canManageOwnedEvent,
+    canPublishEvent,
+    getEventEditorAccessForUser,
+} from '@/lib/events/permissions'
 import { getEventSessionOccurrences } from '@/lib/events/sessions'
 import { audienceAllowsAccess, getCommercialAccessContext } from '@/lib/access/commercial'
 import { sendEmail } from '@/lib/email/index'
@@ -34,7 +41,6 @@ import {
     replaceContentVerticals,
     resolveVerticalVisibilityInput,
 } from '@/lib/supabase/vertical-content'
-
 async function resolveUniqueEventSlug(supabase: any, baseValue: string, eventId?: string) {
     const fallbackBase = slugifyCatalogText(baseValue) || `evento-${crypto.randomUUID().slice(0, 8)}`
     let candidate = fallbackBase
@@ -832,18 +838,18 @@ export async function createEvent(formData: FormData) {
         return { error: 'No autenticado' }
     }
 
-    // Verify user is admin or ponente
     const { data: profile } = await (supabase
         .from('profiles') as any)
         .select('role')
         .eq('id', user.id)
         .single()
 
-    if (!profile || !['admin', 'ponente'].includes(profile.role)) {
+    if (!profile || !canCreateEvent(profile.role)) {
         return { error: 'No tienes permisos para crear eventos' }
     }
 
-    const isAdmin = profile.role === 'admin'
+    const canPublish = canPublishEvent(profile.role)
+    const canUseAdvancedSettings = canManageEventAdvancedSettings(profile.role)
     const title = readTrimmedString(formData.get('title'))
     const subtitle = readTrimmedString(formData.get('subtitle'))
     const description = readTrimmedString(formData.get('description'))
@@ -857,7 +863,7 @@ export async function createEvent(formData: FormData) {
     const location = readTrimmedString(formData.get('location'))
     const recordingUrl = readTrimmedString(formData.get('recordingUrl'))
     const maxAttendees = parseIntegerField(formData.get('maxAttendees'))
-    const customSlug = isAdmin ? readTrimmedString(formData.get('slug')) : null
+    const customSlug = canUseAdvancedSettings ? readTrimmedString(formData.get('slug')) : null
     const targetAudience = (formData.getAll('audience') as string[]).filter(Boolean)
     const normalizedAudience = targetAudience.length > 0 ? targetAudience : ['public']
     const registrationFields = parseRegistrationFields(formData)
@@ -941,7 +947,7 @@ export async function createEvent(formData: FormData) {
     const formationTrack = readTrimmedString(formData.get('formationTrack'))
     const slug = await resolveUniqueEventSlug(supabase, customSlug || title)
     const meetingLink = eventType === 'presencial' ? null : readTrimmedString(formData.get('meetingLink'))
-    const advancedValues = isAdmin
+    const advancedValues = canUseAdvancedSettings
         ? {
             is_embeddable: formData.has('isEmbeddable') ? formData.get('isEmbeddable') === 'on' : true,
             og_description: formData.has('ogDescription') ? readTrimmedString(formData.get('ogDescription')) : null,
@@ -964,7 +970,7 @@ export async function createEvent(formData: FormData) {
         requestedPrimaryVerticalId: formData.get('primaryVerticalId'),
         requestedRelatedVerticalIds: formData.getAll('relatedVerticalIds'),
         fallbackPrimaryVerticalId: primaryVerticalId,
-        isAdmin,
+        isAdmin: canUseAdvancedSettings,
     })
 
     if ('error' in verticalVisibility) {
@@ -982,7 +988,7 @@ export async function createEvent(formData: FormData) {
             start_time: sessionSchedule.firstSession.startTimeIso,
             end_time: sessionSchedule.firstSession.endTimeIso,
             event_type: eventType,
-            status: profile.role === 'admin' ? 'upcoming' : 'draft',
+            status: canPublish ? 'upcoming' : 'draft',
             meeting_link: meetingLink,
             max_attendees: maxAttendees,
             price,
@@ -1095,7 +1101,8 @@ export async function updateEvent(eventId: string, formData: FormData) {
         return { error: 'Este evento no pertenece a la vertical activa' }
     }
 
-    const isAdmin = profile?.role === 'admin'
+    const canPublish = canPublishEvent(profile?.role)
+    const canUseAdvancedSettings = canManageEventAdvancedSettings(profile?.role)
     const title = readTrimmedString(formData.get('title'))
     const subtitle = readTrimmedString(formData.get('subtitle'))
     const description = formData.has('description')
@@ -1148,7 +1155,7 @@ export async function updateEvent(eventId: string, formData: FormData) {
     const formationTrack = formData.has('formationTrack')
         ? readTrimmedString(formData.get('formationTrack'))
         : undefined
-    const customSlug = isAdmin ? readTrimmedString(formData.get('slug')) : null
+    const customSlug = canUseAdvancedSettings ? readTrimmedString(formData.get('slug')) : null
 
     if (eventType === 'presencial' && !location) {
         return { error: 'La ubicacion es obligatoria para eventos presenciales' }
@@ -1235,7 +1242,7 @@ export async function updateEvent(eventId: string, formData: FormData) {
     }
 
     if (eventType) updates.event_type = eventType
-    if (isAdmin) {
+    if (canPublish) {
         if (status) updates.status = status
     } else {
         updates.status = 'draft'
@@ -1279,7 +1286,7 @@ export async function updateEvent(eventId: string, formData: FormData) {
     if (specializationCode !== undefined) updates.specialization_code = specializationCode || null
     if (formationTrack !== undefined) updates.formation_track = formationTrack || null
 
-    if (isAdmin) {
+    if (canUseAdvancedSettings) {
         if (formData.has('isEmbeddable')) updates.is_embeddable = formData.get('isEmbeddable') === 'on'
         if (formData.has('ogDescription')) updates.og_description = readTrimmedString(formData.get('ogDescription')) || null
         if (formData.has('seoTitle')) updates.seo_title = readTrimmedString(formData.get('seoTitle')) || null
@@ -1288,7 +1295,7 @@ export async function updateEvent(eventId: string, formData: FormData) {
         if (formData.has('publicCtaLabel')) updates.public_cta_label = readTrimmedString(formData.get('publicCtaLabel')) || null
     }
 
-    const shouldUpdateVerticalVisibility = isAdmin && formData.has('contentScope')
+    const shouldUpdateVerticalVisibility = canUseAdvancedSettings && formData.has('contentScope')
     let verticalVisibility: ReturnType<typeof resolveVerticalVisibilityInput> | null = null
     if (shouldUpdateVerticalVisibility) {
         verticalVisibility = resolveVerticalVisibilityInput({
@@ -1296,7 +1303,7 @@ export async function updateEvent(eventId: string, formData: FormData) {
             requestedPrimaryVerticalId: formData.get('primaryVerticalId'),
             requestedRelatedVerticalIds: formData.getAll('relatedVerticalIds'),
             fallbackPrimaryVerticalId: event.primary_vertical_id ?? viewer.activeVertical?.id ?? await getDefaultPrimaryVerticalId(supabase),
-            isAdmin,
+            isAdmin: canUseAdvancedSettings,
         })
 
         if ('error' in verticalVisibility) {
@@ -1307,7 +1314,7 @@ export async function updateEvent(eventId: string, formData: FormData) {
         updates.content_scope = verticalVisibility.contentScope
     }
 
-    if (isAdmin && customSlug !== null) {
+    if (canUseAdvancedSettings && customSlug !== null) {
         const normalizedSlug = slugifyCatalogText(customSlug)
         if (normalizedSlug) {
             updates.slug = await resolveUniqueEventSlug(supabase, normalizedSlug, eventId)
@@ -1401,7 +1408,6 @@ export async function deleteEvent(eventId: string) {
         return { error: 'No autenticado' }
     }
 
-    // Verify user is admin or event creator
     const { data: event } = await (supabase
         .from('events') as any)
         .select('created_by')
@@ -1414,7 +1420,7 @@ export async function deleteEvent(eventId: string) {
         .eq('id', user.id)
         .single()
 
-    if (!event || (event.created_by !== user.id && profile?.role !== 'admin')) {
+    if (!event || !canDeleteEvent(profile?.role)) {
         return { error: 'No tienes permisos para eliminar este evento' }
     }
 
@@ -1453,7 +1459,7 @@ export async function duplicateEvent(eventId: string) {
             .single(),
     ])
 
-    if (!event || (event.created_by !== user.id && profile?.role !== 'admin')) {
+    if (!event || !canManageOwnedEvent({ userId: user.id, role: profile?.role, createdBy: event.created_by })) {
         return { error: 'No tienes permisos para duplicar este evento' }
     }
 
@@ -1613,7 +1619,7 @@ export async function addSpeakerToEvent(eventId: string, speakerId: string, role
         (supabase.from('profiles') as any).select('role').eq('id', user.id).single()
     ])
 
-    if (!event || (event.created_by !== user.id && profile?.role !== 'admin')) {
+    if (!event || !canManageOwnedEvent({ userId: user.id, role: profile?.role, createdBy: event.created_by })) {
         return { error: 'No tienes permisos para modificar este evento' }
     }
 
@@ -1683,7 +1689,7 @@ export async function removeSpeakerFromEvent(eventId: string, speakerId: string)
         (supabase.from('profiles') as any).select('role').eq('id', user.id).single()
     ])
 
-    if (!event || (event.created_by !== user.id && profile?.role !== 'admin')) {
+    if (!event || !canManageOwnedEvent({ userId: user.id, role: profile?.role, createdBy: event.created_by })) {
         return { error: 'No tienes permisos para modificar este evento' }
     }
 

@@ -32,7 +32,7 @@ export default async function AnalyticsPage() {
     }
 
     // Only admin and psychologists can see analytics
-    if (profile.role === 'patient') {
+    if (profile.role !== 'admin' && profile.role !== 'psychologist') {
         redirect('/dashboard')
     }
 

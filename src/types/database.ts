@@ -2,7 +2,7 @@
 // DATABASE TYPES - Auto-generated from Supabase schema
 // ============================================
 
-export type UserRole = 'admin' | 'support' | 'psychologist' | 'patient' | 'ponente'
+export type UserRole = 'admin' | 'support' | 'event_manager' | 'psychologist' | 'patient' | 'ponente'
 
 export type SubscriptionStatus = 'trial' | 'active' | 'past_due' | 'cancelled' | 'inactive'
 

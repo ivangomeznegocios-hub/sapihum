@@ -9,7 +9,8 @@ import {
     Shield,
     Activity,
     UserCog,
-    Mic2
+    Mic2,
+    CalendarDays,
 } from 'lucide-react'
 
 interface Profile {
@@ -67,6 +68,7 @@ export default async function AdminUsersPage() {
     const patients = allUsers.filter(u => u.role === 'patient')
     const admins = allUsers.filter(u => u.role === 'admin')
     const ponentes = allUsers.filter(u => u.role === 'ponente')
+    const eventManagers = allUsers.filter(u => u.role === 'event_manager')
 
     return (
         <div className="w-full space-y-8">
@@ -94,7 +96,7 @@ export default async function AdminUsersPage() {
             </div>
 
             {/* Stats */}
-            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
+            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-6">
                 <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                         <CardTitle className="text-sm font-medium">Total</CardTitle>
@@ -138,6 +140,15 @@ export default async function AdminUsersPage() {
                     </CardHeader>
                     <CardContent>
                         <div className="text-2xl font-bold">{ponentes.length}</div>
+                    </CardContent>
+                </Card>
+                <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="text-sm font-medium">Eventos</CardTitle>
+                        <CalendarDays className="h-4 w-4 text-cyan-600" />
+                    </CardHeader>
+                    <CardContent>
+                        <div className="text-2xl font-bold">{eventManagers.length}</div>
                     </CardContent>
                 </Card>
             </div>

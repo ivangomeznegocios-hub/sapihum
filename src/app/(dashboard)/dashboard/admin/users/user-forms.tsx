@@ -86,6 +86,7 @@ export function RoleChangeForm({ user, onClose }: RoleChangeFormProps) {
                             <option value="patient">Paciente</option>
                             <option value="psychologist">Psicólogo</option>
                             <option value="ponente">Ponente</option>
+                            <option value="event_manager">Gestor de eventos</option>
                             <option value="support">Soporte</option>
                             <option value="admin">Administrador</option>
                         </select>
@@ -688,6 +689,7 @@ export function AddUserForm({ onClose }: { onClose: () => void }) {
                             <option value="patient">Paciente</option>
                             <option value="psychologist">Psicólogo</option>
                             <option value="ponente">Ponente</option>
+                            <option value="event_manager">Gestor de eventos</option>
                             <option value="support">Soporte</option>
                             <option value="admin">Administrador</option>
                         </select>

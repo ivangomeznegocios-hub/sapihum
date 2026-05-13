@@ -5,6 +5,7 @@ import { CreateEventForm } from '../event-forms'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
+import { canCreateEvent } from '@/lib/events/permissions'
 
 export default async function NewEventPage() {
     const { profile, availableVerticals, activeVertical } = await getViewerContext()
@@ -13,8 +14,7 @@ export default async function NewEventPage() {
         redirect('/auth/login')
     }
 
-    // Only admins and ponentes can create events
-    if (!['admin', 'ponente'].includes(profile.role || '')) {
+    if (!canCreateEvent(profile.role)) {
         redirect('/dashboard/events')
     }
 

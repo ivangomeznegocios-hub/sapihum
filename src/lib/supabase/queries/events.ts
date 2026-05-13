@@ -14,6 +14,7 @@ import { getPublicCatalogKindForEvent } from '@/lib/events/public'
 import { getUniqueEventAccessCount, getUniqueEventAccessCounts } from '@/lib/events/attendance'
 import { audienceAllowsAccess, getCommercialAccessContext, type CommercialAccessSnapshot } from '@/lib/access/commercial'
 import { canViewerSeeCatalogEvent } from '@/lib/access/catalog'
+import { canManageAnyEvent } from '@/lib/events/permissions'
 import { applyVerticalContentFilter } from '@/lib/supabase/vertical-content'
 import { normalizeVerticalCode } from '@/lib/verticals'
 import { isSpeakerVisibleToPublic } from '@/lib/speakers/display'
@@ -258,6 +259,10 @@ export async function getEventsWithRegistration(
     return allEvents.filter((event) => {
         if (!canViewerSeeCatalogEvent(event as any, commercialAccess.viewer)) {
             return false
+        }
+
+        if (canManageAnyEvent(profile.role)) {
+            return true
         }
 
         return audienceAllowsAccess(event.target_audience as string[] | null | undefined, commercialAccess, {

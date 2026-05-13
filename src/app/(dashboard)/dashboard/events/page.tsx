@@ -20,6 +20,7 @@ import {
     isPurchasableRecordingEvent,
 } from '@/lib/events/pricing'
 import { isCommunityReadOnlyViewer } from '@/lib/access/commercial'
+import { canCreateEvent, canManageAnyEvent, canViewEventStats } from '@/lib/events/permissions'
 
 function formatEventDate(dateStr: string, timezone: string = DEFAULT_TIMEZONE) {
     return formatEventDateTimeWithZone(dateStr, timezone)
@@ -520,7 +521,7 @@ export default async function EventsPage() {
     const isPsychologist = profile?.role === 'psychologist'
     const isActiveMember = Boolean(
         commercialAccess?.hasActiveMembership ||
-        profile?.role === 'admin' ||
+        canManageAnyEvent(profile?.role) ||
         profile?.role === 'ponente'
     )
     const isReadOnly = commercialAccess
@@ -552,7 +553,7 @@ export default async function EventsPage() {
         if (e.status === 'draft' || e.status === 'cancelled') return false
         return e.status === 'upcoming' && isEventSessionSeriesPast(e)
     })
-    const canSeeDraftAgenda = profile?.role === 'admin' || profile?.role === 'ponente'
+    const canSeeDraftAgenda = canManageAnyEvent(profile?.role) || profile?.role === 'ponente'
     const draftCreatorIds = Array.from(new Set(
         drafts
             .map((event) => event.created_by)
@@ -600,7 +601,7 @@ export default async function EventsPage() {
     ])
 
     const canEditListedEvent = (event: EventWithRegistration) => Boolean(
-        profile?.role === 'admin'
+        canManageAnyEvent(profile?.role)
         || profile?.id === event.created_by
         || assignedEventIds.has(event.id)
     )
@@ -648,7 +649,7 @@ export default async function EventsPage() {
                 </div>
                 <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:justify-end">
                     {/* Admin Analytics Link */}
-                    {profile?.role === 'admin' && (
+                    {canViewEventStats(profile?.role) && (
                         <Button variant="outline" asChild className="w-full sm:w-auto">
                             <Link href="/dashboard/events/analytics">
                                 <svg
@@ -672,7 +673,7 @@ export default async function EventsPage() {
                         </Button>
                     )}
                     {/* Create Event Button (Admin + Ponente) */}
-                    {(profile?.role === 'admin' || profile?.role === 'ponente') && (
+                    {canCreateEvent(profile?.role) && (
                         <Button asChild className="w-full sm:w-auto">
                             <Link href="/dashboard/events/new">
                                 <svg

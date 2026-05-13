@@ -1,5 +1,6 @@
 import { addDays } from 'date-fns'
 import { isPurchasableRecordingEvent } from '@/lib/events/pricing'
+import { canManageAnyEvent } from '@/lib/events/permissions'
 import type { Event, Profile, Resource, Subscription, TargetAudience } from '@/types/database'
 
 const MEMBERSHIP_ACCESS_STATUSES = new Set(['trial', 'trialing', 'active', 'past_due'])
@@ -153,7 +154,7 @@ export function canViewerReachEventOffer(
     viewer: ViewerAccessContext | null
 ) {
     if (!viewer) return canGuestReachEventOffer(event)
-    if (viewer.profile.role === 'admin') return true
+    if (canManageAnyEvent(viewer.profile.role)) return true
     if (event.created_by && event.created_by === viewer.profile.id) return true
     if (isPurchasableRecordingEvent(event)) return true
     return viewerMatchesAudience(event.target_audience, viewer)
@@ -163,7 +164,7 @@ export function canViewerSeeCatalogEvent(
     event: Pick<Event, 'status' | 'target_audience' | 'created_by'>,
     viewer: ViewerAccessContext | null
 ) {
-    if (viewer?.profile.role === 'admin') return true
+    if (canManageAnyEvent(viewer?.profile.role)) return true
     if (event.created_by && viewer?.profile.id === event.created_by) return true
     if (event.status === 'draft' || event.status === 'cancelled') return false
     return viewerMatchesAudience(event.target_audience, viewer)

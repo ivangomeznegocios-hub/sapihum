@@ -1,5 +1,11 @@
 import { expect, test } from '@playwright/test'
-import { resolveEventEditorAccess } from '../src/lib/events/permissions'
+import {
+  canCreateEvent,
+  canDeleteEvent,
+  canPublishEvent,
+  canViewEventStats,
+  resolveEventEditorAccess,
+} from '../src/lib/events/permissions'
 
 test.describe('event permissions', () => {
   test('admin can manage and edit any event', () => {
@@ -14,6 +20,41 @@ test.describe('event permissions', () => {
       canEditEvent: true,
       isAssignedSpeaker: false,
     })
+  })
+
+  test('event manager can manage and edit any event', () => {
+    expect(
+      resolveEventEditorAccess({
+        userId: 'manager-1',
+        role: 'event_manager',
+        createdBy: 'someone-else',
+      })
+    ).toEqual({
+      canManageEvent: true,
+      canEditEvent: true,
+      isAssignedSpeaker: false,
+    })
+  })
+
+  test('event manager can create and publish but cannot delete or view stats', () => {
+    expect(canCreateEvent('event_manager')).toBe(true)
+    expect(canPublishEvent('event_manager')).toBe(true)
+    expect(canDeleteEvent('event_manager')).toBe(false)
+    expect(canViewEventStats('event_manager')).toBe(false)
+  })
+
+  test('admin keeps full event privileges', () => {
+    expect(canCreateEvent('admin')).toBe(true)
+    expect(canPublishEvent('admin')).toBe(true)
+    expect(canDeleteEvent('admin')).toBe(true)
+    expect(canViewEventStats('admin')).toBe(true)
+  })
+
+  test('ponente can create but cannot publish, delete, or view stats', () => {
+    expect(canCreateEvent('ponente')).toBe(true)
+    expect(canPublishEvent('ponente')).toBe(false)
+    expect(canDeleteEvent('ponente')).toBe(false)
+    expect(canViewEventStats('ponente')).toBe(false)
   })
 
   test('creator can manage and edit own event', () => {

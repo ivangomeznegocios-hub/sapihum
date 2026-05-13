@@ -112,6 +112,55 @@ async function findAuthUserIdByEmail(email: string) {
   throw new Error(`Unable to find auth user for ${email}`)
 }
 
+async function ensureAuthUserIdByEmail(email: string) {
+  const admin = createAdminSupabase()
+
+  try {
+    return await findAuthUserIdByEmail(email)
+  } catch (error) {
+    if (!String(error instanceof Error ? error.message : error).includes('Unable to find auth user')) {
+      throw error
+    }
+  }
+
+  const { data, error } = await admin.auth.admin.createUser({
+    email,
+    password: PASSWORD,
+    email_confirm: true,
+    user_metadata: {
+      full_name: 'Gestor de Eventos',
+    },
+  })
+
+  if (error || !data.user) {
+    throw new Error(`Unable to create auth user for ${email}: ${error?.message ?? 'missing user'}`)
+  }
+
+  return data.user.id
+}
+
+async function ensureEventManagerTestUser() {
+  const admin = createAdminSupabase()
+  const userId = await ensureAuthUserIdByEmail('event_manager@test.com')
+
+  const { error } = await admin
+    .from('profiles')
+    .upsert({
+      id: userId,
+      email: 'event_manager@test.com',
+      role: 'event_manager',
+      full_name: 'Gestor de Eventos',
+      membership_level: 0,
+      subscription_status: 'inactive',
+    }, { onConflict: 'id' })
+
+  if (error) {
+    throw new Error(`Unable to prepare event manager profile: ${error.message}`)
+  }
+
+  return userId
+}
+
 test.describe('server route permissions', () => {
   test.describe.configure({ mode: 'serial' })
 
@@ -139,6 +188,38 @@ test.describe('server route permissions', () => {
     await page.waitForLoadState('networkidle').catch(() => null)
 
     expect(new URL(page.url()).pathname).toBe('/dashboard/admin/speakers/new')
+  })
+
+  test('event manager can access event management but not analytics or admin routes', async ({ page }) => {
+    test.setTimeout(180_000)
+    await ensureEventManagerTestUser()
+    await signInAs(page, 'event_manager@test.com')
+
+    const allowedRoutes = [
+      '/dashboard/events',
+      '/dashboard/events/new',
+      '/dashboard/events/formations',
+      '/dashboard/events/formations/nueva',
+    ]
+
+    for (const path of allowedRoutes) {
+      await page.goto(path, { waitUntil: 'domcontentloaded', timeout: 60_000 })
+      await page.waitForLoadState('networkidle').catch(() => null)
+      expect(new URL(page.url()).pathname).toBe(path)
+    }
+
+    const forbiddenRoutes = [
+      { path: '/dashboard/events/analytics', expectedPath: '/dashboard/events' },
+      { path: '/dashboard/admin', expectedPath: '/dashboard' },
+      { path: '/dashboard/admin/users', expectedPath: '/dashboard' },
+      { path: '/dashboard/analytics', expectedPath: '/dashboard' },
+    ]
+
+    for (const route of forbiddenRoutes) {
+      await page.goto(route.path, { waitUntil: 'domcontentloaded', timeout: 60_000 })
+      await page.waitForLoadState('networkidle').catch(() => null)
+      expect(new URL(page.url()).pathname).toBe(route.expectedPath)
+    }
   })
 
   test('ponente keeps access to resource creation', async ({ page }) => {

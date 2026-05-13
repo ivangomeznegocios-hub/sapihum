@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { registerForEvent, cancelEventRegistration, createEvent, updateEvent, deleteEvent, duplicateEvent } from './actions'
 import { createClient } from '@/lib/supabase/client'
 import { getPublicEventPath } from '@/lib/events/public'
+import { canManageEventAdvancedSettings, canPublishEvent } from '@/lib/events/permissions'
 import { MaterialLinksEditor, type EditableMaterialLink } from '@/components/materials/material-links-editor'
 import {
     DEFAULT_SPEAKER_PERCENTAGE_RATE,
@@ -556,7 +557,8 @@ export function CreateEventForm({
     activeVertical = null,
 }: CreateEventFormProps) {
     const router = useRouter()
-    const isAdmin = userRole === 'admin'
+    const canPublish = canPublishEvent(userRole)
+    const canUseAdvancedSettings = canManageEventAdvancedSettings(userRole)
     const [isLoading, setIsLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
     const [selectedAudience, setSelectedAudience] = useState<string[]>(initialData?.target_audience || ['public'])
@@ -637,7 +639,7 @@ export function CreateEventForm({
         return zonedDateTimeToUtcIso(dateValue, timeValue, DEFAULT_TIMEZONE)
     }, [dateValue, timeValue])
     const normalizedAudience = normalizeAudience(selectedAudience)
-    const statusPreview = isAdmin ? (initialData ? selectedStatus : 'upcoming') : 'draft'
+    const statusPreview = canPublish ? (initialData ? selectedStatus : 'upcoming') : 'draft'
     const numericPrice = Number.parseFloat(priceValue || '0') || 0
     const numericMemberPrice = Number.parseFloat(memberPriceValue || '0') || 0
     const selectedSpecializationLabel =
@@ -995,7 +997,7 @@ export function CreateEventForm({
                     )}
                 </div>
 
-                {isAdmin && selectedSpeakerAssignments.length > 0 && (
+                {canUseAdvancedSettings && selectedSpeakerAssignments.length > 0 && (
                     <div className="space-y-3 rounded-xl border bg-background p-4">
                         <div>
                             <h4 className="text-sm font-medium">Pago por ponente</h4>
@@ -1084,7 +1086,7 @@ export function CreateEventForm({
     }
 
     function renderAdvancedSettings() {
-        if (!isAdmin) return null
+        if (!canUseAdvancedSettings) return null
 
         const embedCode = publicUrl
             ? `<iframe src="${publicUrl}/embed" width="400" height="420" frameBorder="0" style="border-radius:16px;overflow:hidden;" loading="lazy"></iframe>`
@@ -1455,7 +1457,7 @@ export function CreateEventForm({
                 .filter((item) => item.title && item.url)
         ))
 
-        if (isAdmin) {
+        if (canUseAdvancedSettings) {
             formData.set('isEmbeddable', isEmbeddable ? 'on' : 'off')
             formData.set('contentScope', contentScopeValue)
             formData.delete('relatedVerticalIds')
@@ -1995,7 +1997,7 @@ export function CreateEventForm({
                 {renderSpeakerPicker()}
                 <QuestionList items={registrationFields} onChange={setRegistrationFields} />
 
-                {isAdmin && initialData && (
+                {canPublish && initialData && (
                     <div>
                         <label className="text-sm font-medium" htmlFor="status">
                             Estado del evento
@@ -2016,7 +2018,7 @@ export function CreateEventForm({
                     </div>
                 )}
 
-                {!isAdmin && (
+                {!canPublish && (
                     <div className="flex items-start gap-2 rounded-xl border border-brand-blue bg-brand-blue p-4 text-sm text-brand-blue">
                         <AlertTriangle className="mt-0.5 h-4 w-4 flex-shrink-0" />
                         <p>
@@ -2107,7 +2109,7 @@ export function CreateEventForm({
                             items={materialLinkItems}
                             onChange={setMaterialLinkItems}
                             helperText={
-                                isAdmin
+                                canUseAdvancedSettings
                                     ? 'Agrega presentaciones, PDFs, carpetas o enlaces externos para que la gente con acceso pueda abrirlos despues.'
                                     : 'Agrega presentaciones, PDFs, carpetas o enlaces externos. Como ponente, el evento quedara en borrador para revision con estos materiales.'
                             }
@@ -2150,8 +2152,8 @@ export function CreateEventForm({
                 </div>
 
                 <div className="rounded-xl border border-dashed bg-muted/10 p-4 text-sm text-muted-foreground">
-                    {isAdmin
-                        ? 'Como admin, puedes guardar y ajustar despues el estado o los metadatos avanzados.'
+                    {canPublish
+                        ? 'Puedes guardar y ajustar despues el estado o los metadatos avanzados.'
                         : 'Como ponente, el evento se guardara como borrador y mantendra intactos los ajustes avanzados existentes.'}
                 </div>
 
