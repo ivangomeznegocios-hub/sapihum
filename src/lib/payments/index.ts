@@ -7,6 +7,7 @@ import { recordAnalyticsServerEvent } from '@/lib/analytics/server'
 import type { AnalyticsConsentSnapshot, AttributionSnapshot } from '@/lib/analytics/types'
 import { getAppUrl } from '@/lib/config/app-url'
 import { getActiveEntitlementForEvent } from '@/lib/events/access'
+import { syncCongressBundleEntitlementsForIdentity } from '@/lib/events/congress'
 import { grantEventEntitlements, revokeEventEntitlementsBySourceReference } from '@/lib/events/entitlements'
 import { upsertAutomaticEventSpeakerEarnings } from '@/lib/earnings/compensation'
 import { reconcileGrowthRewards } from '@/lib/growth/reward-engine'
@@ -878,6 +879,12 @@ async function fulfillEventPurchase(params: {
             amount_paid: params.data.amount,
             currency: (params.data.currency || 'mxn').toUpperCase(),
         },
+    })
+
+    await syncCongressBundleEntitlementsForIdentity({
+        supabase: params.supabase,
+        userId: resolvedUserId,
+        email: customerEmail,
     })
 
     console.log(`[Payment] Event purchase confirmed, access granted for event: ${params.eventId}`)

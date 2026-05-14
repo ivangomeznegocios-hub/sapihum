@@ -1,8 +1,18 @@
 import type { Metadata } from 'next'
+import Link from 'next/link'
 import { notFound } from 'next/navigation'
+import { ArrowRight } from 'lucide-react'
 import { PublicEventLanding } from '@/components/catalog/public-event-landing'
+import { PublicCongressLanding } from '@/components/catalog/public-congress-landing'
 import { applyEventCampaignCopy, getEventCampaignForEvent } from '@/lib/events/campaigns'
 import { buildEventSeoDescription, getPublicEventPath } from '@/lib/events/public'
+import {
+    getCongressIncludedEvents,
+    getCongressLandingByParentSlug,
+    getCongressLandingForEvent,
+    getCongressLandingPath,
+    syncCongressBundleEntitlementsForIdentity,
+} from '@/lib/events/congress'
 import { getUnifiedCatalogEvents, getPublicEventBySlug } from '@/lib/supabase/queries/events'
 import { createClient, getUserProfile } from '@/lib/supabase/server'
 import { getCommercialAccessContext } from '@/lib/access/commercial'
@@ -62,6 +72,15 @@ export default async function EventoPublicoPage({ params }: PageProps) {
     const commercialAccess = user && profile 
         ? await getCommercialAccessContext({ supabase, userId: user.id, profile }) 
         : null
+
+    if (user?.email) {
+        await syncCongressBundleEntitlementsForIdentity({
+            supabase,
+            userId: user.id,
+            email: user.email,
+            commercialAccess,
+        })
+    }
     
     const membershipLevel = commercialAccess?.membershipLevel ?? 0
 
@@ -77,8 +96,26 @@ export default async function EventoPublicoPage({ params }: PageProps) {
         commercialAccess,
     })
 
+    const congressLanding = getCongressLandingByParentSlug(event.slug)
+    if (congressLanding) {
+        const includedEvents = await getCongressIncludedEvents(congressLanding, event.id)
+
+        return (
+            <PublicCongressLanding
+                event={event}
+                config={congressLanding}
+                includedEvents={includedEvents}
+                membershipLevel={membershipLevel}
+                hasActiveMembership={commercialAccess?.hasActiveMembership ?? false}
+                membershipSpecializationCode={commercialAccess?.membershipSpecializationCode ?? null}
+                hasAccess={hasAccess}
+            />
+        )
+    }
+
     const allEvents = (await getUnifiedCatalogEvents()).map((item: any) => applyEventCampaignCopy(item))
     const campaign = getEventCampaignForEvent(event)
+    const congressContext = getCongressLandingForEvent(event)
     const relatedEvents = campaign
         ? allEvents
             .filter((item: any) => item.id !== event.id && item.formation_track === campaign.formationTrack)
@@ -88,13 +125,37 @@ export default async function EventoPublicoPage({ params }: PageProps) {
             .slice(0, 3)
 
     return (
-        <PublicEventLanding 
-            event={event} 
-            relatedEvents={relatedEvents} 
-            membershipLevel={membershipLevel}
-            hasActiveMembership={commercialAccess?.hasActiveMembership ?? false}
-            membershipSpecializationCode={commercialAccess?.membershipSpecializationCode ?? null}
-            hasAccess={hasAccess}
-        />
+        <>
+            {congressContext && (
+                <section className="border-b border-brand-border bg-brand-surface-soft/80">
+                    <div className="mx-auto flex max-w-7xl flex-col gap-3 px-6 py-4 text-sm text-brand-text sm:flex-row sm:items-center sm:justify-between sm:px-8">
+                        <div>
+                            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-brand-blue">
+                                Parte del congreso
+                            </p>
+                            <p className="mt-1 leading-relaxed">
+                                Este encuentro forma parte de <strong>{congressContext.shortTitle}</strong> y aparece automaticamente dentro de la agenda del 20 al 31 de mayo.
+                            </p>
+                        </div>
+                        <Link
+                            href={getCongressLandingPath(congressContext)}
+                            className="inline-flex items-center gap-2 font-medium text-brand-blue hover:text-brand-text-strong"
+                        >
+                            Volver a la landing del congreso
+                            <ArrowRight className="h-4 w-4" />
+                        </Link>
+                    </div>
+                </section>
+            )}
+
+            <PublicEventLanding 
+                event={event} 
+                relatedEvents={relatedEvents} 
+                membershipLevel={membershipLevel}
+                hasActiveMembership={commercialAccess?.hasActiveMembership ?? false}
+                membershipSpecializationCode={commercialAccess?.membershipSpecializationCode ?? null}
+                hasAccess={hasAccess}
+            />
+        </>
     )
 }

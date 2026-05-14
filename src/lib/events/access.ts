@@ -5,6 +5,7 @@ import { getMembershipAccessEnd } from '@/lib/access/catalog'
 import { createServiceClient } from '@/lib/supabase/service'
 import { getEventAccessKinds } from './entitlements'
 import { getEffectiveEventPriceForProfile, normalizeMemberAccessType } from './pricing'
+import { isCongressBundleGrantMetadata, syncCongressBundleEntitlementsForIdentity } from './congress'
 
 type EventAccessPolicyEvent = Pick<
     Event,
@@ -13,6 +14,7 @@ type EventAccessPolicyEvent = Pick<
 
 type EventAccessPolicyEntitlement = {
     source_type?: EventEntitlementSourceType | string | null
+    metadata?: Record<string, unknown> | null
 } | null | undefined
 
 type EventAccessPolicyCommercialAccess = Pick<
@@ -61,9 +63,14 @@ function currentProfilePriceForEvent(
 export function membershipEntitlementCanAccessEvent(params: {
     event: EventAccessPolicyEvent
     commercialAccess: EventAccessPolicyCommercialAccess
+    entitlement?: EventAccessPolicyEntitlement
 }) {
-    const { event, commercialAccess } = params
+    const { event, commercialAccess, entitlement } = params
     if (!commercialAccess?.hasActiveMembership) return false
+
+    if (isCongressBundleGrantMetadata(entitlement?.metadata ?? null)) {
+        return true
+    }
 
     const hasAudienceAccess = audienceAllowsAccess(event.target_audience, commercialAccess as CommercialAccessSnapshot, {
         creatorId: event.created_by,
@@ -98,7 +105,7 @@ export function entitlementCanGrantEventAccess(params: {
     if (!entitlement) return false
 
     if (entitlement.source_type === 'membership') {
-        return membershipEntitlementCanAccessEvent({ event, commercialAccess })
+        return membershipEntitlementCanAccessEvent({ event, commercialAccess, entitlement })
     }
 
     if (entitlement.source_type === 'registration') {
@@ -193,7 +200,31 @@ export async function getActiveEntitlementForEvent(params: {
         query = query.in('access_kind', allowedAccessKinds)
     }
 
-    const { data } = await query.maybeSingle()
+    let { data } = await query.maybeSingle()
+    if (!data) {
+        await syncCongressBundleEntitlementsForIdentity({
+            supabase: createServiceClient(),
+            userId: params.userId ?? null,
+            email: normalizedEmail ?? null,
+        })
+
+        query = (params.supabase as any)
+            .from('event_entitlements')
+            .select('*')
+            .eq('event_id', params.eventId)
+            .eq('status', 'active')
+            .or(filters.join(','))
+            .order('created_at', { ascending: false })
+            .limit(1)
+
+        if (allowedAccessKinds?.length) {
+            query = query.in('access_kind', allowedAccessKinds)
+        }
+
+        const retried = await query.maybeSingle()
+        data = retried.data
+    }
+
     if (!data) return null
 
     if (data.ends_at && new Date(data.ends_at) <= new Date()) {

@@ -5,10 +5,12 @@ import {
 } from '@/lib/events/access'
 import { getEventAccessKinds } from '@/lib/events/entitlements'
 import { getPublicEventPath } from '@/lib/events/public'
+import { syncCongressBundleEntitlementsForIdentity } from '@/lib/events/congress'
 import { createClient, getUserProfile } from '@/lib/supabase/server'
 import { getCommercialAccessContext } from '@/lib/access/commercial'
 
 export async function claimCurrentUserEventEntitlements() {
+    const supabase = await createClient()
     const profile = await getUserProfile()
 
     if (!profile?.id || !profile.email) return
@@ -16,6 +18,19 @@ export async function claimCurrentUserEventEntitlements() {
     await claimEventEntitlementsByEmail({
         userId: profile.id,
         email: profile.email,
+    })
+
+    const commercialAccess = await getCommercialAccessContext({
+        supabase,
+        userId: profile.id,
+        profile,
+    })
+
+    await syncCongressBundleEntitlementsForIdentity({
+        supabase,
+        userId: profile.id,
+        email: profile.email,
+        commercialAccess,
     })
 }
 
