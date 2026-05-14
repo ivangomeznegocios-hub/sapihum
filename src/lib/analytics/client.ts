@@ -322,18 +322,23 @@ export async function collectAnalyticsEvent(
         touch: buildBrowserTouch(input?.touch),
     }
 
-    const response = await analyticsCollectFetch('/api/analytics/collect', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-    })
+    try {
+        const response = await analyticsCollectFetch('/api/analytics/collect', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+        })
 
-    if (!response.ok) {
+        if (!response.ok) {
+            return { skipped: true }
+        }
+
+        const data = await response.json()
+        if (data.visitorId) setStoredValue(ANALYTICS_VISITOR_KEY, data.visitorId)
+        if (data.sessionId) setStoredValue(ANALYTICS_SESSION_KEY, data.sessionId)
+        return data
+    } catch (error) {
+        console.warn('[Analytics] collect request skipped:', error)
         return { skipped: true }
     }
-
-    const data = await response.json()
-    if (data.visitorId) setStoredValue(ANALYTICS_VISITOR_KEY, data.visitorId)
-    if (data.sessionId) setStoredValue(ANALYTICS_SESSION_KEY, data.sessionId)
-    return data
 }

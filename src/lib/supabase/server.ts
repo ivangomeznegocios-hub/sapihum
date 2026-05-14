@@ -13,7 +13,7 @@ import type { Profile, UserRole, Database, UserVerticalAccess, Vertical, Vertica
 
 const supabaseServerFetch = createTimeoutFetch(12_000, 'Supabase server request')
 
-export async function createClient() {
+export async function createClient(options?: { fetch?: typeof fetch }) {
     const cookieStore = await cookies()
 
     return createServerClient<Database>(
@@ -37,7 +37,7 @@ export async function createClient() {
                 },
             },
             global: {
-                fetch: supabaseServerFetch,
+                fetch: options?.fetch ?? supabaseServerFetch,
             },
         }
     )
@@ -60,7 +60,7 @@ export interface ViewerContext {
     verticalAccess: UserVerticalAccess[]
 }
 
-export async function createAdminClient() {
+export async function createAdminClient(options?: { fetch?: typeof fetch }) {
     const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
 
     if (!serviceRoleKey) {
@@ -77,7 +77,7 @@ export async function createAdminClient() {
                 persistSession: false,
             },
             global: {
-                fetch: supabaseServerFetch,
+                fetch: options?.fetch ?? supabaseServerFetch,
             },
         }
     )

@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { after, NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { hasMeasurementConsent, parseConsentCookieFromCookieHeader } from '@/lib/consent'
 import { ingestAnalyticsEvent } from '@/lib/analytics/server'
@@ -6,6 +6,7 @@ import { RequestTimeoutError, withTimeout } from '@/lib/http/timeout-fetch'
 import type { AnalyticsCollectRequest } from '@/lib/analytics/types'
 
 export const maxDuration = 10
+const ANALYTICS_INGESTION_TIMEOUT_MS = 6_000
 
 const AnalyticsEventNameSchema = z.enum([
     'page_view',
@@ -66,6 +67,25 @@ const AnalyticsCollectSchema = z.object({
     touch: z.record(z.string(), z.unknown()).optional().nullable(),
 })
 
+function enqueueAnalyticsIngestion(payload: AnalyticsCollectRequest) {
+    after(async () => {
+        try {
+            await withTimeout(
+                ingestAnalyticsEvent(payload),
+                ANALYTICS_INGESTION_TIMEOUT_MS,
+                'Analytics background ingestion'
+            )
+        } catch (error) {
+            if (error instanceof RequestTimeoutError) {
+                console.warn('[Analytics] background ingestion timed out:', error.message)
+                return
+            }
+
+            console.error('[Analytics] background ingestion failed:', error)
+        }
+    })
+}
+
 export async function POST(request: NextRequest) {
     try {
         const consent = parseConsentCookieFromCookieHeader(request.headers.get('cookie'))
@@ -73,25 +93,28 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ skipped: true }, { status: 200 })
         }
 
-        const parsedPayload = AnalyticsCollectSchema.safeParse(await request.json())
+        let requestBody: unknown
+        try {
+            requestBody = await request.json()
+        } catch {
+            return NextResponse.json({ error: 'invalid_json' }, { status: 400 })
+        }
+
+        const parsedPayload = AnalyticsCollectSchema.safeParse(requestBody)
         if (!parsedPayload.success) {
             return NextResponse.json({ error: 'invalid_payload' }, { status: 400 })
         }
 
         const payload = parsedPayload.data as AnalyticsCollectRequest
         payload.consent = consent
-        const result = await withTimeout(
-            ingestAnalyticsEvent(payload),
-            8_000,
-            'Analytics ingestion'
-        )
-        return NextResponse.json(result)
-    } catch (error) {
-        if (error instanceof RequestTimeoutError) {
-            console.error('[Analytics] collect timeout:', error)
-            return NextResponse.json({ accepted: false, timedOut: true }, { status: 202 })
-        }
+        enqueueAnalyticsIngestion(payload)
 
+        return NextResponse.json({
+            accepted: true,
+            visitorId: payload.visitorId,
+            sessionId: payload.sessionId,
+        }, { status: 202 })
+    } catch (error) {
         console.error('[Analytics] collect error:', error)
         return NextResponse.json({ error: 'collect_failed' }, { status: 500 })
     }

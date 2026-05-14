@@ -2,7 +2,7 @@ import { createAdminClient, createClient } from '@/lib/supabase/server'
 import { dispatchExternalTrackingEvent } from '@/lib/tracking/server-destinations'
 import { sanitizeTrackingProperties } from '@/lib/tracking/sanitize'
 import { createAttributionSnapshot, hasMeaningfulTouch, normalizeAttributionTouch, touchToDbFields } from './attribution'
-import { withTimeout } from '@/lib/http/timeout-fetch'
+import { createTimeoutFetch, withTimeout } from '@/lib/http/timeout-fetch'
 import type {
     AnalyticsCollectRequest,
     AnalyticsConsentSnapshot,
@@ -12,16 +12,30 @@ import type {
     AttributionTouch,
 } from './types'
 
+const analyticsSupabaseFetch = createTimeoutFetch(4_000, 'Supabase analytics request')
+
 function isUuid(value: string | null | undefined): value is string {
     return Boolean(value && /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value))
 }
 
+async function createAnalyticsAdminClient() {
+    return createAdminClient({ fetch: analyticsSupabaseFetch })
+}
+
 async function getAuthenticatedUserId(): Promise<string | null> {
-    const supabase = await createClient()
-    const {
-        data: { user },
-    } = await supabase.auth.getUser()
-    return user?.id ?? null
+    try {
+        const supabase = await createClient({ fetch: analyticsSupabaseFetch })
+        const {
+            data: { user },
+        } = await withTimeout(
+            supabase.auth.getUser(),
+            1_500,
+            'Analytics auth lookup'
+        )
+        return user?.id ?? null
+    } catch {
+        return null
+    }
 }
 
 async function syncVisitorIdentity(admin: any, visitorId: string, userId: string) {
@@ -51,7 +65,7 @@ function normalizeConsentSnapshot(value: unknown): AnalyticsConsentSnapshot | nu
 }
 
 export async function resolveAttributionSnapshot(context?: AnalyticsContext & { userId?: string | null }): Promise<AttributionSnapshot> {
-    const admin = await createAdminClient()
+    const admin = await createAnalyticsAdminClient()
     const visitorId = isUuid(context?.visitorId ?? null) ? context?.visitorId ?? null : null
 
     if (visitorId) {
@@ -85,7 +99,7 @@ export async function resolveAttributionSnapshot(context?: AnalyticsContext & { 
 }
 
 export async function ingestAnalyticsEvent(payload: AnalyticsCollectRequest) {
-    const admin = await createAdminClient()
+    const admin = await createAnalyticsAdminClient()
     const now = new Date().toISOString()
     const eventId = payload.eventId ?? crypto.randomUUID()
     const visitorId = isUuid(payload.visitorId ?? null) ? payload.visitorId! : null
@@ -231,7 +245,7 @@ export async function recordAnalyticsServerEvent(input: {
     touch?: Partial<AttributionTouch> | null
     properties?: Record<string, unknown>
 }) {
-    const admin = await createAdminClient()
+    const admin = await createAnalyticsAdminClient()
     const now = new Date().toISOString()
     const eventId = input.eventId ?? crypto.randomUUID()
     const visitorId = isUuid(input.visitorId ?? null) ? input.visitorId! : null
