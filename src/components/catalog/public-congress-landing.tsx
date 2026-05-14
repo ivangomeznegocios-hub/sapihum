@@ -15,13 +15,14 @@ import type {
     AggregatedCongressSpeaker,
     CongressLandingConfig,
     CongressLandingEvent,
+    CongressSpeakerProfile,
 } from '@/lib/events/congress'
 import {
-    getAggregatedCongressSpeakers,
     getCongressLandingPath,
+    mergeCongressSpeakersWithDirectory,
 } from '@/lib/events/congress'
-import { getEventTypeLabel } from '@/lib/events/public'
 import { getEffectiveEventPriceForProfile } from '@/lib/events/pricing'
+import type { SpeakerWithProfile } from '@/types/database'
 
 function formatCongressDate(value: string, timeZone: string) {
     return new Intl.DateTimeFormat('es-MX', {
@@ -40,52 +41,73 @@ function formatCongressTime(value: string, timeZone: string) {
     }).format(new Date(value))
 }
 
-function getSpeakerHref(speaker: AggregatedCongressSpeaker['speaker'], returnTo: string) {
+function getProgramTypeLabel(event: CongressLandingEvent) {
+    const subcategoryLabels: Record<string, string> = {
+        clase: 'Clase',
+        conferencia: 'Conferencia',
+        congreso: 'Congreso',
+        curso: 'Curso',
+        diplomado: 'Diplomado',
+        meetup: 'Encuentro',
+        otro: 'Sesión especial',
+        seminario: 'Seminario',
+        taller: 'Taller',
+    }
+
+    if (event.subcategory && subcategoryLabels[event.subcategory]) {
+        return subcategoryLabels[event.subcategory]
+    }
+
+    if (event.event_type === 'course') return 'Clase'
+    if (event.event_type === 'presencial') return 'Sesión presencial'
+    return 'Sesión en vivo'
+}
+
+function getSpeakerHref(speaker: CongressSpeakerProfile, returnTo: string) {
     if (!speaker?.id || !speaker?.is_public) return null
     return `/speakers/${speaker.id}?returnTo=${encodeURIComponent(returnTo)}`
 }
 
-function getSpeakerImage(speaker: AggregatedCongressSpeaker['speaker']) {
+function getSpeakerImage(speaker: CongressSpeakerProfile) {
     return speaker?.photo_url || speaker?.profile?.avatar_url || null
 }
 
-function getStatusLabel(status: string | null | undefined) {
-    if (status === 'live') return 'En vivo'
-    if (status === 'completed') return 'Archivo'
-    return 'Programado'
+function getSpeakerName(speaker: CongressSpeakerProfile) {
+    return speaker?.profile?.full_name || speaker?.headline || 'Ponente invitado'
 }
 
-function getStatusClasses(status: string | null | undefined) {
-    if (status === 'live') {
-        return 'border-emerald-400/25 bg-emerald-400/10 text-emerald-100'
+function getSpeakerDescription(speaker: CongressSpeakerProfile) {
+    if (speaker?.headline?.trim()) return speaker.headline.trim()
+    if (speaker?.bio?.trim()) {
+        const firstSentence = speaker.bio.trim().split(/[.!?]\s/)[0]?.trim()
+        return firstSentence ? `${firstSentence}.` : speaker.bio.trim()
     }
+    return 'Especialista invitado de SAPIHUM.'
+}
 
-    if (status === 'completed') {
-        return 'border-white/10 bg-white/6 text-stone-200'
-    }
+function getEventSpeakerNames(event: CongressLandingEvent) {
+    const names = (event.speakers ?? [])
+        .map((item) => item.speaker ? getSpeakerName(item.speaker) : null)
+        .filter(Boolean)
 
-    return 'border-amber-300/20 bg-amber-300/10 text-amber-50'
+    return names.length > 0 ? names.join(' · ') : 'Ponente por confirmar'
 }
 
 function MembershipCta({
     eventSlug,
     label,
-    emphasized = false,
+    className,
 }: {
     eventSlug: string
     label: string
-    emphasized?: boolean
+    className?: string
 }) {
     return (
         <Link href={`/precios?next=/eventos/${eventSlug}&autoCheckout=true`}>
             <Button
                 size="lg"
-                className={
-                    emphasized
-                        ? 'h-12 w-full border border-[#d0a96a]/30 bg-[#d0a96a] text-[#0d0c0b] hover:bg-[#e1bc7a]'
-                        : 'h-12 w-full border border-[#6f5730] bg-transparent text-[#f2e7cf] hover:bg-[#20170f]'
-                }
-                variant={emphasized ? 'default' : 'outline'}
+                variant="outline"
+                className={className ?? 'h-12 w-full border-[#c49b63]/50 bg-transparent text-[#f9efe2] hover:bg-[#2a1c14] hover:text-white'}
             >
                 {label}
             </Button>
@@ -93,81 +115,88 @@ function MembershipCta({
     )
 }
 
-function FaqList({ items }: { items: CongressLandingConfig['faq'] }) {
+function SectionHeading({
+    eyebrow,
+    title,
+    description,
+    light = false,
+}: {
+    eyebrow: string
+    title: string
+    description?: string
+    light?: boolean
+}) {
     return (
-        <div className="space-y-3">
-            {items.map((item) => (
-                <details
-                    key={item.question}
-                    className="rounded-sm border border-white/10 bg-black/25 px-5 py-4 text-left"
-                >
-                    <summary className="cursor-pointer list-none text-sm font-semibold text-[#f5ecd9]">
-                        {item.question}
-                    </summary>
-                    <p className="mt-3 text-sm leading-relaxed text-stone-300">{item.answer}</p>
-                </details>
-            ))}
+        <div className="max-w-3xl">
+            <p className={`text-xs font-semibold uppercase tracking-[0.24em] ${light ? 'text-[#f0c98f]' : 'text-[#9a6a2e]'}`}>
+                {eyebrow}
+            </p>
+            <h2 className={`mt-3 font-serif text-3xl leading-tight sm:text-4xl ${light ? 'text-[#fff8ef]' : 'text-[#271a13]'}`}>
+                {title}
+            </h2>
+            {description && (
+                <p className={`mt-3 text-base leading-relaxed ${light ? 'text-[#eadfce]' : 'text-[#5a4b40]'}`}>
+                    {description}
+                </p>
+            )}
         </div>
     )
 }
 
-function AgendaItem({
+function CongressCtaGroup({
     event,
-    timeZone,
+    config,
+    finalPrice,
+    hasAccess,
+    dark = false,
 }: {
-    event: CongressLandingEvent
-    timeZone: string
+    event: any
+    config: CongressLandingConfig
+    finalPrice: number
+    hasAccess: boolean
+    dark?: boolean
 }) {
-    const speakerNames = (event.speakers ?? [])
-        .map((item) => item.speaker?.profile?.full_name || item.speaker?.headline)
-        .filter(Boolean)
-        .slice(0, 3)
+    const purchaseButtonClass = dark
+        ? 'h-12 w-full border border-[#c49b63] bg-[#c49b63] text-[#1e140f] hover:bg-[#d5ae78]'
+        : 'h-12 w-full border border-[#a77739] bg-[#a77739] text-white hover:bg-[#8f632f]'
+    const membershipButtonClass = dark
+        ? 'h-12 w-full border-[#c49b63]/50 bg-transparent text-[#f9efe2] hover:bg-[#2a1c14] hover:text-white'
+        : 'h-12 w-full border-[#d7c0a3] bg-white text-[#3d2a1d] hover:bg-[#f8f1e8]'
+    const accessButtonClass = dark
+        ? 'h-12 w-full border border-[#c49b63] bg-[#c49b63] text-[#1e140f] hover:bg-[#d5ae78]'
+        : 'h-12 w-full border border-[#a77739] bg-[#a77739] text-white hover:bg-[#8f632f]'
+
+    if (hasAccess) {
+        return (
+            <Link href={`/hub/${event.slug}`} className="block w-full">
+                <Button className={accessButtonClass} size="lg">
+                    Acceder al congreso
+                    <ArrowRight className="h-4 w-4" />
+                </Button>
+            </Link>
+        )
+    }
 
     return (
-        <Link href={`/eventos/${event.slug}`} className="block h-full">
-            <article className="flex h-full flex-col justify-between border border-[#3a2d1b] bg-[#120f0b]/92 p-5 transition-colors hover:border-[#c59a53] hover:bg-[#17120d]">
-                <div className="space-y-4">
-                    <div className="flex flex-wrap items-center gap-2">
-                        <span className={`inline-flex items-center rounded-full border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] ${getStatusClasses(event.status)}`}>
-                            {getStatusLabel(event.status)}
-                        </span>
-                        <span className="inline-flex items-center rounded-full border border-white/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-stone-300">
-                            {getEventTypeLabel(event.event_type)}
-                        </span>
-                    </div>
-
-                    <div>
-                        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#c59a53]">
-                            {formatCongressDate(event.start_time, timeZone)}
-                        </p>
-                        <h3 className="mt-2 font-serif text-2xl leading-tight text-[#f5ecd9]">
-                            {event.title}
-                        </h3>
-                        {event.subtitle && (
-                            <p className="mt-3 text-sm leading-relaxed text-stone-300">{event.subtitle}</p>
-                        )}
-                    </div>
-
-                    <div className="space-y-2 text-sm text-stone-300">
-                        <div className="flex items-center gap-2">
-                            <Clock3 className="h-4 w-4 text-[#c59a53]" />
-                            <span>{formatCongressTime(event.start_time, timeZone)}</span>
-                        </div>
-                        {speakerNames.length > 0 && (
-                            <div className="flex items-start gap-2">
-                                <Users className="mt-0.5 h-4 w-4 text-[#c59a53]" />
-                                <span>{speakerNames.join(' · ')}</span>
-                            </div>
-                        )}
-                    </div>
-                </div>
-
-                <div className="mt-6 flex items-center gap-2 text-sm font-medium text-[#f2d6a1]">
-                    Ver ficha individual
-                    <ArrowRight className="h-4 w-4" />
-                </div>
-            </article>
-        </Link>
+        <div className="flex w-full flex-col gap-3 sm:flex-row">
+            <div className="w-full sm:flex-1">
+                <PublicAccessCta
+                    eventId={event.id}
+                    eventSlug={event.slug}
+                    title={event.title}
+                    label={config.cta.purchaseLabel}
+                    requiresPayment={finalPrice > 0}
+                    buttonClassName={purchaseButtonClass}
+                />
+            </div>
+            <div className="w-full sm:flex-1">
+                <MembershipCta
+                    eventSlug={event.slug}
+                    label={config.cta.membershipLabel}
+                    className={membershipButtonClass}
+                />
+            </div>
+        </div>
     )
 }
 
@@ -178,61 +207,54 @@ function SpeakerCard({
     item: AggregatedCongressSpeaker
     returnTo: string
 }) {
-    const name = item.speaker?.profile?.full_name || item.speaker?.headline || 'Ponente'
+    const name = getSpeakerName(item.speaker)
     const image = getSpeakerImage(item.speaker)
     const href = getSpeakerHref(item.speaker, returnTo)
-    const specialties = (item.speaker?.specialties ?? []).filter(Boolean).slice(0, 3)
+    const description = getSpeakerDescription(item.speaker)
+    const areas = (item.speaker.specialties ?? []).filter(Boolean).slice(0, 3)
 
     const content = (
-        <article className="flex h-full flex-col justify-between border border-[#3a2d1b] bg-[#110e0a]/92 p-5 transition-colors hover:border-[#c59a53] hover:bg-[#17120d]">
-            <div className="space-y-4">
-                <div className="flex items-center gap-4">
-                    {image ? (
-                        <div
-                            role="img"
-                            aria-label={name}
-                            className="h-16 w-16 shrink-0 rounded-full border border-[#6d5530] bg-cover bg-center"
-                            style={{ backgroundImage: `url("${image}")` }}
-                        />
-                    ) : (
-                        <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full border border-[#6d5530] bg-[#1d1711] text-xl font-semibold text-[#f2d6a1]">
-                            {name.charAt(0)}
-                        </div>
-                    )}
-
-                    <div>
-                        <h3 className="font-serif text-2xl leading-tight text-[#f5ecd9]">{name}</h3>
-                        {item.speaker?.headline && (
-                            <p className="mt-1 text-sm text-stone-300">{item.speaker.headline}</p>
-                        )}
-                    </div>
-                </div>
-
-                {specialties.length > 0 && (
-                    <div className="flex flex-wrap gap-2">
-                        {specialties.map((specialty) => (
-                            <span
-                                key={specialty}
-                                className="rounded-full border border-[#574123] px-2.5 py-1 text-[11px] text-stone-200"
-                            >
-                                {specialty}
-                            </span>
-                        ))}
+        <article className="flex h-full flex-col rounded-[28px] border border-[#e3d6c7] bg-white p-6 shadow-[0_20px_60px_rgba(44,28,17,0.08)] transition-transform duration-200 hover:-translate-y-1 hover:border-[#c79d67]">
+            <div className="flex items-start gap-4">
+                {image ? (
+                    <div
+                        role="img"
+                        aria-label={name}
+                        className="h-16 w-16 shrink-0 rounded-full border border-[#dcc4a5] bg-cover bg-center"
+                        style={{ backgroundImage: `url("${image}")` }}
+                    />
+                ) : (
+                    <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full border border-[#dcc4a5] bg-[linear-gradient(135deg,#f5e8d6,#e8d0ae)] text-xl font-semibold text-[#7d5727]">
+                        {name.charAt(0).toUpperCase()}
                     </div>
                 )}
 
-                {item.speaker?.credentials?.length ? (
-                    <div className="space-y-2 text-sm leading-relaxed text-stone-300">
-                        {item.speaker.credentials.filter(Boolean).slice(0, 2).map((credential) => (
-                            <p key={credential}>{credential}</p>
-                        ))}
-                    </div>
-                ) : null}
+                <div className="min-w-0">
+                    <h3 className="font-serif text-2xl leading-tight text-[#241913]">{name}</h3>
+                    <p className="mt-2 text-sm leading-relaxed text-[#5f5146]">{description}</p>
+                </div>
             </div>
 
-            <div className="mt-6 flex items-center justify-between gap-3 text-sm text-stone-300">
-                <span>{item.event_count} {item.event_count === 1 ? 'sesion' : 'sesiones'} en la agenda</span>
-                <span className="inline-flex items-center gap-2 font-medium text-[#f2d6a1]">
+            {areas.length > 0 && (
+                <div className="mt-5 flex flex-wrap gap-2">
+                    {areas.map((area) => (
+                        <span
+                            key={area}
+                            className="rounded-full border border-[#e5d5bf] bg-[#fbf6ef] px-3 py-1 text-xs font-medium text-[#6b4a24]"
+                        >
+                            {area}
+                        </span>
+                    ))}
+                </div>
+            )}
+
+            <div className="mt-6 flex items-center justify-between gap-3 text-sm text-[#6b5a4c]">
+                <span>
+                    {item.event_count > 0
+                        ? `${item.event_count} ${item.event_count === 1 ? 'evento incluido' : 'eventos incluidos'}`
+                        : 'Perfil público SAPIHUM'}
+                </span>
+                <span className="inline-flex items-center gap-2 font-medium text-[#9a6a2e]">
                     Ver perfil
                     <ArrowRight className="h-4 w-4" />
                 </span>
@@ -247,10 +269,79 @@ function SpeakerCard({
     return <Link href={href} className="block h-full">{content}</Link>
 }
 
+function ProgrammingCard({
+    event,
+    timeZone,
+}: {
+    event: CongressLandingEvent
+    timeZone: string
+}) {
+    return (
+        <article className="flex h-full flex-col rounded-[28px] border border-[#e3d6c7] bg-white p-6 shadow-[0_20px_60px_rgba(44,28,17,0.08)]">
+            <div className="flex flex-wrap items-center gap-3">
+                <span className="rounded-full bg-[#f6ead8] px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-[#8c5e27]">
+                    {formatCongressDate(event.start_time, timeZone)}
+                </span>
+                <span className="rounded-full border border-[#ead8c2] px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-[#6b5a4c]">
+                    {getProgramTypeLabel(event)}
+                </span>
+            </div>
+
+            <h3 className="mt-5 font-serif text-2xl leading-tight text-[#241913]">
+                {event.title}
+            </h3>
+
+            {event.subtitle && (
+                <p className="mt-3 text-sm leading-relaxed text-[#5f5146]">{event.subtitle}</p>
+            )}
+
+            <div className="mt-5 space-y-3 text-sm text-[#5f5146]">
+                <div className="flex items-start gap-3">
+                    <Clock3 className="mt-0.5 h-4 w-4 text-[#9a6a2e]" />
+                    <span>{formatCongressTime(event.start_time, timeZone)}</span>
+                </div>
+                <div className="flex items-start gap-3">
+                    <Users className="mt-0.5 h-4 w-4 text-[#9a6a2e]" />
+                    <span>{getEventSpeakerNames(event)}</span>
+                </div>
+            </div>
+
+            <div className="mt-6">
+                <Link
+                    href={`/eventos/${event.slug}`}
+                    className="inline-flex items-center gap-2 text-sm font-semibold text-[#9a6a2e] hover:text-[#7d5727]"
+                >
+                    Ver detalle
+                    <ArrowRight className="h-4 w-4" />
+                </Link>
+            </div>
+        </article>
+    )
+}
+
+function FaqList({ items }: { items: CongressLandingConfig['faq'] }) {
+    return (
+        <div className="space-y-3">
+            {items.map((item) => (
+                <details
+                    key={item.question}
+                    className="rounded-[24px] border border-[#e3d6c7] bg-white px-5 py-4 shadow-[0_16px_45px_rgba(44,28,17,0.06)]"
+                >
+                    <summary className="cursor-pointer list-none text-base font-semibold text-[#241913]">
+                        {item.question}
+                    </summary>
+                    <p className="mt-3 text-sm leading-relaxed text-[#5f5146]">{item.answer}</p>
+                </details>
+            ))}
+        </div>
+    )
+}
+
 export function PublicCongressLanding({
     event,
     config,
     includedEvents,
+    directorySpeakers,
     membershipLevel = 0,
     hasActiveMembership = false,
     membershipSpecializationCode = null,
@@ -259,12 +350,13 @@ export function PublicCongressLanding({
     event: any
     config: CongressLandingConfig
     includedEvents: CongressLandingEvent[]
+    directorySpeakers: SpeakerWithProfile[]
     membershipLevel: number
     hasActiveMembership: boolean
     membershipSpecializationCode: string | null
     hasAccess: boolean
 }) {
-    const speakers = getAggregatedCongressSpeakers(includedEvents)
+    const speakers = mergeCongressSpeakersWithDirectory(includedEvents, directorySpeakers)
     const finalPrice = getEffectiveEventPriceForProfile(event, {
         membershipLevel,
         hasActiveMembership,
@@ -272,15 +364,10 @@ export function PublicCongressLanding({
     })
     const timeZone = config.dateWindow.timeZone
     const returnTo = getCongressLandingPath(config)
-    const totalAccessCount = includedEvents.reduce((sum, item) => sum + Number(item.attendee_count || 0), 0)
-    const showMembershipPriority = !hasAccess
 
     return (
-        <div className="relative overflow-hidden bg-[#060505] pb-28 text-white">
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(212,168,106,0.14),transparent_34%),radial-gradient(circle_at_82%_18%,rgba(128,87,31,0.18),transparent_22%),linear-gradient(180deg,#080707_0%,#050505_48%,#090805_100%)]" />
-            <div className="absolute inset-0 opacity-[0.08]" style={{ backgroundImage: 'linear-gradient(to right, rgba(197,154,83,0.16) 1px, transparent 1px), linear-gradient(to bottom, rgba(197,154,83,0.1) 1px, transparent 1px)', backgroundSize: '88px 88px' }} />
-
-            <section className="relative overflow-hidden border-b border-[#2b2218]">
+        <div className="bg-[#f5efe6] pb-28 text-[#241913]">
+            <section className="relative overflow-hidden border-b border-[#2f2118] bg-[#1a120d] text-[#fff8ef]">
                 <div className="absolute inset-0">
                     {event.image_url && (
                         <div
@@ -288,109 +375,92 @@ export function PublicCongressLanding({
                             style={{ backgroundImage: `url("${event.image_url}")` }}
                         />
                     )}
-                    <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(6,5,5,0.94)_0%,rgba(6,5,5,0.8)_52%,rgba(6,5,5,0.88)_100%)]" />
+                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(214,173,111,0.24),transparent_32%),radial-gradient(circle_at_82%_18%,rgba(120,78,27,0.25),transparent_24%),linear-gradient(180deg,rgba(18,12,9,0.88),rgba(18,12,9,0.96))]" />
                 </div>
 
                 <div className="relative mx-auto max-w-7xl px-6 py-14 sm:px-8 md:py-20">
-                    <div className="grid gap-12 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-end">
+                    <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-start">
                         <div className="space-y-8">
-                            <div className="flex items-center gap-4 text-[#f2d6a1]">
-                                <span className="h-px w-14 bg-[#8e6a36]" />
-                                <span className="text-xs font-semibold uppercase tracking-[0.28em]">Sapihum</span>
-                            </div>
-
-                            <div className="space-y-5">
-                                <p className="text-sm font-semibold uppercase tracking-[0.28em] text-[#c59a53]">
-                                    Mayo 2026 · Congreso online 100% remoto
-                                </p>
-                                <h1 className="max-w-4xl font-serif text-5xl leading-[0.95] text-[#f5ecd9] sm:text-6xl lg:text-7xl">
-                                    {config.title}
-                                </h1>
-                                <p className="font-serif text-2xl italic text-stone-200 sm:text-3xl">
-                                    {config.subtitle}
-                                </p>
-                                <div className="max-w-2xl space-y-4">
-                                    <p className="text-lg leading-relaxed text-stone-200">{config.claim}</p>
-                                    <p className="text-base leading-relaxed text-stone-300">{config.quote}</p>
-                                </div>
-                            </div>
-
-                            <div className="grid gap-4 sm:grid-cols-3">
-                                <div className="border border-[#3a2d1b] bg-black/30 p-4">
-                                    <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[#c59a53]">Agenda</p>
-                                    <p className="mt-2 text-3xl font-semibold text-[#f5ecd9]">{includedEvents.length}</p>
-                                    <p className="mt-1 text-sm text-stone-300">eventos entre el 20 y el 31 de mayo</p>
-                                </div>
-                                <div className="border border-[#3a2d1b] bg-black/30 p-4">
-                                    <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[#c59a53]">Ponentes</p>
-                                    <p className="mt-2 text-3xl font-semibold text-[#f5ecd9]">{speakers.length}</p>
-                                    <p className="mt-1 text-sm text-stone-300">perfiles publicos agregados automaticamente</p>
-                                </div>
-                                <div className="border border-[#3a2d1b] bg-black/30 p-4">
-                                    <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[#c59a53]">Comunidad</p>
-                                    <p className="mt-2 text-3xl font-semibold text-[#f5ecd9]">{totalAccessCount}</p>
-                                    <p className="mt-1 text-sm text-stone-300">accesos acumulados en la agenda visible</p>
-                                </div>
-                            </div>
-
-                            <div className="flex flex-wrap gap-3">
-                                {showMembershipPriority ? (
-                                    <>
-                                        <div className="w-full sm:w-auto sm:min-w-[250px]">
-                                            <MembershipCta eventSlug={event.slug} label={config.cta.membershipLabel} emphasized />
-                                        </div>
-                                        <div className="w-full sm:w-auto sm:min-w-[280px]">
-                                            <PublicAccessCta
-                                                eventId={event.id}
-                                                eventSlug={event.slug}
-                                                title={event.title}
-                                                label={config.cta.purchaseLabel}
-                                                requiresPayment={finalPrice > 0}
-                                                buttonVariant="ghost"
-                                                buttonClassName="h-12 w-full border border-[#6f5730] bg-transparent text-[#f2e7cf] hover:bg-[#20170f] hover:text-[#f5ecd9]"
-                                            />
-                                        </div>
-                                    </>
-                                ) : (
-                                    <div className="w-full sm:w-auto sm:min-w-[250px]">
-                                        <Link href={`/hub/${event.slug}`}>
-                                            <Button className="h-12 w-full border border-[#d0a96a]/30 bg-[#d0a96a] text-[#0d0c0b] hover:bg-[#e1bc7a]">
-                                                Acceder al congreso
-                                                <ArrowRight className="h-4 w-4" />
-                                            </Button>
-                                        </Link>
-                                    </div>
+                            <div className="flex flex-wrap items-center gap-3">
+                                <span className="rounded-full border border-[#c49b63]/40 bg-[#c49b63]/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-[#f0c98f]">
+                                    Congreso online SAPIHUM
+                                </span>
+                                {hasAccess && (
+                                    <span className="rounded-full border border-emerald-300/35 bg-emerald-300/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-emerald-100">
+                                        Tu acceso ya está activo
+                                    </span>
                                 )}
                             </div>
 
-                            <p className="text-sm text-stone-300">
-                                Membresia primero. Compra directa disponible para quienes solo necesitan este congreso.
-                            </p>
+                            <div className="space-y-5">
+                                <h1 className="font-serif text-4xl leading-[0.98] text-[#fff8ef] sm:text-5xl lg:text-7xl">
+                                    <span className="block">{config.title}</span>
+                                    <span className="mt-2 block text-[#f0c98f]">{config.subtitle}</span>
+                                </h1>
+                                <p className="max-w-3xl text-lg leading-relaxed text-[#f0e6da] sm:text-xl">
+                                    {config.description}
+                                </p>
+                                <p className="max-w-3xl text-base leading-relaxed text-[#ddcfbf] sm:text-lg">
+                                    {config.supportingText}
+                                </p>
+                            </div>
+
+                            <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+                                {config.heroDetails.map((item) => (
+                                    <div
+                                        key={item.label}
+                                        className="rounded-2xl border border-white/10 bg-white/5 px-4 py-4 backdrop-blur-sm"
+                                    >
+                                        <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[#f0c98f]">
+                                            {item.label}
+                                        </p>
+                                        <p className="mt-2 text-sm leading-relaxed text-[#fff8ef]">
+                                            {item.value}
+                                        </p>
+                                    </div>
+                                ))}
+                            </div>
+
+                            <div className="space-y-4">
+                                <CongressCtaGroup
+                                    event={event}
+                                    config={config}
+                                    finalPrice={finalPrice}
+                                    hasAccess={hasAccess}
+                                    dark
+                                />
+                                <div className="space-y-2 text-sm text-[#ddcfbf]">
+                                    <p>{config.pricing.purchaseNote}</p>
+                                    <p>{config.pricing.membershipNote}</p>
+                                </div>
+                            </div>
                         </div>
 
-                        <aside className="border border-[#4d3a21] bg-black/35 p-6 backdrop-blur">
-                            <div className="space-y-6">
-                                <div>
-                                    <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#c59a53]">Ventana oficial</p>
-                                    <p className="mt-3 font-serif text-4xl text-[#f5ecd9]">20 al 31</p>
-                                    <p className="mt-2 text-base text-stone-300">de mayo de 2026</p>
+                        <aside className="rounded-[28px] border border-[#4f3824] bg-black/30 p-6 shadow-[0_24px_80px_rgba(0,0,0,0.35)] backdrop-blur-sm">
+                            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#f0c98f]">
+                                Acceso completo al congreso
+                            </p>
+                            <div className="mt-5">
+                                <p className="font-serif text-5xl text-[#fff8ef]">$250</p>
+                                <p className="mt-2 text-base text-[#eadfce]">MXN por toda la programación especial</p>
+                            </div>
+
+                            <div className="mt-6 space-y-4 text-sm leading-relaxed text-[#eadfce]">
+                                <div className="flex items-start gap-3">
+                                    <CalendarDays className="mt-0.5 h-4 w-4 text-[#f0c98f]" />
+                                    <span>Del 20 al 31 de mayo de 2026.</span>
                                 </div>
-
-                                <div className="h-px bg-[#3a2d1b]" />
-
-                                <div className="space-y-4 text-sm leading-relaxed text-stone-300">
-                                    <div className="flex items-start gap-3">
-                                        <CalendarDays className="mt-0.5 h-4 w-4 text-[#c59a53]" />
-                                        <span>La agenda se llena automaticamente con cada evento publico creado dentro del periodo.</span>
-                                    </div>
-                                    <div className="flex items-start gap-3">
-                                        <Globe className="mt-0.5 h-4 w-4 text-[#c59a53]" />
-                                        <span>Cada sesion conserva su ficha individual para detalle, perfiles y materiales.</span>
-                                    </div>
-                                    <div className="flex items-start gap-3">
-                                        <Layers3 className="mt-0.5 h-4 w-4 text-[#c59a53]" />
-                                        <span>Compra unica del congreso o acceso incluido con membresia activa.</span>
-                                    </div>
+                                <div className="flex items-start gap-3">
+                                    <Globe className="mt-0.5 h-4 w-4 text-[#f0c98f]" />
+                                    <span>Todas las actividades se realizan online y en vivo.</span>
+                                </div>
+                                <div className="flex items-start gap-3">
+                                    <Layers3 className="mt-0.5 h-4 w-4 text-[#f0c98f]" />
+                                    <span>Un solo acceso cubre todos los eventos incluidos del congreso.</span>
+                                </div>
+                                <div className="flex items-start gap-3">
+                                    <Sparkles className="mt-0.5 h-4 w-4 text-[#f0c98f]" />
+                                    <span>La membresía activa SAPIHUM lo incluye sin costo adicional.</span>
                                 </div>
                             </div>
                         </aside>
@@ -398,165 +468,212 @@ export function PublicCongressLanding({
                 </div>
             </section>
 
-            <section className="relative border-b border-[#1d1811]">
-                <div className="mx-auto max-w-7xl px-6 py-14 sm:px-8">
-                    <div className="mb-8 flex items-end justify-between gap-6">
-                        <div className="max-w-3xl">
-                            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#c59a53]">Propuesta de valor</p>
-                            <h2 className="mt-3 font-serif text-4xl text-[#f5ecd9]">Una landing editorial que vende y organiza la agenda real del congreso</h2>
+            <section className="relative mx-auto max-w-7xl px-6 py-10 sm:px-8 md:py-14">
+                <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
+                    {config.metrics.map((metric) => (
+                        <div
+                            key={metric.label}
+                            className="rounded-[28px] border border-[#e3d6c7] bg-white p-6 shadow-[0_18px_55px_rgba(44,28,17,0.08)]"
+                        >
+                            <p className="text-3xl font-semibold text-[#9a6a2e]">{metric.value}</p>
+                            <p className="mt-3 font-serif text-2xl leading-tight text-[#241913]">{metric.label}</p>
+                            <p className="mt-3 text-sm leading-relaxed text-[#5f5146]">{metric.description}</p>
+                        </div>
+                    ))}
+                </div>
+            </section>
+
+            <section className="mx-auto max-w-7xl px-6 py-8 sm:px-8 md:py-12">
+                <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start">
+                    <div className="rounded-[32px] border border-[#e3d6c7] bg-white p-7 shadow-[0_20px_60px_rgba(44,28,17,0.08)] sm:p-8">
+                        <SectionHeading
+                            eyebrow="Acerca de este encuentro"
+                            title="Acerca de este encuentro"
+                            description="Una experiencia pensada como congreso completo."
+                        />
+                        <div className="mt-6 space-y-4 text-base leading-relaxed text-[#4f4238]">
+                            {config.about.map((paragraph) => (
+                                <p key={paragraph}>{paragraph}</p>
+                            ))}
                         </div>
                     </div>
 
-                    <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
-                        {config.valuePillars.map((item) => (
-                            <div key={item.title} className="border border-[#322618] bg-[#0f0d0a] p-5">
-                                <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[#c59a53]">{item.title}</p>
-                                <p className="mt-3 text-sm leading-relaxed text-stone-300">{item.description}</p>
+                    <div className="rounded-[32px] border border-[#dac6ae] bg-[#fbf6ef] p-6 shadow-[0_20px_60px_rgba(44,28,17,0.06)]">
+                        <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[#9a6a2e]">
+                            Dirigido a
+                        </p>
+                        <p className="mt-4 text-sm leading-relaxed text-[#4f4238]">
+                            Psicólogos, estudiantes de psicología, terapeutas, docentes y profesionales vinculados a la salud mental que buscan actualizarse y conectar con una comunidad profesional en crecimiento.
+                        </p>
+
+                        <div className="mt-6 space-y-3 text-sm text-[#4f4238]">
+                            <div className="flex items-start gap-3">
+                                <Users className="mt-0.5 h-4 w-4 text-[#9a6a2e]" />
+                                <span>Programación en vivo con especialistas invitados de SAPIHUM.</span>
                             </div>
+                            <div className="flex items-start gap-3">
+                                <Check className="mt-0.5 h-4 w-4 text-[#9a6a2e]" />
+                                <span>Acceso a todos los eventos incluidos con un solo registro.</span>
+                            </div>
+                            <div className="flex items-start gap-3">
+                                <Sparkles className="mt-0.5 h-4 w-4 text-[#9a6a2e]" />
+                                <span>Constancia sujeta a las condiciones de participación del congreso.</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section className="mx-auto max-w-7xl px-6 py-8 sm:px-8 md:py-12">
+                <SectionHeading
+                    eyebrow="Beneficios del acceso"
+                    title="Qué incluye tu acceso"
+                    description="Con un solo acceso participas en el paquete completo del congreso y en los recursos que lo acompañan."
+                />
+
+                <div className="mt-8 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+                    {config.benefits.map((benefit) => (
+                        <div
+                            key={benefit.title}
+                            className="rounded-[28px] border border-[#e3d6c7] bg-white p-6 shadow-[0_20px_60px_rgba(44,28,17,0.08)]"
+                        >
+                            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#f6ead8] text-[#9a6a2e]">
+                                <Check className="h-5 w-5" />
+                            </div>
+                            <h3 className="mt-5 font-serif text-2xl leading-tight text-[#241913]">{benefit.title}</h3>
+                            <p className="mt-3 text-sm leading-relaxed text-[#5f5146]">{benefit.description}</p>
+                        </div>
+                    ))}
+                </div>
+            </section>
+
+            <section className="mx-auto max-w-7xl px-6 py-8 sm:px-8">
+                <div className="rounded-[32px] border border-[#d7c0a3] bg-[linear-gradient(135deg,#fff9f0,#f2e4cf)] p-7 shadow-[0_24px_80px_rgba(44,28,17,0.08)] sm:p-8">
+                    <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_420px] lg:items-center">
+                        <div>
+                            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#9a6a2e]">
+                                Acceso y membresía
+                            </p>
+                            <h2 className="mt-3 font-serif text-3xl leading-tight text-[#241913] sm:text-4xl">
+                                Compra tu acceso al congreso o entra sin costo adicional con tu membresía
+                            </h2>
+                            <div className="mt-4 space-y-2 text-sm leading-relaxed text-[#4f4238]">
+                                <p>{config.pricing.purchaseNote}</p>
+                                <p>{config.pricing.membershipNote}</p>
+                            </div>
+                        </div>
+
+                        <CongressCtaGroup
+                            event={event}
+                            config={config}
+                            finalPrice={finalPrice}
+                            hasAccess={hasAccess}
+                        />
+                    </div>
+                </div>
+            </section>
+
+            <section className="mx-auto max-w-7xl px-6 py-8 sm:px-8 md:py-12">
+                <SectionHeading
+                    eyebrow="Ponentes invitados"
+                    title="Conoce a los ponentes"
+                    description={config.speakersIntro}
+                />
+
+                {speakers.length > 0 ? (
+                    <div className="mt-8 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+                        {speakers.map((item) => (
+                            <SpeakerCard key={item.key} item={item} returnTo={returnTo} />
                         ))}
                     </div>
-                </div>
-            </section>
-
-            <section className="relative border-b border-[#1d1811]">
-                <div className="mx-auto max-w-7xl px-6 py-14 sm:px-8">
-                    <div className="mb-8 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-                        <div className="max-w-3xl">
-                            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#c59a53]">Agenda cronologica</p>
-                            <h2 className="mt-3 font-serif text-4xl text-[#f5ecd9]">Eventos publicados del 20 al 31 de mayo</h2>
-                            <p className="mt-3 text-base leading-relaxed text-stone-300">
-                                Cada tarjeta abre la ficha individual del evento correspondiente. La agenda se actualiza conforme agregas nuevas sesiones a la plataforma.
-                            </p>
-                        </div>
-                        <div className="text-sm text-stone-300">
-                            {includedEvents.length} {includedEvents.length === 1 ? 'evento visible' : 'eventos visibles'}
-                        </div>
+                ) : (
+                    <div className="mt-8 rounded-[28px] border border-dashed border-[#d7c0a3] bg-white px-6 py-14 text-center text-sm text-[#5f5146]">
+                        Los perfiles públicos de ponentes se mostrarán aquí conforme se publiquen en la plataforma.
                     </div>
-
-                    {includedEvents.length > 0 ? (
-                        <div className="grid gap-5 lg:grid-cols-2">
-                            {includedEvents.map((item) => (
-                                <AgendaItem key={item.id} event={item} timeZone={timeZone} />
-                            ))}
-                        </div>
-                    ) : (
-                        <div className="border border-dashed border-[#4c3a20] bg-[#0e0b08] px-6 py-16 text-center">
-                            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#c59a53]">Agenda en preparacion</p>
-                            <h3 className="mt-3 font-serif text-3xl text-[#f5ecd9]">Todavia no hay sesiones publicadas en esta ventana</h3>
-                            <p className="mx-auto mt-4 max-w-2xl text-sm leading-relaxed text-stone-300">
-                                La landing ya esta lista. En cuanto publiques eventos entre el 20 y el 31 de mayo, apareceran aqui automaticamente con sus ponentes y accesos.
-                            </p>
-                        </div>
-                    )}
-                </div>
+                )}
             </section>
 
-            <section className="relative border-b border-[#1d1811]">
-                <div className="mx-auto max-w-7xl px-6 py-14 sm:px-8">
-                    <div className="mb-8 max-w-3xl">
-                        <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#c59a53]">Ponentes</p>
-                        <h2 className="mt-3 font-serif text-4xl text-[#f5ecd9]">Todos los perfiles publicos agregados desde la agenda</h2>
-                        <p className="mt-3 text-base leading-relaxed text-stone-300">
-                            La seccion se alimenta de los speakers publicos ya existentes en SAPIHUM, manteniendo foto, headline, especialidades y enlace a perfil.
+            <section className="mx-auto max-w-7xl px-6 py-8 sm:px-8 md:py-12">
+                <SectionHeading
+                    eyebrow="Agenda del congreso"
+                    title="Programación incluida"
+                    description={config.programmingIntro}
+                />
+
+                {includedEvents.length > 0 ? (
+                    <div className="mt-8 grid gap-5 lg:grid-cols-2">
+                        {includedEvents.map((includedEvent) => (
+                            <ProgrammingCard
+                                key={includedEvent.id}
+                                event={includedEvent}
+                                timeZone={timeZone}
+                            />
+                        ))}
+                    </div>
+                ) : (
+                    <div className="mt-8 rounded-[28px] border border-dashed border-[#d7c0a3] bg-white px-6 py-16 text-center shadow-[0_16px_45px_rgba(44,28,17,0.05)]">
+                        <p className="text-base leading-relaxed text-[#5f5146]">
+                            {config.programmingEmptyState}
                         </p>
                     </div>
-
-                    {speakers.length > 0 ? (
-                        <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-                            {speakers.map((item) => (
-                                <SpeakerCard key={item.key} item={item} returnTo={returnTo} />
-                            ))}
-                        </div>
-                    ) : (
-                        <div className="border border-dashed border-[#4c3a20] bg-[#0e0b08] px-6 py-14 text-center">
-                            <p className="text-sm text-stone-300">Aun no hay ponentes publicos visibles en la agenda del congreso.</p>
-                        </div>
-                    )}
-                </div>
+                )}
             </section>
 
-            <section className="relative border-b border-[#1d1811]">
-                <div className="mx-auto grid max-w-7xl gap-10 px-6 py-14 sm:px-8 lg:grid-cols-[1.15fr_0.85fr]">
-                    <div>
-                        <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#c59a53]">Acceso y beneficios</p>
-                        <h2 className="mt-3 font-serif text-4xl text-[#f5ecd9]">Membresia como via principal, compra directa como alternativa</h2>
-                        <div className="mt-6 space-y-4">
-                            {config.benefitBullets.map((item) => (
-                                <div key={item} className="flex items-start gap-3 text-sm leading-relaxed text-stone-300">
-                                    <Check className="mt-0.5 h-4 w-4 shrink-0 text-[#c59a53]" />
-                                    <span>{item}</span>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-
-                    <div className="border border-[#4d3a21] bg-[#0f0d0a] p-6">
-                        <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#c59a53]">Conversion principal</p>
-                        <div className="mt-5 space-y-3">
-                            {hasAccess ? (
-                                <Link href={`/hub/${event.slug}`}>
-                                    <Button className="h-12 w-full border border-[#d0a96a]/30 bg-[#d0a96a] text-[#0d0c0b] hover:bg-[#e1bc7a]">
-                                        Acceder al congreso
-                                        <ArrowRight className="h-4 w-4" />
-                                    </Button>
-                                </Link>
-                            ) : (
-                                <>
-                                    <MembershipCta eventSlug={event.slug} label={config.cta.membershipLabel} emphasized />
-                                    <PublicAccessCta
-                                        eventId={event.id}
-                                        eventSlug={event.slug}
-                                        title={event.title}
-                                        label={config.cta.purchaseLabel}
-                                        requiresPayment={finalPrice > 0}
-                                        buttonVariant="ghost"
-                                        buttonClassName="h-12 w-full border border-[#6f5730] bg-transparent text-[#f2e7cf] hover:bg-[#20170f] hover:text-[#f5ecd9]"
-                                    />
-                                </>
-                            )}
-                        </div>
-
-                        <div className="mt-6 space-y-3 text-sm text-stone-300">
-                            <div className="flex items-start gap-3">
-                                <Sparkles className="mt-0.5 h-4 w-4 text-[#c59a53]" />
-                                <span>Precio publico actual: {finalPrice > 0 ? `$${finalPrice.toFixed(0)} MXN` : 'Incluido con membresia'}</span>
-                            </div>
-                            <div className="flex items-start gap-3">
-                                <Globe className="mt-0.5 h-4 w-4 text-[#c59a53]" />
-                                <span>Acceso centralizado desde la landing del congreso y desde cada ficha individual.</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <section className="relative">
-                <div className="mx-auto grid max-w-7xl gap-10 px-6 py-14 sm:px-8 lg:grid-cols-[1fr_0.92fr]">
-                    <div>
-                        <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#c59a53]">Preguntas frecuentes</p>
-                        <h2 className="mt-3 font-serif text-4xl text-[#f5ecd9]">Todo queda resuelto desde la misma URL del congreso</h2>
-                        <p className="mt-3 max-w-2xl text-base leading-relaxed text-stone-300">
-                            La landing vive como pagina paraguas y conserva el archivo historico del congreso incluso despues de mayo.
-                        </p>
-                    </div>
+            <section className="mx-auto max-w-7xl px-6 py-8 sm:px-8 md:py-12">
+                <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_0.95fr]">
+                    <SectionHeading
+                        eyebrow="FAQ del congreso"
+                        title="Preguntas frecuentes"
+                        description="Esta landing resume la lógica comercial del congreso, el acceso por membresía y la recuperación de tus accesos."
+                    />
 
                     <FaqList items={config.faq} />
                 </div>
             </section>
 
+            <section className="mx-auto max-w-7xl px-6 py-8 sm:px-8 md:py-12">
+                <div className="rounded-[32px] bg-[#1a120d] px-7 py-10 text-[#fff8ef] shadow-[0_24px_80px_rgba(0,0,0,0.2)] sm:px-8">
+                    <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_420px] lg:items-center">
+                        <div>
+                            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#f0c98f]">
+                                Cierre comercial
+                            </p>
+                            <h2 className="mt-3 font-serif text-3xl leading-tight sm:text-4xl">
+                                El Congreso de Psicología 2026 reúne toda una programación, no un solo horario
+                            </h2>
+                            <div className="mt-4 space-y-2 text-sm leading-relaxed text-[#ddcfbf]">
+                                <p>{config.pricing.purchaseNote}</p>
+                                <p>{config.pricing.membershipNote}</p>
+                            </div>
+                        </div>
+
+                        <CongressCtaGroup
+                            event={event}
+                            config={config}
+                            finalPrice={finalPrice}
+                            hasAccess={hasAccess}
+                            dark
+                        />
+                    </div>
+                </div>
+            </section>
+
             {!hasAccess && (
                 <div className="fixed inset-x-0 bottom-0 z-50 p-4 lg:hidden">
-                    <div className="mx-auto max-w-md border border-[#5c4526] bg-[#0c0906]/96 p-3 shadow-2xl backdrop-blur">
+                    <div className="mx-auto max-w-md rounded-[28px] border border-[#c9a169] bg-[#120c09]/96 p-3 shadow-2xl backdrop-blur">
                         <div className="space-y-3">
-                            <MembershipCta eventSlug={event.slug} label={config.cta.membershipLabel} emphasized />
                             <PublicAccessCta
                                 eventId={event.id}
                                 eventSlug={event.slug}
                                 title={event.title}
                                 label={config.cta.purchaseLabel}
                                 requiresPayment={finalPrice > 0}
-                                buttonVariant="ghost"
-                                buttonClassName="h-11 w-full border border-[#6f5730] bg-transparent text-[#f2e7cf] hover:bg-[#20170f] hover:text-[#f5ecd9]"
+                                buttonClassName="h-11 w-full border border-[#c49b63] bg-[#c49b63] text-[#1e140f] hover:bg-[#d5ae78]"
+                            />
+                            <MembershipCta
+                                eventSlug={event.slug}
+                                label={config.cta.membershipLabel}
+                                className="h-11 w-full border-[#c49b63]/50 bg-transparent text-[#f9efe2] hover:bg-[#2a1c14] hover:text-white"
                             />
                         </div>
                     </div>

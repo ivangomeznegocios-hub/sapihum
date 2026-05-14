@@ -14,6 +14,7 @@ import {
     syncCongressBundleEntitlementsForIdentity,
 } from '@/lib/events/congress'
 import { getUnifiedCatalogEvents, getPublicEventBySlug } from '@/lib/supabase/queries/events'
+import { getPublicSpeakers } from '@/lib/supabase/queries/speakers'
 import { createClient, getUserProfile } from '@/lib/supabase/server'
 import { getCommercialAccessContext } from '@/lib/access/commercial'
 import { entitlementCanGrantEventAccess, getActiveEntitlementForEvent } from '@/lib/events/access'
@@ -30,6 +31,38 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
     if (!event) {
         return { title: 'Evento no encontrado | SAPIHUM' }
+    }
+
+    const congressLanding = getCongressLandingByParentSlug(event.slug)
+    if (congressLanding) {
+        const title = `${congressLanding.title} | ${congressLanding.subtitle} | SAPIHUM`
+        const description = congressLanding.description
+
+        return {
+            title,
+            description,
+            openGraph: {
+                title,
+                description,
+                images: event.image_url ? [{
+                    url: event.image_url,
+                    width: 1200,
+                    height: 630,
+                    alt: `${congressLanding.title} | ${congressLanding.subtitle}`,
+                }] : undefined,
+                type: 'website',
+                siteName: brandFullName,
+            },
+            twitter: {
+                card: 'summary_large_image',
+                title,
+                description,
+                images: event.image_url ? [event.image_url] : undefined,
+            },
+            alternates: {
+                canonical: getPublicEventPath(event),
+            },
+        }
     }
 
     return {
@@ -98,13 +131,17 @@ export default async function EventoPublicoPage({ params }: PageProps) {
 
     const congressLanding = getCongressLandingByParentSlug(event.slug)
     if (congressLanding) {
-        const includedEvents = await getCongressIncludedEvents(congressLanding, event.id)
+        const [includedEvents, directorySpeakers] = await Promise.all([
+            getCongressIncludedEvents(congressLanding, event.id),
+            getPublicSpeakers(),
+        ])
 
         return (
             <PublicCongressLanding
                 event={event}
                 config={congressLanding}
                 includedEvents={includedEvents}
+                directorySpeakers={directorySpeakers}
                 membershipLevel={membershipLevel}
                 hasActiveMembership={commercialAccess?.hasActiveMembership ?? false}
                 membershipSpecializationCode={commercialAccess?.membershipSpecializationCode ?? null}

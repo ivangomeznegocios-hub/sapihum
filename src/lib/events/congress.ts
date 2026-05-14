@@ -1,9 +1,9 @@
-import { createServiceClient } from '@/lib/supabase/service'
-import type { EventType } from '@/types/database'
-import type { CommercialAccessSnapshot } from '@/lib/access/commercial'
 import { audienceAllowsAccess } from '@/lib/access/commercial'
-import { getEffectiveEventPriceForProfile } from '@/lib/events/pricing'
+import type { CommercialAccessSnapshot } from '@/lib/access/commercial'
 import { grantEventEntitlements } from '@/lib/events/entitlements'
+import { getEffectiveEventPriceForProfile } from '@/lib/events/pricing'
+import { createServiceClient } from '@/lib/supabase/service'
+import type { EventSubcategory, EventType, SpeakerWithProfile } from '@/types/database'
 
 const CONGRESS_PARENT_EVENT_SELECT = [
     'id',
@@ -29,6 +29,7 @@ const CONGRESS_CHILD_EVENT_SELECT = [
     'start_time',
     'end_time',
     'event_type',
+    'subcategory',
     'recording_url',
     'recording_expires_at',
     'price',
@@ -45,6 +46,7 @@ const CONGRESS_CHILD_SPEAKER_SELECT = `
     speaker:speakers (
         id,
         headline,
+        bio,
         photo_url,
         credentials,
         specialties,
@@ -59,14 +61,30 @@ const CONGRESS_CHILD_SPEAKER_SELECT = `
 
 const CONGRESS_ALLOWED_STATUSES = ['upcoming', 'live', 'completed'] as const
 
+export type CongressLandingHeroDetail = {
+    label: string
+    value: string
+}
+
+export type CongressLandingMetric = {
+    value: string
+    label: string
+    description: string
+}
+
+export type CongressLandingBenefit = {
+    title: string
+    description: string
+}
+
 export type CongressLandingConfig = {
     key: string
     parentEventSlug: string
     title: string
     shortTitle: string
     subtitle: string
-    claim: string
-    quote: string
+    description: string
+    supportingText: string
     dateWindow: {
         timeZone: string
         startDate: string
@@ -74,21 +92,40 @@ export type CongressLandingConfig = {
         startUtc: string
         endExclusiveUtc: string
     }
-    primaryCtaMode: 'membership_first'
-    visualVariant: 'sapihum-editorial-gold'
+    heroDetails: CongressLandingHeroDetail[]
+    metrics: CongressLandingMetric[]
+    about: string[]
+    benefits: CongressLandingBenefit[]
+    pricing: {
+        purchaseNote: string
+        membershipNote: string
+    }
+    speakersIntro: string
+    programmingIntro: string
+    programmingEmptyState: string
     cta: {
         membershipLabel: string
         purchaseLabel: string
     }
-    valuePillars: Array<{
-        title: string
-        description: string
-    }>
-    benefitBullets: string[]
     faq: Array<{
         question: string
         answer: string
     }>
+}
+
+export type CongressSpeakerProfile = {
+    id?: string | null
+    headline?: string | null
+    bio?: string | null
+    photo_url?: string | null
+    credentials?: string[] | null
+    specialties?: string[] | null
+    is_public?: boolean | null
+    profile?: {
+        id?: string | null
+        full_name?: string | null
+        avatar_url?: string | null
+    } | null
 }
 
 export type CongressLandingEvent = {
@@ -102,6 +139,7 @@ export type CongressLandingEvent = {
     start_time: string
     end_time?: string | null
     event_type?: EventType | null
+    subcategory?: EventSubcategory | null
     recording_url?: string | null
     recording_expires_at?: string | null
     price?: number | null
@@ -118,28 +156,17 @@ export type CongressLandingSpeakerRow = {
     id?: string
     event_id?: string
     display_order?: number | null
-    speaker?: {
-        id?: string | null
-        headline?: string | null
-        photo_url?: string | null
-        credentials?: string[] | null
-        specialties?: string[] | null
-        is_public?: boolean | null
-        profile?: {
-            id?: string | null
-            full_name?: string | null
-            avatar_url?: string | null
-        } | null
-    } | null
+    speaker?: CongressSpeakerProfile | null
 }
 
 export type AggregatedCongressSpeaker = {
     key: string
     display_order: number
-    first_event_start: string
+    first_event_start: string | null
     event_count: number
     event_titles: string[]
-    speaker: NonNullable<CongressLandingSpeakerRow['speaker']>
+    source: 'agenda' | 'directory'
+    speaker: CongressSpeakerProfile
 }
 
 type CongressGrantSource = {
@@ -153,11 +180,11 @@ export const CONGRESS_LANDING_CONFIGS: CongressLandingConfig[] = [
     {
         key: 'sapihum-psychology-congress-2026',
         parentEventSlug: 'congreso-de-psicologia-2026-especial-dia-del-psicologo',
-        title: 'Congreso de Psicologia 2026',
-        shortTitle: 'Congreso de Psicologia 2026',
-        subtitle: 'Especial Dia del Psicologo',
-        claim: 'Comprender al ser humano para transformar realidades.',
-        quote: 'Ciencia, etica, compasion e impacto en una agenda viva durante el cierre de mayo.',
+        title: 'Congreso de Psicología 2026',
+        shortTitle: 'Congreso de Psicología 2026',
+        subtitle: 'Especial Día del Psicólogo',
+        description: 'Del 20 al 31 de mayo, vive una programación online con conferencias, talleres, clases y espacios de actualización profesional para psicólogos, estudiantes y profesionales de la salud mental.',
+        supportingText: 'Un solo acceso te permite participar en todos los eventos incluidos dentro de la programación especial del Congreso de Psicología 2026.',
         dateWindow: {
             timeZone: 'America/Mexico_City',
             startDate: '2026-05-20',
@@ -165,52 +192,83 @@ export const CONGRESS_LANDING_CONFIGS: CongressLandingConfig[] = [
             startUtc: '2026-05-20T06:00:00.000Z',
             endExclusiveUtc: '2026-06-01T06:00:00.000Z',
         },
-        primaryCtaMode: 'membership_first',
-        visualVariant: 'sapihum-editorial-gold',
-        cta: {
-            membershipLabel: 'Acceder con membresia',
-            purchaseLabel: 'Comprar congreso por $250 MXN',
+        heroDetails: [
+            { label: 'Fecha', value: 'Del 20 al 31 de mayo de 2026' },
+            { label: 'Formato', value: 'Online en vivo' },
+            { label: 'Acceso', value: 'Incluye todos los eventos del congreso' },
+            { label: 'Dirigido a', value: 'Psicólogos, estudiantes de psicología, terapeutas y profesionales de la salud mental' },
+            { label: 'Inversión', value: '$250 MXN' },
+            { label: 'Membresía', value: 'Incluido sin costo adicional con membresía activa SAPIHUM' },
+        ],
+        metrics: [
+            { value: '+1,200', label: 'Psicólogos invitados', description: 'Convocados para esta programación especial.' },
+            { value: '12 días', label: 'De actividades online', description: 'Con encuentros en vivo del 20 al 31 de mayo.' },
+            { value: '20–31 mayo', label: 'Programación especial', description: 'Una agenda diseñada como congreso, no como evento único.' },
+            { value: 'Acceso completo', label: 'A todos los eventos incluidos', description: 'Un solo registro para toda la experiencia del congreso.' },
+        ],
+        about: [
+            'El Congreso de Psicología 2026 | Especial Día del Psicólogo es una programación online creada por SAPIHUM para celebrar y fortalecer la práctica profesional de la psicología.',
+            'Del 20 al 31 de mayo de 2026, las y los participantes tendrán acceso a una serie de eventos en vivo con especialistas invitados en distintas áreas de la psicología, incluyendo conferencias, talleres, clases y espacios de actualización profesional.',
+            'A diferencia de un evento aislado, este congreso reúne varios encuentros dentro de una misma experiencia. Con un solo acceso podrás participar en todos los eventos incluidos en la programación especial.',
+            'Este espacio está diseñado para psicólogos, estudiantes, terapeutas, docentes y profesionales vinculados a la salud mental que buscan actualizarse, conectar con otros colegas y formar parte de una comunidad profesional en crecimiento.',
+        ],
+        benefits: [
+            {
+                title: 'Acceso a todos los eventos del congreso',
+                description: 'Participa en la programación especial del 20 al 31 de mayo con un solo registro.',
+            },
+            {
+                title: 'Conferencias, talleres y clases online',
+                description: 'Accede a sesiones en vivo con especialistas invitados de SAPIHUM.',
+            },
+            {
+                title: 'Materiales y recursos disponibles',
+                description: 'Recibe los materiales que cada ponente comparta durante sus sesiones.',
+            },
+            {
+                title: 'Constancia de participación',
+                description: 'Obtén constancia según las condiciones de participación del congreso.',
+            },
+            {
+                title: 'Acceso preferencial como miembro',
+                description: 'Si tienes membresía activa SAPIHUM, este congreso queda incluido sin costo adicional.',
+            },
+        ],
+        pricing: {
+            purchaseNote: 'El acceso individual al congreso tiene un costo de $250 MXN e incluye la programación especial del 20 al 31 de mayo de 2026.',
+            membershipNote: 'Si cuentas con membresía activa SAPIHUM, el acceso al congreso está incluido sin costo adicional.',
         },
-        valuePillars: [
-            {
-                title: 'Agenda dinamica',
-                description: 'Integra automaticamente cada evento publico creado entre el 20 y el 31 de mayo.',
-            },
-            {
-                title: 'Ponentes de SAPIHUM',
-                description: 'Reune a especialistas publicos de la plataforma en una sola experiencia editorial.',
-            },
-            {
-                title: 'Acceso remoto',
-                description: 'Seguimiento 100% online con rutas individuales por cada evento y su ficha completa.',
-            },
-            {
-                title: 'Archivo vivo',
-                description: 'La landing conserva agenda, ponentes y estado historico despues de terminar mayo.',
-            },
-        ],
-        benefitBullets: [
-            'La membresia activa desbloquea el congreso sin costo y concentra el acceso desde un solo punto.',
-            'La compra del congreso habilita automaticamente todos los eventos publicados en la ventana oficial.',
-            'Cada sesion mantiene su propia ficha, perfil de ponentes, materiales y flujo de acceso.',
-            'La agenda se actualiza conforme agregas nuevas sesiones o nuevos ponentes a la plataforma.',
-        ],
+        speakersIntro: 'Especialistas invitados durante la programación del 20 al 31 de mayo.',
+        programmingIntro: 'Estos son algunos de los eventos incluidos dentro del acceso al Congreso de Psicología 2026.',
+        programmingEmptyState: 'La programación completa se irá publicando conforme se confirmen las sesiones del congreso.',
+        cta: {
+            purchaseLabel: 'Adquirir acceso completo',
+            membershipLabel: 'Unirme a SAPIHUM y acceder sin costo adicional',
+        },
         faq: [
             {
-                question: 'Que cubre exactamente el acceso al congreso?',
-                answer: 'Incluye todos los eventos publicos de SAPIHUM publicados entre el 20 y el 31 de mayo de 2026 dentro de esta programacion.',
+                question: '¿Cómo funciona mi acceso al congreso?',
+                answer: 'Con tu registro podrás acceder a los eventos incluidos dentro de la programación especial del 20 al 31 de mayo de 2026.',
             },
             {
-                question: 'Si compro el congreso y despues agregan mas eventos, tambien quedan incluidos?',
-                answer: 'Si. Los eventos nuevos que entren en la ventana oficial del congreso se sincronizan con quienes ya tengan acceso.',
+                question: '¿El acceso es para un solo evento?',
+                answer: 'No. El acceso corresponde al Congreso de Psicología 2026 e incluye los eventos contemplados dentro de la programación del 20 al 31 de mayo.',
             },
             {
-                question: 'La membresia tambien desbloquea los eventos individuales del congreso?',
-                answer: 'Si. Para esta edicion, la membresia activa habilita el acceso al congreso y a los eventos que forman parte de esta agenda.',
+                question: '¿Qué pasa si ya soy miembro de SAPIHUM?',
+                answer: 'Si tienes membresía activa, el congreso queda incluido sin costo adicional.',
             },
             {
-                question: 'Puedo entrar a cada evento por separado?',
-                answer: 'Si. La agenda del congreso enlaza a la ficha individual de cada sesion para conservar detalles, perfiles y materiales.',
+                question: '¿Recibiré constancia?',
+                answer: 'Sí, se podrá emitir constancia de participación conforme a las condiciones del congreso y la asistencia registrada.',
+            },
+            {
+                question: '¿Dónde se realizarán los eventos?',
+                answer: 'Todos los eventos serán online.',
+            },
+            {
+                question: '¿Necesito cuenta para entrar?',
+                answer: 'El acceso debe poder recuperarse con el correo usado en el registro o compra. Si el usuario crea cuenta, debe poder visualizar sus accesos desde su área privada.',
             },
         ],
     },
@@ -236,6 +294,49 @@ function formatDateKeyInTimeZone(value: string, timeZone: string) {
 
     if (!year || !month || !day) return null
     return `${year}-${month}-${day}`
+}
+
+function getCongressSpeakerKey(speaker: CongressSpeakerProfile, fallbackKey: string) {
+    return speaker.id ?? speaker.profile?.id ?? speaker.profile?.full_name ?? speaker.headline ?? fallbackKey
+}
+
+function normalizeDirectorySpeaker(speaker: SpeakerWithProfile): CongressSpeakerProfile {
+    return {
+        id: speaker.id,
+        headline: speaker.headline,
+        bio: speaker.bio,
+        photo_url: speaker.photo_url,
+        credentials: speaker.credentials ?? null,
+        specialties: speaker.specialties ?? null,
+        is_public: speaker.is_public,
+        profile: speaker.profile
+            ? {
+                id: speaker.profile.id,
+                full_name: speaker.profile.full_name,
+                avatar_url: speaker.profile.avatar_url,
+            }
+            : null,
+    }
+}
+
+function mergeSpeakerProfiles(
+    primary: CongressSpeakerProfile,
+    fallback: CongressSpeakerProfile
+): CongressSpeakerProfile {
+    return {
+        id: primary.id ?? fallback.id ?? null,
+        headline: primary.headline ?? fallback.headline ?? null,
+        bio: primary.bio ?? fallback.bio ?? null,
+        photo_url: primary.photo_url ?? fallback.photo_url ?? null,
+        credentials: primary.credentials?.length ? primary.credentials : (fallback.credentials ?? null),
+        specialties: primary.specialties?.length ? primary.specialties : (fallback.specialties ?? null),
+        is_public: primary.is_public ?? fallback.is_public ?? null,
+        profile: {
+            id: primary.profile?.id ?? fallback.profile?.id ?? null,
+            full_name: primary.profile?.full_name ?? fallback.profile?.full_name ?? null,
+            avatar_url: primary.profile?.avatar_url ?? fallback.profile?.avatar_url ?? null,
+        },
+    }
 }
 
 export function isEventIncludedInCongressWindow(
@@ -287,13 +388,7 @@ export function getAggregatedCongressSpeakers(events: CongressLandingEvent[]): A
             const speaker = item.speaker
             if (!speaker) continue
 
-            const key =
-                speaker.id
-                ?? speaker.profile?.id
-                ?? speaker.profile?.full_name
-                ?? speaker.headline
-                ?? `${event.id}-${item.display_order ?? 999}`
-
+            const key = getCongressSpeakerKey(speaker, `${event.id}-${item.display_order ?? 999}`)
             const displayOrder = Number(item.display_order ?? 999)
             const existing = speakers.get(key)
 
@@ -304,6 +399,7 @@ export function getAggregatedCongressSpeakers(events: CongressLandingEvent[]): A
                     first_event_start: event.start_time,
                     event_count: 1,
                     event_titles: [event.title],
+                    source: 'agenda',
                     speaker,
                 })
                 continue
@@ -313,13 +409,14 @@ export function getAggregatedCongressSpeakers(events: CongressLandingEvent[]): A
                 ...existing,
                 display_order: Math.min(existing.display_order, displayOrder),
                 first_event_start:
-                    new Date(existing.first_event_start).getTime() <= new Date(event.start_time).getTime()
+                    existing.first_event_start && new Date(existing.first_event_start).getTime() <= new Date(event.start_time).getTime()
                         ? existing.first_event_start
                         : event.start_time,
                 event_count: existing.event_count + 1,
                 event_titles: existing.event_titles.includes(event.title)
                     ? existing.event_titles
                     : [...existing.event_titles, event.title],
+                speaker: mergeSpeakerProfiles(existing.speaker, speaker),
             })
         }
     }
@@ -329,8 +426,48 @@ export function getAggregatedCongressSpeakers(events: CongressLandingEvent[]): A
             return a.display_order - b.display_order
         }
 
-        return new Date(a.first_event_start).getTime() - new Date(b.first_event_start).getTime()
+        const aStart = a.first_event_start ? new Date(a.first_event_start).getTime() : Number.POSITIVE_INFINITY
+        const bStart = b.first_event_start ? new Date(b.first_event_start).getTime() : Number.POSITIVE_INFINITY
+        return aStart - bStart
     })
+}
+
+export function mergeCongressSpeakersWithDirectory(
+    events: CongressLandingEvent[],
+    directorySpeakers: SpeakerWithProfile[]
+): AggregatedCongressSpeaker[] {
+    const merged = new Map(
+        getAggregatedCongressSpeakers(events).map((item) => [item.key, item] as const)
+    )
+
+    let displayOrder = Math.max(0, ...Array.from(merged.values()).map((item) => item.display_order)) + 1
+
+    for (const speaker of directorySpeakers) {
+        const normalized = normalizeDirectorySpeaker(speaker)
+        const key = getCongressSpeakerKey(normalized, `directory-${displayOrder}`)
+        const existing = merged.get(key)
+
+        if (existing) {
+            merged.set(key, {
+                ...existing,
+                speaker: mergeSpeakerProfiles(existing.speaker, normalized),
+            })
+            continue
+        }
+
+        merged.set(key, {
+            key,
+            display_order: displayOrder,
+            first_event_start: null,
+            event_count: 0,
+            event_titles: [],
+            source: 'directory',
+            speaker: normalized,
+        })
+        displayOrder += 1
+    }
+
+    return Array.from(merged.values())
 }
 
 export function getCongressLandingPath(config: Pick<CongressLandingConfig, 'parentEventSlug'>) {

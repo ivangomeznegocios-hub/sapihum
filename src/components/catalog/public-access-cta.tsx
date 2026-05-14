@@ -2,10 +2,8 @@
 
 import { useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Loader2, Mail, Ticket, CreditCard } from 'lucide-react'
+import { CreditCard, Loader2, Mail, Ticket } from 'lucide-react'
 import { Button, type ButtonProps } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import {
     Dialog,
     DialogContent,
@@ -14,6 +12,8 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 import { collectAnalyticsEvent, getClientAnalyticsContext } from '@/lib/analytics/client'
 import { cn } from '@/lib/utils'
 
@@ -45,7 +45,9 @@ export function PublicAccessCta({
     const [error, setError] = useState<string | null>(null)
 
     const icon = useMemo(() => {
-        return requiresPayment ? <CreditCard className="mr-2 h-4 w-4" /> : <Ticket className="mr-2 h-4 w-4" />
+        return requiresPayment
+            ? <CreditCard className="mr-2 h-4 w-4" />
+            : <Ticket className="mr-2 h-4 w-4" />
     }, [requiresPayment])
 
     async function runRequest(withGuestDetails: boolean) {
