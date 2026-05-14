@@ -598,6 +598,7 @@ export function CreateEventForm({
     const [totalSessions, setTotalSessions] = useState(initialData?.session_config?.total_sessions || 1)
     const [sessionDuration, setSessionDuration] = useState(initialData?.session_config?.session_duration_minutes || 60)
     const [recurrence, setRecurrence] = useState(initialData?.session_config?.recurrence || 'none')
+    const [openAgendaMode, setOpenAgendaMode] = useState(Boolean(initialData?.session_config?.open_agenda))
     const [manualSessions, setManualSessions] = useState<ManualSessionInput[]>(() => getInitialManualSessions(initialData))
     const [modality, setModality] = useState(
         initialData?.session_config?.modality || (initialData?.event_type === 'presencial' ? 'presencial' : 'online')
@@ -815,6 +816,38 @@ export function CreateEventForm({
         })
     }
 
+    function selectAllSpeakers() {
+        setSelectedSpeakerAssignments((current) => {
+            const currentById = new Map(current.map((assignment) => [assignment.speakerId, assignment]))
+            return availableSpeakers.map((speaker) => currentById.get(speaker.id) ?? createDefaultSpeakerAssignment(speaker.id))
+        })
+    }
+
+    function clearSpeakers() {
+        setSelectedSpeakerAssignments([])
+    }
+
+    function addDaysToInputDate(value: string, days: number) {
+        const [year, month, day] = value.split('-').map(Number)
+        if (!year || !month || !day) return ''
+
+        const date = new Date(Date.UTC(year, month - 1, day + days))
+        return date.toISOString().slice(0, 10)
+    }
+
+    function fillConsecutiveManualSessions() {
+        if (!dateValue) {
+            setError('Primero elige la fecha principal.')
+            return
+        }
+
+        setManualSessions((current) => current.map((session, index) => ({
+            ...session,
+            date: addDaysToInputDate(dateValue, index + 1),
+            time: session.time || timeValue,
+        })))
+    }
+
     function updatePrimaryVertical(nextVerticalId: string) {
         setPrimaryVerticalIdValue(nextVerticalId)
         setRelatedVerticalIds((current) => Array.from(new Set([nextVerticalId, ...current.filter(Boolean)])))
@@ -941,8 +974,22 @@ export function CreateEventForm({
                             Elige quienes apareceran vinculados a la pagina publica del evento.
                         </p>
                     </div>
-                    <div className="rounded-full bg-muted px-3 py-1 text-xs text-muted-foreground">
-                        {selectedSpeakerAssignments.length} seleccionados
+                    <div className="flex flex-wrap items-center justify-end gap-2">
+                        {availableSpeakers.length > 0 && (
+                            <>
+                                <Button type="button" variant="outline" size="sm" onClick={selectAllSpeakers}>
+                                    Seleccionar todos
+                                </Button>
+                                {selectedSpeakerAssignments.length > 0 && (
+                                    <Button type="button" variant="ghost" size="sm" onClick={clearSpeakers}>
+                                        Limpiar
+                                    </Button>
+                                )}
+                            </>
+                        )}
+                        <div className="rounded-full bg-muted px-3 py-1 text-xs text-muted-foreground">
+                            {selectedSpeakerAssignments.length} seleccionados
+                        </div>
                     </div>
                 </div>
 
@@ -1383,8 +1430,11 @@ export function CreateEventForm({
             session_duration_minutes: sessionDuration,
             recurrence: totalSessions > 1 && recurrence !== 'none' ? recurrence : undefined,
             modality,
+            open_agenda: canUseAdvancedSettings && openAgendaMode,
             ...(modality === 'presencial' && locationValue.trim() ? { location: locationValue.trim() } : {}),
         }))
+        formData.set('duration', String(sessionDuration))
+        formData.set('openAgendaMode', canUseAdvancedSettings && openAgendaMode ? 'on' : 'off')
 
         // Add selected speakers and their payout configuration
         const invalidSpeakerAssignment = selectedSpeakerAssignments.find((assignment) => {
@@ -1659,6 +1709,23 @@ export function CreateEventForm({
                     </div>
                 </div>
 
+                {canUseAdvancedSettings && (
+                    <label className="flex items-start gap-3 rounded-xl border border-brand-blue/20 bg-brand-blue/5 p-4">
+                        <input
+                            type="checkbox"
+                            checked={openAgendaMode}
+                            onChange={(e) => setOpenAgendaMode(e.target.checked)}
+                            className="mt-1 rounded"
+                        />
+                        <div>
+                            <span className="text-sm font-medium">Agenda abierta / congreso</span>
+                            <p className="text-xs text-muted-foreground">
+                                Usalo para congresos o programas con muchas participaciones. Permite guardar aunque los ponentes ya tengan eventos o calendario ocupado.
+                            </p>
+                        </div>
+                    </label>
+                )}
+
                 <div className="grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
                     <div className="space-y-4">
                         <div>
@@ -1737,6 +1804,9 @@ export function CreateEventForm({
                                         La primera sesion usa la fecha principal de arriba. Agrega aqui las siguientes sesiones.
                                     </p>
                                 </div>
+                                <Button type="button" variant="outline" size="sm" onClick={fillConsecutiveManualSessions}>
+                                    Rellenar dias consecutivos
+                                </Button>
 
                                 <div className="space-y-2">
                                     {manualSessions.slice(0, totalSessions - 1).map((session, index) => (

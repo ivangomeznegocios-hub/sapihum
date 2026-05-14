@@ -261,13 +261,23 @@ function parseSessionConfig(formData: FormData, eventType: string, location: str
         modality = 'hibrido'
     }
 
+    const openAgenda = parsedConfig?.open_agenda === true
+
     return {
         total_sessions: totalSessions,
         session_duration_minutes: sessionDurationMinutes,
         recurrence,
         modality,
+        ...(openAgenda ? { open_agenda: true } : {}),
         ...(location ? { location } : {}),
     }
+}
+
+function canBypassEventScheduleConflicts(formData: FormData, canUseAdvancedSettings: boolean) {
+    return canUseAdvancedSettings && (
+        formData.get('openAgendaMode') === 'on' ||
+        formData.get('openAgendaMode') === 'true'
+    )
 }
 
 async function getDefaultPrimaryVerticalId(supabase: any) {
@@ -850,6 +860,7 @@ export async function createEvent(formData: FormData) {
 
     const canPublish = canPublishEvent(profile.role)
     const canUseAdvancedSettings = canManageEventAdvancedSettings(profile.role)
+    const bypassScheduleConflicts = canBypassEventScheduleConflicts(formData, canUseAdvancedSettings)
     const title = readTrimmedString(formData.get('title'))
     const subtitle = readTrimmedString(formData.get('subtitle'))
     const description = readTrimmedString(formData.get('description'))
@@ -899,41 +910,43 @@ export async function createEvent(formData: FormData) {
         return sessionSchedule
     }
 
-    const scheduleConflict = await findEventScheduleConflictForSessions({
-        supabase,
-        ownerId: profile.role === 'ponente' ? user.id : null,
-        speakerIds: speakerAssignments.map((assignment) => assignment.speakerId),
-        sessions: sessionSchedule.sessions,
-    })
+    if (!bypassScheduleConflicts) {
+        const scheduleConflict = await findEventScheduleConflictForSessions({
+            supabase,
+            ownerId: profile.role === 'ponente' ? user.id : null,
+            speakerIds: speakerAssignments.map((assignment) => assignment.speakerId),
+            sessions: sessionSchedule.sessions,
+        })
 
-    if (scheduleConflict) {
-        return { error: buildEventScheduleConflictMessage(scheduleConflict) }
-    }
-
-    try {
-        const externalConflictUserIds = Array.from(new Set([
-            ...(profile.role === 'ponente' ? [user.id] : []),
-            ...speakerAssignments.map((assignment) => assignment.speakerId),
-        ]))
-        let externalConflict: Awaited<ReturnType<typeof findExternalCalendarConflictForUsers>> = null
-        for (const session of sessionSchedule.sessions) {
-            externalConflict = await findExternalCalendarConflictForUsers(
-                externalConflictUserIds,
-                session.startTimeIso,
-                session.endTimeIso
-            )
-
-            if (externalConflict) break
+        if (scheduleConflict) {
+            return { error: buildEventScheduleConflictMessage(scheduleConflict) }
         }
 
-        if (externalConflict) {
-            const conflictKind = externalConflict.userId === user.id ? 'owner' : 'speaker'
-            return { error: buildExternalEventConflictMessage(externalConflict, conflictKind) }
-        }
-    } catch (externalError) {
-        console.error('[CreateEvent] Error al validar Google Calendar:', externalError)
-        return {
-            error: 'No pudimos verificar la disponibilidad externa de los participantes. Pideles reconectar Google Calendar e intenta de nuevo.',
+        try {
+            const externalConflictUserIds = Array.from(new Set([
+                ...(profile.role === 'ponente' ? [user.id] : []),
+                ...speakerAssignments.map((assignment) => assignment.speakerId),
+            ]))
+            let externalConflict: Awaited<ReturnType<typeof findExternalCalendarConflictForUsers>> = null
+            for (const session of sessionSchedule.sessions) {
+                externalConflict = await findExternalCalendarConflictForUsers(
+                    externalConflictUserIds,
+                    session.startTimeIso,
+                    session.endTimeIso
+                )
+
+                if (externalConflict) break
+            }
+
+            if (externalConflict) {
+                const conflictKind = externalConflict.userId === user.id ? 'owner' : 'speaker'
+                return { error: buildExternalEventConflictMessage(externalConflict, conflictKind) }
+            }
+        } catch (externalError) {
+            console.error('[CreateEvent] Error al validar Google Calendar:', externalError)
+            return {
+                error: 'No pudimos verificar la disponibilidad externa de los participantes. Pideles reconectar Google Calendar e intenta de nuevo.',
+            }
         }
     }
 
@@ -1103,6 +1116,7 @@ export async function updateEvent(eventId: string, formData: FormData) {
 
     const canPublish = canPublishEvent(profile?.role)
     const canUseAdvancedSettings = canManageEventAdvancedSettings(profile?.role)
+    const bypassScheduleConflicts = canBypassEventScheduleConflicts(formData, canUseAdvancedSettings)
     const title = readTrimmedString(formData.get('title'))
     const subtitle = readTrimmedString(formData.get('subtitle'))
     const description = formData.has('description')
@@ -1202,42 +1216,44 @@ export async function updateEvent(eventId: string, formData: FormData) {
         updates.end_time = nextEndTimeIso
     }
 
-    const scheduleConflict = await findEventScheduleConflictForSessions({
-        supabase,
-        ownerId: profile?.role === 'ponente' ? user.id : null,
-        speakerIds: speakerAssignments.map((assignment) => assignment.speakerId),
-        sessions: sessionSchedule?.sessions ?? [{ startTimeIso: nextStartTimeIso, endTimeIso: nextEndTimeIso }],
-        excludeEventId: eventId,
-    })
+    if (!bypassScheduleConflicts) {
+        const scheduleConflict = await findEventScheduleConflictForSessions({
+            supabase,
+            ownerId: profile?.role === 'ponente' ? user.id : null,
+            speakerIds: speakerAssignments.map((assignment) => assignment.speakerId),
+            sessions: sessionSchedule?.sessions ?? [{ startTimeIso: nextStartTimeIso, endTimeIso: nextEndTimeIso }],
+            excludeEventId: eventId,
+        })
 
-    if (scheduleConflict) {
-        return { error: buildEventScheduleConflictMessage(scheduleConflict) }
-    }
-
-    try {
-        const externalConflictUserIds = Array.from(new Set([
-            ...(profile?.role === 'ponente' ? [user.id] : []),
-            ...speakerAssignments.map((assignment) => assignment.speakerId),
-        ]))
-        let externalConflict: Awaited<ReturnType<typeof findExternalCalendarConflictForUsers>> = null
-        for (const session of sessionSchedule?.sessions ?? [{ startTimeIso: nextStartTimeIso, endTimeIso: nextEndTimeIso }]) {
-            externalConflict = await findExternalCalendarConflictForUsers(
-                externalConflictUserIds,
-                session.startTimeIso,
-                session.endTimeIso
-            )
-
-            if (externalConflict) break
+        if (scheduleConflict) {
+            return { error: buildEventScheduleConflictMessage(scheduleConflict) }
         }
 
-        if (externalConflict) {
-            const conflictKind = externalConflict.userId === user.id ? 'owner' : 'speaker'
-            return { error: buildExternalEventConflictMessage(externalConflict, conflictKind) }
-        }
-    } catch (externalError) {
-        console.error('[UpdateEvent] Error al validar Google Calendar:', externalError)
-        return {
-            error: 'No pudimos verificar la disponibilidad externa de los participantes. Pideles reconectar Google Calendar e intenta de nuevo.',
+        try {
+            const externalConflictUserIds = Array.from(new Set([
+                ...(profile?.role === 'ponente' ? [user.id] : []),
+                ...speakerAssignments.map((assignment) => assignment.speakerId),
+            ]))
+            let externalConflict: Awaited<ReturnType<typeof findExternalCalendarConflictForUsers>> = null
+            for (const session of sessionSchedule?.sessions ?? [{ startTimeIso: nextStartTimeIso, endTimeIso: nextEndTimeIso }]) {
+                externalConflict = await findExternalCalendarConflictForUsers(
+                    externalConflictUserIds,
+                    session.startTimeIso,
+                    session.endTimeIso
+                )
+
+                if (externalConflict) break
+            }
+
+            if (externalConflict) {
+                const conflictKind = externalConflict.userId === user.id ? 'owner' : 'speaker'
+                return { error: buildExternalEventConflictMessage(externalConflict, conflictKind) }
+            }
+        } catch (externalError) {
+            console.error('[UpdateEvent] Error al validar Google Calendar:', externalError)
+            return {
+                error: 'No pudimos verificar la disponibilidad externa de los participantes. Pideles reconectar Google Calendar e intenta de nuevo.',
+            }
         }
     }
 
@@ -1623,7 +1639,7 @@ export async function addSpeakerToEvent(eventId: string, speakerId: string, role
         return { error: 'No tienes permisos para modificar este evento' }
     }
 
-    if (event.start_time) {
+    if (event.start_time && !event.session_config?.open_agenda) {
         const eventSessions = getEventSessionOccurrences(event)
             .map((session) => ({
                 startTimeIso: session.start_time,

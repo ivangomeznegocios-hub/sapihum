@@ -777,6 +777,7 @@ export interface SessionConfig {
     modality: EventModality
     location?: string
     sessions?: EventSessionSchedule[]
+    open_agenda?: boolean
 }
 export type EventCategory = 'general' | 'networking' | 'clinical' | 'business'
 export type EventSubcategory = 'curso' | 'diplomado' | 'clase' | 'taller' | 'conferencia' | 'seminario' | 'congreso' | 'meetup' | 'otro'

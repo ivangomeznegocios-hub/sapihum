@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { getPublicEventPath, isPastPublicCatalogEvent } from '@/lib/events/public'
+import { getEventSessionOccurrences } from '@/lib/events/sessions'
 import { getSpecializationByCode } from '@/lib/specializations'
 import { DEFAULT_TIMEZONE } from '@/lib/timezone'
 
@@ -11,6 +12,26 @@ function formatEventDate(date: string) {
         month: d.toLocaleDateString('es-MX', { month: 'short', timeZone: DEFAULT_TIMEZONE }).replace('.', ''),
         year: d.toLocaleDateString('es-MX', { year: 'numeric', timeZone: DEFAULT_TIMEZONE }),
         time: d.toLocaleTimeString('es-MX', { hour: 'numeric', minute: '2-digit', timeZone: DEFAULT_TIMEZONE }),
+    }
+}
+
+function formatEventDateBadge(event: any) {
+    const sessions = getEventSessionOccurrences(event)
+    if (sessions.length <= 1) {
+        return formatEventDate(event.start_time)
+    }
+
+    const first = formatEventDate(sessions[0].start_time)
+    const last = formatEventDate(sessions[sessions.length - 1].start_time)
+    const day = first.month === last.month && first.year === last.year
+        ? `${first.day}-${last.day}`
+        : `${first.day} ${first.month} - ${last.day}`
+    const month = first.month === last.month && first.year === last.year ? first.month : last.month
+
+    return {
+        ...first,
+        day,
+        month,
     }
 }
 
@@ -55,7 +76,7 @@ export function PublicCatalogCard({
     const price = Number(event.price || 0)
     const priceLabel = price > 0 ? `$${price.toFixed(0)} MXN` : 'Gratis'
     const typeMeta = getTypeMeta(event)
-    const dateInfo = formatEventDate(event.start_time)
+    const dateInfo = formatEventDateBadge(event)
     const speakerName = event.speakers?.[0]?.speaker?.profile?.full_name
     const speakerAvatar = event.speakers?.[0]?.speaker?.photo_url || event.speakers?.[0]?.speaker?.profile?.avatar_url
     const isFree = price === 0

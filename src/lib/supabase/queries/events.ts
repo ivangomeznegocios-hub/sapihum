@@ -60,6 +60,7 @@ const PUBLIC_CATALOG_EVENT_SELECT = [
     'target_audience',
     'hero_badge',
     'public_cta_label',
+    'session_config',
     'formation_track',
     'ideal_for',
     'learning_outcomes',
