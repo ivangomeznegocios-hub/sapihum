@@ -3,7 +3,7 @@
 import { useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Loader2, Mail, Ticket, CreditCard } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import { Button, type ButtonProps } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import {
@@ -15,6 +15,7 @@ import {
     DialogTitle,
 } from '@/components/ui/dialog'
 import { collectAnalyticsEvent, getClientAnalyticsContext } from '@/lib/analytics/client'
+import { cn } from '@/lib/utils'
 
 interface PublicAccessCtaProps {
     eventId: string
@@ -22,6 +23,8 @@ interface PublicAccessCtaProps {
     title: string
     label: string
     requiresPayment: boolean
+    buttonVariant?: ButtonProps['variant']
+    buttonClassName?: string
 }
 
 export function PublicAccessCta({
@@ -30,6 +33,8 @@ export function PublicAccessCta({
     title,
     label,
     requiresPayment,
+    buttonVariant = 'default',
+    buttonClassName,
 }: PublicAccessCtaProps) {
     const router = useRouter()
     const [loading, setLoading] = useState(false)
@@ -156,7 +161,13 @@ export function PublicAccessCta({
     return (
         <>
             <div className="space-y-3">
-                <Button className="w-full" size="lg" onClick={handlePrimaryAction} disabled={loading}>
+                <Button
+                    variant={buttonVariant}
+                    className={cn('w-full', buttonClassName)}
+                    size="lg"
+                    onClick={handlePrimaryAction}
+                    disabled={loading}
+                >
                     {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : icon}
                     {loading ? 'Procesando...' : label}
                 </Button>

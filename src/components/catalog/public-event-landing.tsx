@@ -329,15 +329,25 @@ export function PublicEventLanding({
             (Number(event.price || 0) > 0 && Boolean(event.specialization_code)) ||
             (Number(event.price || 0) > 0 && event.member_access_type !== 'full_price')
         )
+    const shouldFeatureMembershipCta =
+        showMembershipUpsell &&
+        !isMembersOnly &&
+        Number(event.price || 0) > 0 &&
+        event.member_access_type === 'free'
     const membershipCtaLabel = isMembersOnly
-        ? 'Hazte miembro para participar'
+        ? 'Adquiere la membresia para participar'
         : specialization
             ? event.member_access_type === 'discounted'
-                ? 'Activa tu especialidad o suscribete y ahorra'
+                ? 'Activa tu especialidad o adquiere la membresia y ahorra'
                 : event.member_access_type === 'free'
-                    ? 'Suscribete y accede sin costo'
+                    ? 'Adquiere la membresia y accede gratis'
                     : 'Activa tu especialidad y accede sin costo'
-            : `Suscribete y ${event.member_access_type === 'free' ? 'accede gratis' : 'ahorra'}`
+            : `Adquiere la membresia y ${event.member_access_type === 'free' ? 'accede gratis' : 'ahorra'}`
+    const publicAccessLabel = finalPrice > 0
+        ? shouldFeatureMembershipCta
+            ? 'Comprar solo este evento'
+            : ctaLabel
+        : 'Recibir acceso gratis'
 
     const valueItems = [
         { title: 'Acceso completo', description: 'Link exclusivo al evento y sus materiales.' },
@@ -532,11 +542,12 @@ export function PublicEventLanding({
                                         {hasAccess ? (
                                             <>
                                                 <Link href={`/hub/${event.slug}`}>
-                                                    <Button className="w-full h-12 text-base font-semibold shadow-lg shadow-brand-blue/20" size="lg">
-                                                        Entrar al hub privado
+                                                    <Button className="w-full h-12 text-base font-semibold shadow-lg shadow-brand-blue/20 ring-1 ring-brand-blue/20" size="lg">
+                                                        Acceder ahora
+                                                        <ArrowRight className="h-4 w-4" />
                                                     </Button>
                                                 </Link>
-                                                <p className="text-center text-xs font-medium text-brand-blue">
+                                                <p className="text-center text-xs font-semibold text-brand-blue">
                                                     Ya tienes acceso a este contenido
                                                 </p>
                                             </>
@@ -551,17 +562,34 @@ export function PublicEventLanding({
                                             </>
                                         ) : (
                                             <>
+                                                {shouldFeatureMembershipCta && (
+                                                    <>
+                                                        <Link href={`/precios?next=/eventos/${event.slug}&autoCheckout=true`}>
+                                                            <Button className="w-full h-12 text-base font-semibold shadow-lg shadow-brand-blue/20" size="lg">
+                                                                {membershipCtaLabel}
+                                                            </Button>
+                                                        </Link>
+                                                        <p className="text-center text-xs font-medium text-brand-blue">
+                                                            Con membresia activa este evento queda incluido sin costo.
+                                                        </p>
+                                                    </>
+                                                )}
+
                                                 {!isMembersOnly && (
                                                     <PublicAccessCta
                                                         eventId={event.id}
                                                         eventSlug={event.slug}
                                                         title={event.title}
-                                                        label={finalPrice > 0 ? ctaLabel : 'Recibir acceso gratis'}
+                                                        label={publicAccessLabel}
                                                         requiresPayment={finalPrice > 0}
+                                                        buttonVariant={shouldFeatureMembershipCta ? 'outline' : 'default'}
+                                                        buttonClassName={shouldFeatureMembershipCta
+                                                            ? 'border-brand-border text-brand-text-strong hover:bg-brand-surface-soft hover:text-brand-text-strong'
+                                                            : undefined}
                                                     />
                                                 )}
 
-                                                {showMembershipUpsell && (
+                                                {showMembershipUpsell && !shouldFeatureMembershipCta && (
                                                     <>
                                                         {!isMembersOnly && (
                                                             <div className="relative py-2">
@@ -597,12 +625,19 @@ export function PublicEventLanding({
                                     </div>
 
                                     {!hasAccess && (
-                                        <p className="mt-5 text-center text-[11px] text-brand-text-muted">
-                                            Ya lo adquiriste?{' '}
-                                            <Link href="/compras/recuperar" className="font-medium text-brand-text-strong hover:text-brand-blue transition-colors underline underline-offset-2">
-                                                Recupera tu acceso
+                                        <div className="mt-5 space-y-2">
+                                            <p className="text-center text-[11px] text-brand-text-muted">
+                                                Ya lo adquiriste?
+                                            </p>
+                                            <Link href="/compras/recuperar" className="block">
+                                                <Button
+                                                    variant="outline"
+                                                    className="w-full h-11 border-brand-border text-brand-text-strong hover:bg-brand-surface-soft hover:text-brand-text-strong"
+                                                >
+                                                    Acceder a mi compra
+                                                </Button>
                                             </Link>
-                                        </p>
+                                        </div>
                                     )}
                                 </div>
                             </div>
@@ -861,14 +896,21 @@ export function PublicEventLanding({
                         <div className="min-w-0 flex-1">
                             {hasAccess ? (
                                 <Link href={`/hub/${event.slug}`} className="block">
-                                    <Button className="w-full">Entrar al hub</Button>
+                                    <Button className="w-full">
+                                        Acceder ahora
+                                        <ArrowRight className="h-4 w-4" />
+                                    </Button>
+                                </Link>
+                            ) : shouldFeatureMembershipCta ? (
+                                <Link href={`/precios?next=/eventos/${event.slug}&autoCheckout=true`} className="block">
+                                    <Button className="w-full">Acceso gratis con membresia</Button>
                                 </Link>
                             ) : (
                                 <PublicAccessCta
                                     eventId={event.id}
                                     eventSlug={event.slug}
                                     title={event.title}
-                                    label={finalPrice > 0 ? ctaLabel : 'Recibir acceso gratis'}
+                                    label={publicAccessLabel}
                                     requiresPayment={finalPrice > 0}
                                 />
                             )}
