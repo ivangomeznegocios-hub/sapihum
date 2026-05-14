@@ -77,27 +77,6 @@ export type CongressLandingBenefit = {
     description: string
 }
 
-export type CongressGalleryOrientation = 'landscape' | 'portrait' | 'square'
-
-export type CongressGalleryAssetConfig = {
-    alt?: string
-    caption?: string
-    eventSlug?: string | null
-    featured?: boolean
-    id: string
-    orientation?: CongressGalleryOrientation
-    src?: string | null
-}
-
-export type ResolvedCongressGalleryAsset = {
-    alt: string
-    caption?: string
-    featured: boolean
-    id: string
-    orientation: CongressGalleryOrientation
-    src: string
-}
-
 export type CongressLandingConfig = {
     about: string[]
     benefits: CongressLandingBenefit[]
@@ -114,10 +93,9 @@ export type CongressLandingConfig = {
         timeZone: string
     }
     description: string
-    gallery: {
+    officialImage: {
         description: string
         eyebrow: string
-        items: CongressGalleryAssetConfig[]
         title: string
     }
     heroDetails: CongressLandingHeroDetail[]
@@ -234,39 +212,10 @@ export const CONGRESS_LANDING_CONFIGS: CongressLandingConfig[] = [
             { value: '20–31 mayo', label: 'Programación especial', description: 'Una agenda diseñada como congreso, no como evento único.' },
             { value: 'Acceso completo', label: 'A todos los eventos incluidos', description: 'Un solo registro para toda la experiencia del congreso.' },
         ],
-        gallery: {
-            eyebrow: 'Vista previa del congreso',
-            title: 'Imágenes reales de la programación',
-            description: 'Explora algunas piezas visuales y sesiones destacadas que forman parte de la programación especial del congreso.',
-            items: [
-                {
-                    id: 'congreso-hero',
-                    eventSlug: 'congreso-de-psicologia-2026-especial-dia-del-psicologo',
-                    featured: true,
-                    orientation: 'landscape',
-                    alt: 'Imagen principal del Congreso de Psicología 2026 | Especial Día del Psicólogo',
-                },
-                {
-                    id: 'congreso-cognitivo-conductual',
-                    eventSlug: 'fundamentos-teoricos-de-cognitivo-conductual',
-                    orientation: 'portrait',
-                },
-                {
-                    id: 'congreso-desgaste-empatia',
-                    eventSlug: 'sindrome-del-desgaste-por-empatia-en-profesionales-del-cuidado',
-                    orientation: 'portrait',
-                },
-                {
-                    id: 'congreso-humanismo',
-                    eventSlug: 'fundamentos-teoricos-del-humanismo',
-                    orientation: 'portrait',
-                },
-                {
-                    id: 'congreso-psicologia-educativa',
-                    eventSlug: 'psicologia-educativa',
-                    orientation: 'portrait',
-                },
-            ],
+        officialImage: {
+            eyebrow: 'IMAGEN OFICIAL',
+            title: 'Congreso de Psicología 2026',
+            description: 'Una programación especial online del 20 al 31 de mayo para celebrar, actualizar y conectar a profesionales de la psicología.',
         },
         about: [
             'El Congreso de Psicología 2026 | Especial Día del Psicólogo es una programación online creada por SAPIHUM para celebrar y fortalecer la práctica profesional de la psicología.',
@@ -400,57 +349,6 @@ function mergeSpeakerProfiles(
             avatar_url: primary.profile?.avatar_url ?? fallback.profile?.avatar_url ?? null,
         },
     }
-}
-
-function guessGalleryOrientation(index: number): CongressGalleryOrientation {
-    if (index === 0) return 'landscape'
-    if (index % 3 === 0) return 'square'
-    return 'portrait'
-}
-
-export function resolveCongressGalleryAssets(
-    config: Pick<CongressLandingConfig, 'gallery' | 'parentEventSlug' | 'title'>,
-    parentEvent: Pick<CongressLandingEvent, 'image_url' | 'slug' | 'title'>,
-    includedEvents: Array<Pick<CongressLandingEvent, 'image_url' | 'slug' | 'title'>>
-): ResolvedCongressGalleryAsset[] {
-    const eventMap = new Map<string, Pick<CongressLandingEvent, 'image_url' | 'slug' | 'title'>>([
-        [parentEvent.slug, parentEvent],
-        ...includedEvents.map((event) => [event.slug, event] as const),
-    ])
-
-    const configuredItems = config.gallery.items
-        .map((item, index) => {
-            const referencedEvent = item.eventSlug ? eventMap.get(item.eventSlug) : null
-            const src = item.src ?? referencedEvent?.image_url ?? null
-
-            if (!src) return null
-
-            return {
-                id: item.id,
-                src,
-                alt: item.alt ?? referencedEvent?.title ?? config.title,
-                caption: item.caption,
-                featured: Boolean(item.featured),
-                orientation: item.orientation ?? guessGalleryOrientation(index),
-            } satisfies ResolvedCongressGalleryAsset
-        })
-        .filter((item) => item !== null)
-
-    if (configuredItems.length > 0) {
-        return configuredItems
-    }
-
-    const defaultItems = [parentEvent, ...includedEvents]
-        .filter((event) => Boolean(event.image_url))
-        .map((event, index) => ({
-            id: `gallery-${event.slug}`,
-            src: event.image_url as string,
-            alt: event.title,
-            featured: index === 0,
-            orientation: guessGalleryOrientation(index),
-        }))
-
-    return defaultItems
 }
 
 export function isEventIncludedInCongressWindow(

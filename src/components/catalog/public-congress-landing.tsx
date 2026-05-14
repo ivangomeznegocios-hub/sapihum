@@ -21,7 +21,6 @@ import type {
 import {
     getCongressLandingPath,
     mergeCongressSpeakersWithDirectory,
-    resolveCongressGalleryAssets,
 } from '@/lib/events/congress'
 import { getEffectiveEventPriceForProfile } from '@/lib/events/pricing'
 import type { SpeakerWithProfile } from '@/types/database'
@@ -166,22 +165,16 @@ function getEventSpeakerNames(event: CongressLandingEvent) {
     return names.length > 0 ? names.join(' · ') : 'Ponente por confirmar'
 }
 
-function getGalleryCardClasses(index: number, featured: boolean) {
-    if (featured || index === 0) {
-        return 'md:col-span-2 xl:col-span-2'
-    }
-
-    return 'md:col-span-1'
-}
-
-function getGalleryAspectClasses(index: number, orientation: 'landscape' | 'portrait' | 'square', featured: boolean) {
-    if (featured || index === 0) {
-        return 'aspect-[4/3] xl:aspect-[5/4]'
-    }
-
-    if (orientation === 'portrait') return 'aspect-[4/5]'
-    if (orientation === 'square') return 'aspect-square'
-    return 'aspect-[4/3]'
+function getOfficialCongressImage(event: any) {
+    return (
+        event?.cover_image_url
+        ?? event?.image_url
+        ?? event?.featured_image
+        ?? event?.hero_image
+        ?? event?.coverImage
+        ?? event?.coverImageUrl
+        ?? null
+    )
 }
 
 function MembershipCta({
@@ -296,63 +289,41 @@ function CongressCtaGroup({
     )
 }
 
-function GallerySection({
+function OfficialImageSection({
     config,
     event,
-    includedEvents,
 }: {
     config: CongressLandingConfig
     event: any
-    includedEvents: CongressLandingEvent[]
 }) {
-    const assets = resolveCongressGalleryAssets(config, event, includedEvents)
-    if (assets.length === 0) return null
+    const imageSrc = getOfficialCongressImage(event)
+    if (!imageSrc) return null
 
     return (
         <section className="mx-auto max-w-7xl px-6 py-10 sm:px-8 md:py-14">
-            <div className="overflow-hidden rounded-[32px] border border-[#e3d6c7] bg-white p-6 shadow-[0_24px_80px_rgba(44,28,17,0.08)] sm:p-8">
-                <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+            <div className="overflow-hidden rounded-[32px] border border-[#2f2118] bg-[#120c09] p-6 shadow-[0_24px_80px_rgba(18,12,9,0.22)] sm:p-8">
+                <div className="min-w-0">
                     <SectionHeading
-                        eyebrow={config.gallery.eyebrow}
-                        title={config.gallery.title}
-                        description={config.gallery.description}
+                        eyebrow={config.officialImage.eyebrow}
+                        title={config.officialImage.title}
+                        description={config.officialImage.description}
+                        light
                     />
-                    <div className="text-sm text-[#6b5a4c]">
-                        {assets.length} {assets.length === 1 ? 'pieza visual' : 'piezas visuales'} disponibles
-                    </div>
                 </div>
 
-                <div className="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-                    {assets.map((asset, index) => (
-                        <figure
-                            key={asset.id}
-                            className={`group min-w-0 overflow-hidden rounded-[28px] bg-[#f8f1e7] ${getGalleryCardClasses(index, asset.featured)}`}
-                        >
-                            <div className={`relative overflow-hidden ${getGalleryAspectClasses(index, asset.orientation, asset.featured)}`}>
-                                <Image
-                                    src={asset.src}
-                                    alt={asset.alt}
-                                    fill
-                                    priority={index < 2}
-                                    quality={72}
-                                    sizes={index === 0
-                                        ? '(min-width: 1280px) 50vw, (min-width: 768px) 100vw, 100vw'
-                                        : '(min-width: 1280px) 25vw, (min-width: 768px) 50vw, 100vw'}
-                                    className="object-cover transition-transform duration-500 group-hover:scale-[1.02]"
-                                />
-                                <div className="absolute inset-0 bg-gradient-to-t from-[#170f0b]/78 via-[#170f0b]/8 to-transparent" />
-                                <div className="absolute inset-x-0 bottom-0 p-4 text-white">
-                                    <p className="line-clamp-2 text-sm font-medium leading-relaxed">
-                                        {asset.alt}
-                                    </p>
-                                    {asset.caption && (
-                                        <p className="mt-2 text-xs leading-relaxed text-white/80">{asset.caption}</p>
-                                    )}
-                                </div>
-                            </div>
-                        </figure>
-                    ))}
-                </div>
+                <figure className="mt-8 overflow-hidden rounded-[28px] border border-white/10 bg-[radial-gradient(circle_at_top,rgba(214,173,111,0.18),transparent_42%),#1a120d]">
+                    <div className="relative aspect-[16/9] min-w-0">
+                        <Image
+                            src={imageSrc}
+                            alt={`${config.title} | ${config.subtitle}`}
+                            fill
+                            priority
+                            quality={86}
+                            sizes="(min-width: 1280px) 1120px, (min-width: 768px) calc(100vw - 4rem), calc(100vw - 3rem)"
+                            className="object-contain p-3 sm:p-5"
+                        />
+                    </div>
+                </figure>
             </div>
         </section>
     )
@@ -638,8 +609,6 @@ export function PublicCongressLanding({
                 </div>
             </section>
 
-            <GallerySection config={config} event={event} includedEvents={includedEvents} />
-
             <section className="relative mx-auto max-w-7xl px-6 py-10 sm:px-8 md:py-14">
                 <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
                     {config.metrics.map((metric) => (
@@ -654,6 +623,8 @@ export function PublicCongressLanding({
                     ))}
                 </div>
             </section>
+
+            <OfficialImageSection config={config} event={event} />
 
             <section className="mx-auto max-w-7xl px-6 py-8 sm:px-8 md:py-12">
                 <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start">
