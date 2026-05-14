@@ -7,12 +7,12 @@ import { AcademiaCatalog } from '@/components/catalog/academia-catalog'
 
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { getAcademiaFeaturedEventSettings, resolveAcademiaFeaturedEvent } from '@/lib/academia/featured-event'
 import {
     applyEventCampaignCopy,
     getAllEventCampaigns,
     getCampaignEventsFromCatalog,
     getEventCampaignByKey,
-    type EventCampaignConfig,
 } from '@/lib/events/campaigns'
 import { getPublicEventPath, splitPublicCatalogEvents } from '@/lib/events/public'
 import { getSpecializationByCode } from '@/lib/specializations'
@@ -58,9 +58,10 @@ interface AcademiaPageProps {
 
 export default async function AcademiaPage({ searchParams }: AcademiaPageProps) {
     const params = (await searchParams) ?? {}
-    const [allEvents, formations] = await Promise.all([
+    const [allEvents, formations, featuredEventSettings] = await Promise.all([
         getUnifiedCatalogEvents(),
         getPublicFormations(),
+        getAcademiaFeaturedEventSettings(),
     ])
 
     const normalizedEvents = allEvents.map((event: any) => applyEventCampaignCopy(event))
@@ -80,9 +81,12 @@ export default async function AcademiaPage({ searchParams }: AcademiaPageProps) 
         ? visibleCampaignBlocks[0]?.events ?? []
         : upcoming
 
-    const featuredEvent = activeCampaign
-        ? visibleCampaignBlocks[0]?.events[0] ?? upcoming.find((event: any) => event.image_url) ?? upcoming[0]
-        : campaignBlocks[0]?.events[0] ?? upcoming.find((event: any) => event.image_url) ?? upcoming[0]
+    const featuredEvent = resolveAcademiaFeaturedEvent({
+        settings: featuredEventSettings,
+        activeCampaign,
+        campaignBlocks,
+        upcoming,
+    })
 
     return (
         <div className="relative flex w-full flex-1 flex-col items-center bg-background">

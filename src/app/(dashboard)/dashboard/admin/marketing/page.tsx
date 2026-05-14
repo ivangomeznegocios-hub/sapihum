@@ -6,19 +6,25 @@ import {
     Search as SearchIcon, Users, FileEdit, BarChart3,
     Sparkles,
 } from 'lucide-react'
+import { getAcademiaFeaturedEventSettings } from '@/lib/academia/featured-event'
 import { getHomeFeaturedSpeakersSettings } from '@/lib/home/featured-speakers'
 import { getSpeakerImage, getSpeakerName } from '@/lib/speakers/display'
 import { getSpeakerMeritScore } from '@/lib/speakers/ranking'
+import { applyEventCampaignCopy } from '@/lib/events/campaigns'
+import { splitPublicCatalogEvents } from '@/lib/events/public'
 import {
     getMarketingOverview,
     SERVICE_LABELS,
     STATUS_CONFIG,
     type MarketingServiceKey,
 } from '@/lib/supabase/queries/marketing-services'
+import { getUnifiedCatalogEvents } from '@/lib/supabase/queries/events'
 import { getPublicSpeakers } from '@/lib/supabase/queries/speakers'
 import { UpdateServiceForm, BriefStatusButtons, InitServicesButton } from './admin-marketing-forms'
+import { AcademiaFeaturedEventSettings } from './academia-featured-event-settings'
 import { HomeSpeakersSettings } from './home-speakers-settings'
 import { cn } from '@/lib/utils'
+import { DEFAULT_TIMEZONE, formatEventDate, formatEventTime } from '@/lib/timezone'
 
 const SERVICE_ICONS: Record<string, React.ElementType> = {
     community_manager: Megaphone,
@@ -43,10 +49,12 @@ export default async function AdminMarketingPage() {
 
     if ((profile as any)?.role !== 'admin') redirect('/dashboard')
 
-    const [{ users }, homeFeaturedSettings, publicSpeakers] = await Promise.all([
+    const [{ users }, homeFeaturedSettings, academiaFeaturedEventSettings, publicSpeakers, allEvents] = await Promise.all([
         getMarketingOverview(),
         getHomeFeaturedSpeakersSettings(),
+        getAcademiaFeaturedEventSettings(),
         getPublicSpeakers(),
+        getUnifiedCatalogEvents(),
     ])
 
     // Stats
@@ -66,6 +74,17 @@ export default async function AdminMarketingPage() {
         formationsCount: speaker.formations?.length ?? 0,
         specialtiesCount: speaker.specialties?.length ?? 0,
         hasPhoto: Boolean(getSpeakerImage(speaker)),
+    }))
+    const upcomingEvents = splitPublicCatalogEvents(
+        allEvents.map((event: any) => applyEventCampaignCopy(event))
+    ).upcoming
+    const featuredEventOptions = upcomingEvents.map((event: any) => ({
+        id: event.id,
+        title: event.title,
+        slug: event.slug,
+        status: event.status,
+        startLabel: `${formatEventDate(event.start_time, DEFAULT_TIMEZONE)} · ${formatEventTime(event.start_time, DEFAULT_TIMEZONE)}`,
+        hasImage: Boolean(event.image_url),
     }))
 
     return (
@@ -87,6 +106,12 @@ export default async function AdminMarketingPage() {
                 initialMode={homeFeaturedSettings.mode}
                 initialManualSpeakerIds={homeFeaturedSettings.manualSpeakerIds}
                 speakerOptions={speakerOptions}
+            />
+
+            <AcademiaFeaturedEventSettings
+                initialMode={academiaFeaturedEventSettings.mode}
+                initialManualEventId={academiaFeaturedEventSettings.manualEventId}
+                eventOptions={featuredEventOptions}
             />
 
             {/* Stats */}

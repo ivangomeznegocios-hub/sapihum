@@ -270,6 +270,13 @@ export const TRACKING_EVENT_DEFINITIONS: Record<AnalyticsEventName, TrackingEven
         allowOnZones: ['private_app'],
         description: 'Featured speakers settings updated.',
     },
+    academia_featured_event_updated: {
+        internalName: 'academia_featured_event_updated',
+        canonicalName: 'form_submit',
+        allowedDestinations: ['first_party_analytics'],
+        allowOnZones: ['private_app'],
+        description: 'Academia featured event settings updated.',
+    },
     growth_campaign_created: {
         internalName: 'growth_campaign_created',
         canonicalName: 'form_submit',

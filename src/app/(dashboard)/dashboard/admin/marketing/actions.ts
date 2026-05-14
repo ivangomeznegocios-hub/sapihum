@@ -3,6 +3,11 @@
 import { createClient } from '@/lib/supabase/server'
 import { recordAnalyticsServerEvent } from '@/lib/analytics/server'
 import {
+    ACADEMIA_FEATURED_EVENT_SETTING_KEY,
+    normalizeAcademiaFeaturedEventSettings,
+    type AcademiaFeaturedEventMode,
+} from '@/lib/academia/featured-event'
+import {
     HOME_FEATURED_SPEAKERS_SETTING_KEY,
     normalizeHomeFeaturedSpeakersSettings,
     type HomeFeaturedSpeakersMode,
@@ -236,6 +241,87 @@ export async function updateHomeFeaturedSpeakersSettings(input: {
         return { success: true }
     } catch (err) {
         console.error('Unexpected error in updateHomeFeaturedSpeakersSettings:', err)
+        return { success: false, error: 'Error inesperado' }
+    }
+}
+
+export async function updateAcademiaFeaturedEventSettings(input: {
+    mode: AcademiaFeaturedEventMode
+    manualEventId: string | null
+}): Promise<{ success: boolean; error?: string }> {
+    try {
+        const supabase = await createClient()
+        const { data: { user } } = await supabase.auth.getUser()
+        if (!user) return { success: false, error: 'No autenticado' }
+
+        const { data: profile } = await supabase
+            .from('profiles')
+            .select('role')
+            .eq('id', user.id)
+            .single()
+
+        if ((profile as any)?.role !== 'admin') {
+            return { success: false, error: 'Solo administradores' }
+        }
+
+        const normalizedSettings = normalizeAcademiaFeaturedEventSettings(input)
+        let validManualEventId: string | null = normalizedSettings.manualEventId
+
+        if (validManualEventId) {
+            const { data: event, error: eventError } = await (supabase
+                .from('events') as any)
+                .select('id')
+                .eq('id', validManualEventId)
+                .not('status', 'eq', 'draft')
+                .not('status', 'eq', 'cancelled')
+                .maybeSingle()
+
+            if (eventError) {
+                console.error('Error validating featured academia event:', eventError)
+                return { success: false, error: 'No fue posible validar el evento destacado' }
+            }
+
+            if (!event?.id) {
+                validManualEventId = null
+            }
+        }
+
+        const value = {
+            ...normalizedSettings,
+            manualEventId: validManualEventId,
+        }
+
+        const { error } = await (supabase
+            .from('platform_settings') as any)
+            .upsert({
+                key: ACADEMIA_FEATURED_EVENT_SETTING_KEY,
+                value,
+                description: 'Controls the featured event shown on Academia.',
+                updated_by: user.id,
+                updated_at: new Date().toISOString(),
+            }, { onConflict: 'key' })
+
+        if (error) {
+            console.error('Error updating academia featured event settings:', error)
+            return { success: false, error: 'No fue posible guardar el evento destacado de Academia' }
+        }
+
+        await recordAnalyticsServerEvent({
+            eventName: 'academia_featured_event_updated',
+            eventSource: 'server',
+            userId: user.id,
+            touch: { funnel: 'admin_marketing' },
+            properties: {
+                mode: value.mode,
+                manualEventId: value.manualEventId,
+            },
+        })
+
+        revalidatePath('/academia')
+        revalidatePath('/dashboard/admin/marketing')
+        return { success: true }
+    } catch (err) {
+        console.error('Unexpected error in updateAcademiaFeaturedEventSettings:', err)
         return { success: false, error: 'Error inesperado' }
     }
 }
