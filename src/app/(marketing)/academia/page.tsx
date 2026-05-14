@@ -396,7 +396,6 @@ function FeaturedEventCard({ event }: { event: any }) {
                         <span className="text-6xl opacity-20">S</span>
                     </div>
                 )}
-                <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-background/20 to-transparent" />
 
                 <div className="absolute left-3 top-3 flex items-center gap-2">
                     <span

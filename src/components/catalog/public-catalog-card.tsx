@@ -117,8 +117,6 @@ export function PublicCatalogCard({
                         </div>
                     </div>
                 )}
-                {/* Dark gradient overlay */}
-                <div className="absolute inset-0 bg-gradient-to-t from-background/60 via-transparent to-transparent" />
 
                 {/* Type Badge */}
                 <div className="absolute left-3 top-3 flex items-center gap-1.5 flex-wrap max-w-[calc(100%-6rem)]">
