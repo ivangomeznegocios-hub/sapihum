@@ -77,103 +77,131 @@ export type CongressLandingBenefit = {
     description: string
 }
 
+export type CongressGalleryOrientation = 'landscape' | 'portrait' | 'square'
+
+export type CongressGalleryAssetConfig = {
+    alt?: string
+    caption?: string
+    eventSlug?: string | null
+    featured?: boolean
+    id: string
+    orientation?: CongressGalleryOrientation
+    src?: string | null
+}
+
+export type ResolvedCongressGalleryAsset = {
+    alt: string
+    caption?: string
+    featured: boolean
+    id: string
+    orientation: CongressGalleryOrientation
+    src: string
+}
+
 export type CongressLandingConfig = {
-    key: string
-    parentEventSlug: string
-    title: string
-    shortTitle: string
-    subtitle: string
-    description: string
-    supportingText: string
-    dateWindow: {
-        timeZone: string
-        startDate: string
-        endDate: string
-        startUtc: string
-        endExclusiveUtc: string
-    }
-    heroDetails: CongressLandingHeroDetail[]
-    metrics: CongressLandingMetric[]
     about: string[]
     benefits: CongressLandingBenefit[]
-    pricing: {
-        purchaseNote: string
-        membershipNote: string
-    }
-    speakersIntro: string
-    programmingIntro: string
-    programmingEmptyState: string
     cta: {
+        membershipCaption: string
         membershipLabel: string
         purchaseLabel: string
     }
+    dateWindow: {
+        endDate: string
+        endExclusiveUtc: string
+        startDate: string
+        startUtc: string
+        timeZone: string
+    }
+    description: string
+    gallery: {
+        description: string
+        eyebrow: string
+        items: CongressGalleryAssetConfig[]
+        title: string
+    }
+    heroDetails: CongressLandingHeroDetail[]
+    key: string
+    metrics: CongressLandingMetric[]
+    parentEventSlug: string
+    pricing: {
+        membershipNote: string
+        purchaseNote: string
+    }
+    programmingEmptyState: string
+    programmingIntro: string
+    shortTitle: string
+    speakersIntro: string
+    subtitle: string
+    supportingText: string
+    title: string
     faq: Array<{
-        question: string
         answer: string
+        question: string
     }>
 }
 
 export type CongressSpeakerProfile = {
-    id?: string | null
-    headline?: string | null
     bio?: string | null
-    photo_url?: string | null
     credentials?: string[] | null
-    specialties?: string[] | null
+    headline?: string | null
+    id?: string | null
     is_public?: boolean | null
+    photo_url?: string | null
     profile?: {
-        id?: string | null
-        full_name?: string | null
         avatar_url?: string | null
+        full_name?: string | null
+        id?: string | null
     } | null
+    specialties?: string[] | null
 }
 
 export type CongressLandingEvent = {
-    id: string
-    slug: string
-    status: string | null
-    title: string
-    subtitle?: string | null
-    description?: string | null
-    image_url?: string | null
-    start_time: string
-    end_time?: string | null
-    event_type?: EventType | null
-    subcategory?: EventSubcategory | null
-    recording_url?: string | null
-    recording_expires_at?: string | null
-    price?: number | null
-    member_price?: number | null
-    member_access_type?: string | null
-    specialization_code?: string | null
-    target_audience?: string[] | null
-    speakers?: CongressLandingSpeakerRow[]
     attendee_count?: number
     created_by?: string | null
+    description?: string | null
+    end_time?: string | null
+    event_type?: EventType | null
+    id: string
+    image_url?: string | null
+    member_access_type?: string | null
+    member_price?: number | null
+    price?: number | null
+    recording_expires_at?: string | null
+    recording_url?: string | null
+    slug: string
+    speakers?: CongressLandingSpeakerRow[]
+    specialization_code?: string | null
+    start_time: string
+    status: string | null
+    subcategory?: EventSubcategory | null
+    subtitle?: string | null
+    target_audience?: string[] | null
+    title: string
 }
 
 export type CongressLandingSpeakerRow = {
-    id?: string
-    event_id?: string
     display_order?: number | null
+    event_id?: string
+    id?: string
     speaker?: CongressSpeakerProfile | null
 }
 
 export type AggregatedCongressSpeaker = {
-    key: string
     display_order: number
-    first_event_start: string | null
     event_count: number
     event_titles: string[]
+    first_event_start: string | null
+    key: string
     source: 'agenda' | 'directory'
     speaker: CongressSpeakerProfile
 }
 
 type CongressGrantSource = {
-    sourceType: 'registration' | 'purchase' | 'membership' | 'manual' | 'support' | 'gift' | 'alliance' | 'migration'
-    sourceReference: string | null
-    startsAt?: string | null
     metadata: Record<string, unknown>
+    sourceReference: string | null
+    sourceType: 'registration' | 'purchase' | 'membership' | 'manual' | 'support' | 'gift' | 'alliance' | 'migration'
+    startsAt?: string | null
 }
 
 export const CONGRESS_LANDING_CONFIGS: CongressLandingConfig[] = [
@@ -206,6 +234,40 @@ export const CONGRESS_LANDING_CONFIGS: CongressLandingConfig[] = [
             { value: '20–31 mayo', label: 'Programación especial', description: 'Una agenda diseñada como congreso, no como evento único.' },
             { value: 'Acceso completo', label: 'A todos los eventos incluidos', description: 'Un solo registro para toda la experiencia del congreso.' },
         ],
+        gallery: {
+            eyebrow: 'Vista previa del congreso',
+            title: 'Imágenes reales de la programación',
+            description: 'Explora algunas piezas visuales y sesiones destacadas que forman parte de la programación especial del congreso.',
+            items: [
+                {
+                    id: 'congreso-hero',
+                    eventSlug: 'congreso-de-psicologia-2026-especial-dia-del-psicologo',
+                    featured: true,
+                    orientation: 'landscape',
+                    alt: 'Imagen principal del Congreso de Psicología 2026 | Especial Día del Psicólogo',
+                },
+                {
+                    id: 'congreso-cognitivo-conductual',
+                    eventSlug: 'fundamentos-teoricos-de-cognitivo-conductual',
+                    orientation: 'portrait',
+                },
+                {
+                    id: 'congreso-desgaste-empatia',
+                    eventSlug: 'sindrome-del-desgaste-por-empatia-en-profesionales-del-cuidado',
+                    orientation: 'portrait',
+                },
+                {
+                    id: 'congreso-humanismo',
+                    eventSlug: 'fundamentos-teoricos-del-humanismo',
+                    orientation: 'portrait',
+                },
+                {
+                    id: 'congreso-psicologia-educativa',
+                    eventSlug: 'psicologia-educativa',
+                    orientation: 'portrait',
+                },
+            ],
+        },
         about: [
             'El Congreso de Psicología 2026 | Especial Día del Psicólogo es una programación online creada por SAPIHUM para celebrar y fortalecer la práctica profesional de la psicología.',
             'Del 20 al 31 de mayo de 2026, las y los participantes tendrán acceso a una serie de eventos en vivo con especialistas invitados en distintas áreas de la psicología, incluyendo conferencias, talleres, clases y espacios de actualización profesional.',
@@ -243,7 +305,8 @@ export const CONGRESS_LANDING_CONFIGS: CongressLandingConfig[] = [
         programmingEmptyState: 'La programación completa se irá publicando conforme se confirmen las sesiones del congreso.',
         cta: {
             purchaseLabel: 'Adquirir acceso completo',
-            membershipLabel: 'Unirme a SAPIHUM y acceder sin costo adicional',
+            membershipLabel: 'Unirme a SAPIHUM',
+            membershipCaption: 'Incluye acceso al congreso sin costo adicional.',
         },
         faq: [
             {
@@ -339,8 +402,59 @@ function mergeSpeakerProfiles(
     }
 }
 
+function guessGalleryOrientation(index: number): CongressGalleryOrientation {
+    if (index === 0) return 'landscape'
+    if (index % 3 === 0) return 'square'
+    return 'portrait'
+}
+
+export function resolveCongressGalleryAssets(
+    config: Pick<CongressLandingConfig, 'gallery' | 'parentEventSlug' | 'title'>,
+    parentEvent: Pick<CongressLandingEvent, 'image_url' | 'slug' | 'title'>,
+    includedEvents: Array<Pick<CongressLandingEvent, 'image_url' | 'slug' | 'title'>>
+): ResolvedCongressGalleryAsset[] {
+    const eventMap = new Map<string, Pick<CongressLandingEvent, 'image_url' | 'slug' | 'title'>>([
+        [parentEvent.slug, parentEvent],
+        ...includedEvents.map((event) => [event.slug, event] as const),
+    ])
+
+    const configuredItems = config.gallery.items
+        .map((item, index) => {
+            const referencedEvent = item.eventSlug ? eventMap.get(item.eventSlug) : null
+            const src = item.src ?? referencedEvent?.image_url ?? null
+
+            if (!src) return null
+
+            return {
+                id: item.id,
+                src,
+                alt: item.alt ?? referencedEvent?.title ?? config.title,
+                caption: item.caption,
+                featured: Boolean(item.featured),
+                orientation: item.orientation ?? guessGalleryOrientation(index),
+            } satisfies ResolvedCongressGalleryAsset
+        })
+        .filter((item) => item !== null)
+
+    if (configuredItems.length > 0) {
+        return configuredItems
+    }
+
+    const defaultItems = [parentEvent, ...includedEvents]
+        .filter((event) => Boolean(event.image_url))
+        .map((event, index) => ({
+            id: `gallery-${event.slug}`,
+            src: event.image_url as string,
+            alt: event.title,
+            featured: index === 0,
+            orientation: guessGalleryOrientation(index),
+        }))
+
+    return defaultItems
+}
+
 export function isEventIncludedInCongressWindow(
-    event: Pick<CongressLandingEvent, 'id' | 'slug' | 'status' | 'start_time'>,
+    event: Pick<CongressLandingEvent, 'id' | 'slug' | 'start_time' | 'status'>,
     config: CongressLandingConfig,
     parentEventId?: string | null
 ) {
@@ -358,7 +472,7 @@ export function isEventIncludedInCongressWindow(
 }
 
 export function getCongressLandingForEvent(
-    event: Pick<CongressLandingEvent, 'id' | 'slug' | 'status' | 'start_time'>,
+    event: Pick<CongressLandingEvent, 'id' | 'slug' | 'start_time' | 'status'>,
     parentEventId?: string | null
 ) {
     if (getCongressLandingByParentSlug(event.slug)) {
@@ -499,11 +613,11 @@ function buildIdentityFilters(userId?: string | null, email?: string | null) {
 }
 
 async function resolveCongressGrantSource(params: {
-    supabase: any
-    parentEvent: any
-    userId?: string | null
-    email?: string | null
     commercialAccess?: CommercialAccessSnapshot | null
+    email?: string | null
+    parentEvent: any
+    supabase: any
+    userId?: string | null
 }) {
     if (canMembershipAccessCongressParent(params.parentEvent, params.commercialAccess)) {
         return {
@@ -556,9 +670,9 @@ async function resolveCongressGrantSource(params: {
 }
 
 async function fetchCongressChildEventsForSync(params: {
-    supabase: any
     config: CongressLandingConfig
     parentEventId: string
+    supabase: any
 }) {
     const { data, error } = await (params.supabase
         .from('events') as any)
@@ -580,10 +694,10 @@ async function fetchCongressChildEventsForSync(params: {
 }
 
 export async function syncCongressBundleEntitlementsForIdentity(params: {
+    commercialAccess?: CommercialAccessSnapshot | null
+    email?: string | null
     supabase?: any
     userId?: string | null
-    email?: string | null
-    commercialAccess?: CommercialAccessSnapshot | null
 }) {
     const normalizedEmail = params.email?.trim().toLowerCase()
         ?? params.commercialAccess?.email?.trim().toLowerCase()
