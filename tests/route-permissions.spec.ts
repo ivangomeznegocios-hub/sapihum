@@ -140,8 +140,8 @@ async function ensureAuthUserIdByEmail(email: string) {
 }
 
 async function ensureEventManagerTestUser() {
-  const admin = createAdminSupabase()
-  const userId = await ensureAuthUserIdByEmail('event_manager@test.com')
+    const admin = createAdminSupabase()
+    const userId = await ensureAuthUserIdByEmail('event_manager@test.com')
 
   const { error } = await admin
     .from('profiles')
@@ -158,6 +158,28 @@ async function ensureEventManagerTestUser() {
     throw new Error(`Unable to prepare event manager profile: ${error.message}`)
   }
 
+    return userId
+}
+
+async function ensureRoleTestUser(email: string, role: string, fullName: string) {
+  const admin = createAdminSupabase()
+  const userId = await ensureAuthUserIdByEmail(email)
+
+  const { error } = await admin
+    .from('profiles')
+    .upsert({
+      id: userId,
+      email,
+      role,
+      full_name: fullName,
+      membership_level: 0,
+      subscription_status: 'inactive',
+    }, { onConflict: 'id' })
+
+  if (error) {
+    throw new Error(`Unable to prepare ${role} profile: ${error.message}`)
+  }
+
   return userId
 }
 
@@ -171,6 +193,7 @@ test.describe('server route permissions', () => {
     const forbiddenRoutes = [
       { path: '/dashboard/admin/speakers/new', expectedPath: '/dashboard' },
       { path: '/dashboard/resources/new', expectedPath: '/dashboard/resources' },
+      { path: '/dashboard/tutoriales', expectedPath: '/dashboard' },
     ]
 
     for (const route of forbiddenRoutes) {
@@ -230,6 +253,38 @@ test.describe('server route permissions', () => {
     await page.waitForLoadState('networkidle').catch(() => null)
 
     expect(new URL(page.url()).pathname).toBe('/dashboard/resources/new')
+  })
+
+  test('tutoriales is restricted to admins and ponentes', async ({ page }) => {
+    test.setTimeout(180_000)
+    await ensureEventManagerTestUser()
+    await ensureRoleTestUser('support@test.com', 'support', 'Soporte')
+
+    const allowedRoutes = [
+      { email: 'admin@test.com', expectedPath: '/dashboard/tutoriales' },
+      { email: 'ponente@test.com', expectedPath: '/dashboard/tutoriales' },
+    ]
+
+    for (const route of allowedRoutes) {
+      await signInAs(page, route.email)
+      await page.goto('/dashboard/tutoriales', { waitUntil: 'domcontentloaded', timeout: 60_000 })
+      await page.waitForLoadState('networkidle').catch(() => null)
+      expect(new URL(page.url()).pathname).toBe(route.expectedPath)
+    }
+
+    const forbiddenRoutes = [
+      { email: 'psicologo2@test.com', expectedPath: '/dashboard' },
+      { email: 'paciente@test.com', expectedPath: '/dashboard' },
+      { email: 'event_manager@test.com', expectedPath: '/dashboard' },
+      { email: 'support@test.com', expectedPath: '/dashboard/admin/operations' },
+    ]
+
+    for (const route of forbiddenRoutes) {
+      await signInAs(page, route.email)
+      await page.goto('/dashboard/tutoriales', { waitUntil: 'domcontentloaded', timeout: 60_000 })
+      await page.waitForLoadState('networkidle').catch(() => null)
+      expect(new URL(page.url()).pathname).toBe(route.expectedPath)
+    }
   })
 
   test('paid member without local subscription detail still sees the Stripe portal CTA', async ({ page }) => {

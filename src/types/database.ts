@@ -1013,6 +1013,41 @@ export interface SpeakerWithProfile extends Speaker {
 }
 
 // ============================================
+// TABLE: speaker_tutorials
+// ============================================
+export interface SpeakerTutorial {
+    id: string
+    title: string
+    description: string | null
+    youtube_url: string
+    youtube_video_id: string
+    sort_order: number
+    is_active: boolean
+    created_by: string | null
+    created_at: string
+    updated_at: string
+}
+
+export interface SpeakerTutorialInsert {
+    title: string
+    description?: string | null
+    youtube_url: string
+    youtube_video_id: string
+    sort_order?: number
+    is_active?: boolean
+    created_by?: string | null
+}
+
+export interface SpeakerTutorialUpdate {
+    title?: string
+    description?: string | null
+    youtube_url?: string
+    youtube_video_id?: string
+    sort_order?: number
+    is_active?: boolean
+}
+
+// ============================================
 // TABLE: event_speakers
 // ============================================
 export interface EventSpeaker {

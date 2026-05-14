@@ -35,6 +35,7 @@ import {
     TrendingUp,
     ShieldCheck,
     Library,
+    Youtube,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { getMembershipTier } from '@/lib/membership'
@@ -121,6 +122,7 @@ const navGroups: NavGroup[] = [
             { name: 'Formaciones', href: '/dashboard/events/formations', icon: GraduationCap, roles: ['admin', 'event_manager', 'ponente'] },
             { name: 'Ganancias', href: '/dashboard/earnings', icon: DollarSign, roles: ['admin', 'ponente'] },
             { name: 'Crear Evento', href: '/dashboard/events/new', icon: CalendarPlus, roles: ['admin', 'event_manager', 'ponente'] },
+            { name: 'Tutoriales', href: '/dashboard/tutoriales', icon: Youtube, roles: ['admin', 'ponente'] },
             { name: 'Mi Perfil Ponente', href: '/dashboard/settings', icon: Mic2, roles: ['admin', 'ponente'] },
         ],
     },
@@ -167,6 +169,7 @@ const FORENSIC_ITEM_LABELS: Record<string, string> = {
     '/dashboard/growth': 'Invitacion Forense',
     '/dashboard/earnings': 'Ganancias',
     '/dashboard/events/new': 'Crear Evento Forense',
+    '/dashboard/tutoriales': 'Tutoriales Forenses',
 }
 
 function NavGroupSection({
