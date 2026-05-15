@@ -14,6 +14,8 @@ type RevenueRow = {
     providerPaymentId: string | null
 }
 
+const QA_PROVIDER_MARKERS = ['phase11', 'smoke']
+
 type ChannelPerformanceRow = {
     channel: string
     campaign: string
@@ -99,6 +101,13 @@ function isCoveredByTransaction(
     )
 }
 
+function hasQaProviderMarker(...values: Array<string | null | undefined>) {
+    return values.some((value) => {
+        const normalized = value?.toLowerCase()
+        return normalized ? QA_PROVIDER_MARKERS.some((marker) => normalized.includes(marker)) : false
+    })
+}
+
 export async function getAdminAnalyticsDashboard(model: AttributionModel = 'last_non_direct') {
     const admin = await createAdminClient()
     const windowStart = daysAgo(30)
@@ -127,7 +136,7 @@ export async function getAdminAnalyticsDashboard(model: AttributionModel = 'last
         (admin.from('analytics_visitors') as any).select('id, user_id, first_seen_at'),
         (admin.from('analytics_sessions') as any).select('id, visitor_id, user_id, started_at, attribution_snapshot'),
         (admin.from('analytics_events') as any).select('id, user_id, event_name, occurred_at, attribution_snapshot, properties'),
-        (admin.from('payment_transactions') as any).select('id, user_id, profile_id, purchase_type, amount, status, completed_at, created_at, attribution_snapshot, provider_session_id, provider_payment_id'),
+        (admin.from('payment_transactions') as any).select('id, user_id, profile_id, purchase_type, amount, status, completed_at, created_at, attribution_snapshot, provider_session_id, provider_payment_id, provider_invoice_id'),
         (admin.from('subscriptions') as any).select('id, user_id, membership_level, specialization_code, provider_price_id, status, created_at, cancelled_at, attribution_snapshot'),
         (admin.from('marketing_cost_entries') as any).select('*').order('period_start', { ascending: false }),
         (admin.from('manual_deals') as any).select('*').order('closed_at', { ascending: false }),
@@ -155,7 +164,10 @@ export async function getAdminAnalyticsDashboard(model: AttributionModel = 'last
     const adminOperationLogs = (adminOperationLogsResult.data || []) as any[]
 
     const allTransactions = ((transactionsResult.data || []) as any[]).filter(
-        (row) => (!row.user_id || !testUserIds.has(row.user_id)) && (!row.profile_id || !testUserIds.has(row.profile_id))
+        (row) =>
+            (!row.user_id || !testUserIds.has(row.user_id)) &&
+            (!row.profile_id || !testUserIds.has(row.profile_id)) &&
+            !hasQaProviderMarker(row.provider_session_id, row.provider_payment_id, row.provider_invoice_id)
     )
 
     const transactions = allTransactions.filter(
@@ -166,8 +178,16 @@ export async function getAdminAnalyticsDashboard(model: AttributionModel = 'last
     )
 
     const subscriptions = ((subscriptionsResult.data || []) as any[]).filter((row) => !row.user_id || !testUserIds.has(row.user_id))
-    const eventPurchasesAll = ((eventPurchasesResult.data || []) as any[]).filter((row) => !row.user_id || !testUserIds.has(row.user_id))
-    const formationPurchasesAll = ((formationPurchasesResult.data || []) as any[]).filter((row) => !row.user_id || !testUserIds.has(row.user_id))
+    const eventPurchasesAll = ((eventPurchasesResult.data || []) as any[]).filter(
+        (row) =>
+            (!row.user_id || !testUserIds.has(row.user_id)) &&
+            !hasQaProviderMarker(row.provider_session_id, row.provider_payment_id)
+    )
+    const formationPurchasesAll = ((formationPurchasesResult.data || []) as any[]).filter(
+        (row) =>
+            (!row.user_id || !testUserIds.has(row.user_id)) &&
+            !hasQaProviderMarker(row.provider_session_id, row.provider_payment_id)
+    )
     const eventPurchases = eventPurchasesAll.filter(
         (row) => row.status === 'confirmed' && (!row.user_id || !testUserIds.has(row.user_id))
     )
