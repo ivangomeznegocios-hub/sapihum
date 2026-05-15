@@ -7,7 +7,6 @@ import {
     applyEventCampaignCopy,
     getAllEventCampaigns,
     getCampaignEventsFromCatalog,
-    getEventCampaignByKey,
     sortCampaignEventsFirst,
 } from '@/lib/events/campaigns'
 import { splitPublicCatalogEvents } from '@/lib/events/public'
@@ -39,13 +38,7 @@ export const metadata: Metadata = {
 // guaranteed by unstable_cache in getUnifiedCatalogEvents (TTL 300s).
 export const revalidate = 300
 
-interface EventosPageProps {
-    searchParams?: Promise<{ track?: string }>
-}
-
-export default async function EventosPage({ searchParams }: EventosPageProps) {
-    const params = (await searchParams) ?? {}
-    const activeCampaign = getEventCampaignByKey(params.track)
+export default async function EventosPage() {
     const allItems = (await getUnifiedCatalogEvents()).map((item: any) => applyEventCampaignCopy(item))
     const items = splitPublicCatalogEvents(allItems).upcoming.filter((event: any) =>
         event.event_type !== 'course' &&
@@ -58,9 +51,7 @@ export default async function EventosPage({ searchParams }: EventosPageProps) {
         }))
         .filter((entry) => entry.events.length > 0)
 
-    const visibleItems = activeCampaign
-        ? getCampaignEventsFromCatalog(items, activeCampaign)
-        : sortCampaignEventsFirst(items)
+    const visibleItems = sortCampaignEventsFirst(items)
 
     return (
         <div className="relative flex w-full flex-1 flex-col items-center bg-background">
@@ -85,13 +76,13 @@ export default async function EventosPage({ searchParams }: EventosPageProps) {
                         </p>
                         <div className="flex flex-wrap gap-3">
                             <Link href="/eventos">
-                                <Button variant={!activeCampaign ? 'default' : 'outline'}>
+                                <Button variant="default">
                                     Ver todo
                                 </Button>
                             </Link>
                             {getAllEventCampaigns().map((campaign) => (
-                                <Link key={campaign.key} href={`/eventos?track=${campaign.key}`}>
-                                    <Button variant={activeCampaign?.key === campaign.key ? 'default' : 'outline'}>
+                                <Link key={campaign.key} href={`/eventos#campaign-${campaign.key}`}>
+                                    <Button variant="outline">
                                         {campaign.title}
                                     </Button>
                                 </Link>
@@ -109,31 +100,32 @@ export default async function EventosPage({ searchParams }: EventosPageProps) {
                 <section className="w-full px-4 py-10 sm:px-6 lg:px-8">
                     <div className="mx-auto max-w-7xl space-y-6">
                         {campaignBlocks.map(({ campaign, events }) => (
-                            <EventCampaignSpotlight
-                                key={campaign.key}
-                                campaign={campaign}
-                                events={events}
-                                sourceSurface="events_index"
-                                redirectAfterDownload
-                                secondaryHref={activeCampaign?.key === campaign.key ? '/eventos' : `/eventos?track=${campaign.key}`}
-                                secondaryLabel={activeCampaign?.key === campaign.key ? 'Mostrar todos los eventos' : 'Ver solo este bloque'}
-                            />
+                            <div key={campaign.key} id={`campaign-${campaign.key}`} className="scroll-mt-24">
+                                <EventCampaignSpotlight
+                                    campaign={campaign}
+                                    events={events}
+                                    sourceSurface="events_index"
+                                    redirectAfterDownload
+                                    secondaryHref="#catalogo"
+                                    secondaryLabel="Ver todos los eventos"
+                                />
+                            </div>
                         ))}
                     </div>
                 </section>
             )}
 
-            <section className="w-full px-4 py-12 sm:px-6 md:py-16 lg:px-8">
+            <section id="catalogo" className="w-full scroll-mt-24 px-4 py-12 sm:px-6 md:py-16 lg:px-8">
                 <div className="mx-auto max-w-7xl">
                     {visibleItems.length > 0 ? (
                         <>
                             <div className="mb-6 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
                                 <div>
                                     <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-brand-blue">
-                                        {activeCampaign ? 'Filtro activo' : 'Agenda general'}
+                                        Agenda general
                                     </p>
                                     <h2 className="mt-2 text-2xl font-bold tracking-tight text-foreground">
-                                        {activeCampaign ? activeCampaign.title : 'Todos los eventos activos'}
+                                        Todos los eventos activos
                                     </h2>
                                 </div>
                                 <p className="text-sm font-medium text-muted-foreground">

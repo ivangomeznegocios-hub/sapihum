@@ -137,6 +137,17 @@ option {
   border-color: var(--brand-border);
 }
 
+.marketing-long-page > section:nth-of-type(n + 3) {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 900px;
+}
+
+@media (min-width: 768px) {
+  .marketing-long-page > section:nth-of-type(n + 3) {
+    contain-intrinsic-size: auto 1100px;
+  }
+}
+
 .brand-orbit {
   position: relative;
   overflow: hidden;

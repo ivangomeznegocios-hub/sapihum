@@ -1,6 +1,5 @@
 import type { Metadata, Viewport } from 'next'
 import { Manrope, Playfair_Display } from 'next/font/google'
-import { ThemeProvider } from '@/components/theme-provider'
 import { TrackingBootstrap } from '@/components/providers/tracking-bootstrap'
 import { DeferredClientRuntime } from '@/components/providers/deferred-client-runtime'
 import { ServiceWorkerRegister } from '@/components/providers/service-worker-register'
@@ -68,16 +67,9 @@ export default function RootLayout({
             </head>
             <body className={`${manrope.variable} ${playfair.variable} antialiased`}>
                 <TrackingBootstrap />
-                <ThemeProvider
-                    attribute="class"
-                    defaultTheme="light"
-                    enableSystem={false}
-                    disableTransitionOnChange
-                >
-                    {children}
-                    <ServiceWorkerRegister />
-                    <DeferredClientRuntime />
-                </ThemeProvider>
+                {children}
+                <ServiceWorkerRegister />
+                <DeferredClientRuntime />
             </body>
         </html>
     )

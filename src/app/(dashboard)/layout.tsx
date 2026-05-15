@@ -1,6 +1,7 @@
 import { getViewerContext } from '@/lib/supabase/server'
 import { DashboardShell } from '@/components/layout/dashboard-shell'
 import { SessionTimeout } from '@/components/auth/session-timeout'
+import { ThemeProvider } from '@/components/theme-provider'
 
 export default async function DashboardLayout({
     children,
@@ -19,16 +20,23 @@ export default async function DashboardLayout({
     })
 
     return (
-        <DashboardShell
-            user={user}
-            userRole={role}
-            membershipLevel={membershipLevel}
-            membershipSpecializationCode={membershipSpecializationCode}
-            activeVertical={activeVertical}
-            availableVerticals={availableVerticals}
+        <ThemeProvider
+            attribute="class"
+            defaultTheme="light"
+            enableSystem={false}
+            disableTransitionOnChange
         >
-            <SessionTimeout />
-            {children}
-        </DashboardShell>
+            <DashboardShell
+                user={user}
+                userRole={role}
+                membershipLevel={membershipLevel}
+                membershipSpecializationCode={membershipSpecializationCode}
+                activeVertical={activeVertical}
+                availableVerticals={availableVerticals}
+            >
+                <SessionTimeout />
+                {children}
+            </DashboardShell>
+        </ThemeProvider>
     )
 }

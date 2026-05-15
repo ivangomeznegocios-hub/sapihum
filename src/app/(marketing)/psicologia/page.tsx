@@ -216,7 +216,7 @@ export default async function LandingPage() {
   const featuredEvents = splitPublicCatalogEvents(catalogEvents).upcoming.slice(0, 3)
 
   return (
-    <div className="flex flex-col items-center flex-1 w-full">
+    <div className="marketing-long-page flex flex-col items-center flex-1 w-full">
 
       {/* ══════════════════════════════════════════════════
           1. HERO

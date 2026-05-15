@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button'
 import { BrandWordmark } from '@/components/brand/brand-wordmark'
 import { getMarketingSpecializations } from '@/lib/specializations'
 import { MarketingDesktopNav } from '@/components/marketing/marketing-desktop-nav'
-import { MobileMarketingMenu } from '@/components/marketing/mobile-marketing-menu'
+import { MobileMarketingMenuEntry } from '@/components/marketing/mobile-marketing-menu-entry'
 
 const SPECIALIZATION_ITEMS = getMarketingSpecializations().map((spec) => ({
     label: spec.name,
@@ -62,7 +62,7 @@ export function MarketingNavbar() {
                         </Button>
                     </Link>
 
-                    <MobileMarketingMenu navItems={NAV_ITEMS} />
+                    <MobileMarketingMenuEntry navItems={NAV_ITEMS} />
                 </div>
             </div>
         </header>

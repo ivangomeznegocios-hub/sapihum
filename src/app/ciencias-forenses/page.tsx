@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import Image from 'next/image'
 import Link from 'next/link'
-import { ArrowRight, Calendar, Users, GraduationCap, Briefcase, Microscope, Scale, FileSignature, Shield, Beaker } from 'lucide-react'
+import { ArrowRight, Shield } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { getPublicCatalogEvents } from '@/lib/supabase/queries/events'
 import { getFeaturedPublicSpeakers } from '@/lib/supabase/queries/speakers'
@@ -33,7 +33,7 @@ const AREAS = [
         name: 'Criminología',
         tagline: 'Análisis del comportamiento delictivo.',
         description: 'Causas del delito, victimología, prevención y perfiles criminales.',
-        placeholder: 'https://images.unsplash.com/photo-1453723490881-a1ca50d4fb4c?auto=format&fit=crop&w=800&q=80',
+        placeholder: 'https://images.unsplash.com/photo-1505664194779-8beaceb93744?auto=format&fit=crop&w=800&q=80',
         position: 'center',
     },
     {
@@ -90,7 +90,7 @@ export default async function CienciasForensesPage() {
     const featuredEvents = splitPublicCatalogEvents(catalogEvents).upcoming.slice(0, 3)
 
     return (
-        <div className="flex flex-col items-center flex-1 w-full bg-slate-950 text-slate-200">
+        <div className="marketing-long-page flex flex-col items-center flex-1 w-full bg-slate-950 text-slate-200">
             {/* ══════════════════════════════════════════════════
                 1. HERO
             ══════════════════════════════════════════════════ */}

@@ -1,4 +1,3 @@
-import Script from 'next/script'
 import { buildGoogleConsentModeState } from '@/lib/consent'
 
 export function TrackingBootstrap() {
@@ -21,9 +20,8 @@ export function TrackingBootstrap() {
     `
 
     return (
-        <Script
+        <script
             id="tracking-bootstrap"
-            strategy="afterInteractive"
             dangerouslySetInnerHTML={{ __html: bootstrapScript }}
         />
     )
