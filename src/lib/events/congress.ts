@@ -2,6 +2,7 @@ import { audienceAllowsAccess } from '@/lib/access/commercial'
 import type { CommercialAccessSnapshot } from '@/lib/access/commercial'
 import { grantEventEntitlements } from '@/lib/events/entitlements'
 import { getEffectiveEventPriceForProfile } from '@/lib/events/pricing'
+import { isSpeakerDisplayableInEvent } from '@/lib/speakers/display'
 import { createServiceClient } from '@/lib/supabase/service'
 import type { EventSubcategory, EventType, SpeakerWithProfile } from '@/types/database'
 
@@ -696,7 +697,7 @@ export async function getCongressIncludedEvents(
 
     for (const row of speakers ?? []) {
         const speaker = Array.isArray(row.speaker) ? row.speaker[0] : row.speaker
-        if (!speaker?.is_public) continue
+        if (!isSpeakerDisplayableInEvent(speaker)) continue
         const collection = speakerMap.get(row.event_id) ?? []
         collection.push({ ...row, speaker })
         speakerMap.set(row.event_id, collection)

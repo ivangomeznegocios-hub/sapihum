@@ -17,7 +17,7 @@ import { canViewerSeeCatalogEvent } from '@/lib/access/catalog'
 import { canManageAnyEvent } from '@/lib/events/permissions'
 import { applyVerticalContentFilter, getContentIdsForVertical } from '@/lib/supabase/vertical-content'
 import { normalizeVerticalCode } from '@/lib/verticals'
-import { isSpeakerVisibleToPublic } from '@/lib/speakers/display'
+import { isSpeakerDisplayableInEvent } from '@/lib/speakers/display'
 
 interface EventViewerOptions {
     supabase?: any
@@ -86,13 +86,13 @@ const PUBLIC_CATALOG_SPEAKER_SELECT = `
     )
 `
 
-function getPublishablePublicSpeakerRows(rows: any[] | null | undefined) {
+function getDisplayableEventSpeakerRows(rows: any[] | null | undefined) {
     return (rows ?? [])
         .map((row) => {
             const speaker = Array.isArray(row.speaker) ? row.speaker[0] : row.speaker
             return speaker ? { ...row, speaker } : null
         })
-        .filter((row): row is any => Boolean(row?.speaker && isSpeakerVisibleToPublic(row.speaker)))
+        .filter((row): row is any => Boolean(row?.speaker && isSpeakerDisplayableInEvent(row.speaker)))
 }
 
 async function getRegisteredEventCounts(supabase: any, eventIds: string[]) {
@@ -471,7 +471,7 @@ export async function getPublicEventById(eventId: string): Promise<any | null> {
 
     return {
         ...event,
-        speakers: getPublishablePublicSpeakerRows(speakers),
+        speakers: getDisplayableEventSpeakerRows(speakers),
         attendee_count: attendeeCount,
     }
 }
@@ -699,7 +699,7 @@ async function fetchPublicCatalogEvents(
     }
 
     const speakerMap = new Map<string, any[]>()
-    for (const row of getPublishablePublicSpeakerRows(speakers)) {
+    for (const row of getDisplayableEventSpeakerRows(speakers)) {
         const collection = speakerMap.get(row.event_id) ?? []
         collection.push(row)
         speakerMap.set(row.event_id, collection)
@@ -760,7 +760,7 @@ async function fetchUnifiedCatalogEvents(verticalCode?: string | null): Promise<
     }
 
     const speakerMap = new Map<string, any[]>()
-    for (const row of getPublishablePublicSpeakerRows(speakers)) {
+    for (const row of getDisplayableEventSpeakerRows(speakers)) {
         const collection = speakerMap.get(row.event_id) ?? []
         collection.push(row)
         speakerMap.set(row.event_id, collection)

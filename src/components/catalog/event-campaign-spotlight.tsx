@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import { ArrowRight, CalendarDays, Download, Filter } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { type EventCampaignConfig, type EventCampaignKey, getCampaignPrimaryEvent, getCampaignPrimaryEventPath } from '@/lib/events/campaigns'
@@ -65,26 +66,45 @@ function CampaignEventList({
             {campaign.events.map((campaignEvent) => {
                 const liveEvent = events.find((item) => item.slug === campaignEvent.slug)
                 const href = `/eventos/${campaignEvent.slug}`
-                const speakerName = liveEvent?.speakers?.[0]?.speaker?.profile?.full_name || null
+                const speakerName = liveEvent?.speakers?.[0]?.speaker?.profile?.full_name || liveEvent?.speakers?.[0]?.speaker?.headline || null
+                const imageSrc = liveEvent?.image_url || null
 
                 return (
                     <Link
                         key={campaignEvent.slug}
                         href={href}
-                        className="group rounded-[22px] border border-brand-border bg-white p-4 transition-all duration-300 hover:-translate-y-0.5 hover:border-brand-blue/30 hover:bg-background/30"
+                        className="group overflow-hidden rounded-[22px] border border-brand-border bg-white transition-all duration-300 hover:-translate-y-0.5 hover:border-brand-blue/30 hover:bg-background/30"
                     >
-                        <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-brand-blue/80">
-                            {liveEvent?.slug === campaign.primaryEventSlug ? 'Evento ancla' : 'Ruta activa'}
-                        </p>
-                        <h3 className={cn('mt-2 font-semibold text-foreground transition-colors group-hover:text-brand-blue', compact ? 'text-sm' : 'text-sm md:text-base')}>
-                            {liveEvent?.title || campaignEvent.title}
-                        </h3>
-                        <div className="mt-4 flex flex-wrap items-center gap-3 text-xs text-brand-text-muted">
-                            <span className="inline-flex items-center gap-1.5">
-                                <CalendarDays className="h-3.5 w-3.5 text-brand-blue" />
-                                {formatShortDate(liveEvent?.start_time)}
-                            </span>
-                            {speakerName && <span className="line-clamp-1">{speakerName}</span>}
+                        <div className={cn('relative overflow-hidden bg-brand-surface-soft', compact ? 'aspect-[5/2]' : 'aspect-[16/9]')}>
+                            {imageSrc ? (
+                                <Image
+                                    src={imageSrc}
+                                    alt={liveEvent?.title || campaignEvent.title}
+                                    fill
+                                    sizes={compact ? '(min-width: 1024px) 320px, 100vw' : '(min-width: 1024px) 33vw, 100vw'}
+                                    quality={58}
+                                    className="object-cover transition-transform duration-500 group-hover:scale-105"
+                                />
+                            ) : (
+                                <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(37,99,235,0.18),transparent_42%),linear-gradient(135deg,#f8fafc,#eef2ff)]" />
+                            )}
+                            <div className="absolute left-3 top-3">
+                                <span className="inline-flex rounded-full bg-white/92 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-brand-blue shadow-sm">
+                                    {liveEvent?.slug === campaign.primaryEventSlug ? 'Evento ancla' : 'Ruta activa'}
+                                </span>
+                            </div>
+                        </div>
+                        <div className="p-4">
+                            <h3 className={cn('font-semibold text-foreground transition-colors group-hover:text-brand-blue', compact ? 'text-sm' : 'text-sm md:text-base')}>
+                                {liveEvent?.title || campaignEvent.title}
+                            </h3>
+                            <div className="mt-4 flex flex-wrap items-center gap-3 text-xs text-brand-text-muted">
+                                <span className="inline-flex items-center gap-1.5">
+                                    <CalendarDays className="h-3.5 w-3.5 text-brand-blue" />
+                                    {formatShortDate(liveEvent?.start_time)}
+                                </span>
+                                {speakerName && <span className="line-clamp-1">{speakerName}</span>}
+                            </div>
                         </div>
                     </Link>
                 )

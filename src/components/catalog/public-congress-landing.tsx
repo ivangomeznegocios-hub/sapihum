@@ -318,7 +318,7 @@ function OfficialImageSection({
                             alt={`${config.title} | ${config.subtitle}`}
                             fill
                             priority
-                            quality={86}
+                            quality={75}
                             sizes="(min-width: 1280px) 1120px, (min-width: 768px) calc(100vw - 4rem), calc(100vw - 3rem)"
                             className="object-contain p-3 sm:p-5"
                         />
@@ -412,42 +412,62 @@ function SpeakerCard({
 
 function ProgrammingCard({
     event,
+    fallbackImage,
     timeZone,
 }: {
     event: CongressLandingEvent
+    fallbackImage?: string | null
     timeZone: string
 }) {
+    const imageSrc = event.image_url || fallbackImage || null
+
     return (
-        <article className="flex h-full min-w-0 flex-col rounded-[28px] border border-[#e3d6c7] bg-white p-6 shadow-[0_20px_60px_rgba(44,28,17,0.08)]">
-            <div className="flex flex-wrap items-center gap-3">
-                <span className="rounded-full bg-[#f6ead8] px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-[#8c5e27]">
-                    {formatCongressDate(event.start_time, timeZone)}
-                </span>
-                <span className="rounded-full border border-[#ead8c2] px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-[#6b5a4c]">
-                    {getProgramTypeLabel(event)}
-                </span>
-            </div>
-
-            <h3 className="mt-5 font-serif text-2xl leading-tight text-[#241913]">
-                {event.title}
-            </h3>
-
-            {event.subtitle && (
-                <p className="mt-3 line-clamp-3 text-sm leading-relaxed text-[#5f5146]">{event.subtitle}</p>
-            )}
-
-            <div className="mt-5 space-y-3 text-sm text-[#5f5146]">
-                <div className="flex items-start gap-3">
-                    <Clock3 className="mt-0.5 h-4 w-4 shrink-0 text-[#9a6a2e]" />
-                    <span>{formatCongressTime(event.start_time, timeZone)}</span>
-                </div>
-                <div className="flex items-start gap-3">
-                    <Users className="mt-0.5 h-4 w-4 shrink-0 text-[#9a6a2e]" />
-                    <span>{getEventSpeakerNames(event)}</span>
+        <article className="flex h-full min-w-0 flex-col overflow-hidden rounded-[28px] border border-[#e3d6c7] bg-white shadow-[0_20px_60px_rgba(44,28,17,0.08)]">
+            <div className="relative aspect-[16/9] bg-[#1a120d]">
+                {imageSrc ? (
+                    <Image
+                        src={imageSrc}
+                        alt={event.title}
+                        fill
+                        sizes="(min-width: 1024px) 50vw, 100vw"
+                        quality={72}
+                        className="object-cover"
+                    />
+                ) : (
+                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(214,173,111,0.28),transparent_42%),linear-gradient(135deg,#241913,#8c5e27)]" />
+                )}
+                <div className="absolute inset-0 bg-gradient-to-t from-[#1a120d]/72 via-transparent to-transparent" />
+                <div className="absolute bottom-4 left-4 right-4 flex flex-wrap items-center gap-2">
+                    <span className="rounded-full bg-[#f6ead8] px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-[#8c5e27] shadow-sm">
+                        {formatCongressDate(event.start_time, timeZone)}
+                    </span>
+                    <span className="rounded-full border border-white/25 bg-white/90 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-[#6b5a4c] shadow-sm">
+                        {getProgramTypeLabel(event)}
+                    </span>
                 </div>
             </div>
 
-            <div className="mt-auto pt-6">
+            <div className="flex flex-1 flex-col p-6">
+                <h3 className="font-serif text-2xl leading-tight text-[#241913]">
+                    {event.title}
+                </h3>
+
+                {event.subtitle && (
+                    <p className="mt-3 line-clamp-3 text-sm leading-relaxed text-[#5f5146]">{event.subtitle}</p>
+                )}
+
+                <div className="mt-5 space-y-3 text-sm text-[#5f5146]">
+                    <div className="flex items-start gap-3">
+                        <Clock3 className="mt-0.5 h-4 w-4 shrink-0 text-[#9a6a2e]" />
+                        <span>{formatCongressTime(event.start_time, timeZone)}</span>
+                    </div>
+                    <div className="flex items-start gap-3">
+                        <Users className="mt-0.5 h-4 w-4 shrink-0 text-[#9a6a2e]" />
+                        <span>{getEventSpeakerNames(event)}</span>
+                    </div>
+                </div>
+
+                <div className="mt-auto pt-6">
                 <Link
                     href={`/eventos/${event.slug}`}
                     className="inline-flex items-center gap-2 text-sm font-semibold text-[#9a6a2e] hover:text-[#7d5727]"
@@ -455,6 +475,7 @@ function ProgrammingCard({
                     Ver detalle
                     <ArrowRight className="h-4 w-4" />
                 </Link>
+                </div>
             </div>
         </article>
     )
@@ -503,6 +524,7 @@ export function PublicCongressLanding({
         hasActiveMembership,
         membershipSpecializationCode,
     })
+    const congressImage = getOfficialCongressImage(event)
     const timeZone = config.dateWindow.timeZone
     const returnTo = getCongressLandingPath(config)
 
@@ -751,6 +773,7 @@ export function PublicCongressLanding({
                             <ProgrammingCard
                                 key={includedEvent.id}
                                 event={includedEvent}
+                                fallbackImage={congressImage}
                                 timeZone={timeZone}
                             />
                         ))}

@@ -63,6 +63,10 @@ export function isSpeakerProfileReadyForPublication(speaker?: SpeakerLike | null
     return Boolean(getSpeakerName(speaker) !== 'Ponente' && getSpeakerImage(speaker))
 }
 
+export function isSpeakerDisplayableInEvent(speaker?: SpeakerLike | null) {
+    return getSpeakerName(speaker) !== 'Ponente'
+}
+
 export function isSpeakerVisibleToPublic(speaker?: (SpeakerLike & { is_public?: boolean }) | null) {
     return Boolean(speaker?.is_public && isSpeakerProfileReadyForPublication(speaker))
 }

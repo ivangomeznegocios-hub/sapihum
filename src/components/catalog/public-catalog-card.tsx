@@ -77,7 +77,7 @@ export function PublicCatalogCard({
     const priceLabel = price > 0 ? `$${price.toFixed(0)} MXN` : 'Gratis'
     const typeMeta = getTypeMeta(event)
     const dateInfo = formatEventDateBadge(event)
-    const speakerName = event.speakers?.[0]?.speaker?.profile?.full_name
+    const speakerName = event.speakers?.[0]?.speaker?.profile?.full_name || event.speakers?.[0]?.speaker?.headline
     const speakerAvatar = event.speakers?.[0]?.speaker?.photo_url || event.speakers?.[0]?.speaker?.profile?.avatar_url
     const isFree = price === 0
     const specialization = getSpecializationByCode(event.specialization_code)

@@ -456,7 +456,7 @@ export function PublicEventLanding({
                                 <div className="flex flex-wrap items-center gap-5 pt-4">
                                     {event.speakers.map((item: any) => {
                                         const speaker = item.speaker
-                                        const name = speaker?.profile?.full_name || 'Ponente'
+                                        const name = speaker?.profile?.full_name || speaker?.headline || 'Ponente'
                                         const avatar = getSpeakerImage(speaker)
                                         const speakerHref = getPublicSpeakerHref(speaker, speakerReturnTo)
 
@@ -770,7 +770,7 @@ export function PublicEventLanding({
                                 <div className="grid gap-6 sm:grid-cols-2">
                                     {event.speakers.map((item: any) => {
                                         const speaker = item.speaker
-                                        const name = speaker?.profile?.full_name || 'Ponente'
+                                        const name = speaker?.profile?.full_name || speaker?.headline || 'Ponente'
                                         const avatar = getSpeakerImage(speaker)
                                         const speakerHref = getPublicSpeakerHref(speaker, speakerReturnTo)
                                         const specialties = Array.isArray(speaker?.specialties) ? speaker.specialties.filter(Boolean).slice(0, 3) : []
