@@ -1,4 +1,5 @@
 import { createAdminClient, createClient } from '@/lib/supabase/server'
+import { createServiceClient } from '@/lib/supabase/service'
 import { createPublicClient } from '@/lib/supabase/public'
 import { getHomeFeaturedSpeakersSettings } from '@/lib/home/featured-speakers'
 import { selectFeaturedSpeakers, selectRotatingFeaturedSpeakers, sortSpeakersByMerit } from '@/lib/speakers/ranking'
@@ -160,7 +161,7 @@ function attachProfilesToSpeakers<T extends { id: string }>(
  * Get all public speakers with their profile info
  */
 export async function getPublicSpeakers(): Promise<SpeakerWithProfile[]> {
-    const supabase = createPublicClient()
+    const supabase = createServiceClient()
 
     const { data, error } = await (supabase
         .from('speakers') as any)
@@ -174,7 +175,27 @@ export async function getPublicSpeakers(): Promise<SpeakerWithProfile[]> {
     }
 
     const speakers = (data ?? []) as Speaker[]
-    const profileMap = await loadSpeakerProfiles(speakers.map((speaker) => speaker.id), { publicOnly: true })
+    const profileMap = await loadSpeakerProfiles(speakers.map((speaker) => speaker.id))
+    const speakersWithProfiles = attachProfilesToSpeakers(speakers, profileMap) as SpeakerWithProfile[]
+    return sortSpeakersByMerit(speakersWithProfiles.filter(isSpeakerVisibleToPublic))
+}
+
+export async function getPublicSpeakersForEventLanding(): Promise<SpeakerWithProfile[]> {
+    const supabase = createServiceClient()
+
+    const { data, error } = await (supabase
+        .from('speakers') as any)
+        .select('*')
+        .eq('is_public', true)
+        .order('created_at', { ascending: false })
+
+    if (error) {
+        console.error('Error fetching event landing speakers:', error)
+        return []
+    }
+
+    const speakers = (data ?? []) as Speaker[]
+    const profileMap = await loadSpeakerProfiles(speakers.map((speaker) => speaker.id))
     const speakersWithProfiles = attachProfilesToSpeakers(speakers, profileMap) as SpeakerWithProfile[]
     return sortSpeakersByMerit(speakersWithProfiles.filter(isSpeakerVisibleToPublic))
 }

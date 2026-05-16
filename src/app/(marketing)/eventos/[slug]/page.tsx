@@ -13,7 +13,7 @@ import {
     getCongressLandingPath,
 } from '@/lib/events/congress'
 import { getUnifiedCatalogEvents, getPublicEventBySlug, getPublicEventSlugs } from '@/lib/supabase/queries/events'
-import { getPublicSpeakers } from '@/lib/supabase/queries/speakers'
+import { getPublicSpeakersForEventLanding } from '@/lib/supabase/queries/speakers'
 import { brandFullName } from '@/lib/brand'
 
 interface PageProps {
@@ -108,7 +108,7 @@ export default async function EventoPublicoPage({ params }: PageProps) {
     if (congressLanding) {
         const [includedEvents, directorySpeakers] = await Promise.all([
             getCongressIncludedEvents(congressLanding, event.id),
-            getPublicSpeakers(),
+            getPublicSpeakersForEventLanding(),
         ])
 
         return (

@@ -337,6 +337,11 @@ function SpeakerCard({
     returnTo: string
 }) {
     const name = getSpeakerName(item.speaker)
+    const headline = normalizeText(item.speaker.headline)
+    const eyebrow = item.event_count > 0
+        ? `${item.event_count} ${item.event_count === 1 ? 'evento incluido' : 'eventos incluidos'}`
+        : name
+    const title = item.source === 'directory' && headline && headline !== name ? headline : name
     const image = getSpeakerImage(item.speaker)
     const href = getSpeakerHref(item.speaker, returnTo)
     const primaryText = getSpeakerPrimaryText(item.speaker)
@@ -366,11 +371,9 @@ function SpeakerCard({
 
                 <div className="min-w-0 flex-1">
                     <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#9a6a2e]">
-                        {item.event_count > 0
-                            ? `${item.event_count} ${item.event_count === 1 ? 'evento incluido' : 'eventos incluidos'}`
-                            : 'Perfil público SAPIHUM'}
+                        {eyebrow}
                     </p>
-                    <h3 className="mt-2 line-clamp-2 font-serif text-2xl leading-tight text-[#241913]">{name}</h3>
+                    <h3 className="mt-2 line-clamp-2 font-serif text-2xl leading-tight text-[#241913]">{title}</h3>
                     <p className="mt-3 line-clamp-3 text-sm leading-relaxed text-[#5f5146]">{primaryText}</p>
                 </div>
             </div>
