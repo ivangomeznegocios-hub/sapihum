@@ -491,6 +491,11 @@ function throwPublicCatalogError(scope: string, error: any): never {
     throw new Error(`${scope}: ${error?.message ?? 'Unknown Supabase error'}`)
 }
 
+function isMissingPublicVerticalTable(error: any) {
+    const message = String(error?.message ?? '')
+    return error?.code === 'PGRST205' && message.includes("public.verticals")
+}
+
 async function getPublicVerticalId(supabase: any, verticalCode?: string | null) {
     const normalizedCode = normalizeVerticalCode(verticalCode)
     if (!normalizedCode) return null
@@ -503,6 +508,14 @@ async function getPublicVerticalId(supabase: any, verticalCode?: string | null) 
         .maybeSingle()
 
     if (error) {
+        if (isMissingPublicVerticalTable(error)) {
+            console.warn('Public vertical table missing; rendering public catalog without vertical filter', {
+                code: error.code,
+                message: error.message,
+            })
+            return null
+        }
+
         throwPublicCatalogError('Error resolving public vertical', error)
     }
 
