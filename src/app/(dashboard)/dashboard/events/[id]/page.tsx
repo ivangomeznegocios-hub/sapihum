@@ -333,7 +333,7 @@ export default async function EventDetailPage({ params }: PageProps) {
                 {canEditEvent && (
                     <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:justify-end">
                         <EditEventButton
-                            event={{ ...event, related_vertical_ids: relatedVerticalIds }}
+                            event={{ ...event, related_vertical_ids: relatedVerticalIds, speakers: eventSpeakers }}
                             userRole={profile.role || ''}
                             speakerOptions={speakerOptions}
                             availableVerticals={viewer.availableVerticals}

@@ -258,6 +258,20 @@ function mapSpeakerAssignmentFromSource(source: any): SpeakerAssignmentState | n
     }
 }
 
+function getInitialSpeakerAssignments(initialData: any): SpeakerAssignmentState[] {
+    const assignmentSources = [
+        initialData?.speakers,
+        initialData?.event_speakers,
+        initialData?.speakerAssignments,
+        initialData?.speaker_assignments,
+    ]
+    const source = assignmentSources.find((items) => Array.isArray(items) && items.length > 0) || []
+
+    return source
+        .map((speaker: any) => mapSpeakerAssignmentFromSource(speaker))
+        .filter((assignment: SpeakerAssignmentState | null): assignment is SpeakerAssignmentState => Boolean(assignment))
+}
+
 const CATEGORY_OPTIONS = [
     { value: 'general', label: 'General' },
     { value: 'networking', label: 'Networking / Social' },
@@ -647,11 +661,10 @@ export function CreateEventForm({
         MEMBERSHIP_SPECIALIZATION_OPTIONS.find((option) => option.value === selectedSpecializationCode)?.label ?? null
 
     // Speakers selection
+    const initialSpeakerAssignments = useMemo(() => getInitialSpeakerAssignments(initialData), [initialData])
     const [availableSpeakers, setAvailableSpeakers] = useState<SpeakerOption[]>(speakerOptions ?? [])
     const [selectedSpeakerAssignments, setSelectedSpeakerAssignments] = useState<SpeakerAssignmentState[]>(
-        (initialData?.speakers || [])
-            .map((speaker: any) => mapSpeakerAssignmentFromSource(speaker))
-            .filter((assignment: SpeakerAssignmentState | null): assignment is SpeakerAssignmentState => Boolean(assignment))
+        initialSpeakerAssignments
     )
     const [loadingSpeakers, setLoadingSpeakers] = useState(speakerOptions === undefined)
     const selectedSpeakerIds = selectedSpeakerAssignments.map((assignment) => assignment.speakerId)
@@ -739,46 +752,49 @@ export function CreateEventForm({
         let ignore = false
 
         async function fetchSpeakers() {
-            if (speakerOptions !== undefined) {
-                if (ignore) return
-                setAvailableSpeakers(speakerOptions)
-                setLoadingSpeakers(false)
-                return
-            }
-
-            setLoadingSpeakers(true)
             const supabase = createClient()
-            const [{ data, error }, selectedSpeakerResponse] = await Promise.all([
-                supabase
-                    .from('speakers')
-                    .select(`
-                        id,
-                        profile:profiles ( full_name, avatar_url )
-                    `),
-                eventId
+            setLoadingSpeakers(speakerOptions === undefined)
+
+            const [speakerResponse, selectedSpeakerResponse] = await Promise.all([
+                speakerOptions !== undefined
+                    ? Promise.resolve({ data: null, error: null })
+                    : supabase
+                        .from('speakers')
+                        .select(`
+                            id,
+                            profile:profiles ( full_name, avatar_url )
+                        `),
+                eventId && initialSpeakerAssignments.length === 0
                     ? supabase
                         .from('event_speakers')
                         .select('speaker_id, compensation_type, compensation_value')
                         .eq('event_id', eventId)
+                        .order('display_order', { ascending: true })
                     : Promise.resolve({ data: [], error: null }),
             ])
 
             if (ignore) return
 
-            if (!error && data) {
-                setAvailableSpeakers(data.map((s: any) => ({
+            if (speakerOptions !== undefined) {
+                setAvailableSpeakers(speakerOptions)
+            } else if (!speakerResponse.error && speakerResponse.data) {
+                setAvailableSpeakers(speakerResponse.data.map((s: any) => ({
                     id: s.id,
                     name: s.profile?.full_name || 'Desconocido',
                     avatar: s.profile?.avatar_url || null
                 })))
             }
 
-            if ((!initialData?.speakers || initialData.speakers.length === 0) && selectedSpeakerResponse.data) {
-                setSelectedSpeakerAssignments(
-                    selectedSpeakerResponse.data
-                        .map((row: any) => mapSpeakerAssignmentFromSource(row))
-                        .filter((assignment: SpeakerAssignmentState | null): assignment is SpeakerAssignmentState => Boolean(assignment))
-                )
+            if (selectedSpeakerResponse.data) {
+                const fetchedAssignments = selectedSpeakerResponse.data
+                    .map((row: any) => mapSpeakerAssignmentFromSource(row))
+                    .filter((assignment: SpeakerAssignmentState | null): assignment is SpeakerAssignmentState => Boolean(assignment))
+
+                if (fetchedAssignments.length > 0) {
+                    setSelectedSpeakerAssignments((current) => (
+                        current.length > 0 ? current : fetchedAssignments
+                    ))
+                }
             }
 
             setLoadingSpeakers(false)
@@ -788,7 +804,7 @@ export function CreateEventForm({
         return () => {
             ignore = true
         }
-    }, [eventId, initialData?.speakers, speakerOptions])
+    }, [eventId, initialSpeakerAssignments, speakerOptions])
 
     function toggleAudience(value: string) {
         setSelectedAudience(prev => {
