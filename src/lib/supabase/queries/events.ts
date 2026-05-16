@@ -438,15 +438,18 @@ export async function getPublicEventById(eventId: string): Promise<any | null> {
         .eq('id', eventId)
         .not('status', 'eq', 'draft')
         .not('status', 'eq', 'cancelled')
-        .single()
+        .maybeSingle()
 
-    if (error || !event) {
-        console.error('Error fetching public event:', error)
+    if (error) {
+        throwPublicCatalogError('Error fetching public event', error)
+    }
+
+    if (!event) {
         return null
     }
 
     // Get speakers
-    const { data: speakers } = await (supabase
+    const { data: speakers, error: speakersError } = await (supabase
         .from('event_speakers') as any)
         .select(`
             *,
@@ -462,6 +465,10 @@ export async function getPublicEventById(eventId: string): Promise<any | null> {
         .eq('event_id', eventId)
         .order('display_order', { ascending: true })
 
+    if (speakersError) {
+        throwPublicCatalogError('Error fetching public event speakers', speakersError)
+    }
+
     const attendeeCount = await getPublicEventAttendeeCount(supabase, eventId)
 
     return {
@@ -475,6 +482,17 @@ async function getPublicEventAttendeeCount(supabase: any, eventId: string) {
     return getUniqueEventAccessCount(supabase, eventId)
 }
 
+function throwPublicCatalogError(scope: string, error: any): never {
+    console.error(scope, {
+        code: error?.code,
+        message: error?.message,
+        details: error?.details,
+        hint: error?.hint,
+    })
+
+    throw new Error(`${scope}: ${error?.message ?? 'Unknown Supabase error'}`)
+}
+
 async function getPublicVerticalId(supabase: any, verticalCode?: string | null) {
     const normalizedCode = normalizeVerticalCode(verticalCode)
     if (!normalizedCode) return null
@@ -486,8 +504,11 @@ async function getPublicVerticalId(supabase: any, verticalCode?: string | null) 
         .eq('status', 'active')
         .maybeSingle()
 
-    if (error || !data) {
-        console.error('Error resolving public vertical:', error)
+    if (error) {
+        throwPublicCatalogError('Error resolving public vertical', error)
+    }
+
+    if (!data) {
         return null
     }
 
@@ -508,15 +529,20 @@ async function fetchPublicEventBySlug(slug: string): Promise<any | null> {
         .eq('slug', slug)
         .not('status', 'eq', 'draft')
         .not('status', 'eq', 'cancelled')
-        .single()
+        .maybeSingle()
 
-    if (error || !event) {
-        console.error('Error fetching public event by slug:', error)
+    if (error) {
+        throwPublicCatalogError('Error fetching public event by slug', error)
+    }
+
+    if (!event) {
         return null
     }
 
     const hydrated = await getPublicEventById(event.id)
-    if (!hydrated) return null
+    if (!hydrated) {
+        throw new Error(`Public event ${event.id} was found by slug but could not be hydrated`)
+    }
 
     const formation = Array.isArray(event.formation)
         ? event.formation[0] ?? null
@@ -534,6 +560,34 @@ export const getPublicEventBySlug = unstable_cache(
     ['public-event-by-slug'],
     {
         revalidate: 120,
+        tags: ['public-events'],
+    }
+)
+
+async function fetchPublicEventSlugs(): Promise<Array<{ slug: string }>> {
+    const supabase = createServiceClient()
+    const { data, error } = await (supabase
+        .from('events') as any)
+        .select('slug')
+        .not('status', 'eq', 'draft')
+        .not('status', 'eq', 'cancelled')
+        .not('slug', 'is', null)
+
+    if (error || !data) {
+        throwPublicCatalogError('Error fetching public event slugs', error)
+    }
+
+    return (data as Array<{ slug: string | null }>)
+        .map((event) => event.slug?.trim())
+        .filter((slug): slug is string => Boolean(slug))
+        .map((slug) => ({ slug }))
+}
+
+export const getPublicEventSlugs = unstable_cache(
+    fetchPublicEventSlugs,
+    ['public-event-slugs'],
+    {
+        revalidate: PUBLIC_CATALOG_REVALIDATE_SECONDS,
         tags: ['public-events'],
     }
 )
@@ -569,14 +623,13 @@ async function fetchPublicCatalogEvents(
     const { data, error } = await query.order('start_time', { ascending: true })
 
     if (error || !data) {
-        console.error('Error fetching public catalog events:', error)
-        return []
+        throwPublicCatalogError('Error fetching public catalog events', error)
     }
 
     const ids = data.map((event: any) => event.id)
     if (ids.length === 0) return []
 
-    const [{ data: speakers }, attendeeCounts] = await Promise.all([
+    const [{ data: speakers, error: speakersError }, attendeeCounts] = await Promise.all([
         (supabase
             .from('event_speakers') as any)
             .select(PUBLIC_CATALOG_SPEAKER_SELECT)
@@ -584,6 +637,10 @@ async function fetchPublicCatalogEvents(
             .order('display_order', { ascending: true }),
         getUniqueEventAccessCounts(supabase, ids),
     ])
+
+    if (speakersError) {
+        throwPublicCatalogError('Error fetching public catalog speakers', speakersError)
+    }
 
     const speakerMap = new Map<string, any[]>()
     for (const row of getPublishablePublicSpeakerRows(speakers)) {
@@ -635,14 +692,13 @@ async function fetchUnifiedCatalogEvents(verticalCode?: string | null): Promise<
         .order('start_time', { ascending: true })
 
     if (error || !data) {
-        console.error('Error fetching unified catalog events:', error)
-        return []
+        throwPublicCatalogError('Error fetching unified catalog events', error)
     }
 
     const ids = data.map((event: any) => event.id)
     if (ids.length === 0) return []
 
-    const [{ data: speakers }, attendeeCounts] = await Promise.all([
+    const [{ data: speakers, error: speakersError }, attendeeCounts] = await Promise.all([
         (supabase
             .from('event_speakers') as any)
             .select(PUBLIC_CATALOG_SPEAKER_SELECT)
@@ -650,6 +706,10 @@ async function fetchUnifiedCatalogEvents(verticalCode?: string | null): Promise<
             .order('display_order', { ascending: true }),
         getUniqueEventAccessCounts(supabase, ids),
     ])
+
+    if (speakersError) {
+        throwPublicCatalogError('Error fetching unified catalog speakers', speakersError)
+    }
 
     const speakerMap = new Map<string, any[]>()
     for (const row of getPublishablePublicSpeakerRows(speakers)) {

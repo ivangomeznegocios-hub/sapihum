@@ -11,17 +11,22 @@ import {
     getCongressLandingByParentSlug,
     getCongressLandingForEvent,
     getCongressLandingPath,
-    syncCongressBundleEntitlementsForIdentity,
 } from '@/lib/events/congress'
-import { getUnifiedCatalogEvents, getPublicEventBySlug } from '@/lib/supabase/queries/events'
+import { getUnifiedCatalogEvents, getPublicEventBySlug, getPublicEventSlugs } from '@/lib/supabase/queries/events'
 import { getPublicSpeakers } from '@/lib/supabase/queries/speakers'
-import { createClient, getUserProfile } from '@/lib/supabase/server'
-import { getCommercialAccessContext } from '@/lib/access/commercial'
-import { entitlementCanGrantEventAccess, getActiveEntitlementForEvent } from '@/lib/events/access'
 import { brandFullName } from '@/lib/brand'
 
 interface PageProps {
     params: Promise<{ slug: string }>
+}
+
+// PERF: Keep public event landings cacheable for anonymous traffic. Per-user
+// access checks happen in the CTA/API flow and private hub, not in this shell.
+export const revalidate = 300
+export const dynamicParams = true
+
+export async function generateStaticParams() {
+    return getPublicEventSlugs()
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
@@ -99,36 +104,6 @@ export default async function EventoPublicoPage({ params }: PageProps) {
 
     if (!event) notFound()
 
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    const profile = user ? await getUserProfile() : null
-    const commercialAccess = user && profile 
-        ? await getCommercialAccessContext({ supabase, userId: user.id, profile }) 
-        : null
-
-    if (user?.email) {
-        await syncCongressBundleEntitlementsForIdentity({
-            supabase,
-            userId: user.id,
-            email: user.email,
-            commercialAccess,
-        })
-    }
-    
-    const membershipLevel = commercialAccess?.membershipLevel ?? 0
-
-    const entitlement = user ? await getActiveEntitlementForEvent({
-        supabase,
-        eventId: event.id,
-        userId: user.id,
-        email: user.email,
-    }) : null
-    const hasAccess = entitlementCanGrantEventAccess({
-        entitlement,
-        event,
-        commercialAccess,
-    })
-
     const congressLanding = getCongressLandingByParentSlug(event.slug)
     if (congressLanding) {
         const [includedEvents, directorySpeakers] = await Promise.all([
@@ -142,10 +117,10 @@ export default async function EventoPublicoPage({ params }: PageProps) {
                 config={congressLanding}
                 includedEvents={includedEvents}
                 directorySpeakers={directorySpeakers}
-                membershipLevel={membershipLevel}
-                hasActiveMembership={commercialAccess?.hasActiveMembership ?? false}
-                membershipSpecializationCode={commercialAccess?.membershipSpecializationCode ?? null}
-                hasAccess={hasAccess}
+                membershipLevel={0}
+                hasActiveMembership={false}
+                membershipSpecializationCode={null}
+                hasAccess={false}
             />
         )
     }
@@ -188,10 +163,10 @@ export default async function EventoPublicoPage({ params }: PageProps) {
             <PublicEventLanding 
                 event={event} 
                 relatedEvents={relatedEvents} 
-                membershipLevel={membershipLevel}
-                hasActiveMembership={commercialAccess?.hasActiveMembership ?? false}
-                membershipSpecializationCode={commercialAccess?.membershipSpecializationCode ?? null}
-                hasAccess={hasAccess}
+                membershipLevel={0}
+                hasActiveMembership={false}
+                membershipSpecializationCode={null}
+                hasAccess={false}
             />
         </>
     )

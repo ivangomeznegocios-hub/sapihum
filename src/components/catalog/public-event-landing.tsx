@@ -1,7 +1,8 @@
 'use client'
 
 import Link from 'next/link'
-import { useState } from 'react'
+import Image from 'next/image'
+import { useEffect, useState } from 'react'
 import { ArrowRight, Check, Download, Lock } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { getEffectiveEventPriceForProfile, getEventMemberAccessMessage, isEventIncludedForMatchingSpecialization } from '@/lib/events/pricing'
@@ -283,10 +284,10 @@ function FaqAccordion({ items }: { items: { question: string; answer: string }[]
 export function PublicEventLanding({
     event,
     relatedEvents,
-    membershipLevel = 0,
-    hasActiveMembership = false,
-    membershipSpecializationCode = null,
-    hasAccess = false,
+    membershipLevel: initialMembershipLevel = 0,
+    hasActiveMembership: initialHasActiveMembership = false,
+    membershipSpecializationCode: initialMembershipSpecializationCode = null,
+    hasAccess: initialHasAccess = false,
 }: {
     event: any
     relatedEvents: any[]
@@ -295,6 +296,37 @@ export function PublicEventLanding({
     membershipSpecializationCode: string | null
     hasAccess: boolean
 }) {
+    const [accessState, setAccessState] = useState({
+        membershipLevel: initialMembershipLevel,
+        hasActiveMembership: initialHasActiveMembership,
+        membershipSpecializationCode: initialMembershipSpecializationCode,
+        hasAccess: initialHasAccess,
+    })
+    const { membershipLevel, hasActiveMembership, membershipSpecializationCode, hasAccess } = accessState
+
+    useEffect(() => {
+        let isMounted = true
+
+        fetch(`/api/events/access-status?eventId=${encodeURIComponent(event.id)}`, {
+            credentials: 'include',
+        })
+            .then((response) => response.ok ? response.json() : null)
+            .then((data) => {
+                if (!isMounted || !data) return
+                setAccessState({
+                    membershipLevel: Number(data.membershipLevel ?? 0),
+                    hasActiveMembership: Boolean(data.hasActiveMembership),
+                    membershipSpecializationCode: data.membershipSpecializationCode ?? null,
+                    hasAccess: Boolean(data.hasAccess),
+                })
+            })
+            .catch(() => undefined)
+
+        return () => {
+            isMounted = false
+        }
+    }, [event.id])
+
     const ctaLabel = getDefaultPublicCtaLabel(event)
     const isMembersOnly = Array.isArray(event.target_audience)
         ? event.target_audience.includes('members') && !event.target_audience.includes('public')
@@ -493,11 +525,14 @@ export function PublicEventLanding({
                         <aside className="space-y-6 lg:sticky lg:top-24">
                             {event.image_url && (
                                 <div className="aspect-video w-full rounded-[32px] overflow-hidden border border-brand-border shadow-2xl relative group">
-                                    <div 
-                                        role="img" 
-                                        aria-label={event.title}
-                                        className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105" 
-                                        style={{ backgroundImage: `url("${event.image_url}")` }} 
+                                    <Image
+                                        src={event.image_url}
+                                        alt={event.title}
+                                        fill
+                                        priority
+                                        quality={72}
+                                        sizes="(min-width: 1280px) 420px, (min-width: 1024px) 380px, calc(100vw - 3rem)"
+                                        className="object-cover transition-transform duration-700 group-hover:scale-105"
                                     />
                                     <div className="absolute inset-0 bg-gradient-to-t from-background/60 via-transparent to-transparent opacity-80" />
                                     <div className="absolute inset-0 ring-1 ring-inset ring-brand-border rounded-[32px] pointer-events-none" />
