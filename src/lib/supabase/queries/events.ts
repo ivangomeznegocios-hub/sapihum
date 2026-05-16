@@ -15,7 +15,7 @@ import { getUniqueEventAccessCount, getUniqueEventAccessCounts } from '@/lib/eve
 import { audienceAllowsAccess, getCommercialAccessContext, type CommercialAccessSnapshot } from '@/lib/access/commercial'
 import { canViewerSeeCatalogEvent } from '@/lib/access/catalog'
 import { canManageAnyEvent } from '@/lib/events/permissions'
-import { applyVerticalContentFilter } from '@/lib/supabase/vertical-content'
+import { applyVerticalContentFilter, getContentIdsForVertical } from '@/lib/supabase/vertical-content'
 import { normalizeVerticalCode } from '@/lib/verticals'
 import { isSpeakerVisibleToPublic } from '@/lib/speakers/display'
 
@@ -66,8 +66,6 @@ const PUBLIC_CATALOG_EVENT_SELECT = [
     'learning_outcomes',
     'seo_description',
     'og_description',
-    'primary_vertical_id',
-    'content_scope',
 ].join(', ')
 
 const PUBLIC_CATALOG_SPEAKER_SELECT = `
@@ -515,6 +513,54 @@ async function getPublicVerticalId(supabase: any, verticalCode?: string | null) 
     return data.id as string
 }
 
+function isMissingVerticalContentColumn(error: any) {
+    const message = String(error?.message ?? '')
+    return error?.code === '42703' && (
+        message.includes('events.primary_vertical_id') ||
+        message.includes('events.content_scope') ||
+        message.includes('primary_vertical_id') ||
+        message.includes('content_scope')
+    )
+}
+
+async function runPublicCatalogEventQuery(
+    supabase: any,
+    buildBaseQuery: () => any,
+    activeVerticalId: string | null
+) {
+    let query = buildBaseQuery()
+    query = (await applyVerticalContentFilter(
+        supabase,
+        query,
+        { table: 'event_verticals', contentIdColumn: 'event_id' },
+        activeVerticalId
+    )).query
+
+    const result = await query.order('start_time', { ascending: true })
+    if (!isMissingVerticalContentColumn(result.error) || !activeVerticalId) {
+        return result
+    }
+
+    console.warn('Public event catalog vertical column missing; falling back to event_verticals bridge filter', {
+        code: result.error?.code,
+        message: result.error?.message,
+    })
+
+    const eventIds = await getContentIdsForVertical(
+        supabase,
+        { table: 'event_verticals', contentIdColumn: 'event_id' },
+        activeVerticalId
+    )
+
+    if (eventIds.length === 0) {
+        return { data: [], error: null }
+    }
+
+    return buildBaseQuery()
+        .in('id', eventIds)
+        .order('start_time', { ascending: true })
+}
+
 async function fetchPublicEventBySlug(slug: string): Promise<any | null> {
     const supabase = createServiceClient()
 
@@ -599,28 +645,25 @@ async function fetchPublicCatalogEvents(
     const supabase = createServiceClient()
     const activeVerticalId = await getPublicVerticalId(supabase, verticalCode)
 
-    let query = (supabase
-        .from('events') as any)
-        .select(PUBLIC_CATALOG_EVENT_SELECT)
-        .not('status', 'eq', 'draft')
-        .not('status', 'eq', 'cancelled')
+    const buildBaseQuery = () => {
+        let query = (supabase
+            .from('events') as any)
+            .select(PUBLIC_CATALOG_EVENT_SELECT)
+            .not('status', 'eq', 'draft')
+            .not('status', 'eq', 'cancelled')
 
-    if (kind === 'cursos') {
-        query = query.eq('event_type', 'course')
-    } else if (kind === 'grabaciones') {
-        query = query.or('event_type.eq.on_demand,and(status.eq.completed,recording_url.not.is.null)')
-    } else {
-        query = query.not('event_type', 'eq', 'course').not('event_type', 'eq', 'on_demand')
+        if (kind === 'cursos') {
+            query = query.eq('event_type', 'course')
+        } else if (kind === 'grabaciones') {
+            query = query.or('event_type.eq.on_demand,and(status.eq.completed,recording_url.not.is.null)')
+        } else {
+            query = query.not('event_type', 'eq', 'course').not('event_type', 'eq', 'on_demand')
+        }
+
+        return query
     }
 
-    query = (await applyVerticalContentFilter(
-        supabase,
-        query,
-        { table: 'event_verticals', contentIdColumn: 'event_id' },
-        activeVerticalId
-    )).query
-
-    const { data, error } = await query.order('start_time', { ascending: true })
+    const { data, error } = await runPublicCatalogEventQuery(supabase, buildBaseQuery, activeVerticalId)
 
     if (error || !data) {
         throwPublicCatalogError('Error fetching public catalog events', error)
@@ -674,22 +717,14 @@ async function fetchUnifiedCatalogEvents(verticalCode?: string | null): Promise<
     const supabase = createServiceClient()
     const activeVerticalId = await getPublicVerticalId(supabase, verticalCode)
 
-    let query = (supabase
+    const buildBaseQuery = () => (supabase
         .from('events') as any)
         .select(PUBLIC_CATALOG_EVENT_SELECT)
         .not('status', 'eq', 'draft')
         .not('status', 'eq', 'cancelled')
         .not('event_type', 'eq', 'on_demand')
 
-    query = (await applyVerticalContentFilter(
-        supabase,
-        query,
-        { table: 'event_verticals', contentIdColumn: 'event_id' },
-        activeVerticalId
-    )).query
-
-    const { data, error } = await query
-        .order('start_time', { ascending: true })
+    const { data, error } = await runPublicCatalogEventQuery(supabase, buildBaseQuery, activeVerticalId)
 
     if (error || !data) {
         throwPublicCatalogError('Error fetching unified catalog events', error)
