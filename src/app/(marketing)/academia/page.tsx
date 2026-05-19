@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import Image from 'next/image'
+import { Suspense } from 'react'
 
 import { BrandWordmark } from '@/components/brand/brand-wordmark'
 import { AcademiaCatalog } from '@/components/catalog/academia-catalog'
@@ -12,7 +13,6 @@ import {
     applyEventCampaignCopy,
     getAllEventCampaigns,
     getCampaignEventsFromCatalog,
-    getEventCampaignByKey,
 } from '@/lib/events/campaigns'
 import { getPublicEventPath, splitPublicCatalogEvents } from '@/lib/events/public'
 import { getSpecializationByCode } from '@/lib/specializations'
@@ -52,12 +52,7 @@ function formatHours(value: number | null | undefined) {
     return Number.isInteger(hours) ? `${hours} horas` : `${hours.toFixed(1)} horas`
 }
 
-interface AcademiaPageProps {
-    searchParams?: Promise<{ track?: string }>
-}
-
-export default async function AcademiaPage({ searchParams }: AcademiaPageProps) {
-    const params = (await searchParams) ?? {}
+export default async function AcademiaPage() {
     const [allEvents, formations, featuredEventSettings] = await Promise.all([
         getUnifiedCatalogEvents(),
         getPublicFormations(),
@@ -66,24 +61,15 @@ export default async function AcademiaPage({ searchParams }: AcademiaPageProps) 
 
     const normalizedEvents = allEvents.map((event: any) => applyEventCampaignCopy(event))
     const { upcoming, past } = splitPublicCatalogEvents(normalizedEvents)
-    const activeCampaign = getEventCampaignByKey(params.track)
     const campaignBlocks = getAllEventCampaigns()
         .map((campaign) => ({
             campaign,
             events: getCampaignEventsFromCatalog(upcoming, campaign),
         }))
 
-    const visibleCampaignBlocks = activeCampaign
-        ? campaignBlocks.filter((entry) => entry.campaign.key === activeCampaign.key)
-        : campaignBlocks
-
-    const visibleUpcoming = activeCampaign
-        ? visibleCampaignBlocks[0]?.events ?? []
-        : upcoming
-
     const featuredEvent = resolveAcademiaFeaturedEvent({
         settings: featuredEventSettings,
-        activeCampaign,
+        activeCampaign: null,
         campaignBlocks,
         upcoming,
     })
@@ -102,22 +88,18 @@ export default async function AcademiaPage({ searchParams }: AcademiaPageProps) 
                                 <span className="relative flex h-2 w-2">
                                     <span className="relative inline-flex h-2 w-2 rounded-full bg-brand-blue" />
                                 </span>
-                                {activeCampaign
-                                    ? `Ruta destacada: ${activeCampaign.title}`
-                                    : `Qué viene en la Academia`}
+                                Que viene en la Academia
                             </div>
 
                             <h1 className="mb-6 font-serif text-4xl font-bold leading-[1.05] tracking-normal text-brand-text-strong md:text-5xl lg:text-6xl">
-                                {activeCampaign ? 'La ruta recomendada para avanzar en' : 'Formacion continua para psicologos que quieren avanzar con mas'}{' '}
+                                Formacion continua para psicologos que quieren avanzar con mas{' '}
                                 <span className="italic font-bold text-brand-blue-dark">
-                                    {activeCampaign ? activeCampaign.title.toLowerCase() : 'criterio, profundidad y aplicacion real'}
+                                    criterio, profundidad y aplicacion real
                                 </span>
                             </h1>
 
                             <p className="mb-8 max-w-2xl text-lg leading-relaxed text-brand-text-muted md:text-xl">
-                                {activeCampaign
-                                    ? activeCampaign.promise
-                                    : 'Encuentros en vivo y programas completos para seguir formandote con claridad, respaldo academico y una siguiente accion evidente en cada paso.'}
+                                Encuentros en vivo y programas completos para seguir formandote con claridad, respaldo academico y una siguiente accion evidente en cada paso.
                             </p>
 
                             <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
@@ -126,13 +108,6 @@ export default async function AcademiaPage({ searchParams }: AcademiaPageProps) 
                                         Ver agenda en vivo
                                     </Button>
                                 </a>
-                                {activeCampaign && (
-                                    <a href="#temario">
-                                        <Button size="lg" variant="outline" className="h-12 w-full px-7 font-bold uppercase text-xs tracking-[0.1em] sm:w-auto">
-                                            Recibir temario
-                                        </Button>
-                                    </a>
-                                )}
                             </div>
                         </div>
 
@@ -155,12 +130,10 @@ export default async function AcademiaPage({ searchParams }: AcademiaPageProps) 
                                 Agenda en vivo
                             </p>
                             <h2 className="mt-3 text-2xl font-bold tracking-tight text-foreground md:text-3xl">
-                                {activeCampaign ? `Eventos de ${activeCampaign.title}` : 'Eventos'}
+                                Eventos
                             </h2>
                             <p className="mt-2 max-w-2xl text-muted-foreground">
-                                {activeCampaign
-                                    ? 'Aqui ves solo los encuentros de esta ruta para mantener la decision mas simple y enfocada.'
-                                    : 'Encuentra lo que viene en camino. Filtra por area tematica, formato o busca por nombre.'}
+                                Encuentra lo que viene en camino. Filtra por area tematica, formato o busca por nombre.
                             </p>
                         </div>
                     </div>
@@ -168,8 +141,8 @@ export default async function AcademiaPage({ searchParams }: AcademiaPageProps) 
                     <div className="mb-8 flex flex-wrap gap-2">
                         <Link href="/academia#catalogo">
                             <Badge 
-                                variant={!activeCampaign ? 'default' : 'outline'} 
-                                className={!activeCampaign ? 'bg-brand-blue text-white hover:bg-brand-blue-hover px-4 py-1.5' : 'border-brand-border hover:bg-brand-surface-soft px-4 py-1.5'}
+                                variant="default"
+                                className="bg-brand-blue text-white hover:bg-brand-blue-hover px-4 py-1.5"
                             >
                                 Toda la agenda
                             </Badge>
@@ -177,8 +150,8 @@ export default async function AcademiaPage({ searchParams }: AcademiaPageProps) 
                         {campaignBlocks.map(({ campaign }) => (
                             <Link key={campaign.key} href={`/academia?track=${campaign.key}#catalogo`}>
                                 <Badge 
-                                    variant={activeCampaign?.key === campaign.key ? 'default' : 'outline'} 
-                                    className={activeCampaign?.key === campaign.key ? 'bg-brand-blue text-white hover:bg-brand-blue-hover px-4 py-1.5' : 'border-brand-border hover:bg-brand-surface-soft px-4 py-1.5'}
+                                    variant="outline"
+                                    className="border-brand-border hover:bg-brand-surface-soft px-4 py-1.5"
                                 >
                                     {campaign.title}
                                 </Badge>
@@ -186,7 +159,9 @@ export default async function AcademiaPage({ searchParams }: AcademiaPageProps) 
                         ))}
                     </div>
 
-                    <AcademiaCatalog events={visibleUpcoming} />
+                    <Suspense fallback={<div className="min-h-[24rem]" />}>
+                        <AcademiaCatalog events={upcoming} />
+                    </Suspense>
                 </div>
             </section>
 
@@ -314,7 +289,9 @@ export default async function AcademiaPage({ searchParams }: AcademiaPageProps) 
                         <div className="mb-10">
                             <h2 className="text-2xl font-bold tracking-tight md:text-3xl">Eventos pasados</h2>
                         </div>
-                        <AcademiaCatalog events={past} />
+                        <Suspense fallback={<div className="min-h-[24rem]" />}>
+                            <AcademiaCatalog events={past} />
+                        </Suspense>
                     </div>
                 </section>
             )}

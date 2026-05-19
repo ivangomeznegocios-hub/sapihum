@@ -48,6 +48,48 @@ interface PageProps {
     params: Promise<{ id: string }>
 }
 
+const EVENT_DETAIL_SELECT = [
+    'id',
+    'slug',
+    'title',
+    'subtitle',
+    'description',
+    'image_url',
+    'start_time',
+    'end_time',
+    'event_type',
+    'type',
+    'status',
+    'price',
+    'member_price',
+    'member_access_type',
+    'specialization_code',
+    'target_audience',
+    'is_members_only',
+    'meeting_link',
+    'recording_url',
+    'recording_expires_at',
+    'max_attendees',
+    'created_by',
+    'location',
+    'session_config',
+    'material_links',
+    'registration_fields',
+    'is_embeddable',
+    'category',
+    'subcategory',
+    'content_scope',
+    'certificate_type',
+    'included_resources',
+    'formation_track',
+    'seo_title',
+    'seo_description',
+    'public_cta_label',
+    'hero_badge',
+    'ideal_for',
+    'learning_outcomes',
+].join(', ')
+
 export default async function EventDetailPage({ params }: PageProps) {
     const { id } = await params
     const viewer = await getViewerContext({ includeCommercialAccess: true })
@@ -62,7 +104,7 @@ export default async function EventDetailPage({ params }: PageProps) {
     // Get event details
     const { data: eventData, error } = await supabase
         .from('events' as any)
-        .select('*')
+        .select(EVENT_DETAIL_SELECT)
         .eq('id', id)
         .single()
 
@@ -72,66 +114,72 @@ export default async function EventDetailPage({ params }: PageProps) {
         notFound()
     }
 
-    const canUseActiveVertical = await contentBelongsToActiveVertical(
-        supabase,
-        { table: 'event_verticals', contentIdColumn: 'event_id' },
-        event,
-        viewer.activeVertical?.id
-    )
+    const [
+        canUseActiveVertical,
+        { data: registrationData },
+        editorAccess,
+    ] = await Promise.all([
+        contentBelongsToActiveVertical(
+            supabase,
+            { table: 'event_verticals', contentIdColumn: 'event_id' },
+            event,
+            viewer.activeVertical?.id
+        ),
+        (supabase
+            .from('event_registrations') as any)
+            .select('id, status')
+            .eq('event_id', id)
+            .eq('user_id', profile.id)
+            .maybeSingle(),
+        getEventEditorAccessForUser({
+            supabase,
+            eventId: id,
+            userId: profile.id,
+            role: profile.role,
+            createdBy: event.created_by,
+        }),
+    ])
     if (!canUseActiveVertical) {
         notFound()
     }
 
-    // Check if user is registered
-    const { data: registrationData } = await supabase
-        .from('event_registrations' as any)
-        .select('id, status')
-        .eq('event_id', id)
-        .eq('user_id', profile.id)
-        .single()
-
     const registration = registrationData as any
-
     const isRegistered = registration?.status === 'registered'
+    const { canManageEvent, canEditEvent } = editorAccess
 
-    const { canManageEvent, canEditEvent } = await getEventEditorAccessForUser({
-        supabase,
-        eventId: id,
-        userId: profile.id,
-        role: profile.role,
-        createdBy: event.created_by,
-    })
-
-    const speakerOptions = canEditEvent
-        ? await getEventSpeakerOptions()
-        : []
-    const relatedVerticalIds = canEditEvent && event.content_scope !== 'global'
-        ? await getRelatedVerticalIds(
-            supabase,
-            { table: 'event_verticals', contentIdColumn: 'event_id' },
-            id
-        )
-        : []
-
-    const accessEntitlement = canEditEvent
-        ? null
-        : await getActiveEntitlementForEvent({
-            supabase,
-            eventId: id,
-            userId: profile.id,
-            email: profile.email,
-            eventType: event.event_type,
-        })
-
-    const replayEntitlement = canEditEvent
-        ? null
-        : await getActiveEntitlementForEvent({
-            supabase,
-            eventId: id,
-            userId: profile.id,
-            email: profile.email,
-            allowedAccessKinds: ['replay_access'],
-        })
+    const [
+        speakerOptions,
+        relatedVerticalIds,
+        accessEntitlement,
+        replayEntitlement,
+    ] = await Promise.all([
+        canEditEvent ? getEventSpeakerOptions() : Promise.resolve([]),
+        canEditEvent && event.content_scope !== 'global'
+            ? getRelatedVerticalIds(
+                supabase,
+                { table: 'event_verticals', contentIdColumn: 'event_id' },
+                id
+            )
+            : Promise.resolve([]),
+        canEditEvent
+            ? Promise.resolve(null)
+            : getActiveEntitlementForEvent({
+                supabase,
+                eventId: id,
+                userId: profile.id,
+                email: profile.email,
+                eventType: event.event_type,
+            }),
+        canEditEvent
+            ? Promise.resolve(null)
+            : getActiveEntitlementForEvent({
+                supabase,
+                eventId: id,
+                userId: profile.id,
+                email: profile.email,
+                allowedAccessKinds: ['replay_access'],
+            }),
+    ])
 
     const canReachOffer = commercialAccess
         ? audienceAllowsAccess(event.target_audience, commercialAccess, { creatorId: event.created_by })
@@ -166,7 +214,7 @@ export default async function EventDetailPage({ params }: PageProps) {
         )
     }
 
-    const attendeeCount = await getUniqueEventAccessCount(supabase, id)
+    const attendeeCountPromise = getUniqueEventAccessCount(supabase, id)
     const accessEntitlementGrantsAccess = entitlementCanGrantEventAccess({
         entitlement: accessEntitlement,
         event,
@@ -185,10 +233,9 @@ export default async function EventDetailPage({ params }: PageProps) {
     const hasEventAccess = canEditEvent || registrationGrantsAccess || accessEntitlementGrantsAccess
 
     // Get all registrations with user info (for admins/creators only)
-    let allRegistrations: any[] = []
-    if (canManageEvent) {
-        const { data: regsData } = await supabase
-            .from('event_registrations' as any)
+    const allRegistrationsPromise = canManageEvent
+        ? (supabase
+            .from('event_registrations') as any)
             .select(`
                 id,
                 user_id,
@@ -200,8 +247,7 @@ export default async function EventDetailPage({ params }: PageProps) {
             .eq('event_id', id)
             .eq('status', 'registered')
             .order('registered_at', { ascending: false })
-        allRegistrations = (regsData || []) as any[]
-    }
+        : Promise.resolve({ data: [] })
 
     // Calculate effective price for user
     let currentPrice = event.price || 0
@@ -229,11 +275,18 @@ export default async function EventDetailPage({ params }: PageProps) {
         }
     }
 
-    // Get event speakers
-    const eventSpeakers = await getEventSpeakers(id)
-
-    // Get linked resources
-    const eventResources = await getResourcesByEvent(id)
+    const [
+        attendeeCount,
+        { data: regsData },
+        eventSpeakers,
+        eventResources,
+    ] = await Promise.all([
+        attendeeCountPromise,
+        allRegistrationsPromise,
+        getEventSpeakers(id),
+        getResourcesByEvent(id),
+    ])
+    const allRegistrations = (regsData || []) as any[]
     const directMaterialLinks = Array.isArray(event.material_links)
         ? event.material_links.filter((item: any) => item?.title && item?.url)
         : []
@@ -354,7 +407,6 @@ export default async function EventDetailPage({ params }: PageProps) {
                                 src={event.image_url}
                                 alt={event.title}
                                 fill
-                                unoptimized
                                 className="object-cover"
                                 sizes="(max-width: 1024px) 100vw, 66vw"
                             />

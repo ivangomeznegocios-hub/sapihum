@@ -184,12 +184,16 @@ export function PublicCatalogCard({
                     {speakerName && (
                         <div className="flex items-center gap-2">
                             {speakerAvatar ? (
-                                <div
-                                    role="img"
-                                    aria-label={speakerName}
-                                    className="h-5 w-5 rounded-full bg-cover bg-center ring-1 ring-border"
-                                    style={{ backgroundImage: `url("${speakerAvatar}")` }}
-                                />
+                                <div className="relative h-5 w-5 overflow-hidden rounded-full ring-1 ring-border">
+                                    <Image
+                                        src={speakerAvatar}
+                                        alt={speakerName}
+                                        fill
+                                        quality={58}
+                                        sizes="20px"
+                                        className="object-cover"
+                                    />
+                                </div>
                             ) : (
                                 <div className="flex h-5 w-5 items-center justify-center rounded-full bg-brand-blue text-[9px] font-bold text-brand-blue">
                                     {speakerName.charAt(0)}

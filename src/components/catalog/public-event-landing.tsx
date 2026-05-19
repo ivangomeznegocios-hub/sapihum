@@ -1,8 +1,5 @@
-'use client'
-
 import Link from 'next/link'
 import Image from 'next/image'
-import { useEffect, useState } from 'react'
 import { ArrowRight, Check, Download, Lock } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { getEffectiveEventPriceForProfile, getEventMemberAccessMessage, isEventIncludedForMatchingSpecialization } from '@/lib/events/pricing'
@@ -14,6 +11,7 @@ import { getSpecializationByCode } from '@/lib/specializations'
 import { DEFAULT_TIMEZONE } from '@/lib/timezone'
 import { cn } from '@/lib/utils'
 import { CampaignLeadMagnetInline } from './campaign-lead-magnet-inline'
+import { FaqAccordion } from './faq-accordion'
 import { PublicAccessCta } from './public-access-cta'
 import { PublicCatalogCard } from './public-catalog-card'
 
@@ -245,42 +243,6 @@ function getPublicSpeakerHref(speaker: any, returnTo?: string) {
     return `/speakers/${speaker.id}?returnTo=${encodeURIComponent(returnTo)}`
 }
 
-function FaqAccordion({ items }: { items: { question: string; answer: string }[] }) {
-    const [openIndex, setOpenIndex] = useState<number | null>(null)
-
-    return (
-        <div className="divide-y divide-border">
-            {items.map((item, index) => (
-                <div key={item.question}>
-                    <button
-                        onClick={() => setOpenIndex(openIndex === index ? null : index)}
-                        className="flex w-full items-center justify-between py-4 text-left text-sm font-medium text-brand-text-strong transition-colors hover:text-brand-blue"
-                    >
-                        {item.question}
-                        <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="16"
-                            height="16"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            className={`ml-2 shrink-0 text-brand-text-muted transition-transform duration-200 ${openIndex === index ? 'rotate-180' : ''}`}
-                        >
-                            <path d="m6 9 6 6 6-6" />
-                        </svg>
-                    </button>
-                    <div className={`overflow-hidden transition-all duration-200 ${openIndex === index ? 'max-h-40 pb-4' : 'max-h-0'}`}>
-                        <p className="text-sm leading-relaxed text-brand-text-muted">{item.answer}</p>
-                    </div>
-                </div>
-            ))}
-        </div>
-    )
-}
-
 export function PublicEventLanding({
     event,
     relatedEvents,
@@ -296,36 +258,10 @@ export function PublicEventLanding({
     membershipSpecializationCode: string | null
     hasAccess: boolean
 }) {
-    const [accessState, setAccessState] = useState({
-        membershipLevel: initialMembershipLevel,
-        hasActiveMembership: initialHasActiveMembership,
-        membershipSpecializationCode: initialMembershipSpecializationCode,
-        hasAccess: initialHasAccess,
-    })
-    const { membershipLevel, hasActiveMembership, membershipSpecializationCode, hasAccess } = accessState
-
-    useEffect(() => {
-        let isMounted = true
-
-        fetch(`/api/events/access-status?eventId=${encodeURIComponent(event.id)}`, {
-            credentials: 'include',
-        })
-            .then((response) => response.ok ? response.json() : null)
-            .then((data) => {
-                if (!isMounted || !data) return
-                setAccessState({
-                    membershipLevel: Number(data.membershipLevel ?? 0),
-                    hasActiveMembership: Boolean(data.hasActiveMembership),
-                    membershipSpecializationCode: data.membershipSpecializationCode ?? null,
-                    hasAccess: Boolean(data.hasAccess),
-                })
-            })
-            .catch(() => undefined)
-
-        return () => {
-            isMounted = false
-        }
-    }, [event.id])
+    const membershipLevel = initialMembershipLevel
+    const hasActiveMembership = initialHasActiveMembership
+    const membershipSpecializationCode = initialMembershipSpecializationCode
+    const hasAccess = initialHasAccess
 
     const ctaLabel = getDefaultPublicCtaLabel(event)
     const isMembersOnly = Array.isArray(event.target_audience)
@@ -463,12 +399,16 @@ export function PublicEventLanding({
                                         const content = (
                                             <>
                                                 {avatar ? (
-                                                    <div
-                                                        role="img"
-                                                        aria-label={name}
-                                                        className="h-12 w-12 rounded-full bg-cover bg-center ring-2 ring-brand-border shadow-lg"
-                                                        style={{ backgroundImage: `url("${avatar}")` }}
-                                                    />
+                                                    <div className="relative h-12 w-12 overflow-hidden rounded-full ring-2 ring-brand-border shadow-lg">
+                                                        <Image
+                                                            src={avatar}
+                                                            alt={name}
+                                                            fill
+                                                            quality={58}
+                                                            sizes="48px"
+                                                            className="object-cover"
+                                                        />
+                                                    </div>
                                                 ) : (
                                                     <div className="flex h-12 w-12 items-center justify-center rounded-full bg-brand-blue/20 text-sm font-bold text-brand-blue ring-2 ring-brand-border">
                                                         {name.charAt(0)}
@@ -780,12 +720,16 @@ export function PublicEventLanding({
                                             <div className="flex flex-col h-full rounded-[24px] border border-brand-border bg-white overflow-hidden hover:border-brand-blue/30 hover:bg-brand-blue-soft/60 transition-all group">
                                                 <div className="p-6 pb-0 flex items-center gap-4">
                                                     {avatar ? (
-                                                        <div
-                                                            role="img"
-                                                            aria-label={name}
-                                                            className="h-16 w-16 shrink-0 rounded-full bg-cover bg-center ring-2 ring-brand-border"
-                                                            style={{ backgroundImage: `url("${avatar}")` }}
-                                                        />
+                                                        <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-full ring-2 ring-brand-border">
+                                                            <Image
+                                                                src={avatar}
+                                                                alt={name}
+                                                                fill
+                                                                quality={58}
+                                                                sizes="64px"
+                                                                className="object-cover"
+                                                            />
+                                                        </div>
                                                     ) : (
                                                         <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-brand-blue/10 text-xl font-bold text-brand-blue ring-2 ring-brand-blue/20">
                                                             {name.charAt(0)}

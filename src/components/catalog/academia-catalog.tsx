@@ -1,8 +1,10 @@
 'use client'
 
 import { useMemo, useState } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { Search, SlidersHorizontal, X } from 'lucide-react'
 import { PublicCatalogCard } from './public-catalog-card'
+import { getEventCampaignByKey } from '@/lib/events/campaigns'
 
 const AREA_FILTERS = [
     { value: 'all', label: 'Todas las areas' },
@@ -29,13 +31,16 @@ interface AcademiaCatalogProps {
 }
 
 export function AcademiaCatalog({ events }: AcademiaCatalogProps) {
+    const searchParams = useSearchParams()
     const [areaFilter, setAreaFilter] = useState<string>('all')
     const [formatFilter, setFormatFilter] = useState<string>('all')
     const [searchQuery, setSearchQuery] = useState('')
     const [showFilters, setShowFilters] = useState(false)
+    const activeCampaign = getEventCampaignByKey(searchParams.get('track'))
 
     const filteredEvents = useMemo(() => {
         return events.filter((event) => {
+            if (activeCampaign && event.formation_track !== activeCampaign.formationTrack) return false
             if (areaFilter !== 'all' && event.category !== areaFilter) return false
 
             if (formatFilter !== 'all') {
@@ -65,7 +70,7 @@ export function AcademiaCatalog({ events }: AcademiaCatalogProps) {
 
             return true
         })
-    }, [events, areaFilter, formatFilter, searchQuery])
+    }, [events, activeCampaign, areaFilter, formatFilter, searchQuery])
 
     const hasActiveFilters =
         areaFilter !== 'all' || formatFilter !== 'all' || searchQuery.trim() !== ''
@@ -196,7 +201,7 @@ export function AcademiaCatalog({ events }: AcademiaCatalogProps) {
                 <p className="text-sm text-muted-foreground">
                     <span className="font-semibold text-foreground">{filteredEvents.length}</span>{' '}
                     {filteredEvents.length === 1 ? 'resultado' : 'resultados'}
-                    {hasActiveFilters && (
+                    {(hasActiveFilters || activeCampaign) && (
                         <span className="text-muted-foreground"> de {events.length} en total</span>
                     )}
                 </p>

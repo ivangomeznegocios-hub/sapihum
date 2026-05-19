@@ -722,6 +722,72 @@ export const getPublicCatalogEvents = unstable_cache(
     }
 )
 
+async function fetchPublicRelatedEvents(params: {
+    currentEventId: string
+    formationTrack?: string | null
+}): Promise<PublicCatalogEvent[]> {
+    const supabase = createServiceClient()
+    let query = (supabase
+        .from('events') as any)
+        .select(PUBLIC_CATALOG_EVENT_SELECT)
+        .not('status', 'eq', 'draft')
+        .not('status', 'eq', 'cancelled')
+        .neq('id', params.currentEventId)
+
+    if (params.formationTrack) {
+        query = query.eq('formation_track', params.formationTrack)
+    } else {
+        query = query.in('status', ['upcoming', 'live'])
+    }
+
+    const { data, error } = await query
+        .order('start_time', { ascending: true })
+        .limit(3)
+
+    if (error || !data) {
+        throwPublicCatalogError('Error fetching related public events', error)
+    }
+
+    const ids = data.map((event: any) => event.id)
+    if (ids.length === 0) return []
+
+    const [{ data: speakers, error: speakersError }, attendeeCounts] = await Promise.all([
+        (supabase
+            .from('event_speakers') as any)
+            .select(PUBLIC_CATALOG_SPEAKER_SELECT)
+            .in('event_id', ids)
+            .order('display_order', { ascending: true }),
+        getUniqueEventAccessCounts(supabase, ids),
+    ])
+
+    if (speakersError) {
+        throwPublicCatalogError('Error fetching related public event speakers', speakersError)
+    }
+
+    const speakerMap = new Map<string, any[]>()
+    for (const row of getDisplayableEventSpeakerRows(speakers)) {
+        const collection = speakerMap.get(row.event_id) ?? []
+        collection.push(row)
+        speakerMap.set(row.event_id, collection)
+    }
+
+    return data.map((event: any) => ({
+        ...event,
+        speakers: speakerMap.get(event.id) ?? [],
+        attendee_count: attendeeCounts[event.id] || 0,
+        public_kind: getPublicCatalogKindForEvent(event),
+    }))
+}
+
+export const getPublicRelatedEvents = unstable_cache(
+    fetchPublicRelatedEvents,
+    ['public-related-events'],
+    {
+        revalidate: PUBLIC_CATALOG_REVALIDATE_SECONDS,
+        tags: ['public-events'],
+    }
+)
+
 /**
  * Get ALL published events (excluding on_demand recordings) — unified catalog for Academia.
  * Sorts upcoming first (by start_time ASC), completed last.

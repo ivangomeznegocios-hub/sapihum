@@ -1,5 +1,6 @@
 'use client'
 
+import dynamic from 'next/dynamic'
 import { useMemo, useState } from 'react'
 import Link from 'next/link'
 import {
@@ -33,7 +34,6 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { SubscribeButton } from '@/components/payments/SubscribeButton'
 import {
   LEVEL_1_FEATURE_IDS,
   LEVEL_2_CARD_FEATURE_IDS,
@@ -46,6 +46,18 @@ import {
 } from '@/lib/pricing-catalog'
 import { LEVEL_2_DEFAULT_SPECIALIZATION } from '@/lib/specializations'
 import { Fragment } from 'react'
+
+const SubscribeButton = dynamic(
+  () => import('@/components/payments/SubscribeButton').then((module) => module.SubscribeButton),
+  {
+    ssr: false,
+    loading: () => (
+      <Button className="w-full" size="lg" disabled>
+        Cargando...
+      </Button>
+    ),
+  }
+)
 
 interface SerializedPlan {
   name: string

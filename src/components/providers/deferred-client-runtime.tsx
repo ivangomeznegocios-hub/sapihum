@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState, type ElementType } from 'react'
+import { usePathname } from 'next/navigation'
 
 type RuntimeComponent = ElementType
 
@@ -18,6 +19,7 @@ function scheduleIdle(callback: () => void) {
 }
 
 export function DeferredClientRuntime() {
+    const pathname = usePathname() || '/'
     const [components, setComponents] = useState<RuntimeComponent[]>([])
 
     useEffect(() => {
@@ -33,13 +35,19 @@ export function DeferredClientRuntime() {
                 import('@/components/providers/analytics-provider').then((module) => module.AnalyticsProvider),
                 import('@/components/gdpr/cookie-consent-banner').then((module) => module.CookieConsentBanner),
             ]
+            const isAuthRoute = pathname.startsWith('/auth/')
 
             if (!isLocalhost) {
                 imports.push(
-                    import('@/components/providers/onesignal-provider').then((module) => module.OneSignalSetup),
                     import('@vercel/analytics/next').then((module) => module.Analytics),
                     import('@vercel/speed-insights/next').then((module) => module.SpeedInsights)
                 )
+
+                if (!isAuthRoute && document.cookie.includes('cp_consent_status=')) {
+                    imports.push(
+                        import('@/components/providers/onesignal-provider').then((module) => module.OneSignalSetup)
+                    )
+                }
             }
 
             void Promise.all(imports).then((loadedComponents) => {
@@ -53,7 +61,7 @@ export function DeferredClientRuntime() {
             isMounted = false
             cancel?.()
         }
-    }, [])
+    }, [pathname])
 
     return (
         <>

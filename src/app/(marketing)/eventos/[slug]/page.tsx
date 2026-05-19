@@ -12,7 +12,7 @@ import {
     getCongressLandingForEvent,
     getCongressLandingPath,
 } from '@/lib/events/congress'
-import { getUnifiedCatalogEvents, getPublicEventBySlug, getPublicEventSlugs } from '@/lib/supabase/queries/events'
+import { getPublicEventBySlug, getPublicEventSlugs, getPublicRelatedEvents } from '@/lib/supabase/queries/events'
 import { getPublicSpeakersForEventLanding } from '@/lib/supabase/queries/speakers'
 import { brandFullName } from '@/lib/brand'
 
@@ -125,16 +125,12 @@ export default async function EventoPublicoPage({ params }: PageProps) {
         )
     }
 
-    const allEvents = (await getUnifiedCatalogEvents()).map((item: any) => applyEventCampaignCopy(item))
     const campaign = getEventCampaignForEvent(event)
     const congressContext = getCongressLandingForEvent(event)
-    const relatedEvents = campaign
-        ? allEvents
-            .filter((item: any) => item.id !== event.id && item.formation_track === campaign.formationTrack)
-            .slice(0, 3)
-        : allEvents
-            .filter((item: any) => item.id !== event.id && (item.status === 'upcoming' || item.status === 'live'))
-            .slice(0, 3)
+    const relatedEvents = (await getPublicRelatedEvents({
+        currentEventId: event.id,
+        formationTrack: campaign?.formationTrack ?? null,
+    })).map((item: any) => applyEventCampaignCopy(item))
 
     return (
         <>
