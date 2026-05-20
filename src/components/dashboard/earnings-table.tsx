@@ -15,6 +15,13 @@ interface EarningRow {
     commission_rate: number
     compensation_type?: string | null
     compensation_value?: number | null
+    amount_paid?: number | null
+    sapihum_amount?: number | null
+    sale_origin?: string | null
+    price_type?: string | null
+    financial_status?: string | null
+    requested_at?: string | null
+    paid_at?: string | null
     net_amount: number
     status: string
     attendance_date: string
@@ -41,12 +48,28 @@ const statusConfig: Record<string, { label: string; variant: 'default' | 'second
     pending: { label: 'Pendiente', variant: 'secondary' },
     released: { label: 'Liberado', variant: 'default' },
     voided: { label: 'Anulado', variant: 'destructive' },
+    available: { label: 'Disponible', variant: 'default' },
+    requested: { label: 'Solicitada', variant: 'outline' },
+    paid: { label: 'Pagada', variant: 'default' },
+    cancelled: { label: 'Cancelada', variant: 'destructive' },
 }
 
 const typeLabels: Record<string, string> = {
     membership_proration: 'Membresía',
     premium_commission: 'Programa Premium',
     manual_bonus: 'Manual / Bono',
+}
+
+const saleOriginLabels: Record<string, string> = {
+    speaker_direct: 'Link ponente',
+    sapihum_channel: 'Canal SAPIHUM',
+    manual_adjustment: 'Ajuste manual',
+}
+
+const priceTypeLabels: Record<string, string> = {
+    public: 'Publico',
+    member: 'Miembro',
+    manual: 'Manual',
 }
 
 export function EarningsTable({ earnings, csvData, showStudentPaymentStatus = true }: EarningsTableProps) {
@@ -114,7 +137,8 @@ export function EarningsTable({ earnings, csvData, showStudentPaymentStatus = tr
                     <>
                     <div className="space-y-3 md:hidden">
                         {earnings.map((earning) => {
-                            const status = statusConfig[earning.status] || statusConfig.pending
+                            const displayStatus = earning.financial_status ?? (earning.status === 'released' ? 'available' : earning.status === 'voided' ? 'cancelled' : earning.status)
+                            const status = statusConfig[displayStatus] || statusConfig.pending
 
                             return (
                                 <div key={earning.id} className="rounded-xl border bg-muted/30 p-4 space-y-3">
@@ -137,15 +161,23 @@ export function EarningsTable({ earnings, csvData, showStudentPaymentStatus = tr
                                         </div>
                                         <div>
                                             <p className="text-[11px] uppercase tracking-wide text-muted-foreground">Bruto</p>
-                                            <p>{formatMXN(earning.gross_amount)}</p>
+                                            <p>{formatMXN(earning.amount_paid ?? earning.gross_amount)}</p>
                                         </div>
                                         <div className="text-right">
+                                            <p className="text-[11px] uppercase tracking-wide text-muted-foreground">Origen</p>
+                                            <p>{saleOriginLabels[earning.sale_origin ?? 'sapihum_channel'] ?? earning.sale_origin}</p>
+                                        </div>
+                                        <div>
                                             <p className="text-[11px] uppercase tracking-wide text-muted-foreground">Esquema</p>
                                             <p>{formatSpeakerCompensationLabel(
                                                 earning.compensation_type,
                                                 earning.compensation_value,
                                                 earning.commission_rate
                                             )}</p>
+                                        </div>
+                                        <div className="text-right">
+                                            <p className="text-[11px] uppercase tracking-wide text-muted-foreground">Precio</p>
+                                            <p>{priceTypeLabels[earning.price_type ?? 'public'] ?? earning.price_type}</p>
                                         </div>
                                     </div>
 
@@ -168,9 +200,12 @@ export function EarningsTable({ earnings, csvData, showStudentPaymentStatus = tr
                                     <TableHead>Alumno</TableHead>
                                     <TableHead>Evento</TableHead>
                                     <TableHead>Tipo</TableHead>
+                                    <TableHead>Origen</TableHead>
+                                    <TableHead>Precio</TableHead>
                                     <TableHead className="text-right">Monto Bruto</TableHead>
                                     <TableHead className="text-right">Esquema</TableHead>
                                     <TableHead className="text-right">Monto Neto</TableHead>
+                                    <TableHead className="text-right">SAPIHUM</TableHead>
                                     {showStudentPaymentStatus && (
                                         <TableHead>Estado de Pago</TableHead>
                                     )}
@@ -180,7 +215,8 @@ export function EarningsTable({ earnings, csvData, showStudentPaymentStatus = tr
                             </TableHeader>
                             <TableBody>
                                 {earnings.map((earning) => {
-                                    const status = statusConfig[earning.status] || statusConfig.pending
+                                    const displayStatus = earning.financial_status ?? (earning.status === 'released' ? 'available' : earning.status === 'voided' ? 'cancelled' : earning.status)
+                                    const status = statusConfig[displayStatus] || statusConfig.pending
                                     return (
                                         <TableRow key={earning.id}>
                                             <TableCell className="font-medium">
@@ -194,8 +230,14 @@ export function EarningsTable({ earnings, csvData, showStudentPaymentStatus = tr
                                                     {typeLabels[earning.earning_type] || earning.earning_type}
                                                 </span>
                                             </TableCell>
+                                            <TableCell className="text-xs text-muted-foreground">
+                                                {saleOriginLabels[earning.sale_origin ?? 'sapihum_channel'] ?? earning.sale_origin}
+                                            </TableCell>
+                                            <TableCell className="text-xs text-muted-foreground">
+                                                {priceTypeLabels[earning.price_type ?? 'public'] ?? earning.price_type}
+                                            </TableCell>
                                             <TableCell className="text-right">
-                                                {formatMXN(earning.gross_amount)}
+                                                {formatMXN(earning.amount_paid ?? earning.gross_amount)}
                                             </TableCell>
                                             <TableCell className="text-right text-muted-foreground">
                                                 {formatSpeakerCompensationLabel(
@@ -206,6 +248,9 @@ export function EarningsTable({ earnings, csvData, showStudentPaymentStatus = tr
                                             </TableCell>
                                             <TableCell className="text-right font-semibold">
                                                 {formatMXN(earning.net_amount)}
+                                            </TableCell>
+                                            <TableCell className="text-right text-muted-foreground">
+                                                {formatMXN(earning.sapihum_amount ?? Math.max(Number(earning.gross_amount ?? 0) - Number(earning.net_amount ?? 0), 0))}
                                             </TableCell>
                                             {showStudentPaymentStatus && (
                                                 <TableCell>

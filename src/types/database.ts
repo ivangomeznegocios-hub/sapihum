@@ -40,6 +40,14 @@ export type AttendanceSource = 'manual' | 'embedded_page' | 'api' | 'jitsi' | 'y
 
 export type SpeakerCompensationType = 'percentage' | 'fixed' | 'variable'
 
+export type SaleOrigin = 'speaker_direct' | 'sapihum_channel' | 'manual_adjustment'
+
+export type PriceType = 'public' | 'member' | 'manual'
+
+export type FinancialStatus = 'pending' | 'available' | 'requested' | 'paid' | 'cancelled'
+
+export type PayoutRequestStatus = 'requested' | 'approved' | 'paid' | 'rejected' | 'cancelled'
+
 export type TaskStatus = 'pending' | 'in_progress' | 'completed' | 'reviewed'
 
 export type TaskType = 'journal' | 'reading' | 'exercise' | 'form' | 'general'
@@ -2228,11 +2236,26 @@ export interface SpeakerEarning {
     student_id: string | null
     earning_type: EarningType
     gross_amount: number
+    amount_paid: number | null
+    sapihum_amount: number | null
     commission_rate: number
     compensation_type: SpeakerCompensationType
     compensation_value: number | null
     net_amount: number
     status: EarningStatus
+    financial_status: FinancialStatus | null
+    sale_origin: SaleOrigin | null
+    price_type: PriceType | null
+    attributed_speaker_id: string | null
+    sales_link_id: string | null
+    commission_rule_id: string | null
+    commission_snapshot: Record<string, unknown>
+    locked_at: string | null
+    requested_at: string | null
+    paid_at: string | null
+    payout_request_id: string | null
+    source_purchase_type: 'event_purchase' | 'formation_purchase' | 'manual' | null
+    source_purchase_id: string | null
     attendance_date: string
     release_date: string
     released_at: string | null
@@ -2254,11 +2277,26 @@ export interface SpeakerEarningInsert {
     student_id?: string | null
     earning_type?: EarningType
     gross_amount: number
+    amount_paid?: number | null
+    sapihum_amount?: number | null
     commission_rate?: number
     compensation_type?: SpeakerCompensationType
     compensation_value?: number | null
     net_amount: number
     status?: EarningStatus
+    financial_status?: FinancialStatus | null
+    sale_origin?: SaleOrigin | null
+    price_type?: PriceType | null
+    attributed_speaker_id?: string | null
+    sales_link_id?: string | null
+    commission_rule_id?: string | null
+    commission_snapshot?: Record<string, unknown>
+    locked_at?: string | null
+    requested_at?: string | null
+    paid_at?: string | null
+    payout_request_id?: string | null
+    source_purchase_type?: 'event_purchase' | 'formation_purchase' | 'manual' | null
+    source_purchase_id?: string | null
     attendance_date?: string
     release_date?: string
     source_transaction_id?: string | null
@@ -2269,6 +2307,21 @@ export interface SpeakerEarningInsert {
 
 export interface SpeakerEarningUpdate {
     status?: EarningStatus
+    financial_status?: FinancialStatus | null
+    amount_paid?: number | null
+    sapihum_amount?: number | null
+    sale_origin?: SaleOrigin | null
+    price_type?: PriceType | null
+    attributed_speaker_id?: string | null
+    sales_link_id?: string | null
+    commission_rule_id?: string | null
+    commission_snapshot?: Record<string, unknown>
+    locked_at?: string | null
+    requested_at?: string | null
+    paid_at?: string | null
+    payout_request_id?: string | null
+    source_purchase_type?: 'event_purchase' | 'formation_purchase' | 'manual' | null
+    source_purchase_id?: string | null
     released_at?: string | null
     voided_at?: string | null
     void_reason?: string | null

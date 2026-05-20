@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { CreditCard, Loader2, ExternalLink } from 'lucide-react'
 import type { AICreditPackageKey } from '@/lib/payments/config'
@@ -20,6 +21,7 @@ interface CheckoutButtonProps {
     packageKey?: AICreditPackageKey
     eventId?: string
     formationId?: string
+    speakerCode?: string
     title?: string
     label?: string
     variant?: 'default' | 'outline'
@@ -31,6 +33,7 @@ export function CheckoutButton({
     packageKey,
     eventId,
     formationId,
+    speakerCode,
     title,
     label = 'Pagar',
     variant = 'default',
@@ -41,6 +44,8 @@ export function CheckoutButton({
     const [dialogOpen, setDialogOpen] = useState(false)
     const [email, setEmail] = useState('')
     const [fullName, setFullName] = useState('')
+    const searchParams = useSearchParams()
+    const resolvedSpeakerCode = speakerCode || searchParams.get('speaker') || searchParams.get('speaker_code') || undefined
 
     const handleCheckout = async (withGuestDetails = false) => {
         setIsLoading(true)
@@ -73,6 +78,7 @@ export function CheckoutButton({
                     packageKey,
                     eventId,
                     formationId,
+                    speakerCode: resolvedSpeakerCode,
                     analyticsContext,
                     ...(withGuestDetails ? { email, fullName } : {}),
                 }),

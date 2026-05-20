@@ -1,11 +1,14 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { createServiceClient } from '@/lib/supabase/service'
 import {
     formatSpeakerCompensationLabel,
     upsertAutomaticEventSpeakerEarnings,
 } from '@/lib/earnings/compensation'
+import { isSpeakerCommerceEngineEnabled, isSpeakerPayoutRequestsEnabled } from '@/lib/earnings/speaker-commerce'
 import type { SpeakerFinancialSummary } from '@/types/database'
+import { revalidatePath } from 'next/cache'
 
 // ============================================
 // POOL & CONSTANTS
@@ -36,7 +39,7 @@ export async function getSpeakerFinancialSummary(): Promise<{ data: SpeakerFinan
     // Get all earnings for this speaker
     const { data: earnings, error } = await (supabase
         .from('speaker_earnings') as any)
-        .select('gross_amount, net_amount, status, month_key')
+        .select('gross_amount, net_amount, status, financial_status, month_key')
         .eq('speaker_id', user.id)
 
     if (error) return { data: null, error: error.message }
@@ -44,25 +47,25 @@ export async function getSpeakerFinancialSummary(): Promise<{ data: SpeakerFinan
     const allEarnings = earnings || []
 
     const totalAccumulated = allEarnings
-        .filter((e: any) => e.status !== 'voided')
+        .filter((e: any) => e.status !== 'voided' && e.financial_status !== 'cancelled')
         .reduce((sum: number, e: any) => sum + Number(e.net_amount), 0)
 
     const availableForPayment = allEarnings
-        .filter((e: any) => e.status === 'released')
+        .filter((e: any) => e.financial_status === 'available' || (e.financial_status == null && e.status === 'released'))
         .reduce((sum: number, e: any) => sum + Number(e.net_amount), 0)
 
     const pendingAmount = allEarnings
-        .filter((e: any) => e.status === 'pending')
+        .filter((e: any) => e.financial_status === 'pending' || (e.financial_status == null && e.status === 'pending'))
         .reduce((sum: number, e: any) => sum + Number(e.net_amount), 0)
 
     const voidedAmount = allEarnings
-        .filter((e: any) => e.status === 'voided')
+        .filter((e: any) => e.status === 'voided' || e.financial_status === 'cancelled')
         .reduce((sum: number, e: any) => sum + Number(e.net_amount), 0)
 
     // Current month earnings
     const currentMonth = new Date().toISOString().slice(0, 7) // YYYY-MM
     const currentMonthEarnings = allEarnings
-        .filter((e: any) => e.month_key === currentMonth && e.status !== 'voided')
+        .filter((e: any) => e.month_key === currentMonth && e.status !== 'voided' && e.financial_status !== 'cancelled')
         .reduce((sum: number, e: any) => sum + Number(e.net_amount), 0)
 
     // Unique students and events
@@ -113,7 +116,8 @@ export async function getSpeakerEarningsHistory(month?: string) {
         .select(`
             id, earning_type, gross_amount, commission_rate, compensation_type, compensation_value, net_amount,
             status, attendance_date, release_date, released_at, voided_at,
-            void_reason, month_key, created_at,
+            void_reason, month_key, created_at, sale_origin, price_type, amount_paid, sapihum_amount,
+            financial_status, requested_at, paid_at,
             student:profiles!speaker_earnings_student_id_fkey(id, full_name, avatar_url),
             event:events!speaker_earnings_event_id_fkey(id, title, start_time)
         `)
@@ -140,20 +144,43 @@ export async function getSpeakerCourses() {
 
     if (!user) return { data: null, error: 'No autenticado' }
 
-    const { data: events, error } = await (supabase
+    const { data: ownedEvents, error: ownedError } = await (supabase
         .from('events') as any)
         .select(`
-            id, title, description, start_time, end_time, status,
+            id, slug, title, description, start_time, end_time, status,
             meeting_link, recording_url, recording_available_days,
-            price, member_price, image_url, event_type, category, subcategory
+            price, member_price, member_access_type, image_url, event_type, category, subcategory
         `)
         .eq('created_by', user.id)
         .order('start_time', { ascending: false })
 
-    if (error) return { data: null, error: error.message }
+    if (ownedError) return { data: null, error: ownedError.message }
+
+    const { data: assignedRows } = await (supabase
+        .from('event_speakers') as any)
+        .select(`
+            event:events!event_speakers_event_id_fkey(
+                id, slug, title, description, start_time, end_time, status,
+                meeting_link, recording_url, recording_available_days,
+                price, member_price, member_access_type, image_url, event_type, category, subcategory
+            )
+        `)
+        .eq('speaker_id', user.id)
+
+    const eventsById = new Map<string, any>()
+    for (const event of ownedEvents ?? []) {
+        eventsById.set(event.id, event)
+    }
+    for (const row of assignedRows ?? []) {
+        if (row.event?.id) {
+            eventsById.set(row.event.id, row.event)
+        }
+    }
+    const events = Array.from(eventsById.values())
+        .sort((a: any, b: any) => new Date(b.start_time).getTime() - new Date(a.start_time).getTime())
 
     // Check recording expiry (20 days from event end)
-    const eventsWithExpiry = (events || []).map((event: any) => {
+    const eventsWithExpiry = events.map((event: any) => {
         let recording_expired = false
         if (event.recording_url && event.end_time) {
             const endDate = new Date(event.end_time)
@@ -162,6 +189,35 @@ export async function getSpeakerCourses() {
         }
         return { ...event, recording_expired }
     })
+
+    const db = createServiceClient()
+    const eventIds = eventsWithExpiry.map((event: any) => event.id)
+    const { data: existingLinks } = eventIds.length > 0
+        ? await (db.from('event_speaker_sales_links') as any)
+            .select('id, event_id, code, is_active')
+            .eq('speaker_id', user.id)
+            .in('event_id', eventIds)
+        : { data: [] }
+
+    const linkByEvent = new Map<string, any>((existingLinks ?? []).map((link: any) => [link.event_id, link]))
+
+    if (isSpeakerCommerceEngineEnabled()) {
+        for (const event of eventsWithExpiry) {
+            if (linkByEvent.has(event.id)) continue
+
+            const { data: insertedLink } = await (db.from('event_speaker_sales_links') as any)
+                .insert({
+                    event_id: event.id,
+                    speaker_id: user.id,
+                })
+                .select('id, event_id, code, is_active')
+                .single()
+
+            if (insertedLink?.event_id) {
+                linkByEvent.set(insertedLink.event_id, insertedLink)
+            }
+        }
+    }
 
     // Get attendee counts
     const eventsWithCounts = []
@@ -172,7 +228,15 @@ export async function getSpeakerCourses() {
             .eq('event_id', event.id)
             .eq('status', 'registered')
 
-        eventsWithCounts.push({ ...event, attendee_count: count || 0 })
+        const salesLink = linkByEvent.get(event.id)
+        eventsWithCounts.push({
+            ...event,
+            attendee_count: count || 0,
+            sales_link_code: salesLink?.code ?? null,
+            sales_link_active: salesLink?.is_active ?? false,
+            direct_commission_rate: 0.8,
+            sapihum_commission_rate: 0.5,
+        })
     }
 
     return { data: eventsWithCounts, error: null }
@@ -187,7 +251,6 @@ export async function getSpeakerStudents(eventId?: string) {
 
     if (!user) return { data: null, error: 'No autenticado' }
 
-    // Get events created by this speaker
     let eventsQuery = (supabase.from('events') as any)
         .select('id')
         .eq('created_by', user.id)
@@ -197,11 +260,23 @@ export async function getSpeakerStudents(eventId?: string) {
     }
 
     const { data: speakerEvents } = await eventsQuery
-    if (!speakerEvents || speakerEvents.length === 0) {
+    const { data: assignedRows } = await (supabase
+        .from('event_speakers') as any)
+        .select('event_id')
+        .eq('speaker_id', user.id)
+
+    const eventIds = Array.from(new Set([
+        ...(speakerEvents ?? []).map((event: any) => event.id),
+        ...(assignedRows ?? []).map((row: any) => row.event_id),
+    ].filter(Boolean)))
+
+    if (eventId && !eventIds.includes(eventId)) {
         return { data: [], error: null }
     }
 
-    const eventIds = speakerEvents.map((e: any) => e.id)
+    if (eventIds.length === 0) {
+        return { data: [], error: null }
+    }
 
     // Get registrations with student profiles
     const { data: registrations, error } = await (supabase
@@ -229,7 +304,7 @@ export async function getSpeakerStudents(eventId?: string) {
         // Get earning status
         const { data: earning } = await (supabase
             .from('speaker_earnings') as any)
-            .select('status, net_amount, release_date')
+            .select('status, financial_status, net_amount, release_date, sale_origin, amount_paid')
             .eq('event_id', reg.event_id)
             .eq('student_id', reg.student?.id)
             .eq('speaker_id', user.id)
@@ -250,6 +325,9 @@ export async function getSpeakerStudents(eventId?: string) {
             attendance_qualifies: attendance?.qualifies || false,
             duration_minutes: attendance?.duration_minutes || null,
             earning_status: earning?.status || null,
+            earning_financial_status: earning?.financial_status || null,
+            earning_sale_origin: earning?.sale_origin || null,
+            earning_amount_paid: earning?.amount_paid || null,
             earning_amount: earning?.net_amount || null,
             earning_release_date: earning?.release_date || null,
         })
@@ -441,7 +519,8 @@ export async function getEarningsReportData(month: string) {
         .from('speaker_earnings') as any)
         .select(`
             id, earning_type, gross_amount, commission_rate, compensation_type, compensation_value, net_amount,
-            status, attendance_date, release_date, month_key,
+            status, financial_status, sale_origin, price_type, amount_paid, sapihum_amount,
+            attendance_date, release_date, month_key,
             student:profiles!speaker_earnings_student_id_fkey(full_name),
             event:events!speaker_earnings_event_id_fkey(title)
         `)
@@ -457,16 +536,119 @@ export async function getEarningsReportData(month: string) {
         evento: e.event?.title || 'N/A',
         tipo: e.earning_type === 'membership_proration' ? 'Membresía (Prorrateo)' : e.earning_type === 'premium_commission' ? 'Programa Premium' : 'Manual / Bono',
         monto_bruto: e.gross_amount,
+        monto_pagado: e.amount_paid ?? e.gross_amount,
+        origen_venta: e.sale_origin === 'speaker_direct' ? 'Link ponente' : e.sale_origin === 'manual_adjustment' ? 'Ajuste manual' : 'Canal SAPIHUM',
+        tipo_precio: e.price_type === 'member' ? 'Miembro' : e.price_type === 'manual' ? 'Manual' : 'Publico',
         esquema_pago: formatSpeakerCompensationLabel(
             e.compensation_type,
             e.compensation_value,
             e.commission_rate
         ),
         monto_neto: e.net_amount,
-        estado: e.status === 'pending' ? 'Pendiente' : e.status === 'released' ? 'Liberado' : 'Anulado',
+        sapihum: e.sapihum_amount ?? Math.max(Number(e.gross_amount ?? 0) - Number(e.net_amount ?? 0), 0),
+        estado: e.financial_status === 'available' || e.status === 'released'
+            ? 'Disponible'
+            : e.financial_status === 'requested'
+                ? 'Solicitada'
+                : e.financial_status === 'paid'
+                    ? 'Pagada'
+                    : e.financial_status === 'cancelled' || e.status === 'voided'
+                        ? 'Cancelada'
+                        : 'Pendiente',
         fecha_asistencia: e.attendance_date,
         fecha_liberacion: e.release_date,
     }))
 
     return { data: csvRows, error: null }
+}
+
+export async function getSpeakerPayoutRequests() {
+    if (!isSpeakerPayoutRequestsEnabled()) {
+        return { data: [], error: null }
+    }
+
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) return { data: null, error: 'No autenticado' }
+
+    const { data, error } = await (supabase
+        .from('speaker_payout_requests') as any)
+        .select('id, status, amount, requested_at, approved_at, paid_at, payment_method, payment_reference, admin_notes')
+        .eq('speaker_id', user.id)
+        .order('requested_at', { ascending: false })
+        .limit(20)
+
+    if (error) return { data: null, error: error.message }
+
+    return { data: data ?? [], error: null }
+}
+
+export async function requestSpeakerPayout() {
+    if (!isSpeakerPayoutRequestsEnabled()) {
+        return { error: 'Las solicitudes de retiro aun no estan habilitadas' }
+    }
+
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) return { error: 'No autenticado' }
+
+    const db = createServiceClient()
+    const { data: availableEarnings, error: earningsError } = await (db
+        .from('speaker_earnings') as any)
+        .select('id, net_amount')
+        .eq('speaker_id', user.id)
+        .eq('financial_status', 'available')
+        .gt('net_amount', 0)
+        .is('payout_request_id', null)
+        .is('paid_at', null)
+
+    if (earningsError) return { error: earningsError.message }
+
+    const items = availableEarnings ?? []
+    const amount = Math.round(items.reduce((sum: number, item: any) => sum + Number(item.net_amount ?? 0), 0) * 100) / 100
+
+    if (items.length === 0 || amount <= 0) {
+        return { error: 'No hay saldo disponible para solicitar retiro' }
+    }
+
+    const { data: request, error: requestError } = await (db
+        .from('speaker_payout_requests') as any)
+        .insert({
+            speaker_id: user.id,
+            amount,
+            status: 'requested',
+        })
+        .select('id')
+        .single()
+
+    if (requestError) return { error: requestError.message }
+
+    const payoutItems = items.map((item: any) => ({
+        payout_request_id: request.id,
+        speaker_earning_id: item.id,
+        amount: Number(item.net_amount ?? 0),
+    }))
+
+    const { error: itemError } = await (db
+        .from('speaker_payout_request_items') as any)
+        .insert(payoutItems)
+
+    if (itemError) return { error: itemError.message }
+
+    const { error: updateError } = await (db
+        .from('speaker_earnings') as any)
+        .update({
+            financial_status: 'requested',
+            requested_at: new Date().toISOString(),
+            payout_request_id: request.id,
+            updated_at: new Date().toISOString(),
+        })
+        .in('id', items.map((item: any) => item.id))
+
+    if (updateError) return { error: updateError.message }
+
+    revalidatePath('/dashboard/earnings')
+    return { success: true, payoutRequestId: request.id, amount }
 }

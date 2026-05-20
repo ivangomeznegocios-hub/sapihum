@@ -3,11 +3,13 @@ import { redirect } from 'next/navigation'
 import { EarningsSummary } from '@/components/dashboard/earnings-summary'
 import { EarningsTable } from '@/components/dashboard/earnings-table'
 import { StudentTable } from '@/components/dashboard/student-table'
-import { getSpeakerFinancialSummary, getSpeakerEarningsHistory, getSpeakerCourses, getSpeakerStudents, getEarningsReportData } from './actions'
+import { PayoutRequestCard } from '@/components/dashboard/payout-request-card'
+import { getSpeakerFinancialSummary, getSpeakerEarningsHistory, getSpeakerCourses, getSpeakerStudents, getEarningsReportData, getSpeakerPayoutRequests } from './actions'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import { ArrowRight, CalendarDays, Video, Link2, Users } from 'lucide-react'
+import { getAppUrl } from '@/lib/config/app-url'
 
 export default async function EarningsDashboardPage() {
     const profile = await getUserProfile()
@@ -16,17 +18,20 @@ export default async function EarningsDashboardPage() {
     if (!['ponente', 'admin'].includes(profile.role)) redirect('/dashboard')
 
     // Fetch all data in parallel
-    const [summaryRes, earningsRes, coursesRes, studentsRes] = await Promise.all([
+    const [summaryRes, earningsRes, coursesRes, studentsRes, payoutRequestsRes] = await Promise.all([
         getSpeakerFinancialSummary(),
         getSpeakerEarningsHistory(),
         getSpeakerCourses(),
         getSpeakerStudents(),
+        getSpeakerPayoutRequests(),
     ])
 
     const summary = summaryRes.data
     const earnings = earningsRes.data || []
     const courses = coursesRes.data || []
     const students = studentsRes.data || []
+    const payoutRequests = payoutRequestsRes.data || []
+    const appUrl = getAppUrl()
 
     // Get current month CSV data
     const currentMonth = new Date().toISOString().slice(0, 7)
@@ -45,6 +50,13 @@ export default async function EarningsDashboardPage() {
 
             {/* I. Financial Summary */}
             {summary && <EarningsSummary summary={summary} />}
+
+            {summary && (
+                <PayoutRequestCard
+                    availableAmount={summary.availableForPayment}
+                    requests={payoutRequests}
+                />
+            )}
 
             {/* II. My Courses & Materials */}
             <Card>
@@ -85,8 +97,12 @@ export default async function EarningsDashboardPage() {
                                     completed: 'Finalizado', cancelled: 'Cancelado',
                                 }
 
+                                const directLink = course.sales_link_code && course.slug
+                                    ? `${appUrl}/eventos/${course.slug}?speaker=${course.sales_link_code}`
+                                    : null
+
                                 return (
-                                    <div key={course.id} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg hover:bg-muted transition-colors">
+                                    <div key={course.id} className="flex items-center justify-between gap-4 p-3 bg-muted/50 rounded-lg hover:bg-muted transition-colors">
                                         <div className="flex-1 min-w-0">
                                             <div className="flex items-center gap-2">
                                                 <Link href={`/dashboard/events/${course.id}`} className="text-sm font-medium hover:underline truncate">
@@ -105,8 +121,22 @@ export default async function EarningsDashboardPage() {
                                                     <Users className="h-3 w-3" /> {course.attendee_count}
                                                 </span>
                                             </p>
+                                            <p className="mt-1 text-xs text-muted-foreground">
+                                                Publico {new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(Number(course.price ?? 0))}
+                                                {' · '}
+                                                Miembro {new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(Number(course.member_price ?? course.price ?? 0))}
+                                                {' · '}
+                                                Link ponente 80% / SAPIHUM 50%
+                                            </p>
                                         </div>
                                         <div className="flex items-center gap-2 flex-shrink-0 ml-3">
+                                            {directLink && (
+                                                <a href={directLink} target="_blank" rel="noopener noreferrer"
+                                                    className="p-1.5 rounded-md hover:bg-background transition-colors"
+                                                    title="Link directo de venta">
+                                                    <Link2 className="h-3.5 w-3.5 text-brand-blue" />
+                                                </a>
+                                            )}
                                             {course.meeting_link && (
                                                 <a href={course.meeting_link} target="_blank" rel="noopener noreferrer"
                                                     className="p-1.5 rounded-md hover:bg-background transition-colors"

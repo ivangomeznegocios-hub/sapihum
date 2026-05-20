@@ -55,6 +55,9 @@ export function PublicAccessCta({
         setError(null)
         setStatusMessage(null)
         const analyticsContext = getClientAnalyticsContext({ funnel: 'event' })
+        const speakerCode = new URLSearchParams(window.location.search).get('speaker')
+            || new URLSearchParams(window.location.search).get('speaker_code')
+            || undefined
 
         try {
             const endpoint = requiresPayment ? '/api/payments/checkout' : '/api/events/public-access'
@@ -62,6 +65,7 @@ export function PublicAccessCta({
                 ? {
                     purchaseType: 'event_purchase',
                     eventId,
+                    speakerCode,
                     analyticsContext,
                     ...(withGuestDetails ? { email, fullName, successPath: `/compras/exito?slug=${eventSlug}` } : {}),
                 }

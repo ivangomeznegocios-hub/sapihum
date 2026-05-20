@@ -1,9 +1,11 @@
 import { getUserProfile } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import { adminGetAllSpeakerEarnings, adminGetAllSpeakers } from './actions'
+import { adminGetAllSpeakerEarnings, adminGetAllSpeakers, adminGetPayoutRequests, adminGetCommissionRules } from './actions'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { DollarSign, Users, Clock, CheckCircle2, TrendingUp, Ban, Shield } from 'lucide-react'
 import { AdminEarningsActions } from './admin-earnings-client'
+import { AdminPayoutRequests } from './admin-payout-requests'
+import { AdminCommissionRules } from './admin-commission-rules'
 
 function formatMXN(amount: number): string {
     return new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(amount)
@@ -18,6 +20,8 @@ export default async function AdminEarningsPage() {
     const currentMonth = new Date().toISOString().slice(0, 7)
     const { data, error } = await adminGetAllSpeakerEarnings(currentMonth)
     const { data: speakerList } = await adminGetAllSpeakers()
+    const { data: payoutRequests } = await adminGetPayoutRequests()
+    const { data: commissionRules } = await adminGetCommissionRules()
 
     if (error || !data) {
         return (
@@ -94,6 +98,23 @@ export default async function AdminEarningsPage() {
             </div>
 
             {/* Per-Speaker Breakdown */}
+            <AdminCommissionRules rules={commissionRules || []} />
+
+            <Card>
+                <CardHeader>
+                    <CardTitle className="text-base flex items-center gap-2">
+                        <DollarSign className="h-4 w-4 text-primary" />
+                        Solicitudes de Retiro
+                    </CardTitle>
+                    <CardDescription>
+                        Pagos manuales registrados por referencia
+                    </CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <AdminPayoutRequests requests={payoutRequests || []} />
+                </CardContent>
+            </Card>
+
             <Card>
                 <CardHeader>
                     <CardTitle className="text-base flex items-center gap-2">

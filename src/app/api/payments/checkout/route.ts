@@ -26,6 +26,11 @@ import { createConfirmedFormationPurchaseAndGrantAccess } from '@/lib/formations
 import { sendFormationPurchaseConfirmation } from '@/lib/payments/commerce'
 import { createServiceClient } from '@/lib/supabase/service'
 import { checkRateLimit, rateLimitResponse } from '@/lib/rate-limit'
+import {
+    inferPriceType,
+    isSpeakerCommerceEngineEnabled,
+    resolveSalesLinkAttribution,
+} from '@/lib/earnings/speaker-commerce'
 
 
 const EVENT_CHECKOUT_RESERVATION_MINUTES = 30
@@ -72,6 +77,7 @@ async function reserveEventCheckoutPurchase(params: {
     amount: number
     analyticsContext?: any
     attributionSnapshot?: any
+    commerceMetadata?: Record<string, unknown>
     enforceCapacity: boolean
 }) {
     const db = createServiceClient()
@@ -92,6 +98,7 @@ async function reserveEventCheckoutPurchase(params: {
         p_metadata: {
             analytics: params.analyticsContext ?? null,
             attribution_snapshot: params.attributionSnapshot ?? null,
+            ...(params.commerceMetadata ?? {}),
         },
         p_enforce_capacity: params.enforceCapacity,
     })
@@ -132,6 +139,7 @@ async function syncPendingEventCheckoutPurchase(params: {
     checkoutExpiresAt?: string
     analyticsContext?: any
     attributionSnapshot?: any
+    commerceMetadata?: Record<string, unknown>
 }) {
     const db = createServiceClient()
     const normalizedEmail = normalizeCheckoutEmail(params.email)
@@ -161,6 +169,7 @@ async function syncPendingEventCheckoutPurchase(params: {
         checkout_session_id: params.sessionId,
         checkout_session_expires_at: params.checkoutExpiresAt ?? null,
         checkout_prepared_at: new Date().toISOString(),
+        ...(params.commerceMetadata ?? {}),
     }
 
     const { error } = await (db
@@ -654,6 +663,13 @@ export async function POST(request: NextRequest) {
             email?: string
             fullName?: string
         }
+        const speakerCode = typeof body?.speakerCode === 'string'
+            ? body.speakerCode
+            : typeof body?.speaker_code === 'string'
+                ? body.speaker_code
+                : typeof body?.speaker === 'string'
+                    ? body.speaker
+                    : null
 
         if (!purchaseType) {
             return NextResponse.json({ error: 'Tipo de compra requerido' }, { status: 400 })
@@ -691,6 +707,7 @@ export async function POST(request: NextRequest) {
         let pendingEventId = ''
         let pendingFormationPurchaseId = ''
         let checkoutExpiresAt: string | undefined
+        let commerceMetadata: Record<string, string> = {}
 
         if (purchaseType === 'ai_credits') {
             const pkg = AI_CREDIT_PACKAGES[packageKey as AICreditPackageKey]
@@ -727,6 +744,27 @@ export async function POST(request: NextRequest) {
             checkoutDescription = resolvedEventPurchase.description
             referenceId = resolvedEventPurchase.referenceId
 
+            if (isSpeakerCommerceEngineEnabled()) {
+                const attribution = await resolveSalesLinkAttribution({
+                    supabase: createServiceClient(),
+                    eventId,
+                    speakerCode,
+                })
+                const priceType = inferPriceType({
+                    amountPaid: checkoutAmount,
+                    publicPrice: resolvedEventPurchase.event.price,
+                    memberPrice: resolvedEventPurchase.event.member_price,
+                })
+
+                commerceMetadata = {
+                    sale_origin: attribution.saleOrigin,
+                    sales_link_id: attribution.salesLinkId ?? '',
+                    attributed_speaker_id: attribution.attributedSpeakerId ?? '',
+                    speaker_code: attribution.speakerCode ?? '',
+                    price_type: priceType,
+                }
+            }
+
             if (!customerEmail) {
                 return NextResponse.json(
                     { error: 'Correo requerido para continuar', requiresGuestDetails: true },
@@ -742,6 +780,7 @@ export async function POST(request: NextRequest) {
                 amount: checkoutAmount,
                 analyticsContext,
                 attributionSnapshot,
+                commerceMetadata,
                 enforceCapacity: !isPurchasableRecordingEvent(resolvedEventPurchase.event),
             })
 
@@ -771,6 +810,7 @@ export async function POST(request: NextRequest) {
             metadata = {
                 event_purchase_id: pendingEventPurchaseId,
                 buyer_full_name: fullName || profile.data?.full_name || '',
+                ...commerceMetadata,
             }
 
             if (!user) {
@@ -1018,6 +1058,7 @@ export async function POST(request: NextRequest) {
                     checkoutExpiresAt: result.expiresAt ?? checkoutExpiresAt,
                     analyticsContext,
                     attributionSnapshot,
+                    commerceMetadata,
                 })
             } catch (syncError) {
                 await cancelPendingEventCheckoutPurchase({

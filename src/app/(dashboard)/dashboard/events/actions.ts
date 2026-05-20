@@ -101,6 +101,27 @@ function parseFloatField(value: FormDataEntryValue | null) {
     return Number.isFinite(parsed) ? parsed : null
 }
 
+function validateMemberDiscountRule(params: {
+    price: number
+    memberAccessType: string
+    memberPrice: number
+    canUseAdvancedSettings: boolean
+}) {
+    if (params.memberAccessType !== 'discounted' || params.price <= 0) {
+        return null
+    }
+
+    if (params.memberPrice <= 0) {
+        return 'Ingresa un precio preferencial para miembros o cambia el tipo de acceso'
+    }
+
+    if (!params.canUseAdvancedSettings && params.price >= 200 && params.price - params.memberPrice < 200) {
+        return 'El precio miembro debe tener al menos $200 MXN de descuento frente al precio publico'
+    }
+
+    return null
+}
+
 function parseJsonValue<T>(value: FormDataEntryValue | null, fallback: T): T {
     if (typeof value !== 'string' || !value.trim()) {
         return fallback
@@ -201,6 +222,25 @@ function validateSpeakerAssignments(assignments: SpeakerAssignmentInput[]) {
     }
 
     return 'Cada ponente con esquema fijo o porcentual necesita un valor mayor a 0.'
+}
+
+function validatePaidMultiSpeakerPublication(params: {
+    price: number
+    speakerAssignments: SpeakerAssignmentInput[]
+    requestedStatus?: string | null
+    canUseAdvancedSettings: boolean
+}) {
+    const isPublishing = params.requestedStatus === 'upcoming' || params.requestedStatus === 'live'
+    if (
+        params.price > 0
+        && params.speakerAssignments.length > 1
+        && isPublishing
+        && !params.canUseAdvancedSettings
+    ) {
+        return 'Los eventos pagados con varios ponentes requieren que admin configure el reparto antes de publicar.'
+    }
+
+    return null
 }
 
 function parseSpeakerAssignments(formData: FormData): SpeakerAssignmentInput[] {
@@ -895,14 +935,29 @@ export async function createEvent(formData: FormData) {
         return { error: 'La ubicacion es obligatoria para eventos presenciales' }
     }
 
-    if (memberAccessType === 'discounted' && price > 0 && memberPrice <= 0) {
-        return { error: 'Ingresa un precio preferencial para miembros o cambia el tipo de acceso' }
+    const memberDiscountError = validateMemberDiscountRule({
+        price,
+        memberAccessType,
+        memberPrice,
+        canUseAdvancedSettings,
+    })
+    if (memberDiscountError) {
+        return { error: memberDiscountError }
     }
 
     const speakerAssignments = parseSpeakerAssignments(formData)
     const speakerAssignmentError = validateSpeakerAssignments(speakerAssignments)
     if (speakerAssignmentError) {
         return { error: speakerAssignmentError }
+    }
+    const multiSpeakerPublicationError = validatePaidMultiSpeakerPublication({
+        price,
+        speakerAssignments,
+        requestedStatus: canPublish ? 'upcoming' : 'draft',
+        canUseAdvancedSettings,
+    })
+    if (multiSpeakerPublicationError) {
+        return { error: multiSpeakerPublicationError }
     }
 
     const sessionSchedule = parseSessionSchedule(formData, eventType, location, date, time, duration)
@@ -1175,8 +1230,14 @@ export async function updateEvent(eventId: string, formData: FormData) {
         return { error: 'La ubicacion es obligatoria para eventos presenciales' }
     }
 
-    if (memberAccessType === 'discounted' && price > 0 && memberPrice <= 0) {
-        return { error: 'Ingresa un precio preferencial para miembros o cambia el tipo de acceso' }
+    const memberDiscountError = validateMemberDiscountRule({
+        price,
+        memberAccessType,
+        memberPrice,
+        canUseAdvancedSettings,
+    })
+    if (memberDiscountError) {
+        return { error: memberDiscountError }
     }
 
     const speakerAssignments: SpeakerAssignmentInput[] = formData.has('speakerIds') || formData.has('speakerAssignments')
@@ -1189,6 +1250,15 @@ export async function updateEvent(eventId: string, formData: FormData) {
     const speakerAssignmentError = validateSpeakerAssignments(speakerAssignments)
     if (speakerAssignmentError) {
         return { error: speakerAssignmentError }
+    }
+    const multiSpeakerPublicationError = validatePaidMultiSpeakerPublication({
+        price,
+        speakerAssignments,
+        requestedStatus: status || event.status,
+        canUseAdvancedSettings,
+    })
+    if (multiSpeakerPublicationError) {
+        return { error: multiSpeakerPublicationError }
     }
 
     let nextStartTimeIso = event.start_time

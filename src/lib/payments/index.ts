@@ -10,6 +10,13 @@ import { getActiveEntitlementForEvent } from '@/lib/events/access'
 import { syncCongressBundleEntitlementsForIdentity } from '@/lib/events/congress'
 import { grantEventEntitlements, revokeEventEntitlementsBySourceReference } from '@/lib/events/entitlements'
 import { upsertAutomaticEventSpeakerEarnings } from '@/lib/earnings/compensation'
+import {
+    createRefundAdjustmentForPaidEarning,
+    inferPriceType,
+    isSpeakerCommerceEngineEnabled,
+    normalizePriceType,
+    upsertCommerceSpeakerEarnings,
+} from '@/lib/earnings/speaker-commerce'
 import { reconcileGrowthRewards } from '@/lib/growth/reward-engine'
 import {
     PROFESSIONAL_INVITE_PROGRAM_TYPE,
@@ -388,6 +395,10 @@ async function upsertPremiumCommission(params: {
     studentId: string | null
     transactionId: string | null
     grossAmount: number
+    metadata?: Record<string, string | undefined> | null
+    purchaseType?: 'event_purchase' | 'formation_purchase'
+    sourcePurchaseId?: string | null
+    priceType?: 'public' | 'member' | 'manual'
 }) {
     if (!params.studentId || params.grossAmount <= 0) {
         return
@@ -398,6 +409,26 @@ async function upsertPremiumCommission(params: {
     const releaseDate = new Date(today.getTime() + 30 * 24 * 60 * 60 * 1000)
         .toISOString()
         .split('T')[0]
+    const monthKey = today.toISOString().slice(0, 7)
+
+    const commerceResult = await upsertCommerceSpeakerEarnings({
+        supabase: params.supabase,
+        eventId: params.eventId,
+        studentId: params.studentId,
+        transactionId: params.transactionId,
+        grossAmount: params.grossAmount,
+        attendanceDate,
+        releaseDate,
+        monthKey,
+        metadata: params.metadata,
+        purchaseType: params.purchaseType ?? 'event_purchase',
+        sourcePurchaseId: params.sourcePurchaseId ?? null,
+        priceType: params.priceType,
+    })
+
+    if (commerceResult.handled) {
+        return
+    }
 
     await upsertAutomaticEventSpeakerEarnings({
         supabase: params.supabase,
@@ -407,7 +438,7 @@ async function upsertPremiumCommission(params: {
         earningType: 'premium_commission',
         attendanceDate,
         releaseDate,
-        monthKey: today.toISOString().slice(0, 7),
+        monthKey,
         sourceTransactionId: params.transactionId,
     })
 }
@@ -568,23 +599,60 @@ async function voidSpeakerEarningsForTransaction(params: {
         return 0
     }
 
-    const { data, error } = await (params.supabase
+    const { data: earnings, error: selectError } = await (params.supabase
         .from('speaker_earnings') as any)
-        .update({
-            status: 'voided',
-            voided_at: new Date().toISOString(),
-            void_reason: params.reason,
-            updated_at: new Date().toISOString(),
-        })
+        .select('id, speaker_id, event_id, student_id, net_amount, status, financial_status, paid_at, requested_at, source_transaction_id')
         .eq('source_transaction_id', params.transactionId)
         .neq('status', 'voided')
-        .select('id')
 
-    if (error) {
-        throw error
+    if (selectError) {
+        throw selectError
     }
 
-    return (data ?? []).length
+    let affected = 0
+    const now = new Date().toISOString()
+
+    for (const earning of earnings ?? []) {
+        const financialStatus = earning.financial_status ?? (earning.status === 'released' ? 'available' : 'pending')
+        const isPaid = financialStatus === 'paid' || Boolean(earning.paid_at)
+
+        if (isPaid) {
+            await createRefundAdjustmentForPaidEarning({
+                supabase: params.supabase,
+                earning,
+                reason: params.reason,
+            })
+            affected += 1
+            continue
+        }
+
+        if (financialStatus === 'requested' || Boolean(earning.requested_at)) {
+            console.warn('[Payment] Refund requires admin review because earning is in payout request', {
+                earningId: earning.id,
+                transactionId: params.transactionId,
+            })
+            continue
+        }
+
+        const { error: updateError } = await (params.supabase
+            .from('speaker_earnings') as any)
+            .update({
+                status: 'voided',
+                financial_status: 'cancelled',
+                voided_at: now,
+                void_reason: params.reason,
+                updated_at: now,
+            })
+            .eq('id', earning.id)
+
+        if (updateError) {
+            throw updateError
+        }
+
+        affected += 1
+    }
+
+    return affected
 }
 
 async function cancelPendingEventPurchaseRecord(params: {
@@ -1692,6 +1760,10 @@ export async function fulfillOneTimePayment(data: PaymentWebhookData): Promise<v
                 studentId: resolvedFulfillmentUserId,
                 transactionId,
                 grossAmount: data.amount,
+                metadata: data.metadata,
+                purchaseType: 'event_purchase',
+                sourcePurchaseId: normalizeWebhookValue(data.metadata?.event_purchase_id),
+                priceType: normalizePriceType(data.metadata?.price_type),
             })
         } catch (commissionError) {
             console.error('[Payment] Failed to create premium commission:', commissionError)
@@ -1705,6 +1777,41 @@ export async function fulfillOneTimePayment(data: PaymentWebhookData): Promise<v
             profileId,
         })
         resolvedFulfillmentUserId = result.resolvedUserId
+
+        if (isSpeakerCommerceEngineEnabled() && resolvedFulfillmentUserId) {
+            try {
+                const { data: formationEvents } = await (supabase
+                    .from('events') as any)
+                    .select('id, price, member_price')
+                    .eq('formation_id', referenceId)
+                    .neq('status', 'cancelled')
+
+                const linkedEvents = formationEvents ?? []
+                const splitAmount = linkedEvents.length > 0 ? data.amount / linkedEvents.length : 0
+
+                for (const event of linkedEvents) {
+                    await upsertPremiumCommission({
+                        supabase,
+                        eventId: event.id,
+                        studentId: resolvedFulfillmentUserId,
+                        transactionId,
+                        grossAmount: splitAmount,
+                        metadata: data.metadata,
+                        purchaseType: 'formation_purchase',
+                        sourcePurchaseId: normalizeWebhookValue(data.metadata?.formation_purchase_id) ?? referenceId,
+                        priceType: data.metadata?.price_type
+                            ? normalizePriceType(data.metadata.price_type)
+                            : inferPriceType({
+                                amountPaid: splitAmount,
+                                publicPrice: event.price,
+                                memberPrice: event.member_price,
+                            }),
+                    })
+                }
+            } catch (commissionError) {
+                console.error('[Payment] Failed to create formation speaker commissions:', commissionError)
+            }
+        }
     }
 
     if (transactionId && resolvedFulfillmentUserId && (!userId || !profileId)) {
