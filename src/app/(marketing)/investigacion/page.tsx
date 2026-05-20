@@ -25,6 +25,7 @@ export default function InvestigacionPage() {
             src="https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?q=80&w=2874&auto=format&fit=crop"
             alt="Abstract geometry"
             fill
+            sizes="(min-width: 768px) 66vw, 100vw"
             className="object-cover object-right-bottom mask-image-gradient-to-l"
             priority
           />
@@ -100,6 +101,7 @@ export default function InvestigacionPage() {
                     src="https://images.unsplash.com/photo-1518152006812-edab29b069ac?q=80&w=2938&auto=format&fit=crop"
                     alt="Estructuras de investigación abstracta"
                     fill
+                    sizes="(min-width: 1280px) 600px, (min-width: 1024px) 50vw, 100vw"
                     className="object-cover opacity-60 transition-transform duration-[10s] group-hover:scale-110 grayscale group-hover:grayscale-0"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent" />

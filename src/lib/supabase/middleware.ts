@@ -49,8 +49,6 @@ function shouldRefreshSupabaseSession(request: NextRequest) {
 
     return (
         pathname.startsWith('/dashboard') ||
-        pathname.startsWith('/auth') ||
-        pathname.startsWith('/api') ||
         hasSupabaseSessionCookie(request)
     )
 }
@@ -73,6 +71,13 @@ export async function updateSession(request: NextRequest) {
         return NextResponse.next({
             request,
         })
+    }
+
+    if (pathname.startsWith('/dashboard') && !hasSupabaseSessionCookie(request)) {
+        const url = request.nextUrl.clone()
+        url.pathname = '/auth/login'
+        url.searchParams.set('next', pathname)
+        return NextResponse.redirect(url)
     }
 
     if (
