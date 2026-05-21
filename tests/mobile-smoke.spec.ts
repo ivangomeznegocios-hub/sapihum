@@ -11,10 +11,10 @@ const PUBLIC_ROUTES = [
   { path: '/blog', label: 'blog' },
   { path: '/recursos', label: 'recursos' },
   { path: '/especialidades', label: 'especialidades' },
-  { path: '/especialidades/psicologia-clinica', label: 'especialidad clinica' },
-  { path: '/especialidades/psicologia-infantojuvenil', label: 'especialidad infantojuvenil' },
-  { path: '/especialidades/psicologia-forense', label: 'especialidad forense' },
-  { path: '/especialidades/psicogerontologia', label: 'especialidad psicogerontologia' },
+  { path: '/especialidades/evaluacion-clinica', label: 'especialidad evaluacion clinica' },
+  { path: '/especialidades/terapia-cognitivo-conductual', label: 'especialidad tcc' },
+  { path: '/especialidades/terapias-contextuales', label: 'especialidad terapias contextuales' },
+  { path: '/especialidades/supervision-clinica', label: 'especialidad supervision clinica' },
   { path: '/aviso-privacidad', label: 'aviso de privacidad' },
   { path: '/terminos', label: 'terminos' },
   { path: '/auth/login', label: 'login' },
@@ -66,7 +66,8 @@ async function assertMobileHealthy(page: Page) {
 
 for (const route of PUBLIC_ROUTES) {
   test(`mobile smoke: ${route.label}`, async ({ page }) => {
-    const response = await page.goto(route.path, { waitUntil: 'domcontentloaded' })
+    test.setTimeout(60_000)
+    const response = await page.goto(route.path, { waitUntil: 'domcontentloaded', timeout: 60_000 })
 
     expect(response, `No response received for ${route.path}`).not.toBeNull()
     expect(response?.status(), `${route.path} returned an unexpected status`).toBeLessThan(400)

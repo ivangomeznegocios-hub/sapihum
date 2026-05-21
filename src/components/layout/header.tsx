@@ -199,14 +199,14 @@ export function Header({
                                 <DropdownMenuItem asChild>
                                     <Link href="/dashboard/mi-acceso" className="flex cursor-pointer items-center">
                                         <Library className="mr-2 h-4 w-4" />
-                                        <span>Mis accesos</span>
+                                        <span>Mis cursos y eventos</span>
                                     </Link>
                                 </DropdownMenuItem>
                                 {userRole !== 'patient' && (
                                     <DropdownMenuItem asChild>
                                         <Link href="/dashboard/subscription" className="flex cursor-pointer items-center">
                                             <CreditCard className="mr-2 h-4 w-4" />
-                                            <span>Suscripcion</span>
+                                            <span>Suscripción</span>
                                         </Link>
                                     </DropdownMenuItem>
                                 )}

@@ -127,7 +127,7 @@ export default async function AdminGrowthPage() {
                         <TrendingUp className="h-6 w-6" />
                     </div>
                     <div>
-                        <h1 className="text-3xl font-bold tracking-tight">Programa de Invitacion Profesional</h1>
+                        <h1 className="text-3xl font-bold tracking-tight">Invita colegas</h1>
                         <p className="text-sm text-muted-foreground">
                             Crecimiento monetizable para captar psicologos y ponentes, separado de la canalizacion clinica.
                         </p>

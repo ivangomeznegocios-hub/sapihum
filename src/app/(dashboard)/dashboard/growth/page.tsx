@@ -117,7 +117,7 @@ export default async function GrowthHubPage() {
                             <Rocket className="h-6 w-6" />
                         </div>
                         <div>
-                            <h1 className="text-3xl font-bold tracking-tight">Programa de Invitacion Profesional</h1>
+                            <h1 className="text-3xl font-bold tracking-tight">Invita colegas</h1>
                             <p className="text-sm text-muted-foreground">
                                 Monetiza invitando psicologos y ponentes a la plataforma con payouts, bonos y metas.
                             </p>

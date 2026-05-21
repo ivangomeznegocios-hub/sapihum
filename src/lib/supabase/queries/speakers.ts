@@ -265,7 +265,7 @@ export async function getSpeakersByIds(speakerIds: string[]): Promise<SpeakerWit
  * Get a single speaker by ID with profile
  */
 export async function getSpeakerById(speakerId: string): Promise<SpeakerWithProfile | null> {
-    const supabase = await createClient()
+    const supabase = createServiceClient()
 
     const { data, error } = await (supabase
         .from('speakers') as any)

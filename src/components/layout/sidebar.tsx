@@ -63,10 +63,10 @@ const navGroups: NavGroup[] = [
         roles: ['admin', 'event_manager', 'psychologist', 'patient', 'ponente'],
         items: [
             { name: 'Inicio', href: '/dashboard', icon: Home, roles: ['admin', 'event_manager', 'psychologist', 'patient', 'ponente'] },
-            { name: 'Mi Acceso', href: '/dashboard/mi-acceso', icon: Library, roles: ['admin', 'psychologist', 'patient', 'ponente'] },
+            { name: 'Mis cursos y eventos', href: '/dashboard/mi-acceso', icon: Library, roles: ['admin', 'psychologist', 'patient', 'ponente'] },
             { name: 'Calendario', href: '/dashboard/calendar', icon: Calendar, roles: ['admin', 'patient'] },
             { name: 'Mensajes', href: '/dashboard/messages', icon: MessageSquare, roles: ['admin', 'psychologist', 'patient'] },
-            { name: 'Invitacion Pro', href: '/dashboard/growth', icon: Gift, roles: ['admin', 'psychologist', 'ponente'] },
+            { name: 'Invita colegas', href: '/dashboard/growth', icon: Gift, roles: ['admin', 'psychologist', 'ponente'] },
         ],
     },
     {
@@ -79,7 +79,7 @@ const navGroups: NavGroup[] = [
             { name: 'Negocios', href: '/dashboard/events/business', icon: Briefcase, roles: ['admin', 'psychologist', 'ponente'] },
             { name: 'Grabaciones', href: '/dashboard/events/recordings', icon: Video, roles: ['admin', 'psychologist', 'ponente'] },
             { name: 'Ponentes', href: '/dashboard/speakers', icon: Mic2, roles: ['admin', 'psychologist', 'ponente'] },
-            { name: 'Recursos', href: '/dashboard/resources', icon: BookOpen, roles: ['admin', 'psychologist', 'ponente'] },
+            { name: 'Biblioteca', href: '/dashboard/resources', icon: BookOpen, roles: ['admin', 'psychologist', 'ponente'] },
             { name: 'Newsletter', href: '/dashboard/newsletter', icon: Newspaper, roles: ['admin', 'psychologist', 'ponente'] },
             { name: 'Convenios', href: '/dashboard/agreements', icon: Handshake, roles: ['admin', 'psychologist', 'ponente'] },
         ],
@@ -108,10 +108,10 @@ const navGroups: NavGroup[] = [
         ],
     },
     {
-        label: 'Nivel 3 - Avanzado',
+        label: 'Crecimiento',
         roles: ['admin', 'psychologist'],
         items: [
-            { name: 'Hub Avanzado', href: '/dashboard/marketing', icon: Sparkles, roles: ['admin', 'psychologist'] },
+            { name: 'Impulso profesional', href: '/dashboard/marketing', icon: Sparkles, roles: ['admin', 'psychologist'] },
         ],
     },
     {
@@ -140,7 +140,7 @@ const adminGroup: NavGroup = {
         { name: 'Canalizacion', href: '/dashboard/admin/referrals', icon: GitBranch, roles: ['admin'] },
         { name: 'Newsletters', href: '/dashboard/admin/newsletters', icon: Newspaper, roles: ['admin'] },
         { name: 'Convenios', href: '/dashboard/admin/agreements', icon: Handshake, roles: ['admin'] },
-        { name: 'Invitacion Pro', href: '/dashboard/admin/growth', icon: TrendingUp, roles: ['admin'] },
+        { name: 'Invita colegas', href: '/dashboard/admin/growth', icon: TrendingUp, roles: ['admin'] },
         { name: 'Marketing', href: '/dashboard/admin/marketing', icon: Sparkles, roles: ['admin'] },
         { name: 'Analytics', href: '/dashboard/admin/analytics', icon: BarChart3, roles: ['admin'] },
     ],
@@ -165,11 +165,169 @@ const FORENSIC_ITEM_LABELS: Record<string, string> = {
     '/dashboard/resources': 'Biblioteca Forense',
     '/dashboard/newsletter': 'Boletin Forense',
     '/dashboard/agreements': 'Convenios Periciales',
-    '/dashboard/mi-acceso': 'Mi Acceso Forense',
-    '/dashboard/growth': 'Invitacion Forense',
+    '/dashboard/mi-acceso': 'Mis cursos y eventos forenses',
+    '/dashboard/growth': 'Invita colegas forenses',
     '/dashboard/earnings': 'Ganancias',
     '/dashboard/events/new': 'Crear Evento Forense',
     '/dashboard/tutoriales': 'Tutoriales Forenses',
+}
+
+function cloneNavItem(item: NavItem, name?: string): NavItem {
+    return {
+        ...item,
+        name: name ?? item.name,
+    }
+}
+
+function getItemByHref(href: string, items: NavItem[]) {
+    return items.find((item) => item.href === href)
+}
+
+function groupFromHrefs(label: string, hrefs: string[], items: NavItem[], labels: Record<string, string> = {}): NavGroup | null {
+    const groupItems = hrefs
+        .map((href) => {
+            const item = getItemByHref(href, items)
+            return item ? cloneNavItem(item, labels[href]) : null
+        })
+        .filter((item): item is NavItem => Boolean(item))
+
+    if (groupItems.length === 0) return null
+
+    return {
+        label,
+        roles: ['admin', 'event_manager', 'psychologist', 'patient', 'ponente', 'support'],
+        items: groupItems,
+    }
+}
+
+function getSimplifiedGroups({
+    userRole,
+    membershipLevel,
+    visibleItems,
+}: {
+    userRole: UserRole
+    membershipLevel: number
+    visibleItems: NavItem[]
+}): NavGroup[] | null {
+    const labels: Record<string, string> = {
+        '/dashboard/calendar': userRole === 'patient' ? 'Citas' : 'Agenda',
+        '/dashboard/documents': userRole === 'patient' ? 'Recursos' : 'Documentos',
+        '/dashboard/events': userRole === 'ponente' ? 'Mis eventos' : 'Eventos y comunidad',
+        '/dashboard/growth': 'Invita colegas',
+        '/dashboard/mi-acceso': 'Mis cursos y eventos',
+        '/dashboard/marketing': 'Impulso profesional',
+        '/dashboard/resources': 'Biblioteca',
+        '/dashboard/settings': userRole === 'ponente' ? 'Mi perfil' : 'Configuracion',
+    }
+
+    if (userRole === 'patient') {
+        return [
+            groupFromHrefs('Principal', [
+                '/dashboard',
+                '/dashboard/calendar',
+                '/dashboard/tasks',
+                '/dashboard/documents',
+                '/dashboard/my-psychologist',
+            ], visibleItems, labels),
+            groupFromHrefs('Mas', [
+                '/dashboard/booking',
+                '/dashboard/tools',
+                '/dashboard/events',
+                '/dashboard/messages',
+                '/dashboard/mi-acceso',
+            ], visibleItems, labels),
+        ].filter((group): group is NavGroup => Boolean(group))
+    }
+
+    if (userRole === 'psychologist') {
+        if (membershipLevel >= 2) {
+            return [
+                groupFromHrefs('Principal', ['/dashboard'], visibleItems, labels),
+                groupFromHrefs('Tu consultorio', [
+                    '/dashboard/calendar',
+                    '/dashboard/patients',
+                    '/dashboard/tasks',
+                    '/dashboard/documents',
+                    '/dashboard/referrals',
+                    '/dashboard/analytics',
+                ], visibleItems, labels),
+                groupFromHrefs('Comunidad profesional', [
+                    '/dashboard/events',
+                    '/dashboard/resources',
+                    '/dashboard/events/recordings',
+                    '/dashboard/events/networking',
+                    '/dashboard/speakers',
+                ], visibleItems, labels),
+                groupFromHrefs('Tu crecimiento', [
+                    '/dashboard/mi-acceso',
+                    '/dashboard/growth',
+                    '/dashboard/marketing',
+                    '/dashboard/subscription',
+                ], visibleItems, labels),
+                groupFromHrefs('Mas', [
+                    '/dashboard/events/clinical',
+                    '/dashboard/events/business',
+                    '/dashboard/newsletter',
+                    '/dashboard/agreements',
+                    '/dashboard/messages',
+                ], visibleItems, labels),
+            ].filter((group): group is NavGroup => Boolean(group))
+        }
+
+        return [
+            groupFromHrefs('Principal', [
+                '/dashboard',
+                '/dashboard/mi-acceso',
+            ], visibleItems, labels),
+            groupFromHrefs('Comunidad profesional', [
+                '/dashboard/events',
+                '/dashboard/resources',
+                '/dashboard/events/recordings',
+                '/dashboard/events/networking',
+            ], visibleItems, labels),
+            groupFromHrefs('Tu crecimiento', [
+                '/dashboard/growth',
+                '/dashboard/subscription',
+            ], visibleItems, labels),
+            groupFromHrefs('Mas', [
+                '/dashboard/events/clinical',
+                '/dashboard/events/business',
+                '/dashboard/speakers',
+                '/dashboard/newsletter',
+                '/dashboard/agreements',
+                '/dashboard/messages',
+            ], visibleItems, labels),
+        ].filter((group): group is NavGroup => Boolean(group))
+    }
+
+    if (userRole === 'ponente') {
+        return [
+            groupFromHrefs('Principal', [
+                '/dashboard',
+                '/dashboard/mi-acceso',
+            ], visibleItems, labels),
+            groupFromHrefs('Eventos', [
+                '/dashboard/events',
+                '/dashboard/events/new',
+                '/dashboard/events/formations',
+                '/dashboard/tutoriales',
+            ], visibleItems, labels),
+            groupFromHrefs('Crecimiento', [
+                '/dashboard/earnings',
+                '/dashboard/growth',
+            ], visibleItems, labels),
+            groupFromHrefs('Mas', [
+                '/dashboard/events/recordings',
+                '/dashboard/events/networking',
+                '/dashboard/speakers',
+                '/dashboard/resources',
+                '/dashboard/newsletter',
+                '/dashboard/agreements',
+            ], visibleItems, labels),
+        ].filter((group): group is NavGroup => Boolean(group))
+    }
+
+    return null
 }
 
 function NavGroupSection({
@@ -332,9 +490,37 @@ export function Sidebar({
 
     if (!userRole) return null
 
-    const visibleGroups = navGroups.filter((group) => group.roles.includes(userRole))
     const showAdmin = adminGroup.roles.includes(userRole)
-    const filteredBottomNav = bottomNav.filter((item) => item.roles.includes(userRole))
+    const baseGroups = navGroups.filter((group) => group.roles.includes(userRole))
+    const candidateItems = [
+        ...baseGroups.flatMap((group) => group.items),
+        ...(showAdmin ? adminGroup.items : []),
+        ...bottomNav,
+    ]
+    const visibleItems = candidateItems.filter((item) => (
+        item.roles.includes(userRole) &&
+        canSeeSidebarItem(item.href, {
+            role: userRole,
+            membershipLevel,
+            membershipSpecializationCode,
+            activeVerticalCode: activeVertical?.code,
+        })
+    )).filter((item, index, items) => items.findIndex((candidate) => candidate.href === item.href) === index)
+    const simplifiedGroups = activeVertical?.code === 'ciencias_forenses'
+        ? null
+        : getSimplifiedGroups({ userRole, membershipLevel, visibleItems })
+    const visibleGroups = simplifiedGroups ?? baseGroups
+    const groupedHrefs = new Set(visibleGroups.flatMap((group) => group.items.map((item) => item.href)))
+    const filteredBottomNav = bottomNav.filter((item) => (
+        item.roles.includes(userRole) &&
+        !groupedHrefs.has(item.href) &&
+        canSeeSidebarItem(item.href, {
+            role: userRole,
+            membershipLevel,
+            membershipSpecializationCode,
+            activeVerticalCode: activeVertical?.code,
+        })
+    ))
 
     return (
         <aside className={cn(

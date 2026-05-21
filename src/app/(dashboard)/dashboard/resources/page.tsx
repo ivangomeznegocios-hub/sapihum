@@ -283,7 +283,7 @@ export default async function ResourcesPage({
             {/* Header */}
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-3xl font-bold tracking-tight">Hub de Recursos</h1>
+                    <h1 className="text-3xl font-bold tracking-tight">Biblioteca</h1>
                     <p className="text-muted-foreground mt-1">
                         Material educativo, guías, herramientas y recursos para tu desarrollo profesional
                     </p>
@@ -306,7 +306,7 @@ export default async function ResourcesPage({
                                 <line x1="12" x2="12" y1="5" y2="19" />
                                 <line x1="5" x2="19" y1="12" y2="12" />
                             </svg>
-                            Agregar Recurso
+                            Agregar recurso
                         </Link>
                     </Button>
                 )}

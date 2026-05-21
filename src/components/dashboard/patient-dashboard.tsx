@@ -10,10 +10,10 @@ import {
     CheckSquare,
     Brain,
     Sparkles,
+    BookOpen,
 } from 'lucide-react'
 import { ProgressRing } from './ui/ProgressRing'
 import { MilestoneTracker, type Milestone } from './ui/MilestoneTracker'
-import { StatCard } from './ui/StatCard'
 import { ContentCarousel, type ContentItem } from './ui/ContentCarousel'
 
 interface PatientDashboardProps {
@@ -22,7 +22,6 @@ interface PatientDashboardProps {
     resourcesAvailable: number
     userName: string
     greeting: string
-    // New dynamic data
     completedSessions: number
     completedTasks: number
     totalTasks: number
@@ -32,13 +31,13 @@ interface PatientDashboardProps {
 }
 
 const WELLNESS_TIPS = [
-    { title: 'Mindfulness', text: 'Dedica 5 minutos a respirar profundamente. Inhala por la nariz, exhala por la boca. Tu mente te lo agradecerá.' },
-    { title: 'Gratitud', text: 'Escribe 3 cosas por las que estás agradecido hoy. La gratitud transforma la perspectiva.' },
-    { title: 'Movimiento', text: 'Tu cuerpo necesita moverse. Una caminata de 15 minutos puede mejorar significativamente tu estado de ánimo.' },
-    { title: 'Conexión', text: 'Habla con alguien que te haga sentir bien. Las relaciones son pilares de la salud mental.' },
-    { title: 'Descanso', text: 'El descanso no es un lujo, es una necesidad. Intenta dormir 7-8 horas esta noche.' },
-    { title: 'Creatividad', text: 'Haz algo creativo hoy: dibuja, escribe, baila. La creatividad libera emociones.' },
-    { title: 'Amabilidad', text: 'Sé amable contigo mismo. Háblate como le hablarías a tu mejor amigo.' },
+    { title: 'Respira', text: 'Dedica 5 minutos a respirar profundo y bajar el ritmo.' },
+    { title: 'Registra', text: 'Escribe 3 cosas que te ayudaron hoy, aunque sean pequeñas.' },
+    { title: 'Muévete', text: 'Una caminata corta puede ayudar a ordenar el día.' },
+    { title: 'Conecta', text: 'Habla con alguien que te haga sentir acompañado.' },
+    { title: 'Descansa', text: 'El descanso también forma parte del proceso.' },
+    { title: 'Crea', text: 'Dibuja, escribe o haz algo breve que te permita expresarte.' },
+    { title: 'Sé amable', text: 'Háblate con la misma paciencia que tendrías con alguien querido.' },
 ]
 
 function getWellnessTip() {
@@ -48,11 +47,11 @@ function getWellnessTip() {
 
 function getPatientMilestones(sessions: number, completedTasks: number): Milestone[] {
     return [
-        { title: 'Primera Sesión', completed: sessions > 0, current: sessions === 0, icon: 'Calendar' },
-        { title: '3 Sesiones', completed: sessions >= 3, current: sessions > 0 && sessions < 3, icon: 'UserCog' },
-        { title: 'Primera Tarea', completed: completedTasks > 0, current: sessions >= 3 && completedTasks === 0, icon: 'CheckSquare' },
-        { title: '5 Tareas', completed: completedTasks >= 5, current: completedTasks > 0 && completedTasks < 5, icon: 'BookOpen' },
-        { title: 'Auto-evaluación', completed: false, current: completedTasks >= 5, icon: 'Brain' },
+        { title: 'Primera sesión', completed: sessions > 0, current: sessions === 0, icon: 'Calendar' },
+        { title: '3 sesiones', completed: sessions >= 3, current: sessions > 0 && sessions < 3, icon: 'UserCog' },
+        { title: 'Primera tarea', completed: completedTasks > 0, current: sessions >= 3 && completedTasks === 0, icon: 'CheckSquare' },
+        { title: '5 tareas', completed: completedTasks >= 5, current: completedTasks > 0 && completedTasks < 5, icon: 'BookOpen' },
+        { title: 'Autoevaluación', completed: false, current: completedTasks >= 5, icon: 'Brain' },
     ]
 }
 
@@ -64,11 +63,11 @@ function getGreeting(): string {
 }
 
 const taskTypeLabels: Record<string, string> = {
-    journal: '📝 Diario',
-    exercise: '💪 Ejercicio',
-    reading: '📖 Lectura',
-    form: '📋 Formulario',
-    general: '📌 General',
+    journal: 'Diario',
+    exercise: 'Ejercicio',
+    reading: 'Lectura',
+    form: 'Formulario',
+    general: 'General',
 }
 
 export function PatientDashboard({
@@ -88,119 +87,84 @@ export function PatientDashboard({
     const heroGreeting = userName ? `${greeting}, ${userName}` : 'Tu espacio de bienestar'
     const tip = getWellnessTip()
     const milestones = getPatientMilestones(completedSessions, completedTasks)
-
-    // Wellness progress based on task completion and sessions
     const totalActions = completedTasks + completedSessions
     const wellnessPercentage = Math.min(100, Math.round((totalActions / Math.max(totalActions + pendingTasks.length, 10)) * 100))
+    const taskCompletion = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0
 
     return (
-        <div className="space-y-8 dashboard-stagger">
-            {/* Hero Banner */}
-            <div className="rounded-2xl border bg-gradient-to-br from-card via-brand-blue-hover/20 to-green-50/30 dark:from-card dark:via-brand-blue-hover/10 dark:to-green-950/10 p-6 sm:p-8">
-                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6">
+        <div className="space-y-7 dashboard-stagger">
+            <div className="rounded-xl border bg-card p-5 sm:p-6">
+                <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
                     <ProgressRing
                         percentage={wellnessPercentage}
-                        label="Tu Bienestar"
+                        label="Tu bienestar"
                         sublabel="Progreso de actividades"
                         color="primary"
-                        size={100}
+                        size={92}
                     />
-                    <div className="flex-1 min-w-0">
-                        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
+                    <div className="min-w-0 flex-1">
+                        <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
                             {heroGreeting}
                         </h1>
-                        <p className="text-muted-foreground mt-1">
-                            Tu espacio de bienestar personal
+                        <p className="mt-1 text-muted-foreground">
+                            Citas, tareas y recursos de tu proceso.
                         </p>
                         {psychologistName && (
-                            <p className="text-sm text-muted-foreground mt-2">
+                            <p className="mt-2 text-sm text-muted-foreground">
                                 Tu psicólogo: <span className="font-medium text-foreground">{psychologistName}</span>
                             </p>
                         )}
                     </div>
+                    <Button asChild className="min-h-11 shrink-0 sm:min-h-9">
+                        <Link href="/dashboard/tasks">
+                            Ver tareas
+                            <ArrowRight className="ml-2 h-4 w-4" />
+                        </Link>
+                    </Button>
                 </div>
             </div>
 
-            {/* Milestone Tracker */}
-            <div className="rounded-xl border bg-card p-5">
-                <MilestoneTracker
-                    milestones={milestones}
-                    title="Tu Journey de Bienestar"
-                />
-            </div>
-
-            {/* Stats + Next Appointment */}
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                <StatCard
-                    title="Mi Psicólogo"
-                    value={psychologistName || 'Sin asignar'}
-                    subtitle={psychologistName ? 'Asignado' : 'Contacta al administrador'}
-                    icon="UserCog"
-                    color="primary"
-                    delay={0}
-                />
-                <StatCard
-                    title="Próximas Citas"
-                    value={upcomingAppointments}
-                    subtitle="Programadas"
-                    icon="Calendar"
-                    color="primary"
-                    delay={80}
-                />
-                <StatCard
-                    title="Recursos Disponibles"
-                    value={resourcesAvailable}
-                    subtitle="Asignados para ti"
-                    icon="BookOpen"
-                    color="secondary"
-                    delay={160}
-                />
-            </div>
-
-            {/* Next Appointment Card + Pending Tasks */}
             <div className="grid gap-6 lg:grid-cols-2">
-                {/* Next Appointment */}
                 <Card>
                     <CardHeader>
-                        <CardTitle className="text-base">Próxima Cita</CardTitle>
+                        <CardTitle className="text-base">Próxima cita</CardTitle>
                         <CardDescription>Tu siguiente sesión</CardDescription>
                     </CardHeader>
                     <CardContent>
                         {nextAppointment ? (
-                            <div className="rounded-xl bg-gradient-to-br from-brand-blue to-brand-blue-hover p-5 text-white">
+                            <div className="rounded-xl border bg-muted/40 p-5">
                                 <div className="flex items-start gap-4">
-                                    <div className="rounded-xl bg-white/15 p-3">
-                                        <Calendar className="h-6 w-6 text-white" />
+                                    <div className="rounded-xl bg-background p-3">
+                                        <Calendar className="h-6 w-6 text-primary" />
                                     </div>
-                                    <div className="flex-1 min-w-0">
-                                        <p className="font-semibold text-white">
+                                    <div className="min-w-0 flex-1">
+                                        <p className="font-semibold">
                                             {new Date(nextAppointment.start_time).toLocaleDateString('es-MX', {
-                                                weekday: 'long', day: 'numeric', month: 'long'
+                                                weekday: 'long',
+                                                day: 'numeric',
+                                                month: 'long',
                                             })}
                                         </p>
-                                        <p className="mt-0.5 break-words whitespace-normal text-sm text-white/85">
+                                        <p className="mt-0.5 break-words text-sm text-muted-foreground">
                                             {new Date(nextAppointment.start_time).toLocaleTimeString('es-MX', {
-                                                hour: '2-digit', minute: '2-digit'
+                                                hour: '2-digit',
+                                                minute: '2-digit',
                                             })}
                                             {' · '}con {nextAppointment.psychologist_name}
                                         </p>
-                                        <div className="mt-3">
-                                            <Button asChild size="sm" className="min-h-11 border-white bg-white text-brand-blue-dark hover:bg-brand-blue-soft hover:text-brand-blue-dark sm:min-h-8">
-                                                <Link href="/dashboard/calendar">
-                                                    Ver Detalles
-                                                </Link>
-                                            </Button>
-                                        </div>
+                                        <Button asChild size="sm" className="mt-3 min-h-11 sm:min-h-8">
+                                            <Link href="/dashboard/calendar">Ver detalles</Link>
+                                        </Button>
                                     </div>
                                 </div>
                             </div>
                         ) : (
-                            <div className="text-center py-8 text-muted-foreground">
-                                <Clock className="h-12 w-12 mx-auto mb-4 opacity-30" />
+                            <div className="py-8 text-center text-muted-foreground">
+                                <Clock className="mx-auto mb-4 h-12 w-12 opacity-30" />
                                 <p>No hay citas programadas</p>
                                 {psychologistName && (
-                                    <p className="text-sm mt-2">
-                                        Contacta a {psychologistName} para agendar
+                                    <p className="mt-2 text-sm">
+                                        Contacta a {psychologistName} para agendar.
                                     </p>
                                 )}
                             </div>
@@ -208,31 +172,28 @@ export function PatientDashboard({
                     </CardContent>
                 </Card>
 
-                {/* Pending Tasks */}
                 <Card>
                     <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                         <div>
-                            <CardTitle className="text-base">Tareas Pendientes</CardTitle>
+                            <CardTitle className="text-base">Tareas pendientes</CardTitle>
                             <CardDescription>
                                 {completedTasks} de {totalTasks} completadas
                             </CardDescription>
                         </div>
                         {totalTasks > 0 && (
-                            <div className="text-right">
-                                <span className="text-2xl font-bold text-brand-blue-hover">
-                                    {totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0}%
-                                </span>
-                            </div>
+                            <span className="text-2xl font-bold text-brand-blue-hover">
+                                {taskCompletion}%
+                            </span>
                         )}
                     </CardHeader>
                     <CardContent>
                         {pendingTasks.length > 0 ? (
                             <div className="space-y-2.5">
                                 {pendingTasks.slice(0, 3).map((task) => (
-                                    <div key={task.id} className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg">
-                                        <CheckSquare className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-                                        <div className="flex-1 min-w-0">
-                                            <p className="text-sm font-medium truncate">{task.title}</p>
+                                    <div key={task.id} className="flex items-center gap-3 rounded-lg bg-muted/50 p-3">
+                                        <CheckSquare className="h-4 w-4 shrink-0 text-muted-foreground" />
+                                        <div className="min-w-0 flex-1">
+                                            <p className="truncate text-sm font-medium">{task.title}</p>
                                             <p className="text-xs text-muted-foreground">
                                                 {taskTypeLabels[task.type] || task.type}
                                                 {task.due_date && ` · Vence ${new Date(task.due_date).toLocaleDateString('es-MX', { day: 'numeric', month: 'short' })}`}
@@ -241,46 +202,76 @@ export function PatientDashboard({
                                     </div>
                                 ))}
                                 <Button asChild variant="outline" className="mt-1 min-h-11 w-full sm:min-h-9">
-                                    <Link href="/dashboard/tasks">
-                                        Ver todas las tareas
-                                    </Link>
+                                    <Link href="/dashboard/tasks">Ver todas las tareas</Link>
                                 </Button>
                             </div>
                         ) : (
-                            <div className="text-center py-6 text-muted-foreground">
-                                <CheckSquare className="h-10 w-10 mx-auto mb-3 opacity-30" />
-                                <p className="text-sm">¡Excelente! No tienes tareas pendientes</p>
+                            <div className="py-6 text-center text-muted-foreground">
+                                <CheckSquare className="mx-auto mb-3 h-10 w-10 opacity-30" />
+                                <p className="text-sm">No tienes tareas pendientes</p>
                             </div>
                         )}
                     </CardContent>
                 </Card>
             </div>
 
-            {/* Content Carousel */}
+            <div className="grid gap-4 md:grid-cols-3">
+                <Card>
+                    <CardContent className="flex items-center gap-3 p-4">
+                        <Calendar className="h-5 w-5 text-primary" />
+                        <div>
+                            <p className="text-sm font-medium">Citas programadas</p>
+                            <p className="text-2xl font-bold">{upcomingAppointments}</p>
+                        </div>
+                    </CardContent>
+                </Card>
+                <Card>
+                    <CardContent className="flex items-center gap-3 p-4">
+                        <BookOpen className="h-5 w-5 text-primary" />
+                        <div>
+                            <p className="text-sm font-medium">Recursos</p>
+                            <p className="text-2xl font-bold">{resourcesAvailable}</p>
+                        </div>
+                    </CardContent>
+                </Card>
+                <Card>
+                    <CardContent className="flex items-center gap-3 p-4">
+                        <Heart className="h-5 w-5 text-primary" />
+                        <div>
+                            <p className="text-sm font-medium">Sesiones completadas</p>
+                            <p className="text-2xl font-bold">{completedSessions}</p>
+                        </div>
+                    </CardContent>
+                </Card>
+            </div>
+
+            <div className="rounded-xl border bg-card p-5">
+                <MilestoneTracker milestones={milestones} title="Tu progreso" />
+            </div>
+
             {contentItems.length > 0 && (
                 <ContentCarousel
                     items={contentItems}
-                    title="Recursos Para Ti"
-                    viewAllHref="/dashboard/resources"
+                    title="Eventos para ti"
+                    viewAllHref="/dashboard/events"
                 />
             )}
 
-            {/* Quick Access */}
             <Card>
                 <CardHeader>
-                    <CardTitle className="text-base">Acceso Rápido</CardTitle>
+                    <CardTitle className="text-base">Accesos útiles</CardTitle>
                 </CardHeader>
                 <CardContent>
-                    <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                    <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
                         {[
-                            { title: 'Mi Psicólogo', href: '/dashboard/my-psychologist', icon: UserCog },
-                            { title: 'Mis Citas', href: '/dashboard/calendar', icon: Calendar },
-                            { title: 'Mis Tareas', href: '/dashboard/tasks', icon: CheckSquare },
+                            { title: 'Mi psicólogo', href: '/dashboard/my-psychologist', icon: UserCog },
+                            { title: 'Citas', href: '/dashboard/calendar', icon: Calendar },
+                            { title: 'Tareas', href: '/dashboard/tasks', icon: CheckSquare },
+                            { title: 'Recursos', href: '/dashboard/documents', icon: BookOpen },
                             { title: 'Herramientas', href: '/dashboard/tools', icon: Brain },
-                            { title: 'Eventos', href: '/dashboard/events', icon: Heart },
-                        ].map((action, i) => (
-                            <Link key={i} href={action.href}>
-                                <Button variant="outline" className="w-full justify-start gap-3 h-auto py-3 whitespace-normal text-left sm:justify-between">
+                        ].map((action) => (
+                            <Link key={action.href} href={action.href}>
+                                <Button variant="outline" className="h-auto w-full justify-start gap-3 py-3 text-left whitespace-normal sm:justify-between">
                                     <div className="flex min-w-0 items-center gap-3">
                                         <action.icon className="h-4 w-4" />
                                         <span className="min-w-0 text-left leading-snug">{action.title}</span>
@@ -293,19 +284,14 @@ export function PatientDashboard({
                 </CardContent>
             </Card>
 
-            {/* Wellness Tip */}
-            <div className="rounded-xl border border-emerald-200 bg-gradient-to-r from-emerald-50 to-brand-blue-soft p-5">
+            <div className="rounded-xl border bg-muted/35 p-5">
                 <div className="flex items-start gap-4">
-                    <div className="p-2.5 bg-emerald-100 rounded-full flex-shrink-0">
-                        <Sparkles className="h-5 w-5 text-emerald-700" />
+                    <div className="shrink-0 rounded-full bg-background p-2.5">
+                        <Sparkles className="h-5 w-5 text-primary" />
                     </div>
                     <div>
-                        <h3 className="font-semibold text-emerald-900">
-                            Tip del día: {tip.title}
-                        </h3>
-                        <p className="text-sm text-emerald-800 mt-1">
-                            {tip.text}
-                        </p>
+                        <h3 className="font-semibold">Tip del día: {tip.title}</h3>
+                        <p className="mt-1 text-sm text-muted-foreground">{tip.text}</p>
                     </div>
                 </div>
             </div>

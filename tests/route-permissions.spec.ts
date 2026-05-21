@@ -2,10 +2,11 @@ import dotenv from 'dotenv'
 import { expect, test, type Page } from '@playwright/test'
 import { createServerClient } from '@supabase/ssr'
 import { createClient } from '@supabase/supabase-js'
+import { prepareCoreRoleTestUsers, prepareRoleTestUser, TEST_USER_PASSWORD } from './helpers/test-users'
 
 dotenv.config({ path: '.env.local', quiet: true })
 
-const PASSWORD = 'test1234'
+const PASSWORD = TEST_USER_PASSWORD
 const BASE_URL = process.env.PLAYWRIGHT_BASE_URL ?? 'http://127.0.0.1:3000'
 
 function createSessionSupabase(
@@ -112,79 +113,30 @@ async function findAuthUserIdByEmail(email: string) {
   throw new Error(`Unable to find auth user for ${email}`)
 }
 
-async function ensureAuthUserIdByEmail(email: string) {
-  const admin = createAdminSupabase()
-
-  try {
-    return await findAuthUserIdByEmail(email)
-  } catch (error) {
-    if (!String(error instanceof Error ? error.message : error).includes('Unable to find auth user')) {
-      throw error
-    }
-  }
-
-  const { data, error } = await admin.auth.admin.createUser({
-    email,
-    password: PASSWORD,
-    email_confirm: true,
-    user_metadata: {
-      full_name: 'Gestor de Eventos',
-    },
-  })
-
-  if (error || !data.user) {
-    throw new Error(`Unable to create auth user for ${email}: ${error?.message ?? 'missing user'}`)
-  }
-
-  return data.user.id
-}
-
 async function ensureEventManagerTestUser() {
-    const admin = createAdminSupabase()
-    const userId = await ensureAuthUserIdByEmail('event_manager@test.com')
-
-  const { error } = await admin
-    .from('profiles')
-    .upsert({
-      id: userId,
-      email: 'event_manager@test.com',
-      role: 'event_manager',
-      full_name: 'Gestor de Eventos',
-      membership_level: 0,
-      subscription_status: 'inactive',
-    }, { onConflict: 'id' })
-
-  if (error) {
-    throw new Error(`Unable to prepare event manager profile: ${error.message}`)
-  }
-
-    return userId
+  return prepareRoleTestUser({
+    email: 'event_manager@test.com',
+    role: 'event_manager',
+    fullName: 'Gestor de Eventos',
+  })
 }
 
 async function ensureRoleTestUser(email: string, role: string, fullName: string) {
-  const admin = createAdminSupabase()
-  const userId = await ensureAuthUserIdByEmail(email)
-
-  const { error } = await admin
-    .from('profiles')
-    .upsert({
-      id: userId,
-      email,
-      role,
-      full_name: fullName,
-      membership_level: 0,
-      subscription_status: 'inactive',
-    }, { onConflict: 'id' })
-
-  if (error) {
-    throw new Error(`Unable to prepare ${role} profile: ${error.message}`)
-  }
-
-  return userId
+  return prepareRoleTestUser({
+    email,
+    role: role as Parameters<typeof prepareRoleTestUser>[0]['role'],
+    fullName,
+  })
 }
 
 test.describe('server route permissions', () => {
   test.describe.configure({ mode: 'serial' })
+
+  test.beforeAll(async () => {
+    await prepareCoreRoleTestUsers()
+    await ensureEventManagerTestUser()
+    await ensureRoleTestUser('support@test.com', 'support', 'Soporte')
+  })
 
   test('psychologist level 2 is redirected away from forbidden create routes', async ({ page }) => {
     test.setTimeout(120_000)
@@ -276,7 +228,7 @@ test.describe('server route permissions', () => {
       { email: 'psicologo2@test.com', expectedPath: '/dashboard' },
       { email: 'paciente@test.com', expectedPath: '/dashboard' },
       { email: 'event_manager@test.com', expectedPath: '/dashboard' },
-      { email: 'support@test.com', expectedPath: '/dashboard/admin/operations' },
+      { email: 'support@test.com', expectedPath: '/dashboard' },
     ]
 
     for (const route of forbiddenRoutes) {

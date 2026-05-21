@@ -236,7 +236,7 @@ export function ClinicalTabs({ notes, documents, appointments, sessionSummaries,
                     {/* Quick Actions */}
                     <Card>
                         <CardHeader>
-                            <CardTitle className="text-lg">Acciones Rápidas</CardTitle>
+                            <CardTitle className="text-lg">Accesos útiles</CardTitle>
                         </CardHeader>
                         <CardContent>
                             <div className="flex flex-wrap gap-3">

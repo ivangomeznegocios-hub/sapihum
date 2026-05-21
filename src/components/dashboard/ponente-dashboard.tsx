@@ -4,12 +4,10 @@ import { CalendarDays, Mic2, ArrowRight, Users, DollarSign, Clock, CheckCircle2,
 import Link from 'next/link'
 import { ProgressRing } from './ui/ProgressRing'
 import { MilestoneTracker, type Milestone } from './ui/MilestoneTracker'
-import { StatCard } from './ui/StatCard'
 
 interface PonenteDashboardProps {
     userName: string
     greeting: string
-    // New dynamic data
     totalEvents: number
     upcomingEvents: number
     totalAttendees: number
@@ -21,7 +19,6 @@ interface PonenteDashboardProps {
         start_time: string
         attendee_count: number
     }[]
-    // Financial data
     totalAccumulated?: number
     availableForPayment?: number
     pendingAmount?: number
@@ -38,19 +35,23 @@ function getGreeting(): string {
 
 function getSpeakerMilestones(profileComplete: number, totalEvents: number, totalAttendees: number): Milestone[] {
     return [
-        { title: 'Perfil Completo', completed: profileComplete >= 80, current: profileComplete < 80, icon: 'Mic2' },
-        { title: 'Primer Evento', completed: totalEvents > 0, current: profileComplete >= 80 && totalEvents === 0, icon: 'CalendarDays' },
-        { title: '50 Asistentes', completed: totalAttendees >= 50, current: totalEvents > 0 && totalAttendees < 50, icon: 'Users' },
-        { title: 'Speaker Certificado', completed: false, current: totalAttendees >= 50, icon: 'Award' },
+        { title: 'Perfil completo', completed: profileComplete >= 80, current: profileComplete < 80, icon: 'Mic2' },
+        { title: 'Primer evento', completed: totalEvents > 0, current: profileComplete >= 80 && totalEvents === 0, icon: 'CalendarDays' },
+        { title: '50 asistentes', completed: totalAttendees >= 50, current: totalEvents > 0 && totalAttendees < 50, icon: 'Users' },
+        { title: 'Speaker certificado', completed: false, current: totalAttendees >= 50, icon: 'Award' },
     ]
 }
 
 const statusBadges: Record<string, { label: string; color: string }> = {
     draft: { label: 'Borrador', color: 'bg-muted text-muted-foreground' },
     upcoming: { label: 'Próximo', color: 'bg-brand-blue text-white' },
-    live: { label: 'En Vivo', color: 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300' },
+    live: { label: 'En vivo', color: 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300' },
     completed: { label: 'Finalizado', color: 'bg-muted text-muted-foreground' },
     cancelled: { label: 'Cancelado', color: 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300' },
+}
+
+function formatMXN(amount: number): string {
+    return new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(amount)
 }
 
 export function PonenteDashboard({
@@ -70,255 +71,284 @@ export function PonenteDashboard({
     const greeting = initialGreeting || getGreeting()
     const heroGreeting = userName ? `${greeting}, ${userName}` : 'Tu panel de ponente'
     const milestones = getSpeakerMilestones(profileCompleteness, totalEvents, totalAttendees)
+    const nextEvent = events.find((event) => event.status === 'upcoming' || event.status === 'live') ?? null
 
     return (
-        <div className="space-y-8 dashboard-stagger">
-            {/* Hero Banner */}
-            <div className="rounded-2xl border bg-gradient-to-br from-card to-brand-blue-hover/30 dark:from-card dark:to-brand-blue-hover/10 p-6 sm:p-8">
-                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6">
+        <div className="space-y-7 dashboard-stagger">
+            <div className="rounded-xl border bg-card p-5 sm:p-6">
+                <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
                     <ProgressRing
                         percentage={profileCompleteness}
-                        label="Tu Perfil"
-                        sublabel="Completa tu perfil"
+                        label="Tu perfil"
+                        sublabel="Perfil de ponente"
                         color="secondary"
-                        size={100}
+                        size={92}
                     />
-                    <div className="flex-1 min-w-0">
-                        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
+                    <div className="min-w-0 flex-1">
+                        <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
                             {heroGreeting}
                         </h1>
-                        <p className="text-muted-foreground mt-1 text-lg">
-                            Tu panel de ponente. Gestiona tus eventos y perfil profesional.
+                        <p className="mt-1 text-muted-foreground">
+                            Eventos, perfil y ganancias en una vista más clara.
                         </p>
                     </div>
-                    <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
-                        <Button asChild variant="outline" className="min-h-11 w-full sm:min-h-9 sm:w-auto">
-                            <Link href="/dashboard/calendar" className="sm:flex-shrink-0">
-                                Ver Agenda
-                                <ArrowRight className="ml-2 h-4 w-4" />
-                            </Link>
-                        </Button>
-                        <Button asChild className="min-h-11 w-full sm:min-h-9 sm:w-auto">
-                            <Link href="/dashboard/events/new" className="sm:flex-shrink-0">
-                                <CalendarDays className="mr-2 h-4 w-4" />
-                                Crear Evento
-                            </Link>
-                        </Button>
-                    </div>
-                </div>
-            </div>
-
-            {/* Milestone Tracker */}
-            <div className="rounded-xl border bg-card p-5">
-                <MilestoneTracker
-                    milestones={milestones}
-                    title="Tu Journey como Ponente"
-                />
-            </div>
-
-            {/* Financial Summary */}
-            <div className="rounded-xl border bg-card p-5">
-                <div className="flex flex-col gap-3 mb-4 sm:flex-row sm:items-center sm:justify-between">
-                    <h2 className="text-base font-semibold flex items-center gap-2">
-                        <DollarSign className="h-4 w-4 text-brand-blue-hover" />
-                        Resumen Financiero
-                    </h2>
-                    <Button asChild variant="outline" size="sm" className="min-h-11 w-full sm:min-h-8 sm:w-auto">
-                        <Link href="/dashboard/earnings">
-                            Ver Panel Completo
-                            <ArrowRight className="ml-2 h-3 w-3" />
+                    <Button asChild className="min-h-11 shrink-0 sm:min-h-9">
+                        <Link href="/dashboard/events/new">
+                            <CalendarDays className="mr-2 h-4 w-4" />
+                            Crear evento
                         </Link>
                     </Button>
                 </div>
-                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-                    <div className="p-3 rounded-lg bg-brand-blue-soft border border-brand-blue-border">
-                        <div className="flex items-center gap-2 mb-1">
-                            <TrendingUp className="h-3.5 w-3.5 text-brand-blue" />
-                            <span className="text-xs text-muted-foreground">Total Acumulado</span>
-                        </div>
-                        <p className="text-lg font-bold">
-                            {new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(totalAccumulated)}
-                        </p>
-                    </div>
-                    <div className="p-3 rounded-lg bg-brand-teal-soft border border-emerald-200">
-                        <div className="flex items-center gap-2 mb-1">
-                            <CheckCircle2 className="h-3.5 w-3.5 text-emerald-700" />
-                            <span className="text-xs text-muted-foreground">Disponible</span>
-                        </div>
-                        <p className="text-lg font-bold text-emerald-700">
-                            {new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(availableForPayment)}
-                        </p>
-                    </div>
-                    <div className="p-3 rounded-lg bg-amber-50 border border-amber-200">
-                        <div className="flex items-center gap-2 mb-1">
-                            <Clock className="h-3.5 w-3.5 text-amber-700" />
-                            <span className="text-xs text-muted-foreground">En Garantía (30d)</span>
-                        </div>
-                        <p className="text-lg font-bold text-amber-800">
-                            {new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(pendingAmount)}
-                        </p>
-                    </div>
-                    <div className="p-3 rounded-lg bg-brand-teal-soft border border-emerald-200">
-                        <div className="flex items-center gap-2 mb-1">
-                            <CalendarDays className="h-3.5 w-3.5 text-emerald-700" />
-                            <span className="text-xs text-muted-foreground">Este Mes</span>
-                        </div>
-                        <p className="text-lg font-bold">
-                            {new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(currentMonthEarnings)}
-                        </p>
-                    </div>
-                </div>
-                {nextPaymentDate && (
-                    <p className="mt-4 text-xs text-muted-foreground">
-                        Proximo pago estimado: {new Date(nextPaymentDate).toLocaleDateString('es-MX', {
-                            day: 'numeric',
-                            month: 'long',
-                            year: 'numeric',
-                        })}
-                    </p>
-                )}
             </div>
 
-            {/* Stats */}
-            <div className="grid gap-4 md:grid-cols-3">
-                <StatCard
-                    title="Eventos Creados"
-                    value={totalEvents}
-                    subtitle="Total de eventos"
-                    icon="CalendarDays"
-                    color="secondary"
-                    delay={0}
-                />
-                <StatCard
-                    title="Eventos Próximos"
-                    value={upcomingEvents}
-                    subtitle="Próximamente"
-                    icon="Eye"
-                    color="primary"
-                    delay={80}
-                />
-                <StatCard
-                    title="Asistentes Totales"
-                    value={totalAttendees}
-                    subtitle="Acumulados"
-                    icon="Users"
-                    color="primary"
-                    delay={160}
-                />
-            </div>
-
-            {/* Events Grid + Profile */}
             <div className="grid gap-6 lg:grid-cols-3">
-                {/* My Events */}
                 <Card className="lg:col-span-2">
                     <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                         <div>
-                            <CardTitle className="text-base flex items-center gap-2">
-                                <CalendarDays className="h-4 w-4 text-primary" />
-                                Mis Eventos
-                            </CardTitle>
-                            <CardDescription>Gestiona y visualiza tus eventos</CardDescription>
+                            <CardTitle className="text-base">Próximo evento</CardTitle>
+                            <CardDescription>Lo más importante para preparar ahora</CardDescription>
                         </div>
                         <Button asChild variant="outline" size="sm" className="min-h-11 w-full sm:min-h-8 sm:w-auto">
                             <Link href="/dashboard/events">
-                                Ver Todos
+                                Ver mis eventos
                                 <ArrowRight className="ml-2 h-3 w-3" />
                             </Link>
                         </Button>
                     </CardHeader>
                     <CardContent>
-                        {events.length > 0 ? (
-                            <div className="space-y-2.5">
-                                {events.slice(0, 5).map((event) => {
-                                    const badge = statusBadges[event.status] || statusBadges.draft
-                                    return (
-                                        <Link key={event.id} href={`/dashboard/events/${event.id}`}>
-                                            <div className="flex flex-col gap-3 rounded-lg bg-muted/50 p-3 transition-colors hover:bg-muted sm:flex-row sm:items-center sm:justify-between">
-                                                <div className="flex-1 min-w-0">
-                                                    <p className="text-sm font-medium truncate">{event.title}</p>
-                                                    <p className="text-xs text-muted-foreground mt-0.5">
-                                                        {new Date(event.start_time).toLocaleDateString('es-MX', {
-                                                            weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit'
-                                                        })}
-                                                    </p>
-                                                </div>
-                                                <div className="flex flex-wrap items-center gap-2 flex-shrink-0 ml-0 sm:ml-3">
-                                                    <span className="text-xs text-muted-foreground flex items-center gap-1">
-                                                        <Users className="h-3 w-3" />
-                                                        {event.attendee_count}
-                                                    </span>
-                                                    <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${badge.color}`}>
-                                                        {badge.label}
-                                                    </span>
-                                                </div>
-                                            </div>
-                                        </Link>
-                                    )
-                                })}
-                            </div>
+                        {nextEvent ? (
+                            <Link href={`/dashboard/events/${nextEvent.id}`}>
+                                <div className="rounded-xl border bg-muted/40 p-4 transition-colors hover:bg-muted">
+                                    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                                        <div className="min-w-0">
+                                            <p className="truncate font-semibold">{nextEvent.title}</p>
+                                            <p className="mt-1 text-sm text-muted-foreground">
+                                                {new Date(nextEvent.start_time).toLocaleDateString('es-MX', {
+                                                    weekday: 'short',
+                                                    day: 'numeric',
+                                                    month: 'short',
+                                                    hour: '2-digit',
+                                                    minute: '2-digit',
+                                                })}
+                                            </p>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                                                <Users className="h-3 w-3" />
+                                                {nextEvent.attendee_count}
+                                            </span>
+                                            <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${statusBadges[nextEvent.status]?.color ?? statusBadges.draft.color}`}>
+                                                {statusBadges[nextEvent.status]?.label ?? statusBadges.draft.label}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </Link>
                         ) : (
-                            <div className="text-center py-8 text-muted-foreground">
-                                <CalendarDays className="h-12 w-12 mx-auto mb-4 opacity-30" />
-                                <p>Aún no has creado eventos</p>
+                            <div className="py-8 text-center text-muted-foreground">
+                                <CalendarDays className="mx-auto mb-4 h-12 w-12 opacity-30" />
+                                <p>No tienes eventos próximos</p>
                                 <Button asChild variant="outline" size="sm" className="mt-4 min-h-11 w-full sm:min-h-8 sm:w-auto">
-                                    <Link href="/dashboard/events/new">
-                                        Crear Mi Primer Evento
-                                    </Link>
+                                    <Link href="/dashboard/events/new">Crear evento</Link>
                                 </Button>
                             </div>
                         )}
                     </CardContent>
                 </Card>
 
-                {/* Profile Completion */}
                 <Card>
                     <CardHeader>
-                        <CardTitle className="text-base flex items-center gap-2">
+                        <CardTitle className="flex items-center gap-2 text-base">
                             <Mic2 className="h-4 w-4 text-brand-blue-hover" />
-                            Perfil de Ponente
+                            Perfil de ponente
                         </CardTitle>
-                        <CardDescription>
-                            Mantén actualizado tu perfil para tu audiencia
-                        </CardDescription>
+                        <CardDescription>Tu carta de presentación pública</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
-                        {/* Completion bar */}
                         <div>
-                            <div className="flex justify-between text-xs mb-1.5">
+                            <div className="mb-1.5 flex justify-between text-xs">
                                 <span className="text-muted-foreground">Completitud</span>
                                 <span className="font-medium">{profileCompleteness}%</span>
                             </div>
-                            <div className="h-2 bg-muted rounded-full overflow-hidden">
+                            <div className="h-2 overflow-hidden rounded-full bg-muted">
                                 <div
-                                    className="h-full bg-brand-blue-hover rounded-full transition-all duration-1000"
+                                    className="h-full rounded-full bg-brand-blue-hover transition-all duration-1000"
                                     style={{ width: `${profileCompleteness}%` }}
                                 />
                             </div>
                         </div>
-
                         {profileCompleteness < 100 && (
                             <p className="text-xs text-muted-foreground">
-                                Completa tu biografía, especialidades y foto para tu landing page.
+                                Completa biografía, especialidades y foto para mejorar tu landing.
                             </p>
                         )}
+                        <Button asChild variant="outline" className="w-full justify-between">
+                            <Link href="/dashboard/settings">
+                                Actualizar perfil
+                                <ArrowRight className="h-4 w-4" />
+                            </Link>
+                        </Button>
+                    </CardContent>
+                </Card>
+            </div>
 
-                        <div className="flex flex-col gap-2">
-                            <Button asChild variant="secondary" className="w-full justify-start gap-3 whitespace-normal text-left sm:justify-between">
-                                <Link href="/dashboard/settings">
-                                    Actualizar Mi Perfil
-                                    <ArrowRight className="h-4 w-4" />
-                                </Link>
-                            </Button>
-                            <Button asChild variant="outline" className="w-full justify-start gap-3 whitespace-normal text-left sm:justify-between">
-                                <Link href="/dashboard/events/new">
-                                    Crear Nuevo Evento
-                                    <ArrowRight className="h-4 w-4" />
-                                </Link>
-                            </Button>
+            <Card>
+                <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                        <CardTitle className="flex items-center gap-2 text-base">
+                            <DollarSign className="h-4 w-4 text-brand-blue-hover" />
+                            Ganancias
+                        </CardTitle>
+                        <CardDescription>Resumen financiero de tus eventos</CardDescription>
+                    </div>
+                    <Button asChild variant="outline" size="sm" className="min-h-11 w-full sm:min-h-8 sm:w-auto">
+                        <Link href="/dashboard/earnings">
+                            Ver ganancias
+                            <ArrowRight className="ml-2 h-3 w-3" />
+                        </Link>
+                    </Button>
+                </CardHeader>
+                <CardContent>
+                    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                        <div className="rounded-lg border bg-muted/35 p-3">
+                            <div className="mb-1 flex items-center gap-2">
+                                <TrendingUp className="h-3.5 w-3.5 text-brand-blue" />
+                                <span className="text-xs text-muted-foreground">Total acumulado</span>
+                            </div>
+                            <p className="text-lg font-bold">{formatMXN(totalAccumulated)}</p>
+                        </div>
+                        <div className="rounded-lg border bg-muted/35 p-3">
+                            <div className="mb-1 flex items-center gap-2">
+                                <CheckCircle2 className="h-3.5 w-3.5 text-emerald-700" />
+                                <span className="text-xs text-muted-foreground">Disponible</span>
+                            </div>
+                            <p className="text-lg font-bold text-emerald-700">{formatMXN(availableForPayment)}</p>
+                        </div>
+                        <div className="rounded-lg border bg-muted/35 p-3">
+                            <div className="mb-1 flex items-center gap-2">
+                                <Clock className="h-3.5 w-3.5 text-amber-700" />
+                                <span className="text-xs text-muted-foreground">En garantía</span>
+                            </div>
+                            <p className="text-lg font-bold text-amber-800">{formatMXN(pendingAmount)}</p>
+                        </div>
+                        <div className="rounded-lg border bg-muted/35 p-3">
+                            <div className="mb-1 flex items-center gap-2">
+                                <CalendarDays className="h-3.5 w-3.5 text-brand-blue" />
+                                <span className="text-xs text-muted-foreground">Este mes</span>
+                            </div>
+                            <p className="text-lg font-bold">{formatMXN(currentMonthEarnings)}</p>
+                        </div>
+                    </div>
+                    {nextPaymentDate && (
+                        <p className="mt-4 text-xs text-muted-foreground">
+                            Próximo pago estimado: {new Date(nextPaymentDate).toLocaleDateString('es-MX', {
+                                day: 'numeric',
+                                month: 'long',
+                                year: 'numeric',
+                            })}
+                        </p>
+                    )}
+                </CardContent>
+            </Card>
+
+            <div className="grid gap-4 md:grid-cols-3">
+                <Card>
+                    <CardContent className="flex items-center gap-3 p-4">
+                        <CalendarDays className="h-5 w-5 text-primary" />
+                        <div>
+                            <p className="text-sm font-medium">Eventos creados</p>
+                            <p className="text-2xl font-bold">{totalEvents}</p>
+                        </div>
+                    </CardContent>
+                </Card>
+                <Card>
+                    <CardContent className="flex items-center gap-3 p-4">
+                        <Clock className="h-5 w-5 text-primary" />
+                        <div>
+                            <p className="text-sm font-medium">Próximos</p>
+                            <p className="text-2xl font-bold">{upcomingEvents}</p>
+                        </div>
+                    </CardContent>
+                </Card>
+                <Card>
+                    <CardContent className="flex items-center gap-3 p-4">
+                        <Users className="h-5 w-5 text-primary" />
+                        <div>
+                            <p className="text-sm font-medium">Asistentes</p>
+                            <p className="text-2xl font-bold">{totalAttendees}</p>
                         </div>
                     </CardContent>
                 </Card>
             </div>
+
+            <div className="rounded-xl border bg-card p-5">
+                <MilestoneTracker
+                    milestones={milestones}
+                    title="Tu progreso como ponente"
+                />
+            </div>
+
+            <Card>
+                <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                        <CardTitle className="flex items-center gap-2 text-base">
+                            <CalendarDays className="h-4 w-4 text-primary" />
+                            Mis eventos
+                        </CardTitle>
+                        <CardDescription>Últimos eventos creados o asignados</CardDescription>
+                    </div>
+                    <Button asChild variant="outline" size="sm" className="min-h-11 w-full sm:min-h-8 sm:w-auto">
+                        <Link href="/dashboard/events">
+                            Ver todos
+                            <ArrowRight className="ml-2 h-3 w-3" />
+                        </Link>
+                    </Button>
+                </CardHeader>
+                <CardContent>
+                    {events.length > 0 ? (
+                        <div className="space-y-2.5">
+                            {events.slice(0, 5).map((event) => {
+                                const badge = statusBadges[event.status] || statusBadges.draft
+                                return (
+                                    <Link key={event.id} href={`/dashboard/events/${event.id}`}>
+                                        <div className="flex flex-col gap-3 rounded-lg bg-muted/50 p-3 transition-colors hover:bg-muted sm:flex-row sm:items-center sm:justify-between">
+                                            <div className="min-w-0 flex-1">
+                                                <p className="truncate text-sm font-medium">{event.title}</p>
+                                                <p className="mt-0.5 text-xs text-muted-foreground">
+                                                    {new Date(event.start_time).toLocaleDateString('es-MX', {
+                                                        weekday: 'short',
+                                                        day: 'numeric',
+                                                        month: 'short',
+                                                        hour: '2-digit',
+                                                        minute: '2-digit',
+                                                    })}
+                                                </p>
+                                            </div>
+                                            <div className="ml-0 flex shrink-0 flex-wrap items-center gap-2 sm:ml-3">
+                                                <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                                                    <Users className="h-3 w-3" />
+                                                    {event.attendee_count}
+                                                </span>
+                                                <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${badge.color}`}>
+                                                    {badge.label}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </Link>
+                                )
+                            })}
+                        </div>
+                    ) : (
+                        <div className="py-8 text-center text-muted-foreground">
+                            <CalendarDays className="mx-auto mb-4 h-12 w-12 opacity-30" />
+                            <p>Aún no has creado eventos</p>
+                            <Button asChild variant="outline" size="sm" className="mt-4 min-h-11 w-full sm:min-h-8 sm:w-auto">
+                                <Link href="/dashboard/events/new">Crear mi primer evento</Link>
+                            </Button>
+                        </div>
+                    )}
+                </CardContent>
+            </Card>
         </div>
     )
 }

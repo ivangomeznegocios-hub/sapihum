@@ -85,15 +85,15 @@ function DashboardAccessShortcut() {
                 <div className="min-w-0">
                     <div className="flex items-center gap-2 text-sm font-medium text-primary">
                         <Library className="h-4 w-4" />
-                        Mi acceso
+                        Mis cursos y eventos
                     </div>
                     <p className="mt-1 text-sm text-muted-foreground">
-                        Tus eventos, cursos y grabaciones activas en un solo lugar.
+                        Tus cursos, eventos y grabaciones activas en un solo lugar.
                     </p>
                 </div>
                 <Button asChild className="w-full sm:w-auto">
                     <Link href="/dashboard/mi-acceso">
-                        Abrir mis accesos
+                        Abrir mis cursos y eventos
                         <ArrowRight className="ml-2 h-4 w-4" />
                     </Link>
                 </Button>

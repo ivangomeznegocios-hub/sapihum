@@ -2,10 +2,11 @@ import dotenv from 'dotenv'
 import { expect, test, type Page } from '@playwright/test'
 import { createServerClient } from '@supabase/ssr'
 import { createClient } from '@supabase/supabase-js'
+import { prepareCoreRoleTestUsers, TEST_USER_PASSWORD } from './helpers/test-users'
 
 dotenv.config({ path: '.env.local', quiet: true })
 
-const PASSWORD = 'test1234'
+const PASSWORD = TEST_USER_PASSWORD
 const BASE_URL = process.env.PLAYWRIGHT_BASE_URL ?? 'http://127.0.0.1:3000'
 
 type SampleKey =
@@ -336,6 +337,7 @@ async function resolveSamples(): Promise<Samples> {
     const psychologist2Id = userIdByEmail.get('psicologo2@test.com')
     const psychologist3Id = userIdByEmail.get('psicologo3@test.com')
     const patientId = userIdByEmail.get('paciente@test.com')
+    const ponenteId = userIdByEmail.get('ponente@test.com')
 
     const [
       eventResult,
@@ -431,8 +433,8 @@ async function resolveSamples(): Promise<Samples> {
     return {
       eventId: eventResult.data?.id ?? undefined,
       publicEventId: publicEventResult.data?.id ?? undefined,
-      speakerId: speakerResult.data?.id ?? undefined,
-      publicSpeakerId: publicSpeakerResult.data?.id ?? undefined,
+      speakerId: ponenteId ?? speakerResult.data?.id ?? undefined,
+      publicSpeakerId: ponenteId ?? publicSpeakerResult.data?.id ?? undefined,
       resourceId: resourceResult.data?.id ?? undefined,
       patientId: relationshipResult.data?.patient_id ?? undefined,
       psychologist2PatientId: psychologist2RelationshipResult.data?.patient_id ?? undefined,
@@ -461,18 +463,7 @@ async function waitForStableLayout(page: Page) {
 
   await page.waitForFunction(
     () => {
-      const hasNextStyles = Array.from(document.styleSheets).some((sheet) => {
-        try {
-          return Boolean(
-            sheet.href?.includes('/_next/static/css') &&
-              (sheet as CSSStyleSheet).cssRules.length > 0
-          )
-        } catch {
-          return false
-        }
-      })
-
-      if (!hasNextStyles) {
+      if (document.readyState === 'loading' || !document.body || document.body.children.length === 0) {
         return false
       }
 
@@ -481,7 +472,8 @@ async function waitForStableLayout(page: Page) {
         return true
       }
 
-      return getComputedStyle(header).position === 'sticky'
+      const position = getComputedStyle(header).position
+      return position === 'sticky' || position === 'fixed'
     },
     undefined,
     { timeout: 15_000 }
@@ -515,6 +507,7 @@ async function assertMobileHealthy(page: Page, route: string, roleName: string) 
 }
 
 test.beforeAll(async () => {
+  await prepareCoreRoleTestUsers()
   samples = await resolveSamples()
 })
 
