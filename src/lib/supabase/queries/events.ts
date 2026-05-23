@@ -12,9 +12,8 @@ import type {
 } from '@/types/database'
 import { getPublicCatalogKindForEvent } from '@/lib/events/public'
 import { getUniqueEventAccessCount, getUniqueEventAccessCounts } from '@/lib/events/attendance'
-import { audienceAllowsAccess, getCommercialAccessContext, type CommercialAccessSnapshot } from '@/lib/access/commercial'
-import { canViewerSeeCatalogEvent } from '@/lib/access/catalog'
-import { canManageAnyEvent } from '@/lib/events/permissions'
+import { getCommercialAccessContext, type CommercialAccessSnapshot } from '@/lib/access/commercial'
+import { canViewerReachEventOffer, canViewerSeeCatalogEvent } from '@/lib/access/catalog'
 import { applyVerticalContentFilter, getContentIdsForVertical } from '@/lib/supabase/vertical-content'
 import { normalizeVerticalCode } from '@/lib/verticals'
 import { isSpeakerDisplayableInEvent } from '@/lib/speakers/display'
@@ -244,7 +243,10 @@ export async function getEventsWithRegistration(
     const allEvents = events.map((event: any) => ({
         ...event,
         registration: registrations?.find((r: any) => r.event_id === event.id),
-        attendee_count: attendeeCounts[event.id] || 0
+        attendee_count: attendeeCounts[event.id] || 0,
+        viewer_can_reach_offer: commercialAccess
+            ? canViewerReachEventOffer(event as any, commercialAccess.viewer)
+            : false,
     })) as EventWithRegistration[]
 
     if (!userId) {
@@ -255,19 +257,7 @@ export async function getEventsWithRegistration(
 
     if (!commercialAccess) return []
 
-    return allEvents.filter((event) => {
-        if (!canViewerSeeCatalogEvent(event as any, commercialAccess.viewer)) {
-            return false
-        }
-
-        if (canManageAnyEvent(profile.role)) {
-            return true
-        }
-
-        return audienceAllowsAccess(event.target_audience as string[] | null | undefined, commercialAccess, {
-            creatorId: event.created_by,
-        })
-    })
+    return allEvents.filter((event) => canViewerSeeCatalogEvent(event as any, commercialAccess.viewer))
 }
 
 /**

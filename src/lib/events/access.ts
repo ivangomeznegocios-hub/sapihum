@@ -1,7 +1,6 @@
 import type { Event, EventEntitlementAccessKind, EventEntitlementSourceType } from '@/types/database'
 import type { CommercialAccessSnapshot } from '@/lib/access/commercial'
-import { audienceAllowsAccess } from '@/lib/access/commercial'
-import { getMembershipAccessEnd } from '@/lib/access/catalog'
+import { canViewerReachEventOffer, getMembershipAccessEnd } from '@/lib/access/catalog'
 import { createServiceClient } from '@/lib/supabase/service'
 import { getEventAccessKinds } from './entitlements'
 import { getEffectiveEventPriceForProfile, normalizeMemberAccessType } from './pricing'
@@ -72,9 +71,7 @@ export function membershipEntitlementCanAccessEvent(params: {
         return true
     }
 
-    const hasAudienceAccess = audienceAllowsAccess(event.target_audience, commercialAccess as CommercialAccessSnapshot, {
-        creatorId: event.created_by,
-    })
+    const hasAudienceAccess = canViewerReachEventOffer(event as any, commercialAccess?.viewer ?? null)
     if (!hasAudienceAccess) return false
 
     return currentProfilePriceForEvent(event, commercialAccess) <= 0
@@ -88,9 +85,7 @@ export function eventRegistrationCanGrantAccess(params: {
     const { event, commercialAccess, registrationStatus } = params
     if (registrationStatus !== 'registered') return false
 
-    const hasAudienceAccess = audienceAllowsAccess(event.target_audience, commercialAccess as CommercialAccessSnapshot, {
-        creatorId: event.created_by,
-    })
+    const hasAudienceAccess = canViewerReachEventOffer(event as any, commercialAccess?.viewer ?? null)
     if (!hasAudienceAccess) return false
 
     return currentProfilePriceForEvent(event, commercialAccess) <= 0

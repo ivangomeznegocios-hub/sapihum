@@ -27,7 +27,8 @@ import {
     isPurchasableRecordingEvent,
     normalizeMemberAccessType,
 } from '@/lib/events/pricing'
-import { audienceAllowsAccess, isCommunityReadOnlyViewer } from '@/lib/access/commercial'
+import { isCommunityReadOnlyViewer } from '@/lib/access/commercial'
+import { canViewerReachEventOffer, canViewerSeeCatalogEvent } from '@/lib/access/catalog'
 import { contentBelongsToActiveVertical, getRelatedVerticalIds } from '@/lib/supabase/vertical-content'
 import { getSpecializationByCode } from '@/lib/specializations'
 import { DEFAULT_TIMEZONE, formatDateInTimezone, getTimezoneShortLabel } from '@/lib/timezone'
@@ -79,6 +80,7 @@ const EVENT_DETAIL_SELECT = [
     'category',
     'subcategory',
     'content_scope',
+    'primary_vertical_id',
     'certificate_type',
     'included_resources',
     'formation_track',
@@ -182,10 +184,12 @@ export default async function EventDetailPage({ params }: PageProps) {
     ])
 
     const canReachOffer = commercialAccess
-        ? audienceAllowsAccess(event.target_audience, commercialAccess, { creatorId: event.created_by })
+        ? canViewerReachEventOffer(event, commercialAccess.viewer)
         : false
+    const canDiscoverEvent = canViewerSeeCatalogEvent(event, commercialAccess?.viewer ?? null)
+    const isAudienceLocked = !canEditEvent && !canReachOffer && !isRegistered && !accessEntitlement
 
-    if (!canEditEvent && !canReachOffer && !isRegistered && !accessEntitlement) {
+    if (!canEditEvent && !canDiscoverEvent && !isRegistered && !accessEntitlement) {
         return (
             <div className="space-y-8">
                 <Link
@@ -198,7 +202,7 @@ export default async function EventDetailPage({ params }: PageProps) {
                 <Card>
                     <CardContent className="flex flex-col items-center justify-center py-12 text-center">
                         <h3 className="text-lg font-medium mb-2">Acceso restringido</h3>
-                        <p className="text-muted-foreground text-sm max-w-md">
+                        <p className="text-sm text-muted-foreground max-w-md">
                             Este evento no esta disponible para tu perfil actual.
                         </p>
                         {profile.role === 'psychologist' ? (
@@ -774,6 +778,21 @@ export default async function EventDetailPage({ params }: PageProps) {
                                             <AddToCalendarButton event={event} className="w-full" />
                                         </div>
                                     )}
+                                </>
+                            ) : isAudienceLocked ? (
+                                <>
+                                    <div className="rounded-lg border border-brand-blue-border bg-brand-blue-soft p-3 text-center text-sm font-medium text-brand-blue-hover">
+                                        Este evento requiere una membresia activa para participar.
+                                    </div>
+                                    <Button asChild variant="outline" className="w-full bg-primary/5 hover:bg-primary/10 border-primary/20">
+                                        <Link href="/dashboard/subscription">
+                                            <Lock className="mr-2 h-4 w-4 text-primary" />
+                                            Actualizar membresia
+                                        </Link>
+                                    </Button>
+                                    <p className="text-center text-xs text-muted-foreground">
+                                        Si el evento es gratis para todos, veras el boton de registro gratuito aqui.
+                                    </p>
                                 </>
                             ) : isReadOnly ? (
                                 <>

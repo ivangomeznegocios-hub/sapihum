@@ -63,12 +63,14 @@ export function EventCard({
     userId,
     isReadOnly = false,
     timezone = DEFAULT_TIMEZONE,
+    canReachOffer,
 }: {
     event: EventWithRegistration
     isActiveMember: boolean
     userId?: string
     isReadOnly?: boolean
     timezone?: string
+    canReachOffer?: boolean
 }) {
     const isRegistered = event.registration?.status === 'registered'
     const hasRecording = event.status === 'completed' && event.recording_url
@@ -76,6 +78,7 @@ export function EventCard({
     const isCreator = userId && event.created_by === userId
     const category = (event as any).category as string
     const subcategory = (event as any).subcategory as string
+    const offerIsReachable = canReachOffer ?? (event as any).viewer_can_reach_offer !== false
 
     // ──── READ-ONLY MODE (level 0 psychologists) ────
     if (isReadOnly) {
@@ -292,6 +295,10 @@ export function EventCard({
                                 <AddToCalendarButton event={event} className="w-full" />
                             </div>
                         </>
+                    ) : !offerIsReachable ? (
+                        <Button asChild variant="outline" className="w-full justify-center whitespace-normal text-center leading-snug">
+                            <Link href={`/dashboard/events/${event.id}`}>Ver detalles</Link>
+                        </Button>
                     ) : isFull ? (
                         <Button variant="outline" className="w-full" disabled>Cupo Lleno</Button>
                     ) : event.status === 'cancelled' ? (

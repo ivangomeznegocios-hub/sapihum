@@ -3,7 +3,6 @@
 import { createClient, getViewerContext } from '@/lib/supabase/server'
 import { recordAnalyticsServerEvent } from '@/lib/analytics/server'
 import { revalidatePath } from 'next/cache'
-import type { TargetAudience } from '@/types/database'
 import {
     getEffectiveEventPriceForProfile,
     normalizeMemberAccessType,
@@ -21,7 +20,8 @@ import {
     getEventEditorAccessForUser,
 } from '@/lib/events/permissions'
 import { getEventSessionOccurrences } from '@/lib/events/sessions'
-import { audienceAllowsAccess, getCommercialAccessContext } from '@/lib/access/commercial'
+import { getCommercialAccessContext } from '@/lib/access/commercial'
+import { canViewerReachEventOffer } from '@/lib/access/catalog'
 import { sendEmail } from '@/lib/email/index'
 import { buildEventRegistrationEmail } from '@/lib/email/templates'
 import { DEFAULT_TIMEZONE, formatDateInTimezone, getTimezoneShortLabel, zonedDateTimeToUtcIso } from '@/lib/timezone'
@@ -684,10 +684,9 @@ export async function registerForEvent(eventId: string, registrationData: Record
             profile: profileData,
         })
         : null
-    const audience = (event as any).target_audience as TargetAudience[] || ['public']
     const hasAccess = commercialAccess
-        ? audienceAllowsAccess(audience, commercialAccess)
-        : audience.includes('public')
+        ? canViewerReachEventOffer(event as any, commercialAccess.viewer)
+        : Array.isArray((event as any).target_audience) && (event as any).target_audience.includes('public')
 
     if (!hasAccess) {
         return { error: 'No tienes acceso a este evento' }

@@ -157,7 +157,26 @@ export function canViewerReachEventOffer(
     if (canManageAnyEvent(viewer.profile.role)) return true
     if (event.created_by && event.created_by === viewer.profile.id) return true
     if (isPurchasableRecordingEvent(event)) return true
-    return viewerMatchesAudience(event.target_audience, viewer)
+
+    const normalizedAudience = Array.isArray(event.target_audience) && event.target_audience.length > 0
+        ? event.target_audience
+        : ['public']
+
+    if (normalizedAudience.includes('public')) return true
+    if (normalizedAudience.includes('members') && viewer.membershipActive) return true
+    if (normalizedAudience.includes('psychologists') && viewer.profile.role === 'psychologist' && viewer.membershipActive) return true
+    if (normalizedAudience.includes('patients') && viewer.profile.role === 'patient') return true
+    if (normalizedAudience.includes('active_patients') && viewer.hasActivePatientRelationship) return true
+
+    return false
+}
+
+export function canViewerDiscoverMemberCatalogEvent(
+    audience: TargetAudience[] | string[] | null | undefined,
+    viewer: ViewerAccessContext | null
+) {
+    const normalizedAudience = Array.isArray(audience) && audience.length > 0 ? audience : ['public']
+    return normalizedAudience.includes('members') && viewer?.profile.role === 'psychologist'
 }
 
 export function canViewerSeeCatalogEvent(
@@ -168,6 +187,7 @@ export function canViewerSeeCatalogEvent(
     if (event.created_by && viewer?.profile.id === event.created_by) return true
     if (event.status === 'draft' || event.status === 'cancelled') return false
     return viewerMatchesAudience(event.target_audience, viewer)
+        || canViewerDiscoverMemberCatalogEvent(event.target_audience, viewer)
 }
 
 export function canViewerSeeListedResource(

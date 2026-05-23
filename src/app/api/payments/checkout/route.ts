@@ -20,7 +20,8 @@ import {
 } from '@/lib/events/access'
 import { getUniqueEventAccessCount } from '@/lib/events/attendance'
 import { getEventGrantAccessKinds } from '@/lib/events/entitlements'
-import { audienceAllowsAccess, getCommercialAccessContext } from '@/lib/access/commercial'
+import { getCommercialAccessContext } from '@/lib/access/commercial'
+import { canViewerReachEventOffer } from '@/lib/access/catalog'
 import { getFormationCommercialState } from '@/lib/formations/pricing'
 import { createConfirmedFormationPurchaseAndGrantAccess } from '@/lib/formations/service'
 import { sendFormationPurchaseConfirmation } from '@/lib/payments/commerce'
@@ -290,7 +291,7 @@ async function resolveEventPurchaseDetails(
         }
         const hasAccess =
             isPurchasableRecordingEvent(event) ||
-            audienceAllowsAccess(event.target_audience, commercialAccess, { creatorId: event.created_by })
+            canViewerReachEventOffer(event as any, commercialAccess.viewer)
 
         if (!hasAccess) {
             return { error: 'No tienes acceso a este evento' as const }

@@ -132,6 +132,7 @@ function EventCard({
     commercialAccess,
     isReadOnly = false,
     timezone = DEFAULT_TIMEZONE,
+    canReachOffer,
 }: {
     event: EventWithRegistration
     userId?: string
@@ -144,12 +145,14 @@ function EventCard({
     }
     isReadOnly?: boolean
     timezone?: string
+    canReachOffer?: boolean
 }) {
     const isRegistered = event.registration?.status === 'registered'
     const hasRecording = event.status === 'completed' && event.recording_url
     const isFull = event.max_attendees && (event.attendee_count || 0) >= event.max_attendees
     const isCreator = userId && event.created_by === userId
     const recordingProductAvailable = isPurchasableRecordingEvent(event)
+    const offerIsReachable = canReachOffer ?? (event as any).viewer_can_reach_offer !== false
     const effectivePrice = getEffectiveEventPriceForProfile(
         {
             price: event.price,
@@ -468,6 +471,12 @@ function EventCard({
                                 <AddToCalendarButton event={event} className="w-full" />
                             </div>
                         </>
+                    ) : !offerIsReachable ? (
+                        <Button asChild variant="outline" className="w-full justify-center whitespace-normal text-center leading-snug">
+                            <Link href={`/dashboard/events/${event.id}`}>
+                                Ver detalles
+                            </Link>
+                        </Button>
                     ) : isFull ? (
                         <Button variant="outline" className="w-full" disabled>
                             Cupo Lleno

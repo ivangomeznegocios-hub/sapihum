@@ -8,7 +8,8 @@ import {
 } from '@/lib/events/pricing'
 import { getUniqueEventAccessCount } from '@/lib/events/attendance'
 import { createClient } from '@/lib/supabase/server'
-import { audienceAllowsAccess, getCommercialAccessContext } from '@/lib/access/commercial'
+import { getCommercialAccessContext } from '@/lib/access/commercial'
+import { canViewerReachEventOffer } from '@/lib/access/catalog'
 import { recordAnalyticsServerEvent, resolveAttributionSnapshot } from '@/lib/analytics/server'
 import { sendEmail } from '@/lib/email/index'
 import { buildGuestAccessEmail } from '@/lib/email/templates'
@@ -69,9 +70,7 @@ export async function POST(request: NextRequest) {
             if (!commercialAccess) {
                 return NextResponse.json({ error: 'No fue posible resolver el acceso comercial de esta cuenta' }, { status: 500 })
             }
-            const hasAudienceAccess = audienceAllowsAccess(event.target_audience, commercialAccess, {
-                creatorId: event.created_by,
-            })
+            const hasAudienceAccess = canViewerReachEventOffer(event as any, commercialAccess.viewer)
             if (!hasAudienceAccess) {
                 return NextResponse.json({ error: 'No tienes acceso a este activo' }, { status: 403 })
             }
