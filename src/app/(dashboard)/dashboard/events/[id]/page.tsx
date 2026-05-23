@@ -59,7 +59,6 @@ const EVENT_DETAIL_SELECT = [
     'start_time',
     'end_time',
     'event_type',
-    'type',
     'status',
     'price',
     'member_price',
@@ -474,7 +473,7 @@ export default async function EventDetailPage({ params }: PageProps) {
                                     <Video className="h-5 w-5 text-muted-foreground" />
                                     <div>
                                         <p className="text-sm text-muted-foreground">Tipo</p>
-                                        <p className="font-medium">{getTypeLabel(event.event_type || event.type)}</p>
+                                        <p className="font-medium">{getTypeLabel(event.event_type)}</p>
                                     </div>
                                 </div>
                                 <div className="flex items-center gap-3 p-3 bg-muted rounded-lg">
