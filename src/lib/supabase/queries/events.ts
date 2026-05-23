@@ -25,6 +25,7 @@ interface EventViewerOptions {
     statuses?: EventStatus[]
     limit?: number
     select?: string
+    throwOnError?: boolean
     includeRegistrations?: boolean
     includeAttendeeCounts?: boolean
     profile?: Pick<
@@ -170,6 +171,9 @@ export async function getEventsWithRegistration(
 
     if (eventsError || !events) {
         console.error('Error fetching events:', eventsError?.message || eventsError)
+        if (options?.throwOnError) {
+            throw new Error(`EVENTS_LIST_LOAD_FAILED: ${eventsError?.message ?? 'Unknown Supabase error'}`)
+        }
         return []
     }
 
@@ -230,7 +234,7 @@ export async function getEventsWithRegistration(
     })()
 
     const [
-        { data: registrations },
+        { data: registrations, error: registrationsError },
         attendeeCounts,
         { profile, commercialAccess },
     ] = await Promise.all([
@@ -238,6 +242,13 @@ export async function getEventsWithRegistration(
         countsPromise,
         accessPromise,
     ])
+
+    if (registrationsError) {
+        console.error('Error fetching event registrations:', registrationsError?.message || registrationsError)
+        if (options?.throwOnError) {
+            throw new Error(`EVENT_REGISTRATIONS_LOAD_FAILED: ${registrationsError?.message ?? 'Unknown Supabase error'}`)
+        }
+    }
 
     // Merge data
     const allEvents = events.map((event: any) => ({

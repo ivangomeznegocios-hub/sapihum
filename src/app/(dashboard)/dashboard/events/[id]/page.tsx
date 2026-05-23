@@ -44,6 +44,8 @@ import {
     Share2,
     ClipboardList
 } from 'lucide-react'
+import { EventStatePanel } from '../event-state-panel'
+import { resolveEventDetailState } from '@/lib/events/detail-state'
 
 interface PageProps {
     params: Promise<{ id: string }>
@@ -107,11 +109,20 @@ export default async function EventDetailPage({ params }: PageProps) {
         .from('events' as any)
         .select(EVENT_DETAIL_SELECT)
         .eq('id', id)
-        .single()
+        .maybeSingle()
 
     const event = eventData as any
 
-    if (!event || error) {
+    if (error) {
+        console.error('[Events] Failed to load event detail:', {
+            eventId: id,
+            code: error.code,
+            message: error.message,
+        })
+        throw new Error(`EVENT_DETAIL_LOAD_FAILED: ${error.message}`)
+    }
+
+    if (!event) {
         notFound()
     }
 
@@ -140,10 +151,6 @@ export default async function EventDetailPage({ params }: PageProps) {
             createdBy: event.created_by,
         }),
     ])
-    if (!canUseActiveVertical) {
-        notFound()
-    }
-
     const registration = registrationData as any
     const isRegistered = registration?.status === 'registered'
     const { canManageEvent, canEditEvent } = editorAccess
@@ -188,7 +195,15 @@ export default async function EventDetailPage({ params }: PageProps) {
     const canDiscoverEvent = canViewerSeeCatalogEvent(event, commercialAccess?.viewer ?? null)
     const isAudienceLocked = !canEditEvent && !canReachOffer && !isRegistered && !accessEntitlement
 
-    if (!canEditEvent && !canDiscoverEvent && !isRegistered && !accessEntitlement) {
+    const eventDetailState = resolveEventDetailState({
+        canEditEvent,
+        canUseActiveVertical,
+        canDiscoverEvent,
+        isRegistered,
+        hasAccessEntitlement: Boolean(accessEntitlement),
+    })
+
+    if (eventDetailState === 'restricted') {
         return (
             <div className="space-y-8">
                 <Link
@@ -198,21 +213,14 @@ export default async function EventDetailPage({ params }: PageProps) {
                     <ArrowLeft className="h-4 w-4 mr-2" />
                     Volver a eventos
                 </Link>
-                <Card>
-                    <CardContent className="flex flex-col items-center justify-center py-12 text-center">
-                        <h3 className="text-lg font-medium mb-2">Acceso restringido</h3>
-                        <p className="text-sm text-muted-foreground max-w-md">
-                            Este evento no esta disponible para tu perfil actual.
-                        </p>
-                        {profile.role === 'psychologist' ? (
-                            <div className="mt-4">
-                                <Button asChild>
-                                    <Link href="/precios">Ver membresia</Link>
-                                </Button>
-                            </div>
-                        ) : null}
-                    </CardContent>
-                </Card>
+                <EventStatePanel
+                    variant="restricted"
+                    description="Este evento no esta disponible para tu perfil actual. Puedes revisar otros eventos o actualizar tu membresia."
+                    primaryHref={profile.role === 'psychologist' ? '/dashboard/subscription' : '/dashboard/events'}
+                    primaryLabel={profile.role === 'psychologist' ? 'Actualizar membresia' : 'Ver eventos disponibles'}
+                    secondaryHref="/dashboard/events"
+                    secondaryLabel="Ver eventos disponibles"
+                />
             </div>
         )
     }

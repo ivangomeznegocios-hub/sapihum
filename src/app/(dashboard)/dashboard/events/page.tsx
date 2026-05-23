@@ -11,6 +11,7 @@ import { RecordingCountdown } from './recordings/recording-countdown'
 import { EventsCategoryNav } from './events-filter'
 import { DraftEventsWorkspace, type DraftEventsWorkspaceItem } from './draft-events-workspace'
 import { EVENTS_LIST_SELECT } from './event-list-select'
+import { EventStatePanel } from './event-state-panel'
 import type { EventWithRegistration } from '@/types/database'
 import { DEFAULT_TIMEZONE, formatEventDateTimeWithZone, isEventPast } from '@/lib/timezone'
 import { getNextEventSessionOccurrence, isEventSessionSeriesPast } from '@/lib/events/sessions'
@@ -525,6 +526,7 @@ export default async function EventsPage() {
         commercialAccess,
         activeVerticalId: viewer.activeVertical?.id ?? null,
         select: EVENTS_LIST_SELECT,
+        throwOnError: true,
     })
 
     const isPsychologist = profile?.role === 'psychologist'
@@ -848,31 +850,7 @@ export default async function EventsPage() {
 
             {/* Empty State */}
             {displayEvents.length === 0 && (
-                <Card className="border-dashed">
-                    <CardContent className="flex flex-col items-center justify-center py-12">
-                        <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="48"
-                            height="48"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="1"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            className="text-muted-foreground mb-4"
-                        >
-                            <rect width="18" height="18" x="3" y="4" rx="2" ry="2" />
-                            <line x1="16" x2="16" y1="2" y2="6" />
-                            <line x1="8" x2="8" y1="2" y2="6" />
-                            <line x1="3" x2="21" y1="10" y2="10" />
-                        </svg>
-                        <h3 className="text-lg font-medium mb-1">No hay eventos programados</h3>
-                        <p className="text-sm text-muted-foreground">
-                            Pronto agregaremos nuevos talleres y eventos
-                        </p>
-                    </CardContent>
-                </Card>
+                <EventStatePanel variant="empty-list" className="border-dashed" />
             )}
         </div>
     )
