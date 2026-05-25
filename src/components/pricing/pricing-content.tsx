@@ -155,11 +155,11 @@ function PriceDisplay({
 
 function ComparisonCell({ included }: { included: boolean }) {
   return included ? (
-    <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-[#2563EB]/12 text-[#2563EB]">
+    <span className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-[#2563EB]/18 bg-[#DBEAFE] text-[#1D4ED8]">
       <Check className="h-3.5 w-3.5" />
     </span>
   ) : (
-    <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-brand-surface-soft text-foreground/20">
+    <span className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-brand-border bg-[#F8FAFC] text-brand-text-disabled">
       <X className="h-3.5 w-3.5" />
     </span>
   )
@@ -547,18 +547,18 @@ export function PricingContent({
             </div>
 
             {comparisonOpen && (
-              <div className="mt-10 overflow-x-auto rounded-2xl border border-brand-border bg-[#070707]">
-                <Table className="w-full min-w-[640px] text-foreground">
+              <div className="mt-10 overflow-x-auto rounded-2xl border border-brand-border bg-white shadow-sm">
+                <Table className="w-full min-w-[640px] text-brand-text-strong">
                   <TableHeader>
-                    <TableRow className="border-brand-border bg-white hover:bg-white">
-                      <TableHead className="w-[40%] text-brand-text-muted text-xs">Beneficio</TableHead>
-                      <TableHead className="w-[20%] text-center text-brand-text-muted text-xs">
+                    <TableRow className="border-brand-border bg-[#F8FAFC] hover:bg-[#F8FAFC]">
+                      <TableHead className="w-[40%] px-5 py-4 text-xs font-semibold text-brand-text-strong">Beneficio</TableHead>
+                      <TableHead className="w-[20%] px-4 py-4 text-center text-xs font-semibold text-brand-text-strong">
                         Comunidad
                       </TableHead>
-                      <TableHead className="w-[20%] text-center text-brand-text-muted text-xs">
+                      <TableHead className="w-[20%] px-4 py-4 text-center text-xs font-semibold text-brand-text-strong">
                         + Consultorio
                       </TableHead>
-                      <TableHead className="w-[20%] text-center text-brand-text-muted text-xs">
+                      <TableHead className="w-[20%] px-4 py-4 text-center text-xs font-semibold text-brand-text-strong">
                         + Marketing
                       </TableHead>
                     </TableRow>
@@ -566,32 +566,32 @@ export function PricingContent({
                   <TableBody>
                     {comparisonGroups.map((group) => (
                       <Fragment key={group.group}>
-                        <TableRow className="border-border/[0.06] bg-[#0d0d0d] hover:bg-[#0d0d0d]">
-                          <TableCell colSpan={4} className="py-2.5 text-[10px] font-bold uppercase tracking-[0.2em] text-[#2563EB]">
+                        <TableRow className="border-brand-border bg-[#EFF6FF] hover:bg-[#EFF6FF]">
+                          <TableCell colSpan={4} className="px-5 py-3 text-[10px] font-bold uppercase tracking-[0.2em] text-[#1D4ED8]">
                             {group.label}
                           </TableCell>
                         </TableRow>
                         {group.rows.map((feature, index) => (
                           <TableRow
                             key={feature.id}
-                            className={`cursor-pointer border-border/[0.05] transition-colors hover:bg-brand-surface-soft ${
-                              index % 2 === 0 ? 'bg-transparent' : 'bg-white/[0.015]'
+                            className={`cursor-pointer border-brand-border/60 transition-colors hover:bg-[#F8FAFC] ${
+                              index % 2 === 0 ? 'bg-white' : 'bg-[#FCFDFE]'
                             }`}
                             onClick={() => setSelectedFeatureId(feature.id)}
                           >
-                            <TableCell className="align-middle">
+                            <TableCell className="px-5 py-4 align-middle">
                               <div className="min-w-0">
-                                <p className="text-sm font-medium text-foreground">{feature.title}</p>
+                                <p className="text-sm font-semibold text-brand-text-strong">{feature.title}</p>
                                 <p className="mt-0.5 text-xs text-brand-text-muted">{feature.description}</p>
                               </div>
                             </TableCell>
-                            <TableCell className="text-center align-middle">
+                            <TableCell className="px-4 py-4 text-center align-middle">
                               <ComparisonCell included={feature.availability.level1} />
                             </TableCell>
-                            <TableCell className="text-center align-middle">
+                            <TableCell className="px-4 py-4 text-center align-middle">
                               <ComparisonCell included={feature.availability.level2} />
                             </TableCell>
-                            <TableCell className="text-center align-middle">
+                            <TableCell className="px-4 py-4 text-center align-middle">
                               <ComparisonCell included={feature.availability.level3} />
                             </TableCell>
                           </TableRow>
