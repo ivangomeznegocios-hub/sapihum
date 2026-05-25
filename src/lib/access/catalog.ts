@@ -204,6 +204,7 @@ export function canViewerSeeListedResource(
     if (viewer?.profile.role === 'admin') return true
     if (resource.created_by && viewer?.profile.id === resource.created_by) return true
     if (resource.visibility === 'private') return false
+    if (resource.visibility === 'members_only' && !viewer?.membershipActive) return false
     if (!viewerMatchesAudience(resource.target_audience, viewer)) return false
 
     const minMembershipLevel = Number(resource.min_membership_level ?? 0)

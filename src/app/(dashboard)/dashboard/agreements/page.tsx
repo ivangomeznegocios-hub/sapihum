@@ -1,17 +1,40 @@
 import Image from 'next/image'
-import { createClient } from '@/lib/supabase/server'
-import { getUserProfile } from '@/lib/supabase/server'
+import { getViewerContext } from '@/lib/supabase/server'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import type { ExclusiveAgreement } from '@/types/database'
+import { Lock } from 'lucide-react'
 
 export default async function AgreementsPage() {
-    const supabase = await createClient()
-    const profile = await getUserProfile()
+    const viewer = await getViewerContext({ includeCommercialAccess: true })
+    const { supabase, profile, commercialAccess } = viewer
 
     if (!profile) {
         return <div className="p-8 text-center text-muted-foreground">Inicia sesión para ver los convenios.</div>
+    }
+
+    const hasMembershipAccess = profile.role === 'admin' || Boolean(commercialAccess?.hasActiveMembership)
+    if (!hasMembershipAccess) {
+        return (
+            <div className="space-y-8">
+                <div>
+                    <h1 className="text-3xl font-bold tracking-tight">Convenios Exclusivos</h1>
+                    <p className="mt-1 text-muted-foreground">Beneficios exclusivos para miembros activos.</p>
+                </div>
+                <Card className="border-dashed">
+                    <CardContent className="flex flex-col items-center justify-center py-16 text-center">
+                        <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-muted">
+                            <Lock className="h-5 w-5 text-muted-foreground" />
+                        </div>
+                        <h2 className="text-xl font-semibold">Acceso con membresía activa</h2>
+                        <p className="mt-2 max-w-md text-sm text-muted-foreground">
+                            Los convenios están disponibles únicamente para cuentas con membresía activa.
+                        </p>
+                    </CardContent>
+                </Card>
+            </div>
+        )
     }
 
     // Get active agreements

@@ -1,5 +1,6 @@
 ﻿import { createClient, getUserProfile } from '@/lib/supabase/server'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { getViewerContext } from '@/lib/supabase/server'
 import { Button } from '@/components/ui/button'
 import { redirect } from 'next/navigation'
 import { ProfileForm, PasswordForm, PsychologistProfileForm } from './settings-forms'
@@ -63,13 +64,16 @@ function getCalendarNoticeMessage(notice: string | undefined) {
 
 export default async function SettingsPage({ searchParams }: { searchParams: SearchParams }) {
     const profile = await getUserProfile()
+    const viewer = await getViewerContext({ includeCommercialAccess: true })
     const params = await searchParams
 
     if (!profile) {
         redirect('/auth/login')
     }
 
-    const membershipLevel = profile.membership_level ?? 0
+    const membershipLevel = profile.role === 'admin'
+        ? (profile.membership_level ?? 0)
+        : (viewer.commercialAccess?.membershipLevel ?? 0)
     const membershipSpecialization = (profile as any).membership_specialization_code as string | null
     const calendarSyncAvailable = (profile.role === 'psychologist' || profile.role === 'ponente')
         ? await isGoogleCalendarSyncAvailable()
@@ -118,7 +122,7 @@ export default async function SettingsPage({ searchParams }: { searchParams: Sea
                 <div className="lg:col-span-2 space-y-6">
                     {/* Profile Form */}
                     {profile.role === 'psychologist' ? (
-                        <PsychologistProfileForm profile={profile} />
+                        <PsychologistProfileForm profile={profile} membershipLevel={membershipLevel} />
                     ) : (
                         <ProfileForm profile={profile} />
                     )}

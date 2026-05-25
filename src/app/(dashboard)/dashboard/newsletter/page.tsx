@@ -1,8 +1,8 @@
 import Image from 'next/image'
-import { createClient } from '@/lib/supabase/server'
-import { getUserProfile } from '@/lib/supabase/server'
+import { getViewerContext } from '@/lib/supabase/server'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import Link from 'next/link'
+import { Lock } from 'lucide-react'
 
 const MONTH_NAMES = [
     'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
@@ -10,11 +10,34 @@ const MONTH_NAMES = [
 ]
 
 export default async function NewsletterPage() {
-    const supabase = await createClient()
-    const profile = await getUserProfile()
+    const viewer = await getViewerContext({ includeCommercialAccess: true })
+    const { supabase, profile, commercialAccess } = viewer
 
     if (!profile) {
         return <div className="p-8 text-center text-muted-foreground">Inicia sesión para ver el newsletter.</div>
+    }
+
+    const hasMembershipAccess = profile.role === 'admin' || Boolean(commercialAccess?.hasActiveMembership)
+    if (!hasMembershipAccess) {
+        return (
+            <div className="space-y-8">
+                <div>
+                    <h1 className="text-3xl font-bold tracking-tight">Newsletter</h1>
+                    <p className="mt-1 text-muted-foreground">Actualizaciones de la comunidad para miembros activos.</p>
+                </div>
+                <Card className="border-dashed">
+                    <CardContent className="flex flex-col items-center justify-center py-16 text-center">
+                        <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-muted">
+                            <Lock className="h-5 w-5 text-muted-foreground" />
+                        </div>
+                        <h2 className="text-xl font-semibold">Acceso con membresía activa</h2>
+                        <p className="mt-2 max-w-md text-sm text-muted-foreground">
+                            El newsletter está disponible únicamente para cuentas con membresía activa.
+                        </p>
+                    </CardContent>
+                </Card>
+            </div>
+        )
     }
 
     // Get the active newsletter

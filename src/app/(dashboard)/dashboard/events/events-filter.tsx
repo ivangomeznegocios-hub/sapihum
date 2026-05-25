@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation'
 
 const CATEGORY_TABS = [
     { value: 'all', label: 'Todos', href: '/dashboard/events' },
+    { value: 'free', label: 'Gratuitos', href: '/dashboard/events/free' },
     { value: 'networking', label: 'Networking', href: '/dashboard/events/networking' },
     { value: 'clinical', label: 'Escuela Clínica', href: '/dashboard/events/clinical' },
     { value: 'business', label: 'Negocios', href: '/dashboard/events/business' },

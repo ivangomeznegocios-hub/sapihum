@@ -20,7 +20,7 @@ import {
     PRICING_PLAN_COPY,
     getPricingFeatureTitles,
 } from '@/lib/pricing-catalog'
-import { Check, Sparkles, Star } from 'lucide-react'
+import { Check, Lock, Sparkles, Star } from 'lucide-react'
 
 interface SubscriptionTierCardsProps {
     currentLevel: number
@@ -86,6 +86,41 @@ export function SubscriptionTierCards({
                     </button>
                 </div>
             </div>
+
+            <Card className={currentLevel === 0 ? 'border-brand-blue-border bg-brand-blue-soft/70' : ''}>
+                <CardHeader>
+                    <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                        <div>
+                            <CardTitle>{MEMBERSHIP_TIERS[0].label}</CardTitle>
+                            <CardDescription>
+                                Registro sin costo para entrar a la comunidad y a eventos abiertos.
+                            </CardDescription>
+                        </div>
+                        <Badge variant="outline" className="self-start">Gratis</Badge>
+                    </div>
+                    <div className="mt-2">
+                        <span className="text-3xl font-bold">$0</span>
+                        <span className="text-sm text-muted-foreground">/mes</span>
+                    </div>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                    <ul className="space-y-2">
+                        {MEMBERSHIP_TIERS[0].features.map((feature) => (
+                            <li key={feature} className="flex items-center gap-2 text-sm">
+                                <Check className="h-4 w-4 shrink-0 text-green-500" />
+                                {feature}
+                            </li>
+                        ))}
+                        <li className="flex items-center gap-2 text-sm text-muted-foreground">
+                            <Lock className="h-4 w-4 shrink-0" />
+                            Grabaciones, biblioteca premium, newsletter y convenios requieren membresía activa.
+                        </li>
+                    </ul>
+                    <Button className="w-full" variant="outline" disabled>
+                        {currentLevel === 0 ? 'Tu acceso actual' : 'Incluido con tu cuenta'}
+                    </Button>
+                </CardContent>
+            </Card>
 
             {level1Plan && (
                 <Card className={currentLevel === 1 ? 'border-green-500' : ''}>

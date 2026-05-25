@@ -7,8 +7,10 @@ import { SubscriptionStatus } from '@/components/payments/SubscriptionStatus'
 import { CheckoutButton } from '@/components/payments/CheckoutButton'
 import { getSubscriptionManagementSnapshot } from '@/lib/payments/subscription-management'
 import {
+    CheckCircle2,
     CreditCard,
     Shield,
+    Sparkles,
     Zap,
 } from 'lucide-react'
 import { SubscriptionTierCards } from './subscription-tier-cards'
@@ -45,26 +47,37 @@ export default async function SubscriptionPage() {
                 </p>
             </div>
 
-            <Card className="border-brand-blue bg-gradient-to-r from-brand-blue to-brand-blue-hover dark:border-brand-blue dark:from-brand-blue/30 dark:to-brand-blue-hover/30">
+            <Card className="overflow-hidden border-brand-blue-border bg-brand-blue-soft dark:border-brand-blue/40 dark:bg-brand-blue/15">
                 <CardContent className="pt-6">
                     <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                        <div>
-                            <p className="text-sm text-muted-foreground">Tu nivel actual</p>
-                            <h2 className="mt-1 text-2xl font-bold">
+                        <div className="flex items-start gap-4">
+                            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-white text-brand-blue-hover shadow-sm dark:bg-background">
+                                {isAdmin || currentLevel >= 1 ? <Shield className="h-5 w-5" /> : <Sparkles className="h-5 w-5" />}
+                            </div>
+                            <div>
+                            <p className="text-sm font-medium text-brand-text-muted">Tu nivel actual</p>
+                            <h2 className="mt-1 text-2xl font-bold text-brand-text-strong">
                                 {isAdmin ? 'Administrador' : getMembershipLabel(currentLevel)}
                             </h2>
-                            <p className="mt-1 text-sm text-muted-foreground">
+                            <p className="mt-1 max-w-2xl text-sm text-brand-text-muted">
                                 {isAdmin
                                     ? 'Acceso total a todas las funciones de la plataforma'
                                     : (MEMBERSHIP_TIERS[currentLevel]?.description ?? 'Membresia activa')}
                             </p>
+                            {currentLevel === 0 && !isAdmin && (
+                                <p className="mt-2 flex items-center gap-2 text-sm font-medium text-brand-blue-hover">
+                                    <CheckCircle2 className="h-4 w-4" />
+                                    Registro sin costo: comunidad y eventos gratuitos.
+                                </p>
+                            )}
+                            </div>
                         </div>
 
                         <div
-                            className={`self-start rounded-full px-4 py-2 ${
+                            className={`self-start rounded-full px-4 py-2 text-sm font-semibold shadow-sm ${
                                 isAdmin || currentLevel >= 1
                                     ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
-                                    : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400'
+                                    : 'bg-white text-brand-text-strong ring-1 ring-brand-blue-border dark:bg-background'
                             }`}
                         >
                             <div className="flex items-center gap-2">

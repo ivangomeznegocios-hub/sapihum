@@ -12,7 +12,7 @@ import { PaymentMethodsEditor } from '@/components/scheduling/payment-methods-ed
 import { updateProfile, updatePsychologistProfile, changePassword, acceptReferralTerms } from './actions'
 import {
     User, Shield, Check, Loader2, Stethoscope,
-    Clock, CreditCard, UserCog, MapPin, CheckCircle2, AlertCircle,
+    Clock, CreditCard, UserCog, MapPin, CheckCircle2, AlertCircle, Lock,
     GraduationCap, GitBranch
 } from 'lucide-react'
 
@@ -260,9 +260,24 @@ interface PsychologistProfileFormProps {
         accepts_referral_terms?: boolean
         referral_terms_accepted_at?: string | null
     }
+    membershipLevel?: number
 }
 
-export function PsychologistProfileForm({ profile }: PsychologistProfileFormProps) {
+function LockedSettingsPanel({ title }: { title: string }) {
+    return (
+        <div className="rounded-lg border border-dashed p-6 text-center">
+            <div className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-muted">
+                <Lock className="h-4 w-4 text-muted-foreground" />
+            </div>
+            <h3 className="font-semibold">{title}</h3>
+            <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">
+                Esta sección se desbloquea con Consultorio Digital o una membresía superior activa.
+            </p>
+        </div>
+    )
+}
+
+export function PsychologistProfileForm({ profile, membershipLevel = 0 }: PsychologistProfileFormProps) {
     const [isLoading, setIsLoading] = useState(false)
     const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null)
 
@@ -293,6 +308,7 @@ export function PsychologistProfileForm({ profile }: PsychologistProfileFormProp
             ? 'Has aceptado los lineamientos de canalizacion clinica. Ya puedes participar en la red.'
             : 'Has revocado tu aceptacion de los lineamientos de canalizacion clinica.')
         : termsMessage?.text
+    const canUsePracticeTools = membershipLevel >= 2
 
     async function handleSubmit() {
         setIsLoading(true)
@@ -304,9 +320,9 @@ export function PsychologistProfileForm({ profile }: PsychologistProfileFormProp
             bio,
             hourlyRate,
             officeAddress,
-            services,
-            availability,
-            paymentMethods,
+            services: canUsePracticeTools ? services : undefined,
+            availability: canUsePracticeTools ? availability : undefined,
+            paymentMethods: canUsePracticeTools ? paymentMethods : undefined,
             phone,
             cedulaProfesional: cedula,
             populationsServed,
@@ -366,15 +382,15 @@ export function PsychologistProfileForm({ profile }: PsychologistProfileFormProp
                             <span className="hidden sm:inline">Profesional</span>
                         </TabsTrigger>
                         <TabsTrigger value="services" className="gap-1.5 text-xs sm:text-sm">
-                            <Stethoscope className="h-4 w-4" />
+                            {canUsePracticeTools ? <Stethoscope className="h-4 w-4" /> : <Lock className="h-4 w-4" />}
                             <span className="hidden sm:inline">Servicios</span>
                         </TabsTrigger>
                         <TabsTrigger value="availability" className="gap-1.5 text-xs sm:text-sm">
-                            <Clock className="h-4 w-4" />
+                            {canUsePracticeTools ? <Clock className="h-4 w-4" /> : <Lock className="h-4 w-4" />}
                             <span className="hidden sm:inline">Agenda</span>
                         </TabsTrigger>
                         <TabsTrigger value="payments" className="gap-1.5 text-xs sm:text-sm">
-                            <CreditCard className="h-4 w-4" />
+                            {canUsePracticeTools ? <CreditCard className="h-4 w-4" /> : <Lock className="h-4 w-4" />}
                             <span className="hidden sm:inline">Pagos</span>
                         </TabsTrigger>
                         <TabsTrigger value="referrals" className="gap-1.5 text-xs sm:text-sm">
@@ -535,17 +551,29 @@ export function PsychologistProfileForm({ profile }: PsychologistProfileFormProp
 
                     {/* ── Services Tab ── */}
                     <TabsContent value="services">
-                        <ServicesEditor value={services} onChange={setServices} />
+                        {canUsePracticeTools ? (
+                            <ServicesEditor value={services} onChange={setServices} />
+                        ) : (
+                            <LockedSettingsPanel title="Servicios bloqueados" />
+                        )}
                     </TabsContent>
 
                     {/* ── Availability Tab ── */}
                     <TabsContent value="availability">
-                        <AvailabilityEditor value={availability} onChange={setAvailability} />
+                        {canUsePracticeTools ? (
+                            <AvailabilityEditor value={availability} onChange={setAvailability} />
+                        ) : (
+                            <LockedSettingsPanel title="Agenda bloqueada" />
+                        )}
                     </TabsContent>
 
                     {/* ── Payments Tab ── */}
                     <TabsContent value="payments">
-                        <PaymentMethodsEditor value={paymentMethods} onChange={setPaymentMethods} />
+                        {canUsePracticeTools ? (
+                            <PaymentMethodsEditor value={paymentMethods} onChange={setPaymentMethods} />
+                        ) : (
+                            <LockedSettingsPanel title="Pagos bloqueados" />
+                        )}
                     </TabsContent>
 
                     {/* ── Referrals / Derivaciones Tab ── */}

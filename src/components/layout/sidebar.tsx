@@ -27,7 +27,6 @@ import {
     Newspaper,
     Handshake,
     GraduationCap,
-    Briefcase,
     Users2,
     Mic2,
     DollarSign,
@@ -36,6 +35,7 @@ import {
     ShieldCheck,
     Library,
     Youtube,
+    HelpCircle,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { getMembershipTier } from '@/lib/membership'
@@ -75,8 +75,6 @@ const navGroups: NavGroup[] = [
         items: [
             { name: 'Eventos', href: '/dashboard/events', icon: CalendarDays, roles: ['admin', 'psychologist', 'patient', 'ponente'] },
             { name: 'Networking', href: '/dashboard/events/networking', icon: Users2, roles: ['admin', 'psychologist', 'ponente'] },
-            { name: 'Escuela Clinica', href: '/dashboard/events/clinical', icon: GraduationCap, roles: ['admin', 'psychologist', 'ponente'] },
-            { name: 'Negocios', href: '/dashboard/events/business', icon: Briefcase, roles: ['admin', 'psychologist', 'ponente'] },
             { name: 'Grabaciones', href: '/dashboard/events/recordings', icon: Video, roles: ['admin', 'psychologist', 'ponente'] },
             { name: 'Ponentes', href: '/dashboard/speakers', icon: Mic2, roles: ['admin', 'psychologist', 'ponente'] },
             { name: 'Biblioteca', href: '/dashboard/resources', icon: BookOpen, roles: ['admin', 'psychologist', 'ponente'] },
@@ -149,6 +147,7 @@ const adminGroup: NavGroup = {
 const bottomNav: NavItem[] = [
     { name: 'Suscripcion', href: '/dashboard/subscription', icon: CreditCard, roles: ['admin', 'psychologist'] },
     { name: 'Configuracion', href: '/dashboard/settings', icon: Settings, roles: ['admin', 'support', 'event_manager', 'psychologist', 'patient', 'ponente'] },
+    { name: 'Ayuda', href: '/dashboard/help', icon: HelpCircle, roles: ['admin', 'support', 'event_manager', 'psychologist', 'patient', 'ponente'] },
 ]
 
 const FORENSIC_GROUP_LABELS: Record<string, string> = {
@@ -265,8 +264,6 @@ function getSimplifiedGroups({
                     '/dashboard/subscription',
                 ], visibleItems, labels),
                 groupFromHrefs('Mas', [
-                    '/dashboard/events/clinical',
-                    '/dashboard/events/business',
                     '/dashboard/newsletter',
                     '/dashboard/agreements',
                     '/dashboard/messages',
@@ -290,8 +287,6 @@ function getSimplifiedGroups({
                 '/dashboard/subscription',
             ], visibleItems, labels),
             groupFromHrefs('Mas', [
-                '/dashboard/events/clinical',
-                '/dashboard/events/business',
                 '/dashboard/speakers',
                 '/dashboard/newsletter',
                 '/dashboard/agreements',

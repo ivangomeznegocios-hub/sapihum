@@ -1,6 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
 
-export const TEST_USER_PASSWORD = 'test1234'
+export const TEST_USER_PASSWORD = 'test12345'
 
 type TestUserRole = 'admin' | 'support' | 'event_manager' | 'psychologist' | 'patient' | 'ponente'
 
@@ -11,6 +11,60 @@ interface TestUserConfig {
   membershipLevel?: number
   membershipSpecializationCode?: string | null
 }
+
+export const CORE_TEST_USERS: TestUserConfig[] = [
+  {
+    email: 'admin@test.com',
+    role: 'admin',
+    fullName: 'Admin Test',
+    membershipLevel: 3,
+  },
+  {
+    email: 'support@test.com',
+    role: 'support',
+    fullName: 'Support Test',
+  },
+  {
+    email: 'event_manager@test.com',
+    role: 'event_manager',
+    fullName: 'Event Manager Test',
+  },
+  {
+    email: 'psicologo0@test.com',
+    role: 'psychologist',
+    fullName: 'Psicologo Nivel 0',
+  },
+  {
+    email: 'psicologo1@test.com',
+    role: 'psychologist',
+    fullName: 'Psicologo Nivel 1',
+    membershipLevel: 1,
+  },
+  {
+    email: 'psicologo2@test.com',
+    role: 'psychologist',
+    fullName: 'Psicologo Nivel 2',
+    membershipLevel: 2,
+    membershipSpecializationCode: 'clinica',
+  },
+  {
+    email: 'psicologo3@test.com',
+    role: 'psychologist',
+    fullName: 'Psicologo Nivel 3',
+    membershipLevel: 3,
+    membershipSpecializationCode: 'clinica',
+  },
+  {
+    email: 'paciente@test.com',
+    role: 'patient',
+    fullName: 'Paciente Test',
+  },
+  {
+    email: 'ponente@test.com',
+    role: 'ponente',
+    fullName: 'Ponente Test',
+  },
+]
 
 function createAdminSupabase() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL
@@ -196,46 +250,7 @@ export async function prepareRoleTestUser(config: TestUserConfig) {
 }
 
 export async function prepareCoreRoleTestUsers() {
-  const users: TestUserConfig[] = [
-    {
-      email: 'admin@test.com',
-      role: 'admin',
-      fullName: 'Admin Test',
-      membershipLevel: 3,
-    },
-    {
-      email: 'psicologo1@test.com',
-      role: 'psychologist',
-      fullName: 'Psicologo Nivel 1',
-      membershipLevel: 1,
-    },
-    {
-      email: 'psicologo2@test.com',
-      role: 'psychologist',
-      fullName: 'Psicologo Nivel 2',
-      membershipLevel: 2,
-      membershipSpecializationCode: 'clinica',
-    },
-    {
-      email: 'psicologo3@test.com',
-      role: 'psychologist',
-      fullName: 'Psicologo Nivel 3',
-      membershipLevel: 3,
-      membershipSpecializationCode: 'clinica',
-    },
-    {
-      email: 'paciente@test.com',
-      role: 'patient',
-      fullName: 'Paciente Test',
-    },
-    {
-      email: 'ponente@test.com',
-      role: 'ponente',
-      fullName: 'Ponente Test',
-    },
-  ]
-
-  for (const user of users) {
+  for (const user of CORE_TEST_USERS) {
     await prepareRoleTestUser(user)
   }
 }

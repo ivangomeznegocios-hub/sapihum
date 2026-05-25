@@ -30,14 +30,15 @@ export const MEMBERSHIP_TIERS: Record<number, MembershipTierConfig> = {
     0: {
         level: 0,
         label: 'Registro Gratuito',
-        description: 'Psicologo registrado sin plan de pago activo.',
+        description: 'Registro gratuito para comunidad y eventos abiertos, sin beneficios de membresia.',
         price: 0,
         priceLabel: 'Gratis',
         trialDays: 0,
-        tagline: 'Sin membresia',
+        tagline: 'Registro sin costo',
         features: [
             'Perfil basico en la plataforma',
-            'Acceso a recursos publicos',
+            'Acceso a comunidad',
+            'Eventos gratuitos abiertos al publico',
         ],
     },
     1: {

@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { getCommercialAccessContext } from '@/lib/access/commercial'
 import { revokeGoogleToken } from '@/lib/calendar-sync'
 import { revalidatePath } from 'next/cache'
 
@@ -39,9 +40,9 @@ export async function updatePsychologistProfile(data: {
     bio: string
     hourlyRate: number
     officeAddress: string
-    services: any[]
-    availability: any
-    paymentMethods: any
+    services?: any[]
+    availability?: any
+    paymentMethods?: any
     phone: string
     cedulaProfesional: string
     populationsServed: string[]
@@ -61,7 +62,7 @@ export async function updatePsychologistProfile(data: {
     // Verify user is a psychologist
     const { data: profile } = await (supabase
         .from('profiles') as any)
-        .select('role')
+        .select('role, email, membership_level, subscription_status, membership_specialization_code')
         .eq('id', user.id)
         .single()
 
@@ -69,26 +70,46 @@ export async function updatePsychologistProfile(data: {
         return { error: 'Solo psicólogos pueden actualizar estos campos' }
     }
 
+    const commercialAccess = await getCommercialAccessContext({
+        supabase,
+        userId: user.id,
+        profile: profile as any,
+    })
+    const canUpdatePracticeTools = Boolean(commercialAccess?.hasActiveMembership && commercialAccess.membershipLevel >= 2)
+    const premiumFieldsRequested =
+        data.services !== undefined ||
+        data.availability !== undefined ||
+        data.paymentMethods !== undefined
+
+    if (premiumFieldsRequested && !canUpdatePracticeTools) {
+        return { error: 'Servicios, agenda y pagos requieren Consultorio Digital activo.' }
+    }
+
+    const updates: Record<string, any> = {
+        full_name: data.fullName,
+        specialty: data.specialty || null,
+        bio: data.bio || null,
+        hourly_rate: data.hourlyRate || null,
+        office_address: data.officeAddress || null,
+        phone: data.phone || null,
+        cedula_profesional: data.cedulaProfesional || null,
+        populations_served: data.populationsServed || [],
+        therapeutic_approaches: data.therapeuticApproaches || [],
+        languages: data.languages || [],
+        years_experience: data.yearsExperience || null,
+        education: data.education || null,
+        updated_at: new Date().toISOString(),
+    }
+
+    if (canUpdatePracticeTools) {
+        updates.services = data.services || []
+        updates.availability = data.availability || {}
+        updates.payment_methods = data.paymentMethods || {}
+    }
+
     const { error } = await (supabase
         .from('profiles') as any)
-        .update({
-            full_name: data.fullName,
-            specialty: data.specialty || null,
-            bio: data.bio || null,
-            hourly_rate: data.hourlyRate || null,
-            office_address: data.officeAddress || null,
-            services: data.services || [],
-            availability: data.availability || {},
-            payment_methods: data.paymentMethods || {},
-            phone: data.phone || null,
-            cedula_profesional: data.cedulaProfesional || null,
-            populations_served: data.populationsServed || [],
-            therapeutic_approaches: data.therapeuticApproaches || [],
-            languages: data.languages || [],
-            years_experience: data.yearsExperience || null,
-            education: data.education || null,
-            updated_at: new Date().toISOString()
-        } as any)
+        .update(updates as any)
         .eq('id', user.id)
 
     if (error) {

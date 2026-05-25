@@ -12,6 +12,7 @@ type EventAccessPolicyEvent = Pick<
 >
 
 type EventAccessPolicyEntitlement = {
+    access_kind?: EventEntitlementAccessKind | string | null
     source_type?: EventEntitlementSourceType | string | null
     metadata?: Record<string, unknown> | null
 } | null | undefined
@@ -81,9 +82,14 @@ export function eventRegistrationCanGrantAccess(params: {
     event: EventAccessPolicyEvent
     commercialAccess: EventAccessPolicyCommercialAccess
     registrationStatus?: string | null
+    accessKind?: EventEntitlementAccessKind | string | null
 }) {
-    const { event, commercialAccess, registrationStatus } = params
+    const { event, commercialAccess, registrationStatus, accessKind } = params
     if (registrationStatus !== 'registered') return false
+
+    if (accessKind === 'replay_access' && !commercialAccess?.hasActiveMembership) {
+        return commercialAccess?.role === 'admin'
+    }
 
     const hasAudienceAccess = canViewerReachEventOffer(event as any, commercialAccess?.viewer ?? null)
     if (!hasAudienceAccess) return false
@@ -108,6 +114,7 @@ export function entitlementCanGrantEventAccess(params: {
             event,
             commercialAccess,
             registrationStatus: 'registered',
+            accessKind: entitlement.access_kind,
         })
     }
 

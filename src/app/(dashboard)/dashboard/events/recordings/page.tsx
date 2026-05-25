@@ -1,4 +1,4 @@
-import { getUserProfile } from '@/lib/supabase/server'
+import { getViewerContext } from '@/lib/supabase/server'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import Image from 'next/image'
@@ -12,11 +12,13 @@ import {
     Calendar,
     Clock,
     Video,
-    Infinity as InfinityIcon
+    Infinity as InfinityIcon,
+    Lock
 } from 'lucide-react'
 
 export default async function RecordingsPage() {
-    const profile = await getUserProfile()
+    const viewer = await getViewerContext({ includeCommercialAccess: true })
+    const profile = viewer.profile
 
     if (!profile) {
         redirect('/compras/recuperar?next=/dashboard/events/recordings')
@@ -24,7 +26,11 @@ export default async function RecordingsPage() {
 
     const now = new Date()
     const userTimezone = (profile as any).timezone || DEFAULT_TIMEZONE
-    const accessibleEvents = await getMyReplayAccessibleEvents()
+    const hasReplayMembership = Boolean(
+        profile.role === 'admin' ||
+        viewer.commercialAccess?.hasActiveMembership
+    )
+    const accessibleEvents = hasReplayMembership ? await getMyReplayAccessibleEvents() : []
     const accessibleRecordings = accessibleEvents
         .map((row: any) => row.event)
         .filter((event: any) => {
@@ -60,20 +66,27 @@ export default async function RecordingsPage() {
                     Mis Grabaciones
                 </h1>
                 <p className="text-muted-foreground mt-1">
-                    Accede a las grabaciones de los eventos que asististe
+                    Accede a las grabaciones incluidas con tu membresía activa
                 </p>
             </div>
 
             {/* Info Notice */}
-            <Card className="border-brand-blue bg-brand-blue dark:bg-brand-blue/30 dark:border-brand-blue">
+            <Card className="border-brand-blue-border bg-brand-blue-soft dark:border-brand-blue/40 dark:bg-brand-blue/15">
                 <CardContent className="pt-6">
                     <div className="flex items-start gap-4">
-                        <Video className="h-6 w-6 text-brand-blue flex-shrink-0" />
+                        {hasReplayMembership ? (
+                            <Video className="h-6 w-6 text-brand-blue-hover flex-shrink-0" />
+                        ) : (
+                            <Lock className="h-6 w-6 text-brand-blue-hover flex-shrink-0" />
+                        )}
                         <div>
-                            <h3 className="font-semibold text-brand-blue dark:text-brand-blue">Solo eventos inscritos</h3>
-                            <p className="text-sm text-brand-blue dark:text-brand-blue mt-1">
-                                Aquí aparecen las grabaciones de los eventos en los que te inscribiste.
-                                Las grabaciones pueden tardar hasta 24 horas después del evento.
+                            <h3 className="font-semibold text-brand-blue-hover">
+                                {hasReplayMembership ? 'Grabaciones para miembros' : 'Acceso con membresía activa'}
+                            </h3>
+                            <p className="text-sm text-brand-text-muted mt-1">
+                                {hasReplayMembership
+                                    ? 'Aquí aparecen las grabaciones incluidas con tu membresía. Pueden tardar hasta 24 horas después del evento.'
+                                    : 'El registro gratuito permite entrar a la comunidad y a eventos gratuitos, pero no incluye grabaciones. Aunque te inscribas a un evento sin costo, la grabación permanece bloqueada sin membresía activa.'}
                             </p>
                         </div>
                     </div>
@@ -87,10 +100,12 @@ export default async function RecordingsPage() {
                         <Video className="h-12 w-12 mx-auto mb-4 text-muted-foreground opacity-50" />
                         <h3 className="font-semibold mb-2">No hay grabaciones disponibles</h3>
                         <p className="text-muted-foreground text-sm mb-4">
-                            Las grabaciones de eventos aparecerán aquí después de que finalicen.
+                            {hasReplayMembership
+                                ? 'Las grabaciones de eventos aparecerán aquí después de que finalicen.'
+                                : 'Activa una membresía para desbloquear las grabaciones disponibles.'}
                         </p>
-                        <Link href="/dashboard/events">
-                            <Button>Ver eventos próximos</Button>
+                        <Link href={hasReplayMembership ? '/dashboard/events' : '/dashboard/subscription'}>
+                            <Button>{hasReplayMembership ? 'Ver eventos próximos' : 'Ver membresías'}</Button>
                         </Link>
                     </CardContent>
                 </Card>

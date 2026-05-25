@@ -241,7 +241,7 @@ export function MembershipChangeForm({ user, onClose }: MembershipChangeFormProp
                             onChange={(event) => setMembershipLevel(event.target.value)}
                             className="mt-1 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
                         >
-                            <option value="0">Nivel 0 · Sin membresia</option>
+                            <option value="0">Nivel 0 · Registro gratuito</option>
                             <option value="1">Nivel 1 · Comunidad</option>
                             <option value="2">Nivel 2 · Especializacion</option>
                             <option value="3">Nivel 3 · Avanzado</option>

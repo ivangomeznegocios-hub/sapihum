@@ -2,13 +2,15 @@ import Link from 'next/link'
 import { Suspense } from 'react'
 import { EditResourceButton, DeleteResourceButton } from './resource-form'
 import { ResourceActionButton } from './resource-buttons'
-import { getVisibleResources, getEventsForLinking } from '@/lib/supabase/queries/resources'
-import { getUserProfile, getUserRole, createClient } from '@/lib/supabase/server'
+import { getEventsForLinking } from '@/lib/supabase/queries/resources'
+import { getViewerContext } from '@/lib/supabase/server'
+import { canViewerSeeListedResource } from '@/lib/access/catalog'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { ResourceFilters } from './resource-filters'
 import type { Resource } from '@/types/database'
+import { Lock } from 'lucide-react'
 
 // ──── ICONS ────
 
@@ -110,12 +112,14 @@ function getExpirationBadge(expiresAt: string | null) {
 
 function ResourceCard({
     resource,
+    isLocked = false,
     showActions = false,
     showDelete = false,
     creatorName,
     events
 }: {
     resource: Resource
+    isLocked?: boolean
     showActions?: boolean
     showDelete?: boolean
     creatorName?: string
@@ -142,7 +146,7 @@ function ResourceCard({
                             </div>
                         )}
                         <Badge variant="outline" className="text-[10px]">
-                            {resource.visibility === 'public' ? 'Público' : resource.visibility === 'members_only' ? 'Miembros' : 'Privado'}
+                            {isLocked ? 'Bloqueado' : resource.visibility === 'public' ? 'Público' : resource.visibility === 'members_only' ? 'Miembros' : 'Privado'}
                         </Badge>
                     </div>
                 </div>
@@ -203,14 +207,26 @@ function ResourceCard({
                                 </span>
                             )}
                         </div>
-                        <ResourceActionButton
-                            url={resource.url}
-                            title={resource.title}
-                            type={resource.type}
-                            resourceId={resource.id}
-                            htmlContent={(resource as any).html_content}
-                        />
+                        {isLocked ? (
+                            <Button size="sm" variant="secondary" className="w-full max-w-[150px]" disabled>
+                                <Lock className="mr-1 h-4 w-4" />
+                                Membresía
+                            </Button>
+                        ) : (
+                            <ResourceActionButton
+                                url={resource.url}
+                                title={resource.title}
+                                type={resource.type}
+                                resourceId={resource.id}
+                                htmlContent={(resource as any).html_content}
+                            />
+                        )}
                     </div>
+                    {isLocked && (
+                        <p className="pt-2 text-xs text-muted-foreground">
+                            Recurso disponible únicamente con membresía activa.
+                        </p>
+                    )}
                 </div>
             </CardContent>
         </Card>
@@ -225,20 +241,54 @@ export default async function ResourcesPage({
     searchParams: Promise<{ type?: string; category?: string; audience?: string; search?: string }>
 }) {
     const params = await searchParams
-    const profile = await getUserProfile()
-    const role = await getUserRole()
+    const viewer = await getViewerContext({ includeCommercialAccess: true })
+    const profile = viewer.profile
+    const role = viewer.role
+    const supabase = viewer.supabase
 
     const isAdmin = role === 'admin'
     const isPonente = role === 'ponente'
     const canCreate = isAdmin || isPonente
 
-    // Get filtered resources
-    const resources = await getVisibleResources({
-        type: params.type,
-        category: params.category,
-        audience: params.audience,
-        search: params.search
-    })
+    let resourcesQuery = (supabase.from('resources') as any)
+        .select('*')
+        .order('is_featured', { ascending: false })
+        .order('sort_order', { ascending: true })
+        .order('created_at', { ascending: false })
+
+    if (params.type && params.type !== 'all') {
+        resourcesQuery = resourcesQuery.eq('type', params.type)
+    }
+
+    if (params.category && params.category !== 'all') {
+        resourcesQuery = resourcesQuery.eq('category', params.category)
+    }
+
+    if (params.search) {
+        resourcesQuery = resourcesQuery.or(`title.ilike.%${params.search}%,description.ilike.%${params.search}%`)
+    }
+
+    const { data: resourceRows, error: resourcesError } = await resourcesQuery
+    if (resourcesError) {
+        console.error('Error fetching resource catalog:', resourcesError)
+    }
+
+    const now = new Date().toISOString()
+    const resources = ((resourceRows ?? []) as Resource[])
+        .filter((resource: any) => {
+            if (resource.expires_at && resource.expires_at <= now) return false
+            if (!isAdmin && resource.visibility === 'private' && resource.created_by !== profile?.id) return false
+            const audience: string[] = resource.target_audience || ['public']
+            if (params.audience && params.audience !== 'all' && !audience.includes(params.audience)) return false
+            return true
+        })
+        .map((resource: any) => ({
+            ...resource,
+            is_locked_for_viewer: !canViewerSeeListedResource(
+                resource,
+                viewer.commercialAccess?.viewer ?? null
+            ),
+        }))
 
     // Get events for linking (only for those who can create)
     let events: { id: string; title: string; start_time: string }[] = []
@@ -251,7 +301,6 @@ export default async function ResourcesPage({
     const creatorMap: Record<string, string> = {}
 
     if (creatorIds.length > 0) {
-        const supabase = await createClient()
         const { data: creators } = await (supabase
             .from('profiles') as any)
             .select('id, full_name, role')
@@ -334,6 +383,7 @@ export default async function ResourcesPage({
                             <ResourceCard
                                 key={resource.id}
                                 resource={resource}
+                                isLocked={(resource as any).is_locked_for_viewer}
                                 showActions={canEditResource(resource)}
                                 showDelete={isAdmin}
                                 creatorName={getCreatorName(resource)}
@@ -360,6 +410,7 @@ export default async function ResourcesPage({
                             <ResourceCard
                                 key={resource.id}
                                 resource={resource}
+                                isLocked={(resource as any).is_locked_for_viewer}
                                 showActions={canEditResource(resource)}
                                 showDelete={isAdmin}
                                 creatorName={getCreatorName(resource)}

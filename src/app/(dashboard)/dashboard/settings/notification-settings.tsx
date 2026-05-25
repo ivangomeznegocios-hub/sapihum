@@ -200,23 +200,22 @@ export function NotificationSettings() {
                     </button>
                 </div>
 
-                    <div className="flex items-center justify-between rounded-lg border border-brand-blue-border bg-brand-blue-soft p-3">
+                {isPushAvailable && (
+                <div className="flex items-center justify-between rounded-lg border border-brand-blue-border bg-brand-blue-soft p-3">
                     <div>
-                        <p className="flex items-center gap-2 font-medium text-brand-blue dark:text-brand-blue">
+                        <p className="flex items-center gap-2 font-medium text-brand-blue-hover">
                             Notificaciones Push (Navegador)
-                            <span className="rounded-full bg-brand-blue px-2 py-0.5 text-[10px] font-bold uppercase dark:bg-brand-blue">
+                            <span className="rounded-full bg-brand-blue px-2 py-0.5 text-[10px] font-bold uppercase text-white">
                                 Nuevo
                             </span>
                         </p>
-                        <p className="text-sm text-brand-blue/80 dark:text-brand-blue/70">
-                            {isPushAvailable
-                                ? 'Alertas instantaneas en tu dispositivo ademas de la campanita interna'
-                                : 'La campanita interna ya funciona; push quedara disponible cuando OneSignal este configurado'}
+                        <p className="text-sm text-brand-text-muted">
+                            Alertas instantáneas del navegador para actividad importante de tu cuenta.
                         </p>
                     </div>
                     <button
                         onClick={() => toggle('pushNotifications')}
-                        disabled={loading || saving || !isPushAvailable}
+                        disabled={loading || saving}
                         className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 ${prefs.pushNotifications ? 'bg-primary' : 'bg-muted'}`}
                         role="switch"
                         aria-checked={prefs.pushNotifications}
@@ -226,6 +225,7 @@ export function NotificationSettings() {
                         />
                     </button>
                 </div>
+                )}
             </CardContent>
         </Card>
     )
