@@ -74,7 +74,6 @@ const navGroups: NavGroup[] = [
         roles: ['admin', 'psychologist', 'patient', 'ponente'],
         items: [
             { name: 'Eventos', href: '/dashboard/events', icon: CalendarDays, roles: ['admin', 'psychologist', 'patient', 'ponente'] },
-            { name: 'Networking', href: '/dashboard/events/networking', icon: Users2, roles: ['admin', 'psychologist', 'ponente'] },
             { name: 'Grabaciones', href: '/dashboard/events/recordings', icon: Video, roles: ['admin', 'psychologist', 'ponente'] },
             { name: 'Ponentes', href: '/dashboard/speakers', icon: Mic2, roles: ['admin', 'psychologist', 'ponente'] },
             { name: 'Biblioteca', href: '/dashboard/resources', icon: BookOpen, roles: ['admin', 'psychologist', 'ponente'] },
@@ -254,7 +253,6 @@ function getSimplifiedGroups({
                     '/dashboard/events',
                     '/dashboard/resources',
                     '/dashboard/events/recordings',
-                    '/dashboard/events/networking',
                     '/dashboard/speakers',
                 ], visibleItems, labels),
                 groupFromHrefs('Tu crecimiento', [
@@ -280,7 +278,6 @@ function getSimplifiedGroups({
                 '/dashboard/events',
                 '/dashboard/resources',
                 '/dashboard/events/recordings',
-                '/dashboard/events/networking',
             ], visibleItems, labels),
             groupFromHrefs('Tu crecimiento', [
                 '/dashboard/growth',
@@ -313,7 +310,6 @@ function getSimplifiedGroups({
             ], visibleItems, labels),
             groupFromHrefs('Mas', [
                 '/dashboard/events/recordings',
-                '/dashboard/events/networking',
                 '/dashboard/speakers',
                 '/dashboard/resources',
                 '/dashboard/newsletter',
