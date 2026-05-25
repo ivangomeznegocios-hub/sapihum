@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { SubscribeButton } from '@/components/payments/SubscribeButton'
 import { WaitlistCTA } from '@/components/specializations/waitlist-cta'
-import { MEMBERSHIP_TIERS } from '@/lib/membership'
+import { FREE_REGISTRATION_LIMITATION, MEMBERSHIP_TIERS } from '@/lib/membership'
 import { getSubscriptionPlan, type BillingInterval } from '@/lib/payments/config'
 import {
     LEVEL_2_DEFAULT_SPECIALIZATION,
@@ -113,7 +113,7 @@ export function SubscriptionTierCards({
                         ))}
                         <li className="flex items-center gap-2 text-sm text-muted-foreground">
                             <Lock className="h-4 w-4 shrink-0" />
-                            Grabaciones, biblioteca premium, newsletter y convenios requieren membresía activa.
+                            {FREE_REGISTRATION_LIMITATION}
                         </li>
                     </ul>
                     <Button className="w-full" variant="outline" disabled>

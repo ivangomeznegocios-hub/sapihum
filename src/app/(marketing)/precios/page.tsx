@@ -8,7 +8,7 @@ import type { Metadata } from 'next'
 export const metadata: Metadata = {
   title: 'Precios - SAPIHUM',
   description:
-    'Únete a la membresía de SAPIHUM: formación continua, red de profesionales y recursos clínicos. Expansiones opcionales de Consultorio Digital y Marketing.',
+    'Conoce el registro gratuito y la membresia de SAPIHUM: formacion continua, red de profesionales y recursos clinicos. Expansiones opcionales de Consultorio Digital y Marketing.',
 }
 
 export const revalidate = 3600

@@ -16,6 +16,7 @@ import {
 } from '@/lib/events/campaigns'
 import { splitPublicCatalogEvents } from '@/lib/events/public'
 import { getFormationMemberAccessMessage } from '@/lib/formations/pricing'
+import { FREE_REGISTRATION_LIMITATION } from '@/lib/membership'
 import { getSubscriptionPlan } from '@/lib/payments/config'
 import { PRICING_PLAN_COPY } from '@/lib/pricing-catalog'
 import {
@@ -281,6 +282,7 @@ export default async function SpecializationPage(props: Props) {
     generalFormationCount > 0 ? `${generalFormationCount} formaciones generales` : null,
   ].filter(Boolean).join(' y ')
 
+  const freeRegistrationHref = '/auth/register'
   const membershipHref = `/auth/register?plan=level1&specialization=${spec.code}`
   const level2Href = `/auth/register?plan=level2&specialization=${spec.code}`
   const structuredData = buildStructuredData({
@@ -440,11 +442,13 @@ export default async function SpecializationPage(props: Props) {
                   </div>
 
                   <div className="rounded-2xl border border-brand-border bg-white p-4">
-                    <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-brand-text-muted">Membresía</p>
+                    <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-brand-text-muted">Acceso inicial</p>
                     <p className="mt-2 text-lg font-bold text-foreground">
-                      {level1Plan ? `Desde ${formatCurrency(level1Plan.monthly.amount)}/mes` : 'Acceso general'}
+                      {level1Plan ? `Gratis / desde ${formatCurrency(level1Plan.monthly.amount)}/mes` : 'Gratis'}
                     </p>
-                    <p className="mt-1 text-sm text-brand-text-muted">Accede a la comunidad y a todos los contenidos disponibles.</p>
+                    <p className="mt-1 text-sm text-brand-text-muted">
+                      Empieza con registro gratuito para comunidad y eventos abiertos. La membresia activa amplia el acceso a contenidos y beneficios.
+                    </p>
                   </div>
 
                   <div className="rounded-2xl border border-brand-border bg-white p-4">
@@ -528,7 +532,7 @@ export default async function SpecializationPage(props: Props) {
                   Formaciones completas y rutas de aprendizaje.
                 </div>
                 <div className="rounded-2xl border bg-background/60 p-4 text-sm text-muted-foreground">
-                  Membresía para pertenecer y {level2OfferName} para profundizar.
+                  Registro gratuito para entrar, membresia para pertenecer y {level2OfferName} para profundizar.
                 </div>
               </div>
             </div>
@@ -694,7 +698,7 @@ export default async function SpecializationPage(props: Props) {
       <section className="w-full border-y bg-background py-16 text-foreground md:py-20">
         <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="mb-8 max-w-3xl">
-            <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-brand-blue">Membresía y Nivel 2</p>
+            <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-brand-blue">Registro, membresia y Nivel 2</p>
             <h2 className="mt-3 text-3xl font-bold tracking-tight md:text-4xl">
               Tu ruta de crecimiento en {spec.name}
             </h2>
@@ -703,22 +707,25 @@ export default async function SpecializationPage(props: Props) {
           <div className="grid gap-6 lg:grid-cols-2">
             <article className="rounded-[30px] border border-brand-border bg-brand-surface-soft p-7 shadow-2xl shadow-slate-200/80">
               <Badge variant="outline" className="border-brand-blue/30 bg-brand-blue/10 text-brand-blue">
-                Nivel 1
+                Inicio
               </Badge>
-              <h3 className="mt-5 text-3xl font-bold">{PRICING_PLAN_COPY.level1.title}</h3>
+              <h3 className="mt-5 text-3xl font-bold">Registro Gratuito</h3>
               <p className="mt-3 text-base leading-relaxed text-brand-text-muted">
-                Accede a la comunidad, participa en eventos y descubre todas las especialidades disponibles.
+                Registro sin costo para entrar a la comunidad y a eventos abiertos. Despues puedes activar la membresia para ampliar tu acceso.
               </p>
               <div className="mt-6 rounded-2xl border border-brand-border bg-background/25 p-5">
-                <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-brand-text-muted">Desde</p>
+                <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-brand-text-muted">Precio</p>
                 <p className="mt-2 text-3xl font-black text-foreground">
-                  {level1Plan ? `${formatCurrency(level1Plan.monthly.amount)}/mes` : 'Consulta disponibilidad'}
+                  $0/mes
+                </p>
+                <p className="mt-2 text-sm leading-relaxed text-brand-text-muted">
+                  {FREE_REGISTRATION_LIMITATION}
                 </p>
               </div>
               <div className="mt-6 flex flex-col gap-3 sm:flex-row">
-                <Link href={membershipHref}>
+                <Link href={freeRegistrationHref}>
                   <Button className="gap-2">
-                    Unirme a la membresia
+                    Crear cuenta gratis
                     <ArrowRight className="h-4 w-4" />
                   </Button>
                 </Link>
@@ -780,13 +787,13 @@ export default async function SpecializationPage(props: Props) {
             Todo lo que necesitas en {spec.name}, en un solo lugar
           </h2>
           <p className="mx-auto mt-5 max-w-3xl text-lg leading-relaxed text-brand-text-muted">
-            Únete a la comunidad, accede a eventos y formaciones de la especialidad, y avanza hacia {level2OfferName}
-            cuando estés listo para profundizar.
+            Empieza con registro gratuito, accede a eventos y formaciones de la especialidad, y avanza hacia {level2OfferName}
+            cuando estes listo para profundizar.
           </p>
           <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
-            <Link href={membershipHref}>
+            <Link href={freeRegistrationHref}>
               <Button size="lg" className="gap-2">
-                Crear cuenta y entrar por membresia
+                Crear cuenta gratis
                 <ArrowRight className="h-4 w-4" />
               </Button>
             </Link>
@@ -808,12 +815,14 @@ export default async function SpecializationPage(props: Props) {
             )}
           </div>
 
-          <div className="mt-10 grid gap-4 text-left md:grid-cols-3">
-            <div className="rounded-2xl border border-brand-border bg-brand-surface-soft p-5">
-              <Users className="mb-3 h-5 w-5 text-brand-blue" />
-              <h3 className="font-bold">Membresia</h3>
-              <p className="mt-2 text-sm leading-relaxed text-brand-text-muted">Accede a la comunidad y a todos los recursos generales disponibles.</p>
-            </div>
+            <div className="mt-10 grid gap-4 text-left md:grid-cols-3">
+              <div className="rounded-2xl border border-brand-border bg-brand-surface-soft p-5">
+                <Users className="mb-3 h-5 w-5 text-brand-blue" />
+                <h3 className="font-bold">Registro y membresia</h3>
+                <p className="mt-2 text-sm leading-relaxed text-brand-text-muted">
+                  Empieza gratis en comunidad y eventos abiertos. La membresia activa desbloquea mas recursos y beneficios.
+                </p>
+              </div>
             <div className="rounded-2xl border border-brand-border bg-brand-surface-soft p-5">
               <CalendarDays className="mb-3 h-5 w-5 text-brand-blue" />
               <h3 className="font-bold">Eventos y cursos</h3>

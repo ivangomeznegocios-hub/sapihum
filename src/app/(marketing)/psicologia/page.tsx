@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { getMarketingSpecializations } from "@/lib/specializations"
 import { getPublicCatalogEvents } from "@/lib/supabase/queries/events"
 import { splitPublicCatalogEvents } from "@/lib/events/public"
+import { FREE_REGISTRATION_LIMITATION, MEMBERSHIP_TIERS } from "@/lib/membership"
 import { LEVEL_2_CARD_FEATURE_IDS, PRICING_PLAN_COPY, getPricingFeatureTitles } from "@/lib/pricing-catalog"
 import { getFeaturedPublicSpeakers } from "@/lib/supabase/queries/speakers"
 import { getSpeakerHeadline, getSpeakerImage, getSpeakerName } from "@/lib/speakers/display"
@@ -176,6 +177,7 @@ const CLINICAL_LEVEL2_BENEFITS = getPricingFeatureTitles(LEVEL_2_CARD_FEATURE_ID
 const LEVEL_2_SHOWCASE_BENEFITS = CLINICAL_LEVEL2_BENEFITS
   .filter((benefit) => benefit !== "Todo de Comunidad y Crecimiento")
   .slice(0, 8)
+const FREE_REGISTRATION_FEATURES = MEMBERSHIP_TIERS[0].features
 
 // ═══════════════════════════════════════════════════════════════
 // FEATURED SPEAKERS — Change these IDs to control which 4 speakers
@@ -512,6 +514,29 @@ export default async function LandingPage() {
                 </p>
 
                 {/* Benefits — simple list, no cards-within-cards */}
+                <div className="mt-5 border-y border-border/[0.08] py-4">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-brand-text-muted">
+                      Registro Gratuito
+                    </span>
+                    <span className="text-sm font-semibold text-foreground">$0/mes</span>
+                  </div>
+                  <p className="mt-2 text-sm font-light leading-relaxed text-brand-text-muted">
+                    Registro sin costo para entrar a la comunidad y a eventos abiertos.
+                  </p>
+                  <ul className="mt-4 space-y-2">
+                    {FREE_REGISTRATION_FEATURES.map((feature) => (
+                      <li key={feature} className="flex items-center gap-3">
+                        <span className="text-[#2563EB] text-sm">+</span>
+                        <span className="text-sm text-brand-text-muted">{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  <p className="mt-3 text-xs leading-relaxed text-brand-text-muted">
+                    {FREE_REGISTRATION_LIMITATION}
+                  </p>
+                </div>
+
                 <ul className="mt-6 space-y-2.5">
                   {LEVEL_2_SHOWCASE_BENEFITS.map((benefit) => (
                     <li key={benefit} className="flex items-center gap-3">
@@ -521,15 +546,29 @@ export default async function LandingPage() {
                   ))}
                 </ul>
 
-                <div className="mt-8">
+                <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+                  <Link
+                    href="/auth/register"
+                    className="w-full sm:w-auto"
+                    data-analytics-cta
+                    data-analytics-label="Nivel 2 Registro Gratuito"
+                    data-analytics-surface="home_membership_showcase"
+                    data-analytics-funnel="registration"
+                  >
+                    <Button className="w-full gap-2 font-bold uppercase text-[10px] tracking-[0.1em]">
+                      Crear cuenta gratis
+                      <ArrowRight className="h-4 w-4" />
+                    </Button>
+                  </Link>
                   <Link
                     href="/membresia"
+                    className="w-full sm:w-auto"
                     data-analytics-cta
                     data-analytics-label="Nivel 2 Conocer Membresia"
                     data-analytics-surface="home_membership_showcase"
                     data-analytics-funnel="checkout"
                   >
-                    <Button variant="outline" className="gap-2 font-bold uppercase text-[10px] tracking-[0.1em]">
+                    <Button variant="outline" className="w-full gap-2 font-bold uppercase text-[10px] tracking-[0.1em]">
                       Conocer membresía
                       <ArrowRight className="h-4 w-4" />
                     </Button>

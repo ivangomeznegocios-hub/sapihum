@@ -12,6 +12,7 @@ import {
   Crown,
   PlusCircle,
   Sparkles,
+  UserPlus,
   Users,
   X,
   Zap,
@@ -44,6 +45,7 @@ import {
   PRICING_PLAN_COPY,
   type PricingPlanKey,
 } from '@/lib/pricing-catalog'
+import { FREE_REGISTRATION_LIMITATION, MEMBERSHIP_TIERS } from '@/lib/membership'
 import { LEVEL_2_DEFAULT_SPECIALIZATION } from '@/lib/specializations'
 import { Fragment } from 'react'
 
@@ -177,6 +179,7 @@ export function PricingContent({
   const [selectedFeatureId, setSelectedFeatureId] = useState<string | null>(null)
 
   const selectedFeature = selectedFeatureId ? PRICING_FEATURES_BY_ID[selectedFeatureId] : null
+  const freeRegistration = MEMBERSHIP_TIERS[0]
 
   const comparisonGroups = useMemo(
     () =>
@@ -258,7 +261,78 @@ export function PricingContent({
         {/* ── Pricing Cards ── */}
         <section className="w-full bg-background pb-16 pt-8 sm:pb-20 sm:pt-10">
           <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
-            <div className="mx-auto mb-16 max-w-2xl">
+            <div className="mx-auto mb-16 grid max-w-4xl gap-6 md:grid-cols-2">
+              <Card className="relative flex h-full flex-col overflow-hidden rounded-2xl border-brand-border bg-[#F8FAFC]">
+                <CardContent className="flex h-full flex-col p-0">
+                  <div className="px-6 pt-6 pb-5 sm:px-7">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <Badge className="border border-brand-border bg-white text-[10px] uppercase tracking-[0.18em] text-brand-text-muted hover:bg-white">
+                        Registro inicial
+                      </Badge>
+                      <Badge className="border border-[#2563EB]/15 bg-[#2563EB]/8 text-[10px] uppercase tracking-[0.18em] text-[#2563EB] hover:bg-[#2563EB]/8">
+                        Publico
+                      </Badge>
+                    </div>
+
+                    <div className="mt-5 flex items-center gap-3">
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white text-[#2563EB]">
+                        <UserPlus className="h-5 w-5" />
+                      </div>
+                      <h2 className="text-xl font-bold text-foreground sm:text-2xl">
+                        {freeRegistration.label}
+                      </h2>
+                    </div>
+
+                    <p className="mt-3 text-sm leading-relaxed text-brand-text-muted">
+                      {freeRegistration.description}
+                    </p>
+
+                    <div className="mt-5 border-t border-border/[0.06] pt-5">
+                      <div className="flex items-baseline gap-1.5">
+                        <span className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
+                          $0
+                        </span>
+                        <span className="text-sm text-brand-text-muted">/mes</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-1 flex-col border-t border-border/[0.06] px-6 py-5 sm:px-7">
+                    <p className="mb-4 text-[10px] font-bold uppercase tracking-[0.18em] text-brand-text-muted">
+                      Lo que incluye
+                    </p>
+
+                    <ul className="flex-1 space-y-2.5">
+                      {freeRegistration.features.map((feature) => (
+                        <li key={feature} className="flex items-center gap-3">
+                          <Check className="h-4 w-4 shrink-0 text-[#2563EB]/70" />
+                          <span className="text-sm font-medium text-brand-text-muted">{feature}</span>
+                        </li>
+                      ))}
+                    </ul>
+
+                    <p className="mt-5 border-t border-border/[0.06] pt-4 text-xs leading-relaxed text-brand-text-muted">
+                      {FREE_REGISTRATION_LIMITATION}
+                    </p>
+
+                    <div className="mt-5">
+                      {isLoggedIn ? (
+                        <Button className="w-full gap-2" size="lg" variant="outline" disabled>
+                          Ya tienes acceso base
+                        </Button>
+                      ) : (
+                        <Link href="/auth/register" className="block">
+                          <Button className="w-full gap-2" size="lg" variant="outline">
+                            Crear cuenta gratis
+                            <ArrowRight className="h-4 w-4" />
+                          </Button>
+                        </Link>
+                      )}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
               {cardConfigs.filter(c => c.key === 'level1').map((card) => {
                 if (!card.plan) return null
 
@@ -526,6 +600,9 @@ export function PricingContent({
               </h2>
               <p className="mx-auto mt-4 max-w-xl text-sm font-light leading-relaxed text-brand-text-muted">
                 Toca cualquier beneficio para ver la explicación completa.
+              </p>
+              <p className="mx-auto mt-2 max-w-2xl text-xs leading-relaxed text-brand-text-muted">
+                El registro gratuito aparece arriba. Esta tabla compara la membresia activa y sus expansiones.
               </p>
             </div>
 

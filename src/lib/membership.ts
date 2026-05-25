@@ -20,6 +20,9 @@ export interface MembershipTierConfig {
     features: string[]
 }
 
+export const FREE_REGISTRATION_LIMITATION =
+    'Grabaciones, biblioteca premium, newsletter y convenios requieren membresia activa.'
+
 /**
  * Nivel 0 = Registro gratuito
  * Nivel 1 = Comunidad y Educacion
@@ -30,11 +33,11 @@ export const MEMBERSHIP_TIERS: Record<number, MembershipTierConfig> = {
     0: {
         level: 0,
         label: 'Registro Gratuito',
-        description: 'Registro gratuito para comunidad y eventos abiertos, sin beneficios de membresia.',
+        description: 'Registro sin costo para entrar a la comunidad y a eventos abiertos.',
         price: 0,
-        priceLabel: 'Gratis',
+        priceLabel: '$0/mes',
         trialDays: 0,
-        tagline: 'Registro sin costo',
+        tagline: 'Comunidad y eventos abiertos',
         features: [
             'Perfil basico en la plataforma',
             'Acceso a comunidad',
