@@ -204,6 +204,13 @@ type SpeakerOption = {
     avatar: string | null
 }
 
+type ProgramEventOption = {
+    id: string
+    title: string
+    startTime: string | null
+    status: string | null
+}
+
 type ManualSessionInput = {
     id: number
     date: string
@@ -578,11 +585,13 @@ export function CreateEventForm({
     const [selectedAudience, setSelectedAudience] = useState<string[]>(initialData?.target_audience || ['public'])
     const [selectedCategory, setSelectedCategory] = useState(initialData?.category || 'general')
     const [selectedSubcategory, setSelectedSubcategory] = useState(initialData?.subcategory || '')
-    const [selectedStatus, setSelectedStatus] = useState(initialData?.status || 'upcoming')
+    const [selectedStatus, setSelectedStatus] = useState(initialData?.status || 'draft')
     const [eventType, setEventType] = useState(initialData?.event_type || 'live')
     const [memberAccessType, setMemberAccessType] = useState(initialData?.member_access_type || 'free')
     const [priceValue, setPriceValue] = useState(String(initialData?.price ?? 0))
-    const [selectedSpecializationCode, setSelectedSpecializationCode] = useState(initialData?.specialization_code || '')
+    const [selectedSpecializationCode, setSelectedSpecializationCode] = useState(
+        canUseAdvancedSettings ? initialData?.specialization_code || '' : ''
+    )
     const [memberPriceValue, setMemberPriceValue] = useState(
         initialData?.member_price ? String(initialData.member_price) : ''
     )
@@ -613,6 +622,16 @@ export function CreateEventForm({
     const [sessionDuration, setSessionDuration] = useState(initialData?.session_config?.session_duration_minutes || 60)
     const [recurrence, setRecurrence] = useState(initialData?.session_config?.recurrence || 'none')
     const [openAgendaMode, setOpenAgendaMode] = useState(Boolean(initialData?.session_config?.open_agenda))
+    const [programMode, setProgramMode] = useState<'individual' | 'program'>(
+        canUseAdvancedSettings && initialData?.program_mode === 'program' ? 'program' : 'individual'
+    )
+    const [programName, setProgramName] = useState(initialData?.program_name || '')
+    const [programTypeLabel, setProgramTypeLabel] = useState(initialData?.program_type_label || '')
+    const [programEventOptions, setProgramEventOptions] = useState<ProgramEventOption[]>([])
+    const [selectedProgramChildIds, setSelectedProgramChildIds] = useState<string[]>(
+        Array.isArray(initialData?.program_child_event_ids) ? initialData.program_child_event_ids : []
+    )
+    const [loadingProgramEvents, setLoadingProgramEvents] = useState(canUseAdvancedSettings)
     const [manualSessions, setManualSessions] = useState<ManualSessionInput[]>(() => getInitialManualSessions(initialData))
     const [modality, setModality] = useState(
         initialData?.session_config?.modality || (initialData?.event_type === 'presencial' ? 'presencial' : 'online')
@@ -654,7 +673,7 @@ export function CreateEventForm({
         return zonedDateTimeToUtcIso(dateValue, timeValue, DEFAULT_TIMEZONE)
     }, [dateValue, timeValue])
     const normalizedAudience = normalizeAudience(selectedAudience)
-    const statusPreview = canPublish ? (initialData ? selectedStatus : 'upcoming') : 'draft'
+    const statusPreview = canPublish ? selectedStatus : 'draft'
     const numericPrice = Number.parseFloat(priceValue || '0') || 0
     const numericMemberPrice = Number.parseFloat(memberPriceValue || '0') || 0
     const selectedSpecializationLabel =
@@ -762,6 +781,7 @@ export function CreateEventForm({
                         .from('speakers')
                         .select(`
                             id,
+                            photo_url,
                             profile:profiles ( full_name, avatar_url )
                         `),
                 eventId && initialSpeakerAssignments.length === 0
@@ -781,7 +801,7 @@ export function CreateEventForm({
                 setAvailableSpeakers(speakerResponse.data.map((s: any) => ({
                     id: s.id,
                     name: s.profile?.full_name || 'Desconocido',
-                    avatar: s.profile?.avatar_url || null
+                    avatar: s.photo_url || s.profile?.avatar_url || null
                 })))
             }
 
@@ -805,6 +825,43 @@ export function CreateEventForm({
             ignore = true
         }
     }, [eventId, initialSpeakerAssignments, speakerOptions])
+
+    useEffect(() => {
+        if (!canUseAdvancedSettings) return
+        let ignore = false
+
+        async function fetchProgramEvents() {
+            setLoadingProgramEvents(true)
+            const supabase = createClient()
+            const { data, error } = await (supabase
+                .from('events') as any)
+                .select('id, title, start_time, status')
+                .in('status', ['draft', 'upcoming', 'live', 'completed'])
+                .order('start_time', { ascending: false })
+                .limit(200)
+
+            if (!ignore && !error) {
+                setProgramEventOptions((data ?? [])
+                    .filter((event: any) => event.id !== eventId)
+                    .map((event: any) => ({
+                        id: event.id,
+                        title: event.title || 'Evento sin titulo',
+                        startTime: event.start_time || null,
+                        status: event.status || null,
+                    })))
+            }
+
+            if (!ignore) {
+                setLoadingProgramEvents(false)
+            }
+        }
+
+        fetchProgramEvents()
+
+        return () => {
+            ignore = true
+        }
+    }, [canUseAdvancedSettings, eventId])
 
     function toggleAudience(value: string) {
         setSelectedAudience(prev => {
@@ -841,6 +898,19 @@ export function CreateEventForm({
 
     function clearSpeakers() {
         setSelectedSpeakerAssignments([])
+    }
+
+    function toggleProgramChildEvent(eventId: string) {
+        setSelectedProgramChildIds((current) => (
+            current.includes(eventId)
+                ? current.filter((id) => id !== eventId)
+                : [...current, eventId]
+        ))
+    }
+
+    function formatProgramEventDate(value: string | null) {
+        if (!value) return 'Sin fecha'
+        return formatEventDateTime(value, DEFAULT_TIMEZONE)
     }
 
     function addDaysToInputDate(value: string, days: number) {
@@ -1145,6 +1215,118 @@ export function CreateEventForm({
                     </div>
                 )}
             </div>
+        )
+    }
+
+    function renderProgramSettings() {
+        if (!canUseAdvancedSettings) return null
+
+        return (
+            <SectionCard
+                icon={<Calendar className="h-4 w-4 text-primary" />}
+                title="Programacion"
+                description="Agrupa varios eventos bajo una pagina padre cuando quieras crear un foro, congreso, ciclo mensual o cualquier experiencia especial."
+            >
+                <div className="grid gap-3 md:grid-cols-2">
+                    <button
+                        type="button"
+                        onClick={() => setProgramMode('individual')}
+                        className={`rounded-xl border p-4 text-left transition-colors ${programMode === 'individual' ? 'border-primary bg-primary/5' : 'hover:bg-muted/50'}`}
+                    >
+                        <p className="text-sm font-medium">Evento individual</p>
+                        <p className="mt-1 text-xs text-muted-foreground">Un evento normal con su propia pagina, acceso y materiales.</p>
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => setProgramMode('program')}
+                        className={`rounded-xl border p-4 text-left transition-colors ${programMode === 'program' ? 'border-primary bg-primary/5' : 'hover:bg-muted/50'}`}
+                    >
+                        <p className="text-sm font-medium">Programacion</p>
+                        <p className="mt-1 text-xs text-muted-foreground">Un evento padre que agrupa varias actividades y puede venderse como paquete.</p>
+                    </button>
+                </div>
+
+                {programMode === 'program' && (
+                    <div className="space-y-4 rounded-xl border bg-muted/10 p-4">
+                        <div className="grid gap-4 md:grid-cols-2">
+                            <div>
+                                <label className="text-sm font-medium" htmlFor="programName">
+                                    Nombre de la programacion
+                                </label>
+                                <input
+                                    id="programName"
+                                    name="programName"
+                                    type="text"
+                                    value={programName}
+                                    onChange={(e) => setProgramName(e.target.value)}
+                                    className="mt-1 w-full rounded-lg border bg-background px-3 py-2"
+                                    placeholder="Ej: Foro mensual de psicologia clinica"
+                                />
+                            </div>
+                            <div>
+                                <label className="text-sm font-medium" htmlFor="programTypeLabel">
+                                    Tipo visible
+                                </label>
+                                <input
+                                    id="programTypeLabel"
+                                    name="programTypeLabel"
+                                    type="text"
+                                    value={programTypeLabel}
+                                    onChange={(e) => setProgramTypeLabel(e.target.value)}
+                                    className="mt-1 w-full rounded-lg border bg-background px-3 py-2"
+                                    placeholder="Ej: Foro, Congreso, Ciclo mensual"
+                                />
+                            </div>
+                        </div>
+
+                        <div className="space-y-3">
+                            <div className="flex items-center justify-between gap-3">
+                                <div>
+                                    <h4 className="text-sm font-medium">Eventos incluidos</h4>
+                                    <p className="text-xs text-muted-foreground">
+                                        El acceso a esta programacion dara acceso a los eventos que selecciones aqui.
+                                    </p>
+                                </div>
+                                <div className="rounded-full bg-muted px-3 py-1 text-xs text-muted-foreground">
+                                    {selectedProgramChildIds.length} incluidos
+                                </div>
+                            </div>
+
+                            <div className="max-h-72 space-y-2 overflow-y-auto rounded-xl border bg-background p-3">
+                                {loadingProgramEvents ? (
+                                    <div className="flex items-center justify-center py-6">
+                                        <Loader2 className="h-5 w-5 animate-spin text-muted-foreground opacity-50" />
+                                    </div>
+                                ) : programEventOptions.length > 0 ? (
+                                    programEventOptions.map((eventOption) => {
+                                        const selected = selectedProgramChildIds.includes(eventOption.id)
+                                        return (
+                                            <button
+                                                key={eventOption.id}
+                                                type="button"
+                                                onClick={() => toggleProgramChildEvent(eventOption.id)}
+                                                className={`flex w-full items-center justify-between gap-3 rounded-lg border p-3 text-left text-sm transition-colors ${selected ? 'border-primary bg-primary/5 text-primary' : 'border-transparent hover:bg-muted/50'}`}
+                                            >
+                                                <div className="min-w-0">
+                                                    <p className="truncate font-medium">{eventOption.title}</p>
+                                                    <p className="mt-1 text-xs text-muted-foreground">
+                                                        {formatProgramEventDate(eventOption.startTime)} · {STATUS_LABELS[eventOption.status || ''] || eventOption.status || 'Sin estado'}
+                                                    </p>
+                                                </div>
+                                                {selected && <Check className="h-4 w-4 shrink-0" />}
+                                            </button>
+                                        )
+                                    })
+                                ) : (
+                                    <p className="py-3 text-center text-sm text-muted-foreground">
+                                        No hay eventos disponibles para vincular.
+                                    </p>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                )}
+            </SectionCard>
         )
     }
 
@@ -1495,7 +1677,13 @@ export function CreateEventForm({
         formData.set('idealFor', JSON.stringify(idealForItems.map((item) => item.value.trim()).filter(Boolean)))
         formData.set('learningOutcomes', JSON.stringify(learningOutcomeItems.map((item) => item.value.trim()).filter(Boolean)))
         formData.set('includedResources', JSON.stringify(includedResourceItems.map((item) => item.value.trim()).filter(Boolean)))
-        formData.set('specializationCode', selectedSpecializationCode)
+        if (canUseAdvancedSettings) {
+            formData.set('specializationCode', selectedSpecializationCode)
+            formData.set('programMode', programMode)
+            formData.set('programName', programMode === 'program' ? programName.trim() : '')
+            formData.set('programTypeLabel', programMode === 'program' ? programTypeLabel.trim() : '')
+            formData.set('programChildEventIds', JSON.stringify(programMode === 'program' ? selectedProgramChildIds : []))
+        }
 
         const invalidMaterialLink = materialLinkItems.find((item) => {
             const hasContent = item.title.trim() || item.url.trim()
@@ -1734,9 +1922,9 @@ export function CreateEventForm({
                             className="mt-1 rounded"
                         />
                         <div>
-                            <span className="text-sm font-medium">Agenda abierta / congreso</span>
+                            <span className="text-sm font-medium">Permitir solapes de agenda</span>
                             <p className="text-xs text-muted-foreground">
-                                Usalo para congresos o programas con muchas participaciones. Permite guardar aunque los ponentes ya tengan eventos o calendario ocupado.
+                                Permite guardar aunque los ponentes ya tengan eventos o calendario ocupado. Usalo solo cuando la programacion tenga muchas participaciones o bloques simultaneos.
                             </p>
                         </div>
                     </label>
@@ -1930,10 +2118,12 @@ export function CreateEventForm({
                 <input type="hidden" name="duration" value={String(sessionDuration)} />
             </SectionCard>
 
+            {renderProgramSettings()}
+
             <SectionCard
                 icon={<Users className="h-4 w-4 text-primary" />}
-                title="Acceso y venta"
-                description="Define quien puede verlo, el precio, el cupo y que pasa con la grabacion."
+                title="Acceso"
+                description=""
             >
                 <div className="space-y-3">
                     <div>
@@ -2012,28 +2202,30 @@ export function CreateEventForm({
                             />
                         </div>
 
-                        <div className="sm:col-span-2">
-                            <label className="text-sm font-medium" htmlFor="specializationCode">
-                                Especialidad incluida
-                            </label>
-                            <select
-                                id="specializationCode"
-                                name="specializationCode"
-                                value={selectedSpecializationCode}
-                                onChange={(e) => setSelectedSpecializationCode(e.target.value)}
-                                className="mt-1 w-full rounded-lg border bg-background px-3 py-2"
-                            >
-                                <option value="">Sin especialidad asignada</option>
-                                {MEMBERSHIP_SPECIALIZATION_OPTIONS.map((option) => (
-                                    <option key={option.value} value={option.value}>
-                                        {option.label}
-                                    </option>
-                                ))}
-                            </select>
-                            <p className="mt-1 text-xs text-muted-foreground">
-                                Si eliges una especialidad, los miembros activos Nivel 2 o superior de esa especialidad entran sin costo. Los demas miembros siguen el ajuste que definas arriba.
-                            </p>
-                        </div>
+                        {canUseAdvancedSettings && (
+                            <div className="sm:col-span-2">
+                                <label className="text-sm font-medium" htmlFor="specializationCode">
+                                    Especialidad incluida
+                                </label>
+                                <select
+                                    id="specializationCode"
+                                    name="specializationCode"
+                                    value={selectedSpecializationCode}
+                                    onChange={(e) => setSelectedSpecializationCode(e.target.value)}
+                                    className="mt-1 w-full rounded-lg border bg-background px-3 py-2"
+                                >
+                                    <option value="">Sin especialidad asignada</option>
+                                    {MEMBERSHIP_SPECIALIZATION_OPTIONS.map((option) => (
+                                        <option key={option.value} value={option.value}>
+                                            {option.label}
+                                        </option>
+                                    ))}
+                                </select>
+                                <p className="mt-1 text-xs text-muted-foreground">
+                                    Si eliges una especialidad, los miembros activos Nivel 2 o superior de esa especialidad entran sin costo. Los demas miembros siguen el ajuste que definas arriba.
+                                </p>
+                            </div>
+                        )}
                     </div>
 
                     <div className="space-y-4 rounded-xl border bg-muted/10 p-4">
@@ -2083,7 +2275,7 @@ export function CreateEventForm({
                 {renderSpeakerPicker()}
                 <QuestionList items={registrationFields} onChange={setRegistrationFields} />
 
-                {canPublish && initialData && (
+                {canPublish && (
                     <div>
                         <label className="text-sm font-medium" htmlFor="status">
                             Estado del evento

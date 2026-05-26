@@ -10,6 +10,7 @@ import { getUniqueEventAccessCount } from '@/lib/events/attendance'
 import { createClient } from '@/lib/supabase/server'
 import { getCommercialAccessContext } from '@/lib/access/commercial'
 import { canViewerReachEventOffer } from '@/lib/access/catalog'
+import { syncProgramBundleEntitlementsForIdentity } from '@/lib/events/programs'
 import { recordAnalyticsServerEvent, resolveAttributionSnapshot } from '@/lib/analytics/server'
 import { sendEmail } from '@/lib/email/index'
 import { buildGuestAccessEmail } from '@/lib/email/templates'
@@ -134,6 +135,13 @@ export async function POST(request: NextRequest) {
                 },
             })
 
+            await syncProgramBundleEntitlementsForIdentity({
+                supabase,
+                userId: user.id,
+                email: profile.email || user.email || '',
+                commercialAccess,
+            })
+
             await recordAnalyticsServerEvent({
                 eventName: 'event_registered',
                 eventSource: 'server',
@@ -186,6 +194,11 @@ export async function POST(request: NextRequest) {
                 analytics: analyticsContext ?? null,
                 attribution_snapshot: attributionSnapshot ?? null,
             },
+        })
+
+        await syncProgramBundleEntitlementsForIdentity({
+            supabase,
+            email,
         })
 
         await recordAnalyticsServerEvent({

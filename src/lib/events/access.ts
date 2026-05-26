@@ -5,6 +5,7 @@ import { createServiceClient } from '@/lib/supabase/service'
 import { getEventAccessKinds } from './entitlements'
 import { getEffectiveEventPriceForProfile, normalizeMemberAccessType } from './pricing'
 import { isCongressBundleGrantMetadata, syncCongressBundleEntitlementsForIdentity } from './congress'
+import { syncProgramBundleEntitlementsForIdentity } from './programs'
 
 type EventAccessPolicyEvent = Pick<
     Event,
@@ -204,11 +205,19 @@ export async function getActiveEntitlementForEvent(params: {
 
     let { data } = await query.maybeSingle()
     if (!data) {
-        await syncCongressBundleEntitlementsForIdentity({
-            supabase: createServiceClient(),
-            userId: params.userId ?? null,
-            email: normalizedEmail ?? null,
-        })
+        const serviceSupabase = createServiceClient()
+        await Promise.all([
+            syncCongressBundleEntitlementsForIdentity({
+                supabase: serviceSupabase,
+                userId: params.userId ?? null,
+                email: normalizedEmail ?? null,
+            }),
+            syncProgramBundleEntitlementsForIdentity({
+                supabase: serviceSupabase,
+                userId: params.userId ?? null,
+                email: normalizedEmail ?? null,
+            }),
+        ])
 
         query = (params.supabase as any)
             .from('event_entitlements')

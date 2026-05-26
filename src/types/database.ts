@@ -789,6 +789,7 @@ export interface SessionConfig {
 }
 export type EventCategory = 'general' | 'networking' | 'clinical' | 'business'
 export type EventSubcategory = 'curso' | 'diplomado' | 'clase' | 'taller' | 'conferencia' | 'seminario' | 'congreso' | 'meetup' | 'otro'
+export type EventProgramMode = 'individual' | 'program'
 export type MemberAccessType = 'free' | 'discounted' | 'full_price'
 export type EventSpeakerRole = 'speaker' | 'moderator' | 'host'
 export type MaterialLinkType = 'presentation' | 'document' | 'folder' | 'download' | 'other'
@@ -852,6 +853,9 @@ export interface Event {
     formation_id: string | null
     primary_vertical_id?: string | null
     content_scope?: ContentScope
+    program_mode: EventProgramMode
+    program_name: string | null
+    program_type_label: string | null
 }
 
 export interface EventInsert {
@@ -898,6 +902,9 @@ export interface EventInsert {
     formation_id?: string | null
     primary_vertical_id?: string | null
     content_scope?: ContentScope
+    program_mode?: EventProgramMode
+    program_name?: string | null
+    program_type_label?: string | null
 }
 
 export interface EventUpdate {
@@ -940,6 +947,22 @@ export interface EventUpdate {
     formation_id?: string | null
     primary_vertical_id?: string | null
     content_scope?: ContentScope
+    program_mode?: EventProgramMode
+    program_name?: string | null
+    program_type_label?: string | null
+}
+
+export interface EventProgramItem {
+    parent_event_id: string
+    child_event_id: string
+    display_order: number
+    created_at: string
+}
+
+export interface EventProgramItemInsert {
+    parent_event_id: string
+    child_event_id: string
+    display_order?: number
 }
 
 export interface EventRegistration {
@@ -1653,6 +1676,11 @@ export interface Database {
                 Row: Event
                 Insert: EventInsert
                 Update: EventUpdate
+            }
+            event_program_items: {
+                Row: EventProgramItem
+                Insert: EventProgramItemInsert
+                Update: Partial<EventProgramItemInsert>
             }
             therapeutic_tools: {
                 Row: TherapeuticTool

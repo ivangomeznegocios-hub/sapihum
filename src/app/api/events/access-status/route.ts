@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getCommercialAccessContext } from '@/lib/access/commercial'
 import { entitlementCanGrantEventAccess, getActiveEntitlementForEvent } from '@/lib/events/access'
 import { syncCongressBundleEntitlementsForIdentity } from '@/lib/events/congress'
+import { syncProgramBundleEntitlementsForIdentity } from '@/lib/events/programs'
 import { createClient } from '@/lib/supabase/server'
 import { getPublicEventById } from '@/lib/supabase/queries/events'
 
@@ -46,12 +47,20 @@ export async function GET(request: NextRequest) {
         })
 
         if (user.email) {
-            await syncCongressBundleEntitlementsForIdentity({
-                supabase,
-                userId: user.id,
-                email: user.email,
-                commercialAccess,
-            })
+            await Promise.all([
+                syncCongressBundleEntitlementsForIdentity({
+                    supabase,
+                    userId: user.id,
+                    email: user.email,
+                    commercialAccess,
+                }),
+                syncProgramBundleEntitlementsForIdentity({
+                    supabase,
+                    userId: user.id,
+                    email: user.email,
+                    commercialAccess,
+                }),
+            ])
         }
 
         const entitlement = await getActiveEntitlementForEvent({

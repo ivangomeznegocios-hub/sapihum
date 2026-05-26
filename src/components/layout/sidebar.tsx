@@ -27,7 +27,6 @@ import {
     Newspaper,
     Handshake,
     GraduationCap,
-    Users2,
     Mic2,
     DollarSign,
     Gift,

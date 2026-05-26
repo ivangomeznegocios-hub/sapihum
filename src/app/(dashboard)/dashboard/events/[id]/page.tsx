@@ -21,6 +21,7 @@ import {
 import { getUniqueEventAccessCount } from '@/lib/events/attendance'
 import { canDeleteEvent, getEventEditorAccessForUser } from '@/lib/events/permissions'
 import { getEventSessionOccurrences } from '@/lib/events/sessions'
+import { getProgramChildEventIds } from '@/lib/events/programs'
 import {
     getEffectiveEventPriceForProfile,
     getEventMemberAccessMessage,
@@ -91,6 +92,9 @@ const EVENT_DETAIL_SELECT = [
     'hero_badge',
     'ideal_for',
     'learning_outcomes',
+    'program_mode',
+    'program_name',
+    'program_type_label',
 ].join(', ')
 
 export default async function EventDetailPage({ params }: PageProps) {
@@ -160,6 +164,7 @@ export default async function EventDetailPage({ params }: PageProps) {
         relatedVerticalIds,
         accessEntitlement,
         replayEntitlement,
+        programChildEventIds,
     ] = await Promise.all([
         canEditEvent ? getEventSpeakerOptions() : Promise.resolve([]),
         canEditEvent && event.content_scope !== 'global'
@@ -187,6 +192,9 @@ export default async function EventDetailPage({ params }: PageProps) {
                 email: profile.email,
                 allowedAccessKinds: ['replay_access'],
             }),
+        canEditEvent
+            ? getProgramChildEventIds(supabase, id)
+            : Promise.resolve([]),
     ])
 
     const canReachOffer = commercialAccess
@@ -397,7 +405,7 @@ export default async function EventDetailPage({ params }: PageProps) {
                 {canEditEvent && (
                     <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:justify-end">
                         <EditEventButton
-                            event={{ ...event, related_vertical_ids: relatedVerticalIds, speakers: eventSpeakers }}
+                            event={{ ...event, related_vertical_ids: relatedVerticalIds, speakers: eventSpeakers, program_child_event_ids: programChildEventIds }}
                             userRole={profile.role || ''}
                             speakerOptions={speakerOptions}
                             availableVerticals={viewer.availableVerticals}

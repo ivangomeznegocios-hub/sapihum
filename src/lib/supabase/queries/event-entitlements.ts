@@ -6,6 +6,7 @@ import {
 import { getEventAccessKinds } from '@/lib/events/entitlements'
 import { getPublicEventPath } from '@/lib/events/public'
 import { syncCongressBundleEntitlementsForIdentity } from '@/lib/events/congress'
+import { syncProgramBundleEntitlementsForIdentity } from '@/lib/events/programs'
 import { createClient, getUserProfile } from '@/lib/supabase/server'
 import { getCommercialAccessContext } from '@/lib/access/commercial'
 
@@ -26,12 +27,20 @@ export async function claimCurrentUserEventEntitlements() {
         profile,
     })
 
-    await syncCongressBundleEntitlementsForIdentity({
-        supabase,
-        userId: profile.id,
-        email: profile.email,
-        commercialAccess,
-    })
+    await Promise.all([
+        syncCongressBundleEntitlementsForIdentity({
+            supabase,
+            userId: profile.id,
+            email: profile.email,
+            commercialAccess,
+        }),
+        syncProgramBundleEntitlementsForIdentity({
+            supabase,
+            userId: profile.id,
+            email: profile.email,
+            commercialAccess,
+        }),
+    ])
 }
 
 export async function userHasEventHubAccess(event: any) {

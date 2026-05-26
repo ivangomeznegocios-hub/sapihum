@@ -8,6 +8,7 @@ import type { AnalyticsConsentSnapshot, AttributionSnapshot } from '@/lib/analyt
 import { getAppUrl } from '@/lib/config/app-url'
 import { getActiveEntitlementForEvent } from '@/lib/events/access'
 import { syncCongressBundleEntitlementsForIdentity } from '@/lib/events/congress'
+import { syncProgramBundleEntitlementsForIdentity } from '@/lib/events/programs'
 import { grantEventEntitlements, revokeEventEntitlementsBySourceReference } from '@/lib/events/entitlements'
 import { upsertAutomaticEventSpeakerEarnings } from '@/lib/earnings/compensation'
 import {
@@ -950,6 +951,11 @@ async function fulfillEventPurchase(params: {
     })
 
     await syncCongressBundleEntitlementsForIdentity({
+        supabase: params.supabase,
+        userId: resolvedUserId,
+        email: customerEmail,
+    })
+    await syncProgramBundleEntitlementsForIdentity({
         supabase: params.supabase,
         userId: resolvedUserId,
         email: customerEmail,

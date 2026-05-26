@@ -246,6 +246,7 @@ function getPublicSpeakerHref(speaker: any, returnTo?: string) {
 export function PublicEventLanding({
     event,
     relatedEvents,
+    programEvents = [],
     membershipLevel: initialMembershipLevel = 0,
     hasActiveMembership: initialHasActiveMembership = false,
     membershipSpecializationCode: initialMembershipSpecializationCode = null,
@@ -253,6 +254,7 @@ export function PublicEventLanding({
 }: {
     event: any
     relatedEvents: any[]
+    programEvents?: any[]
     membershipLevel: number
     hasActiveMembership: boolean
     membershipSpecializationCode: string | null
@@ -338,6 +340,9 @@ export function PublicEventLanding({
             : []),
     ]
     const sessionOccurrences = getEventSessionOccurrences(event)
+    const isProgram = event.program_mode === 'program'
+    const programTitle = event.program_name || event.title
+    const programTypeLabel = event.program_type_label || 'Programacion'
 
     return (
         <div className="pb-28">
@@ -688,6 +693,22 @@ export function PublicEventLanding({
                                             </ul>
                                         </div>
                                     )}
+                                </div>
+                            </div>
+                        )}
+
+                        {isProgram && programEvents.length > 0 && (
+                            <div>
+                                <p className="mb-2 text-sm font-semibold uppercase tracking-widest text-brand-blue">
+                                    {programTypeLabel}
+                                </p>
+                                <h2 className="mb-6 text-2xl font-semibold text-brand-text-strong">
+                                    Agenda de {programTitle}
+                                </h2>
+                                <div className="grid gap-5 sm:grid-cols-2">
+                                    {programEvents.map((item) => (
+                                        <PublicCatalogCard key={item.id} event={item} fixedLayout />
+                                    ))}
                                 </div>
                             </div>
                         )}

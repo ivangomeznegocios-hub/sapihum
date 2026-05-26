@@ -20,6 +20,7 @@ import {
     getEventEditorAccessForUser,
 } from '@/lib/events/permissions'
 import { getEventSessionOccurrences } from '@/lib/events/sessions'
+import { getProgramChildEventIds, syncProgramBundleEntitlementsForIdentity } from '@/lib/events/programs'
 import { getCommercialAccessContext } from '@/lib/access/commercial'
 import { canViewerReachEventOffer } from '@/lib/access/catalog'
 import { sendEmail } from '@/lib/email/index'
@@ -224,6 +225,34 @@ function validateSpeakerAssignments(assignments: SpeakerAssignmentInput[]) {
     return 'Cada ponente con esquema fijo o porcentual necesita un valor mayor a 0.'
 }
 
+function parseProgramChildEventIds(formData: FormData) {
+    const eventIds = parseJsonValue<unknown[]>(formData.get('programChildEventIds'), [])
+    return Array.from(new Set(
+        eventIds.filter((eventId): eventId is string => typeof eventId === 'string' && eventId.length > 0)
+    ))
+}
+
+async function replaceProgramChildEvents(supabase: any, parentEventId: string, childEventIds: string[]) {
+    await (supabase.from('event_program_items') as any)
+        .delete()
+        .eq('parent_event_id', parentEventId)
+
+    const rows = childEventIds
+        .filter((childEventId) => childEventId !== parentEventId)
+        .map((childEventId, index) => ({
+            parent_event_id: parentEventId,
+            child_event_id: childEventId,
+            display_order: index,
+        }))
+
+    if (rows.length === 0) return
+
+    const { error } = await (supabase.from('event_program_items') as any).insert(rows)
+    if (error) {
+        throw new Error(error.message)
+    }
+}
+
 function validatePaidMultiSpeakerPublication(params: {
     price: number
     speakerAssignments: SpeakerAssignmentInput[]
@@ -241,6 +270,105 @@ function validatePaidMultiSpeakerPublication(params: {
     }
 
     return null
+}
+
+const PUBLIC_EVENT_STATUSES = new Set(['upcoming', 'live', 'completed'])
+
+function isPublicEventStatus(status?: string | null) {
+    return Boolean(status && PUBLIC_EVENT_STATUSES.has(status))
+}
+
+function normalizeRelationProfile(profile: any) {
+    return Array.isArray(profile) ? profile[0] : profile
+}
+
+async function validatePublicEventReadiness({
+    supabase,
+    status,
+    title,
+    description,
+    imageUrl,
+    eventType,
+    meetingLink,
+    location,
+    recordingUrl,
+    programMode,
+    programName,
+    programChildEventIds,
+    speakerIds,
+}: {
+    supabase: any
+    status?: string | null
+    title?: string | null
+    description?: string | null
+    imageUrl?: string | null
+    eventType?: string | null
+    meetingLink?: string | null
+    location?: string | null
+    recordingUrl?: string | null
+    programMode?: string | null
+    programName?: string | null
+    programChildEventIds?: string[]
+    speakerIds: string[]
+}) {
+    if (!isPublicEventStatus(status)) {
+        return null
+    }
+
+    const missing: string[] = []
+    if (!title) missing.push('titulo')
+    if (!description) missing.push('descripcion')
+    if (!imageUrl) missing.push('imagen')
+    if (programMode === 'program') {
+        if (!programName) missing.push('nombre de la programacion')
+        if ((programChildEventIds ?? []).length === 0) missing.push('eventos incluidos')
+    }
+
+    if (eventType === 'presencial') {
+        if (!location) missing.push('ubicacion')
+    } else if (status === 'completed') {
+        if (!recordingUrl && !meetingLink) missing.push('enlace de grabacion')
+    } else if (!meetingLink) {
+        missing.push('enlace de acceso')
+    }
+
+    const uniqueSpeakerIds = Array.from(new Set(speakerIds.filter(Boolean)))
+    if (uniqueSpeakerIds.length === 0) {
+        missing.push('ponente')
+    } else {
+        const { data: speakers, error } = await (supabase
+            .from('speakers') as any)
+            .select(`
+                id,
+                photo_url,
+                profile:profiles!speakers_id_fkey (
+                    full_name,
+                    avatar_url
+                )
+            `)
+            .in('id', uniqueSpeakerIds)
+
+        if (error) {
+            return 'No fue posible validar los ponentes antes de publicar.'
+        }
+
+        const speakerMap = new Map<string, any>((speakers ?? []).map((speaker: any) => [speaker.id, speaker]))
+        const incompleteSpeaker = uniqueSpeakerIds.some((speakerId) => {
+            const speaker = speakerMap.get(speakerId)
+            const profile = normalizeRelationProfile(speaker?.profile)
+            return !speaker || !profile?.full_name || !(speaker.photo_url || profile.avatar_url)
+        })
+
+        if (incompleteSpeaker) {
+            missing.push('nombre y foto de cada ponente')
+        }
+    }
+
+    if (missing.length === 0) {
+        return null
+    }
+
+    return `Para publicar este evento falta: ${missing.join(', ')}. Puedes guardarlo como borrador mientras lo completas.`
 }
 
 function parseSpeakerAssignments(formData: FormData): SpeakerAssignmentInput[] {
@@ -776,6 +904,13 @@ export async function registerForEvent(eventId: string, registrationData: Record
                 registration_data: registrationData,
             },
         })
+
+        await syncProgramBundleEntitlementsForIdentity({
+            supabase,
+            userId: user.id,
+            email: profileData.email,
+            commercialAccess,
+        })
     }
 
     await recordAnalyticsServerEvent({
@@ -914,6 +1049,15 @@ export async function createEvent(formData: FormData) {
     const recordingUrl = readTrimmedString(formData.get('recordingUrl'))
     const maxAttendees = parseIntegerField(formData.get('maxAttendees'))
     const customSlug = canUseAdvancedSettings ? readTrimmedString(formData.get('slug')) : null
+    const requestedStatus = canPublish
+        ? readTrimmedString(formData.get('status')) || 'draft'
+        : 'draft'
+    const programMode = canUseAdvancedSettings && readTrimmedString(formData.get('programMode')) === 'program'
+        ? 'program'
+        : 'individual'
+    const programName = programMode === 'program' ? readTrimmedString(formData.get('programName')) : null
+    const programTypeLabel = programMode === 'program' ? readTrimmedString(formData.get('programTypeLabel')) : null
+    const programChildEventIds = programMode === 'program' ? parseProgramChildEventIds(formData) : []
     const targetAudience = (formData.getAll('audience') as string[]).filter(Boolean)
     const normalizedAudience = targetAudience.length > 0 ? targetAudience : ['public']
     const registrationFields = parseRegistrationFields(formData)
@@ -952,7 +1096,7 @@ export async function createEvent(formData: FormData) {
     const multiSpeakerPublicationError = validatePaidMultiSpeakerPublication({
         price,
         speakerAssignments,
-        requestedStatus: canPublish ? 'upcoming' : 'draft',
+        requestedStatus,
         canUseAdvancedSettings,
     })
     if (multiSpeakerPublicationError) {
@@ -1010,10 +1154,30 @@ export async function createEvent(formData: FormData) {
     const includedResources = parseListField(formData, 'includedResources') ?? null
     const materialLinks = parseMaterialLinksField(formData, 'materialLinks') ?? []
     const certificateType = readTrimmedString(formData.get('certificateType')) || 'none'
-    const specializationCode = readTrimmedString(formData.get('specializationCode'))
+    const specializationCode = canUseAdvancedSettings
+        ? readTrimmedString(formData.get('specializationCode'))
+        : null
     const formationTrack = readTrimmedString(formData.get('formationTrack'))
     const slug = await resolveUniqueEventSlug(supabase, customSlug || title)
     const meetingLink = eventType === 'presencial' ? null : readTrimmedString(formData.get('meetingLink'))
+    const publicReadinessError = await validatePublicEventReadiness({
+        supabase,
+        status: requestedStatus,
+        title,
+        description,
+        imageUrl,
+        eventType,
+        meetingLink,
+        location,
+        recordingUrl,
+        programMode,
+        programName,
+        programChildEventIds,
+        speakerIds: speakerAssignments.map((assignment) => assignment.speakerId),
+    })
+    if (publicReadinessError) {
+        return { error: publicReadinessError }
+    }
     const advancedValues = canUseAdvancedSettings
         ? {
             is_embeddable: formData.has('isEmbeddable') ? formData.get('isEmbeddable') === 'on' : true,
@@ -1055,7 +1219,7 @@ export async function createEvent(formData: FormData) {
             start_time: sessionSchedule.firstSession.startTimeIso,
             end_time: sessionSchedule.firstSession.endTimeIso,
             event_type: eventType,
-            status: canPublish ? 'upcoming' : 'draft',
+            status: requestedStatus,
             meeting_link: meetingLink,
             max_attendees: maxAttendees,
             price,
@@ -1081,6 +1245,9 @@ export async function createEvent(formData: FormData) {
             recording_url: recordingUrl,
             primary_vertical_id: verticalVisibility.primaryVerticalId,
             content_scope: verticalVisibility.contentScope,
+            program_mode: programMode,
+            program_name: programName,
+            program_type_label: programTypeLabel,
         })
         .select('id')
         .single()
@@ -1117,6 +1284,14 @@ export async function createEvent(formData: FormData) {
         }
     }
 
+    if (canUseAdvancedSettings && newEvent) {
+        try {
+            await replaceProgramChildEvents(supabase, newEvent.id, programChildEventIds)
+        } catch (programError: any) {
+            return { error: programError.message || 'No fue posible guardar la programacion' }
+        }
+    }
+
     revalidatePath('/dashboard/events')
     return { success: true }
 }
@@ -1133,7 +1308,7 @@ export async function updateEvent(eventId: string, formData: FormData) {
     const [{ data: event }, { data: profile }] = await Promise.all([
         (supabase
             .from('events') as any)
-        .select('id, created_by, status, formation_id, start_time, end_time, primary_vertical_id, content_scope')
+        .select('id, created_by, status, formation_id, title, description, image_url, event_type, meeting_link, location, recording_url, start_time, end_time, primary_vertical_id, content_scope, program_mode, program_name, program_type_label')
             .eq('id', eventId)
             .single(),
         (supabase
@@ -1206,6 +1381,16 @@ export async function updateEvent(eventId: string, formData: FormData) {
             ? Math.max(0, parseFloatField(formData.get('memberPrice')) || 0)
             : 0
     const status = readTrimmedString(formData.get('status'))
+    const requestedStatus = canPublish ? (status || event.status) : 'draft'
+    const programMode = canUseAdvancedSettings && formData.has('programMode')
+        ? readTrimmedString(formData.get('programMode')) === 'program' ? 'program' : 'individual'
+        : event.program_mode ?? 'individual'
+    const programName = canUseAdvancedSettings && formData.has('programName')
+        ? programMode === 'program' ? readTrimmedString(formData.get('programName')) : null
+        : event.program_name ?? null
+    const programTypeLabel = canUseAdvancedSettings && formData.has('programTypeLabel')
+        ? programMode === 'program' ? readTrimmedString(formData.get('programTypeLabel')) : null
+        : event.program_type_label ?? null
     const category = readTrimmedString(formData.get('category'))
     const subcategory = formData.has('subcategory')
         ? readTrimmedString(formData.get('subcategory'))
@@ -1218,7 +1403,7 @@ export async function updateEvent(eventId: string, formData: FormData) {
         ? (readTrimmedString(formData.get('certificateType')) || 'none')
         : undefined
     const specializationCode = formData.has('specializationCode')
-        ? readTrimmedString(formData.get('specializationCode'))
+        ? canUseAdvancedSettings ? readTrimmedString(formData.get('specializationCode')) : undefined
         : undefined
     const formationTrack = formData.has('formationTrack')
         ? readTrimmedString(formData.get('formationTrack'))
@@ -1246,6 +1431,11 @@ export async function updateEvent(eventId: string, formData: FormData) {
             compensationType: DEFAULT_SPEAKER_COMPENSATION_TYPE as SpeakerCompensationType,
             compensationValue: DEFAULT_SPEAKER_PERCENTAGE_RATE,
         }))
+    const programChildEventIds = canUseAdvancedSettings && formData.has('programChildEventIds')
+        ? programMode === 'program' ? parseProgramChildEventIds(formData).filter((childId) => childId !== eventId) : []
+        : programMode === 'program'
+            ? await getProgramChildEventIds(supabase, eventId)
+            : []
     const speakerAssignmentError = validateSpeakerAssignments(speakerAssignments)
     if (speakerAssignmentError) {
         return { error: speakerAssignmentError }
@@ -1253,11 +1443,39 @@ export async function updateEvent(eventId: string, formData: FormData) {
     const multiSpeakerPublicationError = validatePaidMultiSpeakerPublication({
         price,
         speakerAssignments,
-        requestedStatus: status || event.status,
+        requestedStatus,
         canUseAdvancedSettings,
     })
     if (multiSpeakerPublicationError) {
         return { error: multiSpeakerPublicationError }
+    }
+
+    const nextEventType = eventType || event.event_type || 'live'
+    const nextMeetingLink = nextEventType === 'presencial'
+        ? null
+        : formData.has('meetingLink')
+            ? readTrimmedString(formData.get('meetingLink'))
+            : event.meeting_link
+    const nextLocation = nextEventType === 'presencial'
+        ? location === undefined ? event.location : location
+        : null
+    const publicReadinessError = await validatePublicEventReadiness({
+        supabase,
+        status: requestedStatus,
+        title: title || event.title,
+        description: description === undefined ? event.description : description,
+        imageUrl: imageUrl === undefined ? event.image_url : imageUrl,
+        eventType: nextEventType,
+        meetingLink: nextMeetingLink,
+        location: nextLocation,
+        recordingUrl: recordingUrl === undefined ? event.recording_url : recordingUrl,
+        programMode,
+        programName,
+        programChildEventIds,
+        speakerIds: speakerAssignments.map((assignment) => assignment.speakerId),
+    })
+    if (publicReadinessError) {
+        return { error: publicReadinessError }
     }
 
     let nextStartTimeIso = event.start_time
@@ -1328,7 +1546,7 @@ export async function updateEvent(eventId: string, formData: FormData) {
 
     if (eventType) updates.event_type = eventType
     if (canPublish) {
-        if (status) updates.status = status
+        updates.status = requestedStatus
     } else {
         updates.status = 'draft'
     }
@@ -1370,6 +1588,11 @@ export async function updateEvent(eventId: string, formData: FormData) {
     if (certificateType !== undefined) updates.certificate_type = certificateType || 'none'
     if (specializationCode !== undefined) updates.specialization_code = specializationCode || null
     if (formationTrack !== undefined) updates.formation_track = formationTrack || null
+    if (canUseAdvancedSettings && formData.has('programMode')) {
+        updates.program_mode = programMode
+        updates.program_name = programName
+        updates.program_type_label = programTypeLabel
+    }
 
     if (canUseAdvancedSettings) {
         if (formData.has('isEmbeddable')) updates.is_embeddable = formData.get('isEmbeddable') === 'on'
@@ -1444,6 +1667,14 @@ export async function updateEvent(eventId: string, formData: FormData) {
                     compensation_type: speakerAssignments[i].compensationType,
                     compensation_value: speakerAssignments[i].compensationValue,
                 })
+        }
+    }
+
+    if (canUseAdvancedSettings && formData.has('programChildEventIds')) {
+        try {
+            await replaceProgramChildEvents(supabase, eventId, programChildEventIds)
+        } catch (programError: any) {
+            return { error: programError.message || 'No fue posible guardar la programacion' }
         }
     }
 

@@ -385,6 +385,7 @@ export async function getEventSpeakerOptions(): Promise<EventSpeakerOption[]> {
         .from('speakers') as any)
         .select(`
             id,
+            photo_url,
             profile:profiles!speakers_id_fkey (
                 full_name,
                 avatar_url
@@ -405,7 +406,7 @@ export async function getEventSpeakerOptions(): Promise<EventSpeakerOption[]> {
         return {
             id: speaker.id,
             name: profile?.full_name || 'Desconocido',
-            avatar: profile?.avatar_url || null,
+            avatar: speaker.photo_url || profile?.avatar_url || null,
         }
     })
 }

@@ -12,6 +12,7 @@ import {
     getCongressLandingForEvent,
     getCongressLandingPath,
 } from '@/lib/events/congress'
+import { getPublicProgramChildEvents } from '@/lib/events/programs'
 import { getPublicEventBySlug, getPublicEventSlugs, getPublicRelatedEvents } from '@/lib/supabase/queries/events'
 import { getPublicSpeakersForEventLanding } from '@/lib/supabase/queries/speakers'
 import { brandFullName } from '@/lib/brand'
@@ -127,10 +128,15 @@ export default async function EventoPublicoPage({ params }: PageProps) {
 
     const campaign = getEventCampaignForEvent(event)
     const congressContext = getCongressLandingForEvent(event)
-    const relatedEvents = (await getPublicRelatedEvents({
-        currentEventId: event.id,
-        formationTrack: campaign?.formationTrack ?? null,
-    })).map((item: any) => applyEventCampaignCopy(item))
+    const [relatedEvents, programEvents] = await Promise.all([
+        getPublicRelatedEvents({
+            currentEventId: event.id,
+            formationTrack: campaign?.formationTrack ?? null,
+        }).then((items) => items.map((item: any) => applyEventCampaignCopy(item))),
+        event.program_mode === 'program'
+            ? getPublicProgramChildEvents(event.id).then((items) => items.map((item: any) => applyEventCampaignCopy(item)))
+            : Promise.resolve([]),
+    ])
 
     return (
         <>
@@ -158,7 +164,8 @@ export default async function EventoPublicoPage({ params }: PageProps) {
 
             <PublicEventLanding 
                 event={event} 
-                relatedEvents={relatedEvents} 
+                relatedEvents={relatedEvents}
+                programEvents={programEvents}
                 membershipLevel={0}
                 hasActiveMembership={false}
                 membershipSpecializationCode={null}
