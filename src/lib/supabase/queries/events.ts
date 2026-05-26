@@ -41,7 +41,7 @@ export type PublicCatalogEvent = EventWithSpeakers & {
 }
 
 const PUBLIC_CATALOG_REVALIDATE_SECONDS = 300
-const PUBLIC_CATALOG_EVENT_SELECT = [
+const PUBLIC_CATALOG_BASE_EVENT_COLUMNS = [
     'id',
     'slug',
     'status',
@@ -62,14 +62,24 @@ const PUBLIC_CATALOG_EVENT_SELECT = [
     'public_cta_label',
     'session_config',
     'formation_track',
-    'program_mode',
-    'program_name',
-    'program_type_label',
     'ideal_for',
     'learning_outcomes',
     'seo_description',
     'og_description',
+]
+
+const PUBLIC_CATALOG_PROGRAM_EVENT_COLUMNS = [
+    'program_mode',
+    'program_name',
+    'program_type_label',
+]
+
+const PUBLIC_CATALOG_EVENT_SELECT = [
+    ...PUBLIC_CATALOG_BASE_EVENT_COLUMNS,
+    ...PUBLIC_CATALOG_PROGRAM_EVENT_COLUMNS,
 ].join(', ')
+
+const PUBLIC_CATALOG_EVENT_LEGACY_SELECT = PUBLIC_CATALOG_BASE_EVENT_COLUMNS.join(', ')
 
 const PUBLIC_CATALOG_SPEAKER_SELECT = `
     event_id,
@@ -540,42 +550,82 @@ function isMissingVerticalContentColumn(error: any) {
     )
 }
 
+function isMissingPublicCatalogProgramColumn(error: any) {
+    const message = String(error?.message ?? '')
+    return error?.code === '42703' && PUBLIC_CATALOG_PROGRAM_EVENT_COLUMNS.some((column) => (
+        message.includes(`events.${column}`) || message.includes(column)
+    ))
+}
+
+function withPublicCatalogProgramDefaults(events: any[] | null | undefined) {
+    return (events ?? []).map((event: any) => ({
+        ...event,
+        program_mode: event.program_mode ?? 'individual',
+        program_name: event.program_name ?? null,
+        program_type_label: event.program_type_label ?? null,
+    }))
+}
+
+async function runPublicCatalogSelectWithProgramFallback(buildQuery: (select: string) => any) {
+    let result = await buildQuery(PUBLIC_CATALOG_EVENT_SELECT)
+    if (isMissingPublicCatalogProgramColumn(result.error)) {
+        console.warn('Public event catalog program columns missing; falling back to legacy event select', {
+            code: result.error?.code,
+            message: result.error?.message,
+        })
+        result = await buildQuery(PUBLIC_CATALOG_EVENT_LEGACY_SELECT)
+    }
+
+    if (!result.error && result.data) {
+        return {
+            ...result,
+            data: withPublicCatalogProgramDefaults(result.data),
+        }
+    }
+
+    return result
+}
+
 async function runPublicCatalogEventQuery(
     supabase: any,
-    buildBaseQuery: () => any,
+    buildBaseQuery: (select: string) => any,
     activeVerticalId: string | null
 ) {
-    let query = buildBaseQuery()
-    query = (await applyVerticalContentFilter(
-        supabase,
-        query,
-        { table: 'event_verticals', contentIdColumn: 'event_id' },
-        activeVerticalId
-    )).query
+    const execute = async (select: string) => {
+        let query = buildBaseQuery(select)
+        query = (await applyVerticalContentFilter(
+            supabase,
+            query,
+            { table: 'event_verticals', contentIdColumn: 'event_id' },
+            activeVerticalId
+        )).query
 
-    const result = await query.order('start_time', { ascending: true })
-    if (!isMissingVerticalContentColumn(result.error) || !activeVerticalId) {
-        return result
+        const result = await query.order('start_time', { ascending: true })
+        if (!isMissingVerticalContentColumn(result.error) || !activeVerticalId) {
+            return result
+        }
+
+        console.warn('Public event catalog vertical column missing; falling back to event_verticals bridge filter', {
+            code: result.error?.code,
+            message: result.error?.message,
+        })
+
+        const eventIds = await getContentIdsForVertical(
+            supabase,
+            { table: 'event_verticals', contentIdColumn: 'event_id' },
+            activeVerticalId
+        )
+
+        if (eventIds.length === 0) {
+            return { data: [], error: null }
+        }
+
+        return buildBaseQuery(select)
+            .in('id', eventIds)
+            .order('start_time', { ascending: true })
     }
 
-    console.warn('Public event catalog vertical column missing; falling back to event_verticals bridge filter', {
-        code: result.error?.code,
-        message: result.error?.message,
-    })
-
-    const eventIds = await getContentIdsForVertical(
-        supabase,
-        { table: 'event_verticals', contentIdColumn: 'event_id' },
-        activeVerticalId
-    )
-
-    if (eventIds.length === 0) {
-        return { data: [], error: null }
-    }
-
-    return buildBaseQuery()
-        .in('id', eventIds)
-        .order('start_time', { ascending: true })
+    return runPublicCatalogSelectWithProgramFallback(execute)
 }
 
 async function fetchPublicEventBySlug(slug: string): Promise<any | null> {
@@ -662,10 +712,10 @@ async function fetchPublicCatalogEvents(
     const supabase = createServiceClient()
     const activeVerticalId = await getPublicVerticalId(supabase, verticalCode)
 
-    const buildBaseQuery = () => {
+    const buildBaseQuery = (select: string) => {
         let query = (supabase
             .from('events') as any)
-            .select(PUBLIC_CATALOG_EVENT_SELECT)
+            .select(select)
             .not('status', 'eq', 'draft')
             .not('status', 'eq', 'cancelled')
 
@@ -731,22 +781,24 @@ async function fetchPublicRelatedEvents(params: {
     formationTrack?: string | null
 }): Promise<PublicCatalogEvent[]> {
     const supabase = createServiceClient()
-    let query = (supabase
-        .from('events') as any)
-        .select(PUBLIC_CATALOG_EVENT_SELECT)
-        .not('status', 'eq', 'draft')
-        .not('status', 'eq', 'cancelled')
-        .neq('id', params.currentEventId)
+    const { data, error } = await runPublicCatalogSelectWithProgramFallback((select) => {
+        let query = (supabase
+            .from('events') as any)
+            .select(select)
+            .not('status', 'eq', 'draft')
+            .not('status', 'eq', 'cancelled')
+            .neq('id', params.currentEventId)
 
-    if (params.formationTrack) {
-        query = query.eq('formation_track', params.formationTrack)
-    } else {
-        query = query.in('status', ['upcoming', 'live'])
-    }
+        if (params.formationTrack) {
+            query = query.eq('formation_track', params.formationTrack)
+        } else {
+            query = query.in('status', ['upcoming', 'live'])
+        }
 
-    const { data, error } = await query
-        .order('start_time', { ascending: true })
-        .limit(3)
+        return query
+            .order('start_time', { ascending: true })
+            .limit(3)
+    })
 
     if (error || !data) {
         throwPublicCatalogError('Error fetching related public events', error)
@@ -800,9 +852,9 @@ async function fetchUnifiedCatalogEvents(verticalCode?: string | null): Promise<
     const supabase = createServiceClient()
     const activeVerticalId = await getPublicVerticalId(supabase, verticalCode)
 
-    const buildBaseQuery = () => (supabase
+    const buildBaseQuery = (select: string) => (supabase
         .from('events') as any)
-        .select(PUBLIC_CATALOG_EVENT_SELECT)
+        .select(select)
         .not('status', 'eq', 'draft')
         .not('status', 'eq', 'cancelled')
         .not('event_type', 'eq', 'on_demand')
