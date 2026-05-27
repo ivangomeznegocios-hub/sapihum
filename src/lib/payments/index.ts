@@ -27,6 +27,7 @@ import {
 import { logCommerceOperationalEvent, sendEventPurchaseConfirmation, sendFormationPurchaseConfirmation } from '@/lib/payments/commerce'
 import { syncMembershipEntitlementsForUser } from '@/lib/membership-entitlements'
 import { createUserNotification } from '@/lib/notifications'
+import { sendAdminOperationalAlertBestEffort } from '@/lib/admin/alerts'
 import { getPlanByPriceId } from './config'
 import {
     retrieveCompletedCheckoutPayment,
@@ -984,6 +985,25 @@ async function fulfillEventPurchase(params: {
             console.error('[Payment] Failed to send purchase confirmation email:', emailError)
         }
 
+        sendAdminOperationalAlertBestEffort({
+            level: 'success',
+            subject: `Compra confirmada: ${event.title}`,
+            title: 'Compra de evento confirmada',
+            summary: `${customerEmail} compro ${event.title}.`,
+            actionPath: `/dashboard/admin/operations?q=${encodeURIComponent(customerEmail)}&purchase=${encodeURIComponent(purchaseId ?? '')}`,
+            entityType: 'event_purchase',
+            entityId: purchaseId,
+            targetUserId: resolvedUserId,
+            targetEmail: customerEmail,
+            details: {
+                eventId: params.eventId,
+                eventTitle: event.title,
+                amount: params.data.amount,
+                currency: params.data.currency || 'mxn',
+                sessionId: params.data.sessionId,
+                paymentIntentId: params.data.paymentIntentId || null,
+            },
+        })
     }
 
     if (!wasAlreadyConfirmed && resolvedUserId) {
@@ -1199,6 +1219,27 @@ async function fulfillFormationPurchase(params: {
         } catch (emailError) {
             console.error('[Payment] Failed to send formation purchase confirmation email:', emailError)
         }
+
+        sendAdminOperationalAlertBestEffort({
+            level: 'success',
+            subject: `Compra confirmada: ${formation.title}`,
+            title: 'Compra de formacion confirmada',
+            summary: `${customerEmail} compro ${formation.title}.`,
+            actionPath: `/dashboard/admin/operations?q=${encodeURIComponent(customerEmail)}`,
+            entityType: 'formation_purchase',
+            entityId: purchaseId,
+            targetUserId: resolvedUserId,
+            targetEmail: customerEmail,
+            details: {
+                formationId: params.formationId,
+                formationTitle: formation.title,
+                amount: params.data.amount,
+                currency: params.data.currency || 'mxn',
+                linkedCourses: linkedEvents?.length ?? 0,
+                sessionId: params.data.sessionId,
+                paymentIntentId: params.data.paymentIntentId || null,
+            },
+        })
     }
 
     if (!wasAlreadyConfirmed && resolvedUserId) {
@@ -1384,6 +1425,28 @@ export async function fulfillSubscriptionCreated(data: SubscriptionWebhookData):
         } catch (notificationError) {
             console.error('[Payment] Failed to create internal subscription activation notification:', notificationError)
         }
+
+        sendAdminOperationalAlertBestEffort({
+            level: 'success',
+            subject: `Membresia activada nivel ${membershipLevel}`,
+            title: 'Compra de membresia confirmada',
+            summary: `${identity.normalizedEmail || data.customerEmail || profileId} activo una membresia nivel ${membershipLevel}.`,
+            actionPath: identity.normalizedEmail
+                ? `/dashboard/admin/operations?q=${encodeURIComponent(identity.normalizedEmail)}`
+                : '/dashboard/admin/inbox',
+            entityType: 'subscription',
+            entityId: data.providerSubscriptionId,
+            targetUserId: userId,
+            targetEmail: identity.normalizedEmail || data.customerEmail || null,
+            details: {
+                membershipLevel,
+                specializationCode,
+                status: data.status,
+                amount: data.amount ?? null,
+                currency: data.currency ?? null,
+                providerSubscriptionId: data.providerSubscriptionId,
+            },
+        })
 
         await recordAnalyticsServerEvent({
             eventName: 'subscription_created',

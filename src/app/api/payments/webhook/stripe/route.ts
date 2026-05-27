@@ -12,6 +12,7 @@ import {
     fulfillOneTimePayment,
     refundOneTimePayment,
 } from '@/lib/payments'
+import { sendAdminOperationalAlertBestEffort } from '@/lib/admin/alerts'
 
 // Disable body parsing - Stripe needs raw body for signature verification
 export const dynamic = 'force-dynamic'
@@ -84,6 +85,24 @@ export async function POST(request: NextRequest) {
 
                 case 'payment.failed':
                     console.warn('[Webhook] Payment failed:', event.data)
+                    sendAdminOperationalAlertBestEffort({
+                        level: 'warning',
+                        subject: 'Pago fallido en Stripe',
+                        title: 'Pago fallido',
+                        summary: `Stripe reporto un pago fallido para ${event.data.customerEmail || 'cliente sin correo'}.`,
+                        actionPath: event.data.customerEmail
+                            ? `/dashboard/admin/operations?q=${encodeURIComponent(event.data.customerEmail)}`
+                            : '/dashboard/admin/inbox',
+                        entityType: 'payment_transaction',
+                        targetEmail: event.data.customerEmail ?? null,
+                        details: {
+                            sessionId: event.data.sessionId,
+                            paymentIntentId: event.data.paymentIntentId ?? null,
+                            purchaseType: event.data.purchaseType ?? null,
+                            referenceId: event.data.referenceId ?? null,
+                            providerEventId: event.providerEventId,
+                        },
+                    })
                     break
 
                 case 'unknown':
@@ -105,6 +124,20 @@ export async function POST(request: NextRequest) {
                 p_provider: 'stripe',
                 p_provider_event_id: event.providerEventId,
                 p_error_message: error instanceof Error ? error.message : 'Webhook processing failed',
+            })
+
+            sendAdminOperationalAlertBestEffort({
+                level: 'error',
+                subject: 'Webhook Stripe fallido',
+                title: 'Webhook Stripe requiere revision',
+                summary: error instanceof Error ? error.message : 'Webhook processing failed',
+                actionPath: '/dashboard/admin/inbox',
+                entityType: 'payment_webhook_event',
+                entityId: event.providerEventId,
+                details: {
+                    providerEventId: event.providerEventId,
+                    eventType: event.type,
+                },
             })
 
             throw error

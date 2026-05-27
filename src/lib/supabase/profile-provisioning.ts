@@ -1,6 +1,7 @@
 import { createClient } from '@supabase/supabase-js'
 import type { User } from '@supabase/supabase-js'
 import type { Database, UserRole } from '@/types/database'
+import { sendAdminOperationalAlertBestEffort } from '@/lib/admin/alerts'
 
 type AuthUserSnapshot = Pick<User, 'id' | 'email' | 'user_metadata'>
 
@@ -169,6 +170,10 @@ export async function processSpeakerApplicationForAuthUser(user: AuthUserSnapsho
     const acceptedAt = pickApplicationText(application, 'accepted_at') ?? new Date().toISOString()
     const valid = hasValidSpeakerApplication(user.user_metadata)
     const status = valid ? 'auto_approved_internal' : 'needs_review'
+    const { data: existingApplication } = await (admin.from('speaker_applications') as any)
+        .select('applicant_id, status')
+        .eq('applicant_id', user.id)
+        .maybeSingle()
 
     await (admin.from('speaker_applications') as any)
         .upsert(
@@ -200,6 +205,27 @@ export async function processSpeakerApplicationForAuthUser(user: AuthUserSnapsho
             },
             { onConflict: 'applicant_id' }
         )
+
+    if (!existingApplication) {
+        sendAdminOperationalAlertBestEffort({
+            level: valid ? 'success' : 'warning',
+            subject: 'Nueva solicitud de ponente',
+            title: 'Solicitud de ponente recibida',
+            summary: `${fullName || email || 'Un usuario'} envio una solicitud para entrar como ponente.`,
+            actionPath: email ? `/dashboard/admin/operations?q=${encodeURIComponent(email)}` : '/dashboard/admin/inbox',
+            entityType: 'speaker_application',
+            entityId: user.id,
+            targetUserId: user.id,
+            targetEmail: email,
+            details: {
+                fullName,
+                specialty,
+                yearsExperience,
+                status,
+                valid,
+            },
+        })
+    }
 
     if (!valid) {
         return { processed: true, promoted: false }

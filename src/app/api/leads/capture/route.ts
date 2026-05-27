@@ -15,6 +15,7 @@ import {
 } from '@/lib/events/campaigns'
 import { createAdminClient, createClient } from '@/lib/supabase/server'
 import { checkRateLimit, rateLimitResponse } from '@/lib/rate-limit'
+import { sendAdminOperationalAlertBestEffort } from '@/lib/admin/alerts'
 
 export const maxDuration = 15
 
@@ -141,6 +142,25 @@ export async function POST(request: NextRequest) {
                 sourceSurface: data.sourceSurface,
                 sourceAction: data.sourceAction,
                 speakerRef,
+            },
+        })
+
+        sendAdminOperationalAlertBestEffort({
+            level: 'info',
+            subject: `Nuevo lead: ${campaign.title}`,
+            title: 'Nuevo lead de campana',
+            summary: `${data.name} dejo sus datos para ${campaign.title}.`,
+            actionPath: `/dashboard/admin/operations?q=${encodeURIComponent(data.email.trim().toLowerCase())}`,
+            entityType: 'event_interest_lead',
+            targetEmail: data.email,
+            targetUserId: user?.id ?? null,
+            details: {
+                name: data.name,
+                eventSlug: resolvedEventSlug,
+                formationTrack: data.formationTrack || campaign.formationTrack,
+                sourceSurface: data.sourceSurface,
+                sourceAction: data.sourceAction,
+                leadTag: campaign.leadTag,
             },
         })
 

@@ -4,6 +4,7 @@ import { recordAnalyticsServerEvent, resolveAttributionSnapshot } from '@/lib/an
 import { createClient } from '@/lib/supabase/server'
 import { createServiceClient } from '@/lib/supabase/service'
 import { checkRateLimit, rateLimitResponse } from '@/lib/rate-limit'
+import { sendAdminOperationalAlertBestEffort } from '@/lib/admin/alerts'
 
 const FounderLeadSchema = z.object({
     fullName: z.string().trim().min(2),
@@ -85,6 +86,23 @@ export async function POST(request: NextRequest) {
                 interestArea: data.interestArea,
                 sourceSurface: 'fundadores-mexico',
                 sourceAction: 'calendar_request',
+            },
+        })
+
+        sendAdminOperationalAlertBestEffort({
+            level: 'info',
+            subject: 'Nuevo lead fundador SAPIHUM',
+            title: 'Nuevo lead fundador',
+            summary: `${data.fullName} solicito informacion del acceso fundador.`,
+            actionPath: `/dashboard/admin/operations?q=${encodeURIComponent(normalizedEmail)}`,
+            entityType: 'founders_mx_2026',
+            targetEmail: normalizedEmail,
+            targetUserId: user?.id ?? null,
+            details: {
+                fullName: data.fullName,
+                location: data.location,
+                professionalProfile: data.professionalProfile,
+                interestArea: data.interestArea,
             },
         })
 

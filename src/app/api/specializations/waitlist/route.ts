@@ -3,6 +3,7 @@ import { z } from 'zod'
 import { createAdminClient, createClient } from '@/lib/supabase/server'
 import { getSpecializationByCode } from '@/lib/specializations'
 import { recordAnalyticsServerEvent, resolveAttributionSnapshot } from '@/lib/analytics/server'
+import { sendAdminOperationalAlertBestEffort } from '@/lib/admin/alerts'
 
 type WaitlistSource = 'landing' | 'app'
 
@@ -103,6 +104,22 @@ export async function POST(request: NextRequest) {
             },
             properties: {
                 specializationCode: specialization.code,
+                source,
+            },
+        })
+
+        sendAdminOperationalAlertBestEffort({
+            level: 'info',
+            subject: `Nueva lista de espera: ${specialization.name}`,
+            title: 'Nuevo interesado en especializacion',
+            summary: `${email || 'Un usuario autenticado'} se unio a la lista de espera de ${specialization.name}.`,
+            actionPath: email ? `/dashboard/admin/operations?q=${encodeURIComponent(email)}` : '/dashboard/admin/inbox',
+            entityType: 'specialization_waitlist',
+            targetEmail: email || null,
+            targetUserId: user?.id ?? null,
+            details: {
+                specializationCode: specialization.code,
+                specializationName: specialization.name,
                 source,
             },
         })

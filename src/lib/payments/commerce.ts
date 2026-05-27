@@ -2,6 +2,7 @@ import { getAppUrl } from '@/lib/config/app-url'
 import { sendEmail } from '@/lib/email/index'
 import { buildEventPurchaseEmail, buildFormationPurchaseEmail } from '@/lib/email/templates'
 import { createServiceClient } from '@/lib/supabase/service'
+import { sendAdminOperationalAlertBestEffort } from '@/lib/admin/alerts'
 
 function normalizeEmail(email: string) {
     return email.trim().toLowerCase()
@@ -57,6 +58,31 @@ export async function logCommerceOperationalEvent(input: {
             })
     } catch (error) {
         console.error('[CommerceOps] Failed to log operational event:', error)
+    }
+
+    if (
+        input.actionType === 'commerce_email_failed' ||
+        input.actionType === 'commerce_magic_link_failed' ||
+        input.actionType === 'payment_refund_manual_review_required'
+    ) {
+        sendAdminOperationalAlertBestEffort({
+            level: 'error',
+            subject: `Revisar operacion: ${input.actionType}`,
+            title: 'Actividad operativa requiere revision',
+            summary: input.reason || `Se registro ${input.actionType} en ${input.entityType}.`,
+            actionPath: input.targetEmail
+                ? `/dashboard/admin/operations?q=${encodeURIComponent(normalizeEmail(input.targetEmail))}`
+                : '/dashboard/admin/inbox',
+            entityType: input.entityType,
+            entityId: input.entityId ?? null,
+            targetUserId: input.targetUserId ?? null,
+            targetEmail: input.targetEmail ?? null,
+            details: {
+                actionType: input.actionType,
+                reason: input.reason ?? null,
+                ...(input.details ?? {}),
+            },
+        })
     }
 }
 
