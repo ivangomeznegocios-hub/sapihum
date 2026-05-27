@@ -18,6 +18,7 @@ import {
     eventRegistrationCanGrantAccess,
     getActiveEntitlementForEvent,
 } from '@/lib/events/access'
+import { getEventAttendeeAccessRows, getEventAttendeeSourceLabel } from '@/lib/events/attendees'
 import { getUniqueEventAccessCount } from '@/lib/events/attendance'
 import { canDeleteEvent, getEventEditorAccessForUser } from '@/lib/events/permissions'
 import { getEventSessionOccurrences } from '@/lib/events/sessions'
@@ -251,22 +252,10 @@ export default async function EventDetailPage({ params }: PageProps) {
     })
     const hasEventAccess = canEditEvent || registrationGrantsAccess || accessEntitlementGrantsAccess
 
-    // Get all registrations with user info (for admins/creators only)
-    const allRegistrationsPromise = canManageEvent
-        ? (supabase
-            .from('event_registrations') as any)
-            .select(`
-                id,
-                user_id,
-                status,
-                registration_data,
-                registered_at,
-                profiles:user_id (id, full_name, avatar_url)
-            `)
-            .eq('event_id', id)
-            .eq('status', 'registered')
-            .order('registered_at', { ascending: false })
-        : Promise.resolve({ data: [] })
+    // Get all access rows with user info for event editors.
+    const allAttendeesPromise = canEditEvent
+        ? getEventAttendeeAccessRows(supabase, id)
+        : Promise.resolve([])
 
     // Calculate effective price for user
     let currentPrice = event.price || 0
@@ -296,16 +285,15 @@ export default async function EventDetailPage({ params }: PageProps) {
 
     const [
         attendeeCount,
-        { data: regsData },
+        allAttendees,
         eventSpeakers,
         eventResources,
     ] = await Promise.all([
         attendeeCountPromise,
-        allRegistrationsPromise,
+        allAttendeesPromise,
         getEventSpeakers(id),
         getResourcesByEvent(id),
     ])
-    const allRegistrations = (regsData || []) as any[]
     const directMaterialLinks = Array.isArray(event.material_links)
         ? event.material_links.filter((item: any) => item?.title && item?.url)
         : []
@@ -919,13 +907,13 @@ export default async function EventDetailPage({ params }: PageProps) {
                 </div>
             </div>
 
-            {/* Admin Section: Attendees List */}
-            {canManageEvent && allRegistrations.length > 0 && (
+            {/* Event editor section: Attendees List */}
+            {canEditEvent && allAttendees.length > 0 && (
                 <Card>
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2">
                             <ClipboardList className="h-5 w-5" />
-                            Asistentes Registrados ({allRegistrations.length})
+                            Asistentes con acceso ({allAttendees.length})
                         </CardTitle>
                     </CardHeader>
                     <CardContent>
@@ -934,21 +922,22 @@ export default async function EventDetailPage({ params }: PageProps) {
                                 <thead>
                                     <tr className="border-b">
                                         <th className="text-left py-2 px-3 font-medium">Nombre</th>
-                                        <th className="text-left py-2 px-3 font-medium">Fecha Registro</th>
+                                        <th className="text-left py-2 px-3 font-medium">Fecha acceso</th>
+                                        <th className="text-left py-2 px-3 font-medium">Origen</th>
                                         {event.registration_fields?.map((field: any, i: number) => (
                                             <th key={i} className="text-left py-2 px-3 font-medium">{field.label}</th>
                                         ))}
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {allRegistrations.map((reg: any) => (
-                                        <tr key={reg.id} className="border-b last:border-0 hover:bg-muted/50">
+                                    {allAttendees.map((attendee: any) => (
+                                        <tr key={attendee.identityKey} className="border-b last:border-0 hover:bg-muted/50">
                                             <td className="py-2 px-3">
                                                 <div className="flex items-center gap-2">
-                                                    {reg.profiles?.avatar_url ? (
+                                                    {attendee.avatarUrl ? (
                                                         <div className="relative h-6 w-6 overflow-hidden rounded-full">
                                                             <Image
-                                                                src={reg.profiles.avatar_url}
+                                                                src={attendee.avatarUrl}
                                                                 alt=""
                                                                 fill
                                                                 className="object-cover"
@@ -957,23 +946,30 @@ export default async function EventDetailPage({ params }: PageProps) {
                                                         </div>
                                                     ) : (
                                                         <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-xs">
-                                                            {reg.profiles?.full_name?.charAt(0) || '?'}
+                                                            {attendee.displayName?.charAt(0) || '?'}
                                                         </div>
                                                     )}
-                                                    <span>{reg.profiles?.full_name || 'Usuario'}</span>
+                                                    <span>{attendee.displayName || 'Usuario'}</span>
                                                 </div>
                                             </td>
                                             <td className="py-2 px-3 text-muted-foreground">
-                                                {formatDateInTimezone(reg.registered_at, {
-                                                    day: 'numeric',
-                                                    month: 'short',
-                                                    hour: '2-digit',
-                                                    minute: '2-digit'
-                                                }, userTimezone)}
+                                                {attendee.registeredAt
+                                                    ? formatDateInTimezone(attendee.registeredAt, {
+                                                        day: 'numeric',
+                                                        month: 'short',
+                                                        hour: '2-digit',
+                                                        minute: '2-digit'
+                                                    }, userTimezone)
+                                                    : '-'}
+                                            </td>
+                                            <td className="py-2 px-3 text-muted-foreground">
+                                                {attendee.accessSources
+                                                    ?.map((source: string) => getEventAttendeeSourceLabel(source))
+                                                    .join(', ') || '-'}
                                             </td>
                                             {event.registration_fields?.map((field: any, i: number) => (
                                                 <td key={i} className="py-2 px-3">
-                                                    {reg.registration_data?.[field.label] || '-'}
+                                                    {attendee.registrationData?.[field.label] || '-'}
                                                 </td>
                                             ))}
                                         </tr>

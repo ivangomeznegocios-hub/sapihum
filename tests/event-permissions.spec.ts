@@ -6,6 +6,7 @@ import {
   canViewEventStats,
   resolveEventEditorAccess,
 } from '../src/lib/events/permissions'
+import { mergeEventAttendeeAccessRows } from '../src/lib/events/attendees'
 
 test.describe('event permissions', () => {
   test('admin can manage and edit any event', () => {
@@ -97,6 +98,58 @@ test.describe('event permissions', () => {
       canManageEvent: false,
       canEditEvent: false,
       isAssignedSpeaker: false,
+    })
+  })
+
+  test('attendee access list deduplicates registrations and paid entitlements', () => {
+    const attendees = mergeEventAttendeeAccessRows({
+      registrations: [
+        {
+          id: 'registration-1',
+          user_id: 'user-1',
+          registration_data: { Especialidad: 'Clinica' },
+          registered_at: '2026-05-27T10:00:00.000Z',
+        },
+      ],
+      entitlements: [
+        {
+          id: 'entitlement-1',
+          user_id: 'user-1',
+          email: 'persona@example.com',
+          identity_key: 'persona@example.com',
+          access_kind: 'live_access',
+          source_type: 'registration',
+          created_at: '2026-05-27T10:01:00.000Z',
+        },
+        {
+          id: 'entitlement-2',
+          user_id: null,
+          email: 'comprador@example.com',
+          identity_key: 'comprador@example.com',
+          access_kind: 'live_access',
+          source_type: 'purchase',
+          created_at: '2026-05-27T11:00:00.000Z',
+        },
+      ],
+      profiles: [
+        {
+          id: 'user-1',
+          full_name: 'Persona Registrada',
+          avatar_url: null,
+          email: 'persona@example.com',
+        },
+      ],
+    })
+
+    expect(attendees).toHaveLength(2)
+    expect(attendees.find((attendee) => attendee.userId === 'user-1')).toMatchObject({
+      displayName: 'Persona Registrada',
+      accessSources: ['registration'],
+      registrationData: { Especialidad: 'Clinica' },
+    })
+    expect(attendees.find((attendee) => attendee.email === 'comprador@example.com')).toMatchObject({
+      displayName: 'comprador@example.com',
+      accessSources: ['purchase'],
     })
   })
 })
