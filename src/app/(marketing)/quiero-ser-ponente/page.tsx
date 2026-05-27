@@ -1,231 +1,423 @@
 import Image from 'next/image'
 import Link from 'next/link'
-import { ArrowRight, BadgeCheck, Banknote, ClipboardCheck, FileText, LockKeyhole, Mic2, ShieldCheck } from 'lucide-react'
+import { 
+    ArrowRight, 
+    BadgeCheck, 
+    Banknote, 
+    ClipboardCheck, 
+    FileText, 
+    LockKeyhole, 
+    Mic2, 
+    ShieldCheck, 
+    Award, 
+    Sparkles, 
+    Users, 
+    GraduationCap, 
+    TrendingUp, 
+    HelpCircle, 
+    Coins, 
+    CheckCircle2 
+} from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { formatPageTitle } from '@/lib/brand'
 import { SpeakerApplicationForm } from './speaker-application-form'
 
 export const metadata = {
-    title: formatPageTitle('Ser ponente'),
-    description: 'Registra tu perfil profesional para impartir eventos, cursos y formaciones dentro de SAPIHUM.',
+    title: formatPageTitle('Convocatoria para Ponentes'),
+    description: 'Registra tu perfil profesional como ponente científico para impartir cursos, talleres y masterclasses en la comunidad de psicología SAPIHUM.',
 }
 
 const REQUIREMENTS = [
-    'Identidad profesional verificable y datos de contacto reales.',
-    'Cedula, registro profesional o credencial equivalente.',
-    'Especialidad clara, experiencia minima y propuesta academica coherente.',
-    'Bio, foto profesional y aceptacion de terminos de ponente.',
+    {
+        title: 'Verificabilidad Profesional',
+        desc: 'Identidad académica comprobable con datos de contacto reales y consolidados.',
+        icon: BadgeCheck
+    },
+    {
+        title: 'Cédula o Licencia Activa',
+        desc: 'Cédula, registro profesional o credencial equivalente de tu país de origen.',
+        icon: Award
+    },
+    {
+        title: 'Propuesta Científica Coherente',
+        desc: 'Especialidad clara, años de experiencia clínica/docente y temario estructurado.',
+        icon: GraduationCap
+    },
+    {
+        title: 'Excelencia de Marca',
+        desc: 'Fotografía profesional, bio atractiva y compromiso ético con la salud mental.',
+        icon: ShieldCheck
+    }
 ]
 
 const STEPS = [
     {
-        title: 'Registro interno',
-        description: 'Si cumples los requisitos minimos, se crea tu cuenta con rol de ponente y perfil privado.',
+        title: '1. Solicitud y Validación',
+        description: 'Completa el formulario profesional. Nuestro comité académico revisa tus credenciales y activa tu cuenta de ponente en estado privado de forma ágil.',
         icon: ClipboardCheck,
     },
     {
-        title: 'Carga de eventos',
-        description: 'Desde el dashboard puedes preparar eventos, formaciones y materiales para revision operativa.',
+        title: '2. Configuración del Evento',
+        description: 'Accede a tu dashboard de ponente privado para diseñar tu propuesta (talleres, webinars o formaciones), fijar el precio y subir los materiales de apoyo.',
         icon: Mic2,
     },
     {
-        title: 'Publicacion controlada',
-        description: 'El directorio publico y los eventos visibles quedan sujetos a revision y publicacion por admin.',
+        title: '3. Lanzamiento y Difusión',
+        description: 'Una vez aprobado el contenido por administración, el evento se publica en el directorio global. Recibes soporte de cobro, correos automatizados y difusión.',
         icon: ShieldCheck,
     },
 ]
 
 const TERMS = [
-    'El acceso como ponente no garantiza publicacion publica inmediata.',
-    'Los porcentajes pueden ajustarse por evento cuando exista una regla aprobada por administracion.',
-    'Las ventas, reembolsos y pagos se calculan con los registros internos de la plataforma.',
-    'Debes respetar derechos de autor, confidencialidad, criterios academicos y lineamientos de comunicacion profesional.',
+    'La aprobación como ponente interno no implica la publicación comercial inmediata de cualquier evento propuesto.',
+    'Los márgenes financieros estándares pueden ser modificados por acuerdo mutuo en casos de campañas institucionales especiales.',
+    'La gestión de devoluciones, inscripciones y reportes financieros se realiza de forma centralizada a través del dashboard de SAPIHUM.',
+    'El ponente garantiza que todo el material didáctico respeta estrictamente los derechos de autor y los lineamientos éticos de la profesión.'
+]
+
+const FAQS = [
+    {
+        q: '¿Es necesario ser psicólogo clínico para postularse?',
+        a: 'No necesariamente. Aceptamos investigadores, neurocientíficos, psiquiatras y profesionales afines a las ciencias de la conducta humana, siempre que cuenten con cédula profesional válida y experiencia demostrable en su área.'
+    },
+    {
+        q: '¿Cómo y cuándo recibo los pagos de mis talleres?',
+        a: 'Tus ganancias se acumulan y registran automáticamente por cada transacción en el dashboard. Los fondos correspondientes se liberan según las políticas operativas habituales tras la impartición del evento y puedes solicitar la transferencia con un solo clic.'
+    },
+    {
+        q: '¿Quién define el precio de las formaciones?',
+        a: 'Tú tienes la flexibilidad de sugerir el precio de tus talleres o cursos. El equipo académico de SAPIHUM te brindará asesoría basada en la demanda del mercado para maximizar las inscripciones sin comprometer el valor científico del programa.'
+    },
+    {
+        q: '¿Qué tipo de apoyo de marketing ofrece SAPIHUM?',
+        a: 'Contamos con una comunidad activa de miles de profesionales de la psicología. Además de la presencia en nuestro directorio oficial, invertimos en publicidad segmentada, campañas de email marketing y difusión cross-channel para los eventos que aplican al canal de ventas de la plataforma.'
+    }
 ]
 
 export default function BecomeSpeakerPage() {
     return (
-        <div className="bg-background text-foreground">
-            <section className="relative isolate flex min-h-[74svh] items-end overflow-hidden">
-                <Image
-                    src="/investigacion/sapihum-2025/figura-5-demanda-vs-ingreso.png"
-                    alt=""
-                    fill
-                    priority
-                    sizes="100vw"
-                    className="object-cover opacity-45"
-                />
-                <div className="absolute inset-0 bg-slate-950/70" />
-                <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-background to-transparent" />
+        <div className="bg-background text-foreground sapihum-neural-dots relative overflow-hidden pb-16">
+            
+            {/* HERO SECTION */}
+            <section className="relative isolate min-h-[92vh] flex items-center justify-center overflow-hidden border-b border-brand-border py-20 lg:py-32">
+                {/* Visual Grid and glowing blobs */}
+                <div className="absolute inset-0 sapihum-grid-bg opacity-70 pointer-events-none z-0" />
+                <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[500px] h-[500px] bg-blue-600/10 rounded-full blur-[140px] pointer-events-none z-0 animate-pulse" />
+                
+                <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 w-full">
+                    <div className="grid gap-12 lg:grid-cols-[1.15fr_0.85fr] items-center">
+                        
+                        <div className="max-w-3xl text-left sapihum-stagger">
+                            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-widest bg-brand-blue-soft border border-brand-blue-border text-brand-blue-dark mb-6">
+                                <Sparkles className="h-3.5 w-3.5" /> Convocatoria Académica 2026
+                            </span>
+                            <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl lg:text-6xl text-brand-text-strong leading-[1.1]">
+                                Multiplica tu impacto científico como <span className="bg-gradient-to-r from-brand-blue via-indigo-600 to-sky-500 bg-clip-text text-transparent sapihum-shimmer-text">Ponente SAPIHUM</span>
+                            </h1>
+                            <p className="mt-6 text-base leading-8 text-brand-text-muted sm:text-lg max-w-xl">
+                                Comparte tu especialidad con la mayor red de profesionales de la salud mental y ciencias del comportamiento. Obtén hasta un 80% de ganancias, soporte técnico total y certificación oficial para tus alumnos.
+                            </p>
+                            
+                            <div className="mt-8 flex flex-wrap gap-4">
+                                <Button asChild size="lg" className="sapihum-glow-cta bg-brand-blue hover:bg-brand-blue-dark text-white font-bold text-base px-8 py-6 rounded-md shadow-brand-base">
+                                    <a href="#registro">
+                                        Postularme ahora
+                                        <ArrowRight className="ml-2 h-5 w-5" />
+                                    </a>
+                                </Button>
+                                <Button asChild variant="outline" size="lg" className="border-brand-border bg-white text-brand-text-strong font-semibold hover:bg-brand-surface-soft px-8 py-6 rounded-md">
+                                    <Link href="/speakers">Ver ponentes activos</Link>
+                                </Button>
+                            </div>
+                        </div>
 
-                <div className="relative z-10 mx-auto grid w-full max-w-7xl gap-10 px-4 pb-16 pt-28 sm:px-6 lg:grid-cols-[1.1fr_0.9fr] lg:px-8">
-                    <div className="max-w-3xl text-white">
-                        <p className="mb-5 text-xs font-bold uppercase tracking-[0.24em] text-sky-200">
-                            Convocatoria para ponentes
+                        {/* Visual Right Column - Commission Badges */}
+                        <div className="grid gap-4 sm:grid-cols-3 lg:grid-cols-1">
+                            {[
+                                {
+                                    value: '80%',
+                                    title: 'Inscripción Directa',
+                                    desc: 'De cada alumno que se inscriba mediante tus enlaces atribuidos o red personal.',
+                                    color: 'border-l-4 border-l-brand-blue'
+                                },
+                                {
+                                    value: '50%',
+                                    title: 'Tráfico del Canal SAPIHUM',
+                                    desc: 'De las inscripciones generadas gracias a nuestras campañas y posicionamiento orgánico.',
+                                    color: 'border-l-4 border-l-indigo-600'
+                                },
+                                {
+                                    value: '100% Control',
+                                    title: 'Flexibilidad Académica',
+                                    desc: 'Tú defines los contenidos, materiales de apoyo, el costo de inscripción y el calendario.',
+                                    color: 'border-l-4 border-l-sky-500'
+                                }
+                            ].map((badge, idx) => (
+                                <div 
+                                    key={idx} 
+                                    className={`rounded-xl border border-brand-border bg-white/80 p-6 backdrop-blur shadow-brand-base sapihum-card-glow transition-transform hover:-translate-y-1 ${badge.color}`}
+                                >
+                                    <p className="text-4xl font-extrabold text-brand-text-strong tracking-tight">{badge.value}</p>
+                                    <p className="mt-2 text-base font-bold text-brand-text-strong">{badge.title}</p>
+                                    <p className="mt-1 text-xs text-brand-text-muted leading-relaxed">{badge.desc}</p>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* BENEFITS SECTION */}
+            <section className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
+                <div className="text-center max-w-3xl mx-auto mb-16">
+                    <span className="brand-eyebrow">EL VALOR DE SER PARTE</span>
+                    <h2 className="text-3xl font-extrabold text-brand-text-strong tracking-tight sm:text-4xl mt-3">
+                        Todo lo que necesitas para brillar como docente científico
+                    </h2>
+                    <p className="mt-4 text-base text-brand-text-muted">
+                        Nos ocupamos de la complejidad operativa y técnica para que puedas enfocarte exclusivamente en transmitir tu experiencia clínica y académica.
+                    </p>
+                </div>
+
+                <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
+                    {[
+                        {
+                            title: 'Audiencia Especializada',
+                            desc: 'Accede directamente a miles de profesionales de la salud mental que buscan actualización constante y rigurosa.',
+                            icon: Users
+                        },
+                        {
+                            title: 'Respaldo Curricular',
+                            desc: 'Tus formaciones contarán con aval oficial de SAPIHUM, elevando el prestigio académico de tu oferta formativa.',
+                            icon: GraduationCap
+                        },
+                        {
+                            title: 'Infraestructura Tecnológica',
+                            desc: 'Pasarela de pagos internacional integrada, emisión automática de certificados y soporte técnico en tiempo real.',
+                            icon: Award
+                        },
+                        {
+                            title: 'Monetización Transparente',
+                            desc: 'Acceso a un panel detallado de analíticas de ventas y cobros simplificados con el porcentaje más alto del sector.',
+                            icon: TrendingUp
+                        }
+                    ].map((benefit, idx) => {
+                        const Icon = benefit.icon
+                        return (
+                            <div 
+                                key={idx} 
+                                className="relative rounded-xl border border-brand-border bg-white p-6 shadow-brand-base sapihum-card-glow"
+                            >
+                                <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-lg bg-brand-blue-soft text-brand-blue">
+                                    <Icon className="h-6 w-6" />
+                                </div>
+                                <h3 className="text-lg font-bold text-brand-text-strong">{benefit.title}</h3>
+                                <p className="mt-3 text-sm leading-relaxed text-brand-text-muted">{benefit.desc}</p>
+                            </div>
+                        )
+                    })}
+                </div>
+            </section>
+
+            {/* STEPS FLOW SECTION */}
+            <section className="border-y border-brand-border bg-brand-surface-soft/40 py-20 relative overflow-hidden">
+                <div className="absolute inset-0 sapihum-grid-bg opacity-30 pointer-events-none" />
+                <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                    
+                    <div className="text-center max-w-3xl mx-auto mb-16">
+                        <span className="brand-eyebrow">EL PROCESO</span>
+                        <h2 className="text-3xl font-extrabold text-brand-text-strong tracking-tight sm:text-4xl mt-3">
+                            Cómo iniciar tu trayectoria académica
+                        </h2>
+                        <p className="mt-4 text-base text-brand-text-muted">
+                            Un flujo simplificado y transparente diseñado para garantizar el rigor y la calidad sin burocracia excesiva.
                         </p>
-                        <h1 className="text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl">
-                            Comparte tu experiencia profesional en SAPIHUM
-                        </h1>
-                        <p className="mt-6 max-w-2xl text-base leading-8 text-slate-200 sm:text-lg">
-                            Registra tu perfil para impartir eventos, talleres y formaciones. Si cumples los requisitos,
-                            activamos tu acceso interno como ponente y dejamos tu perfil listo para revision.
+                    </div>
+
+                    <div className="grid gap-8 lg:grid-cols-3">
+                        {STEPS.map((step, idx) => {
+                            const Icon = step.icon
+                            return (
+                                <div key={idx} className="relative rounded-xl border border-brand-border bg-white p-8 shadow-brand-base sapihum-card-glow">
+                                    <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-full bg-brand-blue-soft text-brand-blue font-bold">
+                                        <Icon className="h-6 w-6" />
+                                    </div>
+                                    <h3 className="text-xl font-bold text-brand-text-strong">{step.title}</h3>
+                                    <p className="mt-4 text-sm leading-relaxed text-brand-text-muted">{step.description}</p>
+                                </div>
+                            )
+                        })}
+                    </div>
+                </div>
+            </section>
+
+            {/* INCOME TRANPARENCY SECTION */}
+            <section className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
+                <div className="grid gap-12 lg:grid-cols-[0.9fr_1.1fr] items-center">
+                    <div>
+                        <span className="brand-eyebrow">TRANSPARENCIA FINANCIERA</span>
+                        <h2 className="text-3xl font-extrabold text-brand-text-strong tracking-tight sm:text-4xl mt-3">
+                            Un modelo de comisiones claro y justo
+                        </h2>
+                        <p className="mt-4 text-base text-brand-text-muted leading-relaxed">
+                            Las inscripciones a tus formaciones se gestionan de forma automática en nuestra plataforma. El origen de cada venta determina el porcentaje asignado para asegurar un ecosistema de crecimiento mutuo.
                         </p>
-                        <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-                            <Button asChild size="lg" className="font-semibold">
-                                <a href="#registro">
-                                    Iniciar registro
-                                    <ArrowRight className="ml-2 h-4 w-4" />
-                                </a>
-                            </Button>
-                            <Button asChild variant="outline" size="lg" className="border-white/35 bg-white/10 font-semibold text-white hover:bg-white/20 hover:text-white">
-                                <Link href="/speakers">Ver ponentes actuales</Link>
-                            </Button>
+                        
+                        {/* Interactive Example Box */}
+                        <div className="mt-8 rounded-xl border border-brand-blue-border bg-brand-blue-soft/50 p-6">
+                            <h4 className="flex items-center gap-2 font-bold text-brand-text-strong text-base">
+                                <Coins className="h-5 w-5 text-brand-blue-dark" /> Simulación de ingresos
+                            </h4>
+                            <p className="mt-3 text-sm text-brand-text-muted leading-relaxed">
+                                Si organizas un taller práctico con un costo de <strong>$50 USD</strong> y asisten <strong>30 alumnos</strong>:
+                            </p>
+                            <ul className="mt-4 space-y-2 border-t border-brand-blue-border/40 pt-4 text-sm text-brand-text-strong">
+                                <li className="flex justify-between">
+                                    <span>15 inscritos por tu red (Venta Directa - 80%):</span>
+                                    <strong>$600.00 USD</strong>
+                                </li>
+                                <li className="flex justify-between">
+                                    <span>15 inscritos por difusión de SAPIHUM (50%):</span>
+                                    <strong>$375.00 USD</strong>
+                                </li>
+                                <li className="flex justify-between border-t border-brand-blue-border/50 pt-2 font-extrabold text-base text-brand-blue-dark">
+                                    <span>Tus ganancias totales:</span>
+                                    <span>$975.00 USD</span>
+                                </li>
+                            </ul>
                         </div>
                     </div>
 
-                    <div className="grid content-end gap-3 text-white sm:grid-cols-3 lg:grid-cols-1">
+                    <div className="grid gap-6">
                         {[
-                            ['80%', 'para venta directa atribuida al ponente'],
-                            ['50%', 'para venta por canal SAPIHUM'],
-                            ['Privado', 'perfil publico sujeto a aprobacion'],
-                        ].map(([value, label]) => (
-                            <div key={value} className="rounded-md border border-white/15 bg-white/10 p-4 backdrop-blur">
-                                <p className="text-3xl font-bold">{value}</p>
-                                <p className="mt-1 text-sm leading-5 text-slate-200">{label}</p>
+                            {
+                                title: 'Venta Directa Atribuida (80% para ti)',
+                                desc: 'Cuando la compra llega directamente por tu enlace único de ponente, código promocional o red personal. Recibes la gran mayoría de la inscripción.',
+                                icon: Banknote
+                            },
+                            {
+                                title: 'Venta por Canales SAPIHUM (50% para ti)',
+                                desc: 'Cuando el estudiante te descubre de forma orgánica en nuestro directorio, correos electrónicos a suscriptores o gracias a nuestras campañas pagadas en redes.',
+                                icon: Users
+                            },
+                            {
+                                title: 'Retiros Simples y transparentes',
+                                desc: 'Los estados de cuenta e ingresos se congelan con la regla comercial vigente en el momento de la venta para garantizar auditoría. Retira tus ganancias de forma directa desde tu panel.',
+                                icon: LockKeyhole
+                            }
+                        ].map((item, idx) => (
+                            <div key={idx} className="flex gap-4 rounded-xl border border-brand-border bg-white p-6 shadow-brand-base sapihum-card-glow">
+                                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-brand-blue-soft text-brand-blue">
+                                    <item.icon className="h-5 w-5" />
+                                </div>
+                                <div>
+                                    <h3 className="font-bold text-brand-text-strong text-base">{item.title}</h3>
+                                    <p className="mt-2 text-sm text-brand-text-muted leading-relaxed">{item.desc}</p>
+                                </div>
                             </div>
                         ))}
                     </div>
                 </div>
             </section>
 
-            <section className="mx-auto grid max-w-7xl gap-8 px-4 py-14 sm:px-6 lg:grid-cols-[0.85fr_1.15fr] lg:px-8">
-                <div>
-                    <p className="text-xs font-bold uppercase tracking-[0.2em] text-brand-blue">Requisitos</p>
-                    <h2 className="mt-3 text-3xl font-bold tracking-tight">Alta automatica con control profesional</h2>
-                    <p className="mt-4 text-sm leading-7 text-muted-foreground">
-                        El sistema valida datos minimos declarados. La verificacion documental y publicacion publica
-                        quedan para administracion, para mantener calidad academica y consistencia de marca.
-                    </p>
-                </div>
-                <div className="grid gap-3 sm:grid-cols-2">
-                    {REQUIREMENTS.map((requirement) => (
-                        <div key={requirement} className="flex gap-3 rounded-md border border-brand-border bg-card p-4">
-                            <BadgeCheck className="mt-0.5 h-5 w-5 shrink-0 text-brand-blue" />
-                            <p className="text-sm leading-6 text-muted-foreground">{requirement}</p>
-                        </div>
-                    ))}
-                </div>
-            </section>
-
-            <section className="border-y border-brand-border bg-card/45">
-                <div className="mx-auto grid max-w-7xl gap-5 px-4 py-14 sm:px-6 lg:grid-cols-3 lg:px-8">
-                    {STEPS.map((step) => {
-                        const Icon = step.icon
-                        return (
-                            <Card key={step.title} className="rounded-md border-brand-border shadow-sm">
-                                <CardHeader>
-                                    <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-md bg-brand-blue-soft text-brand-blue">
-                                        <Icon className="h-5 w-5" />
-                                    </div>
-                                    <CardTitle className="text-lg">{step.title}</CardTitle>
-                                </CardHeader>
-                                <CardContent>
-                                    <p className="text-sm leading-6 text-muted-foreground">{step.description}</p>
-                                </CardContent>
-                            </Card>
-                        )
-                    })}
-                </div>
-            </section>
-
-            <section className="mx-auto grid max-w-7xl gap-10 px-4 py-16 sm:px-6 lg:grid-cols-[1fr_1fr] lg:px-8">
-                <div>
-                    <p className="text-xs font-bold uppercase tracking-[0.2em] text-brand-blue">Ingresos</p>
-                    <h2 className="mt-3 text-3xl font-bold tracking-tight">Como se calculan tus ingresos</h2>
-                    <p className="mt-4 text-sm leading-7 text-muted-foreground">
-                        Las ventas se registran por evento y origen. Cada calculo queda congelado con la regla vigente
-                        al momento de la compra, para que el historial financiero sea auditable.
-                    </p>
-                </div>
-                <div className="grid gap-4">
-                    <div className="rounded-md border border-brand-border bg-card p-5">
-                        <div className="flex items-center gap-3">
-                            <Banknote className="h-5 w-5 text-brand-blue" />
-                            <h3 className="font-semibold">Venta directa del ponente</h3>
-                        </div>
-                        <p className="mt-3 text-sm leading-6 text-muted-foreground">
-                            Cuando la compra llega por tu enlace atribuido, la regla global actual asigna 80% para ti
-                            y 20% para SAPIHUM.
+            {/* FAQS SECTION */}
+            <section className="border-t border-brand-border bg-brand-surface-soft/20 py-20">
+                <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                    <div className="text-center max-w-3xl mx-auto mb-16">
+                        <span className="brand-eyebrow">PREGUNTAS FRECUENTES</span>
+                        <h2 className="text-3xl font-extrabold text-brand-text-strong tracking-tight sm:text-4xl mt-3">
+                            Resolviendo tus inquietudes académicas
+                        </h2>
+                        <p className="mt-4 text-base text-brand-text-muted">
+                            Si tienes alguna otra duda sobre el proceso, no dudes en contactar a nuestro equipo de soporte institucional.
                         </p>
                     </div>
-                    <div className="rounded-md border border-brand-border bg-card p-5">
-                        <div className="flex items-center gap-3">
-                            <Banknote className="h-5 w-5 text-brand-blue" />
-                            <h3 className="font-semibold">Venta por canal SAPIHUM</h3>
-                        </div>
-                        <p className="mt-3 text-sm leading-6 text-muted-foreground">
-                            Cuando la venta proviene de la audiencia o campanas de SAPIHUM, la regla global actual
-                            asigna 50% para ti y 50% para la plataforma.
-                        </p>
-                    </div>
-                    <div className="rounded-md border border-brand-border bg-card p-5">
-                        <div className="flex items-center gap-3">
-                            <LockKeyhole className="h-5 w-5 text-brand-blue" />
-                            <h3 className="font-semibold">Liberacion y solicitud de pago</h3>
-                        </div>
-                        <p className="mt-3 text-sm leading-6 text-muted-foreground">
-                            Tus ganancias aparecen en el dashboard, se liberan conforme a las reglas operativas
-                            existentes y pueden solicitarse desde el modulo de ganancias.
-                        </p>
+
+                    <div className="mx-auto max-w-4xl grid gap-6 sm:grid-cols-2">
+                        {FAQS.map((faq, idx) => (
+                            <div key={idx} className="rounded-xl border border-brand-border bg-white p-6 shadow-brand-base">
+                                <h3 className="flex items-start gap-2.5 font-bold text-brand-text-strong text-base">
+                                    <HelpCircle className="h-5 w-5 shrink-0 text-brand-blue mt-0.5" />
+                                    <span>{faq.q}</span>
+                                </h3>
+                                <p className="mt-3 text-sm text-brand-text-muted leading-relaxed pl-7.5">
+                                    {faq.a}
+                                </p>
+                            </div>
+                        ))}
                     </div>
                 </div>
             </section>
 
-            <section className="border-y border-brand-border bg-card/45">
-                <div className="mx-auto grid max-w-7xl gap-10 px-4 py-16 sm:px-6 lg:grid-cols-[0.9fr_1.1fr] lg:px-8">
+            {/* LEGAL TERMS SECTION */}
+            <section className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8 border-t border-brand-border">
+                <div className="grid gap-12 lg:grid-cols-[0.85fr_1.15fr]">
                     <div>
-                        <p className="text-xs font-bold uppercase tracking-[0.2em] text-brand-blue">Terminos clave</p>
-                        <h2 className="mt-3 text-3xl font-bold tracking-tight">Condiciones antes de registrarte</h2>
-                        <p className="mt-4 text-sm leading-7 text-muted-foreground">
-                            Este resumen no sustituye los documentos legales completos. Al registrarte aceptas la
-                            version vigente de terminos, privacidad y reglas comerciales para ponentes.
+                        <span className="brand-eyebrow">MARCO ÉTICO Y LEGAL</span>
+                        <h2 className="text-3xl font-extrabold text-brand-text-strong tracking-tight sm:text-4xl mt-3">
+                            Términos institucionales clave
+                        </h2>
+                        <p className="mt-4 text-sm leading-relaxed text-brand-text-muted">
+                            Para velar por el rigor del hub, todos los ponentes deben aceptar el acuerdo marco de colaboración docente al momento de crear su perfil profesional. Puedes consultar las políticas detalladas en cualquier momento.
                         </p>
-                        <div className="mt-6 flex flex-wrap gap-3">
-                            <Button asChild variant="outline">
+                        
+                        <div className="mt-8 flex flex-wrap gap-3">
+                            <Button asChild variant="outline" className="border-brand-border bg-white hover:bg-brand-surface-soft">
                                 <Link href="/terminos">
-                                    <FileText className="mr-2 h-4 w-4" />
-                                    Terminos
+                                    <FileText className="mr-2 h-4 w-4 text-brand-blue" />
+                                    Términos del Servicio
                                 </Link>
                             </Button>
-                            <Button asChild variant="outline">
+                            <Button asChild variant="outline" className="border-brand-border bg-white hover:bg-brand-surface-soft">
                                 <Link href="/aviso-privacidad">
-                                    <FileText className="mr-2 h-4 w-4" />
-                                    Privacidad
+                                    <FileText className="mr-2 h-4 w-4 text-brand-blue" />
+                                    Aviso de Privacidad
                                 </Link>
                             </Button>
                         </div>
                     </div>
-                    <ul className="grid gap-3">
-                        {TERMS.map((term) => (
-                            <li key={term} className="flex gap-3 rounded-md border border-brand-border bg-background p-4">
-                                <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-brand-blue" />
-                                <span className="text-sm leading-6 text-muted-foreground">{term}</span>
+
+                    <ul className="grid gap-4">
+                        {TERMS.map((term, idx) => (
+                            <li key={idx} className="flex gap-4 rounded-xl border border-brand-border bg-white p-5 shadow-brand-base">
+                                <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-brand-blue" />
+                                <span className="text-sm leading-relaxed text-brand-text-muted">{term}</span>
                             </li>
                         ))}
                     </ul>
                 </div>
             </section>
 
-            <section id="registro" className="mx-auto grid max-w-7xl gap-10 px-4 py-16 sm:px-6 lg:grid-cols-[0.85fr_1.15fr] lg:px-8">
-                <div>
-                    <p className="text-xs font-bold uppercase tracking-[0.2em] text-brand-blue">Registro</p>
-                    <h2 className="mt-3 text-3xl font-bold tracking-tight">Completa tu solicitud de ponente</h2>
-                    <p className="mt-4 text-sm leading-7 text-muted-foreground">
-                        Si el formulario cumple los requisitos, recibiras confirmacion por correo. Al validar tu email,
-                        el sistema activara tu acceso interno como ponente y tu perfil quedara privado.
-                    </p>
+            {/* REGISTRATION FORM WRAPPER */}
+            <section id="registro" className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8 border-t border-brand-border scroll-mt-10">
+                <div className="grid gap-12 lg:grid-cols-[0.85fr_1.15fr]">
+                    <div className="lg:sticky lg:top-28 self-start">
+                        <span className="brand-eyebrow">REGISTRO DOCENTE</span>
+                        <h2 className="text-3xl font-extrabold text-brand-text-strong tracking-tight sm:text-4xl mt-3">
+                            Únete hoy a SAPIHUM
+                        </h2>
+                        <p className="mt-4 text-base leading-relaxed text-brand-text-muted">
+                            Completa tu solicitud profesional y carga tus credenciales académicas. Una vez enviado el formulario, recibirás un correo de verificación para activar tu cuenta de ponente interna.
+                        </p>
+                        
+                        <div className="mt-8 rounded-xl border border-brand-border bg-white p-6 shadow-brand-base flex items-start gap-4">
+                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-green-500/10 text-green-600">
+                                <BadgeCheck className="h-6 w-6" />
+                            </div>
+                            <div>
+                                <h4 className="font-bold text-brand-text-strong text-sm">Validación ágil de perfil</h4>
+                                <p className="mt-2 text-xs text-brand-text-muted leading-relaxed">
+                                    El alta de tu cuenta como ponente se realiza al validar tu correo, permitiéndote explorar el creador de eventos y dashboard de inmediato.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="relative rounded-2xl border border-brand-border bg-white p-1 md:p-2 shadow-brand-luxury backdrop-blur">
+                        <div className="absolute inset-0 bg-gradient-to-tr from-brand-blue/5 to-indigo-600/5 rounded-2xl pointer-events-none" />
+                        <SpeakerApplicationForm />
+                    </div>
                 </div>
-                <SpeakerApplicationForm />
             </section>
         </div>
     )
