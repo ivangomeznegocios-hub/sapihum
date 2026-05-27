@@ -20,6 +20,7 @@ const FOOTER_LINKS = {
     { label: "Pr\u00F3ximos Encuentros", href: "/academia" },
     { label: "Formaciones", href: "/formaciones" },
     { label: "Ponentes", href: "/speakers" },
+    { label: "Ser ponente", href: "/quiero-ser-ponente" },
   ],
   Recursos: [
     { label: "Blog", href: "/blog" },

@@ -6,7 +6,7 @@ import { hasRegistrationConsentMetadata } from '@/lib/consent'
 import { recordAnalyticsServerEvent } from '@/lib/analytics/server'
 import { reconcileGrowthRewards } from '@/lib/growth/reward-engine'
 import { claimCurrentUserEventEntitlements } from '@/lib/supabase/queries/event-entitlements'
-import { ensureProfileForAuthUser } from '@/lib/supabase/profile-provisioning'
+import { ensureProfileForAuthUser, processSpeakerApplicationForAuthUser } from '@/lib/supabase/profile-provisioning'
 
 export async function POST() {
     const supabase = await createClient()
@@ -27,6 +27,7 @@ export async function POST() {
 
     try {
         await ensureProfileForAuthUser(user)
+        await processSpeakerApplicationForAuthUser(user)
 
         const userMetadata = user.user_metadata ?? null
         const inviteRefCode = userMetadata?.invite_ref_code
