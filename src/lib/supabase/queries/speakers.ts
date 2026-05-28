@@ -13,6 +13,7 @@ import type {
 
 type SpeakerProfileSummary = {
     id: string
+    email: string | null
     full_name: string | null
     avatar_url: string | null
     role: string | null
@@ -65,6 +66,7 @@ async function loadAuthProfileFallbacks(speakerIds: string[]) {
 
                 return {
                     id: speakerId,
+                    email: authUser.email ?? null,
                     full_name: fullName,
                     avatar_url: avatarUrl,
                     role: null,
@@ -102,7 +104,7 @@ async function loadSpeakerProfiles(speakerIds: string[], options?: { publicOnly?
     const supabase = options?.publicOnly ? createPublicClient() : await createSpeakerProfileClient()
     const { data, error } = await (supabase
         .from('profiles') as any)
-        .select('id, full_name, avatar_url, role')
+        .select('id, email, full_name, avatar_url, role')
         .in('id', uniqueIds)
 
     if (error) {
@@ -115,6 +117,7 @@ async function loadSpeakerProfiles(speakerIds: string[], options?: { publicOnly?
             profile.id,
             {
                 ...profile,
+                email: normalizeText(profile.email),
                 full_name: normalizeText(profile.full_name),
                 avatar_url: normalizeText(profile.avatar_url),
                 role: normalizeText(profile.role),
@@ -137,6 +140,7 @@ async function loadSpeakerProfiles(speakerIds: string[], options?: { publicOnly?
             const currentProfile = profileMap.get(speakerId)
             profileMap.set(speakerId, {
                 id: speakerId,
+                email: currentProfile?.email ?? authFallback.email ?? null,
                 full_name: currentProfile?.full_name ?? authFallback.full_name ?? null,
                 avatar_url: currentProfile?.avatar_url ?? authFallback.avatar_url ?? null,
                 role: currentProfile?.role ?? authFallback.role ?? null,
@@ -383,14 +387,7 @@ export async function getEventSpeakerOptions(): Promise<EventSpeakerOption[]> {
 
     const { data, error } = await (supabase
         .from('speakers') as any)
-        .select(`
-            id,
-            photo_url,
-            profile:profiles!speakers_id_fkey (
-                full_name,
-                avatar_url
-            )
-        `)
+        .select('id, headline, photo_url')
         .order('created_at', { ascending: false })
 
     if (error) {
@@ -398,14 +395,14 @@ export async function getEventSpeakerOptions(): Promise<EventSpeakerOption[]> {
         return []
     }
 
-    return (data ?? []).map((speaker: any) => {
-        const profile = Array.isArray(speaker.profile)
-            ? speaker.profile[0]
-            : speaker.profile
+    const speakers = (data ?? []) as Array<{ id: string; headline: string | null; photo_url: string | null }>
+    const profileMap = await loadSpeakerProfiles(speakers.map((speaker) => speaker.id))
 
+    return speakers.map((speaker) => {
+        const profile = profileMap.get(speaker.id)
         return {
             id: speaker.id,
-            name: profile?.full_name || 'Desconocido',
+            name: profile?.full_name || normalizeText(speaker.headline) || profile?.email || 'Ponente sin nombre',
             avatar: speaker.photo_url || profile?.avatar_url || null,
         }
     })

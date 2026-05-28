@@ -211,7 +211,7 @@ function getSimplifiedGroups({
     const labels: Record<string, string> = {
         '/dashboard/calendar': userRole === 'patient' ? 'Citas' : 'Agenda',
         '/dashboard/documents': userRole === 'patient' ? 'Recursos' : 'Documentos',
-        '/dashboard/events': userRole === 'ponente' ? 'Mis eventos' : 'Eventos y comunidad',
+        '/dashboard/events': userRole === 'ponente' ? 'Todos los eventos' : 'Eventos y comunidad',
         '/dashboard/growth': 'Invita colegas',
         '/dashboard/mi-acceso': 'Mis cursos y eventos',
         '/dashboard/marketing': 'Impulso profesional',

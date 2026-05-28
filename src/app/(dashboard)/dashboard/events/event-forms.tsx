@@ -25,7 +25,7 @@ import {
 } from '@/lib/timezone'
 import { isValidMaterialLinkUrl } from '@/lib/material-links'
 import { getMembershipSpecializations } from '@/lib/specializations'
-import { Plus, X, Loader2, Check, UserPlus, UserMinus, Users, Lock, Globe, Stethoscope, Heart, Pencil, Trash2, AlertTriangle, GripVertical, Copy, Code2, Link2, Calendar, Clock, GraduationCap, Award, Mic2, ChevronDown } from 'lucide-react'
+import { Plus, X, Loader2, Check, UserPlus, UserMinus, Users, Pencil, Trash2, AlertTriangle, GripVertical, Copy, Code2, Link2, Calendar, Clock, GraduationCap, Mic2, ChevronDown } from 'lucide-react'
 import type { ContentScope, Vertical } from '@/types/database'
 
 interface Event {
@@ -313,16 +313,7 @@ const SUBCATEGORY_OPTIONS: Record<string, { value: string; label: string }[]> = 
     ],
 }
 
-const AUDIENCE_OPTIONS = [
-    { value: 'public', label: 'Público General', icon: Globe, description: 'Cualquier persona puede ver y registrarse' },
-    { value: 'members', label: 'Solo Miembros', icon: Lock, description: 'Usuarios con suscripción activa' },
-    { value: 'psychologists', label: 'Solo Psicólogos', icon: Stethoscope, description: 'Exclusivo para profesionales de la salud mental' },
-    { value: 'patients', label: 'Solo Pacientes', icon: Heart, description: 'Exclusivo para pacientes registrados' },
-    { value: 'active_patients', label: 'Pacientes Activos', icon: Users, description: 'Pacientes con psicólogo asignado actualmente' },
-    { value: 'ponentes', label: 'Solo Ponentes', icon: Mic2, description: 'Eventos internos exclusivos para ponentes' },
-    { value: 'students', label: 'Estudiantes', icon: GraduationCap, description: 'Estudiantes de psicología u otras disciplinas' },
-    { value: 'certified', label: 'Profesionales Certificados', icon: Award, description: 'Profesionales con cédula profesional o certificación vigente' },
-]
+const DEFAULT_EVENT_AUDIENCE = ['public']
 
 const SESSION_DURATION_OPTIONS = [
     { value: 30, label: '30 minutos' },
@@ -539,13 +530,13 @@ function getInitialManualSessions(initialData: any): ManualSessionInput[] {
     }))
 }
 
-function getAudienceLabel(value: string) {
-    return AUDIENCE_OPTIONS.find((option) => option.value === value)?.label || value
+function normalizeSpeakerOptionProfile(profile: any) {
+    return Array.isArray(profile) ? profile[0] : profile
 }
 
-function normalizeAudience(values: string[]) {
-    if (values.includes('public')) return ['public']
-    return values.length > 0 ? values : ['public']
+function getSpeakerOptionName(profile: any, fallbackName?: string | null) {
+    const normalizedFallback = typeof fallbackName === 'string' ? fallbackName.trim() : ''
+    return profile?.full_name || normalizedFallback || profile?.email || 'Ponente sin nombre'
 }
 
 function detectMeetingPlatform(meetingLink?: string | null) {
@@ -584,7 +575,6 @@ export function CreateEventForm({
     const [isLoading, setIsLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
     const [formEventId] = useState(() => initialData?.id || eventId || crypto.randomUUID())
-    const [selectedAudience, setSelectedAudience] = useState<string[]>(initialData?.target_audience || ['public'])
     const [selectedCategory, setSelectedCategory] = useState(initialData?.category || 'general')
     const [selectedSubcategory, setSelectedSubcategory] = useState(initialData?.subcategory || '')
     const [selectedStatus, setSelectedStatus] = useState(initialData?.status || 'draft')
@@ -674,7 +664,7 @@ export function CreateEventForm({
         if (!dateValue || !timeValue) return null
         return zonedDateTimeToUtcIso(dateValue, timeValue, DEFAULT_TIMEZONE)
     }, [dateValue, timeValue])
-    const normalizedAudience = normalizeAudience(selectedAudience)
+    const normalizedAudience = DEFAULT_EVENT_AUDIENCE
     const statusPreview = canPublish ? selectedStatus : 'draft'
     const numericPrice = Number.parseFloat(priceValue || '0') || 0
     const numericMemberPrice = Number.parseFloat(memberPriceValue || '0') || 0
@@ -753,7 +743,7 @@ export function CreateEventForm({
     const statusLabel = STATUS_LABELS[statusPreview] || statusPreview
     const isMembersOnlyEvent = normalizedAudience.includes('members') && !normalizedAudience.includes('public')
     const summaryPrice = numericPrice > 0 ? `$${numericPrice.toFixed(0)} MXN` : (isMembersOnlyEvent ? 'Incluido con Membresía' : 'Gratis')
-    const summaryAudience = normalizedAudience.map(getAudienceLabel).join(', ')
+    const summaryAudience = 'Publico General'
     const memberAccessSummary =
         numericPrice <= 0
             ? (isMembersOnlyEvent
@@ -786,8 +776,9 @@ export function CreateEventForm({
                         .from('speakers')
                         .select(`
                             id,
+                            headline,
                             photo_url,
-                            profile:profiles ( full_name, avatar_url )
+                            profile:profiles ( full_name, avatar_url, email )
                         `),
                 eventId && initialSpeakerAssignments.length === 0
                     ? supabase
@@ -803,11 +794,15 @@ export function CreateEventForm({
             if (speakerOptions !== undefined) {
                 setAvailableSpeakers(speakerOptions)
             } else if (!speakerResponse.error && speakerResponse.data) {
-                setAvailableSpeakers(speakerResponse.data.map((s: any) => ({
-                    id: s.id,
-                    name: s.profile?.full_name || 'Desconocido',
-                    avatar: s.photo_url || s.profile?.avatar_url || null
-                })))
+                setAvailableSpeakers(speakerResponse.data.map((s: any) => {
+                    const profile = normalizeSpeakerOptionProfile(s.profile)
+
+                    return {
+                        id: s.id,
+                        name: getSpeakerOptionName(profile, s.headline),
+                        avatar: s.photo_url || profile?.avatar_url || null
+                    }
+                }))
             }
 
             if (selectedSpeakerResponse.data) {
@@ -867,20 +862,6 @@ export function CreateEventForm({
             ignore = true
         }
     }, [canUseAdvancedSettings, eventId])
-
-    function toggleAudience(value: string) {
-        setSelectedAudience(prev => {
-            if (prev.includes(value)) {
-                return prev.filter(v => v !== value)
-            }
-            // If selecting 'public', clear others
-            if (value === 'public') {
-                return ['public']
-            }
-            // If selecting other, remove 'public'
-            return [...prev.filter(v => v !== 'public'), value]
-        })
-    }
 
     function toggleSpeaker(speakerId: string) {
         setSelectedSpeakerAssignments(prev => {
@@ -1022,37 +1003,6 @@ export function CreateEventForm({
     function copyToClipboard(value: string) {
         if (!value) return
         navigator.clipboard.writeText(value)
-    }
-
-    function renderAudiencePicker() {
-        return (
-            <div className="grid gap-2 md:grid-cols-2">
-                {AUDIENCE_OPTIONS.map((option) => {
-                    const isSelected = selectedAudience.includes(option.value)
-                    const Icon = option.icon
-
-                    return (
-                        <button
-                            key={option.value}
-                            type="button"
-                            onClick={() => toggleAudience(option.value)}
-                            className={`flex items-start gap-3 rounded-xl border p-3 text-left transition-colors ${isSelected
-                                ? 'border-primary bg-primary/5'
-                                : 'hover:bg-muted/50'
-                                }`}
-                        >
-                            <div className={`mt-0.5 flex-shrink-0 ${isSelected ? 'text-primary' : 'text-muted-foreground'}`}>
-                                {isSelected ? <Check className="h-4 w-4" /> : <Icon className="h-4 w-4" />}
-                            </div>
-                            <div className="min-w-0">
-                                <p className={`text-sm font-medium ${isSelected ? 'text-primary' : ''}`}>{option.label}</p>
-                                <p className="text-xs text-muted-foreground">{option.description}</p>
-                            </div>
-                        </button>
-                    )
-                })}
-            </div>
-        )
     }
 
     function renderSpeakerPicker() {
@@ -2131,16 +2081,6 @@ export function CreateEventForm({
                 title="Acceso"
                 description=""
             >
-                <div className="space-y-3">
-                    <div>
-                        <h4 className="text-sm font-medium">Audiencia</h4>
-                        <p className="text-xs text-muted-foreground">
-                            Puedes combinar audiencias, excepto publico general que deja el acceso abierto.
-                        </p>
-                    </div>
-                    {renderAudiencePicker()}
-                </div>
-
                 <div className="grid gap-4 lg:grid-cols-2">
                     <div className="grid gap-4 sm:grid-cols-2">
                         <div>
@@ -2156,6 +2096,9 @@ export function CreateEventForm({
                                 onChange={(e) => setPriceValue(e.target.value)}
                                 className="mt-1 w-full rounded-lg border bg-background px-3 py-2"
                             />
+                            <p className="mt-1 text-xs text-muted-foreground">
+                                El evento siempre queda abierto a Publico General. Si configuras precio preferencial, los miembros deben tener al menos $200 MXN de descuento frente al precio general.
+                            </p>
                         </div>
 
                         <div>
@@ -2172,6 +2115,9 @@ export function CreateEventForm({
                                 className="mt-1 w-full rounded-lg border bg-background px-3 py-2"
                                 placeholder="Opcional"
                             />
+                            <p className="mt-1 text-xs text-muted-foreground">
+                                Numero maximo de lugares disponibles. Dejalo vacio si no necesitas limitar registros o compras.
+                            </p>
                         </div>
 
                         <div>
@@ -2303,8 +2249,8 @@ export function CreateEventForm({
                 )}
 
                 {!canPublish && (
-                    <div className="flex items-start gap-2 rounded-xl border border-brand-blue bg-brand-blue p-4 text-sm text-brand-blue">
-                        <AlertTriangle className="mt-0.5 h-4 w-4 flex-shrink-0" />
+                    <div className="flex items-start gap-2 rounded-xl border border-brand-blue/30 bg-brand-blue/10 p-4 text-sm text-foreground">
+                        <AlertTriangle className="mt-0.5 h-4 w-4 flex-shrink-0 text-brand-blue-hover" />
                         <p>
                             Al guardar, este evento quedara en <strong>Borrador</strong> para revision administrativa.
                         </p>

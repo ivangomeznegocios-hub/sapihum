@@ -172,7 +172,6 @@ function validateMemberDiscountRule(params: {
     price: number
     memberAccessType: string
     memberPrice: number
-    canUseAdvancedSettings: boolean
 }) {
     if (params.memberAccessType !== 'discounted' || params.price <= 0) {
         return null
@@ -182,7 +181,7 @@ function validateMemberDiscountRule(params: {
         return 'Ingresa un precio preferencial para miembros o cambia el tipo de acceso'
     }
 
-    if (!params.canUseAdvancedSettings && params.price >= 200 && params.price - params.memberPrice < 200) {
+    if (params.price >= 200 && params.price - params.memberPrice < 200) {
         return 'El precio miembro debe tener al menos $200 MXN de descuento frente al precio publico'
     }
 
@@ -1140,8 +1139,7 @@ export async function createEvent(formData: FormData) {
     const programName = programMode === 'program' ? readTrimmedString(formData.get('programName')) : null
     const programTypeLabel = programMode === 'program' ? readTrimmedString(formData.get('programTypeLabel')) : null
     const programChildEventIds = programMode === 'program' ? parseProgramChildEventIds(formData) : []
-    const targetAudience = (formData.getAll('audience') as string[]).filter(Boolean)
-    const normalizedAudience = targetAudience.length > 0 ? targetAudience : ['public']
+    const normalizedAudience = ['public']
     const registrationFields = parseRegistrationFields(formData)
     const memberAccessType =
         price > 0
@@ -1164,7 +1162,6 @@ export async function createEvent(formData: FormData) {
         price,
         memberAccessType,
         memberPrice,
-        canUseAdvancedSettings,
     })
     if (memberDiscountError) {
         return failCreateEvent(memberDiscountError)
@@ -1460,8 +1457,7 @@ export async function updateEvent(eventId: string, formData: FormData) {
     const location = formData.has('location')
         ? readTrimmedString(formData.get('location'))
         : undefined
-    const audienceRaw = (formData.getAll('audience') as string[]).filter(Boolean)
-    const targetAudience = audienceRaw.length > 0 ? audienceRaw : undefined
+    const targetAudience = ['public']
     const registrationFields = formData.has('registrationFields')
         ? parseRegistrationFields(formData)
         : undefined
@@ -1511,7 +1507,6 @@ export async function updateEvent(eventId: string, formData: FormData) {
         price,
         memberAccessType,
         memberPrice,
-        canUseAdvancedSettings,
     })
     if (memberDiscountError) {
         return { error: memberDiscountError }
