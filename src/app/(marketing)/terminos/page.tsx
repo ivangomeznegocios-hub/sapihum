@@ -136,10 +136,10 @@ export default function TerminosPage() {
                                     Para dudas legales, aclaraciones sobre membresías o soporte, contáctanos en:
                                 </p>
                                 <a 
-                                    href="mailto:legal@sapihum.com" 
+                                    href="mailto:privacidad@mail.sapihum.com" 
                                     className="mt-3 inline-block font-sans text-xs font-bold text-blue-600 hover:underline dark:text-blue-400"
                                 >
-                                    legal@sapihum.com
+                                    privacidad@mail.sapihum.com
                                 </a>
                             </div>
                         </div>

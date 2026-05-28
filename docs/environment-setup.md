@@ -9,7 +9,6 @@ Server-only secrets must never be sent to the client:
 - `STRIPE_SECRET_KEY`
 - `STRIPE_WEBHOOK_SECRET`
 - `RESEND_API_KEY`
-- `ADMIN_NOTIFY_EMAIL`
 - `ONESIGNAL_REST_API_KEY`
 - `AI_API_KEY`
 - `GA4_API_SECRET`
@@ -38,8 +37,6 @@ Set staging-specific values for:
 - `STRIPE_PRICE_LEVEL_3_MONTHLY`
 - `STRIPE_PRICE_LEVEL_3_ANNUAL`
 - `RESEND_API_KEY`
-- `RESEND_FROM_EMAIL`
-- `ADMIN_NOTIFY_EMAIL`
 - `NEXT_PUBLIC_ONESIGNAL_APP_ID`
 - `ONESIGNAL_REST_API_KEY`
 - `GA4_MEASUREMENT_ID`
@@ -74,8 +71,6 @@ Set production-specific values for the same variables:
 - `STRIPE_PRICE_LEVEL_3_MONTHLY`
 - `STRIPE_PRICE_LEVEL_3_ANNUAL`
 - `RESEND_API_KEY`
-- `RESEND_FROM_EMAIL`
-- `ADMIN_NOTIFY_EMAIL`
 - `NEXT_PUBLIC_ONESIGNAL_APP_ID`
 - `ONESIGNAL_REST_API_KEY`
 - `GA4_MEASUREMENT_ID`
@@ -91,8 +86,7 @@ Set production-specific values for the same variables:
 - `AI_MODEL_NAME`
 
 Use production-only integrations and production-only secrets.
-For Resend, make sure `RESEND_FROM_EMAIL` is a verified sender in the target environment.
-Set `ADMIN_NOTIFY_EMAIL` to the internal inbox that should receive operational alerts for leads, purchases, failed emails, webhook failures, and manual-review cases.
+For Resend, make sure `mail.sapihum.com` is verified for sending. The app sends from `SAPIHUM Team <team@mail.sapihum.com>` and operational alerts go to `team@mail.sapihum.com`.
 
 ## Required Before First Deploy
 
@@ -113,8 +107,6 @@ Before the first billing test:
 - `STRIPE_PRICE_LEVEL_3_MONTHLY`
 - `STRIPE_PRICE_LEVEL_3_ANNUAL`
 - `RESEND_API_KEY`
-- `RESEND_FROM_EMAIL`
-- `ADMIN_NOTIFY_EMAIL`
 
 ## Can Wait To Phase 2
 

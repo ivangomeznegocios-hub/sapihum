@@ -1,9 +1,8 @@
+export const DEFAULT_EMAIL_FROM = 'SAPIHUM Team <team@mail.sapihum.com>'
+export const OPERATIONS_EMAIL = 'team@mail.sapihum.com'
+export const LEGAL_EMAIL = 'privacidad@mail.sapihum.com'
+export const DEFAULT_REPLY_TO = LEGAL_EMAIL
+
 export function getResendFromEmail(): string {
-    const fromEmail = process.env.RESEND_FROM_EMAIL?.trim()
-
-    if (!fromEmail) {
-        throw new Error('RESEND_FROM_EMAIL is not configured')
-    }
-
-    return fromEmail
+    return DEFAULT_EMAIL_FROM
 }

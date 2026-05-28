@@ -2,7 +2,7 @@ import { Resend } from 'resend'
 import WelcomeEmail from '@/emails/WelcomeEmail'
 import AppointmentConfirmationEmail from '@/emails/AppointmentConfirmation'
 import { emailFromName } from '@/lib/brand'
-import { getResendFromEmail } from '@/lib/email/config'
+import { DEFAULT_REPLY_TO, getResendFromEmail } from '@/lib/email/config'
 
 let resendInstance: Resend | null = null
 
@@ -18,8 +18,6 @@ function getResend(): Resend | null {
 
     return resendInstance
 }
-
-const DEFAULT_REPLY_TO = 'soporte@comunidaddepsicologia.com'
 
 export async function sendWelcomeEmail({
     to,

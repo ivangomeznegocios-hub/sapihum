@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { FormEvent, useMemo, useState } from 'react'
-import { CheckCircle2, Loader2, Sparkles, User, Mail, Lock, Phone, CreditCard, Award, BarChart } from 'lucide-react'
+import { CheckCircle2, Loader2, Sparkles, User, Award, BarChart } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { buildAuthCallbackUrl } from '@/lib/config/app-url'
 import { buildRegistrationConsentMetadata, CONSENT_POLICY_VERSION } from '@/lib/consent'

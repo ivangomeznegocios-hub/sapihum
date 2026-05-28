@@ -135,10 +135,10 @@ export default function AvisoPrivacidadPage() {
                                     Para ejercer derechos ARCO, retirar consentimientos o solicitar portabilidad de tus expedientes, escribe a:
                                 </p>
                                 <a 
-                                    href="mailto:privacidad@sapihum.com" 
+                                    href="mailto:privacidad@mail.sapihum.com" 
                                     className="mt-3 inline-block font-sans text-xs font-bold text-blue-600 hover:underline dark:text-blue-400"
                                 >
-                                    privacidad@sapihum.com
+                                    privacidad@mail.sapihum.com
                                 </a>
                             </div>
                         </div>
@@ -246,7 +246,7 @@ export default function AvisoPrivacidadPage() {
                                     </li>
                                 </ul>
                                 <p className="text-xs text-stone-500 dark:text-stone-400 mt-2">
-                                    En caso de que no desee que sus datos sean tratados para las finalidades secundarias descritas, usted puede enviar un correo a <a href="mailto:privacidad@sapihum.com" className="text-blue-600 hover:underline dark:text-blue-400">privacidad@sapihum.com</a> en cualquier momento solicitando su exclusión de dichas listas de difusión.
+                                    En caso de que no desee que sus datos sean tratados para las finalidades secundarias descritas, usted puede enviar un correo a <a href="mailto:privacidad@mail.sapihum.com" className="text-blue-600 hover:underline dark:text-blue-400">privacidad@mail.sapihum.com</a> en cualquier momento solicitando su exclusión de dichas listas de difusión.
                                 </p>
                             </div>
                         </section>
@@ -331,7 +331,7 @@ export default function AvisoPrivacidadPage() {
                                     <li><strong>Oposición:</strong> Oponerse por motivos legítimos al tratamiento de sus datos personales para fines específicos.</li>
                                 </ul>
                                 <p>
-                                    <strong>Procedimiento de Solicitud ARCO:</strong> Para ejercer estos derechos o revocar su consentimiento, debe enviar una solicitud formal por escrito al correo <a href="mailto:privacidad@sapihum.com" className="text-blue-600 hover:underline dark:text-blue-400">privacidad@sapihum.com</a> adjuntando: (1) Identificación oficial vigente (INE o Pasaporte), (2) Correo electrónico asociado a su cuenta SAPIHUM, (3) Descripción clara del derecho ARCO que desea ejercer e indicando detalladamente qué datos se pretende cancelar, rectificar u oponerse. La solicitud será atendida y respondida en un plazo máximo de 20 días hábiles.
+                                    <strong>Procedimiento de Solicitud ARCO:</strong> Para ejercer estos derechos o revocar su consentimiento, debe enviar una solicitud formal por escrito al correo <a href="mailto:privacidad@mail.sapihum.com" className="text-blue-600 hover:underline dark:text-blue-400">privacidad@mail.sapihum.com</a> adjuntando: (1) Identificación oficial vigente (INE o Pasaporte), (2) Correo electrónico asociado a su cuenta SAPIHUM, (3) Descripción clara del derecho ARCO que desea ejercer e indicando detalladamente qué datos se pretende cancelar, rectificar u oponerse. La solicitud será atendida y respondida en un plazo máximo de 20 días hábiles.
                                 </p>
                             </div>
                         </section>
@@ -373,7 +373,7 @@ export default function AvisoPrivacidadPage() {
                                     <strong>Estándares HIPAA (Health Insurance Portability and Accountability Act):</strong> Para profesionales de la psicología que operan bajo leyes federales de los Estados Unidos y procesan Información de Salud Protegida (Protected Health Information - PHI) de pacientes, SAPIHUM implementa medidas de seguridad técnicas que apoyan el cumplimiento de HIPAA, actuando bajo la figura de proveedor tecnológico.
                                 </p>
                                 <p>
-                                    <strong>Privacidad en el Estado de California (CCPA / CPRA):</strong> En cumplimiento con la Ley de Privacidad del Consumidor de California, los usuarios residentes de California tienen el derecho de solicitar información detallada sobre las categorías de datos recolectados, conocer si sus datos han sido vendidos (SAPIHUM no vende información), y solicitar la eliminación de su información personal. Puede ejercer estas peticiones a través del correo <a href="mailto:privacidad@sapihum.com" className="text-blue-600 hover:underline dark:text-blue-400">privacidad@sapihum.com</a> sin ser objeto de ninguna discriminación en el precio o nivel del servicio.
+                                    <strong>Privacidad en el Estado de California (CCPA / CPRA):</strong> En cumplimiento con la Ley de Privacidad del Consumidor de California, los usuarios residentes de California tienen el derecho de solicitar información detallada sobre las categorías de datos recolectados, conocer si sus datos han sido vendidos (SAPIHUM no vende información), y solicitar la eliminación de su información personal. Puede ejercer estas peticiones a través del correo <a href="mailto:privacidad@mail.sapihum.com" className="text-blue-600 hover:underline dark:text-blue-400">privacidad@mail.sapihum.com</a> sin ser objeto de ninguna discriminación en el precio o nivel del servicio.
                                 </p>
                             </div>
                         </section>
@@ -430,7 +430,7 @@ export default function AvisoPrivacidadPage() {
                                     Para cualquier duda, comentario o reclamación sobre el tratamiento de sus datos personales, o para solicitar aclaraciones sobre este Aviso de Privacidad Integral, nuestra Oficina de Privacidad se encuentra plenamente a su servicio mediante el correo electrónico oficial:
                                 </p>
                                 <p className="font-bold text-center py-4 bg-stone-100 dark:bg-stone-900 rounded-xl text-stone-900 dark:text-stone-100 font-sans text-base">
-                                    privacidad@sapihum.com
+                                    privacidad@mail.sapihum.com
                                 </p>
                                 <p>
                                     <strong>Modificaciones a este Aviso:</strong> SAPIHUM modificará, adaptará o actualizará este Aviso de Privacidad a fin de reflejar cambios legales del sector salud y tecnológico, nuevas funcionalidades de Inteligencia Artificial que se incorporen o regulaciones internacionales vigentes. Cualquier modificación le será notificada mediante publicación directa de la nueva versión con su respectiva fecha en esta misma sección, o por correo electrónico enviado a la dirección asociada a su perfil de usuario.

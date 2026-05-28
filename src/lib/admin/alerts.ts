@@ -1,5 +1,6 @@
 import { getAppUrl } from '@/lib/config/app-url'
 import { sendEmail } from '@/lib/email/index'
+import { OPERATIONS_EMAIL } from '@/lib/email/config'
 import { createServiceClient } from '@/lib/supabase/service'
 
 type AdminAlertLevel = 'info' | 'success' | 'warning' | 'error'
@@ -111,18 +112,10 @@ export function sendAdminOperationalAlertBestEffort(input: SendAdminOperationalA
 }
 
 export async function sendAdminOperationalAlert(input: SendAdminOperationalAlertInput) {
-    const adminEmail = normalizeEmail(process.env.ADMIN_NOTIFY_EMAIL)
-
-    if (!adminEmail) {
-        await logAdminAlertIssue(input, 'admin_alert_skipped', 'ADMIN_NOTIFY_EMAIL is not configured')
-        return { success: false, skipped: true, error: 'ADMIN_NOTIFY_EMAIL is not configured' }
-    }
-
     const appUrl = getAppUrl()
-    const actionPath = input.actionPath?.startsWith('/') ? input.actionPath : '/dashboard/admin/inbox'
-    const actionUrl = `${appUrl}${actionPath}`
+    const actionUrl = `${appUrl}/dashboard/admin/inbox`
     const result = await sendEmail({
-        to: adminEmail,
+        to: OPERATIONS_EMAIL,
         subject: input.subject,
         html: buildAlertHtml(input, actionUrl),
     })

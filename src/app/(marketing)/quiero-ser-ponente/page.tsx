@@ -1,4 +1,3 @@
-import Image from 'next/image'
 import Link from 'next/link'
 import { 
     ArrowRight, 
@@ -26,29 +25,6 @@ export const metadata = {
     title: formatPageTitle('Convocatoria para Ponentes'),
     description: 'Registra tu perfil profesional como ponente científico para impartir cursos, talleres y masterclasses en la comunidad de psicología SAPIHUM.',
 }
-
-const REQUIREMENTS = [
-    {
-        title: 'Verificabilidad Profesional',
-        desc: 'Identidad académica comprobable con datos de contacto reales y consolidados.',
-        icon: BadgeCheck
-    },
-    {
-        title: 'Cédula o Licencia Activa',
-        desc: 'Cédula, registro profesional o credencial equivalente de tu país de origen.',
-        icon: Award
-    },
-    {
-        title: 'Propuesta Científica Coherente',
-        desc: 'Especialidad clara, años de experiencia clínica/docente y temario estructurado.',
-        icon: GraduationCap
-    },
-    {
-        title: 'Excelencia de Marca',
-        desc: 'Fotografía profesional, bio atractiva y compromiso ético con la salud mental.',
-        icon: ShieldCheck
-    }
-]
 
 const STEPS = [
     {
