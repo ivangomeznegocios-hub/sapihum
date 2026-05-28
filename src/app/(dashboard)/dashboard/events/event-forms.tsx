@@ -9,6 +9,7 @@ import { createClient } from '@/lib/supabase/client'
 import { getPublicEventPath } from '@/lib/events/public'
 import { canManageEventAdvancedSettings, canPublishEvent } from '@/lib/events/permissions'
 import { MaterialLinksEditor, type EditableMaterialLink } from '@/components/materials/material-links-editor'
+import { EventImageFormUpload } from './event-image-form-upload'
 import {
     DEFAULT_SPEAKER_PERCENTAGE_RATE,
     normalizeSpeakerCompensationType,
@@ -582,6 +583,7 @@ export function CreateEventForm({
     const canUseAdvancedSettings = canManageEventAdvancedSettings(userRole)
     const [isLoading, setIsLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
+    const [formEventId] = useState(() => initialData?.id || eventId || crypto.randomUUID())
     const [selectedAudience, setSelectedAudience] = useState<string[]>(initialData?.target_audience || ['public'])
     const [selectedCategory, setSelectedCategory] = useState(initialData?.category || 'general')
     const [selectedSubcategory, setSelectedSubcategory] = useState(initialData?.subcategory || '')
@@ -678,6 +680,9 @@ export function CreateEventForm({
     const numericMemberPrice = Number.parseFloat(memberPriceValue || '0') || 0
     const selectedSpecializationLabel =
         MEMBERSHIP_SPECIALIZATION_OPTIONS.find((option) => option.value === selectedSpecializationCode)?.label ?? null
+    const imageSignatureEndpoint = initialData && eventId
+        ? `/api/events/${eventId}/image-upload-signature`
+        : '/api/events/new/image-upload-signature'
 
     // Speakers selection
     const initialSpeakerAssignments = useMemo(() => getInitialSpeakerAssignments(initialData), [initialData])
@@ -1802,19 +1807,20 @@ export function CreateEventForm({
 
                     <div className="space-y-4">
                         <div>
-                            <label className="text-sm font-medium" htmlFor="imageUrl">
+                            <label className="text-sm font-medium">
                                 Imagen del evento
                             </label>
-                            <input
-                                id="imageUrl"
-                                name="imageUrl"
-                                type="url"
-                                defaultValue={initialData?.image_url || ''}
-                                className="mt-1 w-full rounded-lg border bg-background px-3 py-2"
-                                placeholder="https://ejemplo.com/imagen.jpg"
-                            />
+                            <div className="mt-2">
+                                <EventImageFormUpload
+                                    eventId={formEventId}
+                                    signatureEndpoint={imageSignatureEndpoint}
+                                    initialImageUrl={initialData?.image_url || ''}
+                                    initialPublicId={initialData?.image_public_id || ''}
+                                    initialAltText={initialData?.image_alt_text || ''}
+                                />
+                            </div>
                             <p className="mt-1 text-xs text-muted-foreground">
-                                Puedes pegar la URL de una portada horizontal o cuadrada.
+                                En eventos nuevos, la imagen se sube a Cloudinary y queda guardada al crear el evento.
                             </p>
                         </div>
 

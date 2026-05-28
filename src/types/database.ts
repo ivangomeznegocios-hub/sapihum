@@ -862,6 +862,7 @@ export interface Event {
 }
 
 export interface EventInsert {
+    id?: string
     slug?: string
     title: string
     subtitle?: string | null

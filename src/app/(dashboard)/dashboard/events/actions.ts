@@ -2,7 +2,7 @@
 
 import { createClient, getViewerContext } from '@/lib/supabase/server'
 import { recordAnalyticsServerEvent } from '@/lib/analytics/server'
-import { revalidatePath } from 'next/cache'
+import { revalidatePath, revalidateTag } from 'next/cache'
 import {
     getEffectiveEventPriceForProfile,
     normalizeMemberAccessType,
@@ -42,6 +42,72 @@ import {
     replaceContentVerticals,
     resolveVerticalVisibilityInput,
 } from '@/lib/supabase/vertical-content'
+import { destroyCloudinaryImage, getCloudinaryCloudName } from '@/lib/cloudinary/server'
+import {
+    getEventImagePublicIdPrefix,
+    validateCloudinaryEventImageResult,
+} from '@/lib/events/image-upload'
+
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
+
+function normalizeImageAltText(value: FormDataEntryValue | null) {
+    const trimmed = readTrimmedString(value)
+    return trimmed ? trimmed.slice(0, 180) : null
+}
+
+async function destroyCloudinaryImageQuietly(publicId?: string | null) {
+    if (!publicId) return
+
+    try {
+        await destroyCloudinaryImage(publicId)
+    } catch (error) {
+        console.error('[Events] Failed to destroy Cloudinary image:', error)
+    }
+}
+
+async function parseSubmittedEventImage(formData: FormData, eventId: string) {
+    const imageUrl = readTrimmedString(formData.get('imageUrl'))
+    const imagePublicId = readTrimmedString(formData.get('imagePublicId'))
+
+    if (!imagePublicId) {
+        return {
+            imageUrl,
+            imagePublicId: null,
+            imageAltText: normalizeImageAltText(formData.get('imageAltText')),
+            imageUpdatedAt: null,
+            uploadedPublicId: null,
+        }
+    }
+
+    const validation = validateCloudinaryEventImageResult({
+        eventId,
+        cloudName: getCloudinaryCloudName(),
+        result: {
+            secure_url: imageUrl,
+            public_id: imagePublicId,
+            resource_type: readTrimmedString(formData.get('imageResourceType')),
+            format: readTrimmedString(formData.get('imageFormat')),
+            bytes: parseIntegerField(formData.get('imageBytes')),
+            mimeType: readTrimmedString(formData.get('imageMimeType')),
+        },
+    })
+
+    if ('error' in validation) {
+        if (imagePublicId.startsWith(getEventImagePublicIdPrefix(eventId))) {
+            await destroyCloudinaryImageQuietly(imagePublicId)
+        }
+
+        return { error: validation.error }
+    }
+
+    return {
+        imageUrl: validation.data.secureUrl,
+        imagePublicId: validation.data.publicId,
+        imageAltText: normalizeImageAltText(formData.get('imageAltText')),
+        imageUpdatedAt: new Date().toISOString(),
+        uploadedPublicId: validation.data.publicId,
+    }
+}
 async function resolveUniqueEventSlug(supabase: any, baseValue: string, eventId?: string) {
     const fallbackBase = slugifyCatalogText(baseValue) || `evento-${crypto.randomUUID().slice(0, 8)}`
     let candidate = fallbackBase
@@ -1035,6 +1101,22 @@ export async function createEvent(formData: FormData) {
     const canPublish = canPublishEvent(profile.role)
     const canUseAdvancedSettings = canManageEventAdvancedSettings(profile.role)
     const bypassScheduleConflicts = canBypassEventScheduleConflicts(formData, canUseAdvancedSettings)
+    const requestedEventId = readTrimmedString(formData.get('eventId'))
+
+    if (requestedEventId && !UUID_PATTERN.test(requestedEventId)) {
+        return { error: 'ID de evento invalido' }
+    }
+
+    const newEventId = requestedEventId || crypto.randomUUID()
+    const submittedImage = await parseSubmittedEventImage(formData, newEventId)
+    if ('error' in submittedImage) {
+        return { error: submittedImage.error }
+    }
+    const failCreateEvent = async (message: string) => {
+        await destroyCloudinaryImageQuietly(submittedImage.uploadedPublicId)
+        return { error: message }
+    }
+
     const title = readTrimmedString(formData.get('title'))
     const subtitle = readTrimmedString(formData.get('subtitle'))
     const description = readTrimmedString(formData.get('description'))
@@ -1042,7 +1124,7 @@ export async function createEvent(formData: FormData) {
     const time = readTrimmedString(formData.get('time'))
     const eventType = readTrimmedString(formData.get('eventType')) || 'live'
     const duration = parseIntegerField(formData.get('duration')) || 60
-    const imageUrl = readTrimmedString(formData.get('imageUrl'))
+    const imageUrl = submittedImage.imageUrl
     const price = Math.max(0, parseFloatField(formData.get('price')) || 0)
     const recordingDays = Math.min(30, Math.max(7, parseIntegerField(formData.get('recordingDays')) || 15))
     const location = readTrimmedString(formData.get('location'))
@@ -1071,11 +1153,11 @@ export async function createEvent(formData: FormData) {
             : 0
 
     if (!title || !date || !time) {
-        return { error: 'Faltan campos requeridos' }
+        return failCreateEvent('Faltan campos requeridos')
     }
 
     if (eventType === 'presencial' && !location) {
-        return { error: 'La ubicacion es obligatoria para eventos presenciales' }
+        return failCreateEvent('La ubicacion es obligatoria para eventos presenciales')
     }
 
     const memberDiscountError = validateMemberDiscountRule({
@@ -1085,13 +1167,13 @@ export async function createEvent(formData: FormData) {
         canUseAdvancedSettings,
     })
     if (memberDiscountError) {
-        return { error: memberDiscountError }
+        return failCreateEvent(memberDiscountError)
     }
 
     const speakerAssignments = parseSpeakerAssignments(formData)
     const speakerAssignmentError = validateSpeakerAssignments(speakerAssignments)
     if (speakerAssignmentError) {
-        return { error: speakerAssignmentError }
+        return failCreateEvent(speakerAssignmentError)
     }
     const multiSpeakerPublicationError = validatePaidMultiSpeakerPublication({
         price,
@@ -1100,12 +1182,12 @@ export async function createEvent(formData: FormData) {
         canUseAdvancedSettings,
     })
     if (multiSpeakerPublicationError) {
-        return { error: multiSpeakerPublicationError }
+        return failCreateEvent(multiSpeakerPublicationError)
     }
 
     const sessionSchedule = parseSessionSchedule(formData, eventType, location, date, time, duration)
     if ('error' in sessionSchedule) {
-        return sessionSchedule
+        return failCreateEvent(sessionSchedule.error)
     }
 
     if (!bypassScheduleConflicts) {
@@ -1117,7 +1199,7 @@ export async function createEvent(formData: FormData) {
         })
 
         if (scheduleConflict) {
-            return { error: buildEventScheduleConflictMessage(scheduleConflict) }
+            return failCreateEvent(buildEventScheduleConflictMessage(scheduleConflict))
         }
 
         try {
@@ -1138,13 +1220,11 @@ export async function createEvent(formData: FormData) {
 
             if (externalConflict) {
                 const conflictKind = externalConflict.userId === user.id ? 'owner' : 'speaker'
-                return { error: buildExternalEventConflictMessage(externalConflict, conflictKind) }
+                return failCreateEvent(buildExternalEventConflictMessage(externalConflict, conflictKind))
             }
         } catch (externalError) {
             console.error('[CreateEvent] Error al validar Google Calendar:', externalError)
-            return {
-                error: 'No pudimos verificar la disponibilidad externa de los participantes. Pideles reconectar Google Calendar e intenta de nuevo.',
-            }
+            return failCreateEvent('No pudimos verificar la disponibilidad externa de los participantes. Pideles reconectar Google Calendar e intenta de nuevo.')
         }
     }
 
@@ -1176,7 +1256,7 @@ export async function createEvent(formData: FormData) {
         speakerIds: speakerAssignments.map((assignment) => assignment.speakerId),
     })
     if (publicReadinessError) {
-        return { error: publicReadinessError }
+        return failCreateEvent(publicReadinessError)
     }
     const advancedValues = canUseAdvancedSettings
         ? {
@@ -1205,17 +1285,21 @@ export async function createEvent(formData: FormData) {
     })
 
     if ('error' in verticalVisibility) {
-        return { error: verticalVisibility.error }
+        return failCreateEvent(verticalVisibility.error || 'No fue posible validar la visibilidad del evento')
     }
 
     const { data: newEvent, error } = await (supabase
         .from('events') as any)
         .insert({
+            id: newEventId,
             slug,
             title,
             subtitle,
             description,
             image_url: imageUrl,
+            image_public_id: submittedImage.imagePublicId,
+            image_alt_text: submittedImage.imageAltText,
+            image_updated_at: submittedImage.imageUpdatedAt,
             start_time: sessionSchedule.firstSession.startTimeIso,
             end_time: sessionSchedule.firstSession.endTimeIso,
             event_type: eventType,
@@ -1253,6 +1337,7 @@ export async function createEvent(formData: FormData) {
         .single()
 
     if (error) {
+        await destroyCloudinaryImageQuietly(submittedImage.uploadedPublicId)
         return { error: error.message }
     }
 
@@ -1267,6 +1352,7 @@ export async function createEvent(formData: FormData) {
             )
         } catch (verticalError: any) {
             await (supabase.from('events') as any).delete().eq('id', newEvent.id)
+            await destroyCloudinaryImageQuietly(submittedImage.uploadedPublicId)
             return { error: verticalError.message || 'No fue posible guardar las verticales del evento' }
         }
     }
@@ -1293,6 +1379,7 @@ export async function createEvent(formData: FormData) {
     }
 
     revalidatePath('/dashboard/events')
+    revalidateTag('public-events', 'max')
     return { success: true }
 }
 
@@ -1308,7 +1395,7 @@ export async function updateEvent(eventId: string, formData: FormData) {
     const [{ data: event }, { data: profile }] = await Promise.all([
         (supabase
             .from('events') as any)
-        .select('id, created_by, status, formation_id, title, description, image_url, event_type, meeting_link, location, recording_url, start_time, end_time, primary_vertical_id, content_scope, program_mode, program_name, program_type_label')
+        .select('id, slug, created_by, status, formation_id, title, description, image_url, image_public_id, event_type, meeting_link, location, recording_url, start_time, end_time, primary_vertical_id, content_scope, program_mode, program_name, program_type_label')
             .eq('id', eventId)
             .single(),
         (supabase
@@ -1356,8 +1443,14 @@ export async function updateEvent(eventId: string, formData: FormData) {
     const duration = parseIntegerField(formData.get('duration')) || 60
     const eventType = readTrimmedString(formData.get('eventType'))
     const maxAttendees = parseIntegerField(formData.get('maxAttendees'))
-    const imageUrl = formData.has('imageUrl')
-        ? readTrimmedString(formData.get('imageUrl'))
+    const submittedImage = formData.has('imageUrl')
+        ? await parseSubmittedEventImage(formData, eventId)
+        : null
+    if (submittedImage && 'error' in submittedImage) {
+        return { error: submittedImage.error }
+    }
+    const imageUrl = submittedImage
+        ? submittedImage.imageUrl
         : undefined
     const price = Math.max(0, parseFloatField(formData.get('price')) || 0)
     const recordingDays = Math.min(30, Math.max(7, parseIntegerField(formData.get('recordingDays')) || 15))
@@ -1486,7 +1579,12 @@ export async function updateEvent(eventId: string, formData: FormData) {
 
     if (title) updates.title = title
     if (description !== undefined) updates.description = description || null
-    if (imageUrl !== undefined) updates.image_url = imageUrl || null
+    if (imageUrl !== undefined) {
+        updates.image_url = imageUrl || null
+        updates.image_public_id = submittedImage?.imagePublicId ?? null
+        updates.image_alt_text = submittedImage?.imageAltText ?? null
+        updates.image_updated_at = submittedImage?.imageUpdatedAt
+    }
 
     if (date && time) {
         const nextEventType = eventType || 'live'
@@ -1635,7 +1733,20 @@ export async function updateEvent(eventId: string, formData: FormData) {
         .eq('id', eventId)
 
     if (error) {
+        if (submittedImage && !('error' in submittedImage)) {
+            await destroyCloudinaryImageQuietly(submittedImage.uploadedPublicId)
+        }
         return { error: error.message }
+    }
+
+    if (
+        submittedImage &&
+        !('error' in submittedImage) &&
+        submittedImage.uploadedPublicId &&
+        event.image_public_id &&
+        event.image_public_id !== submittedImage.uploadedPublicId
+    ) {
+        await destroyCloudinaryImageQuietly(event.image_public_id)
     }
 
     if (verticalVisibility && !('error' in verticalVisibility)) {
@@ -1712,6 +1823,10 @@ export async function updateEvent(eventId: string, formData: FormData) {
 
     revalidatePath('/dashboard/events')
     revalidatePath(`/dashboard/events/${eventId}`)
+    revalidateTag('public-events', 'max')
+    if (event.slug) {
+        revalidatePath(`/eventos/${event.slug}`)
+    }
     return { success: true }
 }
 
