@@ -808,6 +808,9 @@ export interface Event {
     subtitle: string | null
     description: string | null
     image_url: string | null
+    image_public_id: string | null
+    image_alt_text: string | null
+    image_updated_at: string | null
     start_time: string
     end_time: string | null
     status: EventStatus
@@ -864,6 +867,9 @@ export interface EventInsert {
     subtitle?: string | null
     description?: string | null
     image_url?: string | null
+    image_public_id?: string | null
+    image_alt_text?: string | null
+    image_updated_at?: string | null
     start_time: string
     end_time?: string | null
     status?: EventStatus
@@ -913,6 +919,9 @@ export interface EventUpdate {
     subtitle?: string | null
     description?: string | null
     image_url?: string | null
+    image_public_id?: string | null
+    image_alt_text?: string | null
+    image_updated_at?: string | null
     start_time?: string
     end_time?: string | null
     status?: EventStatus

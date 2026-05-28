@@ -20,7 +20,7 @@ import {
 } from '@/lib/events/access'
 import { getEventAttendeeAccessRows, getEventAttendeeSourceLabel } from '@/lib/events/attendees'
 import { getUniqueEventAccessCount } from '@/lib/events/attendance'
-import { canDeleteEvent, getEventEditorAccessForUser } from '@/lib/events/permissions'
+import { canDeleteEvent, canManageAnyEvent, getEventEditorAccessForUser } from '@/lib/events/permissions'
 import { getEventSessionOccurrences } from '@/lib/events/sessions'
 import { getProgramChildEventIds } from '@/lib/events/programs'
 import {
@@ -48,6 +48,7 @@ import {
 } from 'lucide-react'
 import { EventStatePanel } from '../event-state-panel'
 import { resolveEventDetailState } from '@/lib/events/detail-state'
+import { EventImageUploadPanel } from './event-image-upload-panel'
 
 interface PageProps {
     params: Promise<{ id: string }>
@@ -60,6 +61,9 @@ const EVENT_DETAIL_SELECT = [
     'subtitle',
     'description',
     'image_url',
+    'image_public_id',
+    'image_alt_text',
+    'image_updated_at',
     'start_time',
     'end_time',
     'event_type',
@@ -377,6 +381,7 @@ export default async function EventDetailPage({ params }: PageProps) {
     }
 
     const eventSpecialization = getSpecializationByCode(event.specialization_code)
+    const canUploadEventImage = canManageAnyEvent(profile.role) || (event.status === 'draft' && canEditEvent)
 
     return (
         <div className="space-y-8">
@@ -730,6 +735,16 @@ export default async function EventDetailPage({ params }: PageProps) {
 
                 {/* Sidebar */}
                 <div className="space-y-6">
+                    {canEditEvent && (
+                        <EventImageUploadPanel
+                            eventId={event.id}
+                            eventStatus={event.status}
+                            initialImageUrl={event.image_url}
+                            initialAltText={event.image_alt_text}
+                            canUpload={canUploadEventImage}
+                        />
+                    )}
+
                     {/* Registration Card */}
                     <Card>
                         <CardHeader>

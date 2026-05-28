@@ -76,8 +76,12 @@ export default function BecomeSpeakerPage() {
             
             {/* HERO SECTION */}
             <section className="relative isolate min-h-[92vh] flex items-center justify-center overflow-hidden border-b border-brand-border py-20 lg:py-32">
+                {/* Background Image of a large conference/audience with blend mode */}
+                <div 
+                    className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1540575467063-178a50c2df87?q=80&w=2070&auto=format&fit=crop')] bg-cover bg-center opacity-[0.08] pointer-events-none z-0 mix-blend-luminosity" 
+                />
                 {/* Visual Grid and glowing blobs */}
-                <div className="absolute inset-0 sapihum-grid-bg opacity-70 pointer-events-none z-0" />
+                <div className="absolute inset-0 sapihum-grid-bg opacity-60 pointer-events-none z-0" />
                 <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[500px] h-[500px] bg-blue-600/10 rounded-full blur-[140px] pointer-events-none z-0 animate-pulse" />
                 
                 <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 w-full">
@@ -195,6 +199,50 @@ export default function BecomeSpeakerPage() {
                 </div>
             </section>
 
+            {/* VIDEO TUTORIAL SECTION */}
+            <section className="relative mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
+                <div className="relative rounded-2xl border border-brand-border bg-white/80 p-6 md:p-8 backdrop-blur shadow-brand-luxury overflow-hidden sapihum-card-glow">
+                    <div className="absolute -top-40 -right-40 w-80 h-80 bg-brand-blue/10 rounded-full blur-[80px] pointer-events-none z-0" />
+                    <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-indigo-600/10 rounded-full blur-[80px] pointer-events-none z-0" />
+                    
+                    <div className="grid gap-8 lg:grid-cols-12 items-center relative z-10">
+                        <div className="lg:col-span-5 text-left space-y-4">
+                            <span className="brand-eyebrow">VIDEO EXPLICATIVO</span>
+                            <h3 className="text-2xl font-extrabold text-brand-text-strong tracking-tight sm:text-3xl">
+                                ¿Cómo ser ponente en SAPIHUM?
+                            </h3>
+                            <p className="text-sm text-brand-text-muted leading-relaxed">
+                                En este video te explicamos paso a paso cómo registrar tu perfil, estructurar tu propuesta académica y aprovechar nuestro canal de ventas para llegar a miles de psicólogos en Hispanoamérica.
+                            </p>
+                            <div className="space-y-2.5 pt-2">
+                                {[
+                                    'Requisitos del perfil académico',
+                                    'Simulación de ganancias y cobros',
+                                    'Cómo subir cursos y masterclasses'
+                                ].map((item, i) => (
+                                    <div key={i} className="flex items-center gap-3 text-sm text-brand-text-strong font-medium">
+                                        <CheckCircle2 className="h-5 w-5 text-brand-blue shrink-0" />
+                                        <span>{item}</span>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                        
+                        <div className="lg:col-span-7">
+                            <div className="relative aspect-video rounded-xl overflow-hidden border border-brand-border bg-slate-900 shadow-brand-luxury group">
+                                <iframe
+                                    src="https://www.youtube.com/embed/mq8jiTVbslw"
+                                    title="Cómo aplicar en SAPIHUM"
+                                    className="absolute inset-0 w-full h-full border-0"
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                    allowFullScreen
+                                ></iframe>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
             {/* STEPS FLOW SECTION */}
             <section className="border-y border-brand-border bg-brand-surface-soft/40 py-20 relative overflow-hidden">
                 <div className="absolute inset-0 sapihum-grid-bg opacity-30 pointer-events-none" />
@@ -223,6 +271,62 @@ export default function BecomeSpeakerPage() {
                                 </div>
                             )
                         })}
+                    </div>
+                </div>
+            </section>
+
+            {/* COMMUNITY & CONFERENCES SHOWCASE */}
+            <section className="relative border-t border-brand-border bg-brand-surface-soft/30 py-20 overflow-hidden">
+                <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1505373877841-8d25f7d46678?q=80&w=2070&auto=format&fit=crop')] bg-cover bg-center opacity-[0.03] pointer-events-none" />
+                <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                    <div className="grid gap-12 lg:grid-cols-2 items-center">
+                        <div className="space-y-6">
+                            <span className="brand-eyebrow">COMUNIDAD Y ALCANCE</span>
+                            <h2 className="text-3xl font-extrabold text-brand-text-strong tracking-tight sm:text-4xl">
+                                Comparte tu conocimiento ante una audiencia de miles de profesionales
+                            </h2>
+                            <p className="text-base text-brand-text-muted leading-relaxed">
+                                SAPIHUM es el hub líder de educación científica en psicología de Hispanoamérica. Al unirte como ponente, no solo publicas un curso: te posicionas ante una comunidad vibrante y hambrienta de actualización clínica rigurosa.
+                            </p>
+                            
+                            <div className="grid gap-4 sm:grid-cols-2">
+                                <div className="p-4 rounded-xl bg-white border border-brand-border shadow-brand-base">
+                                    <p className="text-2xl font-black text-brand-blue">+15,000</p>
+                                    <p className="text-sm font-bold text-brand-text-strong mt-1">Miembros Activos</p>
+                                    <p className="text-xs text-brand-text-muted mt-0.5">Psicólogos, terapeutas y estudiantes de toda la región.</p>
+                                </div>
+                                <div className="p-4 rounded-xl bg-white border border-brand-border shadow-brand-base">
+                                    <p className="text-2xl font-black text-indigo-600">98%</p>
+                                    <p className="text-sm font-bold text-brand-text-strong mt-1">Satisfacción Global</p>
+                                    <p className="text-xs text-brand-text-muted mt-0.5">Nuestras masterclasses y talleres son valoradas con excelencia.</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div className="relative">
+                            <div className="absolute -inset-2 rounded-2xl bg-gradient-to-r from-brand-blue to-indigo-600 opacity-10 blur-xl" />
+                            
+                            <div className="relative rounded-2xl overflow-hidden border border-brand-border bg-white p-2 shadow-brand-luxury">
+                                <img 
+                                    src="https://images.unsplash.com/photo-1475721027785-f74eccf877e2?q=80&w=2070&auto=format&fit=crop" 
+                                    alt="Conferencia SAPIHUM" 
+                                    className="w-full h-[320px] object-cover rounded-xl"
+                                />
+                                <div className="absolute bottom-6 left-6 right-6 p-4 rounded-xl bg-white/95 backdrop-blur border border-brand-border shadow-brand-base">
+                                    <div className="flex items-center gap-3">
+                                        <div className="flex -space-x-2 shrink-0">
+                                            <img className="inline-block h-8 w-8 rounded-full ring-2 ring-white object-cover" src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=150&auto=format&fit=crop" alt="User 1" />
+                                            <img className="inline-block h-8 w-8 rounded-full ring-2 ring-white object-cover" src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=150&auto=format&fit=crop" alt="User 2" />
+                                            <img className="inline-block h-8 w-8 rounded-full ring-2 ring-white object-cover" src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?q=80&w=150&auto=format&fit=crop" alt="User 3" />
+                                        </div>
+                                        <div>
+                                            <p className="text-xs font-extrabold text-brand-text-strong">"La mejor plataforma de actualización científica"</p>
+                                            <p className="text-[10px] text-brand-text-muted">Dra. Claudia R. — Ponente de Neuropsicología</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </section>
@@ -386,6 +490,14 @@ export default function BecomeSpeakerPage() {
                                     El alta de tu cuenta como ponente se realiza al validar tu correo, permitiéndote explorar el creador de eventos y dashboard de inmediato.
                                 </p>
                             </div>
+                        </div>
+                        
+                        <div className="mt-6 rounded-xl overflow-hidden border border-brand-border bg-white p-2 shadow-brand-base">
+                            <img 
+                                src="https://images.unsplash.com/photo-1531538606174-0f90ff5dce83?q=80&w=2070&auto=format&fit=crop" 
+                                alt="Docentes en acción" 
+                                className="w-full h-[180px] object-cover rounded-lg"
+                            />
                         </div>
                     </div>
 
