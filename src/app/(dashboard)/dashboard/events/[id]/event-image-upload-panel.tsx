@@ -247,7 +247,11 @@ export function EventImageUploadPanel({
 
                 <div className="flex flex-col gap-2 sm:flex-row">
                     <Button asChild variant="outline" className="w-full sm:w-auto">
-                        <a href="https://chatgpt.com/gpts" target="_blank" rel="noopener noreferrer">
+                        <a
+                            href="https://chatgpt.com/g/g-69cf0d204c948191af60c9e0b07101d6-hacer-portadas-sapihum"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
                             Generar imagen con GPT personalizado
                             <ExternalLink className="ml-2 h-4 w-4" />
                         </a>

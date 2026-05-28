@@ -239,7 +239,11 @@ export function EventImageFormUpload({
 
             <div className="flex flex-wrap gap-2">
                 <Button asChild variant="outline" size="sm">
-                    <a href="https://chatgpt.com/gpts" target="_blank" rel="noreferrer">
+                    <a
+                        href="https://chatgpt.com/g/g-69cf0d204c948191af60c9e0b07101d6-hacer-portadas-sapihum"
+                        target="_blank"
+                        rel="noreferrer"
+                    >
                         <ExternalLink className="h-4 w-4 mr-2" />
                         Generar imagen con GPT personalizado
                     </a>
