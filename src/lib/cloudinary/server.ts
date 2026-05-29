@@ -13,12 +13,34 @@ type CloudinaryConfig = {
     apiSecret: string
 }
 
+function parseCloudinaryUrl(value?: string): CloudinaryConfig | null {
+    if (!value) return null
+
+    try {
+        const url = new URL(value)
+        if (url.protocol !== 'cloudinary:') return null
+
+        const cloudName = url.hostname
+        const apiKey = decodeURIComponent(url.username)
+        const apiSecret = decodeURIComponent(url.password)
+
+        if (!cloudName || !apiKey || !apiSecret) return null
+
+        return { cloudName, apiKey, apiSecret }
+    } catch {
+        return null
+    }
+}
+
 function getCloudinaryConfig(): CloudinaryConfig {
     const cloudName = process.env.CLOUDINARY_CLOUD_NAME
     const apiKey = process.env.CLOUDINARY_API_KEY
     const apiSecret = process.env.CLOUDINARY_API_SECRET
 
     if (!cloudName || !apiKey || !apiSecret) {
+        const cloudinaryUrlConfig = parseCloudinaryUrl(process.env.CLOUDINARY_URL)
+        if (cloudinaryUrlConfig) return cloudinaryUrlConfig
+
         throw new Error('Cloudinary server credentials are not configured')
     }
 

@@ -291,7 +291,7 @@ export default function BecomeSpeakerPage() {
                             
                             <div className="grid gap-4 sm:grid-cols-2">
                                 <div className="p-4 rounded-xl bg-white border border-brand-border shadow-brand-base">
-                                    <p className="text-2xl font-black text-brand-blue">+15,000</p>
+                                    <p className="text-2xl font-black text-brand-blue">+150</p>
                                     <p className="text-sm font-bold text-brand-text-strong mt-1">Miembros Activos</p>
                                     <p className="text-xs text-brand-text-muted mt-0.5">Psicólogos, terapeutas y estudiantes de toda la región.</p>
                                 </div>
