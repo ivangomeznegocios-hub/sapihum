@@ -16,6 +16,8 @@ const AnalyticsEventNameSchema = z.enum([
     'form_start',
     'form_submit',
     'generate_lead',
+    'resource_downloaded',
+    'organic_lead_updated',
     'book_appointment',
     'begin_checkout',
     'purchase',

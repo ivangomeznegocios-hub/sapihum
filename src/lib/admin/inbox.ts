@@ -68,6 +68,7 @@ export async function getAdminInboxDashboard(): Promise<AdminInboxDashboard> {
     const admin = createServiceClient()
     const [
         eventLeadsResult,
+        organicLeadsResult,
         waitlistResult,
         speakerApplicationsResult,
         founderLeadsResult,
@@ -79,6 +80,10 @@ export async function getAdminInboxDashboard(): Promise<AdminInboxDashboard> {
     ] = await Promise.all([
         (admin.from('event_interest_leads') as any)
             .select('id, name, email, whatsapp, event_slug, formation_track, source_surface, source_action, lead_tag, status, created_at')
+            .order('created_at', { ascending: false })
+            .limit(RECENT_LIMIT),
+        (admin.from('organic_leads') as any)
+            .select('id, name, email, source_page, source_topic, source_asset, source_type, intent, lifecycle_stage, score, created_at')
             .order('created_at', { ascending: false })
             .limit(RECENT_LIMIT),
         (admin.from('specialization_waitlist') as any)
@@ -131,6 +136,17 @@ export async function getAdminInboxDashboard(): Promise<AdminInboxDashboard> {
             title: lead.name || lead.email || 'Lead capturado',
             subtitle: `${lead.formation_track || lead.lead_tag || 'Campana'} · ${lead.source_surface || lead.source_action || 'formulario'}`,
             status: lead.status,
+            severity: 'info' as const,
+            occurredAt: lead.created_at,
+            email: lead.email,
+            href: operationsHref(lead.email),
+        })),
+        ...((organicLeadsResult.data ?? []) as any[]).map((lead) => ({
+            id: `organic-lead:${lead.id}`,
+            kind: 'Lead organico',
+            title: lead.name || lead.email || 'Lead organico',
+            subtitle: `${lead.source_topic || lead.source_asset || lead.source_type || 'Contenido'} - score ${lead.score ?? 0}`,
+            status: lead.lifecycle_stage,
             severity: 'info' as const,
             occurredAt: lead.created_at,
             email: lead.email,

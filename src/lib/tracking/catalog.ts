@@ -14,6 +14,7 @@ export type CanonicalTrackingEventName =
     | 'form_start'
     | 'form_submit'
     | 'generate_lead'
+    | 'resource_downloaded'
     | 'book_appointment'
     | 'begin_checkout'
     | 'purchase'
@@ -80,6 +81,20 @@ export const TRACKING_EVENT_DEFINITIONS: Record<AnalyticsEventName, TrackingEven
         allowedDestinations: ['first_party_analytics', 'gtm', 'ga4', 'meta_pixel', 'meta_capi', 'tiktok_pixel', 'tiktok_events_api'],
         allowOnZones: ['public_safe'],
         description: 'Canonical lead-generation event.',
+    },
+    resource_downloaded: {
+        internalName: 'resource_downloaded',
+        canonicalName: 'resource_downloaded',
+        allowedDestinations: ['first_party_analytics', 'gtm', 'ga4'],
+        allowOnZones: ['public_safe'],
+        description: 'Organic resource download after lead capture.',
+    },
+    organic_lead_updated: {
+        internalName: 'organic_lead_updated',
+        canonicalName: 'form_submit',
+        allowedDestinations: ['first_party_analytics'],
+        allowOnZones: ['public_safe'],
+        description: 'Existing organic lead enriched with a new engagement.',
     },
     book_appointment: {
         internalName: 'book_appointment',

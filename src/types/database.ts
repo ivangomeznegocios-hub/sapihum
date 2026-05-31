@@ -67,6 +67,40 @@ export type SpecializationCode =
 
 export type WaitlistSource = 'landing' | 'app'
 
+export type OrganicLeadIntent =
+    | 'learn'
+    | 'download_resource'
+    | 'attend_event'
+    | 'explore_formation'
+    | 'join_community'
+    | 'evaluate_membership'
+    | 'commercial_interest'
+    | 'purchase_intent'
+
+export type OrganicLeadSourceType =
+    | 'guide'
+    | 'resource'
+    | 'resource_format'
+    | 'resource_scale'
+    | 'author'
+    | 'book'
+    | 'approach'
+    | 'tool'
+    | 'psychologist'
+    | 'event'
+    | 'formation'
+    | 'specialty'
+    | 'community'
+    | 'academy'
+
+export type OrganicLeadLifecycleStage =
+    | 'captured'
+    | 'engaged'
+    | 'qualified'
+    | 'opportunity'
+    | 'converted'
+    | 'discarded'
+
 export type NotificationCategory = 'system' | 'messages' | 'calendar' | 'events' | 'payments'
 
 export type NotificationLevel = 'info' | 'success' | 'warning' | 'error'
@@ -1777,6 +1811,11 @@ export interface Database {
                 Insert: SpecializationWaitlistInsert
                 Update: SpecializationWaitlistUpdate
             }
+            organic_leads: {
+                Row: OrganicLead
+                Insert: OrganicLeadInsert
+                Update: OrganicLeadUpdate
+            }
             speaker_earnings: {
                 Row: SpeakerEarning
                 Insert: SpeakerEarningInsert
@@ -2160,6 +2199,89 @@ export interface SpecializationWaitlistInsert {
 export interface SpecializationWaitlistUpdate {
     source?: WaitlistSource
     metadata?: Record<string, any>
+}
+
+// ============================================
+// TABLE: organic_leads
+// ============================================
+export interface OrganicLead {
+    id: string
+    user_id: string | null
+    email: string
+    email_key: string
+    name: string
+    whatsapp: string | null
+    country: string | null
+    city: string | null
+    role: string | null
+    specialty: string | null
+    years_experience: number | null
+    interest_tags: string[]
+    intent: OrganicLeadIntent
+    source_page: string
+    source_topic: string | null
+    source_asset: string | null
+    source_type: OrganicLeadSourceType
+    utms: Record<string, any>
+    referrer: string | null
+    score: number
+    lifecycle_stage: OrganicLeadLifecycleStage
+    attribution_snapshot: Record<string, any>
+    metadata: Record<string, any>
+    first_engagement_at: string
+    last_engagement_at: string
+    created_at: string
+    updated_at: string
+}
+
+export interface OrganicLeadInsert {
+    user_id?: string | null
+    email: string
+    name: string
+    whatsapp?: string | null
+    country?: string | null
+    city?: string | null
+    role?: string | null
+    specialty?: string | null
+    years_experience?: number | null
+    interest_tags?: string[]
+    intent?: OrganicLeadIntent
+    source_page: string
+    source_topic?: string | null
+    source_asset?: string | null
+    source_type?: OrganicLeadSourceType
+    utms?: Record<string, any>
+    referrer?: string | null
+    score?: number
+    lifecycle_stage?: OrganicLeadLifecycleStage
+    attribution_snapshot?: Record<string, any>
+    metadata?: Record<string, any>
+    first_engagement_at?: string
+    last_engagement_at?: string
+}
+
+export interface OrganicLeadUpdate {
+    user_id?: string | null
+    name?: string
+    whatsapp?: string | null
+    country?: string | null
+    city?: string | null
+    role?: string | null
+    specialty?: string | null
+    years_experience?: number | null
+    interest_tags?: string[]
+    intent?: OrganicLeadIntent
+    source_page?: string
+    source_topic?: string | null
+    source_asset?: string | null
+    source_type?: OrganicLeadSourceType
+    utms?: Record<string, any>
+    referrer?: string | null
+    score?: number
+    lifecycle_stage?: OrganicLeadLifecycleStage
+    attribution_snapshot?: Record<string, any>
+    metadata?: Record<string, any>
+    last_engagement_at?: string
 }
 
 // ============================================

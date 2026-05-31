@@ -19,6 +19,8 @@ export type TrackingPageType =
     | 'speaker_index'
     | 'speaker_detail'
     | 'content_hub'
+    | 'organic_index'
+    | 'organic_detail'
     | 'access_library'
     | 'auth_login'
     | 'auth_register'
@@ -42,6 +44,13 @@ export type TrackingContentType =
     | 'specialization'
     | 'recording'
     | 'speaker'
+    | 'organic_guide'
+    | 'organic_resource'
+    | 'organic_author'
+    | 'organic_book'
+    | 'organic_approach'
+    | 'organic_tool'
+    | 'organic_psychologist'
     | 'purchase'
 
 export type TrackingDestination =
@@ -107,6 +116,12 @@ const PUBLIC_SAFE_PREFIXES = [
     '/eventos',
     '/formaciones',
     '/grabaciones',
+    '/guias',
+    '/autores',
+    '/libros',
+    '/enfoques',
+    '/herramientas',
+    '/psicologos',
     '/investigacion',
     '/manifiesto',
     '/nosotros',
@@ -205,6 +220,23 @@ export function inferTrackingPageType(pathname: string | null | undefined): Trac
     if (isDetailPage(normalizedPath, '/grabaciones')) return hasEmbedSegment(normalizedPath) ? 'embed' : 'recording_detail'
     if (normalizedPath === '/speakers') return 'speaker_index'
     if (isDetailPage(normalizedPath, '/speakers')) return 'speaker_detail'
+    if (normalizedPath === '/guias') return 'organic_index'
+    if (isDetailPage(normalizedPath, '/guias')) return 'organic_detail'
+    if (normalizedPath === '/recursos/formatos') return 'organic_index'
+    if (isDetailPage(normalizedPath, '/recursos/formatos')) return 'organic_detail'
+    if (normalizedPath === '/recursos/escalas') return 'organic_index'
+    if (isDetailPage(normalizedPath, '/recursos/escalas')) return 'organic_detail'
+    if (isDetailPage(normalizedPath, '/recursos')) return 'organic_detail'
+    if (normalizedPath === '/autores') return 'organic_index'
+    if (isDetailPage(normalizedPath, '/autores')) return 'organic_detail'
+    if (normalizedPath === '/libros') return 'organic_index'
+    if (isDetailPage(normalizedPath, '/libros')) return 'organic_detail'
+    if (normalizedPath === '/enfoques') return 'organic_index'
+    if (isDetailPage(normalizedPath, '/enfoques')) return 'organic_detail'
+    if (normalizedPath === '/herramientas') return 'organic_index'
+    if (isDetailPage(normalizedPath, '/herramientas')) return 'organic_detail'
+    if (normalizedPath === '/psicologos') return 'organic_index'
+    if (isDetailPage(normalizedPath, '/psicologos')) return 'organic_detail'
     if (normalizedPath === '/mi-acceso') return 'access_library'
     if (matchesPrefix(normalizedPath, '/hub')) return 'content_hub'
     if (normalizedPath === '/auth/login') return 'auth_login'
@@ -236,6 +268,15 @@ export function inferTrackingContentType(pathname: string | null | undefined): T
     if (pageType === 'specialization_detail') return 'specialization'
     if (pageType === 'recording_detail') return 'recording'
     if (pageType === 'speaker_detail') return 'speaker'
+    if (isDetailPage(normalizedPath, '/guias')) return 'organic_guide'
+    if (isDetailPage(normalizedPath, '/recursos/formatos')) return 'organic_resource'
+    if (isDetailPage(normalizedPath, '/recursos/escalas')) return 'organic_resource'
+    if (isDetailPage(normalizedPath, '/recursos')) return 'organic_resource'
+    if (isDetailPage(normalizedPath, '/autores')) return 'organic_author'
+    if (isDetailPage(normalizedPath, '/libros')) return 'organic_book'
+    if (isDetailPage(normalizedPath, '/enfoques')) return 'organic_approach'
+    if (isDetailPage(normalizedPath, '/herramientas')) return 'organic_tool'
+    if (isDetailPage(normalizedPath, '/psicologos')) return 'organic_psychologist'
     if (pageType === 'purchase_success' || pageType === 'purchase_cancelled') return 'purchase'
 
     return 'none'

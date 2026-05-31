@@ -2,6 +2,7 @@ import { createClient } from '@supabase/supabase-js'
 import type { MetadataRoute } from 'next'
 import { getAppUrl } from '@/lib/config/app-url'
 import { getBlogPosts } from '@/lib/blog/posts'
+import { getOrganicContentForSitemap } from '@/lib/organic-leads/routing'
 import { getMarketingSpecializations } from '@/lib/specializations'
 import type { Database } from '@/types/database'
 
@@ -113,10 +114,18 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         priority: post.featured ? 0.8 : 0.65,
     }))
 
+    const organicRoutes: MetadataRoute.Sitemap = getOrganicContentForSitemap().map(({ content, path }) => ({
+        url: toAbsoluteUrl(appUrl, path),
+        lastModified: content.updatedAt ? new Date(content.updatedAt) : new Date(),
+        changeFrequency: 'weekly',
+        priority: content.gatedResource ? 0.76 : 0.68,
+    }))
+
     return [
         ...staticRoutes,
         ...specializationRoutes,
         ...blogRoutes,
+        ...organicRoutes,
         ...eventRoutes,
         ...formationRoutes,
     ]
