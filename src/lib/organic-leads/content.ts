@@ -275,7 +275,7 @@ export const ORGANIC_CONTENT: OrganicContentAsset[] = [
             {
                 heading: 'Cumplimiento normativo y habilitaciones',
                 paragraphs: [
-                    'Establecer un consultorio físico o virtual requiere cumplir con una serie de normativas locales para garantizar que el espacio es seguro para la atención en salud mental.',
+                    'Establecer un consultorio físico o virtual requiere revisar una serie de normativas locales para reducir riesgos y sostener condiciones adecuadas para la atención en salud mental.',
                     'Esto incluye autorizaciones sanitarias locales, normativas sobre el resguardo y confidencialidad del expediente clínico (como la NOM-004 o equivalentes nacionales) e inscripciones fiscales correspondientes.'
                 ],
                 bullets: [
@@ -305,7 +305,7 @@ export const ORGANIC_CONTENT: OrganicContentAsset[] = [
             },
             {
                 question: '¿Cuáles son los requisitos digitales mínimos?',
-                answer: 'Un software clínico que cumpla con la protección de datos personales y cifrado de extremo a extremo para las videoconsultas.'
+                answer: 'Un software clínico que ayude a proteger datos personales y ofrezca cifrado sólido para las videoconsultas.'
             }
         ],
         relatedAssets: [
@@ -436,7 +436,7 @@ export const ORGANIC_CONTENT: OrganicContentAsset[] = [
         sourceType: 'guide',
         title: 'Guía del expediente psicológico clínico y normativo',
         description: 'Aprende a estructurar el expediente psicológico clínico de tus consultantes respetando normativas legales y el secreto profesional.',
-        aiSummary: 'El expediente psicológico clínico profesional ayuda a los terapeutas a resguardar la información del paciente, documentar la evolución de forma rigurosa y cumplir con las normativas oficiales.',
+        aiSummary: 'El expediente psicológico clínico profesional ayuda a los terapeutas a resguardar la información del paciente, documentar la evolución de forma rigurosa y revisar obligaciones normativas aplicables.',
         topic: 'expediente clinico',
         specialty: 'evaluacion_clinica',
         heroEyebrow: 'Recurso premium',
@@ -451,7 +451,7 @@ export const ORGANIC_CONTENT: OrganicContentAsset[] = [
                 heading: 'Estructura normativa del expediente clínico',
                 paragraphs: [
                     'El expediente psicológico es el conjunto único de documentos escritos, gráficos y digitales donde se registran los procesos de evaluación y psicoterapia de un consultante.',
-                    'Llevarlo de manera correcta no solo te blinda legalmente ante auditorías sanitarias, sino que garantiza la continuidad terapéutica y el respeto sistemático por los derechos del paciente.'
+                    'Llevarlo de manera ordenada ayuda a reducir riesgos ante revisiones sanitarias y favorece la continuidad terapéutica y el respeto por los derechos del paciente.'
                 ],
                 bullets: [
                     'Ficha de identificación completa del consultante.',
@@ -601,7 +601,7 @@ export const ORGANIC_CONTENT: OrganicContentAsset[] = [
             {
                 heading: 'Normativa de protección de datos personales',
                 paragraphs: [
-                    'En la práctica privada, garantizar que el expediente esté a salvo del acceso de terceros es una prioridad ética insoslayable. Si utilizas almacenamiento en la nube, asegúrate de que el proveedor cuente con certificaciones de seguridad para datos de salud.'
+                    'En la práctica privada, proteger el expediente frente al acceso de terceros es una prioridad ética insoslayable. Si utilizas almacenamiento en la nube, revisa que el proveedor cuente con controles de seguridad adecuados para datos de salud.'
                 ]
             },
             {
@@ -1888,7 +1888,7 @@ export const ORGANIC_CONTENT: OrganicContentAsset[] = [
                 heading: 'El deber ético de la actualización en psicología',
                 paragraphs: [
                     'La psicología clínica es una disciplina en constante evolución científica. Los tratamientos de primera elección y las guías de práctica clínica de referencia se actualizan periódicamente en base a nuevos hallazgos experimentales.',
-                    'Elegir formaciones con sólida rigurosidad científica no solo eleva tu estatus profesional y tus ingresos, sino que representa la mayor garantía de cuidado para la salud y el bienestar de tus consultantes.'
+                    'Elegir formaciones con sólida rigurosidad científica fortalece tu criterio profesional y aporta mejores condiciones de cuidado para la salud y el bienestar de tus consultantes.'
                 ],
                 bullets: [
                     'Cursos y diplomados enfocados en tratamientos con respaldo empírico.',
@@ -1950,7 +1950,7 @@ export const ORGANIC_CONTENT: OrganicContentAsset[] = [
                 ],
                 bullets: [
                     'Telepsicología encriptada de extremo a extremo que proteja la privacidad.',
-                    'Software de expedientes clínicos que cumpla con regulaciones sanitarias oficiales.',
+                    'Software de expedientes clínicos que facilite buenas prácticas de privacidad y documentación.',
                     'Asistentes de Inteligencia Artificial para la transcripción y redacción ágil de notas clínicas bajo anonimato del paciente.'
                 ]
             },

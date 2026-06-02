@@ -173,6 +173,47 @@ export function buildOrganicContentJsonLd(input: {
         schemas.push(buildBreadcrumbListJsonLd(input.breadcrumbs))
     }
 
+    if (input.content.schemaTypes.includes('Person')) {
+        schemas.push(buildPersonJsonLd({
+            name: input.content.authorName ?? input.content.title,
+            description: input.content.description,
+            url: input.url,
+        }))
+    }
+
+    if (input.content.schemaTypes.includes('Book')) {
+        schemas.push(buildBookJsonLd({
+            name: input.content.title,
+            description: input.content.description,
+            url: input.url,
+            authorName: input.content.authorName,
+        }))
+    }
+
+    if (input.content.schemaTypes.includes('Course')) {
+        schemas.push(buildCourseJsonLd({
+            name: input.content.title,
+            description: input.content.description,
+            url: input.url,
+        }))
+    }
+
+    if (input.content.schemaTypes.includes('Event')) {
+        schemas.push(buildEventJsonLd({
+            name: input.content.title,
+            description: input.content.description,
+            url: input.url,
+        }))
+    }
+
+    if (input.content.schemaTypes.includes('SoftwareApplication')) {
+        schemas.push(buildSoftwareApplicationJsonLd({
+            name: input.content.title,
+            description: input.content.description,
+            url: input.url,
+        }))
+    }
+
     if (input.content.schemaTypes.includes('FAQPage') && input.content.faqs?.length) {
         schemas.push(buildFAQPageJsonLd(input.content.faqs))
     }
