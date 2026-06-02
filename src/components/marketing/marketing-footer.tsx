@@ -17,23 +17,26 @@ const SPECIALIZATION_LINKS = getMarketingSpecializations().map((spec) => ({
 const FOOTER_LINKS = {
   Especialidades: SPECIALIZATION_LINKS,
   Academia: [
-    { label: "Pr\u00F3ximos Encuentros", href: "/academia" },
+    { label: "Próximos Encuentros", href: "/academia" },
     { label: "Formaciones", href: "/formaciones" },
     { label: "Ponentes", href: "/speakers" },
     { label: "Ser ponente", href: "/quiero-ser-ponente" },
   ],
   Recursos: [
     { label: "Blog", href: "/blog" },
-    { label: "Herramientas y Recursos", href: "/recursos" },
+    { label: "Formatos Clínicos", href: "/recursos" },
+    { label: "Guías Prácticas", href: "/guias" },
+    { label: "Herramientas", href: "/herramientas" },
+    { label: "Biblioteca", href: "/biblioteca" },
   ],
   Empresa: [
     { label: "Nosotros", href: "/nosotros" },
     { label: "Manifiesto", href: "/manifiesto" },
-    { label: "Investigaci\u00F3n", href: "/investigacion" },
+    { label: "Investigación", href: "/investigacion" },
     { label: "Comunidad", href: "/comunidad" },
   ],
   Legal: [
-    { label: "T\u00E9rminos de Servicio", href: "/terminos" },
+    { label: "Términos de Servicio", href: "/terminos" },
     { label: "Aviso de Privacidad", href: "/aviso-privacidad" },
   ],
 }
@@ -84,11 +87,11 @@ export function MarketingFooter() {
               <BrandWordmark className="text-sm sm:text-base lg:tracking-[0.16em]" />
             </Link>
             <p className="text-sm leading-relaxed text-muted-foreground">
-              {"Sistemas Avanzados e Investigaci\u00F3n Humana."}
+              {"Sistemas Avanzados e Investigación Humana."}
             </p>
             <div className="mt-6">
               <p className="mb-3 text-[10px] font-bold uppercase tracking-[0.2em] text-foreground">
-                {"S\u00EDguenos"}
+                {"Síguenos"}
               </p>
               <div className="flex flex-wrap gap-3">
                 {SOCIAL_LINKS.map((socialLink) => {
@@ -135,7 +138,7 @@ export function MarketingFooter() {
 
         <div className="flex flex-col items-center justify-between gap-3 border-t py-6 text-center sm:flex-row sm:text-left">
           <p className="text-xs font-semibold text-muted-foreground">
-            &copy; {new Date().getFullYear()} SAPIHUM &mdash; {"Sistemas Avanzados e Investigaci\u00F3n Humana. Todos los derechos reservados."}
+            &copy; {new Date().getFullYear()} SAPIHUM &mdash; {"Sistemas Avanzados e Investigación Humana. Todos los derechos reservados."}
           </p>
           <p className="text-xs text-muted-foreground">
             Construido con ciencia para la comunidad de salud mental

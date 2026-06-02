@@ -84,6 +84,49 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
             changeFrequency: 'weekly',
             priority: 0.75,
         },
+        // SAPIHUM Organic Leads Index Hubs
+        {
+            url: toAbsoluteUrl(appUrl, '/guias'),
+            lastModified: new Date(),
+            changeFrequency: 'weekly',
+            priority: 0.85,
+        },
+        {
+            url: toAbsoluteUrl(appUrl, '/recursos'),
+            lastModified: new Date(),
+            changeFrequency: 'weekly',
+            priority: 0.85,
+        },
+        {
+            url: toAbsoluteUrl(appUrl, '/enfoques'),
+            lastModified: new Date(),
+            changeFrequency: 'weekly',
+            priority: 0.80,
+        },
+        {
+            url: toAbsoluteUrl(appUrl, '/autores'),
+            lastModified: new Date(),
+            changeFrequency: 'weekly',
+            priority: 0.80,
+        },
+        {
+            url: toAbsoluteUrl(appUrl, '/libros'),
+            lastModified: new Date(),
+            changeFrequency: 'weekly',
+            priority: 0.80,
+        },
+        {
+            url: toAbsoluteUrl(appUrl, '/herramientas'),
+            lastModified: new Date(),
+            changeFrequency: 'weekly',
+            priority: 0.80,
+        },
+        {
+            url: toAbsoluteUrl(appUrl, '/biblioteca'),
+            lastModified: new Date(),
+            changeFrequency: 'weekly',
+            priority: 0.90,
+        },
     ]
 
     const eventRoutes: MetadataRoute.Sitemap = (eventsResponse.data ?? []).map((event: { slug: string; updated_at: string }) => ({

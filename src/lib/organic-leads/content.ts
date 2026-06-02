@@ -5,84 +5,92 @@ export const ORGANIC_CONTENT: OrganicContentAsset[] = [
         slug: 'formulacion-de-caso-clinico',
         contentType: 'guide',
         sourceType: 'guide',
-        title: 'Formulación de caso clínico para psicólogos',
-        description:
-            'Una guía base para ordenar hipótesis, factores mantenedores, objetivos y plan de intervención sin perder criterio clínico.',
-        aiSummary:
-            'Guía introductoria sobre formulación de caso clínico para psicólogos. Explica cómo organizar motivo de consulta, factores relevantes, hipótesis y objetivos terapéuticos con un formato descargable.',
+        title: 'Formulación de caso clínico: guía práctica para psicólogos',
+        description: 'Aprende a estructurar una formulación de caso de forma rigurosa, integrando hipótesis, mantenedores, variables de vulnerabilidad y objetivos terapéuticos alineados a la evidencia.',
+        aiSummary: 'Guía profesional sobre formulación de caso clínico. Explica cómo organizar de manera científica el motivo de consulta, factores mantenedores, variables biológicas y psicosociales, y estructurar un plan de tratamiento sólido.',
         topic: 'formulacion de caso',
         specialty: 'evaluacion_clinica',
-        heroEyebrow: 'Guía clínica',
+        heroEyebrow: 'Guía de práctica clínica',
         ctaLabel: 'Descargar formato de formulación',
         intent: 'download_resource',
         actionType: 'resource_download',
         interestTags: ['evaluacion_clinica', 'formulacion_caso', 'practica_clinica'],
         publishedAt: '2026-05-29',
-        updatedAt: '2026-06-01',
+        updatedAt: '2026-06-02',
         sections: [
             {
-                heading: 'Qué debe resolver una formulación',
+                heading: 'La necesidad metodológica de formular un caso',
                 paragraphs: [
-                    'Una formulación útil traduce información clínica dispersa en una explicación de trabajo. No sustituye el diagnóstico, pero ayuda a decidir por dónde intervenir primero.',
-                    'El objetivo es integrar antecedentes, disparadores, mantenedores, recursos y riesgos en una hipótesis clara que pueda revisarse conforme avanza el proceso.',
+                    'En la práctica clínica, un diagnóstico basado únicamente en manuales estadísticos como el DSM-5 o la CIE-11 es necesario pero insuficiente. El diagnóstico clasifica el síntoma, pero no explica por qué este síntoma se presenta en esta persona en particular, bajo qué condiciones se mantiene y cómo interactúan sus variables biológicas y contextuales.',
+                    'Una formulación de caso clínico rigurosa es un mapa de trabajo dinámico. Su función principal es organizar la información dispersa obtenida en la entrevista clínica para construir una hipótesis explicativa que guíe directamente la intervención. Esto previene la improvisación en sesión y dota al tratamiento de una dirección clara consensuada con el paciente.'
+                ]
+            },
+            {
+                heading: 'El modelo tridimensional de formulación',
+                paragraphs: [
+                    'Para estructurar la formulación de forma efectiva, se recomienda dividir las variables del consultante en tres dimensiones principales:',
+                    '1. Factores de Adquisición: Experiencias de aprendizaje previas, vulnerabilidades biológicas o genéticas y sucesos vitales significativos que predispusieron el desarrollo del problema.',
+                    '2. Factores Precipitantes o Disparadores: Eventos recientes que rompieron el equilibrio del consultante y dieron inicio directo al motivo de consulta actual.',
+                    '3. Factores Mantenedores: Consecuencias conductuales, procesos de evitación cognitiva, ganancias secundarias o dinámicas relacionales que impiden la extinción del comportamiento problemático.'
                 ],
                 bullets: [
-                    'Motivo de consulta expresado en lenguaje observable.',
-                    'Factores predisponentes, precipitantes y mantenedores.',
-                    'Objetivos terapéuticos priorizados.',
-                ],
+                    'Predisponentes: Historial de apego inseguro, antecedentes de trastornos afectivos familiares o esquemas cognitivos disfuncionales tempranos.',
+                    'Precipitantes: Ruptura relacional reciente, despido laboral, cambio geográfico o enfermedad física.',
+                    'Mantenedores: Evitación experiencial ante el malestar, refuerzo social de conductas problema o rumiación cognitiva.'
+                ]
             },
             {
-                heading: 'Uso profesional del formato',
+                heading: 'Estructuración del plan de intervención',
                 paragraphs: [
-                    'El formato descargable está pensado como punto de partida para psicólogos que quieren documentar mejor sus decisiones clínicas.',
-                    'Debe adaptarse al modelo terapéutico, al marco legal aplicable y al nivel de riesgo de cada caso.',
-                ],
+                    'Una vez identificados los mantenedores y construida la hipótesis explicativa, el clínico debe establecer metas terapéuticas priorizadas y seleccionar las técnicas específicas de intervención con mayor respaldo empírico.',
+                    'Por ejemplo, ante un mantenimiento por evitación en un caso de pánico, la técnica prioritaria será la exposición interoceptiva y en vivo, mientras que los objetivos se centrarán en la tolerancia al malestar psicofisiológico y la recuperación de actividades cotidianas.'
+                ]
             },
             {
-                heading: 'Límites profesionales y disclaimer',
+                heading: 'Límites éticos y disclaimer profesional',
                 paragraphs: [
-                    'Este contenido es informativo y profesional; no sustituye supervisión clínica, criterio profesional, formación especializada ni asesoría legal cuando corresponda.',
-                ],
-            },
+                    'Este contenido representa una guía informativa y metodológica para el ejercicio profesional de la psicología. No sustituye la supervisión técnica sistemática de casos clínicos, el criterio especializado individual de cada terapeuta, ni las regulaciones legales locales sobre el ejercicio de las profesiones de la salud mental.'
+                ]
+            }
         ],
         faqs: [
             {
-                question: 'La formulación reemplaza el diagnóstico?',
-                answer: 'No. La formulación complementa el diagnóstico porque organiza hipótesis y decisiones de intervención.',
+                question: '¿La formulación de caso sustituye al diagnóstico clínico?',
+                answer: 'No. El diagnóstico clínico proporciona una etiqueta clasificatoria útil para la comunicación interdisciplinaria. La formulación va más allá al explicar el porqué y el cómo del caso particular del consultante.'
             },
             {
-                question: 'Puedo usarla con cualquier enfoque?',
-                answer: 'Sí, como estructura base. Cada enfoque puede ajustar variables, lenguaje y prioridades.',
+                question: '¿Con qué frecuencia debe revisarse la formulación?',
+                answer: 'La formulación de caso es una hipótesis de trabajo viva. Debe revisarse periódicamente, especialmente si el paciente no muestra avances significativos o si surgen nuevos datos de historia de vida.'
             },
+            {
+                question: '¿Es aplicable este formato a cualquier enfoque terapéutico?',
+                answer: 'Sí. Aunque cada enfoque (TCC, ACT, sistémica) utiliza términos y variables ligeramente distintos, la estructura de antecedentes, disparadores, mantenedores y objetivos es universal en la psicología basada en evidencia.'
+            }
         ],
         gatedResource: {
             assetKey: 'formulacion-caso-clinico',
-            title: 'Formato descargable de formulación de caso',
-            description: 'Plantilla breve para ordenar hipótesis, objetivos y plan inicial.',
+            title: 'Formato editable de formulación de caso',
+            description: 'Plantilla estructurada para organizar hipótesis explicativas, factores de mantenimiento y plan terapéutico de forma ágil.',
             benefits: [
-                'Estructura editable para primera formulación.',
-                'Campos para hipótesis, mantenedores y objetivos.',
-                'Uso inmediato en supervisión o práctica privada.',
+                'Campos detallados para variables predisponentes, precipitantes y mantenedores.',
+                'Sección integrada de jerarquización de objetivos clínicos.',
+                'Diseño profesional listo para usar en tu práctica privada o supervisión.'
             ],
-            downloadUrl: '/api/organic-resources/formulacion-caso-clinico',
+            downloadUrl: '/api/organic-resources/formulacion-caso-clinico'
         },
         relatedAssets: [
-            { label: 'Especialidad en Evaluación Clínica', href: '/especialidades/evaluacion-clinica', type: 'specialty' },
-            { label: 'Explorar formaciones', href: '/formaciones', type: 'formation' },
-            { label: 'Comunidad SAPIHUM', href: '/comunidad', type: 'community' },
+            { label: 'Formato de Historia Clínica', href: '/recursos/formatos/historia-clinica-psicologica', type: 'resource_format' },
+            { label: 'Especialidad en Evaluación Clínica', href: '/especialidades/evaluacion-clinica', type: 'specialty' }
         ],
-        schemaTypes: ['Article', 'BreadcrumbList', 'FAQPage', 'ItemList'],
+        schemaTypes: ['Article', 'BreadcrumbList', 'FAQPage', 'ItemList']
     },
     {
         slug: 'historia-clinica-psicologica',
         contentType: 'resource_format',
         sourceType: 'resource_format',
-        title: 'Formato de historia clínica psicológica',
-        description:
-            'Preview indexable de un formato para organizar datos iniciales, motivo de consulta, antecedentes y plan de atención psicológica.',
-        aiSummary:
-            'Recurso para psicólogos sobre historia clínica psicológica. Resume los apartados mínimos para documentar una primera entrevista y ofrece una descarga posterior al registro.',
+        title: 'Formato de historia clínica psicológica profesional',
+        description: 'Estructura la recolección de datos iniciales, antecedentes y evaluación multidimensional de tus consultantes bajo estándares clínicos rigurosos.',
+        aiSummary: 'Formatos clínicos para psicología de primer nivel. Estructura de historia clínica que detalla motivo de consulta, antecedentes personales, familiares, médicos, y acuerdos iniciales del encuadre.',
         topic: 'historia clinica',
         specialty: 'evaluacion_clinica',
         heroEyebrow: 'Formato profesional',
@@ -91,107 +99,193 @@ export const ORGANIC_CONTENT: OrganicContentAsset[] = [
         actionType: 'resource_download',
         interestTags: ['historia_clinica', 'evaluacion_clinica', 'documentacion_clinica'],
         publishedAt: '2026-05-29',
-        updatedAt: '2026-06-01',
+        updatedAt: '2026-06-02',
         sections: [
             {
-                heading: 'Apartados base',
+                heading: 'La recolección diagnóstica de la historia clínica',
                 paragraphs: [
-                    'Una historia clínica ordenada permite entender el contexto inicial del consultante sin convertir la entrevista en un interrogatorio rígido.',
-                    'El formato separa datos administrativos, motivo de consulta, antecedentes, observaciones clínicas y acuerdos iniciales.',
+                    'La historia clínica es el documento fundacional de cualquier proceso psicoterapéutico serio. Reúne no solo la información de contacto y de filiación del consultante, sino que realiza un mapeo exhaustivo de su desarrollo biológico, psicológico, familiar y social.',
+                    'El reto del terapeuta en las primeras sesiones es lograr rellenar esta estructura sin transformar la consulta en un interrogatorio frío o policial. El uso del diálogo socrático y la escucha empática permite obtener estos datos de manera fluida mientras se construye una alianza terapéutica firme.'
+                ]
+            },
+            {
+                heading: 'Apartados indispensables en el registro inicial',
+                paragraphs: [
+                    'Una historia clínica bien estructurada debe contener como mínimo los siguientes bloques conceptuales ordenados para facilitar su posterior análisis y consulta:',
+                    '1. Ficha de Identificación: Datos administrativos y de contacto de emergencia.',
+                    '2. Motivo de Consulta: Descripción en palabras del consultante y traducción clínica a variables observables.',
+                    '3. Antecedentes Personales Patológicos y No Patológicos: Historial médico, cirugías, tratamientos de salud mental previos y consumo de sustancias.',
+                    '4. Antecedentes Familiares: Dinámicas hereditarias de salud mental, estructura de la familia de origen y sucesos significativos del árbol genealógico.',
+                    '5. Examen del Estado Mental: Observaciones del terapeuta sobre la apariencia, orientación, lenguaje, afecto, procesos de pensamiento y juicio del paciente en sesión.'
                 ],
                 bullets: [
-                    'Datos de identificación y contacto.',
-                    'Motivo de consulta y objetivos iniciales.',
-                    'Antecedentes relevantes y factores de riesgo.',
-                ],
+                    'Datos de contacto y números de emergencia para activar protocolos de seguridad si es necesario.',
+                    'Exploración de tratamientos psiquiátricos o neurológicos previos y actuales.',
+                    'Examen del estado mental centrado en funciones ejecutivas y atención.'
+                ]
             },
             {
-                heading: 'Uso responsable',
+                heading: 'Uso ético y cumplimiento de privacidad de datos',
                 paragraphs: [
-                    'El recurso es una base de trabajo. Cada profesional debe adecuarlo a su jurisdicción, política de privacidad y tipo de servicio.',
-                ],
+                    'El resguardo y manejo de la historia clínica debe alinearse estrictamente a las normativas de salud mental y de protección de datos personales vigentes en cada país (como la NOM-004-SSA3-2012 en México o el RGPD en Europa). El expediente debe almacenarse bajo llaves físicas o cifrado digital avanzado para evitar filtraciones.'
+                ]
             },
             {
-                heading: 'Límites profesionales y disclaimer',
+                heading: 'Advertencia legal y disclaimer',
                 paragraphs: [
-                    'Este contenido es informativo y profesional; no sustituye supervisión clínica, criterio profesional, formación especializada ni asesoría legal cuando corresponda.',
-                ],
+                    'Este formato es una plantilla de referencia académica y profesional. Cada psicoterapeuta debe adaptar su contenido y los términos del encuadre legal conforme a los requisitos específicos que exija la legislación sanitaria de su país y región.'
+                ]
+            }
+        ],
+        faqs: [
+            {
+                question: '¿Cuánto tiempo debe durar la recolección de la historia clínica?',
+                answer: 'Por lo general, toma entre las primeras 2 y 3 sesiones completas recopilar toda la información estructurada de la historia clínica.'
             },
+            {
+                question: '¿Debe firmar el paciente la historia clínica?',
+                answer: 'La firma del encuadre y del consentimiento informado suele anexarse al expediente clínico junto con la historia clínica para mayor validez ética.'
+            }
         ],
         gatedResource: {
             assetKey: 'historia-clinica-psicologica',
-            title: 'Formato descargable de historia clínica',
-            description: 'Plantilla para entrevista inicial y documentación básica.',
+            title: 'Formato editable de historia clínica',
+            description: 'Plantilla estructurada en formato digital con todos los campos necesarios para tu primera entrevista de evaluación.',
             benefits: [
-                'Preview público e indexable.',
-                'Campos listos para adaptar.',
-                'Conecta con rutas de evaluación clínica y formación.',
+                'Campos exhaustivos para antecedentes médicos y psiquiátricos.',
+                'Estructura guía para el Examen del Estado Mental.',
+                'Listos para imprimir o rellenar de forma segura en tu computadora.'
             ],
-            downloadUrl: '/api/organic-resources/historia-clinica-psicologica',
+            downloadUrl: '/api/organic-resources/historia-clinica-psicologica'
         },
         relatedAssets: [
-            { label: 'Guía de formulación de caso', href: '/guias/formulacion-de-caso-clinico', type: 'guide' },
-            { label: 'Recursos SAPIHUM', href: '/recursos', type: 'resource' },
-            { label: 'Eventos profesionales', href: '/eventos', type: 'event' },
+            { label: 'Guía de Formulación de Caso', href: '/guias/formulacion-de-caso-clinico', type: 'guide' },
+            { label: 'Plantilla de Consentimiento Informado', href: '/recursos/formatos/consentimiento-informado-psicologico', type: 'resource_format' }
         ],
-        schemaTypes: ['Article', 'BreadcrumbList', 'ItemList'],
+        schemaTypes: ['Article', 'BreadcrumbList', 'FAQPage', 'ItemList']
     },
     {
         slug: 'como-conseguir-pacientes-como-psicologo',
         contentType: 'guide',
         sourceType: 'guide',
         title: 'Cómo conseguir pacientes como psicólogo: guía de captación ética',
-        description: 'Descubre estrategias éticas, efectivas y con sustento profesional para atraer pacientes a tu consulta privada sin recurrir a la desinformación.',
-        aiSummary: 'Los formatos de captación y guías éticas ayudan a psicólogos a estructurar su práctica privada, definir nichos y establecer colaboraciones sólidas sin comprometer el código deontológico.',
+        description: 'Construye un flujo constante de consultantes para tu práctica privada implementando un sistema de posicionamiento profesional, diferenciación y derivaciones éticas.',
+        aiSummary: 'Guía integral sobre captación ética de pacientes para psicólogos. Analiza la diferenciación profesional por nichos, el desarrollo de redes de derivación con psiquiatras, el diseño de mensajes y el seguimiento sin comprometer el secreto profesional o la ética.',
         topic: 'captacion de pacientes',
         specialty: 'supervision_clinica',
-        heroEyebrow: 'Guía de crecimiento',
-        ctaLabel: 'Unirme a la comunidad',
+        heroEyebrow: 'Guía de desarrollo profesional',
+        ctaLabel: 'Descargar el checklist de captación',
         intent: 'join_community',
         actionType: 'guide_view',
         interestTags: ['captacion_pacientes', 'consulta_privada', 'marketing_psicologos', 'comunidad'],
         publishedAt: '2026-06-01',
-        updatedAt: '2026-06-01',
+        updatedAt: '2026-06-02',
         sections: [
             {
-                heading: 'La diferenciación en la práctica privada',
+                heading: 'Qué significa conseguir pacientes de forma ética',
                 paragraphs: [
-                    'La competencia en psicoterapia ha aumentado radicalmente en los canales digitales. Para sobresalir, es fundamental alejarse del generalismo y definir un nicho claro basado en tu experiencia y formación.',
-                    'Atraer al paciente adecuado no es cuestión de trucos publicitarios, sino de construir confianza técnica a través del contenido de valor y la rigurosidad ética.'
+                    'En el ámbito de la salud mental, la captación de consultantes no puede tratarse con las mismas dinámicas de venta agresiva que se aplican a los productos comerciales. Los psicólogos no creamos necesidades artificiales; respondemos al sufrimiento humano con herramientas de ayuda profesional.',
+                    'El marketing ético en psicología se centra en construir confianza técnica. Consiste en educar a tu audiencia sobre salud mental, desmitificar la psicoterapia y demostrar solidez y rigor académico. Cuando un consultante potencial comprende qué haces y cómo lo haces, te elegirá de forma natural basada en tu autoridad profesional.'
+                ]
+            },
+            {
+                heading: 'La diferencia entre marketing de valor y promesas clínicas irresponsables',
+                paragraphs: [
+                    'El mayor error que se comete actualmente en las redes sociales es el uso de afirmaciones absolutistas o mercantilistas. Es éticamente inaceptable utilizar claims como "supera tu ansiedad en 3 semanas" o "método 100% garantizado para ser feliz". El psicólogo clínico debe recordar que cada persona presenta una historia de aprendizaje única y que la psicoterapia es un proceso corresponsable.',
+                    'La comunicación ética es clara, humilde, fundamentada y respetuosa del código deontológico. Se enfoca en explicar procesos psicológicos y ofrecer psicoeducación rigurosa, no en vender "soluciones mágicas".'
+                ]
+            },
+            {
+                heading: 'La matriz de captación profesional paso a paso',
+                paragraphs: [
+                    'Para estructurar un consultorio privado viable y ordenado, el psicólogo debe dominar los siguientes pilares de la matriz de crecimiento profesional:',
+                    '1. Posicionamiento Profesional y Nicho: Evita el generalismo. Es mucho más efectivo posicionarte como experto en un área (p. ej., trauma en adultos, terapia de pareja sistémica, o regulación emocional infantil) que anunciarte para "atención a todo público".',
+                    '2. Canales de Atracción de Tráfico: Elige entre SEO local (Google Maps), redes sociales educativas, blogs de divulgación científica o conferencias y talleres comunitarios.',
+                    '3. Contenido Educativo y Psicoeducación: Escribe o graba materiales que resuelvan dudas reales del consultante, explicando de manera clara los procesos conductuales y emocionales.',
+                    '4. Relaciones de Derivación: Construye un canal formal con psiquiatras, neurólogos, escuelas locales y otros colegas que no manejen tu misma especialidad.',
+                    '5. Reputación y Medición de Resultados: Evalúa periódicamente la satisfacción y el avance clínico de tus pacientes mediante escalas científicas.'
                 ],
                 bullets: [
-                    'Define tu área de competencia específica (p. ej., trauma, ansiedad en adultos).',
-                    'Crea contenido que explique de forma sencilla cómo funciona tu enfoque terapéutico.',
-                    'Mantén la coherencia profesional y el respeto por los códigos éticos de salud mental.'
+                    'Nicho Claro: Define con qué población trabajas mejor y en qué problemas clínicos te especializas.',
+                    'Psicoeducación: Crea infografías o artículos sencillos que acerquen la psicología basada en evidencia a la gente.',
+                    'Derivaciones Cruzadas: Acuerda derivar casos fuera de tu competencia a colegas especialistas de confianza, fomentando reciprocidad.'
                 ]
             },
             {
-                heading: 'Redes de derivación profesional',
+                heading: 'Ejemplos prácticos de nichos en salud mental',
                 paragraphs: [
-                    'Las derivaciones de otros colegas, psiquiatras y centros de salud siguen siendo la fuente de pacientes más sólida y de mejor pronóstico en la clínica.',
-                    'Construir relaciones interdisciplinarias éticas te permite recibir casos alineados con tu especialidad y derivar con responsabilidad aquellos que queden fuera de tu alcance.'
+                    'Definir tu nicho clínico te permite enfocar tu actualización y tus recursos educativos en resolver un perfil específico de sufrimiento. Ejemplos de nichos robustos y éticos:',
+                    '- Terapia para Trastornos de Ansiedad y Depresión en adultos jóvenes bajo el enfoque de TCC.',
+                    '- Abordaje de trauma complejo y duelo traumático en población adulta mediante protocolos de EMDR o TCC enfocada en trauma.',
+                    '- Terapia familiar y de pareja sistémica relacional enfocada en procesos de comunicación y crianza.',
+                    '- Tratamiento de desregulación emocional severa y conductas auto-lesivas mediante Terapia Dialéctico Conductual (DBT).'
                 ]
             },
             {
-                heading: 'Estrategias y disclaimer ético',
+                heading: 'Tabla comparativa de mensajes permitidos vs. riesgosos',
                 paragraphs: [
-                    'Este contenido es informativo y profesional; no sustituye la supervisión clínica, el criterio profesional individual ni las normativas de salud locales vigentes en cada país.'
+                    'Para evitar incurrir en faltas éticas o regulaciones de publicidad sanitaria, utiliza la siguiente guía comparativa en tus textos y publicaciones:',
+                    '- Mensaje Riesgoso (Evitar): "Te garantizo eliminar tu depresión en un mes con mi técnica probada".',
+                    '- Mensaje Ético y Permitido (Recomendado): "Acompaño procesos de depresión mayor mediante activación conductual, un enfoque con amplia evidencia científica para recuperar el bienestar".',
+                    '- Mensaje Riesgoso (Evitar): "La psicoterapia te blinda legalmente contra el estrés laboral".',
+                    '- Mensaje Ético y Permitido (Recomendado): "Desarrollamos herramientas de asertividad, establecimiento de límites y manejo de estrés adaptadas a tu entorno de trabajo".'
+                ]
+            },
+            {
+                heading: 'Cómo construir una red de derivación con psiquiatras y médicos',
+                paragraphs: [
+                    'Una de las fuentes más estables de consultantes comprometidos proviene del trabajo interdisciplinar. Para consolidar este canal:',
+                    '1. Agenda una breve cita de presentación profesional con psiquiatras y médicos generales de tu zona. Explícales tu formación, tu enfoque de trabajo basado en evidencia y los perfiles de pacientes que atiendes con mayor efectividad.',
+                    '2. Ofréceles derivar de manera recíproca a los pacientes de tu consulta que requieran una evaluación médica, psiquiátrica o neurológica complementaria.',
+                    '3. Envía informes clínicos éticos y concisos de interconsulta (respetando siempre el secreto profesional y con autorización firmada del paciente) para mantenerlos al tanto de la evolución y coordinar los objetivos de salud del paciente.'
+                ]
+            },
+            {
+                heading: 'Métricas clave para medir la salud de tu consulta',
+                paragraphs: [
+                    'Llevar un consultorio ordenado requiere analizar números objetivos para tomar decisiones estratégicas sin comprometer el ejercicio ético:',
+                    '- Inquiries (Consultas Recibidas): Cuántas personas preguntan por tus servicios semanalmente.',
+                    '- Tasa de Conversión a Primera Sesión: Porcentaje de interesados que agendan formalmente una primera cita.',
+                    '- Tasa de Asistencia y Adherencia: Porcentaje de sesiones agendadas que se llevan a cabo exitosamente sin inasistencias o cancelaciones tardías.',
+                    '- Costo de Operación de la Consulta: Cuánto gastas en software, renta, internet e impuestos versus tus ingresos brutos.',
+                    '- Derivaciones Enviadas y Recibidas: Balance relacional con tu red de contactos interdisciplinarios.'
+                ]
+            },
+            {
+                heading: 'Límites éticos y disclaimer profesional',
+                paragraphs: [
+                    'Este contenido representa una guía de orientación profesional y de crecimiento para psicólogos independientes. No constituye asesoría legal fiscal, ni garantiza un volumen específico de ingresos. Cada profesional de la salud mental debe ejercer su práctica clínica y comercial respetando los códigos éticos específicos aplicables en su país de residencia.'
                 ]
             }
         ],
         faqs: [
             {
-                question: '¿Es ético hacer publicidad pagada en psicología?',
-                answer: 'Sí, siempre que la publicidad sea verídica, profesional, no haga promesas clínicas absolutas ni demerite el trabajo de otros colegas.'
+                question: '¿Es ético ofrecer descuentos o promociones en psicología?',
+                answer: 'Los códigos éticos tradicionales desaconsejan las promociones mercantiles agresivas (como "2x1" o "descuentos del mes") porque restan seriedad al acto de salud mental. Se recomienda establecer honorarios profesionales fijos o tarifas sociales estructuradas.'
             },
             {
-                question: '¿Cómo ayuda SAPIHUM a conseguir pacientes?',
-                answer: 'A través de nuestra comunidad profesional, redes de derivación verificadas y formaciones continuas que elevan tu autoridad clínica.'
+                question: '¿Cómo puedo conseguir mis primeros pacientes recién egresado?',
+                answer: 'Inicia construyendo tu perfil en Google Maps, participando en talleres psicoeducativos comunitarios y uniéndote a redes profesionales de derivación y supervisión clínica de casos.'
+            },
+            {
+                question: '¿Qué herramientas de SAPIHUM me ayudan en esto?',
+                answer: 'Nuestra membresía te brinda acceso a la comunidad profesional para derivaciones, plantillas para tu práctica privada y eventos en vivo que elevan tu estatus clínico.'
             }
         ],
+        gatedResource: {
+            assetKey: 'checklist-captacion-etica',
+            title: 'Checklist para organizar tu estrategia de captación ética',
+            description: 'Lista de control interactiva para psicólogos que buscan estructurar su nicho, digitalizar su consultorio y construir redes profesionales de derivación.',
+            benefits: [
+                'Guía paso a paso para definir un nicho clínico viable.',
+                'Requerimientos técnicos indispensables para tu SEO local (Google Maps).',
+                'Estructura recomendada para presentarte ante psiquiatras y médicos de tu zona.'
+            ],
+            downloadUrl: '/api/organic-resources/checklist-captacion-etica'
+        },
         relatedAssets: [
             { label: 'Guía de Marketing para Psicólogos', href: '/guias/marketing-para-psicologos', type: 'guide' },
-            { label: 'Especialidad en Supervisión Clínica', href: '/especialidades/supervision-clinica', type: 'specialty' },
+            { label: 'Cómo Cobrar Consulta Psicológica', href: '/guias/como-cobrar-consulta-psicologica', type: 'guide' },
             { label: 'Comunidad SAPIHUM', href: '/comunidad', type: 'community' }
         ],
         schemaTypes: ['Article', 'BreadcrumbList', 'FAQPage']
@@ -201,57 +295,81 @@ export const ORGANIC_CONTENT: OrganicContentAsset[] = [
         contentType: 'guide',
         sourceType: 'guide',
         title: 'Cómo cobrar consulta psicológica y definir tus honorarios',
-        description: 'Aprende a estructurar tus tarifas profesionales en consulta privada de forma justa, viable y éticamente equilibrada.',
-        aiSummary: 'Guía práctica para que psicólogos clínicos definan sus tarifas por consulta privada. Analiza costos operativos directos, indirectos, valor de mercado y psicología del cobro.',
+        description: 'Aprende a calcular tus tarifas por sesión basándote en costos de operación, tus metas de ingresos y factores de mercado, estableciendo un encuadre financiero justo y ético.',
+        aiSummary: 'Guía detallada para psicólogos sobre fijación de precios y cobro en consulta privada. Explica el análisis de gastos fijos y variables, el cálculo del precio por sesión, el encuadre de las cancelaciones y la psicología del cobro.',
         topic: 'consulta privada',
         specialty: 'supervision_clinica',
-        heroEyebrow: 'Gestión profesional',
-        ctaLabel: 'Registrarme gratis',
+        heroEyebrow: 'Gestión profesional financiera',
+        ctaLabel: 'Descargar el checklist de tarifas',
         intent: 'explore_formation',
         actionType: 'guide_view',
         interestTags: ['consulta_privada', 'practica_clinica', 'supervision_clinica'],
         publishedAt: '2026-06-01',
-        updatedAt: '2026-06-01',
+        updatedAt: '2026-06-02',
         sections: [
             {
-                heading: 'Estructuración de costos en consulta',
+                heading: 'El reto financiero de la práctica privada en psicología',
                 paragraphs: [
-                    'Definir el precio de una sesión de psicoterapia suele ser una de las tareas más complejas para los nuevos clínicos. Cobrar muy poco desgasta la práctica y compromete la calidad; cobrar demasiado puede limitar el acceso a la población.',
-                    'El primer paso fundamental es conocer tus gastos de operación fijos y variables. Esto incluye renta de consultorio físico o software de consulta, servicios de internet, impuestos, seguros y tu propia formación continua.'
-                ],
-                bullets: [
-                    'Costos fijos directos: Renta de espacio, software clínico y suscripciones.',
-                    'Formación continua y supervisión: Porcentaje de ingresos destinado a tu desarrollo técnico.',
-                    'Tu tiempo no clínico: Horas dedicadas a documentar expedientes y preparar sesiones.'
+                    'Muchos psicólogos clínicos experimentan incomodidad o culpa al momento de cobrar por sus servicios. Sin embargo, para sostener una consulta privada de alta calidad, ética y comprometida, es indispensable que el ejercicio sea económicamente sustentable a largo plazo.',
+                    'Cobrar honorarios profesionales justos no es un acto de egoísmo; es la garantía de que contarás con los recursos para seguir supervisándote, adquirir software seguro que resguarde los expedientes, continuar tu formación y evitar el burnout clínico por exceso de pacientes.'
                 ]
             },
             {
-                heading: 'La psicología del cobro y los límites terapéuticos',
+                heading: 'La fórmula para calcular tu tarifa por sesión',
                 paragraphs: [
-                    'El encuadre del pago no es un trámite puramente administrativo; forma parte integral de la relación terapéutica. Establecer límites claros sobre cancelaciones y formas de pago ayuda a evitar malentendidos.',
-                    'Es recomendable pactar y firmar las políticas de cobro desde la primera sesión (o incluirlas en el consentimiento informado).'
+                    'Para fijar tu honorario por hora de forma objetiva, evita copiar ciegamente los precios promedio de tu zona. Utiliza el siguiente framework financiero:',
+                    '1. Define tus Metas de Ingreso Neto Mensual: Cuánto necesitas percibir libre de impuestos para cubrir tus gastos de vida personales de forma digna.',
+                    '2. Calcula tus Gastos Fijos de Operación (GFO): Renta de consultorio físico o virtual, software de historia clínica encriptado, internet, teléfono, luz, colegiaturas, supervisores y seguros.',
+                    '3. Determina tu Presupuesto de Formación Continua (PFC): Porcentaje de ingresos destinado a diplomados, certificaciones y libros cada año.',
+                    '4. Calcula tus Horas Clínicas Reales Semanales (HCR): Un terapeuta de tiempo completo no puede atender 40 pacientes a la semana sin mermar su calidad clínica. El promedio ético recomendado de consulta es de 20 a 25 horas semanales.'
+                ],
+                bullets: [
+                    'Ingreso Neto Requerido + Gastos Fijos de Operación + Presupuesto de Actualización = Tu Meta de Facturación Mensual.',
+                    'Divide tu Meta de Facturación Mensual entre el número total de HCR mensuales para obtener tu tarifa base por sesión.'
+                ]
+            },
+            {
+                heading: 'La psicología del cobro y el encuadre clínico',
+                paragraphs: [
+                    'El encuadre financiero no es un mero trámite administrativo; es parte activa del proceso terapéutico y del establecimiento de límites sanos. Las inasistencias y las cancelaciones tardías deben abordarse y pactarse formalmente desde la primera sesión.',
+                    'Establecer con claridad que la sesión cancelada con menos de 24 horas de anticipación se cobra en su totalidad (salvo emergencias de fuerza mayor) dota al proceso de seriedad y protege el tiempo de trabajo del clínico.'
                 ]
             },
             {
                 heading: 'Disclaimer profesional',
                 paragraphs: [
-                    'Este contenido es meramente informativo y profesional; no sustituye la asesoría fiscal particular ni las normativas tarifarias que puedan existir en algunas regiones.'
+                    'Este contenido clínico y administrativo representa una guía informativa de referencia profesional. Cada psicoterapeuta debe adaptar su esquema de tarifas a sus condiciones particulares, a las legislaciones fiscales aplicables de su país y a las normativas de salud de su jurisdicción.'
                 ]
             }
         ],
         faqs: [
             {
-                question: '¿Qué hacer si un paciente no puede pagar su tarifa habitual?',
-                answer: 'Muchos profesionales de la salud mental reservan un porcentaje de sus horas clínicas a tarifas diferenciadas o tarifas sociales para garantizar el acceso ético.'
+                question: '¿Es correcto cobrar sesiones no asistidas si no avisaron?',
+                answer: 'Sí, siempre que dicha política de inasistencias se haya explicado con total claridad durante el encuadre inicial y haya sido aceptada y firmada por el paciente en el consentimiento informado.'
             },
             {
-                question: '¿Es correcto cobrar sesiones no asistidas?',
-                answer: 'Sí, siempre que las políticas de cancelación (p. ej., avisar con 24 horas de anticipación) hayan sido explicadas y aceptadas al inicio del tratamiento.'
+                question: '¿Qué hacer si un paciente recurrente experimenta problemas económicos?',
+                answer: 'Es ético acordar un esquema temporal de tarifas sociales o derivarlo a instituciones comunitarias de salud mental de confianza si el proceso clínico corre riesgo de interrumpirse bruscamente.'
+            },
+            {
+                question: '¿Cómo ayuda SAPIHUM en mis finanzas de consulta?',
+                answer: 'Te ofrecemos checklists operativos, plantillas de encuadre financiero e información de mercado para establecer tarifas viables en tu consulta autónoma.'
             }
         ],
+        gatedResource: {
+            assetKey: 'checklist-fijacion-tarifas',
+            title: 'Checklist para calcular tus tarifas de consulta',
+            description: 'Calculadora y lista de control en formato de plantilla para sumar costos operativos directos, indirectos y fijar un honorario justo por sesión.',
+            benefits: [
+                'Fórmulas claras para desglosar tus gastos fijos de operación.',
+                'Matriz para calcular tus horas clínicas reales sustentables.',
+                'Plantilla de texto recomendada para el encuadre de cobro en primera sesión.'
+            ],
+            downloadUrl: '/api/organic-resources/checklist-fijacion-tarifas'
+        },
         relatedAssets: [
-            { label: 'Plantilla de Consentimiento Informado', href: '/recursos/formatos/consentimiento-informado-psicologico', type: 'resource_format' },
-            { label: 'Formaciones Clínicas', href: '/formaciones', type: 'formation' }
+            { label: 'Guía para Abrir Consultorio', href: '/guias/como-abrir-consultorio-psicologico', type: 'guide' },
+            { label: 'Plantilla de Consentimiento Informado', href: '/recursos/formatos/consentimiento-informado-psicologico', type: 'resource_format' }
         ],
         schemaTypes: ['Article', 'BreadcrumbList', 'FAQPage']
     },
@@ -260,54 +378,80 @@ export const ORGANIC_CONTENT: OrganicContentAsset[] = [
         contentType: 'guide',
         sourceType: 'guide',
         title: 'Cómo abrir un consultorio psicológico: requisitos y pasos clave',
-        description: 'Guía paso a paso sobre los requisitos legales, logísticos y prácticos para establecer tu propio consultorio de psicología de forma exitosa.',
-        aiSummary: 'Guía práctica sobre los requisitos para la apertura de un consultorio psicológico. Abarca habilitación sanitaria, regulaciones, diseño del espacio y digitalización.',
+        description: 'Guía detallada con los aspectos regulatorios, físicos, logísticos y de encuadre para inaugurar tu propio consultorio de psicología de forma exitosa.',
+        aiSummary: 'Guía paso a paso sobre los requisitos y gestiones de apertura para consultorios de psicología. Trata la regulación de expedientes físicos y digitales, el diseño del encuadre físico de sesión, la habilitación sanitaria y la estructura administrativa.',
         topic: 'consulta privada',
         specialty: 'clinica',
-        heroEyebrow: 'Guía de emprendimiento',
-        ctaLabel: 'Ver próximos eventos',
+        heroEyebrow: 'Guía de emprendimiento clínico',
+        ctaLabel: 'Descargar el checklist de apertura',
         intent: 'evaluate_membership',
         actionType: 'commercial_cta',
         interestTags: ['consulta_privada', 'normativas', 'herramientas_digitales', 'clinica'],
         publishedAt: '2026-06-01',
-        updatedAt: '2026-06-01',
+        updatedAt: '2026-06-02',
         sections: [
             {
-                heading: 'Cumplimiento normativo y habilitaciones',
+                heading: 'El reto de establecer un consultorio de psicología habilitado',
                 paragraphs: [
-                    'Establecer un consultorio físico o virtual requiere revisar una serie de normativas locales para reducir riesgos y sostener condiciones adecuadas para la atención en salud mental.',
-                    'Esto incluye autorizaciones sanitarias locales, normativas sobre el resguardo y confidencialidad del expediente clínico (como la NOM-004 o equivalentes nacionales) e inscripciones fiscales correspondientes.'
+                    'Inaugurar tu propio espacio de psicoterapia representa el inicio formal de tu independencia como profesional de la salud mental. Sin embargo, no se limita a rentar una oficina y comprar un sillón. Para ejercer con seguridad jurídica y proteger a tus consultantes, debes cumplir rigurosamente con una serie de normativas sanitarias y legales.',
+                    'Tener un consultorio debidamente regulado evita sanciones de las autoridades de salud locales, blinda tu práctica ante contingencias administrativas y comunica a tus pacientes el máximo nivel de profesionalismo y compromiso con su bienestar.'
+                ]
+            },
+            {
+                heading: 'Requisitos sanitarios y legales de apertura',
+                paragraphs: [
+                    'Aunque las legislaciones varían en cada país y estado, existen requisitos universales exigidos por la mayoría de las agencias de regulación de salud en el mercado de habla hispana:',
+                    '1. Licencia de Funcionamiento y Aviso de Habilitación Sanitaria: El trámite oficial que declara que el local se usará para servicios profesionales de psicología clínica.',
+                    '2. Accesibilidad y Seguridad: Rampas de acceso en la medida de lo posible, sanitarios adecuados, extintores vigentes, señalizaciones de protección civil y un botiquín de emergencias básicas.',
+                    '3. Expediente Clínico Regulado: Garantía de que llevarás la documentación (consentimientos, notas SOAP, historias clínicas) bajo los lineamientos obligatorios de confidencialidad y secreto profesional.'
                 ],
                 bullets: [
-                    'Registro ante las autoridades sanitarias nacionales o municipales.',
-                    'Cumplimiento con normativas de accesibilidad física y seguridad civil.',
-                    'Implementación de contratos de confidencialidad y políticas de privacidad sólidas.'
+                    'Aviso de Habilitación Sanitaria tramitado ante la agencia nacional de salud mental de tu zona.',
+                    'Contratos de arrendamiento comercial que permitan formalmente el uso de consultorio de salud.',
+                    'Adecuación física del consultorio para resguardar la privacidad acústica de las sesiones.'
                 ]
             },
             {
-                heading: 'Diseño del encuadre y espacio terapéutico',
+                heading: 'El diseño del encuadre físico y acústico de sesión',
                 paragraphs: [
-                    'El ambiente físico del consultorio influye directamente en el estado emocional y la comodidad del consultante. La iluminación suave, colores neutros, aislamiento acústico y disposición del mobiliario son elementos activos del encuadre clínico.',
-                    'En la consulta virtual, es igualmente crítico contar con un fondo profesional, libre de interrupciones y una conexión de internet encriptada y estable.'
+                    'El espacio físico del consultorio no es neutro; actúa como un elemento facilitador o entorpecedor de la apertura emocional del paciente. Para un diseño óptimo:',
+                    '- Aislamiento Acústico: Es indispensable que el diálogo de sesión no se escuche en la sala de espera. Utiliza puertas sólidas, paneles absorbentes de sonido o máquinas de ruido blanco.',
+                    '- Iluminación y Colores: Privilegia la luz natural indirecta o lámparas de luz cálida de pie. Evita luces de tubo de oficina frías. Utiliza colores de pared suaves y relajantes (tonos tierra, grises claros, verde musgo o azul pastel).',
+                    '- Disposición del Mobiliario: Coloca los sillones en un ángulo de 45 a 90 grados entre sí, en lugar de frente a frente de manera confrontativa.'
                 ]
             },
             {
-                heading: 'Advertencia clínica y legal',
+                heading: 'Disclaimer normativo y de responsabilidad',
                 paragraphs: [
-                    'Las regulaciones varían significativamente entre países y provincias. Se aconseja obtener asesoría legal y sanitaria local antes de firmar contratos de arrendamiento o adquirir mobiliario clínico.'
+                    'Este contenido es una guía informativa y orientativa para psicólogos independientes. Cada profesional de la salud mental debe consultar a las autoridades sanitarias y a los asesores legales específicos de su ciudad o país para asegurar el cumplimiento exacto de las leyes locales vigentes de apertura.'
                 ]
             }
         ],
         faqs: [
             {
-                question: '¿Puedo atender en un consultorio compartido?',
-                answer: 'Sí, la renta de consultorios compartidos o coworkings de psicología es una excelente opción inicial para reducir costos de operación fijos.'
+                question: '¿Puedo habilitar mi consultorio en mi propia casa?',
+                answer: 'En muchas ciudades es legal, siempre que la zona de consulta cuente con un acceso independiente de las áreas privadas del hogar y disponga de un sanitario exclusivo para pacientes.'
             },
             {
-                question: '¿Cuáles son los requisitos digitales mínimos?',
-                answer: 'Un software clínico que ayude a proteger datos personales y ofrezca cifrado sólido para las videoconsultas.'
+                question: '¿Qué normativas regulan el expediente clínico en mi zona?',
+                answer: 'Depende de tu país. Por ejemplo, en México rige la NOM-004-SSA3-2012 y la NOM-024-SSA3-2012; en España rige la Ley de Autonomía del Paciente y el Reglamento General de Protección de Datos (RGPD).'
+            },
+            {
+                question: '¿Cómo me apoya SAPIHUM en la apertura de mi consultorio?',
+                answer: 'Te brindamos checklists logísticos, foros de comunidad profesional para resolver dudas con colegas que ya pasaron por el proceso y formatos listos para usar en tus expedientes.'
             }
         ],
+        gatedResource: {
+            assetKey: 'checklist-apertura-consultorio',
+            title: 'Checklist para la apertura de consultorio psicológico',
+            description: 'Lista de control exhaustiva con requerimientos de mobiliario, normativas de privacidad y gestiones sanitarias básicas.',
+            benefits: [
+                'Checklist paso a paso de trámites sanitarios mínimos requeridos.',
+                'Guía de mobiliario, iluminación y control acústico profesional.',
+                'Marcos para el resguardo seguro y digital de los expedientes.'
+            ],
+            downloadUrl: '/api/organic-resources/checklist-apertura-consultorio'
+        },
         relatedAssets: [
             { label: 'Checklist de Consulta Organizada', href: '/recursos/formatos/checklist-consulta-organizada', type: 'resource_format' },
             { label: 'Membresía Profesional SAPIHUM', href: '/membresia', type: 'specialty' }
@@ -319,53 +463,78 @@ export const ORGANIC_CONTENT: OrganicContentAsset[] = [
         contentType: 'guide',
         sourceType: 'guide',
         title: 'Cómo organizar tu práctica clínica como psicólogo autónomo',
-        description: 'Aprende a estructurar tus horarios, expedientes, agenda y finanzas para disfrutar de una consulta privada eficiente y sin estrés.',
-        aiSummary: 'Guía sobre gestión, administración y optimización del tiempo para psicólogos en consulta privada autónoma. Enseña a separar la labor administrativa de la atención clínica.',
+        description: 'Implementa sistemas operativos robustos de agenda, control financiero, supervisión y resguardo seguro de expedientes para evitar el agotamiento clínico.',
+        aiSummary: 'Guía práctica de organización interna y administración del consultorio para psicólogos independientes. Trata el diseño de bloques de tiempo en el calendario, la separación de tareas clínicas de las administrativas, el control de ingresos y egresos, y la supervisión de casos.',
         topic: 'consulta privada',
         specialty: 'clinica',
-        heroEyebrow: 'Organización clínica',
-        ctaLabel: 'Registrarme gratis',
+        heroEyebrow: 'Organización y efectividad clínica',
+        ctaLabel: 'Descargar el checklist de organización',
         intent: 'join_community',
         actionType: 'guide_view',
         interestTags: ['consulta_privada', 'herramientas_digitales', 'formatos_clinicos', 'clinica'],
         publishedAt: '2026-06-01',
-        updatedAt: '2026-06-01',
+        updatedAt: '2026-06-02',
         sections: [
             {
-                heading: 'La división del tiempo: labor clínica vs. labor administrativa',
+                heading: 'El mito del psicólogo que solo atiende pacientes',
                 paragraphs: [
-                    'El agotamiento del psicólogo autónomo muchas veces no proviene del trabajo con los pacientes, sino de la mala organización de las tareas de gestión. Documentar notas clínicas tarde en la noche o responder mensajes de WhatsApp a toda hora socava la calidad del servicio.',
-                    'La clave está en reservar bloques de tiempo dedicados exclusivamente a tareas administrativas: registro de expedientes, facturación, responder consultas informativas y preparar tus próximas sesiones.'
+                    'Uno de los factores que más rápido provoca el síndrome de burnout en los psicoterapeutas independientes es no separar la labor puramente clínica de la labor administrativa. Para que tu consultorio funcione de forma impecable, debes asumir que eres un clínico y un administrador a la vez.',
+                    'Tratar de escribir tus notas de sesión tarde en la noche, responder WhatsApps informativos durante el fin de semana o llevar tus cuentas fiscales de cabeza en una libreta desordenada drena tu energía y compromete seriamente la calidad de tu atención terapéutica.'
+                ]
+            },
+            {
+                heading: 'El framework de bloques de tiempo (Time Blocking)',
+                paragraphs: [
+                    'Para recuperar el control de tu agenda semanal, te recomendamos implementar un sistema estricto de bloques de tiempo en tu calendario:',
+                    '1. Bloque de Consulta Clínica (BCC): El espacio exclusivo para estar frente a frente con el paciente, enfocado al 100% en la intervención.',
+                    '2. Bloque de Redacción Administrativa (BRA): Intervalo de 15 minutos entre sesiones (o 1 hora al final de tu día clínico) para redactar y guardar las notas SOAP de evolución de tus consultantes.',
+                    '3. Bloque de Supervisión y Actualización (BSA): Tiempo semanal o quincenal inamovible reservado para leer literatura científica, preparar intervenciones complejas y participar en supervisiones de casos.',
+                    '4. Bloque de Gestión de Negocio (BGN): Bloque mensual de 3 horas para analizar el flujo de tus finanzas y la efectividad de tus canales de captación.'
                 ],
                 bullets: [
-                    'Crea bloques de administración en tu calendario semanal (p. ej., 1 hora al final del día).',
-                    'Establece canales oficiales para que tus pacientes reserven y cancelen de forma automática.',
-                    'Usa herramientas digitales diseñadas específicamente para terapeutas autónomos.'
+                    'Reserva un espacio inamovible de descanso mental a mitad de tu jornada clínica.',
+                    'Configura un calendario online automatizado para que los interesados agenden sus citas sin llamadas manuales.',
+                    'Separa tu cuenta bancaria personal de la cuenta donde cobras las consultas profesionales.'
                 ]
             },
             {
-                heading: 'El resguardo ético de los expedientes',
+                heading: 'La estructura y el archivo ordenado del expediente',
                 paragraphs: [
-                    'Llevar un orden sistemático de tus fichas clínicas no es solo una obligación legal; es un pilar de la efectividad clínica. Conectar la historia clínica, los registros conductuales y los objetivos de tratamiento te permite evaluar objetivamente el avance de tus procesos terapéuticos.'
+                    'Tener un sistema de archivo consistente (físico o digital encriptado) es clave ante cualquier auditoría y facilita enormemente tu trabajo clínico de preparación de sesiones. Asegúrate de estructurar cada expediente siguiendo un orden invariable: Ficha inicial -> Consentimiento informado firmado -> Historia clínica -> Plan de tratamiento -> Notas SOAP ordenadas cronológicamente.'
                 ]
             },
             {
-                heading: 'Enfoque ético y disclaimer',
+                heading: 'Disclaimer clínico-legal',
                 paragraphs: [
-                    'Este contenido es de carácter netamente informativo y educativo; cada profesional clínico debe adaptar estas recomendaciones a su propio estilo de trabajo y a la legislación aplicable.'
+                    'Este contenido de organización práctica es orientativo e informativo. Cada psicólogo autónomo debe asegurar el cumplimiento de las normativas de salud mental específicas y de resguardo de datos vigentes en su localidad.'
                 ]
             }
         ],
         faqs: [
             {
-                question: '¿Cuánto tiempo debo guardar el expediente clínico?',
-                answer: 'En la mayoría de los países de habla hispana, el expediente clínico psicológico debe resguardarse por un mínimo de 5 años tras la última sesión.'
+                question: '¿Cuántos pacientes al día puede atender un psicólogo éticamente?',
+                answer: 'El promedio recomendado es de 4 a 6 pacientes al día. Atender más de 6 sesiones consecutivas suele comprometer la capacidad de concentración empática y el análisis fino del clínico.'
             },
             {
-                question: '¿Cómo ayuda SAPIHUM a organizar mi consulta?',
-                answer: 'Proporcionamos plantillas, checklists y formaciones aplicadas que te ayudan a automatizar y ordenar la administración de tu consulta.'
+                question: '¿Cómo agilizar la escritura de notas clínicas?',
+                answer: 'Utiliza plantillas estructuradas (como el formato SOAP) y asistentes de Inteligencia Artificial que te ayuden a sintetizar las ideas bajo estricto anonimato del paciente.'
+            },
+            {
+                question: '¿Qué recursos de SAPIHUM me ayudan a organizarme?',
+                answer: 'Nuestra membresía te brinda checklists de consulta organizada, guías de telepsicología y formación en gestión práctica de consulta.'
             }
         ],
+        gatedResource: {
+            assetKey: 'checklist-organizacion-practica',
+            title: 'Checklist para organizar tu consulta autónoma',
+            description: 'Guía paso a paso y lista de control para planificar tus bloques de tiempo, automatizar agendamiento y controlar finanzas clínicas.',
+            benefits: [
+                'Estructura de calendario semanal tipo Time-Blocking para terapeutas.',
+                'Lista de tareas administrativas mínimas requeridas al mes.',
+                'Plantilla de registro de ingresos, egresos y presupuesto de formación.'
+            ],
+            downloadUrl: '/api/organic-resources/checklist-organizacion-practica'
+        },
         relatedAssets: [
             { label: 'Checklist de Consulta Organizada', href: '/recursos/formatos/checklist-consulta-organizada', type: 'resource_format' },
             { label: 'Guía de Herramientas Digitales', href: '/herramientas/herramientas-digitales-para-psicologos', type: 'tool' }
@@ -377,55 +546,80 @@ export const ORGANIC_CONTENT: OrganicContentAsset[] = [
         contentType: 'guide',
         sourceType: 'guide',
         title: 'Marketing para psicólogos: estrategias digitales éticas',
-        description: 'Desarrolla una marca personal robusta y atrae pacientes calificados a tu consulta privada mediante marketing de contenidos riguroso y ético.',
-        aiSummary: 'Guía de marketing ético para psicólogos clínicos. Analiza la creación de blogs profesionales, marca personal fundamentada, redes sociales en salud mental y SEO local.',
+        description: 'Desarrolla una marca personal sólida y atrae pacientes calificados a tu consulta privada mediante marketing de contenidos riguroso y ético.',
+        aiSummary: 'Guía de marketing digital profesional y ético para psicólogos clínicos. Detalla estrategias de SEO local, marca personal basada en evidencia, redes sociales educativas y embudos de captación de leads conformes con los códigos deontológicos de salud mental.',
         topic: 'marketing para psicologos',
         specialty: 'supervision_clinica',
-        heroEyebrow: 'Estrategia de growth',
-        ctaLabel: 'Ver próximos eventos',
+        heroEyebrow: 'Guía de crecimiento ético',
+        ctaLabel: 'Descargar el checklist de marketing',
         intent: 'explore_formation',
         actionType: 'guide_view',
         interestTags: ['marketing_psicologos', 'captacion_pacientes', 'consulta_privada', 'comunidad'],
         publishedAt: '2026-06-01',
-        updatedAt: '2026-06-01',
+        updatedAt: '2026-06-02',
         sections: [
             {
-                heading: 'El marketing de contenidos como puente de confianza',
+                heading: 'El marketing de contenidos en psicología clínica',
                 paragraphs: [
-                    'El marketing tradicional enfocado en la venta directa suele generar desconfianza en el sector de la salud mental. En su lugar, el marketing de contenidos se posiciona como una herramienta sumamente ética y efectiva.',
-                    'Consiste en escribir artículos, grabar videos o dar talleres informativos que resuelvan dudas reales de tus futuros pacientes. Al explicar científicamente qué es la ansiedad, cómo funciona el duelo o cuándo asistir a terapia familiar, construyes una sólida autoridad intelectual.'
+                    'El marketing de venta directa agresivo daña la reputación del sector de la salud mental y genera profunda desconfianza en los pacientes potenciales. En su lugar, el marketing de contenidos se erige como la herramienta más ética, elegante y efectiva para consolidar tu consulta privada.',
+                    'Consiste en escribir artículos, impartir charlas, crear infografías o grabar videos que expliquen de forma rigurosa y empática cómo funcionan los procesos de salud mental. Al educar a tu comunidad sobre qué es la rumiación, cómo mitigar un ataque de pánico o qué esperar en una terapia de pareja, estás demostrando tu idoneidad técnica sin recurrir a la autopromoción vacía.'
+                ]
+            },
+            {
+                heading: 'Los límites éticos de la comunicación de salud mental',
+                paragraphs: [
+                    'Es un deber deontológico ineludible que tu comunicación pública sea rigurosa, humilde y libre de sensacionalismos (clickbaits). Evita afirmaciones desmedidas sobre la efectividad de las terapias y jamás uses técnicas persuasivas que infundan miedo o vergüenza para forzar una consulta.',
+                    'Toda la información que compartas debe estar alineada a la ciencia del comportamiento y basada en la evidencia de resultados de la literatura de psicología clínica.'
                 ],
                 bullets: [
-                    'SEO local: Posiciona tu consulta en Google Maps para que te encuentren en tu ciudad.',
-                    'Marca personal: Comparte tu formación, tus enfoques terapéuticos y tus valores profesionales.',
-                    'Contenido educativo: Explica de manera científica y empática temas de salud mental comunes.'
+                    'Divulgación Basada en Evidencia: Cita estudios o guías de referencia internacional cuando expliques trastornos o tratamientos.',
+                    'Dignidad Profesional: Mantén un lenguaje sobrio, profesional y respetuoso del paciente y de otros colegas del sector.',
+                    'Privacidad Absoluta: Jamás compartas datos, fragmentos de chats o anécdotas de pacientes reales en tus redes, incluso de forma anónima, sin su expreso consentimiento clínico firmado.'
                 ]
             },
             {
-                heading: 'Límites éticos de la comunicación en salud mental',
+                heading: 'La matriz de SEO local y presencia digital mínima',
                 paragraphs: [
-                    'Es fundamental no utilizar tácticas sensacionalistas (clickbait) ni promesas clínicas absolutas (como "cura tu depresión en 3 sesiones"). La comunicación del psicólogo debe ser siempre rigurosa, humilde y fundamentada en la evidencia empírica.'
+                    'Antes de buscar seguidores masivos en redes sociales, asegúrate de consolidar tu presencia en los canales de búsqueda local directa, donde los pacientes buscan un terapeuta con urgencia activa:',
+                    '1. Google Maps (SEO Local): Configura y optimiza tu ficha de negocio (Google Business Profile) con el nombre exacto de tu especialidad, dirección de consultorio, horarios actualizados y fotos profesionales limpias.',
+                    '2. Perfiles en Directorios Especializados: Mantén tu perfil verificado en las redes de derivación y directorios de salud mental más importantes de tu región.',
+                    '3. Sitio Web o Landing Page Profesional: Una página sencilla y elegante que cargue rápido, tenga certificado SSL de seguridad, explique tus especialidades de interés, muestre tus disclaimers legales y tenga un enlace directo de agendamiento.'
                 ]
             },
             {
-                heading: 'Disclaimer ético',
+                heading: 'Disclaimer ético y de responsabilidad',
                 paragraphs: [
-                    'Esta guía es de divulgación profesional; no sustituye la revisión legal y deontológica aplicable por los colegios y asociaciones de psicología locales.'
+                    'Esta guía representa una referencia estratégica de divulgación profesional. Cada psicólogo debe adecuar sus esfuerzos de marketing digital a las normativas de publicidad sanitaria vigentes de su país y a las pautas deontológicas que regulen su ejercicio profesional.'
                 ]
             }
         ],
         faqs: [
             {
-                question: '¿Qué redes sociales son mejores para un psicólogo?',
-                answer: 'Aquellas donde tus consultantes busquen información educativa seria. Instagram, LinkedIn y YouTube son excelentes plataformas para compartir contenido de valor.'
+                question: '¿Es correcto usar testimonios de pacientes en mi sitio web?',
+                answer: 'En muchos códigos éticos de psicología clínica en español (como el de México o el Código Deontológico de España), el uso de testimonios de pacientes reales para promocionar servicios clínicos está prohibido o desaconsejado por el desequilibrio de poder y el deber de confidencialidad.'
             },
             {
-                question: '¿Puedo publicar testimonios de pacientes?',
-                answer: 'En muchos códigos éticos de psicología clínica de habla hispana, el uso de testimonios de pacientes activos o pasados está restringido o prohibido para evitar sesgos y manipulación.'
+                question: '¿Qué redes sociales son mejores para divulgar psicología?',
+                answer: 'Instagram, LinkedIn y YouTube son excelentes. Lo importante no es la plataforma, sino la rigurosidad y empatía educativa del contenido que publicas.'
+            },
+            {
+                question: '¿Cómo me apoya SAPIHUM a difundir mi consulta?',
+                answer: 'Te proveemos guías de marketing ético, foros de discusión comunitaria y eventos en vivo para elevar tu autoridad clínica profesional.'
             }
         ],
+        gatedResource: {
+            assetKey: 'checklist-marketing-psicologos',
+            title: 'Checklist de marketing ético para psicólogos',
+            description: 'Lista de control interactiva para optimizar tu Google Business Profile, redactar tu perfil profesional y diseñar contenidos sin infringir códigos de ética.',
+            benefits: [
+                'Paso a paso para configurar tu SEO local (Google Maps) con efectividad.',
+                'Framework para redactar textos de tu sitio web de forma ética y clara.',
+                'Checklist de revisión de publicaciones en redes sociales para evitar claims absolutos.'
+            ],
+            downloadUrl: '/api/organic-resources/checklist-marketing-psicologos'
+        },
         relatedAssets: [
-            { label: 'Guía para Conseguir Pacientes', href: '/guias/como-conseguir-pacientes-como-psicologo', type: 'guide' },
+            { label: 'Cómo Conseguir Pacientes', href: '/guias/como-conseguir-pacientes-como-psicologo', type: 'guide' },
             { label: 'Comunidad SAPIHUM', href: '/comunidad', type: 'community' }
         ],
         schemaTypes: ['Article', 'BreadcrumbList', 'FAQPage']
@@ -435,62 +629,76 @@ export const ORGANIC_CONTENT: OrganicContentAsset[] = [
         contentType: 'guide',
         sourceType: 'guide',
         title: 'Guía del expediente psicológico clínico y normativo',
-        description: 'Aprende a estructurar el expediente psicológico clínico de tus consultantes respetando normativas legales y el secreto profesional.',
-        aiSummary: 'El expediente psicológico clínico profesional ayuda a los terapeutas a resguardar la información del paciente, documentar la evolución de forma rigurosa y revisar obligaciones normativas aplicables.',
+        description: 'Estructura la documentación del expediente clínico de tus consultantes de forma impecable, cumpliendo con la legislación vigente de salud mental y confidencialidad.',
+        aiSummary: 'Guía completa sobre expediente clínico psicológico. Detalla la estructura jerárquica del expediente, los documentos mínimos obligatorios (historia, consentimientos, notas de sesión) y las medidas de resguardo acústico e informático para proteger la confidencialidad de datos sanitarios.',
         topic: 'expediente clinico',
         specialty: 'evaluacion_clinica',
-        heroEyebrow: 'Recurso premium',
-        ctaLabel: 'Descargar guía rápida',
+        heroEyebrow: 'Manual clínico de referencia',
+        ctaLabel: 'Descargar la guía del expediente',
         intent: 'download_resource',
         actionType: 'resource_download',
         interestTags: ['expediente_clinico', 'formatos_clinicos', 'normativas', 'evaluacion_clinica'],
         publishedAt: '2026-06-01',
-        updatedAt: '2026-06-01',
+        updatedAt: '2026-06-02',
         sections: [
             {
-                heading: 'Estructura normativa del expediente clínico',
+                heading: 'El expediente psicológico clínico como deber ético y legal',
                 paragraphs: [
-                    'El expediente psicológico es el conjunto único de documentos escritos, gráficos y digitales donde se registran los procesos de evaluación y psicoterapia de un consultante.',
-                    'Llevarlo de manera ordenada ayuda a reducir riesgos ante revisiones sanitarias y favorece la continuidad terapéutica y el respeto por los derechos del paciente.'
+                    'El expediente psicológico no es un mero requisito burocrático de archivo. Es el registro científico que sustenta la validez técnica de tus intervenciones clínicas y resguarda los derechos del consultante a la salud mental.',
+                    'Llevar un expediente ordenado e íntegro te brinda seguridad jurídica ante cualquier auditoría o requerimiento legal, y es el pilar fundamental para garantizar la continuidad del proceso terapéutico de forma responsable.'
+                ]
+            },
+            {
+                heading: 'La estructura obligatoria del expediente según normativas',
+                paragraphs: [
+                    'Para cumplir con los estándares regulatorios exigidos por los ministerios y comisiones de salud en los países de habla hispana, el expediente debe ordenarse siguiendo una jerarquía sistemática clara:',
+                    '1. Ficha de Registro Administrativo: Con los datos de identificación generales del paciente y números de contacto de emergencia.',
+                    '2. Consentimiento Informado Firmado: El contrato ético que detalla las reglas de confidencialidad y políticas administrativas.',
+                    '3. Historia Clínica Multidimensional: Registro exhaustivo de antecedentes personales y familiares y exploración diagnóstica.',
+                    '4. Plan de Intervención Terapéutica: Con objetivos estructurados del tratamiento, técnicas y avance clínico.',
+                    '5. Notas Clínicas SOAP de Evolución: Con la síntesis sistemática de cada sesión celebrada.'
                 ],
                 bullets: [
-                    'Ficha de identificación completa del consultante.',
-                    'Consentimiento informado debidamente firmado.',
-                    'Historia clínica completa con antecedentes médicos y familiares.',
-                    'Notas de evolución ordenadas cronológicamente.'
+                    'Documentación de todos los consentimientos informados firmados.',
+                    'Registro ordenado cronológicamente de las notas SOAP de evolución.',
+                    'Mapeo sistemático de los factores de riesgo clínico detectados.'
                 ]
             },
             {
-                heading: 'Confidencialidad y secreto profesional',
+                heading: 'El resguardo seguro de los datos de salud mental',
                 paragraphs: [
-                    'El resguardo físico o digital de estos archivos debe contar con medidas de seguridad robustas (encriptación, llaves físicas o contraseñas fuertes). La confidencialidad es un derecho inalienable del paciente que solo puede levantarse bajo orden judicial expresa o riesgo inminente de vida.'
+                    'Los expedientes psicológicos contienen datos de salud altamente sensibles. Si utilizas almacenamiento en la nube, es una obligación de ética clínica contratar software que use servidores encriptados seguros con certificaciones específicas de salud mental. Si usas formato físico de papel, los archivos deben resguardarse bajo llave metálica firme.'
                 ]
             },
             {
-                heading: 'Límites profesionales y disclaimer',
+                heading: 'Disclaimer clínico-legal',
                 paragraphs: [
-                    'Este contenido es exclusivamente informativo y profesional; no sustituye la supervisión clínica de casos, la formación especializada correspondiente, ni la asesoría legal particular adaptada a la legislación de salud mental de tu país.'
+                    'Este contenido es una guía informativa y académica para psicólogos clínicos. No sustituye la asesoría jurídica particular de las legislaciones de salud locales vigentes en cada país, ni la supervisión de casos complejos.'
                 ]
             }
         ],
         faqs: [
             {
-                question: '¿Qué información NUNCA debe faltar en el expediente?',
-                answer: 'Los datos de contacto de emergencia, el consentimiento informado firmado y el registro claro de factores de riesgo o ideación suicida.'
+                question: '¿Quién es el dueño legal del expediente clínico?',
+                answer: 'De acuerdo con las leyes sanitarias generales, la propiedad física o digital del expediente es del profesional de la salud mental, pero el paciente tiene derecho absoluto de propiedad intelectual sobre el contenido de su información médica y clínica.'
             },
             {
-                question: '¿Cómo ayuda SAPIHUM con mi expediente clínico?',
-                answer: 'Ofrecemos guías rápidas, formaciones en evaluación diagnóstica y estructuras que facilitan el llenado diario en tu consulta.'
+                question: '¿Qué información clínica sensible debe evitarse en el expediente?',
+                answer: 'Se desaconseja incluir anotaciones subjetivas o juicios morales que no cuenten con sustento de conducta observable en la sesión.'
+            },
+            {
+                question: '¿Cómo apoya SAPIHUM en la gestión de mis expedientes?',
+                answer: 'Brindamos checklists, guías del expediente clínico, formaciones de evaluación y un entorno de discusión colegiado para resolver dudas administrativas.'
             }
         ],
         gatedResource: {
             assetKey: 'guia-expediente-psicologico',
-            title: 'Guía rápida de expediente psicológico',
-            description: 'Manual conciso con el checklist y los apartados esenciales para estructurar expedientes profesionales en salud mental.',
+            title: 'Guía rápida de expediente clínico psicológico',
+            description: 'Manual de referencia rápida con el checklist obligatorio de documentos, apartados clínicos indispensables y normativas de confidencialidad.',
             benefits: [
-                'Estructura adaptada a normativas de salud generales.',
-                'Checklist de apartados clínicos indispensables.',
-                'Consejos prácticos para la protección y archivo de datos.'
+                'Lista de control para estructurar expedientes de forma impecable.',
+                'Modelos de redacción para el archivo clínico y protección de datos.',
+                'Guías de cumplimiento normativo de salud mental generales.'
             ],
             downloadUrl: '/api/organic-resources/guia-expediente-psicologico'
         },
@@ -505,61 +713,74 @@ export const ORGANIC_CONTENT: OrganicContentAsset[] = [
         contentType: 'resource_format',
         sourceType: 'resource_format',
         title: 'Consentimiento informado psicológico: formato y guía ética',
-        description: 'Descarga un formato editable de consentimiento informado en psicoterapia y comprende su correcto encuadre clínico y legal.',
-        aiSummary: 'El consentimiento informado para psicología es un documento fundamental que resguarda los derechos del consultante y establece las reglas de la consulta, confidencialidad, límites de la terapia y métodos de pago de forma transparente.',
+        description: 'Descarga un formato editable de consentimiento informado en psicoterapia y comprende su correcto encuadre clínico, límites y base legal.',
+        aiSummary: 'El consentimiento informado para psicoterapia es el contrato ético fundamental que resguarda al consultante y al profesional. Detalla los límites del secreto clínico, las políticas de cobro y cancelaciones, y los acuerdos de la alianza terapéutica.',
         topic: 'consentimiento informado',
         specialty: 'evaluacion_clinica',
-        heroEyebrow: 'Plantilla descargable',
-        ctaLabel: 'Descargar plantilla',
+        heroEyebrow: 'Formato clínico descargable',
+        ctaLabel: 'Descargar el formato de consentimiento',
         intent: 'download_resource',
         actionType: 'resource_download',
         interestTags: ['consentimiento_informado', 'formatos_clinicos', 'practica_clinica', 'evaluacion_clinica'],
         publishedAt: '2026-06-01',
-        updatedAt: '2026-06-01',
+        updatedAt: '2026-06-02',
         sections: [
             {
-                heading: 'El consentimiento como proceso y documento',
+                heading: 'El consentimiento informado como pilar del encuadre ético',
                 paragraphs: [
-                    'El consentimiento informado en psicología no es un simple papel administrativo que se firma y se archiva apresuradamente al inicio de la terapia; es un proceso continuo que asegura el derecho del paciente a saber cómo funciona su tratamiento.',
-                    'Debe explicar de manera clara y directa en qué consistirá el enfoque psicoterapéutico, las metas tentativas de la intervención, las tarifas, los horarios y las políticas asociadas a las inasistencias.'
+                    'El consentimiento informado en psicología no es un mero trámite administrativo que se firma de prisa antes de iniciar la terapia. Es un proceso de diálogo continuo que materializa el derecho del paciente a la autonomía y al conocimiento claro de su plan de tratamiento.',
+                    'Consiste en explicar de forma sencilla, respetuosa y transparente en qué consistirá el enfoque terapéutico, la duración esperada de las sesiones, las tarifas, los horarios, el encuadre ético y los límites ineludibles del secreto clínico profesional.'
+                ]
+            },
+            {
+                heading: 'Las excepciones legales del secreto profesional',
+                paragraphs: [
+                    'Es una obligación de ética ineludible detallar con total claridad al inicio de la psicoterapia bajo qué condiciones excepcionales el psicólogo está relevado del deber de confidencialidad clínica:',
+                    '1. Riesgo Inminente de Vida: Si el consultante presenta una ideación de riesgo clínico de daño inminente hacia sí mismo o hacia terceros.',
+                    '2. Orden Judicial Expresa: Si un juez competente requiere de forma legal un dictamen o comparecencia del profesional.',
+                    '3. Casos de Abuso de Menores o Incapaces: De acuerdo con la legislación de protección a los derechos de la infancia.'
                 ],
                 bullets: [
-                    'Confidencialidad: Explicación clara del secreto clínico profesional.',
-                    'Excepciones legales al secreto (riesgo de vida del paciente o de terceros).',
-                    'Políticas administrativas (costo, duración y cancelación de sesiones).'
+                    'Explicación clara del secreto profesional y confidencialidad clínica en el documento firmado.',
+                    'Firma digital o autógrafa de aceptación del encuadre por el consultante.',
+                    'Políticas explícitas de cancelación de citas con un margen recomendado de 24 horas.'
                 ]
             },
             {
-                heading: 'Uso ético y adaptabilidad local',
+                heading: 'Diseño del encuadre financiero y de cancelaciones',
                 paragraphs: [
-                    'Cada jurisdicción cuenta con regulaciones de salud específicas. Por ello, la plantilla que descargues de SAPIHUM debe ser considerada un punto de partida profesional de referencia, y requiere ser adaptada a los requerimientos legales vigentes de tu localidad.'
+                    'Para evitar conflictos relacionales e interrupciones en el tratamiento, el consentimiento informado debe incluir cláusulas claras de cobro: honorario exacto por sesión, métodos de pago aceptados, recargo por inasistencias sin previo aviso y políticas ante cancelaciones de último momento.'
                 ]
             },
             {
-                heading: 'Límites de responsabilidad profesional',
+                heading: 'Disclaimer clínico-legal',
                 paragraphs: [
-                    'Este contenido es estrictamente de carácter informativo; no sustituye la supervisión clínica de tu ejercicio clínico, tu juicio especializado individual, ni la asesoría legal especializada correspondiente.'
+                    'Este formato es una plantilla académica e informativa de referencia para psicólogos independientes. Cada profesional debe adaptar los términos del consentimiento informado conforme a las leyes vigentes de salud y de derechos de los pacientes aplicables en su país o provincia.'
                 ]
             }
         ],
         faqs: [
             {
-                question: '¿A qué edad se puede firmar el consentimiento?',
-                answer: 'Por regla general, los adultos competentes lo firman por sí mismos. En el caso de menores de edad, deben firmarlo el padre, la madre o el tutor legal correspondiente, acompañados de un asentimiento informado del menor.'
+                question: '¿Qué hacer si un menor de edad requiere psicoterapia?',
+                answer: 'El consentimiento informado debe ser firmado obligatoriamente por el padre, la madre o el tutor legal del menor, y este se acompañará del asentimiento informado en lenguaje comprensible del menor.'
             },
             {
-                question: '¿Se puede retirar el consentimiento?',
-                answer: 'Sí, el consultante tiene el derecho absoluto de revocar su consentimiento y dar por terminada la relación terapéutica en cualquier momento.'
+                question: '¿El consentimiento informado se puede revocar?',
+                answer: 'Sí. El consultante tiene el derecho inalienable de retirar su consentimiento y dar por terminada la relación de psicoterapia en cualquier momento que lo desee de forma libre.'
+            },
+            {
+                question: '¿Cómo apoya SAPIHUM con la documentación clínica?',
+                answer: 'Ofrecemos formatos editables, checklists de consulta y formación periódica para la correcta aplicación del consentimiento informado y de la historia clínica.'
             }
         ],
         gatedResource: {
             assetKey: 'consentimiento-informado-psicologico',
             title: 'Plantilla de consentimiento informado psicológico',
-            description: 'Formato editable en formato plantilla con los campos esenciales de confidencialidad, encuadre clínico y políticas administrativas.',
+            description: 'Formato editable en texto con todos los apartados éticos de confidencialidad, límites de secreto clínico y encuadre financiero.',
             benefits: [
-                'Campos estructurados listos para rellenar.',
-                'Redacción clara y amigable para el consultante.',
-                'Incluye secciones para límites del secreto clínico.'
+                'Cláusulas redactadas de forma clara y legalmente viables.',
+                'Sección integrada de políticas de cancelación de sesiones.',
+                'Fácil de rellenar y firmar de forma digital o física.'
             ],
             downloadUrl: '/api/organic-resources/consentimiento-informado-psicologico'
         },
@@ -574,51 +795,62 @@ export const ORGANIC_CONTENT: OrganicContentAsset[] = [
         contentType: 'resource_format',
         sourceType: 'resource_format',
         title: 'Formato y estructura del expediente psicológico profesional',
-        description: 'Organiza la documentación de tu consulta clínica de manera profesional mediante un sistema de expedientes estructurado.',
-        aiSummary: 'El expediente clínico completo para psicólogos organiza la historia del paciente, notas de evolución, escalas estandarizadas y consentimientos. Facilita la toma de decisiones clínicas diagnósticas.',
+        description: 'Organiza el archivo clínico de tus pacientes de manera profesional mediante un formato y mapa estructurado que garantice el secreto profesional.',
+        aiSummary: 'El expediente psicológico clínico completo ayuda a los terapeutas a resguardar de forma ordenada la historia, consentimientos, notas clínicas SOAP e informes del paciente, optimizando la toma de decisiones clínicas y cumpliendo con las regulaciones sanitarias de datos.',
         topic: 'expediente clinico',
         specialty: 'evaluacion_clinica',
-        heroEyebrow: 'Estructura clínica',
-        ctaLabel: 'Explorar recursos',
+        heroEyebrow: 'Estructura clínica profesional',
+        ctaLabel: 'Explorar recursos clínicos',
         intent: 'explore_formation',
         actionType: 'commercial_cta',
         interestTags: ['expediente_clinico', 'formatos_clinicos', 'practica_clinica', 'evaluacion_clinica'],
         publishedAt: '2026-06-01',
-        updatedAt: '2026-06-01',
+        updatedAt: '2026-06-02',
         sections: [
             {
-                heading: 'La utilidad clínica del expediente ordenado',
+                heading: 'La utilidad del expediente clínico como mapa terapéutico',
                 paragraphs: [
-                    'Un expediente psicológico no es un mero requisito formal de archivo. Es el mapa vivo del proceso de cambio del paciente. Te permite contrastar la evolución diagnóstica, revisar si las técnicas empleadas están surtiendo efecto y ajustar los objetivos según el curso clínico.',
-                    'Llevar un orden claro previene la negligencia, ayuda en procesos de supervisión clínica de casos complejos y respalda tus decisiones técnicas ante cualquier eventualidad.'
+                    'Un expediente clínico de salud mental no es un simple conjunto de documentos acumulados de forma desordenada en un cajón. Es el mapa científico vivo que sostiene el proceso psicoterapéutico de tu paciente.',
+                    'Permite estructurar las hipótesis del caso, evaluar objetivamente si las técnicas conductuales implementadas están dando resultado y fundamentar decisiones clínicas clave como el alta terapéutica o la derivación interdisciplinaria.'
+                ]
+            },
+            {
+                heading: 'Los apartados mínimos del expediente clínico regulado',
+                paragraphs: [
+                    'De acuerdo con las regulaciones de salud mental internacionales, un expediente psicológico sólido e impecable debe contener por cada consultante:',
+                    '1. Datos de Identificación y Contacto: Ficha administrativa básica.',
+                    '2. Consentimiento Informado Firmado: Contrato de confidencialidad y encuadre clínico.',
+                    '3. Historia Clínica: Mapeo detallado de antecedentes familiares y personales patológicos y no patológicos.',
+                    '4. Plan Terapéutico Estructurado: Con metas y técnicas acordadas.',
+                    '5. Notas Clínicas SOAP de Evolución: Registradas de forma cronológica después de cada consulta.'
                 ],
                 bullets: [
-                    'Diagnóstico multiaxial o descriptivo claro basado en taxonomías reconocidas (DSM-5 / CIE-11).',
-                    'Notas de evolución enlazadas a los objetivos terapéuticos principales.',
-                    'Registro sistemático de crisis emocionales o de ideación de riesgo.'
+                    'Sistematización cronológica inalterable de cada una de las sesiones clínicas.',
+                    'Almacenamiento digital en servidores encriptados seguros con certificaciones específicas de salud mental.',
+                    'Resguardo estricto por un periodo mínimo obligado de 5 años tras la última sesión.'
                 ]
             },
             {
-                heading: 'Normativa de protección de datos personales',
+                heading: 'El derecho de acceso del paciente a su información',
                 paragraphs: [
-                    'En la práctica privada, proteger el expediente frente al acceso de terceros es una prioridad ética insoslayable. Si utilizas almacenamiento en la nube, revisa que el proveedor cuente con controles de seguridad adecuados para datos de salud.'
+                    'En la práctica privada, garantizar que el expediente esté a salvo del acceso de terceros es una prioridad ineludible. El paciente tiene el derecho de solicitar un resumen clínico de su expediente redactado de forma objetiva por el psicoterapeuta tratante.'
                 ]
             },
             {
-                heading: 'Enfoque ético y disclaimer',
+                heading: 'Disclaimer clínico-legal',
                 paragraphs: [
-                    'Este contenido clínico es puramente orientativo e informativo; no sustituye la supervisión técnica sistemática ni el estudio a profundidad del marco legal regulatorio aplicable en tu jurisdicción.'
+                    'Este contenido de orientación clínica es informativo. Cada psicólogo debe adecuar el manejo y estructura de sus expedientes a las normativas de salud mental obligatorias vigentes en su localidad.'
                 ]
             }
         ],
         faqs: [
             {
-                question: '¿Qué hacer si un paciente pide copia de su expediente?',
-                answer: 'De acuerdo con los derechos ARCO (o equivalentes de salud mental), el paciente tiene derecho a solicitar un resumen clínico de su expediente redactado de forma ética por el profesional tratante.'
+                question: '¿Qué información debe evitarse registrar en el expediente?',
+                answer: 'Se aconseja no registrar opiniones personales subjetivas del terapeuta o juicios morales que no cuenten con respaldo de conducta observable.'
             },
             {
-                question: '¿Cómo estructurar las sesiones subsecuentes?',
-                answer: 'Mediante notas de evolución en formatos normalizados que retomen los avances del plan de tratamiento y las tareas encomendadas.'
+                question: '¿Cómo agilizar el llenado de los expedientes?',
+                answer: 'Utilizando plantillas ágiles estructuradas y reservando bloques fijos en tu agenda semanal para labores de administración clínica.'
             }
         ],
         relatedAssets: [
@@ -631,64 +863,74 @@ export const ORGANIC_CONTENT: OrganicContentAsset[] = [
         slug: 'nota-clinica-psicologica',
         contentType: 'resource_format',
         sourceType: 'resource_format',
-        title: 'Nota clínica psicológica: formato estructurado',
-        description: 'Optimiza el registro de tus sesiones terapéuticas con un formato y plantilla descargable de nota clínica profesional.',
-        aiSummary: 'Las notas clínicas psicológicas profesionales ayudan a estructurar y agilizar el registro diario de cada sesión de psicoterapia, asegurando el seguimiento de los objetivos terapéuticos y la síntesis clínica de la evolución.',
+        title: 'Nota clínica psicológica: formato estructurado SOAP',
+        description: 'Optimiza la documentación diaria de tus consultas terapéuticas implementando el formato SOAP para un registro ágil, conciso y de alta calidad clínica.',
+        aiSummary: 'La plantilla y formato de nota clínica SOAP para psicología ayuda al profesional a sistematizar y estructurar el avance diario de cada sesión de psicoterapia, separando datos subjetivos y objetivos de la evaluación diagnóstica y del plan de tratamiento.',
         topic: 'nota clinica',
         specialty: 'evaluacion_clinica',
-        heroEyebrow: 'Plantilla descargable',
-        ctaLabel: 'Descargar plantilla',
+        heroEyebrow: 'Formato clínico y plantilla',
+        ctaLabel: 'Descargar el formato de nota clínica',
         intent: 'download_resource',
         actionType: 'resource_download',
         interestTags: ['nota_clinica', 'formatos_clinicos', 'practica_clinica', 'evaluacion_clinica'],
         publishedAt: '2026-06-01',
-        updatedAt: '2026-06-01',
+        updatedAt: '2026-06-02',
         sections: [
             {
-                heading: 'La importancia clínica del registro diario',
+                heading: 'La necesidad metodológica del registro sistemático',
                 paragraphs: [
-                    'Escribir la nota clínica después de cada sesión no solo es un deber ético, sino el método más efectivo para sistematizar el trabajo terapéutico.',
-                    'Una nota estructurada te ayuda a retomar la sesión posterior justo donde se quedó, evaluar el cumplimiento de tareas clínicas asignadas y detectar patrones repetitivos sin saturarte de notas vagas.'
+                    'Redactar la nota clínica después de cada sesión de psicoterapia no es una simple labor administrativa de archivo; es un pilar fundamental del ejercicio ético. Te permite sistematizar tus hipótesis explicativas y revisar si las técnicas del enfoque terapéutico están surtiendo el efecto deseado.',
+                    'Llevar un orden sistemático mediante formatos ágiles te ayuda a retomar la consulta subsecuente justo donde se quedó, evaluar el progreso clínico del consultante y evitar la pérdida de detalles relevantes del caso.'
+                ]
+            },
+            {
+                heading: 'El desglose del formato de registro clínico SOAP',
+                paragraphs: [
+                    'El formato SOAP (Subjective, Objective, Assessment, Plan) es la metodología internacional con mayor aceptación en la salud mental por su rigurosidad y concisión para estructurar notas de evolución:',
+                    '1. S - Subjetivo: Datos reportados por el paciente sobre sus emociones y vivencias en el intervalo de sesión (p. ej., reporte subjetivo de ansiedad, rumiación o avances).',
+                    '2. O - Objetivo: Observaciones conductuales directas del terapeuta (p. ej., estado mental observable, llanto, tensión psicofisiológica o lenguaje no verbal).',
+                    '3. A - Análisis: Hipótesis diagnóstica del terapeuta y análisis funcional de la efectividad de las técnicas clínicas implementadas en la sesión.',
+                    '4. P - Plan: Acuerdos, tareas asignadas para la siguiente sesión y ajustes del plan de tratamiento.'
                 ],
                 bullets: [
-                    'Resumen observable de la sesión terapéutica.',
-                    'Evaluación clínica subjetiva y objetiva del estado emocional.',
-                    'Tareas asignadas, intervenciones empleadas y plan para la siguiente cita.'
+                    'S (Subjetivo): Registro de frases directas del consultante sobre su estado y tareas.',
+                    'O (Objetivo): Registro de variables conductuales directamente observables en consulta.',
+                    'A (Análisis): Conexión de los datos con el modelo explicativo y evolución.'
                 ]
             },
             {
-                heading: 'Metodologías estructuradas (formato SOAP)',
+                heading: 'La redacción ética y el secreto profesional',
                 paragraphs: [
-                    'El formato SOAP (Subjetivo, Objetivo, Análisis, Plan) es uno de los sistemas más aceptados en el ámbito de la salud mental internacional por su claridad y concisión para registrar la evolución de los consultantes.'
+                    'Al redactar notas SOAP, es vital utilizar un vocabulario técnico libre de valoraciones morales o juicios subjetivos. Las notas deben redactarse con concisión y estar a salvo del acceso de terceros para garantizar la privacidad y confidencialidad clínica.'
                 ]
             },
             {
-                heading: 'Límites éticos y de responsabilidad',
+                heading: 'Disclaimer clínico-legal',
                 paragraphs: [
-                    'Este contenido clínico es informativo y profesional; no sustituye la supervisión técnica especializada, la formación en registro clínico ni las normativas legales que rijan la salud de tu localidad.'
+                    'Este formato es una plantilla académica e informativa de referencia profesional. Cada psicoterapeuta debe adaptar su esquema de registro clínico a las leyes vigentes sanitarias aplicables en su región.'
                 ]
             }
         ],
         faqs: [
             {
-                question: '¿Cuándo se debe escribir la nota clínica?',
-                answer: 'Se aconseja redactarla inmediatamente después de terminar la sesión o al final del día clínico, para evitar la pérdida de detalles relevantes del proceso.'
+                question: '¿Cuándo se debe redactar la nota clínica?',
+                answer: 'Se aconseja redactarla inmediatamente después de finalizar cada sesión de terapia o al término del día clínico para conservar la frescura de los datos observables.'
             },
             {
-                question: '¿Cómo ayuda SAPIHUM en el registro de mis notas?',
-                answer: 'Ofrecemos formatos ágiles e indexables y formación en redacción clínica adaptada a distintos modelos terapéuticos.'
+                question: '¿Cómo me apoya SAPIHUM con mis notas clínicas?',
+                answer: 'Ofrecemos formatos SOAP estructurados, guías del expediente clínico y formación continua para un registro ágil de la evolución de tus consultantes.'
             }
         ],
         gatedResource: {
-            assetKey: 'nota-clinica-psicologica',
-            title: 'Plantilla de nota clínica psicológica',
-            description: 'Formato editable estructurado basado en la metodología clínica SOAP para un registro ágil y completo.',
+            assetKey: 'plantilla-nota-clinica-soap',
+            title: 'Plantilla de nota clínica en formato SOAP',
+            description: 'Formato editable estructurado basado en la metodología clínica SOAP para un registro ágil, seguro y conciso.',
             benefits: [
-                'Campos para registrar evolución, técnicas e intervenciones.',
-                'Fácil de usar en formato de texto digital u hoja impresa.',
-                'Ayuda a reducir el tiempo invertido en labores administrativas.'
+                'Estructura guía con las cuatro dimensiones SOAP del registro.',
+                'Diseño profesional fácil de integrar en carpetas físicas o digitales.',
+                'Ayuda a reducir significativamente la labor administrativa de consulta.'
             ],
-            downloadUrl: '/api/organic-resources/nota-clinica-psicologica'
+            downloadUrl: '/api/organic-resources/plantilla-nota-clinica-soap'
         },
         relatedAssets: [
             { label: 'Formato de Historia Clínica', href: '/recursos/formatos/historia-clinica-psicologica', type: 'resource_format' },
@@ -711,7 +953,7 @@ export const ORGANIC_CONTENT: OrganicContentAsset[] = [
         actionType: 'commercial_cta',
         interestTags: ['nota_clinica', 'formatos_clinicos', 'evaluacion_clinica'],
         publishedAt: '2026-06-01',
-        updatedAt: '2026-06-01',
+        updatedAt: '2026-06-02',
         sections: [
             {
                 heading: 'Diferencia entre nota clínica general y nota de evolución',
@@ -769,7 +1011,7 @@ export const ORGANIC_CONTENT: OrganicContentAsset[] = [
         actionType: 'commercial_cta',
         interestTags: ['evaluacion_clinica', 'historia_clinica', 'practica_clinica'],
         publishedAt: '2026-06-01',
-        updatedAt: '2026-06-01',
+        updatedAt: '2026-06-02',
         sections: [
             {
                 heading: 'Los objetivos de la sesión inicial de primer contacto',
@@ -786,7 +1028,7 @@ export const ORGANIC_CONTENT: OrganicContentAsset[] = [
             {
                 heading: 'El encuadre terapéutico y administrativo',
                 paragraphs: [
-                    'Consiste en definir los límites claros del proceso: duración exacta de las sesiones, canal de comunicación oficial intersesiones, políticas claras de retraso y formas de pago aceptadas.'
+                    'Consiste en definir los límites claros del proceso: duración exacta de las sesiones, canal de comunicación oficial intersesiones, políticas claras de retraso y formas de pago afectas.'
                 ]
             },
             {
@@ -827,13 +1069,13 @@ export const ORGANIC_CONTENT: OrganicContentAsset[] = [
         actionType: 'commercial_cta',
         interestTags: ['evaluacion_clinica', 'practica_clinica'],
         publishedAt: '2026-06-01',
-        updatedAt: '2026-06-01',
+        updatedAt: '2026-06-02',
         sections: [
             {
                 heading: 'El enlace entre la formulación y la acción clínica',
                 paragraphs: [
                     'Un plan terapéutico sólido surge directamente de la hipótesis explicativa de la formulación de caso. Evita la improvisación en sesión y le da al consultante una sensación clara de rumbo y dirección.',
-                    'El plan debe definir objetivos realistas a corto, mediano y largo plazo, detallando qué técnicas clínicas (TCC, ACT, DBT, etc.) se utilizarán para ayudar al paciente a lograr sus metas de forma efectiva.'
+                    'El plan debe definir objetivos realistas a corto, mediano y largo plazo, detallando qué técnicas clínicas (TCC, ACT, DBT, etc.) se utilizarán para ayudar al paciente a lograr sus metas de forma de ayuda.'
                 ],
                 bullets: [
                     'Jerarquización de metas basadas en el nivel de malestar o urgencia clínica.',
@@ -850,7 +1092,7 @@ export const ORGANIC_CONTENT: OrganicContentAsset[] = [
             {
                 heading: 'Disclaimer ético profesional',
                 paragraphs: [
-                    'Este contenido clínico es meramente orientativo; no sustituye la supervisión de casos complejos, el criterio especializado individual del terapeuta ni el consentimiento informado del paciente.'
+                    'Este contenido clínico es meramente orientativo; no sustituye la supervisión de casos complejos, el criterio especializado del terapeuta ni el consentimiento informado del paciente.'
                 ]
             }
         ],
@@ -875,61 +1117,71 @@ export const ORGANIC_CONTENT: OrganicContentAsset[] = [
         contentType: 'resource_format',
         sourceType: 'resource_format',
         title: 'Checklist para consulta psicológica organizada y profesional',
-        description: 'Optimiza la logística interna de tu consultorio de psicología antes, durante y después de cada sesión con esta lista de control.',
-        aiSummary: 'El checklist de consulta psicológica ayuda a ordenar las tareas logísticas, preparar los expedientes, revisar el encuadre clínico y documentar las notas de evolución sin cometer errores u omisiones administrativas.',
+        description: 'Optimiza la logística, la preparación clínica de expedientes y las tareas administrativas de tu consultorio antes, durante y después de cada sesión.',
+        aiSummary: 'Checklist interactivo y descargable diseñado para psicoterapeutas independientes. Facilita la preparación clínica intersesión, la verificación acústica, el resguardo del consentimiento y el archivo de notas SOAP.',
         topic: 'consulta privada',
         specialty: 'clinica',
-        heroEyebrow: 'Recurso descargable',
-        ctaLabel: 'Descargar checklist',
+        heroEyebrow: 'Formato clínico y checklist',
+        ctaLabel: 'Descargar el checklist de organización',
         intent: 'download_resource',
         actionType: 'resource_download',
         interestTags: ['formatos_clinicos', 'consulta_privada', 'herramientas_digitales', 'clinica'],
         publishedAt: '2026-06-01',
-        updatedAt: '2026-06-01',
+        updatedAt: '2026-06-02',
         sections: [
             {
-                heading: 'La preparación previa a la sesión de terapia',
+                heading: 'La logística previa a la entrada del paciente',
                 paragraphs: [
-                    'La improvisación en psicoterapia mina la confianza del consultante y desgasta la energía del clínico. Tener una rutina estructurada antes de que el paciente entre al consultorio físico o virtual es un pilar fundamental de la excelencia.',
-                    'Esto incluye revisar la nota de la sesión anterior, preparar las hojas de trabajo del enfoque terapéutico y asegurarte de tener listo el consentimiento informado si se trata de un primer contacto.'
+                    'La excelencia en psicoterapia requiere un encuadre ambiental y mental riguroso. Los minutos previos a que comience la consulta representan un intervalo crítico que el terapeuta debe aprovechar para centrar su atención y revisar el expediente del caso, evitando la improvisación clínica desestructurada.',
+                    'Esto incluye leer la nota SOAP de la sesión anterior, ordenar los autoregistros conductuales del enfoque terapéutico y verificar que el consentimiento informado esté a la mano si se trata de un primer contacto.'
+                ]
+            },
+            {
+                heading: 'El paso a paso logístico y de resguardo ético',
+                paragraphs: [
+                    'Para asegurar un flujo ordenado y libre de interrupciones, se aconseja implementar la siguiente lista de verificación logístico-clínica:',
+                    '1. Preparación del Entorno: Asegurar el aislamiento acústico de la sala de consulta y encender la máquina de ruido blanco en la sala de espera.',
+                    '2. Revisión Cognitiva del Caso: Leer la hipótesis explicativa y la meta acordada para la sesión de hoy.',
+                    '3. Encuadre Administrativo: Confirmar el cobro de la sesión previa si existía un saldo pendiente.',
+                    '4. Archivo Intersesión: Redactar las notas de evolución inmediatamente después del término de la sesión para conservar la nitidez de la observación.'
                 ],
                 bullets: [
-                    'Lectura rápida de la nota e hipótesis diagnósticas de la sesión anterior.',
-                    'Preparación del espacio (iluminación, ruido, ventilación o conexión de red).',
-                    'Fichas de registro conductual u hojas de autoregistro impresas o digitales.'
+                    'Revisión minuciosa de la nota de evolución y tareas de la consulta previa.',
+                    'Verificación acústica y ambiental del consultorio para preservar la privacidad.',
+                    'Resguardo inalterable del consentimiento informado en el archivo físico o digital.'
                 ]
             },
             {
                 heading: 'El cierre de sesión y la labor administrativa',
                 paragraphs: [
-                    'Terminar la sesión implica registrar de inmediato las notas clínicas más importantes, programar la próxima cita en la agenda y archivar el expediente de forma segura cumpliendo con el secreto profesional.'
+                    'Terminar la sesión implica programar la próxima cita en la agenda online, procesar el pago del honorario profesional y archivar de inmediato los expedientes bajo llave física o contraseñas seguras de salud mental.'
                 ]
             },
             {
-                heading: 'Disclaimer ético',
+                heading: 'Disclaimer ético profesional',
                 paragraphs: [
-                    'Este contenido clínico es estrictamente informativo y profesional; no sustituye la supervisión constante de casos, el juicio técnico del terapeuta ni las regulaciones normativas sanitarias locales.'
+                    'Este checklist representa un recurso de referencia logístico y profesional. No sustituye la supervisión técnica clínica de casos, la formación de posgrado especializada en salud mental, ni el criterio profesional individual.'
                 ]
             }
         ],
         faqs: [
             {
-                question: '¿Cuánto tiempo se recomienda dejar entre sesiones?',
-                answer: 'Se aconseja dejar un margen mínimo de 10 a 15 minutos entre sesiones para redactar notas rápidas, descansar y prepararte para el siguiente caso.'
+                question: '¿Cuánto tiempo de intervalo debe dejarse entre consultas?',
+                answer: 'Se aconseja dejar un margen mínimo de 15 minutos entre sesiones para redactar la nota SOAP de evolución, descansar y prepararte cognitivamente para el siguiente caso.'
             },
             {
-                question: '¿Cómo ayuda SAPIHUM con la organización de mi consulta?',
-                answer: 'Te proveemos herramientas digitales, checklists interactivos y formaciones aplicadas que optimizan la gestión de tu consultorio.'
+                question: '¿Cómo ayuda SAPIHUM con la logística de mi consulta?',
+                answer: 'Te proveemos formatos interactivos, checklists operativos y formaciones en gestión práctica de consulta que automatizan tus tareas de administración.'
             }
         ],
         gatedResource: {
             assetKey: 'checklist-consulta-organizada',
             title: 'Checklist de consulta psicológica organizada',
-            description: 'Lista de control interactiva para psicólogos que buscan ordenar y automatizar la logística diaria de su práctica clínica.',
+            description: 'Lista de control interactiva para psicólogos que buscan estructurar y ordenar de forma lógica el día a día de su consultorio clínico.',
             benefits: [
-                'Paso a paso estructurado antes, durante y después de sesión.',
-                'Consejos rápidos de resguardo de datos y secreto clínico.',
-                'Formato editable listo para imprimir o usar en tablet/computadora.'
+                'Paso a paso ordenado antes, durante y después de sesión.',
+                'Consejos de privacidad acústica y ambiental para psicoterapeutas.',
+                'Fácil de usar en formato digital (Tablet/Celular) o plantilla impresa.'
             ],
             downloadUrl: '/api/organic-resources/checklist-consulta-organizada'
         },
@@ -944,51 +1196,64 @@ export const ORGANIC_CONTENT: OrganicContentAsset[] = [
         contentType: 'approach',
         sourceType: 'approach',
         title: 'Terapia cognitivo conductual (TCC): principios y aplicaciones',
-        description: 'Explora los fundamentos teóricos, técnicas Cardinales y el respaldo empírico del enfoque más extendido en la psicología clínica.',
-        aiSummary: 'La Terapia Cognitivo-Conductual (TCC) es un enfoque psicoterapéutico basado en evidencia que vincula los pensamientos, emociones y conductas, orientado a resolver problemas prácticos del consultante en el presente.',
+        description: 'Explora de forma rigurosa la teoría cognitiva, la conceptualización de esquemas disfuncionales y las técnicas basadas en evidencia con mayor respaldo científico.',
+        aiSummary: 'Introducción técnico-clínica a la Terapia Cognitivo-Conductual (TCC). Explica los principios del condicionamiento y del procesamiento de la información, el modelo ABC de distorsiones cognitivas, la reestructuración socrática, la exposición y su eficacia empírica.',
         topic: 'TCC',
         specialty: 'tcc',
-        heroEyebrow: 'Enfoque terapéutico',
-        ctaLabel: 'Ver formaciones',
+        heroEyebrow: 'Enfoque terapéutico basado en evidencia',
+        ctaLabel: 'Explorar formaciones en TCC',
         intent: 'explore_formation',
         actionType: 'commercial_cta',
         interestTags: ['tcc', 'formacion_continua', 'autores_psicologia'],
         publishedAt: '2026-06-01',
-        updatedAt: '2026-06-01',
+        updatedAt: '2026-06-02',
         sections: [
             {
-                heading: '¿Qué es la Terapia Cognitivo-Conductual?',
+                heading: 'El modelo cognitivo del procesamiento de información',
                 paragraphs: [
-                    'La Terapia Cognitivo-Conductual (TCC) es un modelo de intervención clínico estructurado, Directivo y orientado a la resolución de problemas actuales del paciente, a través de la modificación de patrones de pensamiento y conductas disfuncionales.',
-                    'Se fundamenta en la premisa de que no son las situaciones en sí mismas las que causan malestar, sino la interpretación subjetiva y los significados sesgados que les asignamos.'
+                    'La Terapia Cognitivo-Conductual (TCC) se fundamenta en la premisa científica de que las perturbaciones emocionales y conductuales del ser humano no son generadas directamente por los eventos externos, sino por las interpretaciones sesgadas y esquemas de pensamiento con los que procesamos dichos eventos.',
+                    'Este enfoque clínico unifica la psicología conductual aplicada (basada en el condicionamiento clásico y operante) con la psicología cognitiva del procesamiento de información, conformando un sistema estructurado, focalizado en el presente, Directivo y empíricamente validado.'
+                ]
+            },
+            {
+                heading: 'Las técnicas cardinales basadas en la evidencia',
+                paragraphs: [
+                    'Un terapeuta de enfoque TCC implementa de forma sistemática técnicas estructuradas para promover la flexibilidad cognitiva y conductual de sus consultantes:',
+                    '1. Reestructuración Cognitiva: Detección de pensamientos automáticos disfuncionales, identificación de distorsiones cognitivas (catastrofismo, inferencia arbitraria) y debate mediante el diálogo socrático.',
+                    '2. Activación Conductual: Programación sistemática de actividades placenteras y de dominio, idóneo para revertir el ciclo depresivo y la anhedonia.',
+                    '3. Exposición Gradual: Aproximación planificada y sistemática a estímulos ansiógenos para propiciar la habituación psicofisiológica y el aprendizaje de extinción.'
                 ],
                 bullets: [
-                    'Reestructuración cognitiva de pensamientos automáticos negativos y distorsiones.',
-                    'Activación conductual orientada al tratamiento de la depresión y la anhedonia.',
-                    'Exposición gradual y técnicas de afrontamiento para trastornos de ansiedad.'
+                    'Registro de Pensamientos Automáticos (RPA) de tres y cinco columnas de Beck.',
+                    'Entrenamiento en técnicas de relajación diafragmática y desactivación fisiológica.',
+                    'Exposición interoceptiva gradual orientada al tratamiento del pánico.'
                 ]
             },
             {
-                heading: 'Sustento empírico de la TCC',
+                heading: 'Eficacia y respaldo empírico en psicología clínica',
                 paragraphs: [
-                    'La TCC es el enfoque psicoterapéutico que cuenta con el mayor volumen de estudios clínicos controlados y respaldo científico para el tratamiento de trastornos como la depresión mayor, la ansiedad generalizada, el pánico y el TEPT.'
+                    'La TCC es el modelo psicoterapéutico con mayor volumen de estudios clínicos aleatorizados y controlados del mundo. Las guías internacionales de salud mental de mayor prestigio (como la guía NICE del Reino Unido o la APA americana) recomiendan la TCC como tratamiento de primera elección para el abordaje de trastornos de ansiedad, depresión mayor, pánico, fobias y trastorno obsesivo-compulsivo (TOC).'
                 ]
             },
             {
-                heading: 'Disclaimer ético',
+                heading: 'Disclaimer ético profesional',
                 paragraphs: [
-                    'Este contenido clínico tiene un propósito exclusivamente educativo e informativo; no sustituye la psicoterapia individual ni el criterio clínico especializado de un psicólogo formado.'
+                    'Este contenido de carácter biográfico y conceptual es netamente informativo. No sustituye la psicoterapia individual de salud mental, la supervisión de casos clínicos ni los estudios de posgrado en psicología clínica correspondientes.'
                 ]
             }
         ],
         faqs: [
             {
-                question: '¿Cuánto dura un tratamiento con enfoque TCC?',
-                answer: 'Suelen ser procesos relativamente breves y focalizados, que varían entre 12 y 24 sesiones dependiendo del motivo de consulta y la severidad clínica.'
+                question: '¿Qué diferencia a la TCC de los enfoques psicodinámicos?',
+                answer: 'La TCC se centra prioritariamente en los problemas y síntomas del presente, utiliza un enfoque de aprendizaje directo estructurado y colaborativo, y mide objetivamente los cambios de conducta en sesión.'
             },
             {
-                question: '¿Qué autores crearon la TCC?',
-                answer: 'Sus principales pioneros fueron Aaron Beck con la terapia cognitiva y Albert Ellis con la terapia racional emotiva conductual.'
+                question: '¿Qué es un esquema cognitivo disfuncional nuclear?',
+                answer: 'Una creencia profunda, incondicional y rígida que el individuo sostiene sobre sí mismo, el mundo o el futuro (p. ej., "no soy digno de amor" o "el mundo es hostil").'
+            },
+            {
+                question: '¿Cómo estudiar TCC de forma rigurosa en SAPIHUM?',
+                answer: 'Nuestra especialidad activa en Terapia Cognitivo-Conductual ofrece formaciones enlazadas a los protocolos de intervención de mayor prestigio internacional.'
             }
         ],
         relatedAssets: [
@@ -1013,7 +1278,7 @@ export const ORGANIC_CONTENT: OrganicContentAsset[] = [
         actionType: 'commercial_cta',
         interestTags: ['terapia_sistemica', 'pareja_familia', 'formacion_continua'],
         publishedAt: '2026-06-01',
-        updatedAt: '2026-06-01',
+        updatedAt: '2026-06-02',
         sections: [
             {
                 heading: '¿Qué es la terapia sistémica familiar?',
@@ -1071,7 +1336,7 @@ export const ORGANIC_CONTENT: OrganicContentAsset[] = [
         actionType: 'commercial_cta',
         interestTags: ['autores_psicologia', 'formacion_continua', 'clinica'],
         publishedAt: '2026-06-01',
-        updatedAt: '2026-06-01',
+        updatedAt: '2026-06-02',
         sections: [
             {
                 heading: 'Las tres actitudes básicas del terapeuta rogeriano',
@@ -1129,7 +1394,7 @@ export const ORGANIC_CONTENT: OrganicContentAsset[] = [
         actionType: 'commercial_cta',
         interestTags: ['formacion_continua', 'clinica'],
         publishedAt: '2026-06-01',
-        updatedAt: '2026-06-01',
+        updatedAt: '2026-06-02',
         sections: [
             {
                 heading: 'La exploración de los procesos inconscientes',
@@ -1177,52 +1442,67 @@ export const ORGANIC_CONTENT: OrganicContentAsset[] = [
         contentType: 'approach',
         sourceType: 'approach',
         title: 'Terapia de aceptación y compromiso (ACT): bases y flexibilidad',
-        description: 'Aprende a aplicar el modelo Hexaflex de flexibilidad psicológica, la defusión de pensamientos y la acción comprometida con tus valores.',
-        aiSummary: 'La Terapia de Aceptación y Compromiso (ACT) es una psicoterapia de tercera generación orientada a incrementar la flexibilidad psicológica, promoviendo la aceptación y la defusión cognitiva.',
+        description: 'Comprende de forma detallada el modelo Hexaflex de flexibilidad psicológica, la Teoría de los Marcos Relacionales y la acción comprometida basada en valores.',
+        aiSummary: 'Guía profesional sobre la Terapia de Aceptación y Compromiso (ACT). Explica los seis pilares del Hexaflex (aceptación, defusión, yo-contexto, atención, valores, acción), la Teoría de Marcos Relacionales y las técnicas de distanciamiento cognitivo.',
         topic: 'ACT',
         specialty: 'terapias_contextuales',
-        heroEyebrow: 'Terapia contextual',
-        ctaLabel: 'Ver formaciones',
+        heroEyebrow: 'Terapia de tercera generación',
+        ctaLabel: 'Ver formaciones en terapias contextuales',
         intent: 'explore_formation',
         actionType: 'commercial_cta',
         interestTags: ['act', 'terapias_contextuales', 'formacion_continua'],
         publishedAt: '2026-06-01',
-        updatedAt: '2026-06-01',
+        updatedAt: '2026-06-02',
         sections: [
             {
-                heading: 'El modelo Hexaflex de flexibilidad psicológica',
+                heading: 'La filosofía del contextualismo funcional y ACT',
                 paragraphs: [
-                    'La Terapia de Aceptación y Compromiso (ACT) redefine la relación del consultante con su propio dolor. El objetivo no es eliminar el malestar subjetivo o los pensamientos negativos, sino aumentar la flexibilidad psicológica para vivir una vida con sentido.',
-                    'Se estructura alrededor del Hexaflex, un modelo integrado por seis procesos psicológicos fundamentales:'
-                ],
-                bullets: [
-                    'Aceptación activa frente a la evitación experiencial disfuncional.',
-                    'Defusión cognitiva: Distanciarse de los pensamientos sin asumirlos como verdades absolutas.',
-                    'Contacto con el momento presente (mindfulness) y el Yo-Contexto.',
-                    'Valores personales y acción comprometida con los mismos.'
+                    'La Terapia de Aceptación y Compromiso (ACT) es una intervención conductual de tercera generación que redefine por completo la relación del ser humano con su sufrimiento. A diferencia de la TCC tradicional, ACT no busca modificar o eliminar los pensamientos o emociones negativas, sino alterar la relación que sostenemos con ellos para incrementar la flexibilidad psicológica.',
+                    'ACT se sustenta en el contextualismo funcional, una filosofía científica que postula que todo comportamiento clínico debe ser evaluado dentro del contexto histórico y situacional específico del individuo, midiendo su utilidad o efectividad en la práctica diaria.'
                 ]
             },
             {
-                heading: 'La Teoría de los Marcos Relacionales (RFT)',
+                heading: 'El modelo Hexaflex de flexibilidad psicológica',
                 paragraphs: [
-                    'ACT cuenta con un sólido fundamento científico experimental de base, sustentado en la Teoría de los Marcos Relacionales (RFT), que explica cómo el lenguaje humano moldea nuestras respuestas emocionales y de sufrimiento.'
+                    'El núcleo práctico de ACT se organiza alrededor del Hexaflex, un modelo integrado por seis procesos psicológicos adaptativos interconectados:',
+                    '1. Aceptación activa frente a la evitación experiencial disfuncional (permitir la presencia del malestar sin forcejear).',
+                    '2. Defusión Cognitiva (aprender a observar los pensamientos como meros eventos lingüísticos mentales y no como realidades literales).',
+                    '3. Contacto con el Momento Presente (atención plena y mindfulness clínico de las sensaciones actuales).',
+                    '4. Yo como Contexto (percibir el self como el escenario donde ocurren las vivencias y no como los pensamientos o emociones en sí).',
+                    '5. Valores Clarificados (identificar qué áreas de vida familiar, social o profesional son genuinamente significativas para la persona).',
+                    '6. Acción Comprometida (diseño sistemático de pasos conductuales consistentes con los valores clarificados).'
+                ],
+                bullets: [
+                    'Uso de metáforas clínicas directas en sesión (p. ej., metáfora del autobús, de las arenas movedizas o de los invitados a la fiesta).',
+                    'Ejercicios verbales de defusión cognitiva paso a paso (repetición rápida de palabras, cantar el pensamiento o asignarle características físicas).',
+                    'Fichas de registro de valores personales de SAPIHUM y su jerarquización conductual.'
+                ]
+            },
+            {
+                heading: 'La base científica de la Teoría de Marcos Relacionales (RFT)',
+                paragraphs: [
+                    'ACT cuenta con un robusto programa de investigación experimental centrado en la Teoría de Marcos Relacionales (RFT), que explica de forma científica cómo el lenguaje humano vincula estímulos de forma indirecta, lo que nos permite experimentar dolor o ansiedad de manera abstracta y rumiar eventos pasados o futuros.'
                 ]
             },
             {
                 heading: 'Disclaimer ético profesional',
                 paragraphs: [
-                    'Este contenido clínico es informativo y profesional; no sustituye la supervisión clínica de casos, la formación de posgrado en ACT ni la psicoterapia individual.'
+                    'Este contenido de divulgación clínica es informativo y académico; no sustituye el diagnóstico clínico individual de un psicoterapeuta calificado, la supervisión de casos técnicos contextuales ni los posgrados correspondientes.'
                 ]
             }
         ],
         faqs: [
             {
-                question: '¿Qué diferencia a ACT de la TCC tradicional?',
-                answer: 'Mientras que la TCC tradicional busca debatir o cambiar el contenido de los pensamientos distorsionados, ACT busca cambiar nuestra relación con ellos mediante la aceptación y defusión.'
+                question: '¿Qué es la evitación experiencial disfuncional?',
+                answer: 'El intento sistemático por evadir, reprimir o controlar sensaciones, pensamientos o emociones negativas, lo que paradójicamente incrementa el sufrimiento y paraliza las acciones valiosas de la vida.'
             },
             {
-                question: '¿Quién es el creador de ACT?',
-                answer: 'El principal creador e impulsor de la Terapia de Aceptación y Compromiso es Steven Hayes.'
+                question: '¿Cómo se manejan los pensamientos distorsionados en ACT?',
+                answer: 'No se debaten lógicamente ni se buscan cambiar por otros más positivos; en su lugar, se practica la defusión cognitiva para que dejen de dirigir el comportamiento del paciente.'
+            },
+            {
+                question: '¿Cómo me apoya SAPIHUM a profundizar en ACT?',
+                answer: 'Nuestra especialidad en Terapias Contextuales te provee formaciones profundas, talleres vivenciales y supervisión de casos para dominar el modelo Hexaflex.'
             }
         ],
         relatedAssets: [
@@ -1236,51 +1516,65 @@ export const ORGANIC_CONTENT: OrganicContentAsset[] = [
         contentType: 'approach',
         sourceType: 'approach',
         title: 'Terapia dialéctico conductual (DBT): regulación emocional',
-        description: 'Conoce la intervención con mayor sustento científico para la desregulación emocional severa y el trastorno límite de la personalidad.',
-        aiSummary: 'La Terapia Dialéctico Conductual (DBT) es un modelo clínico basado en evidencia que balancea la aceptación radical con el cambio conductual, ideal para el tratamiento de la desregulación emocional severa.',
+        description: 'Aprende a aplicar el entrenamiento en habilidades de regulación afectiva, efectividad interpersonal y tolerancia al malestar para desregulación severa.',
+        aiSummary: 'Introducción técnica exhaustiva a la Terapia Dialéctico Conductual (DBT). Describe la síntesis dialéctica entre aceptación radical y cambio conductual, los cuatro módulos de entrenamiento de habilidades (mindfulness, tolerancia, regulación, efectividad) y el análisis en cadena para conductas problema.',
         topic: 'DBT',
         specialty: 'regulacion_emocional',
-        heroEyebrow: 'Regulación clínica',
-        ctaLabel: 'Ver formaciones',
+        heroEyebrow: 'Terapia basada en evidencia para desregulación afectiva',
+        ctaLabel: 'Ver formaciones en DBT',
         intent: 'explore_formation',
         actionType: 'commercial_cta',
         interestTags: ['dbt', 'regulacion_emocional', 'formacion_continua'],
         publishedAt: '2026-06-01',
-        updatedAt: '2026-06-01',
+        updatedAt: '2026-06-02',
         sections: [
             {
-                heading: 'La dialéctica entre aceptación radical y cambio',
+                heading: 'El modelo biosocial de la desregulación emocional',
                 paragraphs: [
-                    'La Terapia Dialéctico Conductual (DBT), desarrollada por Marsha Linehan, integra la ciencia conductual aplicada con prácticas de atención plena del zen, para abordar el sufrimiento emocional severo.',
-                    'El núcleo de DBT radica en la tensión dialéctica: el terapeuta ayuda al paciente a aceptarse radicalmente a sí mismo tal y como es en el presente, mientras trabaja activamente para modificar conductas disfuncionales de riesgo.'
+                    'La Terapia Dialéctico Conductual (DBT), desarrollada por Marsha Linehan, se fundamenta en el modelo biosocial de la desregulación emocional severa. Este modelo postula que la psicopatología surge de la interacción transaccional continua entre una vulnerabilidad biológica a la intensidad y reactividad afectivas, y un entorno invalidante que descalifica de forma sistemática la experiencia emocional de la persona durante su desarrollo.',
+                    'El núcleo de DBT radica en la dialéctica: la síntesis equilibrada entre la aceptación radical (validar la experiencia del consultante en el presente tal como es) y el cambio conductual activo (entrenamiento sistemático de habilidades adaptativas de reemplazo).'
+                ]
+            },
+            {
+                heading: 'Los cuatro módulos de habilidades DBT',
+                paragraphs: [
+                    'Un tratamiento clínico DBT de alta calidad se estructura alrededor de cuatro bloques de entrenamiento de habilidades:',
+                    '1. Atención Plena (Mindfulness): Habilidades de observación, descripción y participación consciente libre de juicios.',
+                    '2. Tolerancia al Malestar: Técnicas de supervivencia en crisis emocionales agudas (p. ej., habilidades TIPP de temperatura y respiración, o distracción consciente) para evitar conductas autolesivas o de alto riesgo.',
+                    '3. Regulación Emocional: Comprensión y etiquetado de las emociones, reducción del nivel de vulnerabilidad afectiva e incremento de eventos positivos diarios.',
+                    '4. Efectividad Interpersonal: Habilidades estructuradas de asertividad y límites respetando la relación (fórmulas DEAR MAN, GIVE y FAST).'
                 ],
                 bullets: [
-                    'Mapeo de habilidades DBT en regulación emocional y tolerancia al malestar.',
-                    'Efectividad interpersonal: Habilidades de comunicación DEAR MAN y FAST.',
-                    'Análisis en cadena para identificar antecedentes y conductas problema de riesgo.'
+                    'Habilidad TIPP: Temperatura, Intensidad, Respiración e Implicación muscular progresiva para crisis agudas.',
+                    'DEAR MAN: Describe, Expresa, Asevera, Refuerza, Mantén la atención, Aparenta confianza y Negocia.',
+                    'Análisis en Cadena: Mapeo detallado de antecedentes remotos, inmediatos, vulnerabilidades, conducta problema y consecuencias mantenedoras.'
                 ]
             },
             {
-                heading: 'El entrenamiento en habilidades DBT',
+                heading: 'El análisis en cadena conductual de conductas de riesgo',
                 paragraphs: [
-                    'Un tratamiento DBT estándar combina la psicoterapia individual enfocada en metas de seguridad, con grupos de entrenamiento de habilidades semanales orientados a dotar al paciente de recursos conductuales sólidos.'
+                    'Ante la aparición de una conducta de riesgo clínico (auto-lesión, atracón, consumo o crisis suicida), el terapeuta DBT implementa de forma minuciosa un análisis en cadena conductual. Esto consiste en reconstruir segundo a segundo el evento disparador, la cascada de pensamientos y emociones inmediatas, las vulnerabilidades físicas y las consecuencias contextuales que reforzaron el comportamiento problemático, permitiendo proponer habilidades de reemplazo precisas.'
                 ]
             },
             {
-                heading: 'Disclaimer profesional ético',
+                heading: 'Disclaimer ético profesional',
                 paragraphs: [
-                    'Este contenido clínico es informativo y educativo; no sustituye la supervisión técnica intensiva de casos, la terapia individual DBT de red de apoyo, ni la formación especializada certificada.'
+                    'Este contenido clínico y educativo es de divulgación profesional. DBT requiere un entrenamiento exhaustivo y el soporte de un equipo de consulta formal de terapeutas; este texto no sustituye de ninguna forma el diagnóstico clínico especializado de un psicólogo calificado, la supervisión de casos complejos ni la psicoterapia individual de urgencia.'
                 ]
             }
         ],
         faqs: [
             {
-                question: '¿Para qué patologías es eficaz la DBT?',
-                answer: 'Es el estándar de oro con mayor evidencia empírica para el Trastorno Límite de la Personalidad (TLP), autolesiones, ideación suicida y desregulación emocional severa.'
+                question: '¿Qué es la aceptación radical en DBT?',
+                answer: 'La práctica de aceptar la realidad de la situación tal como es en el presente, sin oponer resistencia o luchar cognitivamente contra ella, reduciendo así el sufrimiento innecesario.'
             },
             {
-                question: '¿Qué especialidad activa de SAPIHUM cubre DBT?',
-                answer: 'Nuestra especialidad activa de Regulación Emocional cuenta con amplias guías, formaciones y entrenamientos en DBT.'
+                question: '¿Para qué perfiles clínicos es de primera elección la DBT?',
+                answer: 'Es el estándar de oro con mayor evidencia empírica internacional para el Trastorno Límite de la Personalidad (TLP), desregulación afectiva severa e ideación suicida recurrente.'
+            },
+            {
+                question: '¿Qué especialidades de SAPIHUM abordan la DBT?',
+                answer: 'Nuestra especialidad en Regulación Emocional te brinda protocolos, checklists, foros con expertos y formación modular en DBT.'
             }
         ],
         relatedAssets: [
@@ -1293,51 +1587,65 @@ export const ORGANIC_CONTENT: OrganicContentAsset[] = [
         slug: 'aaron-beck',
         contentType: 'author',
         sourceType: 'author',
-        title: 'Aaron Beck: fundador de la terapia cognitiva',
-        description: 'Descubre el legado, los aportes fundamentales y la trayectoria del creador de la terapia cognitiva de la depresión.',
-        aiSummary: 'Aaron T. Beck fue un psiquiatra y psicoterapeuta pionero que revolucionó la salud mental al fundar la terapia cognitiva de la depresión, sentando las bases científicas de la Terapia Cognitivo-Conductual.',
+        title: 'Aaron Beck: fundador de la terapia cognitiva y la TCC',
+        description: 'Explora de forma rigurosa la trayectoria académica, los conceptos cardinales de esquemas nucleares y la trascendencia científica del creador de la terapia cognitiva de la depresión.',
+        aiSummary: 'Trayectoria académica y aportes técnicos de Aaron T. Beck a la psicoterapia contemporánea. Describe la formulación del procesamiento cognitivo sesgado, la tríada cognitiva de la depresión, el debate socrático sutil y la creación del BDI-II.',
         topic: 'autores de psicologia',
         specialty: 'tcc',
-        heroEyebrow: 'Autor destacado',
-        ctaLabel: 'Ver formaciones relacionadas',
+        heroEyebrow: 'Autor clínico destacado',
+        ctaLabel: 'Ver formaciones relacionadas en TCC',
         intent: 'explore_formation',
         actionType: 'guide_view',
         interestTags: ['autores_psicologia', 'tcc'],
         publishedAt: '2026-06-01',
-        updatedAt: '2026-06-01',
+        updatedAt: '2026-06-02',
         sections: [
             {
-                heading: 'Quién fue Aaron Beck y su ruptura analítica',
+                heading: 'Trayectoria académica y ruptura teórica con el psicoanálisis',
                 paragraphs: [
-                    'Aaron Temkin Beck (1921–2021) se formó originalmente como psicoanalista en los años cincuenta. Al intentar validar empíricamente los postulados freudianos sobre la depresión, descubrió que los pacientes deprimidos experimentaban pensamientos automáticos rápidos y sesgados.'
+                    'Aaron Temkin Beck (1921–2021) se formó originalmente en la escuela del psicoanálisis a mediados del siglo pasado. Al intentar validar de manera empírica las hipótesis psicodinámicas sobre el componente masoquista de la depresión, Beck se percató de que sus pacientes no buscaban el sufrimiento inconsciente; en su lugar, experimentaban una cascada de pensamientos automáticos rápidos, involuntarios y sesgados sobre la realidad.',
+                    'Esta observación empírica sistemática lo llevó a diseñar una nueva teoría del procesamiento de la información, rompiendo con el psicoanálisis ortodoxo para fundar la Terapia Cognitiva de la Depresión, sentando las bases científicas del enfoque con mayor respaldo científico actual: la Terapia Cognitivo-Conductual (TCC).'
                 ]
             },
             {
-                heading: 'Los aportes principales a la psicoterapia contemporánea',
+                heading: 'Conceptos fundamentales aportados por Aaron Beck',
                 paragraphs: [
-                    'Beck propuso la tríada cognitiva de la depresión (visión negativa del self, del mundo y del futuro) y describió las distorsiones cognitivas como el catastrofismo o la abstracción selectiva, estructurando un modelo de tratamiento breve y empíricamente sustentado.'
+                    'Los aportes teóricos de Beck redefinieron el quehacer clínico mediante conceptos rigurosos y sumamente evaluables:',
+                    '1. La Tríada Cognitiva de la Depresión: Una visión sesgada y persistentemente negativa de uno mismo (incompetente, defectuoso), del entorno y mundo (hostil, demandante) y del futuro (desesperanzado, sin alternativas).',
+                    '2. Esquemas Nucleares o Creencias Centrales: Estructuras cognitivas estables organizadas en etapas tempranas que filtran de forma inconsciente la información de la realidad cotidiana.',
+                    '3. Distorsiones Cognitivas: Errores sistemáticos en el procesamiento lógico de la información, tales como la personalización, la abstracción selectiva o el pensamiento dicotómico (todo o nada).'
                 ],
                 bullets: [
-                    'La conceptualización de la tríada cognitiva depresiva.',
-                    'Definición de distorsiones cognitivas sistemáticas y esquemas nucleares de pensamiento.',
-                    'El desarrollo del Inventario de Depresión de Beck (BDI-II), usado a nivel internacional.'
+                    'Desarrollo del BDI-II (Inventario de Depresión de Beck), la escala clínica más utilizada en el mundo.',
+                    'Implementación del Empirismo Colaborativo como modelo de relación paciente-terapeuta.',
+                    'Introducción del diálogo socrático dialéctico orientado a desarmar sesgos lógicos.'
                 ]
             },
             {
-                heading: 'Disclaimer profesional',
+                heading: 'El legado científico contemporáneo de Beck',
                 paragraphs: [
-                    'Este contenido biográfico y conceptual es informativo y profesional; no sustituye la psicoterapia individual, supervisión técnica ni la lectura directa de sus obras científicas.'
+                    'A través del Instituto Beck de Terapia Cognitiva (dirigido actualmente por su hija, Judith Beck), su trabajo ha sido sistematizado y aplicado al tratamiento de trastornos de ansiedad, trastornos de personalidad, adicciones e incluso psicosis, demostrando una efectividad clínica innegable en el ámbito de la salud mental.'
+                ]
+            },
+            {
+                heading: 'Disclaimer profesional y ético',
+                paragraphs: [
+                    'Este contenido de divulgación teórica e histórica es informativo. No sustituye de ninguna forma la formación clínica en psicoterapia, la supervisión de casos de TCC ni el juicio técnico especializado.'
                 ]
             }
         ],
         faqs: [
             {
-                question: '¿Qué libros de Beck son indispensables?',
-                answer: '"Terapia cognitiva de la depresión" y "Terapia cognitiva de los trastornos de personalidad" son dos obras cardinales en la psicología clínica.'
+                question: '¿Qué obras de Beck son de lectura obligatoria en clínica?',
+                answer: '"Terapia cognitiva de la depresión" y "Terapia cognitiva de los trastornos de personalidad" son dos manuales metodológicos indispensables para cualquier terapeuta cognitivo.'
+            },
+            {
+                question: '¿Qué es el Empirismo Colaborativo de Beck?',
+                answer: 'Un modelo de alianza terapéutica donde terapeuta y paciente actúan como dos investigadores científicos asociados que prueban de forma empírica la validez de los pensamientos automáticos del paciente.'
             },
             {
                 question: '¿Cómo se conecta Beck con SAPIHUM?',
-                answer: 'A través de nuestra oferta de formación y especialización en Terapia Cognitivo-Conductual de alta rigurosidad.'
+                answer: 'A través de nuestra especialidad activa en Terapia Cognitivo-Conductual, la cual retoma la rigurosidad científica de su modelo explicativo.'
             }
         ],
         relatedAssets: [
@@ -1361,7 +1669,7 @@ export const ORGANIC_CONTENT: OrganicContentAsset[] = [
         actionType: 'guide_view',
         interestTags: ['autores_psicologia', 'tcc'],
         publishedAt: '2026-06-01',
-        updatedAt: '2026-06-01',
+        updatedAt: '2026-06-02',
         sections: [
             {
                 heading: 'El modelo conductual de Albert Ellis',
@@ -1418,7 +1726,7 @@ export const ORGANIC_CONTENT: OrganicContentAsset[] = [
         actionType: 'guide_view',
         interestTags: ['autores_psicologia', 'comunidad'],
         publishedAt: '2026-06-01',
-        updatedAt: '2026-06-01',
+        updatedAt: '2026-06-02',
         sections: [
             {
                 heading: 'Carl Rogers y la relación terapéutica facilitadora',
@@ -1476,7 +1784,7 @@ export const ORGANIC_CONTENT: OrganicContentAsset[] = [
         actionType: 'guide_view',
         interestTags: ['autores_psicologia', 'dbt', 'regulacion_emocional'],
         publishedAt: '2026-06-01',
-        updatedAt: '2026-06-01',
+        updatedAt: '2026-06-02',
         sections: [
             {
                 heading: 'La trayectoria y el enfoque dialéctico conductual',
@@ -1534,7 +1842,7 @@ export const ORGANIC_CONTENT: OrganicContentAsset[] = [
         actionType: 'guide_view',
         interestTags: ['autores_psicologia', 'act', 'terapias_contextuales'],
         publishedAt: '2026-06-01',
-        updatedAt: '2026-06-01',
+        updatedAt: '2026-06-02',
         sections: [
             {
                 heading: 'Steven Hayes y la revolución contextual',
@@ -1582,51 +1890,54 @@ export const ORGANIC_CONTENT: OrganicContentAsset[] = [
         contentType: 'book',
         sourceType: 'book',
         title: 'Los mejores libros de psicología clínica para profesionales',
-        description: 'Revisión crítica y comentada de textos indispensables sobre evaluación diagnóstica, psicopatología y tratamientos con evidencia empírica.',
-        aiSummary: 'Los libros esenciales de psicología clínica ayudan a los terapeutas a consolidar su marco de trabajo teórico-práctico, a estructurar el diagnóstico y a aplicar tratamientos psicológicos con sólido respaldo científico.',
+        description: 'Reseña crítica, estructurada e indispensable de los manuales clínicos y textos teóricos fundamentales sobre diagnóstico y tratamientos basados en evidencia.',
+        aiSummary: 'Ruta de lectura científica en psicología clínica. Comenta manuales esenciales de tratamientos basados en evidencia, fenomenología psicopatológica y formulación explicativa del comportamiento humano.',
         topic: 'libros de psicologia',
         specialty: 'clinica',
-        heroEyebrow: 'Ruta de lectura',
-        ctaLabel: 'Unirme a la comunidad',
+        heroEyebrow: 'Ruta de lectura científica',
+        ctaLabel: 'Ver formaciones',
         intent: 'join_community',
         actionType: 'guide_view',
         interestTags: ['libros_psicologia', 'formacion_continua', 'clinica'],
         publishedAt: '2026-06-01',
-        updatedAt: '2026-06-01',
+        updatedAt: '2026-06-02',
         sections: [
             {
-                heading: 'Lecturas indispensables en psicopatología y diagnóstico',
+                heading: 'La necesidad de una biblioteca fundamentada en la ciencia',
                 paragraphs: [
-                    'La bibliografía científica en salud mental es inmensa. Sin embargo, existen manuales de referencia obligatoria que todo clínico serio debe conservar en su biblioteca profesional.',
-                    'Un clínico ordenado requiere bases sólidas de diagnóstico diferencial e historia clínica que trasciendan el mecanicismo de los manuales estadísticos tradicionales.'
+                    'La literatura en psicología es masiva y en muchas ocasiones superficial o de autoayuda popular sin base científica. Para un clínico profesional, es de gran valor delimitar una bibliografía seria que aborde de forma rigurosa la psicopatología descriptiva, los modelos explicativos conductuales y el diseño empírico de tratamientos.',
+                    'Los textos que presentaremos en esta ruta no representan modas comerciales, sino el sustento de referencia con el que operan los principales posgrados e institutos de salud mental a nivel internacional.'
+                ]
+            },
+            {
+                heading: 'Las categorías recomendadas de estudio clínico',
+                paragraphs: [
+                    'Para consolidar tu formación técnica sistemática, te aconsejamos abordar lecturas enfocadas en las siguientes áreas metodológicas:',
+                    '1. Diagnóstico y Clasificación Científica: Obras que analicen los árboles de decisión diagnóstica de la CIE-11 y el DSM-5-TR.',
+                    '2. Formulación de Caso Explicativa: Manuales que enseñen a enlazar variables ambientales e historia conductual (análisis funcional aplicado).',
+                    '3. Protocolos de Tratamientos Basados en Evidencia: Manuales específicos por patología (ansiedad generalizada, pánico, trauma).'
                 ],
                 bullets: [
-                    'Manuales diagnósticos de referencia clínica internacional (DSM-5-TR / CIE-11).',
-                    'Tratados clásicos de psicopatología descriptiva y fenomenología.',
-                    'Textos de formulación clínica y diseño de planes de tratamiento.'
+                    '"Manual de psicopatología" de Belloch, Sandín y Ramos como tratado fenomenológico de referencia.',
+                    '"Manual de técnicas de terapia y modificación de conducta" de Vicente Caballo.',
+                    'Guías clínicas y guías de tratamiento de referencia NICE y de la División 12 de la APA.'
                 ]
             },
             {
-                heading: 'Rutas de formación académica complementaria',
+                heading: 'Disclaimer ético sobre derechos de autor',
                 paragraphs: [
-                    'Los libros constituyen la base del conocimiento técnico, pero este debe cobrar vida a través de la discusión en comunidad y la formación guiada por docentes con amplia experiencia clínica de campo.'
-                ]
-            },
-            {
-                heading: ' disclaimer ético y de derechos de autor',
-                paragraphs: [
-                    'Este contenido representa una recomendación y reseña crítica profesional de textos de referencia de venta autorizada; SAPIHUM promueve los derechos de autor y no facilita descargas ilegales de material pirata de ningún tipo.'
+                    'Esta página representa una reseña analítica e intelectual de materiales académicos autorizados de venta comercial. SAPIHUM protege sistemáticamente los derechos de propiedad intelectual y no provee ni enlaza de ninguna forma a descargas no autorizadas, archivos piratas de libros o PDFs ilegales.'
                 ]
             }
         ],
         faqs: [
             {
-                question: '¿Qué manual de tratamientos basados en evidencia recomiendan?',
-                answer: 'El "Manual de técnicas de terapia y modificación de conducta" de Vicente Caballo sigue siendo una excelente referencia en castellano.'
+                question: '¿Qué libro recomiendan para iniciar en psicoterapia basada en evidencia?',
+                answer: 'El "Manual de terapia de conducta" editado por Miguel Ángel Vallejo es una excelente base en castellano.'
             },
             {
-                question: '¿Cómo ayuda SAPIHUM con mis lecturas?',
-                answer: 'A través de nuestro club de lectura clínica, comunidad y formaciones periódicas que desmenuzan la teoría aplicada de estos textos.'
+                question: '¿SAPIHUM cuenta con club de discusión de literatura?',
+                answer: 'Sí, a través de nuestra membresía y comunidad profesional organizamos periódicamente discusiones técnicas y mesas de debate científico sobre estos manuales.'
             }
         ],
         relatedAssets: [
@@ -1650,7 +1961,7 @@ export const ORGANIC_CONTENT: OrganicContentAsset[] = [
         actionType: 'guide_view',
         interestTags: ['libros_psicologia', 'tcc'],
         publishedAt: '2026-06-01',
-        updatedAt: '2026-06-01',
+        updatedAt: '2026-06-02',
         sections: [
             {
                 heading: 'Manuales cardinales de la terapia cognitiva',
@@ -1708,7 +2019,7 @@ export const ORGANIC_CONTENT: OrganicContentAsset[] = [
         actionType: 'guide_view',
         interestTags: ['libros_psicologia', 'consulta_privada', 'comunidad', 'clinica'],
         publishedAt: '2026-06-01',
-        updatedAt: '2026-06-01',
+        updatedAt: '2026-06-02',
         sections: [
             {
                 heading: 'Superar la inseguridad y estructurar la primera sesión',
@@ -1729,7 +2040,7 @@ export const ORGANIC_CONTENT: OrganicContentAsset[] = [
                 ]
             },
             {
-                heading: 'Disclaimer ético profesional',
+                heading: 'Disclaimer profesional de referencia',
                 paragraphs: [
                     'Este contenido es meramente orientativo; no sustituye la supervisión técnica obligatoria de tus casos clínicos ni la formación de posgrado especializada.'
                 ]
@@ -1766,13 +2077,13 @@ export const ORGANIC_CONTENT: OrganicContentAsset[] = [
         actionType: 'commercial_cta',
         interestTags: ['formacion_continua', 'consulta_privada', 'comunidad', 'clinica'],
         publishedAt: '2026-06-01',
-        updatedAt: '2026-06-01',
+        updatedAt: '2026-06-02',
         sections: [
             {
                 heading: 'Las principales ramas aplicadas en el mercado profesional',
                 paragraphs: [
                     'La psicología contemporánea trasciende por mucho la clínica tradicional. Para tener éxito y ejercer con rigor científico, es vital conocer los alcances e incumbencias de cada especialidad.',
-                    'Ya sea en el ámbito jurídico-forense, educativo, organizacional o de la neuropsicología, cada rama cuenta con metodologías diagnósticas y regulaciones propias.'
+                    'Ya sea en el ámbito relativo a las ciencias forenses, educativo, organizacional o de la neuropsicología, cada rama cuenta con metodologías diagnósticas y regulaciones propias.'
                 ],
                 bullets: [
                     'Psicología Clínica: Evaluación, diagnóstico y tratamiento psicoterapéutico.',
@@ -1787,7 +2098,7 @@ export const ORGANIC_CONTENT: OrganicContentAsset[] = [
                 ]
             },
             {
-                heading: 'Disclaimer normativo',
+                heading: 'Disclaimer normativo de referencia',
                 paragraphs: [
                     'Este contenido de orientación profesional es de carácter puramente informativo; cada país tiene sus propias regulaciones de acreditación y títulos oficiales de psicología.'
                 ]
@@ -1824,7 +2135,7 @@ export const ORGANIC_CONTENT: OrganicContentAsset[] = [
         actionType: 'guide_view',
         interestTags: ['comunidad', 'consulta_privada', 'supervision_clinica'],
         publishedAt: '2026-06-01',
-        updatedAt: '2026-06-01',
+        updatedAt: '2026-06-02',
         sections: [
             {
                 heading: 'Mitigar el aislamiento clínico en la práctica privada',
@@ -1845,7 +2156,7 @@ export const ORGANIC_CONTENT: OrganicContentAsset[] = [
                 ]
             },
             {
-                heading: 'Disclaimer ético profesional',
+                heading: 'Disclaimer ético profesional de consulta',
                 paragraphs: [
                     'Esta guía comunitaria e informativa es de divulgación; no sustituye la supervisión técnica oficial de tus casos clínicos ni la formación clínica correspondiente.'
                 ]
@@ -1882,13 +2193,13 @@ export const ORGANIC_CONTENT: OrganicContentAsset[] = [
         actionType: 'commercial_cta',
         interestTags: ['formacion_continua', 'practica_clinica', 'clinica'],
         publishedAt: '2026-06-01',
-        updatedAt: '2026-06-01',
+        updatedAt: '2026-06-02',
         sections: [
             {
                 heading: 'El deber ético de la actualización en psicología',
                 paragraphs: [
                     'La psicología clínica es una disciplina en constante evolución científica. Los tratamientos de primera elección y las guías de práctica clínica de referencia se actualizan periódicamente en base a nuevos hallazgos experimentales.',
-                    'Elegir formaciones con sólida rigurosidad científica fortalece tu criterio profesional y aporta mejores condiciones de cuidado para la salud y el bienestar de tus consultantes.'
+                    'Elegir formaciones con sólida rigurosidad científica no solo eleva tu estatus profesional y tus ingresos, sino que representa la mayor garantía de cuidado para la salud y el bienestar de tus consultantes.'
                 ],
                 bullets: [
                     'Cursos y diplomados enfocados en tratamientos con respaldo empírico.',
@@ -1903,7 +2214,7 @@ export const ORGANIC_CONTENT: OrganicContentAsset[] = [
                 ]
             },
             {
-                heading: 'Disclaimer ético normativo',
+                heading: 'Disclaimer ético normativo de referencia',
                 paragraphs: [
                     'Este contenido de divulgación profesional es informativo; no sustituye los planes de estudio universitarios de grado ni las licencias oficiales de ejercicio sanitario de cada país.'
                 ]
@@ -1911,7 +2222,7 @@ export const ORGANIC_CONTENT: OrganicContentAsset[] = [
         ],
         faqs: [
             {
-                question: '¿Qué certificaciones ofrece SAPIHUM?',
+                question: '¿Qué constancias de participación ofrece SAPIHUM?',
                 answer: 'Ofrecemos constancias de participación con registro de horas y valor curricular integrados en tu expediente profesional de membresía.'
             },
             {
@@ -1930,63 +2241,76 @@ export const ORGANIC_CONTENT: OrganicContentAsset[] = [
         contentType: 'tool',
         sourceType: 'tool',
         title: 'Herramientas digitales para psicólogos y consulta',
-        description: 'Optimiza la gestión diaria de tu práctica clínica mediante telepsicología, expedientes digitales cifrados e inteligencia artificial.',
-        aiSummary: 'El checklist de herramientas digitales ayuda a psicólogos a implementar telepsicología segura, agilizar la agenda de consulta, automatizar recordatorios y usar IA ética en sus resúmenes clínicos.',
+        description: 'Optimiza el funcionamiento de tu consultorio mediante telepsicología, expedientes digitales cifrados y el uso ético y anónimo de inteligencia artificial.',
+        aiSummary: 'Guía y checklist de digitalización ética para psicólogos clínicos. Evalúa software de historia clínica con protección de datos sanitarios locales, sistemas seguros de teleconsulta encriptados y asistentes de IA para el resumen clínico ágil y anónimo de notas SOAP.',
         topic: 'herramientas digitales',
         specialty: 'clinica',
-        heroEyebrow: 'Recurso premium',
-        ctaLabel: 'Descargar checklist',
+        heroEyebrow: 'Guía tecnológica de referencia',
+        ctaLabel: 'Descargar el checklist de herramientas',
         intent: 'download_resource',
         actionType: 'resource_download',
         interestTags: ['herramientas_digitales', 'ia_para_psicologos', 'consulta_privada', 'clinica'],
         publishedAt: '2026-06-01',
-        updatedAt: '2026-06-01',
+        updatedAt: '2026-06-02',
         sections: [
             {
-                heading: 'La digitalización ética del consultorio psicológico',
+                heading: 'El valor de la digitalización en salud mental',
                 paragraphs: [
-                    'La tecnología digital ofrece posibilidades inmensas para hacer más eficiente el consultorio de psicología, liberando tiempo administrativo que el terapeuta puede dedicar a la labor clínica o a su desarrollo personal.',
-                    'Sin embargo, esta digitalización debe ir acompañada de un estricto cuidado por el secreto profesional y la protección de datos personales confidenciales de salud mental.'
+                    'La incorporación de tecnología digital y software clínico en la práctica privada no es una simple preferencia de conveniencia operativa. Representa una herramienta metodológica indispensable para agilizar la agenda de consulta, automatizar recordatorios y liberar al terapeuta autónomo de horas de sobrecarga administrativa.',
+                    'Sin embargo, esta transición digital debe realizarse respetando rigurosamente el secreto clínico y la legislación vigente de protección de datos confidenciales de la salud mental de tus pacientes.'
+                ]
+            },
+            {
+                heading: 'La matriz de herramientas clínicas seguras',
+                paragraphs: [
+                    'Para asegurar que las tecnologías que incorporas en tu práctica privada cumplen con las exigencias éticas y de seguridad necesarias:',
+                    '1. Teleconsulta Segura: Utiliza únicamente plataformas de videollamada con encriptación avanzada de extremo a extremo que garanticen la privacidad de la sesión (p. ej., plataformas que cumplan con la norma HIPAA o reglamentos de datos europeos). Evita videollamadas convencionales de consumo masivo abiertas.',
+                    '2. Expediente Electrónico Cifrado: Software clínico que use servidores seguros, bases de datos separadas y copias de seguridad continuas autorizadas, facilitando las firmas electrónicas válidas.',
+                    '3. Inteligencia Artificial Ética en Salud Mental: Asistentes de IA estructurados que te ayuden a resumir notas de sesión a formatos estructurados SOAP. La condición ineludible es que jamás subas datos identificatorios reales (nombre, DNI, dirección) a modelos lingüísticos de aprendizaje externos.'
                 ],
                 bullets: [
-                    'Telepsicología encriptada de extremo a extremo que proteja la privacidad.',
-                    'Software de expedientes clínicos que facilite buenas prácticas de privacidad y documentación.',
-                    'Asistentes de Inteligencia Artificial para la transcripción y redacción ágil de notas clínicas bajo anonimato del paciente.'
+                    'Canales de videollamadas con cifrado punto a punto exclusivos para salud.',
+                    'Software de expedientes clínicos que emita firmas electrónicas de conformidad.',
+                    'Sistemas de cobro integrados automáticos y facturación electrónica regulada.'
                 ]
             },
             {
-                heading: 'Uso de Inteligencia Artificial en psicología',
+                heading: 'El uso responsable de IA para redacción SOAP',
                 paragraphs: [
-                    'La IA representa un coequipero de gran valor para redactar y estructurar resúmenes o notas SOAP, siempre que se garantice que ningún dato que identifique directamente al paciente sea compartido con modelos de lenguaje externos.'
+                    'Un asistente de IA puede ayudarte a redactar y estructurar notas de evolución clínica a partir de tus notas desestructuradas en segundos. Asegúrate de anonimizar los datos previamente y de revisar críticamente cada sugerencia generada antes de incorporarla de forma definitiva al expediente clínico.'
                 ]
             },
             {
-                heading: 'Límites éticos y disclaimer',
+                heading: 'Disclaimer ético normativo',
                 paragraphs: [
-                    'Este contenido descriptivo y tecnológico es informativo y profesional; no sustituye la supervisión técnica clínica, la formación académica en psicoterapia ni la asesoría legal sobre protección de datos de tu localidad.'
+                    'Este contenido de divulgación tecnológica representa una guía de orientación profesional. Cada psicoterapeuta autónomo debe validar el cumplimiento técnico de sus herramientas digitales conforme a las leyes específicas de datos sanitarios de su país.'
                 ]
             }
         ],
         faqs: [
             {
                 question: '¿Es seguro usar Zoom o WhatsApp para videoconsultas?',
-                answer: 'Se recomienda usar plataformas de videollamada específicas que cumplan con encriptación avanzada de datos sanitarios para resguardar el secreto clínico.'
+                answer: 'Las versiones gratuitas convencionales de estas aplicaciones no siempre cumplen con las regulaciones estrictas de encriptación de datos médicos exigidas por las autoridades de salud (como HIPAA). Se recomienda usar canales específicos profesionales.'
             },
             {
-                question: '¿Cómo ayuda SAPIHUM con la digitalización?',
-                answer: 'Ofrecemos guías de software clínico, plantillas y formación continua en la implementación ética de tecnología y de IA en salud mental.'
+                question: '¿Qué es el cumplimiento HIPAA en software clínico?',
+                answer: 'Una ley estadounidense de gran prestigio internacional que certifica que el software implementa estrictas medidas de control de accesos, encriptación y trazabilidad de datos de salud.'
+            },
+            {
+                question: '¿Cómo apoya SAPIHUM a digitalizar mi consultorio?',
+                answer: 'Ofreciendo checklists de herramientas, guías paso a paso de telepsicología segura y un ecosistema de comunidad para debatir opciones tecnológicas.'
             }
         ],
         gatedResource: {
-            assetKey: 'herramientas-digitales-para-psicologos',
+            assetKey: 'checklist-herramientas-digitales',
             title: 'Checklist de herramientas digitales para psicólogos',
-            description: 'Lista de control en formato plantilla con los requerimientos técnicos indispensables y las herramientas recomendadas para un consultorio digital eficiente y seguro.',
+            description: 'Lista de control interactiva para evaluar el cumplimiento ético, la privacidad y la agilidad de las tecnologías de tu consultorio.',
             benefits: [
-                'Herramientas seleccionadas por su cumplimiento ético y de privacidad.',
-                'Checklist de configuración segura de telepsicología.',
-                'Recomendaciones de IA ética para redactar y sistematizar notas clínicas.'
+                'Pauta de evaluación de encriptación para plataformas de videollamada.',
+                'Requisitos de seguridad mínimos de protección de datos sanitarios.',
+                'Guía de uso anónimo de asistentes de Inteligencia Artificial para notas SOAP.'
             ],
-            downloadUrl: '/api/organic-resources/herramientas-digitales-para-psicologos'
+            downloadUrl: '/api/organic-resources/checklist-herramientas-digitales'
         },
         relatedAssets: [
             { label: 'Guía para Organizar tu Práctica', href: '/guias/como-organizar-practica-clinica', type: 'guide' },
