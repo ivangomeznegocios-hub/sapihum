@@ -67,6 +67,10 @@ const FAQS = [
     {
         q: '¿Qué tipo de apoyo de marketing ofrece SAPIHUM?',
         a: 'Contamos con una comunidad activa de miles de profesionales de la psicología. Además de la presencia en nuestro directorio oficial, invertimos en publicidad segmentada, campañas de email marketing y difusión cross-channel para los eventos que aplican al canal de ventas de la plataforma.'
+    },
+    {
+        q: '¿También gano si mi contenido está incluido en una membresía?',
+        a: 'Sí. Cuando un miembro activo consume tu contenido, se calcula una comisión proporcional tomando como base hasta el 50% de su plan mensual. El monto se distribuye según los contenidos consumidos en el mes y el número de ponentes participantes.'
     }
 ]
 
@@ -116,20 +120,20 @@ export default function BecomeSpeakerPage() {
                             {[
                                 {
                                     value: '80%',
-                                    title: 'Inscripción Directa',
-                                    desc: 'De cada alumno que se inscriba mediante tus enlaces atribuidos o red personal.',
+                                    title: 'Venta directa propia',
+                                    desc: 'Recibe el 80% cuando tú generas la venta de tu curso, taller o contenido.',
                                     color: 'border-l-4 border-l-brand-blue'
                                 },
                                 {
                                     value: '50%',
-                                    title: 'Tráfico del Canal SAPIHUM',
-                                    desc: 'De las inscripciones generadas gracias a nuestras campañas y posicionamiento orgánico.',
+                                    title: 'Venta por canal SAPIHUM',
+                                    desc: 'Recibe el 50% cuando la venta llega a través de la comunidad, campañas o canales de SAPIHUM.',
                                     color: 'border-l-4 border-l-indigo-600'
                                 },
                                 {
-                                    value: '100% Control',
-                                    title: 'Flexibilidad Académica',
-                                    desc: 'Tú defines los contenidos, materiales de apoyo, el costo de inscripción y el calendario.',
+                                    value: 'Hasta 50%',
+                                    title: 'Consumo por membresía',
+                                    desc: 'Recibe una comisión proporcional cuando miembros activos consumen tu contenido dentro de su membresía.',
                                     color: 'border-l-4 border-l-sky-500'
                                 }
                             ].map((badge, idx) => (
@@ -379,6 +383,18 @@ export default function BecomeSpeakerPage() {
                                 title: 'Venta por Canales SAPIHUM (50% para ti)',
                                 desc: 'Cuando el estudiante te descubre de forma orgánica en nuestro directorio, correos electrónicos a suscriptores o gracias a nuestras campañas pagadas en redes.',
                                 icon: Users
+                            },
+                            {
+                                title: 'Consumo por membresía',
+                                desc: (
+                                    <>
+                                        Tus contenidos también pueden generar ingresos cuando son consumidos por miembros activos de SAPIHUM. Se asigna hasta el 50% proporcional del plan mensual del miembro, distribuido según los contenidos que consuma durante el mes.
+                                        <span className="block mt-2 text-xs italic text-brand-blue-dark font-medium">
+                                            “Mientras más valor genere tu contenido dentro de la comunidad, más oportunidades tienes de monetizarlo.”
+                                        </span>
+                                    </>
+                                ),
+                                icon: Coins
                             },
                             {
                                 title: 'Retiros Simples y transparentes',

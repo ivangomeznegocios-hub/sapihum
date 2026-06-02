@@ -7,15 +7,260 @@ import {
     upsertAutomaticEventSpeakerEarnings,
 } from '@/lib/earnings/compensation'
 import { isSpeakerCommerceEngineEnabled, isSpeakerPayoutRequestsEnabled } from '@/lib/earnings/speaker-commerce'
+import { getSubscriptionPlan } from '@/lib/payments/config'
 import type { SpeakerFinancialSummary } from '@/types/database'
 import { revalidatePath } from 'next/cache'
 
 // ============================================
 // POOL & CONSTANTS
 // ============================================
-const POOL_PER_USER = 110.00 // MXN monthly pool per user
+const MEMBERSHIP_SPEAKER_POOL_RATE = 0.50
 const RELEASE_DAYS = 30
 const ATTENDANCE_THRESHOLD = 0.90 // 90% permanence required
+
+function roundCurrency(value: number) {
+    return Math.round((value + Number.EPSILON) * 100) / 100
+}
+
+function getMonthRange(monthKey: string) {
+    const [year, month] = monthKey.split('-').map(Number)
+    const start = new Date(Date.UTC(year, month - 1, 1))
+    const end = new Date(Date.UTC(year, month, 1))
+
+    return {
+        start: start.toISOString(),
+        end: end.toISOString(),
+    }
+}
+
+async function getActiveMembershipForProration(supabase: any, studentId: string) {
+    const { data: subscription } = await (supabase
+        .from('subscriptions') as any)
+        .select('id, membership_level, specialization_code, status, current_period_end')
+        .eq('profile_id', studentId)
+        .in('status', ['active', 'trialing'])
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle()
+
+    if (subscription?.id) {
+        return subscription
+    }
+
+    const { data: profile } = await (supabase
+        .from('profiles') as any)
+        .select('id, membership_level, membership_specialization_code, subscription_status')
+        .eq('id', studentId)
+        .maybeSingle()
+
+    if (!profile || Number(profile.membership_level ?? 0) <= 0) {
+        return null
+    }
+
+    if (profile.subscription_status && !['active', 'trialing'].includes(profile.subscription_status)) {
+        return null
+    }
+
+    return {
+        id: null,
+        membership_level: Number(profile.membership_level ?? 0),
+        specialization_code: profile.membership_specialization_code ?? null,
+        status: profile.subscription_status ?? 'profile_legacy',
+        current_period_end: null,
+    }
+}
+
+async function hasMembershipEventAccess(params: {
+    supabase: any
+    eventId: string
+    studentId: string
+}) {
+    const { data } = await (params.supabase
+        .from('event_entitlements') as any)
+        .select('id')
+        .eq('event_id', params.eventId)
+        .eq('user_id', params.studentId)
+        .eq('source_type', 'membership')
+        .eq('status', 'active')
+        .limit(1)
+        .maybeSingle()
+
+    return Boolean(data?.id)
+}
+
+async function countQualifiedMembershipEventsForStudent(params: {
+    supabase: any
+    studentId: string
+    monthKey: string
+}) {
+    const { start, end } = getMonthRange(params.monthKey)
+    const { data: attendanceRows } = await (params.supabase
+        .from('speaker_attendance_log') as any)
+        .select('event_id')
+        .eq('student_id', params.studentId)
+        .eq('qualifies', true)
+        .gte('created_at', start)
+        .lt('created_at', end)
+
+    const eventIds = Array.from(new Set((attendanceRows ?? [])
+        .map((row: any) => row.event_id)
+        .filter(Boolean)))
+
+    if (eventIds.length === 0) {
+        return 1
+    }
+
+    const { data: entitlementRows } = await (params.supabase
+        .from('event_entitlements') as any)
+        .select('event_id')
+        .eq('user_id', params.studentId)
+        .eq('source_type', 'membership')
+        .eq('status', 'active')
+        .in('event_id', eventIds)
+
+    const membershipEventIds = new Set((entitlementRows ?? []).map((row: any) => row.event_id))
+    return Math.max(membershipEventIds.size, 1)
+}
+
+async function getSpeakerIdsForMembershipEvent(params: {
+    supabase: any
+    eventId: string
+}) {
+    const { data: linkedSpeakers } = await (params.supabase
+        .from('event_speakers') as any)
+        .select('speaker_id, display_order')
+        .eq('event_id', params.eventId)
+        .order('display_order', { ascending: true })
+
+    const speakerIds = (linkedSpeakers ?? [])
+        .map((row: any) => row.speaker_id)
+        .filter((speakerId: unknown): speakerId is string => typeof speakerId === 'string' && speakerId.length > 0)
+
+    if (speakerIds.length > 0) {
+        return Array.from(new Set(speakerIds))
+    }
+
+    const { data: event } = await (params.supabase
+        .from('events') as any)
+        .select('created_by')
+        .eq('id', params.eventId)
+        .maybeSingle()
+
+    if (!event?.created_by) {
+        return []
+    }
+
+    const { data: speaker } = await (params.supabase
+        .from('speakers') as any)
+        .select('id')
+        .eq('id', event.created_by)
+        .maybeSingle()
+
+    return speaker?.id ? [speaker.id] : []
+}
+
+async function upsertMembershipProrationEarnings(params: {
+    supabase: any
+    eventId: string
+    studentId: string
+    attendanceDate: string
+    releaseDate: string
+    monthKey: string
+    attendanceLogId: string
+}) {
+    const hasMembershipAccess = await hasMembershipEventAccess({
+        supabase: params.supabase,
+        eventId: params.eventId,
+        studentId: params.studentId,
+    })
+
+    if (!hasMembershipAccess) {
+        return { applied: [], skippedReason: 'not_membership_access' as const }
+    }
+
+    const membership = await getActiveMembershipForProration(params.supabase, params.studentId)
+    if (!membership) {
+        return { applied: [], skippedReason: 'inactive_membership' as const }
+    }
+
+    const plan = getSubscriptionPlan(
+        Number(membership.membership_level ?? 0),
+        membership.specialization_code ?? null
+    )
+
+    if (!plan || plan.monthly.amount <= 0) {
+        return { applied: [], skippedReason: 'missing_plan' as const }
+    }
+
+    const totalMembershipEvents = await countQualifiedMembershipEventsForStudent({
+        supabase: params.supabase,
+        studentId: params.studentId,
+        monthKey: params.monthKey,
+    })
+    const speakerIds = await getSpeakerIdsForMembershipEvent({
+        supabase: params.supabase,
+        eventId: params.eventId,
+    })
+
+    if (speakerIds.length === 0) {
+        return { applied: [], skippedReason: 'missing_speaker' as const }
+    }
+
+    const monthlyMembershipAmount = Number(plan.monthly.amount)
+    const allocatedEventRevenue = roundCurrency(monthlyMembershipAmount / totalMembershipEvents)
+    const speakerPoolForEvent = roundCurrency(allocatedEventRevenue * MEMBERSHIP_SPEAKER_POOL_RATE)
+    const speakerNetAmount = roundCurrency(speakerPoolForEvent / speakerIds.length)
+    const speakerCommissionRate = allocatedEventRevenue > 0
+        ? roundCurrency(speakerNetAmount / allocatedEventRevenue)
+        : 0
+    const now = new Date().toISOString()
+
+    for (const speakerId of speakerIds) {
+        await (params.supabase.from('speaker_earnings') as any)
+            .upsert({
+                speaker_id: speakerId,
+                event_id: params.eventId,
+                student_id: params.studentId,
+                earning_type: 'membership_proration',
+                gross_amount: allocatedEventRevenue,
+                amount_paid: 0,
+                sapihum_amount: roundCurrency(allocatedEventRevenue - speakerNetAmount),
+                commission_rate: speakerCommissionRate,
+                compensation_type: 'percentage',
+                compensation_value: speakerCommissionRate,
+                net_amount: speakerNetAmount,
+                status: 'pending',
+                financial_status: 'pending',
+                sale_origin: 'sapihum_channel',
+                price_type: 'member',
+                attributed_speaker_id: speakerId,
+                attendance_date: params.attendanceDate,
+                release_date: params.releaseDate,
+                attendance_log_id: params.attendanceLogId,
+                month_key: params.monthKey,
+                description: 'Prorrateo por contenido incluido en membresia',
+                locked_at: now,
+                commission_snapshot: {
+                    model: 'membership_proration',
+                    membershipLevel: membership.membership_level,
+                    specializationCode: membership.specialization_code ?? null,
+                    planMonthlyAmount: monthlyMembershipAmount,
+                    speakerPoolRate: MEMBERSHIP_SPEAKER_POOL_RATE,
+                    qualifiedMembershipEventsInMonth: totalMembershipEvents,
+                    allocatedEventRevenue,
+                    speakerPoolForEvent,
+                    speakerCount: speakerIds.length,
+                    speakerNetAmount,
+                    calculatedAt: now,
+                },
+            }, { onConflict: 'speaker_id,event_id,student_id' })
+    }
+
+    return {
+        applied: speakerIds.map((speakerId) => ({ speakerId, netAmount: speakerNetAmount })),
+        skippedReason: null,
+    }
+}
 
 // ============================================
 // 1. GET SPEAKER FINANCIAL SUMMARY
@@ -404,30 +649,17 @@ export async function recordAttendance(
 
     // If qualifies, create/update earning record
     if (qualifies) {
-        // Calculate the prorated earning
-        // Count total events this student attended this month
         const currentMonth = new Date().toISOString().slice(0, 7)
-        const { count: totalStudentEvents } = await (supabase
-            .from('speaker_attendance_log') as any)
-            .select('*', { count: 'exact', head: true })
-            .eq('student_id', studentId)
-            .eq('qualifies', true)
-
-        const totalEvents = totalStudentEvents || 1
-        const grossAmount = Math.round((POOL_PER_USER / totalEvents) * 100) / 100
-
         const today = new Date()
         const attendanceDate = today.toISOString().split('T')[0]
         const releaseDate = new Date(today.getTime() + RELEASE_DAYS * 24 * 60 * 60 * 1000)
             .toISOString().split('T')[0]
 
         try {
-            await upsertAutomaticEventSpeakerEarnings({
-                supabase,
+            await upsertMembershipProrationEarnings({
+                supabase: createServiceClient(),
                 eventId,
                 studentId,
-                grossAmount,
-                earningType: 'membership_proration',
                 attendanceDate,
                 releaseDate,
                 monthKey: currentMonth,
