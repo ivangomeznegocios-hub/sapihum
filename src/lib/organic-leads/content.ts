@@ -191,7 +191,7 @@ export const ORGANIC_CONTENT: OrganicContentAsset[] = [
             {
                 heading: 'La diferencia entre marketing de valor y promesas clínicas irresponsables',
                 paragraphs: [
-                    'El mayor error que se comete actualmente en las redes sociales es el uso de afirmaciones absolutistas o mercantilistas. Es éticamente inaceptable utilizar claims como "supera tu ansiedad en 3 semanas" o "método 100% garantizado para ser feliz". El psicólogo clínico debe recordar que cada persona presenta una historia de aprendizaje única y que la psicoterapia es un proceso corresponsable.',
+                    'El mayor error que se comete actualmente en las redes sociales es el uso de afirmaciones absolutistas o mercantilistas. Es éticamente inaceptable utilizar claims como "supera tu ansiedad en 3 semanas" o "método 100% asegurado para ser feliz". El psicólogo clínico debe recordar que cada persona presenta una historia de aprendizaje única y que la psicoterapia es un proceso corresponsable.',
                     'La comunicación ética es clara, humilde, fundamentada y respetuosa del código deontológico. Se enfoca en explicar procesos psicológicos y ofrecer psicoeducación rigurosa, no en vender "soluciones mágicas".'
                 ]
             },
@@ -227,7 +227,7 @@ export const ORGANIC_CONTENT: OrganicContentAsset[] = [
                     'Para evitar incurrir en faltas éticas o regulaciones de publicidad sanitaria, utiliza la siguiente guía comparativa en tus textos y publicaciones:',
                     '- Mensaje Riesgoso (Evitar): "Te garantizo eliminar tu depresión en un mes con mi técnica probada".',
                     '- Mensaje Ético y Permitido (Recomendado): "Acompaño procesos de depresión mayor mediante activación conductual, un enfoque con amplia evidencia científica para recuperar el bienestar".',
-                    '- Mensaje Riesgoso (Evitar): "La psicoterapia te blinda legalmente contra el estrés laboral".',
+                    '- Mensaje Riesgoso (Evitar): "La psicoterapia te ayuda a mitigar el estrés laboral".',
                     '- Mensaje Ético y Permitido (Recomendado): "Desarrollamos herramientas de asertividad, establecimiento de límites y manejo de estrés adaptadas a tu entorno de trabajo".'
                 ]
             },
@@ -254,7 +254,7 @@ export const ORGANIC_CONTENT: OrganicContentAsset[] = [
             {
                 heading: 'Límites éticos y disclaimer profesional',
                 paragraphs: [
-                    'Este contenido representa una guía de orientación profesional y de crecimiento para psicólogos independientes. No constituye asesoría legal fiscal, ni garantiza un volumen específico de ingresos. Cada profesional de la salud mental debe ejercer su práctica clínica y comercial respetando los códigos éticos específicos aplicables en su país de residencia.'
+                    'Este contenido representa una guía de orientación profesional y de crecimiento para psicólogos independientes. No constituye asesoría legal fiscal, ni asegura un volumen específico de ingresos. Cada profesional de la salud mental debe ejercer su práctica clínica y comercial respetando los códigos éticos específicos aplicables en su país de residencia.'
                 ]
             }
         ],
@@ -645,7 +645,7 @@ export const ORGANIC_CONTENT: OrganicContentAsset[] = [
                 heading: 'El expediente psicológico clínico como deber ético y legal',
                 paragraphs: [
                     'El expediente psicológico no es un mero requisito burocrático de archivo. Es el registro científico que sustenta la validez técnica de tus intervenciones clínicas y resguarda los derechos del consultante a la salud mental.',
-                    'Llevar un expediente ordenado e íntegro te brinda seguridad jurídica ante cualquier auditoría o requerimiento legal, y es el pilar fundamental para garantizar la continuidad del proceso terapéutico de forma responsable.'
+                    'Llevar un expediente ordenado e íntegro te brinda seguridad jurídica ante cualquier auditoría o requerimiento legal, y es el pilar fundamental para asegurar la continuidad del proceso terapéutico de forma responsable.'
                 ]
             },
             {
@@ -833,7 +833,7 @@ export const ORGANIC_CONTENT: OrganicContentAsset[] = [
             {
                 heading: 'El derecho de acceso del paciente a su información',
                 paragraphs: [
-                    'En la práctica privada, garantizar que el expediente esté a salvo del acceso de terceros es una prioridad ineludible. El paciente tiene el derecho de solicitar un resumen clínico de su expediente redactado de forma objetiva por el psicoterapeuta tratante.'
+                    'En la práctica privada, asegurar que el expediente esté a salvo del acceso de terceros es una prioridad ineludible. El paciente tiene el derecho de solicitar un resumen clínico de su expediente redactado de forma objetiva por el psicoterapeuta tratante.'
                 ]
             },
             {
@@ -901,7 +901,7 @@ export const ORGANIC_CONTENT: OrganicContentAsset[] = [
             {
                 heading: 'La redacción ética y el secreto profesional',
                 paragraphs: [
-                    'Al redactar notas SOAP, es vital utilizar un vocabulario técnico libre de valoraciones morales o juicios subjetivos. Las notas deben redactarse con concisión y estar a salvo del acceso de terceros para garantizar la privacidad y confidencialidad clínica.'
+                    'Al redactar notas SOAP, es vital utilizar un vocabulario técnico libre de valoraciones morales o juicios subjetivos. Las notas deben redactarse con concisión y estar a salvo del acceso de terceros para asegurar la privacidad y confidencialidad clínica.'
                 ]
             },
             {
@@ -2317,5 +2317,2190 @@ export const ORGANIC_CONTENT: OrganicContentAsset[] = [
             { label: 'Checklist de Consulta Organizada', href: '/recursos/formatos/checklist-consulta-organizada', type: 'resource_format' }
         ],
         schemaTypes: ['SoftwareApplication', 'BreadcrumbList', 'FAQPage']
-    }
+    },
+    {
+        slug: "como-promocionarse-como-psicologo-sin-parecer-vendedor",
+        contentType: "guide",
+        sourceType: "guide",
+        title: "Cómo promocionarse como psicólogo sin parecer vendedor",
+        description: "Desarrolla una estrategia ética de atracción basada en la confianza, la psicoeducación rigurosa y el posicionamiento de tu autoridad clínica.",
+        aiSummary: "Guía práctica para posicionar tu marca profesional en psicología de forma ética. Aprende a estructurar tu comunicación sin recurrir a técnicas comerciales intrusivas o agresivas.",
+        topic: "desarrollo profesional",
+        specialty: "supervision_clinica",
+        heroEyebrow: "Guía de captación ética",
+        ctaLabel: "Descargar checklist de captación",
+        intent: "join_community",
+        actionType: "guide_view",
+        interestTags: [
+                "captacion_pacientes",
+                "consulta_privada",
+                "marketing_psicologos",
+                "comunidad"
+        ],
+        publishedAt: "2026-06-02",
+        updatedAt: "2026-06-02",
+        sections: [
+                {
+                        heading: "El error de la venta agresiva en psicología",
+                        paragraphs: [
+                                "Intentar aplicar técnicas de venta directa en salud mental daña gravemente la reputación del terapeuta. Los pacientes buscan ayuda profesional, no que les vendan un producto de consumo de forma comercial.",
+                                "Una alternativa respetuosa y efectiva consiste en educar a tu audiencia sobre salud mental, desmitificar la psicoterapia y demostrar solidez teórica y rigor conceptual."
+                        ],
+                        bullets: [
+                                "Evita usar llamadas de venta directas o urgentes.",
+                                "Prioriza ofrecer valor teórico y psicoeducativo sólido.",
+                                "Establece canales claros para que las personas soliciten consulta voluntariamente."
+                        ]
+                },
+                {
+                        heading: "La psicoeducación como motor de confianza",
+                        paragraphs: [
+                                "Cuando explicas de forma sencilla y clara cómo funciona un proceso cognitivo, la persona interesada comprende tu competencia profesional de manera orgánica y natural.",
+                                "Este enfoque genera una relación de alta confianza, posicionando al clínico como un referente en su materia."
+                        ]
+                },
+                {
+                        heading: "Límites éticos y disclaimer profesional",
+                        paragraphs: [
+                                "Este contenido es informativo y profesional; no sustituye supervisión clínica, criterio profesional, formación especializada ni asesoría legal cuando corresponda."
+                        ]
+                }
+        ],
+        faqs: [
+                {
+                        question: "¿Es ético publicar testimonios de pacientes?",
+                        answer: "La mayoría de los códigos éticos de psicología prohíben o desaconsejan solicitar testimonios a pacientes actuales debido a la asimetría de la relación terapéutica."
+                },
+                {
+                        question: "¿Cómo puedo promocionar mi consulta recién egresado?",
+                        answer: "Inicia impartiendo talleres informativos gratuitos, creando alianzas institucionales o escribiendo en blogs de divulgación científica."
+                }
+        ],
+        relatedAssets: [
+                {
+                        label: "Cómo Conseguir Pacientes",
+                        href: "/guias/como-conseguir-pacientes-como-psicologo",
+                        type: "guide"
+                },
+                {
+                        label: "Checklist de Captación Ética",
+                        href: "/recursos/formatos/checklist-captacion-etica",
+                        type: "resource_format"
+                }
+        ],
+        schemaTypes: [
+                "Article",
+                "BreadcrumbList",
+                "FAQPage"
+        ]
+},
+    {
+        slug: "como-llenar-agenda-como-psicologo",
+        contentType: "guide",
+        sourceType: "guide",
+        title: "Cómo llenar la agenda de tu consulta psicológica de forma sostenible",
+        description: "Estructura un sistema de derivaciones éticas, posicionamiento local y canales digitales de alta confianza para mantener un flujo continuo de pacientes.",
+        aiSummary: "Guía detallada para estructurar la agenda de tu consulta psicológica de forma profesional. Analiza el Time-Blocking, la gestión de la lista de espera y los canales de derivación.",
+        topic: "consulta privada",
+        specialty: "supervision_clinica",
+        heroEyebrow: "Organización clínica",
+        ctaLabel: "Descargar checklist de agenda organizada",
+        intent: "join_community",
+        actionType: "guide_view",
+        interestTags: [
+                "consulta_privada",
+                "captacion_pacientes",
+                "comunidad"
+        ],
+        publishedAt: "2026-06-02",
+        updatedAt: "2026-06-02",
+        sections: [
+                {
+                        heading: "El pilar de las derivaciones profesionales",
+                        paragraphs: [
+                                "Para llenar tu agenda de forma constante, es fundamental tejer una red interdisciplinaria con psiquiatras, neurólogos y médicos de atención primaria.",
+                                "Derivar casos que están fuera de tu ámbito de especialización genera reciprocidad profesional y promueve la mejor atención clínica para el consultante."
+                        ]
+                },
+                {
+                        heading: "Gestión efectiva del Time-Blocking",
+                        paragraphs: [
+                                "No llenes tu agenda a costa de tu salud mental. Limita tus sesiones diarias a un máximo ético de 5 o 6 pacientes para evitar el agotamiento clínico.",
+                                "Reserva bloques inamovibles para redactar notas SOAP, estudiar y recibir supervisión técnica."
+                        ]
+                },
+                {
+                        heading: "Límites éticos y disclaimer profesional",
+                        paragraphs: [
+                                "Este contenido es informativo y profesional; no sustituye supervisión clínica, criterio profesional, formación especializada ni asesoría legal cuando corresponda."
+                        ]
+                }
+        ],
+        faqs: [
+                {
+                        question: "¿Cuántas sesiones de terapia es recomendable atender al día?",
+                        answer: "El promedio recomendable para mantener un nivel óptimo de concentración empática y análisis clínico es de 4 a 6 pacientes al día."
+                },
+                {
+                        question: "¿Cómo gestionar las inasistencias de pacientes?",
+                        answer: "Establece desde la primera sesión una política clara de cancelación de citas con un mínimo de 24 horas de anticipación."
+                }
+        ],
+        relatedAssets: [
+                {
+                        label: "Cómo Cobrar Consulta",
+                        href: "/guias/como-cobrar-consulta-psicologica",
+                        type: "guide"
+                },
+                {
+                        label: "Checklist de Consulta Organizada",
+                        href: "/recursos/formatos/checklist-consulta-organizada",
+                        type: "resource_format"
+                }
+        ],
+        schemaTypes: [
+                "Article",
+                "BreadcrumbList",
+                "FAQPage"
+        ]
+},
+    {
+        slug: "como-crear-marca-profesional-psicologo",
+        contentType: "guide",
+        sourceType: "guide",
+        title: "Cómo crear una marca profesional y de autoridad como psicólogo",
+        description: "Construye un perfil profesional sólido basado en tu formación, tus áreas de competencia y la divulgación científica respetuosa y rigurosa.",
+        aiSummary: "Aprende a diseñar tu marca profesional en psicología clínica. Estrategias de especialización de nicho, diseño de perfiles y publicación conforme a códigos éticos.",
+        topic: "desarrollo profesional",
+        specialty: "supervision_clinica",
+        heroEyebrow: "Autoridad profesional",
+        ctaLabel: "Unirse a la comunidad profesional",
+        intent: "explore_formation",
+        actionType: "guide_view",
+        interestTags: [
+                "marketing_psicologos",
+                "consulta_privada",
+                "comunidad"
+        ],
+        publishedAt: "2026-06-02",
+        updatedAt: "2026-06-02",
+        sections: [
+                {
+                        heading: "La diferenciación profesional por nichos clínicos",
+                        paragraphs: [
+                                "El generalismo clínico diluye tu autoridad técnica. Es mucho más efectivo especializarte en un área clínica concreta (p. ej., trauma en adultos o desregulación emocional severa).",
+                                "Al enfocar tu formación y tu comunicación en un nicho clínico particular, facilitas que los pacientes adecuados y otros colegas te identifiquen con claridad."
+                        ]
+                },
+                {
+                        heading: "La ética de la divulgación científica",
+                        paragraphs: [
+                                "Tu marca profesional debe cimentarse en la ciencia aplicada. Evita opinar sobre temas fuera de tu competencia y fundamenta tus escritos en bases teóricas rigurosas.",
+                                "La divulgación ética busca el bienestar de la comunidad y la desestigmatización de la terapia."
+                        ]
+                },
+                {
+                        heading: "Límites éticos y disclaimer profesional",
+                        paragraphs: [
+                                "Este contenido es informativo y profesional; no sustituye supervisión clínica, criterio profesional, formación especializada ni asesoría legal cuando corresponda."
+                        ]
+                }
+        ],
+        faqs: [
+                {
+                        question: "¿Qué canales de comunicación son más recomendables?",
+                        answer: "Un sitio web profesional optimizado para buscadores (SEO local) y perfiles en redes sociales con un enfoque educativo."
+                },
+                {
+                        question: "¿Es ético opinar sobre casos de figuras públicas?",
+                        answer: "No. Diagnosticar u opinar públicamente sobre personas que no han sido evaluadas clínicamente por ti vulnera la ética profesional."
+                }
+        ],
+        relatedAssets: [
+                {
+                        label: "Marketing para Psicólogos",
+                        href: "/guias/marketing-para-psicologos",
+                        type: "guide"
+                },
+                {
+                        label: "Comunidad SAPIHUM",
+                        href: "/comunidad",
+                        type: "community"
+                }
+        ],
+        schemaTypes: [
+                "Article",
+                "BreadcrumbList",
+                "FAQPage"
+        ]
+},
+    {
+        slug: "redes-sociales-para-psicologos",
+        contentType: "guide",
+        sourceType: "guide",
+        title: "Redes sociales para psicólogos: estrategias éticas de psicoeducación",
+        description: "Aprende a utilizar plataformas digitales para compartir conocimiento científico, generar confianza y atraer pacientes sin comprometer la ética.",
+        aiSummary: "Manual práctico sobre el uso ético y efectivo de redes sociales para psicoterapeutas. Analiza la creación de contenido psicoeducativo, el secreto profesional y los límites relacionales.",
+        topic: "desarrollo profesional",
+        specialty: "supervision_clinica",
+        heroEyebrow: "Psicoeducación digital",
+        ctaLabel: "Ver formaciones de marketing ético",
+        intent: "join_community",
+        actionType: "guide_view",
+        interestTags: [
+                "marketing_psicologos",
+                "consulta_privada",
+                "comunidad"
+        ],
+        publishedAt: "2026-06-02",
+        updatedAt: "2026-06-02",
+        sections: [
+                {
+                        heading: "Psicoeducación vs. consejo psicológico directo",
+                        paragraphs: [
+                                "Las redes sociales deben utilizarse con fines puramente informativos y educativos. Un posteo o un mensaje directo nunca puede sustituir a una consulta psicoterapéutica formal.",
+                                "El clínico debe cuidar sus límites profesionales y abstenerse de responder consultas diagnósticas o dar consejos clínicos directos por estos medios."
+                        ]
+                },
+                {
+                        heading: "El secreto profesional en entornos digitales",
+                        paragraphs: [
+                                "Bajo ninguna circunstancia se debe divulgar información que permita identificar a tus consultantes.",
+                                "Incluso si se alteran datos demográficos, es éticamente riesgoso exponer detalles de casos en redes públicas sin autorización formal firmada."
+                        ]
+                },
+                {
+                        heading: "Límites éticos y disclaimer profesional",
+                        paragraphs: [
+                                "Este contenido es informativo y profesional; no sustituye supervisión clínica, criterio profesional, formación especializada ni asesoría legal cuando corresponda."
+                        ]
+                }
+        ],
+        faqs: [
+                {
+                        question: "¿Qué hacer si un seguidor me pide ayuda psicológica en un comentario?",
+                        answer: "Es ético redirigirlo a un canal de atención privada o facilitarle números de emergencia y soporte en crisis si se detecta un riesgo inminente."
+                },
+                {
+                        question: "¿Es correcto cobrar consultas por adelantado por redes sociales?",
+                        answer: "Se recomienda encauzar todos los cobros a través de pasarelas seguras e integradas en tu plataforma oficial de agenda o página web."
+                }
+        ],
+        relatedAssets: [
+                {
+                        label: "Cómo Conseguir Pacientes",
+                        href: "/guias/como-conseguir-pacientes-como-psicologo",
+                        type: "guide"
+                },
+                {
+                        label: "Herramientas Digitales para Psicólogos",
+                        href: "/herramientas/herramientas-digitales-para-psicologos",
+                        type: "tool"
+                }
+        ],
+        schemaTypes: [
+                "Article",
+                "BreadcrumbList",
+                "FAQPage"
+        ]
+},
+    {
+        slug: "errores-comunes-al-cobrar-consulta-psicologica",
+        contentType: "guide",
+        sourceType: "guide",
+        title: "Errores comunes al cobrar consulta psicológica y cómo resolverlos",
+        description: "Evita el desorden financiero y los límites difusos en tu práctica clínica estableciendo un encuadre de tarifas claro, ético y firme desde el inicio.",
+        aiSummary: "Identifica y corrige las principales fallas administrativas en el consultorio privado de psicología. Trata el cobro de inasistencias, los aumentos anuales y el manejo de tarifas.",
+        topic: "consulta privada",
+        specialty: "supervision_clinica",
+        heroEyebrow: "Gestión clínica financiera",
+        ctaLabel: "Descargar el checklist de tarifas",
+        intent: "explore_formation",
+        actionType: "guide_view",
+        interestTags: [
+                "consulta_privada",
+                "supervision_clinica",
+                "practica_clinica"
+        ],
+        publishedAt: "2026-06-02",
+        updatedAt: "2026-06-02",
+        sections: [
+                {
+                        heading: "El error de no cobrar las inasistencias y cancelaciones de última hora",
+                        paragraphs: [
+                                "Muchos terapeutas omiten cobrar las sesiones canceladas con pocas horas de aviso por culpa o temor a la confrontación.",
+                                "Esto debilita el encuadre terapéutico y drena la estabilidad financiera de tu consultorio. Pautar esta regla por escrito y firmarla en el consentimiento informado inicial es fundamental."
+                        ]
+                },
+                {
+                        heading: "Ignorar tus costos directos y de formación continua",
+                        paragraphs: [
+                                "Establecer tarifas al azar o imitar el promedio de tu zona sin sumar tus gastos de renta, software seguro, impuestos y supervisores te conducirá al burnout clínico por saturación de pacientes.",
+                                "Fija un honorario justo que refleje tus costos reales y te permita continuar con tu capacitación técnica sistemática."
+                        ]
+                },
+                {
+                        heading: "Límites éticos y disclaimer profesional",
+                        paragraphs: [
+                                "Este contenido es informativo y profesional; no sustituye supervisión clínica, criterio profesional, formación especializada ni asesoría legal cuando corresponda."
+                        ]
+                }
+        ],
+        faqs: [
+                {
+                        question: "¿Con qué frecuencia se deben ajustar las tarifas de consulta?",
+                        answer: "Lo más recomendable es realizar un ajuste anual conforme a la inflación de tu localidad, notificando a tus pacientes con un mes de anticipación."
+                },
+                {
+                        question: "¿Cómo comunicar las políticas de cobro al paciente?",
+                        answer: "Explícalas verbalmente durante la primera sesión de encuadre y entrégalas impresas o digitales en el consentimiento informado."
+                }
+        ],
+        relatedAssets: [
+                {
+                        label: "Cómo Cobrar Consulta",
+                        href: "/guias/como-cobrar-consulta-psicologica",
+                        type: "guide"
+                },
+                {
+                        label: "Checklist de Consulta Organizada",
+                        href: "/recursos/formatos/checklist-consulta-organizada",
+                        type: "resource_format"
+                }
+        ],
+        schemaTypes: [
+                "Article",
+                "BreadcrumbList",
+                "FAQPage"
+        ]
+},
+    {
+        slug: "como-dar-seguimiento-a-prospectos-sin-ser-invasivo",
+        contentType: "guide",
+        sourceType: "guide",
+        title: "Cómo dar seguimiento a prospectos de pacientes sin ser invasivo",
+        description: "Aprende a contactar a los interesados de forma respetuosa, facilitando su toma de decisiones informada y priorizando su autonomía ética.",
+        aiSummary: "Estrategias de seguimiento ético y no intrusivo para terapeutas autónomos. Protocolos de contacto por WhatsApp, resolución de dudas y respeto al espacio del paciente.",
+        topic: "consulta privada",
+        specialty: "supervision_clinica",
+        heroEyebrow: "Gestión ética de consulta",
+        ctaLabel: "Unirse a la comunidad",
+        intent: "join_community",
+        actionType: "guide_view",
+        interestTags: [
+                "consulta_privada",
+                "captacion_pacientes",
+                "comunidad"
+        ],
+        publishedAt: "2026-06-02",
+        updatedAt: "2026-06-02",
+        sections: [
+                {
+                        heading: "Respetar los tiempos emocionales del consultante",
+                        paragraphs: [
+                                "A diferencia de otros sectores, quien busca terapia puede estar pasando por un momento de alta vulnerabilidad o confusión.",
+                                "Ejercer presión comercial es éticamente inadmisible. El seguimiento debe centrarse en la calidez, la empatía y en brindar información útil para su proceso de toma de decisiones."
+                        ]
+                },
+                {
+                        heading: "El protocolo de un solo contacto de cortesía",
+                        paragraphs: [
+                                "Si una persona solicita informes pero no agenda sesión, se recomienda enviar un único mensaje de cortesía resolviendo sus dudas y reiterando tu disponibilidad.",
+                                "Si no hay respuesta, es ético abstenerse de insistir para resguardar la total autonomía de la persona."
+                        ]
+                },
+                {
+                        heading: "Límites éticos y disclaimer profesional",
+                        paragraphs: [
+                                "Este contenido es informativo y profesional; no sustituye supervisión clínica, criterio profesional, formación especializada ni asesoría legal cuando corresponda."
+                        ]
+                }
+        ],
+        faqs: [
+                {
+                        question: "¿Qué información mínima debe incluir un mensaje de informes?",
+                        answer: "Debe contener tu nombre, enfoque de trabajo, perfiles que atiendes, tarifa por sesión, modalidad (online/presencial) y ubicación."
+                },
+                {
+                        question: "¿Es aconsejable enviar recordatorios automáticos de citas?",
+                        answer: "Sí, enviar un recordatorio formal con 24 o 48 horas de anticipación es sumamente útil y valorado por los consultantes."
+                }
+        ],
+        relatedAssets: [
+                {
+                        label: "Cómo Conseguir Pacientes",
+                        href: "/guias/como-conseguir-pacientes-como-psicologo",
+                        type: "guide"
+                },
+                {
+                        label: "Formato de Historia Clínica",
+                        href: "/recursos/formatos/historia-clinica-psicologica",
+                        type: "resource_format"
+                }
+        ],
+        schemaTypes: [
+                "Article",
+                "BreadcrumbList",
+                "FAQPage"
+        ]
+},
+    {
+        slug: "consentimiento-informado-terapia-online",
+        contentType: "resource_format",
+        sourceType: "resource_format",
+        title: "Consentimiento informado para terapia online: formato editable",
+        description: "Estructura el encuadre legal, tecnológico, ético y de confidencialidad de tus consultas virtuales conforme a los requisitos internacionales de telepsicología.",
+        aiSummary: "Modelos de consentimiento informado para telepsicología. Incluye cláusulas de protección de datos, plataformas seguras, pérdida de conexión y protocolos de crisis a distancia.",
+        topic: "documentacion clinica",
+        specialty: "evaluacion_clinica",
+        heroEyebrow: "Formato clínico descargable",
+        ctaLabel: "Descargar consentimiento online",
+        intent: "download_resource",
+        actionType: "resource_download",
+        interestTags: [
+                "documentacion_clinica",
+                "evaluacion_clinica",
+                "normativas",
+                "herramientas_digitales"
+        ],
+        publishedAt: "2026-06-02",
+        updatedAt: "2026-06-02",
+        sections: [
+                {
+                        heading: "La obligatoriedad de encuadrar la terapia virtual",
+                        paragraphs: [
+                                "Ejercer la psicología clínica en modalidad online exige un consentimiento informado específico que aborde los riesgos de seguridad informática, las plataformas de videollamada autorizadas y las dinámicas del espacio confidencial de sesión.",
+                                "El consultante debe comprender y firmar este encuadre legal y ético de interacciones virtuales antes de la primera consulta diagnóstica formal."
+                        ]
+                },
+                {
+                        heading: "Cláusulas cardinales del consentimiento de telepsicología",
+                        paragraphs: [
+                                "Un documento sólido debe estipular la confidencialidad mutua (evitar grabaciones de sesión), la encriptación de extremo a extremo, los métodos de pago encriptados y un plan de acción formal ante caídas de red o cortes de señal."
+                        ]
+                },
+                {
+                        heading: "Límites éticos y disclaimer profesional",
+                        paragraphs: [
+                                "Este contenido es informativo y profesional; no sustituye supervisión clínica, criterio profesional, formación especializada ni asesoría legal cuando corresponda."
+                        ]
+                }
+        ],
+        faqs: [
+                {
+                        question: "¿Qué plataformas son adecuadas para la consulta online?",
+                        answer: "Plataformas que cumplan normativas sanitarias como HIPAA o el RGPD encriptando las videollamadas de extremo a extremo."
+                },
+                {
+                        question: "¿Cómo debe firmar el paciente este documento?",
+                        answer: "Puede firmarse mediante firmas digitales verificadas o digitalizando su firma manuscrita sobre el formato en formato PDF."
+                }
+        ],
+        gatedResource: {
+                assetKey: "consentimiento-terapia-online",
+                title: "Plantilla de consentimiento informado para terapia online",
+                description: "Formato editable estructurado con cláusulas de telepsicología, seguridad de datos de salud y plan de emergencia a distancia.",
+                benefits: [
+                        "Cláusulas redactadas bajo estándares internacionales de confidencialidad.",
+                        "Protocolo integrado para interrupciones tecnológicas de sesión.",
+                        "Formato digital en Word listo para editar and personalizar."
+                ],
+                downloadUrl: "/api/organic-resources/consentimiento-terapia-online"
+        },
+        relatedAssets: [
+                {
+                        label: "Plantilla de Consentimiento Informado",
+                        href: "/recursos/formatos/consentimiento-informado-psicologico",
+                        type: "resource_format"
+                },
+                {
+                        label: "Guía de Expediente Psicológico",
+                        href: "/guias/guia-expediente-psicologico",
+                        type: "guide"
+                }
+        ],
+        schemaTypes: [
+                "Article",
+                "BreadcrumbList",
+                "FAQPage"
+        ]
+},
+    {
+        slug: "consentimiento-informado-menores-psicologia",
+        contentType: "resource_format",
+        sourceType: "resource_format",
+        title: "Consentimiento informado para menores en psicología: formato legal",
+        description: "Asegura tu respaldo legal y ético en la psicoterapia infantil o adolescente recopilando las firmas de ambos progenitores o tutores legales autorizados.",
+        aiSummary: "Formatos clínicos de consentimiento para la atención de niños y adolescentes. Detalla los derechos del menor, el secreto compartido y la autorización de ambos tutores legales.",
+        topic: "documentacion clinica",
+        specialty: "evaluacion_clinica",
+        heroEyebrow: "Formato clínico legal",
+        ctaLabel: "Descargar consentimiento para menores",
+        intent: "download_resource",
+        actionType: "resource_download",
+        interestTags: [
+                "documentacion_clinica",
+                "evaluacion_clinica",
+                "normativas"
+        ],
+        publishedAt: "2026-06-02",
+        updatedAt: "2026-06-02",
+        sections: [
+                {
+                        heading: "El doble consentimiento en terapia infanto-juvenil",
+                        paragraphs: [
+                                "La intervención terapéutica con personas menores de edad requiere obligatoriamente la aprobación de sus representantes legales.",
+                                "Omitir este paso representa una grave falta ética y legal susceptible de sanciones administrativas por las agencias de salud de tu país."
+                        ]
+                },
+                {
+                        heading: "Secreto profesional compartido con los tutores",
+                        paragraphs: [
+                                "Es fundamental establecer un canal de comunicación transparente con los padres. Sin embargo, se debe respetar el espacio confidencial y de alianza terapéutica con el niño o adolescente, notificando a los adultos solo las variables de riesgo o avances generales."
+                        ]
+                },
+                {
+                        heading: "Límites éticos y disclaimer profesional",
+                        paragraphs: [
+                                "Este contenido es informativo y profesional; no sustituye supervisión clínica, criterio profesional, formación especializada ni asesoría legal cuando corresponda."
+                        ]
+                }
+        ],
+        faqs: [
+                {
+                        question: "¿Qué hacer si los padres del menor están divorciados?",
+                        answer: "Se recomienda encarecidamente recabar la firma de autorización de ambos progenitores, salvo que uno posea la patria potestad exclusiva declarada judicialmente."
+                },
+                {
+                        question: "¿A partir de qué edad se requiere asentimiento del menor?",
+                        answer: "Generalmente a partir de los 12 años se recomienda adjuntar un formato simplificado de asentimiento terapéutico del menor."
+                }
+        ],
+        gatedResource: {
+                assetKey: "consentimiento-menores",
+                title: "Plantilla de consentimiento informado para menores",
+                description: "Formato estructurado de autorización para la intervención psicoterapéutica de niños y adolescentes con firmas de ambos padres.",
+                benefits: [
+                        "Secciones de delimitación del secreto profesional y derecho a la privacidad del menor.",
+                        "Campos de identificación formal de padres o representantes legales.",
+                        "Estructura adaptable a legislaciones civiles y de salud familiar en español."
+                ],
+                downloadUrl: "/api/organic-resources/consentimiento-menores"
+        },
+        relatedAssets: [
+                {
+                        label: "Formato de Historia Clínica",
+                        href: "/recursos/formatos/historia-clinica-psicologica",
+                        type: "resource_format"
+                },
+                {
+                        label: "Guía de Formulación de Caso",
+                        href: "/guias/formulacion-de-caso-clinico",
+                        type: "guide"
+                }
+        ],
+        schemaTypes: [
+                "Article",
+                "BreadcrumbList",
+                "FAQPage"
+        ]
+},
+    {
+        slug: "nota-soap-psicologos",
+        contentType: "resource_format",
+        sourceType: "resource_format",
+        title: "Formato de nota SOAP para psicólogos: guía y plantilla de evolución clínica",
+        description: "Sintetiza la evolución de tus pacientes en cada sesión bajo el estándar SOAP: Subjetivo, Objetivo, Análisis y Plan terapéutico estructurado.",
+        aiSummary: "Plantillas y metodologías de redacción de notas clínicas SOAP para psicología. Explica qué consignar en cada una de las 4 fases de forma objetiva y segura.",
+        topic: "documentacion clinica",
+        specialty: "evaluacion_clinica",
+        heroEyebrow: "Formato operativo de sesión",
+        ctaLabel: "Descargar formato de nota SOAP",
+        intent: "download_resource",
+        actionType: "resource_download",
+        interestTags: [
+                "documentacion_clinica",
+                "evaluacion_clinica",
+                "practica_clinica"
+        ],
+        publishedAt: "2026-06-02",
+        updatedAt: "2026-06-02",
+        sections: [
+                {
+                        heading: "La necesidad científica del registro estructurado SOAP",
+                        paragraphs: [
+                                "El estándar SOAP permite sistematizar el registro de la evolución terapéutica, desglosando la vivencia subjetiva expresada por el consultante de los datos puramente conductuales y de observación clínica del terapeuta.",
+                                "Esto agiliza la toma de decisiones basada en datos empíricos y provee un respaldo profesional robusto ante cualquier requerimiento formal o auditoría de salud."
+                        ]
+                },
+                {
+                        heading: "El desglose de los cuatro cuadrantes SOAP",
+                        paragraphs: [
+                                "S (Subjetivo): Frases textuales y percepciones emocionales relatadas por el paciente.",
+                                "O (Objetivo): Mediciones conductuales, apariencia, lenguaje no verbal y escalas aplicadas.",
+                                "A (Análisis): Formulación del terapeuta sobre la sesión, avances o retrocesos respecto a la línea base.",
+                                "P (Plan): Tareas terapéuticas agendadas, objetivos para la próxima sesión y derivaciones activas."
+                        ]
+                },
+                {
+                        heading: "Límites éticos y disclaimer profesional",
+                        paragraphs: [
+                                "Este contenido es informativo y profesional; no sustituye supervisión clínica, criterio profesional, formación especializada ni asesoría legal cuando corresponda."
+                        ]
+                }
+        ],
+        faqs: [
+                {
+                        question: "¿Cuánto tiempo se recomienda dedicar a escribir una nota SOAP?",
+                        answer: "Una nota SOAP estructurada de forma óptima toma de 5 a 10 minutos de redacción al concluir tu sesión clínica."
+                },
+                {
+                        question: "¿Es obligatorio llevar estas notas para cada sesión?",
+                        answer: "Sí, la legislación sanitaria exige consignar una nota de evolución sistemática por cada interacción terapéutica efectuada."
+                }
+        ],
+        gatedResource: {
+                assetKey: "formato-nota-soap",
+                title: "Formato de nota SOAP para psicólogos",
+                description: "Plantilla interactiva para registrar tus notas SOAP de evolución de forma ágil y sumamente estructurada.",
+                benefits: [
+                        "Guía de llenado detallada con ejemplos prácticos para cada cuadrante.",
+                        "Diseño digital optimizado para archivar en tu computadora de forma segura.",
+                        "Campos limpios y listos para usar en tus sesiones cotidianas."
+                ],
+                downloadUrl: "/api/organic-resources/formato-nota-soap"
+        },
+        relatedAssets: [
+                {
+                        label: "Nota Clínica Psicológica",
+                        href: "/recursos/formatos/nota-clinica-psicologica",
+                        type: "resource_format"
+                },
+                {
+                        label: "Plan Terapéutico Profesional",
+                        href: "/recursos/formatos/plan-terapeutico",
+                        type: "resource_format"
+                }
+        ],
+        schemaTypes: [
+                "Article",
+                "BreadcrumbList",
+                "FAQPage"
+        ]
+},
+    {
+        slug: "canalizacion-psicologica",
+        contentType: "resource_format",
+        sourceType: "resource_format",
+        title: "Formato de canalización psicológica: protocolo de derivación",
+        description: "Estructura formalmente tus derivaciones de pacientes a psiquiatras, neurólogos u otros terapeutas promoviendo la continuidad de su cuidado de salud.",
+        aiSummary: "Modelos de derivación e interconsulta clínica para profesionales de la salud mental. Protocolos de intercambio de informes respetuosos de la privacidad.",
+        topic: "documentacion clinica",
+        specialty: "supervision_clinica",
+        heroEyebrow: "Formato de interconsulta",
+        ctaLabel: "Descargar formato de canalización",
+        intent: "download_resource",
+        actionType: "resource_download",
+        interestTags: [
+                "documentacion_clinica",
+                "supervision_clinica",
+                "practica_clinica"
+        ],
+        publishedAt: "2026-06-02",
+        updatedAt: "2026-06-02",
+        sections: [
+                {
+                        heading: "El acto clínico de la derivación interdisciplinaria",
+                        paragraphs: [
+                                "Cuando un caso supera tus límites de competencia o requiere soporte de especialidades médicas, la derivación formal es obligatoria.",
+                                "Enviar un formato clínico estructurado al nuevo especialista agiliza el encuadre clínico y transmite máxima seriedad metodológica."
+                        ]
+                },
+                {
+                        heading: "Elementos mínimos de una canalización ética",
+                        paragraphs: [
+                                "El informe debe detallar el motivo principal del envío, una síntesis de la evaluación conductual, las escalas aplicadas de screening y el área de salud que requiere apoyo específico, resguardando siempre la privacidad íntima del consultante."
+                        ]
+                },
+                {
+                        heading: "Límites éticos y disclaimer profesional",
+                        paragraphs: [
+                                "Este contenido es informativo y profesional; no sustituye supervisión clínica, criterio profesional, formación especializada ni asesoría legal cuando corresponda."
+                        ]
+                }
+        ],
+        faqs: [
+                {
+                        question: "¿Se requiere autorización del paciente para derivar su caso?",
+                        answer: "Sí. El paciente debe manifestar su consentimiento voluntario y firmar la autorización de transferencia de información clínica básica."
+                },
+                {
+                        question: "¿Qué información se debe resguardar por secreto profesional?",
+                        answer: "Solo se deben compartir los datos funcionales y de salud mental indispensables para la atención coordinada, omitiendo detalles autobiográficos íntimos."
+                }
+        ],
+        gatedResource: {
+                assetKey: "formato-canalizacion",
+                title: "Formato de canalización psicológica",
+                description: "Plantilla profesional estructurada para derivaciones a psiquiatras, neurólogos o terapeutas especializados.",
+                benefits: [
+                        "Campos detallados para antecedentes de tratamiento e hipótesis de derivación.",
+                        "Sección de firmas cruzadas de autorización del paciente y profesional.",
+                        "Formato listo para imprimir o rellenar de forma segura."
+                ],
+                downloadUrl: "/api/organic-resources/formato-canalizacion"
+        },
+        relatedAssets: [
+                {
+                        label: "Formato de Historia Clínica",
+                        href: "/recursos/formatos/historia-clinica-psicologica",
+                        type: "resource_format"
+                },
+                {
+                        label: "Supervisión de Casos Clínicos",
+                        href: "/guias/como-organizar-practica-clinica",
+                        type: "guide"
+                }
+        ],
+        schemaTypes: [
+                "Article",
+                "BreadcrumbList",
+                "FAQPage"
+        ]
+},
+    {
+        slug: "alta-terapeutica",
+        contentType: "resource_format",
+        sourceType: "resource_format",
+        title: "Formato de alta terapéutica: cierre de proceso y prevención",
+        description: "Estructura la sesión de cierre y formaliza el alta de tus consultantes, delineando los logros clínicos alcanzados y un plan sólido de prevención de recaídas.",
+        aiSummary: "Plantillas de alta clínica y cierre de psicoterapia. Métodos para sistematizar el egreso del consultante, evaluar el cumplimiento de metas y planificar seguimientos.",
+        topic: "documentacion clinica",
+        specialty: "evaluacion_clinica",
+        heroEyebrow: "Formato clínico de cierre",
+        ctaLabel: "Descargar formato de alta",
+        intent: "download_resource",
+        actionType: "resource_download",
+        interestTags: [
+                "documentacion_clinica",
+                "evaluacion_clinica",
+                "practica_clinica"
+        ],
+        publishedAt: "2026-06-02",
+        updatedAt: "2026-06-02",
+        sections: [
+                {
+                        heading: "El cierre estructurado del proceso psicoterapéutico",
+                        paragraphs: [
+                                "El alta terapéutica representa la culminación exitosa de un proceso de cambio corresponsable. Formalizarlo ayuda al paciente a tomar conciencia de su propio progreso y consolida sus herramientas personales de afrontamiento.",
+                                "Dejar inconcluso el cierre genera dudas relacionales y entorpece la evaluación funcional del tratamiento."
+                        ]
+                },
+                {
+                        heading: "Planificación activa de prevención de recaídas",
+                        paragraphs: [
+                                "Durante la sesión de alta, se debe redactar junto al consultante una matriz con sus disparadores de malestar identificados, sus estrategias eficaces de autorregulación y un protocolo claro de reingreso a terapia si las variables del entorno lo requieren."
+                        ]
+                },
+                {
+                        heading: "Límites éticos y disclaimer profesional",
+                        paragraphs: [
+                                "Este contenido es informativo y profesional; no sustituye supervisión clínica, criterio profesional, formación especializada ni asesoría legal cuando corresponda."
+                        ]
+                }
+        ],
+        faqs: [
+                {
+                        question: "¿Cuándo se debe proponer el alta terapéutica?",
+                        answer: "Cuando el consultante haya alcanzado la mayoría de los objetivos clínicos pactados y muestre herramientas autónomas de afrontamiento adaptativas."
+                },
+                {
+                        question: "¿Cómo programar las sesiones de seguimiento post-alta?",
+                        answer: "Se recomienda pactar breves contactos de control a los 3, 6 y 12 meses para evaluar la consolidación de los progresos clínicos."
+                }
+        ],
+        gatedResource: {
+                assetKey: "formato-alta-terapeutica",
+                title: "Formato de alta terapéutica",
+                description: "Plantilla digital para formalizar el alta de tus pacientes con resúmenes de objetivos alcanzados y plan preventivo de recaídas.",
+                benefits: [
+                        "Matriz interactiva para documentar logros psicoterapéuticos.",
+                        "Plan preventivo estructurado listo para entregar al paciente.",
+                        "Campos limpios para firmas y constancia administrativa del alta."
+                ],
+                downloadUrl: "/api/organic-resources/formato-alta-terapeutica"
+        },
+        relatedAssets: [
+                {
+                        label: "Plan Terapéutico",
+                        href: "/recursos/formatos/plan-terapeutico",
+                        type: "resource_format"
+                },
+                {
+                        label: "Guía de Formulación de Caso",
+                        href: "/guias/formulacion-de-caso-clinico",
+                        type: "guide"
+                }
+        ],
+        schemaTypes: [
+                "Article",
+                "BreadcrumbList",
+                "FAQPage"
+        ]
+},
+    {
+        slug: "diferencias-historia-clinica-expediente-nota-evolucion",
+        contentType: "guide",
+        sourceType: "guide",
+        title: "Diferencias entre historia clínica, expediente y nota de evolución",
+        description: "Domina los conceptos de documentación en salud mental y estructura tu archivo clínico de forma impecable y conforme a la ley.",
+        aiSummary: "Guía conceptual comparativa sobre el resguardo de información clínica. Clarifica el alcance, la vigencia, el contenido y las normativas aplicables a cada registro.",
+        topic: "documentacion clinica",
+        specialty: "evaluacion_clinica",
+        heroEyebrow: "Guía metodológica legal",
+        ctaLabel: "Descargar el checklist de organización",
+        intent: "learn",
+        actionType: "guide_view",
+        interestTags: [
+                "documentacion_clinica",
+                "evaluacion_clinica",
+                "normativas"
+        ],
+        publishedAt: "2026-06-02",
+        updatedAt: "2026-06-02",
+        sections: [
+                {
+                        heading: "Claridad conceptual en la administración clínica",
+                        paragraphs: [
+                                "Es sumamente común confundir el expediente clínico con la historia clínica o con las notas cotidianas de evolución.",
+                                "Cada uno de estos registros tiene una jerarquía documental diferente y cumple funciones clínicas, éticas y jurídicas específicas en la práctica sanitaria."
+                        ]
+                },
+                {
+                        heading: "El desglose de los componentes documentales",
+                        paragraphs: [
+                                "1. Expediente Clínico: La totalidad de la información de salud del paciente, que unifica consentimientos, historia inicial, notas de evolución, informes y hojas de derivación.",
+                                "2. Historia Clínica: El registro inicial descriptivo que compila los antecedentes personales, genograma familiar, motivo de consulta actual y examen mental.",
+                                "3. Nota de Evolución: El reporte ágil que detalla los hitos de cambio clínico acontecidos específicamente en una sesión de tratamiento."
+                        ]
+                },
+                {
+                        heading: "Límites éticos y disclaimer profesional",
+                        paragraphs: [
+                                "Este contenido es informativo y profesional; no sustituye supervisión clínica, criterio profesional, formación especializada ni asesoría legal cuando corresponda."
+                        ]
+                }
+        ],
+        faqs: [
+                {
+                        question: "¿Cuántos años se debe resguardar el expediente clínico por ley?",
+                        answer: "En la mayoría de las legislaciones de salud mental en español se exige un periodo mínimo de 5 años contados a partir de la última fecha de atención."
+                },
+                {
+                        question: "¿El paciente tiene derecho a solicitar una copia de su expediente?",
+                        answer: "Sí. El expediente clínico pertenece legalmente al clínico o a la institución que lo genera, pero el consultante posee los derechos de acceso y rectificación de sus datos de salud."
+                }
+        ],
+        relatedAssets: [
+                {
+                        label: "Guía de Expediente Psicológico",
+                        href: "/guias/guia-expediente-psicologico",
+                        type: "guide"
+                },
+                {
+                        label: "Formato de Nota SOAP",
+                        href: "/recursos/formatos/nota-soap-psicologos",
+                        type: "resource_format"
+                }
+        ],
+        schemaTypes: [
+                "Article",
+                "BreadcrumbList",
+                "FAQPage"
+        ]
+},
+    {
+        slug: "ia-para-psicologos-clinicos",
+        contentType: "guide",
+        sourceType: "guide",
+        title: "Inteligencia Artificial para psicólogos clínicos: ética y límites",
+        description: "Analiza cómo incorporar asistentes de IA en la gestión de tu consultorio de forma responsable, protegiendo al 100% el anonimato de tus pacientes.",
+        aiSummary: "Guía ética sobre el uso de tecnologías de IA en psicología clínica. Analiza la redacción asistida de notas, la confidencialidad, la seguridad informática y la confidencialidad.",
+        topic: "herramientas digitales",
+        specialty: "clinica",
+        heroEyebrow: "Tecnología y ética clínica",
+        ctaLabel: "Ver checklist ético de IA",
+        intent: "learn",
+        actionType: "guide_view",
+        interestTags: [
+                "herramientas_digitales",
+                "normativas",
+                "clinica"
+        ],
+        publishedAt: "2026-06-02",
+        updatedAt: "2026-06-02",
+        sections: [
+                {
+                        heading: "El imperativo ético de la privacidad clínica en la era de la IA",
+                        paragraphs: [
+                                "La Inteligencia Artificial ofrece potentes herramientas para estructurar resúmenes de sesión o sintetizar formulaciones de caso. Sin embargo, subir información confidencial o transcripciones de audio completas de pacientes a servidores externos sin anonimización absoluta vulnera el secreto profesional.",
+                                "El clínico debe ejercer un riguroso criterio de seguridad para evitar filtraciones y resguardar la identidad de los consultantes."
+                        ]
+                },
+                {
+                        heading: "Aplicaciones viables en la práctica autónoma",
+                        paragraphs: [
+                                "Usa asistentes locales encriptados para agilizar tareas puramente administrativas, redactar artículos de psicoeducación, o jerarquizar hipótesis sobre plantillas SOAP sin ingresar datos de filiación ni información que identifique al paciente."
+                        ]
+                },
+                {
+                        heading: "Límites éticos y disclaimer profesional",
+                        paragraphs: [
+                                "Este contenido es informativo y profesional; no sustituye supervisión clínica, criterio profesional, formación especializada ni asesoría legal cuando corresponda."
+                        ]
+                }
+        ],
+        faqs: [
+                {
+                        question: "¿Es ético utilizar IA para transcribir audios de terapia?",
+                        answer: "Solo si utilizas plataformas encriptadas locales autorizadas por normativas sanitarias y cuentas con el consentimiento firmado explícito del consultante."
+                },
+                {
+                        question: "¿Qué herramientas de SAPIHUM incorporarían IA?",
+                        answer: "Nuestra membresía premium te brinda acceso a herramientas clínicas inteligentes de resguardo de datos y asistencia ética en redacción SOAP."
+                }
+        ],
+        relatedAssets: [
+                {
+                        label: "Checklist Ético de IA",
+                        href: "/herramientas/checklist-etico-ia-psicologos",
+                        type: "tool"
+                },
+                {
+                        label: "Guía de Herramientas Digitales",
+                        href: "/herramientas/herramientas-digitales-para-psicologos",
+                        type: "tool"
+                }
+        ],
+        schemaTypes: [
+                "Article",
+                "BreadcrumbList",
+                "FAQPage"
+        ]
+},
+    {
+        slug: "prompts-de-ia-para-psicologos",
+        contentType: "tool",
+        sourceType: "tool",
+        title: "Prompts de Inteligencia Artificial para psicólogos clínicos",
+        description: "Optimiza la redacción de tus notas SOAP, resúmenes psicoeducativos e hipótesis teóricas con nuestra biblioteca curada de prompts éticos.",
+        aiSummary: "Biblioteca estructurada de prompts de IA para optimizar la redacción clínica y la psicoeducación. Estructuras de prompts anónimos, seguros y objetivos.",
+        topic: "herramientas digitales",
+        specialty: "clinica",
+        heroEyebrow: "Herramienta digital de productividad",
+        ctaLabel: "Ver formaciones de digitalización",
+        intent: "explore_formation",
+        actionType: "guide_view",
+        interestTags: [
+                "herramientas_digitales",
+                "clinica",
+                "practica_clinica"
+        ],
+        publishedAt: "2026-06-02",
+        updatedAt: "2026-06-02",
+        sections: [
+                {
+                        heading: "La ingeniería de instrucciones éticas en salud mental",
+                        paragraphs: [
+                                "Redactar prompts precisos te permite utilizar la IA como un supervisor conceptual que critique constructivamente tus hipótesis de caso clínico de forma abstracta.",
+                                "Al estructurar las instrucciones omitiendo cualquier dato demográfico, puedes obtener sugerencias de intervenciones basadas en evidencia sin poner en riesgo la privacidad clínica."
+                        ]
+                },
+                {
+                        heading: "Estructura modelo para sintetizar notas SOAP",
+                        paragraphs: [
+                                "Un prompt ético e impecable debe formularse así: \"Actúa como supervisor de terapia cognitivo-conductual. Analiza la siguiente descripción abstracta de conductas problema, sin datos de identidad de paciente, y ayúdame a organizar la información bajo el formato estructural SOAP, priorizando objetivos.\""
+                        ]
+                },
+                {
+                        heading: "Límites éticos y disclaimer profesional",
+                        paragraphs: [
+                                "Este contenido es informativo y profesional; no sustituye supervisión clínica, criterio profesional, formación especializada ni asesoría legal cuando corresponda."
+                        ]
+                }
+        ],
+        faqs: [
+                {
+                        question: "¿Qué información debo omitir en mis prompts clínicos?",
+                        answer: "Debes omitir nombres, lugares de trabajo, edades exactas, ciudades de residencia, ocupaciones y cualquier suceso biográfico sumamente singular."
+                },
+                {
+                        question: "¿Cómo ayuda SAPIHUM en el uso de prompts?",
+                        answer: "Te ofrecemos colecciones descargables actualizadas mensualmente en nuestra membresía profesional de digitalización."
+                }
+        ],
+        relatedAssets: [
+                {
+                        label: "IA para Psicólogos",
+                        href: "/guias/ia-para-psicologos-clinicos",
+                        type: "guide"
+                },
+                {
+                        label: "Checklist Ético de IA",
+                        href: "/herramientas/checklist-etico-ia-psicologos",
+                        type: "tool"
+                }
+        ],
+        schemaTypes: [
+                "SoftwareApplication",
+                "BreadcrumbList",
+                "FAQPage"
+        ]
+},
+    {
+        slug: "checklist-etico-ia-psicologos",
+        contentType: "tool",
+        sourceType: "tool",
+        title: "Checklist ético de Inteligencia Artificial para psicólogos",
+        description: "Evalúa el nivel de cumplimiento ético, la privacidad y la encriptación de datos al incorporar tecnologías basadas en IA en tu consulta.",
+        aiSummary: "Listas de control operacional para el uso responsable de la Inteligencia Artificial en psicología. Criterios de protección de datos sanitarios y privacidad.",
+        topic: "herramientas digitales",
+        specialty: "clinica",
+        heroEyebrow: "Herramienta de control ético",
+        ctaLabel: "Descargar el checklist ético de IA",
+        intent: "download_resource",
+        actionType: "resource_download",
+        interestTags: [
+                "herramientas_digitales",
+                "normativas",
+                "clinica"
+        ],
+        publishedAt: "2026-06-02",
+        updatedAt: "2026-06-02",
+        sections: [
+                {
+                        heading: "Pauta de evaluación del cumplimiento normativo tecnológico",
+                        paragraphs: [
+                                "El psicólogo es el responsable final del resguardo de los expedientes. Antes de adoptar cualquier software que incorpore asistentes inteligentes, debes certificar que los datos personales de salud no se utilicen para entrenar modelos públicos externos.",
+                                "Esto violaría las regulaciones y el consentimiento informado firmado por el paciente."
+                        ]
+                },
+                {
+                        heading: "Dimensiones clave de evaluación en el checklist",
+                        paragraphs: [
+                                "El checklist cubre la encriptación de bases de datos, las opciones de borrado definitivo, la anonimización de entradas (inputs) y la firma de acuerdos de confidencialidad de datos sanitarios con el proveedor."
+                        ]
+                },
+                {
+                        heading: "Límites éticos y disclaimer profesional",
+                        paragraphs: [
+                                "Este contenido es informativo y profesional; no sustituye supervisión clínica, criterio profesional, formación especializada ni asesoría legal cuando corresponda."
+                        ]
+                }
+        ],
+        faqs: [
+                {
+                        question: "¿Qué normativas regulan la confidencialidad de datos en salud digital?",
+                        answer: "Las principales son el RGPD en Europa, la HIPAA en los Estados Unidos y leyes locales específicas de expedientes médicos electrónicos de cada país."
+                },
+                {
+                        question: "¿Qué hacer si un software de IA no aclara sus políticas de privacidad?",
+                        answer: "Se recomienda encarecidamente abstenerse de utilizar dicha plataforma para gestionar datos clínicos reales o notas SOAP."
+                }
+        ],
+        gatedResource: {
+                assetKey: "checklist-etico-ia",
+                title: "Checklist ético de IA para psicólogos",
+                description: "Lista de verificación estructurada para evaluar la seguridad, confidencialidad y el cumplimiento ético de asistentes y herramientas de IA.",
+                benefits: [
+                        "Criterios para evaluar acuerdos de procesamiento de datos con proveedores.",
+                        "Directrices claras de anonimización aplicables a notas clínicas SOAP.",
+                        "Esquema práctico de autoevaluación ética digital."
+                ],
+                downloadUrl: "/api/organic-resources/checklist-etico-ia"
+        },
+        relatedAssets: [
+                {
+                        label: "IA para Psicólogos",
+                        href: "/guias/ia-para-psicologos-clinicos",
+                        type: "guide"
+                },
+                {
+                        label: "Prompts de IA",
+                        href: "/herramientas/prompts-de-ia-para-psicologos",
+                        type: "tool"
+                }
+        ],
+        schemaTypes: [
+                "SoftwareApplication",
+                "BreadcrumbList",
+                "FAQPage"
+        ]
+},
+    {
+        slug: "herramientas-consulta-psicologica-online",
+        contentType: "tool",
+        sourceType: "tool",
+        title: "Herramientas esenciales para la consulta psicológica online",
+        description: "Sistemas operativos de agenda, plataformas encriptadas de videollamada, cobros seguros y software de expedientes clínicos recomendados para teleterapia.",
+        aiSummary: "Inventario y comparativa técnica de tecnologías para telepsicología clínica. Evalúa plataformas de videollamada, software de historias clínicas y pasarelas de pago.",
+        topic: "herramientas digitales",
+        specialty: "clinica",
+        heroEyebrow: "Herramienta de digitalización",
+        ctaLabel: "Unirse a la comunidad",
+        intent: "join_community",
+        actionType: "guide_view",
+        interestTags: [
+                "herramientas_digitales",
+                "consulta_privada",
+                "comunidad"
+        ],
+        publishedAt: "2026-06-02",
+        updatedAt: "2026-06-02",
+        sections: [
+                {
+                        heading: "La infraestructura del consultorio digital seguro",
+                        paragraphs: [
+                                "La consulta online de alto rendimiento exige contar con un ecosistema tecnológico ordenado e integrado.",
+                                "Evita improvisar combinando múltiples aplicaciones gratuitas no encriptadas. Unificar tu agenda digital, tus pasarelas seguras de pago y el expediente clínico promueve una experiencia fluida y profesional para tu consultante."
+                        ]
+                },
+                {
+                        heading: "Criterios de selección para plataformas de videollamada",
+                        paragraphs: [
+                                "Elige canales que utilicen cifrado simétrico robusto de extremo a extremo. Evita plataformas genéricas abiertas de chat y exige al proveedor la firma de un acuerdo formal de confidencialidad de datos de salud mental."
+                        ]
+                },
+                {
+                        heading: "Límites éticos y disclaimer profesional",
+                        paragraphs: [
+                                "Este contenido es informativo y profesional; no sustituye supervisión clínica, criterio profesional, formación especializada ni asesoría legal cuando corresponda."
+                        ]
+                }
+        ],
+        faqs: [
+                {
+                        question: "¿Qué ventajas ofrece usar un software clínico integrado?",
+                        answer: "Centraliza tu base de datos, reduce los tiempos de agendamiento, automatiza el envío de recordatorios y protege los expedientes clínicos bajo llaves encriptadas."
+                },
+                {
+                        question: "¿Es recomendable cobrar mediante transferencias bancarias manuales?",
+                        answer: "Es viable al inicio, pero automatizar los cobros con pasarelas integradas (como Stripe o PayPal) reduce drásticamente las tareas administrativas manuales."
+                }
+        ],
+        relatedAssets: [
+                {
+                        label: "Herramientas Digitales para Psicólogos",
+                        href: "/herramientas/herramientas-digitales-para-psicologos",
+                        type: "tool"
+                },
+                {
+                        label: "Cómo Organizar la Práctica",
+                        href: "/guias/como-organizar-practica-clinica",
+                        type: "guide"
+                }
+        ],
+        schemaTypes: [
+                "SoftwareApplication",
+                "BreadcrumbList",
+                "FAQPage"
+        ]
+},
+    {
+        slug: "como-organizar-documentos-clinicos-digitales",
+        contentType: "guide",
+        sourceType: "guide",
+        title: "Cómo organizar documentos clínicos digitales y proteger los datos",
+        description: "Estructura tus carpetas, archivos y copias de seguridad resguardando el cumplimiento estricto de las normativas de privacidad y la confidencialidad de tus pacientes.",
+        aiSummary: "Guía práctica para organizar y archivar documentos clínicos en formato digital. Protocolos de cifrado, nomenclaturas seguras y backups periódicos automáticos.",
+        topic: "documentacion clinica",
+        specialty: "evaluacion_clinica",
+        heroEyebrow: "Organización digital clínica",
+        ctaLabel: "Ver recursos de documentación",
+        intent: "learn",
+        actionType: "guide_view",
+        interestTags: [
+                "documentacion_clinica",
+                "normativas",
+                "herramientas_digitales"
+        ],
+        publishedAt: "2026-06-02",
+        updatedAt: "2026-06-02",
+        sections: [
+                {
+                        heading: "El reto ético del archivo de expedientes digitales",
+                        paragraphs: [
+                                "Digitalizar los expedientes de tus consultantes clínicos es sumamente práctico, pero te obliga a implementar robustas políticas de ciberseguridad.",
+                                "Guardar fichas médicas en carpetas de escritorio de computadoras compartidas sin contraseña ni encriptación representa una grave negligencia clínica que vulnera el secreto ético profesional."
+                        ]
+                },
+                {
+                        heading: "Nomenclaturas seguras para proteger el anonimato",
+                        paragraphs: [
+                                "Evita nombrar los archivos PDF con el nombre y apellido del paciente. Utiliza en su lugar nomenclaturas basadas en códigos alfa-numéricos iniciales correlacionados con un índice maestro encriptado al que solo tú tengas acceso técnico."
+                        ]
+                },
+                {
+                        heading: "Límites éticos y disclaimer profesional",
+                        paragraphs: [
+                                "Este contenido es informativo y profesional; no sustituye supervisión clínica, criterio profesional, formación especializada ni asesoría legal cuando corresponda."
+                        ]
+                }
+        ],
+        faqs: [
+                {
+                        question: "¿Con qué frecuencia se deben programar las copias de seguridad?",
+                        answer: "Se recomienda automatizar backups periódicos semanales o quincenales sobre nubes encriptadas que cumplan normativas sanitarias."
+                },
+                {
+                        question: "¿Es seguro utilizar Google Drive para guardar expedientes?",
+                        answer: "Únicamente si cuentas con una cuenta corporativa que permita configurar la protección y cifrado avanzados bajo cumplimiento HIPAA o el RGPD."
+                }
+        ],
+        relatedAssets: [
+                {
+                        label: "Guía de Expediente Psicológico",
+                        href: "/guias/guia-expediente-psicologico",
+                        type: "guide"
+                },
+                {
+                        label: "Formato de Consentimiento Online",
+                        href: "/recursos/formatos/consentimiento-informado-terapia-online",
+                        type: "resource_format"
+                }
+        ],
+        schemaTypes: [
+                "Article",
+                "BreadcrumbList",
+                "FAQPage"
+        ]
+},
+    {
+        slug: "terapias-de-tercera-generacion",
+        contentType: "approach",
+        sourceType: "approach",
+        title: "Terapias de tercera generación: bases científicas y aplicación",
+        description: "Explora el desarrollo de enfoques contextuales como ACT, DBT, FAP y mindfulness clínico y cómo aplicarlos con rigor científico en sesión.",
+        aiSummary: "Análisis detallado de los enfoques de tercera generación en psicoterapia. Bases conductuales radicales, el rol del lenguaje relacional y la aceptación experiencial.",
+        topic: "enfoques clinicos",
+        specialty: "terapias_contextuales",
+        heroEyebrow: "Bases teóricas clínicas",
+        ctaLabel: "Ver formaciones contextuales",
+        intent: "learn",
+        actionType: "guide_view",
+        interestTags: [
+                "terapias_contextuales",
+                "tcc",
+                "clinica"
+        ],
+        publishedAt: "2026-06-02",
+        updatedAt: "2026-06-02",
+        sections: [
+                {
+                        heading: "El salto de la reestructuración cognitiva al contexto funcional",
+                        paragraphs: [
+                                "A diferencia de la TCC tradicional enfocada en modificar el contenido de los pensamientos disfuncionales, las terapias de tercera generación priorizan alterar la relación funcional del paciente con sus pensamientos y emociones.",
+                                "El foco se desplaza hacia el desarrollo de la flexibilidad psicológica, la aceptación y la acción orientada a valores fundamentales del consultante."
+                        ]
+                },
+                {
+                        heading: "Principales modelos del catálogo de tercera generación",
+                        paragraphs: [
+                                "ACT (Terapia de Aceptación y Compromiso): Centrada en reducir la evitación experiencial y promover el compromiso con acciones valiosas.",
+                                "DBT (Terapia Dialéctico Conductual): Diseñada originalmente para desregulación emocional severa, equilibrando la aceptación y el cambio interactivo.",
+                                "FAP (Psicoterapia Analítica Funcional): Enfocada en potenciar el análisis funcional del comportamiento en sesión como motor cardinal de cambio."
+                        ]
+                },
+                {
+                        heading: "Límites éticos y disclaimer profesional",
+                        paragraphs: [
+                                "Este contenido es informativo y profesional; no sustituye supervisión clínica, criterio profesional, formación especializada ni asesoría legal cuando corresponda."
+                        ]
+                }
+        ],
+        faqs: [
+                {
+                        question: "¿Qué evidencia científica respalda a las terapias contextuales?",
+                        answer: "Cuentan con un amplísimo cuerpo de estudios clínicos controlados aleatorizados que demuestran su efectividad en trastornos del estado de ánimo, dolor crónico y desregulación severa."
+                },
+                {
+                        question: "¿Con qué pioneros se vinculan estas terapias?",
+                        answer: "Principalmente con teóricos de renombre como Steven Hayes (ACT) y Marsha Linehan (DBT)."
+                }
+        ],
+        relatedAssets: [
+                {
+                        label: "Especialidad en Terapias Contextuales",
+                        href: "/especialidades/terapias-contextuales",
+                        type: "specialty"
+                },
+                {
+                        label: "Biografía de Steven Hayes",
+                        href: "/autores/steven-hayes",
+                        type: "author"
+                }
+        ],
+        schemaTypes: [
+                "Article",
+                "BreadcrumbList",
+                "FAQPage"
+        ]
+},
+    {
+        slug: "terapia-de-esquemas",
+        contentType: "approach",
+        sourceType: "approach",
+        title: "Terapia de esquemas: conceptualización y técnicas aplicadas",
+        description: "Profundiza en la teoría integradora de Jeffrey Young para abordar rasgos disfuncionales de personalidad y esquemas cognitivos desadaptativos tempranos.",
+        aiSummary: "Análisis explicativo sobre la Terapia de Esquemas. Integración de TCC, apego y Gestalt para la resolución de patrones crónicos de personalidad y esquemas desadaptativos.",
+        topic: "enfoques clinicos",
+        specialty: "tcc",
+        heroEyebrow: "Bases teóricas clínicas",
+        ctaLabel: "Ver cursos clínicos de TCC",
+        intent: "learn",
+        actionType: "guide_view",
+        interestTags: [
+                "tcc",
+                "evaluacion_clinica",
+                "clinica"
+        ],
+        publishedAt: "2026-06-02",
+        updatedAt: "2026-06-02",
+        sections: [
+                {
+                        heading: "La conceptualización de los Esquemas Desadaptativos Tempranos (EDT)",
+                        paragraphs: [
+                                "La terapia de esquemas nace para responder a consultantes con patrones conductuales profundamente arraigados y crónicos que no respondían de forma óptima a la TCC de corta duración.",
+                                "Los EDT representan lentes cognitivos e interpretativos disfuncionales originados a partir de la insatisfacción sistemática de necesidades emocionales esenciales durante la infancia."
+                        ]
+                },
+                {
+                        heading: "Técnicas nucleares de intervención clínica",
+                        paragraphs: [
+                                "Se recomiendan estrategias cognitivas (refutación empírica del esquema), técnicas experienciales (reparentalización limitada y diálogos en sillas) y modificación conductual para romper patrones reiterados de autoboicot."
+                        ]
+                },
+                {
+                        heading: "Límites éticos y disclaimer profesional",
+                        paragraphs: [
+                                "Este contenido es informativo y profesional; no sustituye supervisión clínica, criterio profesional, formación especializada ni asesoría legal cuando corresponda."
+                        ]
+                }
+        ],
+        faqs: [
+                {
+                        question: "¿Qué población se beneficia más de la terapia de esquemas?",
+                        answer: "Resulta altamente eficaz para el tratamiento de trastornos complejos de la personalidad, problemas de relación interpersonal crónicos y depresiones resistentes."
+                },
+                {
+                        question: "¿Quién desarrolló originalmente este modelo clínico?",
+                        answer: "Fue estructurado por el psicólogo Jeffrey Young, colaborador cercano de Aaron Beck en el desarrollo cognitivo."
+                }
+        ],
+        relatedAssets: [
+                {
+                        label: "Especialidad en Terapia Cognitivo-Conductual",
+                        href: "/especialidades/terapia-cognitivo-conductual",
+                        type: "specialty"
+                },
+                {
+                        label: "Biografía de Aaron Beck",
+                        href: "/autores/aaron-beck",
+                        type: "author"
+                }
+        ],
+        schemaTypes: [
+                "Article",
+                "BreadcrumbList",
+                "FAQPage"
+        ]
+},
+    {
+        slug: "terapia-breve-centrada-en-soluciones",
+        contentType: "approach",
+        sourceType: "approach",
+        title: "Terapia breve centrada en soluciones: herramientas conversacionales",
+        description: "Aprende a formular preguntas eficaces orientadas al futuro, identificar excepciones y co-construir soluciones pragmáticas con tus pacientes.",
+        aiSummary: "Conceptualización y aplicación de la Terapia Breve Centrada en Soluciones (TBCS). Análisis de la pregunta del milagro, escalas subjetivas y mapeo de excepciones.",
+        topic: "enfoques clinicos",
+        specialty: "clinica",
+        heroEyebrow: "Bases teóricas clínicas",
+        ctaLabel: "Ver formaciones de psicología clínica",
+        intent: "learn",
+        actionType: "guide_view",
+        interestTags: [
+                "clinica",
+                "evaluacion_clinica",
+                "practica_clinica"
+        ],
+        publishedAt: "2026-06-02",
+        updatedAt: "2026-06-02",
+        sections: [
+                {
+                        heading: "El desplazamiento del foco del problema a la solución viable",
+                        paragraphs: [
+                                "La TBCS, desarrollada originalmente por Steve de Shazer e Insoo Kim Berg, propone que no es estrictamente indispensable indagar minuciosamente en el origen del problema para construir una solución pragmática adaptativa.",
+                                "El diálogo clínico se orienta de manera sistemática a identificar los recursos actuales del consultante y a expandir las excepciones a la conducta problema."
+                        ]
+                },
+                {
+                        heading: "Preguntas cardinales de la intervención breve",
+                        paragraphs: [
+                                "La Pregunta del Milagro: Invita a conceptualizar un futuro adaptativo libre de la queja inicial.",
+                                "Preguntas de Escala: Permiten cuantificar subjetivamente la mejoría y pautar micro-acciones realistas.",
+                                "Mapeo de Excepciones: Momentos singulares de vida donde el síntoma no se presentó y qué hizo el paciente."
+                        ]
+                },
+                {
+                        heading: "Límites éticos y disclaimer profesional",
+                        paragraphs: [
+                                "Este contenido es informativo y profesional; no sustituye supervisión clínica, criterio profesional, formación especializada ni asesoría legal cuando corresponda."
+                        ]
+                }
+        ],
+        faqs: [
+                {
+                        question: "¿Cuántas sesiones abarca por lo general este enfoque?",
+                        answer: "Suele completarse de forma sumamente ágil en un rango de 5 a 10 sesiones focalizadas de tratamiento."
+                },
+                {
+                        question: "¿Es compatible con otros enfoques clínicos?",
+                        answer: "Sí. Sus técnicas conversacionales se combinan fluidamente con la TCC y terapias contextuales."
+                }
+        ],
+        relatedAssets: [
+                {
+                        label: "Terapia Sistémica",
+                        href: "/enfoques/terapia-sistemica",
+                        type: "approach"
+                },
+                {
+                        label: "Formato de Alta Terapéutica",
+                        href: "/recursos/formatos/alta-terapeutica",
+                        type: "resource_format"
+                }
+        ],
+        schemaTypes: [
+                "Article",
+                "BreadcrumbList",
+                "FAQPage"
+        ]
+},
+    {
+        slug: "terapia-familiar-sistemica",
+        contentType: "approach",
+        sourceType: "approach",
+        title: "Terapia familiar sistémica: análisis de dinámicas relacionales",
+        description: "Domina los conceptos clave del enfoque sistémico, los patrones de comunicación relacional y la intervención estructural en el núcleo familiar.",
+        aiSummary: "Fundamentos de la terapia familiar sistémica. Teoría de sistemas aplicada al ecosistema familiar, genogramas, pautas interaccionales disfuncionales y fronteras límites.",
+        topic: "enfoques clinicos",
+        specialty: "pareja_familia",
+        heroEyebrow: "Bases teóricas clínicas",
+        ctaLabel: "Ver especialidad de pareja y familia",
+        intent: "learn",
+        actionType: "guide_view",
+        interestTags: [
+                "pareja_familia",
+                "evaluacion_clinica",
+                "clinica"
+        ],
+        publishedAt: "2026-06-02",
+        updatedAt: "2026-06-02",
+        sections: [
+                {
+                        heading: "El consultante identificado y el sistema relacional familiar",
+                        paragraphs: [
+                                "Desde la óptica sistémica, el síntoma que presenta un miembro (el paciente identificado) representa un reflejo directo de la desregulación o el conflicto irresuelto en las pautas interaccionales de todo el núcleo familiar.",
+                                "La intervención busca reestructurar las dinámicas de comunicación, redefinir las fronteras internas de los subsistemas y disolver alianzas trianguladas disfuncionales."
+                        ]
+                },
+                {
+                        heading: "Conceptos estructurales de Salvador Minuchin",
+                        paragraphs: [
+                                "Minuchin propuso analizar el genograma, trazar los subsistemas (conyugal, parental, fraternal), delimitar límites claros (claros, rígidos, difusos) y cuestionar las pautas de control del sistema."
+                        ]
+                },
+                {
+                        heading: "Límites éticos y disclaimer profesional",
+                        paragraphs: [
+                                "Este contenido es informativo y profesional; no sustituye supervisión clínica, criterio profesional, formación especializada ni asesoría legal cuando corresponda."
+                        ]
+                }
+        ],
+        faqs: [
+                {
+                        question: "¿Es indispensable que asista toda la familia a la sesión?",
+                        answer: "Aunque es preferible al inicio de la evaluación, es viable realizar terapia sistémica con solo una parte de los subsistemas si se promueven cambios de pauta interaccional."
+                },
+                {
+                        question: "¿Qué pionero destaca en este enfoque estructural?",
+                        answer: "Destaca de manera indiscutible Salvador Minuchin, creador de la terapia estructural familiar."
+                }
+        ],
+        relatedAssets: [
+                {
+                        label: "Especialidad en Pareja y Familia",
+                        href: "/especialidades/pareja-familia",
+                        type: "specialty"
+                },
+                {
+                        label: "Biografía de Salvador Minuchin",
+                        href: "/autores/salvador-minuchin",
+                        type: "author"
+                }
+        ],
+        schemaTypes: [
+                "Article",
+                "BreadcrumbList",
+                "FAQPage"
+        ]
+},
+    {
+        slug: "como-elegir-enfoque-terapeutico",
+        contentType: "guide",
+        sourceType: "guide",
+        title: "Cómo elegir un enfoque terapéutico para tu especialización",
+        description: "Toma una decisión informada sobre tu orientación teórica basándote en la evidencia científica disponible y tu perfil profesional.",
+        aiSummary: "Guía de orientación profesional para estudiantes y psicólogos graduados. Compara el sustento metodológico y práctico de TCC, ACT, DBT y sistémica.",
+        topic: "desarrollo profesional",
+        specialty: "supervision_clinica",
+        heroEyebrow: "Ruta de desarrollo técnico",
+        ctaLabel: "Ver formaciones de psicología",
+        intent: "learn",
+        actionType: "guide_view",
+        interestTags: [
+                "supervision_clinica",
+                "clinica",
+                "formacion_continua"
+        ],
+        publishedAt: "2026-06-02",
+        updatedAt: "2026-06-02",
+        sections: [
+                {
+                        heading: "La responsabilidad ética de elegir un marco empírico",
+                        paragraphs: [
+                                "Adoptar un marco explicativo no es una decisión puramente intuitiva o estética. Es un deber ético que el enfoque con el que trates el dolor humano cuente con evidencia científica rigurosa y respaldo metodológico.",
+                                "Esto previene la iatrogenia clínica en consulta y confiere solidez metodológica a tus intervenciones."
+                        ]
+                },
+                {
+                        heading: "Guía comparativa de orientaciones de primer nivel",
+                        paragraphs: [
+                                "1. Terapia Cognitivo-Conductual (TCC): Centrada en la reestructuración del pensamiento y modificación conductual con altísimo respaldo en ansiedad y depresión.",
+                                "2. Terapias Contextuales (ACT, DBT): Centradas en la aceptación, el análisis funcional del comportamiento en contexto y el compromiso.",
+                                "3. Enfoque Sistémico: Ideal para quienes prefieren la evaluación relacional y el abordaje de dinámicas de pareja y familia."
+                        ]
+                },
+                {
+                        heading: "Límites éticos y disclaimer profesional",
+                        paragraphs: [
+                                "Este contenido es informativo y profesional; no sustituye supervisión clínica, criterio profesional, formación especializada ni asesoría legal cuando corresponda."
+                        ]
+                }
+        ],
+        faqs: [
+                {
+                        question: "¿Es recomendable declararse ecléctico?",
+                        answer: "El eclecticismo no sistemático suele confundir al terapeuta y restarle rigor. Es preferible consolidar una base sólida de un enfoque basado en evidencia y enriquecerlo de forma integrada."
+                },
+                {
+                        question: "¿Qué ayuda ofrece SAPIHUM para especializarme?",
+                        answer: "Nuestra plataforma te brinda eventos, cursos y rutas formativas completas de Nivel 2 en TCC, contextuales, pareja y supervisión."
+                }
+        ],
+        relatedAssets: [
+                {
+                        label: "Especialidades de Psicología",
+                        href: "/guias/especialidades-de-la-psicologia",
+                        type: "guide"
+                },
+                {
+                        label: "Formación Continua",
+                        href: "/guias/formacion-continua-para-psicologos",
+                        type: "guide"
+                }
+        ],
+        schemaTypes: [
+                "Article",
+                "BreadcrumbList",
+                "FAQPage"
+        ]
+},
+    {
+        slug: "psicologia-clinica",
+        contentType: "specialty",
+        sourceType: "specialty",
+        title: "Psicología Clínica: eventos, cursos y formación avanzada",
+        description: "La especialidad nuclear para el abordaje basado en evidencia del sufrimiento de salud mental. Accede a recursos prácticos y software clínico integrado.",
+        aiSummary: "Directorio y recursos para la especialización en Psicología Clínica. Analiza el diagnóstico diferencial, tratamientos eficaces y la gestión del consultorio privado.",
+        topic: "especialidades",
+        specialty: "clinica",
+        heroEyebrow: "Especialidad profesional nuclear",
+        ctaLabel: "Descargar ruta de aprendizaje clínica",
+        intent: "download_resource",
+        actionType: "resource_download",
+        interestTags: [
+                "clinica",
+                "evaluacion_clinica",
+                "practica_clinica"
+        ],
+        publishedAt: "2026-06-02",
+        updatedAt: "2026-06-02",
+        sections: [
+                {
+                        heading: "El rigor científico de la psicología clínica moderna",
+                        paragraphs: [
+                                "La psicología clínica representa el campo fundacional de la salud mental aplicada. Se centra en evaluar, diagnosticar e intervenir trastornos psicológicos y problemas conductuales mediante protocolos clínicos de validez científica demostrada.",
+                                "Ejercer esta disciplina con excelencia metodológica requiere una constante actualización en literatura científica, un consultorio digital seguro que cumpla con la privacidad de los datos, y supervisión clínica continua de casos complejos."
+                        ]
+                },
+                {
+                        heading: "La matriz operativa del clínico autónomo",
+                        paragraphs: [
+                                "Para consolidar una práctica clínica ordenada y sostenible, el psicoterapeuta debe integrar con fluidez la entrevista inicial detallada, las historias clínicas reguladas y los planes terapéuticos explícitos."
+                        ]
+                },
+                {
+                        heading: "Límites éticos y disclaimer profesional",
+                        paragraphs: [
+                                "Este contenido es informativo y profesional; no sustituye supervisión clínica, criterio profesional, formación especializada ni asesoría legal cuando corresponda."
+                        ]
+                }
+        ],
+        faqs: [
+                {
+                        question: "¿Qué perfiles de formación ofrece SAPIHUM en clínica?",
+                        answer: "Te brindamos una membresía completa para acceder a software clínico seguro y una ruta formativa avanzada de Nivel 2 en Psicología Clínica."
+                },
+                {
+                        question: "¿La psicología clínica abarca la prescripción de medicamentos?",
+                        answer: "No. El tratamiento psicofarmacológico compete exclusivamente a psiquiatras y médicos autorizados."
+                }
+        ],
+        gatedResource: {
+                assetKey: "ruta-aprendizaje-clinica",
+                title: "Guía de ruta de aprendizaje en psicología clínica",
+                description: "Mapa de desarrollo profesional detallado con bibliografía elemental, hitos formativos recomendados y guías para tu práctica.",
+                benefits: [
+                        "Jerarquía recomendada de lecturas y manuales clínicos de primer nivel.",
+                        "Listado de habilidades prácticas indispensables para supervisión.",
+                        "Esquema digital interactivo para evaluar tu progreso profesional."
+                ],
+                downloadUrl: "/api/organic-resources/ruta-aprendizaje-clinica"
+        },
+        relatedAssets: [
+                {
+                        label: "Especialidades de Psicología",
+                        href: "/guias/especialidades-de-la-psicologia",
+                        type: "guide"
+                },
+                {
+                        label: "Formación Continua",
+                        href: "/guias/formacion-continua-para-psicologos",
+                        type: "guide"
+                }
+        ],
+        schemaTypes: [
+                "Article",
+                "BreadcrumbList",
+                "FAQPage"
+        ]
+},
+    {
+        slug: "psicologia-forense",
+        contentType: "specialty",
+        sourceType: "specialty",
+        title: "Psicología Forense: peritaje, entrevista y auxilio judicial",
+        description: "La intersección entre ciencia conductual y justicia. Descubre cómo elaborar peritajes psicológicos rigurosos y válidos ante tribunales.",
+        aiSummary: "Directorio conceptual sobre Psicología Forense. Métodos de evaluación de riesgo, credibilidad de testimonios y estructuración de informes periciales jurídicos.",
+        topic: "especialidades",
+        specialty: "forense",
+        heroEyebrow: "Especialidad técnico-jurídica",
+        ctaLabel: "Ver formaciones forenses",
+        intent: "explore_formation",
+        actionType: "guide_view",
+        interestTags: [
+                "forense",
+                "evaluacion_clinica",
+                "normativas"
+        ],
+        publishedAt: "2026-06-02",
+        updatedAt: "2026-06-02",
+        sections: [
+                {
+                        heading: "El rol del psicólogo como perito en el ámbito legal",
+                        paragraphs: [
+                                "La psicología forense no se orienta a la intervención terapéutica directa; su meta principal es proveer al juzgador de una opinión experta e ilustrada sobre variables de personalidad o capacidades cognitivas de las partes en conflicto.",
+                                "Esto demanda un rigor metodológico intachable, el uso de escalas e instrumentos estandarizados específicos de validez legal, y la redacción de dictámenes periciales claros libres de sesgos interpretativos."
+                        ]
+                },
+                {
+                        heading: "Apartados indispensables en el registro forense",
+                        paragraphs: [
+                                "El dictamen forense debe detallar el marco de referencia judicial, la cadena de custodia documental de las pruebas, los protocolos de entrevista forense implementados y una valoración objetiva y descriptiva del caso."
+                        ]
+                },
+                {
+                        heading: "Límites éticos y disclaimer profesional",
+                        paragraphs: [
+                                "Este contenido es informativo y profesional; no sustituye supervisión clínica, criterio profesional, formación especializada ni asesoría legal cuando corresponda."
+                        ]
+                }
+        ],
+        faqs: [
+                {
+                        question: "¿Qué normativas regulan los informes periciales?",
+                        answer: "Se rigen estrictamente por los códigos procesales de materia civil, penal o familiar vigentes de tu jurisdicción legal local."
+                },
+                {
+                        question: "¿Cómo me apoya SAPIHUM en psicología forense?",
+                        answer: "Te ofrecemos foros de comunidad para contactar con peritos verificados y cursos cortos de formación aplicada al ámbito jurídico."
+                }
+        ],
+        relatedAssets: [
+                {
+                        label: "Formato de Canalización",
+                        href: "/recursos/formatos/canalizacion-psicologica",
+                        type: "resource_format"
+                },
+                {
+                        label: "Especialidades de Psicología",
+                        href: "/guias/especialidades-de-la-psicologia",
+                        type: "guide"
+                }
+        ],
+        schemaTypes: [
+                "Article",
+                "BreadcrumbList",
+                "FAQPage"
+        ]
+},
+    {
+        slug: "neuropsicologia",
+        contentType: "specialty",
+        sourceType: "specialty",
+        title: "Neuropsicología: evaluación, rehabilitación y cerebro",
+        description: "Profundiza en la correlación entre el funcionamiento cerebral y la conducta con protocolos clínicos de evaluación cognitiva avanzada.",
+        aiSummary: "Recursos e índice de especialización en Neuropsicología. Tratamientos de rehabilitación cognitiva, screening de demencias e informes neurocognitivos.",
+        topic: "especialidades",
+        specialty: "neuropsicologia",
+        heroEyebrow: "Especialidad neurocientífica clínica",
+        ctaLabel: "Ver formaciones de neuropsicología",
+        intent: "explore_formation",
+        actionType: "guide_view",
+        interestTags: [
+                "neuropsicologia",
+                "evaluacion_clinica",
+                "clinica"
+        ],
+        publishedAt: "2026-06-02",
+        updatedAt: "2026-06-02",
+        sections: [
+                {
+                        heading: "La conceptualización de los perfiles neurocognitivos",
+                        paragraphs: [
+                                "La neuropsicología clínica investiga las consecuencias conductuales y emocionales de lesiones o disfunciones cerebrales.",
+                                "Su labor se enfoca en diseñar baterías completas de evaluación para funciones ejecutivas, memoria, atención y lenguaje, coordinando planes de estimulación o rehabilitación con geriatras y neurólogos de forma interdisciplinaria."
+                        ]
+                },
+                {
+                        heading: "El examen longitudinal de rehabilitación",
+                        paragraphs: [
+                                "Consiste en cuantificar de forma objetiva la línea base del paciente y evaluar periódicamente sus progresos conductuales utilizando software de estimulación y escalas validadas por la literatura científica contemporánea."
+                        ]
+                },
+                {
+                        heading: "Límites éticos y disclaimer profesional",
+                        paragraphs: [
+                                "Este contenido es informativo y profesional; no sustituye supervisión clínica, criterio profesional, formación especializada ni asesoría legal cuando corresponda."
+                        ]
+                }
+        ],
+        faqs: [
+                {
+                        question: "¿Qué escalas de screening son habituales?",
+                        answer: "Habitualmente se emplean el test MoCA (Montreal Cognitive Assessment) y el Minimental (MMSE) para tamizaje inicial rápido."
+                },
+                {
+                        question: "¿Cómo me ayuda la membresía de SAPIHUM en neuropsicología?",
+                        answer: "Accederás a plantillas estructuradas de informes neurocognitivos y eventos clínicos cortos con ponentes expertos."
+                }
+        ],
+        relatedAssets: [
+                {
+                        label: "Formato de Historia Clínica",
+                        href: "/recursos/formatos/historia-clinica-psicologica",
+                        type: "resource_format"
+                },
+                {
+                        label: "Especialidades de Psicología",
+                        href: "/guias/especialidades-de-la-psicologia",
+                        type: "guide"
+                }
+        ],
+        schemaTypes: [
+                "Article",
+                "BreadcrumbList",
+                "FAQPage"
+        ]
+},
+    {
+        slug: "psicologia-organizacional",
+        contentType: "specialty",
+        sourceType: "specialty",
+        title: "Psicología Organizacional: talento humano y bienestar laboral",
+        description: "Optimiza el clima laboral, la salud ocupacional y la gestión del talento en entornos corporativos aplicando la ciencia del comportamiento.",
+        aiSummary: "Recursos conceptuales de Psicología Organizacional. Tratamiento de normativas de estrés laboral, bienestar laboral, clima y liderazgo corporativo.",
+        topic: "especialidades",
+        specialty: "organizacional",
+        heroEyebrow: "Especialidad corporativa conductual",
+        ctaLabel: "Ver formaciones organizacionales",
+        intent: "explore_formation",
+        actionType: "guide_view",
+        interestTags: [
+                "organizacional",
+                "normativas",
+                "comunidad"
+        ],
+        publishedAt: "2026-06-02",
+        updatedAt: "2026-06-02",
+        sections: [
+                {
+                        heading: "El pilar del bienestar laboral corporativo",
+                        paragraphs: [
+                                "La psicología organizacional aplica el conocimiento conductual para potenciar la productividad y resguardar la salud mental de los colaboradores en las empresas.",
+                                "Esto engloba el análisis del clima de trabajo, la prevención del acoso laboral, el desarrollo de esquemas adaptativos de liderazgo y la implementación de normativas reguladoras del estrés ocupacional (como la NOM-035 en México)."
+                        ]
+                },
+                {
+                        heading: "La medición del clima y dashboards organizacionales",
+                        paragraphs: [
+                                "Para implementar mejoras estructuradas, se deben recopilar métricas empíricas mediante evaluaciones de 360 grados, tests de burnout laboral e indicadores objetivos de rotación y satisfacción laboral."
+                        ]
+                },
+                {
+                        heading: "Límites éticos y disclaimer profesional",
+                        paragraphs: [
+                                "Este contenido es informativo y profesional; no sustituye supervisión clínica, criterio profesional, formación especializada ni asesoría legal cuando corresponda."
+                        ]
+                }
+        ],
+        faqs: [
+                {
+                        question: "¿Qué normativas de salud laboral se relacionan con esta rama?",
+                        answer: "Principalmente regulaciones nacionales sobre factores de riesgo psicosocial en los entornos de trabajo."
+                },
+                {
+                        question: "¿Qué herramientas me brinda SAPIHUM en este campo?",
+                        answer: "Acceso a checklists de autoevaluación organizacional y foros profesionales de debate entre colegas consultores."
+                }
+        ],
+        relatedAssets: [
+                {
+                        label: "Especialidades de Psicología",
+                        href: "/guias/especialidades-de-la-psicologia",
+                        type: "guide"
+                },
+                {
+                        label: "Comunidad SAPIHUM",
+                        href: "/comunidad",
+                        type: "community"
+                }
+        ],
+        schemaTypes: [
+                "Article",
+                "BreadcrumbList",
+                "FAQPage"
+        ]
+},
+    {
+        slug: "john-bowlby",
+        contentType: "author",
+        sourceType: "author",
+        title: "John Bowlby: biografía técnica y la Teoría del Apego",
+        description: "Estudia el legado del psicoanalista británico John Bowlby y su revolucionaria Teoría del Apego para conceptualizar los vínculos interpersonales.",
+        aiSummary: "Biografía técnica e hitos conceptuales de John Bowlby. Analiza la evolución del apego seguro, inseguro evitativo, ansioso ambivalente y desorganizado.",
+        topic: "autores pioneros",
+        specialty: "pareja_familia",
+        heroEyebrow: "Biografía técnica y legado",
+        ctaLabel: "Ver especialidad de pareja y familia",
+        intent: "learn",
+        actionType: "guide_view",
+        interestTags: [
+                "pareja_familia",
+                "evaluacion_clinica",
+                "clinica"
+        ],
+        publishedAt: "2026-06-02",
+        updatedAt: "2026-06-02",
+        sections: [
+                {
+                        heading: "La revolución de los vínculos primarios de apego",
+                        paragraphs: [
+                                "John Bowlby postuló que el ser humano nace con un sistema innato de conductas de apego orientadas a procurar la cercanía con un cuidador primordial para su supervivencia.",
+                                "Cuestionando postulados psicoanalíticos ortodoxos de su época, integró nociones evolutivas e instintivas para explicar cómo los patrones de apego del infante determinan su salud relacional adulta."
+                        ]
+                },
+                {
+                        heading: "Los cuatro patrones de apego y Mary Ainsworth",
+                        paragraphs: [
+                                "Junto al test de la Situación Extraña de Mary Ainsworth, se conceptualizaron las bases del apego seguro, del apego ansioso ambivalente, del apego evitativo y el apego desorganizado en el desarrollo infantil."
+                        ]
+                },
+                {
+                        heading: "Límites éticos y disclaimer profesional",
+                        paragraphs: [
+                                "Este contenido es informativo y profesional; no sustituye supervisión clínica, criterio profesional, formación especializada ni asesoría legal cuando corresponda."
+                        ]
+                }
+        ],
+        faqs: [
+                {
+                        question: "¿Qué aplicaciones clínicas tiene la teoría del apego?",
+                        answer: "Resulta medular en la terapia individual de adultos con problemas de vinculación afectiva y en la terapia familiar y de pareja sistémica."
+                },
+                {
+                        question: "¿Qué libros de Bowlby se consideran fundamentales?",
+                        answer: "Su famosa trilogía clásica titulada \"El apego\", \"La separación\" y \"La pérdida\"."
+                }
+        ],
+        relatedAssets: [
+                {
+                        label: "Especialidad en Pareja y Familia",
+                        href: "/especialidades/pareja-familia",
+                        type: "specialty"
+                },
+                {
+                        label: "Terapia Familiar Sistémica",
+                        href: "/enfoques/terapia-familiar-sistemica",
+                        type: "approach"
+                }
+        ],
+        schemaTypes: [
+                "Person",
+                "BreadcrumbList",
+                "FAQPage"
+        ]
+},
+    {
+        slug: "salvador-minuchin",
+        contentType: "author",
+        sourceType: "author",
+        title: "Salvador Minuchin: pionero de la Terapia Familiar Estructural",
+        description: "Conoce la biografía, el legado conceptual y las técnicas de escenificación familiar del influyente psiquiatra Salvador Minuchin.",
+        aiSummary: "Biografía científica de Salvador Minuchin. Detalla las técnicas estructurales de cuestionamiento de fronteras, escenificación de conflictos y repautación.",
+        topic: "autores pioneros",
+        specialty: "pareja_familia",
+        heroEyebrow: "Biografía técnica y legado",
+        ctaLabel: "Ver especialidad de pareja y familia",
+        intent: "learn",
+        actionType: "guide_view",
+        interestTags: [
+                "pareja_familia",
+                "evaluacion_clinica",
+                "clinica"
+        ],
+        publishedAt: "2026-06-02",
+        updatedAt: "2026-06-02",
+        sections: [
+                {
+                        heading: "El modelo estructural de intervención interaccional",
+                        paragraphs: [
+                                "Salvador Minuchin revolucionó la salud mental al proponer que el terapeuta debe ingresar de forma activa al sistema familiar para modificar sus límites interaccionales rígidos o difusos.",
+                                "Sus intervenciones priorizan el cambio pragmático observable en sesión por encima del insight puramente intelectual de los miembros."
+                        ]
+                },
+                {
+                        heading: "Técnicas de escenificación en terapia de familia",
+                        paragraphs: [
+                                "Invitaba a la familia a representar e interactuar con sus disputas de forma directa en consulta, facilitando la redefinición de roles y subsistemas parentales."
+                        ]
+                },
+                {
+                        heading: "Límites éticos y disclaimer profesional",
+                        paragraphs: [
+                                "Este contenido es informativo y profesional; no sustituye supervisión clínica, criterio profesional, formación especializada ni asesoría legal cuando corresponda."
+                        ]
+                }
+        ],
+        faqs: [
+                {
+                        question: "¿Dónde desarrolló Minuchin su trabajo primordial?",
+                        answer: "En la famosa clínica Wiltwyck School para jóvenes desfavorecidos y posteriormente en la Philadelphia Child Guidance Clinic."
+                },
+                {
+                        question: "¿Qué obras teóricas de Minuchin son indispensables?",
+                        answer: "Su obra cumbre \"Familias y terapia familiar\" y \"Técnicas de terapia familiar\"."
+                }
+        ],
+        relatedAssets: [
+                {
+                        label: "Terapia Familiar Sistémica",
+                        href: "/enfoques/terapia-familiar-sistemica",
+                        type: "approach"
+                },
+                {
+                        label: "Especialidad en Pareja y Familia",
+                        href: "/especialidades/pareja-familia",
+                        type: "specialty"
+                }
+        ],
+        schemaTypes: [
+                "Person",
+                "BreadcrumbList",
+                "FAQPage"
+        ]
+},
+    {
+        slug: "libros-de-terapia-sistemica",
+        contentType: "book",
+        sourceType: "book",
+        title: "Libros de terapia familiar sistémica indispensables",
+        description: "Encuentra manuales, tratados teóricos y guías clínicas esenciales de terapia familiar estructural, transgeneracional e interaccional.",
+        aiSummary: "Recopilación estructurada de libros técnicos sobre enfoque sistémico en psicología. Análisis de aportes de Minuchin, de Shazer, Haley y Bateson.",
+        topic: "rutas de lectura",
+        specialty: "pareja_familia",
+        heroEyebrow: "Ruta de aprendizaje y libros",
+        ctaLabel: "Ver especialidad de pareja y familia",
+        intent: "learn",
+        actionType: "guide_view",
+        interestTags: [
+                "pareja_familia",
+                "clinica",
+                "formacion_continua"
+        ],
+        publishedAt: "2026-06-02",
+        updatedAt: "2026-06-02",
+        sections: [
+                {
+                        heading: "La formación teórica del terapeuta sistémico",
+                        paragraphs: [
+                                "Consolidar tu competencia clínica sistémica exige el estudio exhaustivo de las obras fundacionales del enfoque relacional.",
+                                "Leer de forma directa a los teóricos pioneros te proporciona bases conceptuales sólidas para estructurar diagnósticos relacionales complejos en consulta."
+                        ]
+                },
+                {
+                        heading: "Las obras capitales del catálogo recomendado",
+                        paragraphs: [
+                                "- \"Familias y terapia familiar\" de Salvador Minuchin (Estructural).",
+                                "- \"Terapia breve centrada en soluciones\" de Steve de Shazer (Breve).",
+                                "- \"Terapia no convencional\" de Jay Haley (Estratégico).",
+                                "- \"Pasos hacia una ecología de la mente\" de Gregory Bateson (Comunicación)."
+                        ]
+                },
+                {
+                        heading: "Límites éticos y disclaimer profesional",
+                        paragraphs: [
+                                "Este contenido es informativo y profesional; no sustituye supervisión clínica, criterio profesional, formación especializada ni asesoría legal cuando corresponda."
+                        ]
+                }
+        ],
+        faqs: [
+                {
+                        question: "¿Con qué obra se recomienda iniciar en terapia familiar?",
+                        answer: "Se recomienda iniciar con \"Familias y terapia familiar\" de Minuchin por su enorme claridad y pragmatismo clínico."
+                },
+                {
+                        question: "¿Es compatible este enfoque con la psicología clínica general?",
+                        answer: "Sí. Aporta una mirada relacional e interactiva fundamental que enriquece cualquier proceso psicoterapéutico individual."
+                }
+        ],
+        relatedAssets: [
+                {
+                        label: "Terapia Familiar Sistémica",
+                        href: "/enfoques/terapia-familiar-sistemica",
+                        type: "approach"
+                },
+                {
+                        label: "Biografía de Salvador Minuchin",
+                        href: "/autores/salvador-minuchin",
+                        type: "author"
+                }
+        ],
+        schemaTypes: [
+                "Book",
+                "BreadcrumbList",
+                "FAQPage"
+        ]
+},
+    {
+        slug: "libros-para-abrir-consulta-psicologica-privada",
+        contentType: "book",
+        sourceType: "book",
+        title: "Libros esenciales para abrir tu consulta psicológica privada",
+        description: "Construye tu consultorio autónomo sostenible e independiente apoyándote en manuales de administración clínica y ética profesional.",
+        aiSummary: "Recopilación técnica de libros sobre la gestión del consultorio de psicología. Trata temas de finanzas profesionales, encuadres éticos y captación.",
+        topic: "rutas de lectura",
+        specialty: "supervision_clinica",
+        heroEyebrow: "Ruta de aprendizaje y administración",
+        ctaLabel: "Descargar el checklist de consulta",
+        intent: "download_resource",
+        actionType: "resource_download",
+        interestTags: [
+                "consulta_privada",
+                "supervision_clinica",
+                "formacion_continua"
+        ],
+        publishedAt: "2026-06-02",
+        updatedAt: "2026-06-02",
+        sections: [
+                {
+                        heading: "La formación empresarial del psicólogo clínico",
+                        paragraphs: [
+                                "Las facultades de psicología enseñan a intervenir el sufrimiento clínico, pero omiten instruir sobre gestión administrativa y finanzas en la práctica independiente.",
+                                "Estudiar manuales operativos te ayuda a evitar errores fiscales, establecer honorarios profesionales justos y proteger la sustentabilidad de tu ejercicio."
+                        ]
+                },
+                {
+                        heading: "Títulos sugeridos para estructurar tu práctica",
+                        paragraphs: [
+                                "Obras de finanzas personales adaptadas a prestadores de servicios de salud, manuales de códigos éticos nacionales aplicados al ejercicio autónomo y guías de digitalización segura."
+                        ]
+                },
+                {
+                        heading: "Límites éticos y disclaimer profesional",
+                        paragraphs: [
+                                "Este contenido es informativo y profesional; no sustituye supervisión clínica, criterio profesional, formación especializada ni asesoría legal cuando corresponda."
+                        ]
+                }
+        ],
+        faqs: [
+                {
+                        question: "¿Qué temáticas no deben faltar en estas lecturas?",
+                        answer: "Finanzas, encuadres del cobro, regulaciones sanitarias de expedientes y marketing digital de contenidos puramente éticos."
+                },
+                {
+                        question: "¿Cómo me ayuda la plataforma de SAPIHUM en esto?",
+                        answer: "Te ofrecemos checklists de cobro, plantillas estructuradas de consentimiento y una activa comunidad profesional."
+                }
+        ],
+        gatedResource: {
+                assetKey: "checklist-consulta-privada",
+                title: "Checklist para abrir consulta privada",
+                description: "Lista de control interactiva para planificar la apertura física o digital de tu consultorio de psicología paso a paso.",
+                benefits: [
+                        "Hitos de trámites legales, fiscales y sanitarios mínimos requeridos.",
+                        "Lista de mobiliario operativo, aislamiento acústico y encuadres físicos.",
+                        "Protocolos de resguardo y encriptación de datos de consultantes."
+                ],
+                downloadUrl: "/api/organic-resources/checklist-consulta-privada"
+        },
+        relatedAssets: [
+                {
+                        label: "Cómo Conseguir Pacientes",
+                        href: "/guias/como-conseguir-pacientes-como-psicologo",
+                        type: "guide"
+                },
+                {
+                        label: "Cómo Cobrar Consulta",
+                        href: "/guias/como-cobrar-consulta-psicologica",
+                        type: "guide"
+                }
+        ],
+        schemaTypes: [
+                "Book",
+                "BreadcrumbList",
+                "FAQPage"
+        ]
+}
 ]

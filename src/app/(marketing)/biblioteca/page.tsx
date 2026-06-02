@@ -64,6 +64,14 @@ const CATEGORY_MAP = [
         href: '/herramientas',
         routeKind: 'tools' as OrganicRouteKind,
     },
+    {
+        type: 'specialty',
+        label: 'Especialidades',
+        description: 'Áreas profesionales y de especialización: clínica, forense, neuropsicología y organizacional.',
+        icon: <GraduationCap className="h-5 w-5 text-brand-blue" />,
+        href: '/especialidades',
+        routeKind: 'specialties' as OrganicRouteKind,
+    },
 ]
 
 export default function BibliotecaHubPage() {

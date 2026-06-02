@@ -8,6 +8,8 @@ import { PublicCatalogCard } from '@/components/catalog/public-catalog-card'
 import { WaitlistCTA } from '@/components/specializations/waitlist-cta'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { OrganicContentPage } from '@/components/organic-leads/organic-content-page'
+import { buildOrganicMetadata, getOrganicContentByRoute } from '@/lib/organic-leads/routing'
 import { getAppUrl } from '@/lib/config/app-url'
 import {
   applyEventCampaignCopy,
@@ -211,6 +213,11 @@ function buildStructuredData(args: {
 
 export async function generateMetadata(props: Props): Promise<Metadata> {
   const params = await props.params
+  const organicAsset = getOrganicContentByRoute('specialties', params.slug)
+  if (organicAsset) {
+    return buildOrganicMetadata('specialties', params.slug)
+  }
+
   const canonicalSlug = getCanonicalSpecializationSlug(params.slug)
   const spec = getSpecializationBySlug(canonicalSlug)
   if (!spec) return {}
@@ -231,11 +238,18 @@ export async function generateMetadata(props: Props): Promise<Metadata> {
 }
 
 export async function generateStaticParams() {
-  return getMarketingSpecializations().map((spec) => ({ slug: spec.slug }))
+  const marketing = getMarketingSpecializations().map((spec) => ({ slug: spec.slug }))
+  const organic = ['psicologia-clinica', 'psicologia-forense', 'neuropsicologia', 'psicologia-organizacional'].map((slug) => ({ slug }))
+  return [...marketing, ...organic]
 }
 
 export default async function SpecializationPage(props: Props) {
   const params = await props.params
+  const organicAsset = getOrganicContentByRoute('specialties', params.slug)
+  if (organicAsset) {
+    return <OrganicContentPage routeKind="specialties" content={organicAsset} />
+  }
+
   const canonicalSlug = getCanonicalSpecializationSlug(params.slug)
   const spec = getSpecializationBySlug(canonicalSlug)
 

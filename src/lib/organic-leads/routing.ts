@@ -13,6 +13,7 @@ export type OrganicRouteKind =
     | 'approaches'
     | 'tools'
     | 'psychologists'
+    | 'specialties'
 
 export interface OrganicRouteConfig {
     kind: OrganicRouteKind
@@ -31,6 +32,7 @@ export const ORGANIC_ROUTE_CONFIG: Record<OrganicRouteKind, OrganicRouteConfig> 
     approaches: { kind: 'approaches', label: 'Enfoques', pathPrefix: '/enfoques', sourceType: 'approach' },
     tools: { kind: 'tools', label: 'Herramientas', pathPrefix: '/herramientas', sourceType: 'tool' },
     psychologists: { kind: 'psychologists', label: 'Psicologos', pathPrefix: '/psicologos', sourceType: 'psychologist' },
+    specialties: { kind: 'specialties', label: 'Especialidades', pathPrefix: '/especialidades', sourceType: 'specialty' },
 }
 
 import { ORGANIC_CONTENT } from './content'

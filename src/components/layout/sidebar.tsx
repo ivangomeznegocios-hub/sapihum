@@ -36,6 +36,7 @@ import {
     Youtube,
     HelpCircle,
     Inbox,
+    Target,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { getMembershipTier } from '@/lib/membership'
@@ -131,6 +132,7 @@ const adminGroup: NavGroup = {
     items: [
         { name: 'Panel Admin', href: '/dashboard/admin', icon: Shield, roles: ['admin'] },
         { name: 'Actividad', href: '/dashboard/admin/inbox', icon: Inbox, roles: ['admin'] },
+        { name: 'Leads organicos', href: '/dashboard/admin/organic-leads', icon: Target, roles: ['admin'] },
         { name: 'Operaciones', href: '/dashboard/admin/operations', icon: ShieldCheck, roles: ['admin', 'support'] },
         { name: 'Usuarios', href: '/dashboard/admin/users', icon: UserCog, roles: ['admin'] },
         { name: 'Directorio', href: '/dashboard/admin/directory', icon: BookUser, roles: ['admin'] },

@@ -22,6 +22,7 @@ const ROUTE_KIND_MAP: Record<string, OrganicRouteKind> = {
     approach: 'approaches',
     tool: 'tools',
     psychologist: 'psychologists',
+    specialty: 'specialties',
 }
 
 export default function LibrosHubPage() {
